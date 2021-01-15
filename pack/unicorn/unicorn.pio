@@ -1,0 +1,83 @@
+.program unicorn
+.side_set 1 opt
+
+; set pins:
+; 0: data (base)
+; 1: clock
+; 2: latch
+; 3: blank
+
+; sideset pin: clock
+
+; out pins:
+; 0: row 6 select
+; 1: row 5 select
+; 2: row 4 select
+; 3: row 3 select
+; 4: row 2 select
+; 5: row 1 select
+; 6: row 0 select
+
+.wrap_target
+
+; clock out 16 pixels worth of data
+    set y, 15                ; 15 because `jmp` test is pre decrement
+
+pixels:
+
+    ; dummy bit used to align pixel data to nibbles
+    out null, 1              ; discard
+
+    ; red bit
+    out x, 1       side 0    ; pull in first bit from OSR into register X, clear clock
+    set pins, 8              ; clear data bit (maintain blank)
+    jmp !x endr              ; if bit was zero jump to endr
+    set pins, 9              ; set data bit (maintain blank)
+endr:                        ;
+    nop            side 1    ; clock in bit
+
+    ; green bit
+    out x, 1       side 0    ; pull in first bit from OSR into register X, clear clock
+    set pins, 8              ; clear data bit (maintain blank)
+    jmp !x endg              ; if bit was zero jump to endg
+    set pins, 9              ; set data bit (maintain blank)
+endg:                        ;
+    nop            side 1    ; clock in bit
+
+    ; blue bit
+    out x, 1       side 0    ; pull in first bit from OSR into register X, clear clock
+    set pins, 8              ; clear data bit (maintain blank)
+    jmp !x endb              ; if bit was zero jump to endb
+    set pins, 9              ; set data bit (maintain blank)
+endb:                        ;
+    nop            side 1    ; clock in bit
+
+    jmp y-- pixels           ; jump back to start of pixel loop
+
+; select active row
+    out null, 1              ; discard dummy bit
+    out pins, 7              ; output row selection mask
+
+; pull bcd tick count into x register
+    out x, 16
+
+; set latch pin to output column data on shift registers
+    set pins, 12             ; set latch pin (while keeping blank high)
+
+; set blank pin to enable column drivers
+    set pins, 4
+
+bcd_count:
+    jmp x-- bcd_count       ; loop until bcd delay complete
+
+; disable led output (blank) and clear latch pin
+    set pins, 8
+
+; disable all row outputs
+    set x, 0                ; load x register with 0 (we can't set more than 5 bits at a time)
+    mov pins, !x            ; write inverted x (0xff) to row pins latching them all high
+
+; dummy byte to 32 bit align row data
+    out null, 8
+
+.wrap
