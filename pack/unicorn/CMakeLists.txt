@@ -13,6 +13,7 @@ pico_sdk_init()
 add_executable(
   unicorn
   demo.cpp
+  pico_unicorn.cpp
 )
 
 pico_generate_pio_header(unicorn ${CMAKE_CURRENT_LIST_DIR}/unicorn.pio)
