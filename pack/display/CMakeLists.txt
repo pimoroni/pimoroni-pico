@@ -14,7 +14,9 @@ add_executable(
   display
   demo.cpp
   image_data.cpp
+  pico_display.cpp
   ../../../drivers/st7789/st7789.cpp
+  ../../../libraries/pico_graphics/pico_graphics.cpp
 )
 
 # Pull in pico libraries that we need

@@ -1,14 +1,13 @@
 #pragma once
 
 #include "hardware/spi.h"
+#include "hardware/gpio.h"
 
 namespace pimoroni {
 
   class ST7789 {
-    spi_inst_t *spi = spi0_hw;
+    spi_inst_t *spi = spi0;
 
-    // framebuffer for storing pixel data
-    uint16_t *buffer;
     uint32_t dma_channel;
 
     // screen properties
@@ -28,18 +27,28 @@ namespace pimoroni {
     uint32_t spi_baud = 64 * 1024 * 1024;
 
   public:
-    ST7789(spi_inst_t *spi, uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
-      spi(spi), cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso) {}
+    // frame buffer where pixel data is stored
+    uint16_t *frame_buffer;
 
-    void init();
-    void init_240x240();
-    void init_240x235();
+  public:
+    ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer) :
+      width(width), height(height), frame_buffer(frame_buffer) {}
+
+    ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
+           spi_inst_t *spi,
+           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
+      width(width), height(height), frame_buffer(frame_buffer),
+      spi(spi),
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso) {}
+
+    void init(bool auto_init_sequence = true);
+
+    void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void vsync_callback(gpio_irq_callback_t callback);
-    void update();
+    void update(bool dont_block = false);
+    void set_backlight(uint8_t brightness);
 
-    uint16_t pen(uint8_t r, uint8_t g, uint8_t b);
-
-    enum register {
+    enum reg {
       SWRESET   = 0x01,
       TEON      = 0x35,
       MADCTL    = 0x36,
