@@ -14,4 +14,4 @@ add_subdirectory(drivers)
 add_subdirectory(libraries)
 
 # Example Pico Pack projects
-add_subdirectory(pack)
+add_subdirectory(examples)

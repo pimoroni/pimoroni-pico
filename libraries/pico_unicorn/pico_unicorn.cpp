@@ -3,7 +3,7 @@
 #include "hardware/dma.h"
 #include "hardware/irq.h"
 
-#include "unicorn.pio.h"
+#include "pico_unicorn.pio.h"
 #include "pico_unicorn.hpp"
 
 // pixel data is stored as a stream of bits delivered in the
