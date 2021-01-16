@@ -21,14 +21,14 @@ int main() {
 
     for(int y = 0; y < 7; y++) {
       for(int x = 0; x < 17; x++) {
-        int v = (x + y + (i / 250)) % 2 == 0 ? 0 : 3;
+        int v = (x + y + (i / 25)) % 2 == 0 ? 0 : 3;
         pico_scroll.set_pixel(x, y, v);
       }
     }
 
     pico_scroll.update();
 
-    sleep_ms(100);
+    sleep_ms(10);
   }
 
   return 0;
