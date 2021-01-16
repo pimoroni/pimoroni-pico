@@ -30,17 +30,17 @@
 uint32_t         dma_channel;
 
 static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
-  pio_gpio_select(pio, LED_DATA);
-  pio_gpio_select(pio, LED_CLOCK);
-  pio_gpio_select(pio, LED_LATCH);
-  pio_gpio_select(pio, LED_BLANK);
-  pio_gpio_select(pio, ROW_0);
-  pio_gpio_select(pio, ROW_1);
-  pio_gpio_select(pio, ROW_2);
-  pio_gpio_select(pio, ROW_3);
-  pio_gpio_select(pio, ROW_4);
-  pio_gpio_select(pio, ROW_5);
-  pio_gpio_select(pio, ROW_6);
+  pio_gpio_init(pio, LED_DATA);
+  pio_gpio_init(pio, LED_CLOCK);
+  pio_gpio_init(pio, LED_LATCH);
+  pio_gpio_init(pio, LED_BLANK);
+  pio_gpio_init(pio, ROW_0);
+  pio_gpio_init(pio, ROW_1);
+  pio_gpio_init(pio, ROW_2);
+  pio_gpio_init(pio, ROW_3);
+  pio_gpio_init(pio, ROW_4);
+  pio_gpio_init(pio, ROW_5);
+  pio_gpio_init(pio, ROW_6);
 
   pio_sm_set_consecutive_pindirs(pio, sm, LED_DATA, 4, true);
   pio_sm_set_consecutive_pindirs(pio, sm, ROW_6, 7, true);
@@ -62,7 +62,7 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   //sm_config_set_clkdiv(&c, 4);
 
   pio_sm_init(pio, sm, offset, &c);
-  pio_sm_enable(pio, sm, true);
+  pio_sm_set_enabled(pio, sm, true);
 }
 
 // pixel data is stored as a stream of bits delivered in the

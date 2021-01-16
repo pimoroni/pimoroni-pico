@@ -10,5 +10,8 @@ set(CMAKE_CXX_STANDARD 17)
 # Initialize the SDK
 pico_sdk_init()
 
-# Example projects
+add_subdirectory(drivers)
+add_subdirectory(libraries)
+
+# Example Pico Pack projects
 add_subdirectory(pack)
