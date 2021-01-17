@@ -106,6 +106,7 @@ int main() {
     shapes.push_back(shape);
   }
 
+  pico_explorer.set_audio_pin(pico_explorer.GP0);
   uint32_t i = 0;
   while(true) {
     pico_explorer.set_pen(120, 40, 60);
@@ -123,13 +124,30 @@ int main() {
       pico_explorer.circle(shape.x, shape.y, shape.r);
     }
 
-    float led_step = fmod(i / 20.0f, M_PI * 2.0f);
-    int r = (sin(led_step) * 25.0f) + 25.0f;
-    pico_explorer.set_led(r, r / 1.2f, r);
-
     pico_explorer.set_pen(255, 255, 255);
     pico_explorer.text("This is a test of some text data that should wrap nicely onto multiple lines which is dead useful like.", 10, 10, 180);
 
+    float rv = pico_explorer.get_adc(pico_explorer.ADC0);
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.circle(rv * 140 + 50, 110, 20);
+    pico_explorer.set_pen(rv * 255, 0, 0);
+    pico_explorer.circle(rv * 140 + 50, 110, 15);
+
+    float gv = pico_explorer.get_adc(pico_explorer.ADC1);
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.circle(gv * 140 + 50, 160, 20);
+    pico_explorer.set_pen(0, gv * 255, 0);
+    pico_explorer.circle(gv * 140 + 50, 160, 15);
+
+    float bv = pico_explorer.get_adc(pico_explorer.ADC2);
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.circle(bv * 140 + 50, 210, 20);
+    pico_explorer.set_pen(0, 0, bv * 255);
+    pico_explorer.circle(bv * 140 + 50, 210, 15);
+
+    pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, bv);
+
+    pico_explorer.set_tone(100 + (bv * 1000), rv);
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);
