@@ -4,30 +4,17 @@
 #include <cstdlib>
 
 #include "pico_explorer.hpp"
+#include "msa301.hpp"
 
 using namespace pimoroni;
 
 extern unsigned char image_tif[];
 extern unsigned int image_tif_len;
 
-PicoExplorer pico_explorer;
-/*
-void pixel(int x, int y, uint16_t c) {
-  x *= 2;
-  y *= 2;
-  pico_display.frame_buffer[x + y * 240] = c;
-  pico_display.frame_buffer[x + 1 + y * 240] = c;
-  pico_display.frame_buffer[x + 1 + (y + 1) * 240] = c;
-  pico_display.frame_buffer[x + (y + 1) * 240] = c;
-}
+extern unsigned char _binary__home_jon_pimoroni_pico_examples_pico_explorer_fox_tga_start[];
 
-void rect(int x, int y, int w, int h, uint16_t c) {
-  for(int rx = x; rx < x + w; rx++) {
-    for(int ry = y; ry < y + h; ry++) {
-      pixel(rx, ry, c);
-    }
-  }
-}*/
+PicoExplorer pico_explorer;
+MSA301 msa301;
 
 uint8_t arrow[] = {
     0b00010000,
@@ -70,15 +57,7 @@ void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c) {
 }*/
 
 int main() {
-  pico_explorer.set_backlight(100);
-
-  // uint16_t white = pico_display.create_pen(255, 255, 255);
-  // uint16_t black = pico_display.create_pen(0, 0, 0);
-  // uint16_t red = pico_display.create_pen(255, 0, 0);
-  // uint16_t green = pico_display.create_pen(0, 255, 0);
-  // uint16_t dark_grey = pico_display.create_pen(20, 40, 60);
-  // uint16_t dark_green = pico_display.create_pen(10, 100, 10);
-  // uint16_t blue = pico_display.create_pen(0, 0, 255);
+  msa301.init();
 
   bool a_pressed = false;
   bool b_pressed = false;
@@ -146,8 +125,39 @@ int main() {
     pico_explorer.circle(bv * 140 + 50, 210, 15);
 
     pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, bv);
+    pico_explorer.set_motor(pico_explorer.MOTOR2, pico_explorer.FORWARD, rv);
 
     pico_explorer.set_tone(100 + (bv * 1000), rv);
+
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.text("x: " + std::to_string(msa301.get_axis(msa301.X, 16)), 10, 190, 100);
+    pico_explorer.text("y: " + std::to_string(msa301.get_axis(msa301.Y, 16)), 10, 205, 100);
+    pico_explorer.text("z: " + std::to_string(msa301.get_axis(msa301.Z, 16)), 10, 220, 100);
+
+    uint16_t xpos = (msa301.get_axis(msa301.X, 16) * 120) + 120;
+    uint16_t ypos = (msa301.get_axis(msa301.Z, 16) * 120) + 120;
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.circle(xpos, ypos, 20);
+    pico_explorer.set_pen(255, 0, 255);
+    pico_explorer.circle(xpos, ypos, 15);
+
+    float xoff = sin(i / 20.0f) * 50.0f;
+    xoff += 120 - (81 / 2);
+    float yoff = cos(i / 20.0f) * 50.0f;
+    yoff += 120 - (68 / 2);
+    for(int y = 0; y < 68; y++) {
+      uint16_t *dest = pico_explorer.frame_buffer + (y * 240);
+      uint8_t *src = _binary__home_jon_pimoroni_pico_examples_pico_explorer_fox_tga_start + 18 + (y * 81 * 3);
+      for(int x = 0; x < 81; x++) {
+        uint8_t r = *src++;
+        uint8_t g = *src++;
+        uint8_t b = *src++;
+
+        pico_explorer.set_pen(r, g, b);
+        pico_explorer.pixel(x + xoff, 68 - y + yoff);
+      }
+    }
+
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);
