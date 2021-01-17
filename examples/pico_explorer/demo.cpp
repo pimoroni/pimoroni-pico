@@ -8,10 +8,7 @@
 
 using namespace pimoroni;
 
-extern unsigned char image_tif[];
-extern unsigned int image_tif_len;
-
-extern unsigned char _binary__home_jon_pimoroni_pico_examples_pico_explorer_fox_tga_start[];
+extern unsigned char _binary_fox_tga_start[];
 
 PicoExplorer pico_explorer;
 MSA301 msa301;
@@ -147,7 +144,7 @@ int main() {
     yoff += 120 - (68 / 2);
     for(int y = 0; y < 68; y++) {
       uint16_t *dest = pico_explorer.frame_buffer + (y * 240);
-      uint8_t *src = _binary__home_jon_pimoroni_pico_examples_pico_explorer_fox_tga_start + 18 + (y * 81 * 3);
+      uint8_t *src = _binary_fox_tga_start + 18 + (y * 81 * 3);
       for(int x = 0; x < 81; x++) {
         uint8_t r = *src++;
         uint8_t g = *src++;

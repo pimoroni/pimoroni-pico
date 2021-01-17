@@ -1,14 +1,9 @@
-add_custom_command(
-  OUTPUT fox.o
-  COMMAND arm-none-eabi-ld -r -b binary -o fox.o ${CMAKE_CURRENT_SOURCE_DIR}/fox.tga
-  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/fox.tga
-)
-
 add_executable(
   explorer
   demo.cpp
-  fox.o
 )
+
+add_resource(explorer fox.tga)
 
 # Pull in pico libraries that we need
 target_link_libraries(explorer pico_stdlib pico_explorer msa301)
