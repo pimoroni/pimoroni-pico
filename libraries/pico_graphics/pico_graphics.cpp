@@ -1,5 +1,8 @@
 #include "pico_graphics.hpp"
 
+extern uint8_t font_data[96][6];
+extern uint8_t character_widths[96];
+
 namespace pimoroni {
 
   void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
@@ -88,5 +91,56 @@ namespace pimoroni {
     }
   }
 
+  void PicoGraphics::character(const char c, int32_t x, int32_t y, uint8_t scale) {
+    uint8_t char_index = c - 32;
+    const uint8_t *d = &font_data[char_index][0];
+    for(uint8_t cx = 0; cx < character_widths[char_index]; cx++) {
+      for(uint8_t cy = 0; cy < 6; cy++) {
+        if((1U << cy) & *d) {
+          rectangle(x + (cx * scale), y + (cy * scale), scale, scale);
+        }
+      }
+
+      d++;
+    }
+  }
+
+  void PicoGraphics::text(const std::string &t, int32_t x, int32_t y, int32_t wrap) {
+    uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
+
+    uint8_t scale = 2;
+
+    size_t i = 0;
+    while(i < t.length()) {
+      // find length of current word
+      size_t next_space = t.find(' ', i + 1);
+
+      if(next_space == std::string::npos) {
+        next_space = t.length();
+      }
+
+      uint16_t word_length = 0;
+      for(size_t j = i; j < next_space; j++) {
+        word_length += character_widths[t[j] - 32];
+      }
+
+      // if this word would exceed the wrap limit then
+      // move to the next line
+      if(co + word_length > wrap) {
+        co = 0;
+        lo += 7 * scale;
+      }
+
+      // draw word
+      for(size_t j = i; j < next_space; j++) {
+        character(t[j], x + co, y + lo, scale);
+        co += character_widths[t[j] - 32] * scale;
+      }
+
+      // move character offset to end of word and add a space
+      co += character_widths[0] * scale;
+      i = next_space + 1;
+    }
+  }
 
 }

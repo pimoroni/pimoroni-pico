@@ -53,7 +53,9 @@ namespace pimoroni {
         command(reg::MADCTL,    1, "\x04");  // row/column addressing order - rgb pixel order
         command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
         command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
-      }else if(width == 240 && height == 135) {
+      }
+
+      if(width == 240 && height == 135) {
         command(reg::MADCTL,    1, "\x70");
         command(reg::COLMOD,    1, "\x05");
       }
@@ -68,7 +70,9 @@ namespace pimoroni {
       if(width == 240 && height == 240) {
         command(reg::CASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 columns
         command(reg::RASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 rows
-      }else if(width == 240 && height == 135) {
+      }
+
+      if(width == 240 && height == 135) {
         command(reg::RASET,     4, "\x00\x35\x00\xbb"); // 53 .. 187 (135 rows)
         command(reg::CASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
       }

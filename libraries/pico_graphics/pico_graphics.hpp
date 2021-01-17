@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 // a tiny little graphics library for our Pico products
 // supports only 16-bit (565) RGB framebuffers
@@ -27,6 +28,8 @@ namespace pimoroni {
     void pixel_span(int32_t x, int32_t y, int32_t l);
     void rectangle(int32_t x, int32_t y, int32_t w, int32_t h);
     void circle(int32_t x, int32_t y, int32_t r);
+    void text(const std::string &t, int32_t x, int32_t y, int32_t wrap);
+    void character(const char c, int32_t x, int32_t y, uint8_t scale);
     //void polygon(std::vector);
   };
 
