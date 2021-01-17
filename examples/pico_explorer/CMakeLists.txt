@@ -1,6 +1,6 @@
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/fox.o
-  COMMAND arm-none-eabi-ld -r -b binary -o ${CMAKE_CURRENT_BINARY_DIR}/fox.o ${CMAKE_CURRENT_SOURCE_DIR}/fox.tga
+  OUTPUT fox.o
+  COMMAND arm-none-eabi-ld -r -b binary -o fox.o ${CMAKE_CURRENT_SOURCE_DIR}/fox.tga
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/fox.tga
 )
 
