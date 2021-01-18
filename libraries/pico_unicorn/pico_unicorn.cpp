@@ -36,7 +36,11 @@ enum pin {
   ROW_3 = 19,
   ROW_4 = 18,
   ROW_5 = 17,
-  ROW_6 = 16
+  ROW_6 = 16,
+  A     = 12,
+  B     = 13,
+  X     = 14,
+  Y     = 15,
 };
 
 constexpr uint32_t ROW_COUNT = 7;
@@ -152,6 +156,20 @@ namespace pimoroni {
     sm = 0;
     uint offset = pio_add_program(bitstream_pio, &unicorn_program);
     unicorn_jetpack_program_init(bitstream_pio, sm, offset);
+
+    // setup button inputs
+    gpio_set_function(pin::A, GPIO_FUNC_SIO); gpio_set_dir(pin::A, GPIO_IN); gpio_pull_up(pin::A);
+    gpio_set_function(pin::B, GPIO_FUNC_SIO); gpio_set_dir(pin::B, GPIO_IN); gpio_pull_up(pin::B);
+    gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
+    gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
+  }
+
+  void PicoUnicorn::clear() {
+    for(uint8_t y = 0; y < 7; y++) {
+      for(uint8_t x = 0; x < 16; x++) {
+        set_pixel(x, y, 0);
+      }
+    }
   }
 
   void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
@@ -193,6 +211,10 @@ namespace pimoroni {
     }
   }
 
+  void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t v) {
+    set_pixel(x, y, v, v, v);
+  }
+
   void PicoUnicorn::update() {
     // copy data to pio tx fifo 4 bytes at a time
     uint32_t *p = (uint32_t *)bitstream;
@@ -200,4 +222,9 @@ namespace pimoroni {
       pio_sm_put_blocking(bitstream_pio, sm, *p++);
     }
   }
+
+  bool PicoUnicorn::is_pressed(uint8_t button) {
+    return !gpio_get(button);
+  }
+
 }
