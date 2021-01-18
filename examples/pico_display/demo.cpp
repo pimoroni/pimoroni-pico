@@ -109,18 +109,18 @@ int main() {
   uint32_t i = 0;
   while(true) {
     pico_display.set_pen(120, 40, 60);
-    pico_display.rectangle(0, 0, 240, 135);
+    pico_display.clear();
 
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
       if(shape.x < 0) shape.dx *= -1;
-      if(shape.x >= pico_display.width) shape.dx *= -1;
+      if(shape.x >= pico_display.bounds.w) shape.dx *= -1;
       if(shape.y < 0) shape.dy *= -1;
-      if(shape.y >= pico_display.height) shape.dy *= -1;
+      if(shape.y >= pico_display.bounds.h) shape.dy *= -1;
 
       pico_display.set_pen(shape.pen);
-      pico_display.circle(shape.x, shape.y, shape.r);
+      pico_display.circle(point(shape.x, shape.y), shape.r);
     }
 
     float led_step = fmod(i / 20.0f, M_PI * 2.0f);

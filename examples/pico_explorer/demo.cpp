@@ -86,57 +86,51 @@ int main() {
   uint32_t i = 0;
   while(true) {
     pico_explorer.set_pen(120, 40, 60);
-    pico_explorer.rectangle(0, 0, pico_explorer.width, pico_explorer.height);
+    pico_explorer.clear();
 
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
       if(shape.x < 0) shape.dx *= -1;
-      if(shape.x >= pico_explorer.width) shape.dx *= -1;
+      if(shape.x >= pico_explorer.bounds.w) shape.dx *= -1;
       if(shape.y < 0) shape.dy *= -1;
-      if(shape.y >= pico_explorer.height) shape.dy *= -1;
+      if(shape.y >= pico_explorer.bounds.h) shape.dy *= -1;
 
       pico_explorer.set_pen(shape.pen);
-      pico_explorer.circle(shape.x, shape.y, shape.r);
+      pico_explorer.circle(point(shape.x, shape.y), shape.r);
     }
-
-    pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.text("This is a test of some text data that should wrap nicely onto multiple lines which is dead useful like.", 10, 10, 180);
 
     float rv = pico_explorer.get_adc(pico_explorer.ADC0);
     pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.circle(rv * 140 + 50, 110, 20);
+    pico_explorer.circle(point(rv * 140 + 50, 110), 20);
     pico_explorer.set_pen(rv * 255, 0, 0);
-    pico_explorer.circle(rv * 140 + 50, 110, 15);
+    pico_explorer.circle(point(rv * 140 + 50, 110), 15);
 
     float gv = pico_explorer.get_adc(pico_explorer.ADC1);
     pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.circle(gv * 140 + 50, 160, 20);
+    pico_explorer.circle(point(gv * 140 + 50, 160), 20);
     pico_explorer.set_pen(0, gv * 255, 0);
-    pico_explorer.circle(gv * 140 + 50, 160, 15);
+    pico_explorer.circle(point(gv * 140 + 50, 160), 15);
 
     float bv = pico_explorer.get_adc(pico_explorer.ADC2);
     pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.circle(bv * 140 + 50, 210, 20);
+    pico_explorer.circle(point(bv * 140 + 50, 210), 20);
     pico_explorer.set_pen(0, 0, bv * 255);
-    pico_explorer.circle(bv * 140 + 50, 210, 15);
+    pico_explorer.circle(point(bv * 140 + 50, 210), 15);
 
     pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, bv);
     pico_explorer.set_motor(pico_explorer.MOTOR2, pico_explorer.FORWARD, rv);
 
     pico_explorer.set_tone(100 + (bv * 1000), rv);
 
+    float tyoff = cos(i / 20.0f) * 50.0f - 50.0f;
+    rect text_box(10, 10, 150, 150);
+    pico_explorer.set_pen(55, 65, 75);
+    pico_explorer.rectangle(text_box);
+    text_box.deflate(10);
+    pico_explorer.set_clip(text_box);
     pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.text("x: " + std::to_string(msa301.get_axis(msa301.X, 16)), 10, 190, 100);
-    pico_explorer.text("y: " + std::to_string(msa301.get_axis(msa301.Y, 16)), 10, 205, 100);
-    pico_explorer.text("z: " + std::to_string(msa301.get_axis(msa301.Z, 16)), 10, 220, 100);
-
-    uint16_t xpos = (msa301.get_axis(msa301.X, 16) * 120) + 120;
-    uint16_t ypos = (msa301.get_axis(msa301.Z, 16) * 120) + 120;
-    pico_explorer.set_pen(255, 255, 255);
-    pico_explorer.circle(xpos, ypos, 20);
-    pico_explorer.set_pen(255, 0, 255);
-    pico_explorer.circle(xpos, ypos, 15);
+    pico_explorer.text("This is a test of some text data that should wrap nicely onto multiple lines which is dead useful like.", point(text_box.x, text_box.y + tyoff), 100);
 
     float xoff = sin(i / 20.0f) * 50.0f;
     xoff += 120 - (81 / 2);
@@ -151,9 +145,24 @@ int main() {
         uint8_t b = *src++;
 
         pico_explorer.set_pen(r, g, b);
-        pico_explorer.pixel(x + xoff, 68 - y + yoff);
+        pico_explorer.pixel(point(x + xoff, 68 - y + yoff));
       }
     }
+
+    pico_explorer.remove_clip();
+
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.text("x: " + std::to_string(int(msa301.get_axis(msa301.X, 16) * 100)), point(10, 190), 100);
+    pico_explorer.text("y: " + std::to_string(int(msa301.get_axis(msa301.Y, 16) * 100)), point(10, 205), 100);
+    pico_explorer.text("z: " + std::to_string(int(msa301.get_axis(msa301.Z, 16) * 100)), point(10, 220), 100);
+
+    uint16_t xpos = (msa301.get_axis(msa301.X, 16) * 120) + 120;
+    uint16_t ypos = (msa301.get_axis(msa301.Z, 16) * 120) + 120;
+    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.circle(point(xpos, ypos), 20);
+    pico_explorer.set_pen(255, 0, 255);
+    pico_explorer.circle(point(xpos, ypos), 15);
+
 
 /*
     if(pico_display.is_pressed(pico_display.A)) {
