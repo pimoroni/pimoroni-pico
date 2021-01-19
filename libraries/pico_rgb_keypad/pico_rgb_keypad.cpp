@@ -3,11 +3,9 @@
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
+#include "hardware/spi.h"
 
 #include "pico_rgb_keypad.hpp"
-
-#include "hardware/i2c.h"
-#include "hardware/spi.h"
 
 enum pin {
   SDA       =  4,
