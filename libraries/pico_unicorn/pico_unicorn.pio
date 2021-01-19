@@ -25,6 +25,8 @@
 
 pixels:
 
+    pull ifempty
+
     ; dummy bit used to align pixel data to nibbles
     out null, 1              ; discard
 
@@ -54,6 +56,11 @@ endb:                        ;
 
     jmp y-- pixels           ; jump back to start of pixel loop
 
+    pull
+
+; dummy byte to 32 bit align row data
+    out null, 8
+
 ; select active row
     out null, 1              ; discard dummy bit
     out pins, 7              ; output row selection mask
@@ -70,14 +77,11 @@ endb:                        ;
 bcd_count:
     jmp x-- bcd_count       ; loop until bcd delay complete
 
-; disable led output (blank) and clear latch pin
-    set pins, 8
-
 ; disable all row outputs
     set x, 0                ; load x register with 0 (we can't set more than 5 bits at a time)
     mov pins, !x            ; write inverted x (0xff) to row pins latching them all high
 
-; dummy byte to 32 bit align row data
-    out null, 8
+; disable led output (blank) and clear latch pin
+    set pins, 8
 
 .wrap

@@ -128,8 +128,8 @@ int main() {
       }
     }
 
+    sleep_ms(10);
 
-    pico_unicorn.update();
   }
 
   printf("done\n");

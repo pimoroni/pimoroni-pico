@@ -16,8 +16,10 @@
 // each row looks like this:
 //
 //      0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, 0b00000000, # pixel data
+//      0b00000000, # dummy byte to 32-bit align the frame (could be used to extend row select in future)
 //      0b01111111, # row 0 select (7-bit row address, 1-bit dummy data)
 //      0b00001111, 0b11111111, # bcd tick count (0-65536)
+//
 //      .. next BCD frame for this row (repeat for 14 frames)
 //
 //  .. next row (repeat for 7 rows)
@@ -75,7 +77,7 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   pio_sm_config c = unicorn_program_get_default_config(offset);
 
   // osr shifts right, autopull on, autopull threshold 8
-  sm_config_set_out_shift(&c, true, true, 32);
+  sm_config_set_out_shift(&c, true, false, 32);
 
   // configure out, set, and sideset pins
   sm_config_set_out_pins(&c, pin::ROW_6, 7);
@@ -94,12 +96,29 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
 
 namespace pimoroni {
 
+  // once the dma transfer of the scanline is complete we move to the
+  // next scanline (or quit if we're finished)
+  void __isr dma_complete() {
+    if (dma_hw->ints0 & (1u << dma_channel)) {
+      dma_hw->ints0 = (1u << dma_channel); // clear irq flag
+      dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
+      dma_channel_set_read_addr(dma_channel, bitstream, true);
+
+      static bool hilo = false;
+      gpio_put(2, hilo);
+      hilo = !hilo;
+    }
+  }
+
+
   void PicoUnicorn::init() {
     // setup pins
     gpio_init(pin::LED_DATA); gpio_set_dir(pin::LED_DATA, GPIO_OUT);
     gpio_init(pin::LED_CLOCK); gpio_set_dir(pin::LED_CLOCK, GPIO_OUT);
     gpio_init(pin::LED_LATCH); gpio_set_dir(pin::LED_LATCH, GPIO_OUT);
     gpio_init(pin::LED_BLANK); gpio_set_dir(pin::LED_BLANK, GPIO_OUT);
+
+    gpio_init(2); gpio_set_dir(2, GPIO_OUT);
 
     gpio_init(pin::ROW_0); gpio_set_dir(pin::ROW_0, GPIO_OUT);
     gpio_init(pin::ROW_1); gpio_set_dir(pin::ROW_1, GPIO_OUT);
@@ -129,13 +148,13 @@ namespace pimoroni {
         // determine offset in the buffer for this row/frame
         uint16_t offset = (row * ROW_BYTES * BCD_FRAMES) + (ROW_BYTES * frame);
 
-        uint16_t row_select_offset = offset + 8;
+        uint16_t row_select_offset = offset + 9;
+        uint16_t bcd_offset = offset + 10;
 
         // the last bcd frame is used to allow the fets to discharge to avoid ghosting
         if(frame == BCD_FRAMES - 1) {
           bitstream[row_select_offset] = 0b01111111;
 
-          uint16_t bcd_offset = offset + 9;
           uint16_t bcd_ticks = 65535;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
@@ -143,7 +162,6 @@ namespace pimoroni {
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
 
-          uint16_t bcd_offset = offset + 9;
           uint16_t bcd_ticks = pow(2, frame);
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
@@ -153,15 +171,30 @@ namespace pimoroni {
 
     // setup the pio
     bitstream_pio = pio0;
-    sm = 0;
+    bitstream_sm = 0;
     uint offset = pio_add_program(bitstream_pio, &unicorn_program);
-    unicorn_jetpack_program_init(bitstream_pio, sm, offset);
+    unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, offset);
 
     // setup button inputs
     gpio_set_function(pin::A, GPIO_FUNC_SIO); gpio_set_dir(pin::A, GPIO_IN); gpio_pull_up(pin::A);
     gpio_set_function(pin::B, GPIO_FUNC_SIO); gpio_set_dir(pin::B, GPIO_IN); gpio_pull_up(pin::B);
     gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
     gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
+
+    // setup dma transfer for pixel data to the pio
+    dma_channel = dma_claim_unused_channel(true);
+    dma_channel_config config = dma_channel_get_default_config(dma_channel);
+    channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
+    channel_config_set_bswap(&config, false); // byte swap to reverse little endian
+    channel_config_set_dreq(&config, pio_get_dreq(bitstream_pio, bitstream_sm, true));
+    dma_channel_configure(dma_channel, &config, &bitstream_pio->txf[bitstream_sm], NULL, 0, false);
+    dma_channel_set_irq0_enabled(dma_channel, true);
+    irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), true);
+    irq_set_exclusive_handler(DMA_IRQ_0, dma_complete);
+    irq_set_enabled(DMA_IRQ_0, true);
+
+    dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
+    dma_channel_set_read_addr(dma_channel, bitstream, true);
   }
 
   void PicoUnicorn::clear() {
@@ -213,14 +246,6 @@ namespace pimoroni {
 
   void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t v) {
     set_pixel(x, y, v, v, v);
-  }
-
-  void PicoUnicorn::update() {
-    // copy data to pio tx fifo 4 bytes at a time
-    uint32_t *p = (uint32_t *)bitstream;
-    for(uint16_t i = 0; i < BITSTREAM_LENGTH; i+=4) {
-      pio_sm_put_blocking(bitstream_pio, sm, *p++);
-    }
   }
 
   bool PicoUnicorn::is_pressed(uint8_t button) {
