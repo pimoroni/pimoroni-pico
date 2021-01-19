@@ -143,7 +143,7 @@ namespace pimoroni {
     }
 
     // initialise the bcd timing values and row selects in the bitstream
-    for(uint8_t row = 0; row < 7; row++) {
+    for(uint8_t row = 0; row < HEIGHT; row++) {
       for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {
         // determine offset in the buffer for this row/frame
         uint16_t offset = (row * ROW_BYTES * BCD_FRAMES) + (ROW_BYTES * frame);
@@ -198,18 +198,18 @@ namespace pimoroni {
   }
 
   void PicoUnicorn::clear() {
-    for(uint8_t y = 0; y < 7; y++) {
-      for(uint8_t x = 0; x < 16; x++) {
+    for(uint8_t y = 0; y < HEIGHT; y++) {
+      for(uint8_t x = 0; x < WIDTH; x++) {
         set_pixel(x, y, 0);
       }
     }
   }
 
   void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-    if(x < 0 || x > 15 || y < 0 || y > 6) return;
+    if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
     // make those coordinates sane
-    x = 15 - x;
+    x = (WIDTH - 1) - x;
 
     // work out the byte offset of this pixel
     uint8_t byte_offset = x / 2;
