@@ -83,6 +83,7 @@ int main() {
   }
 
   pico_explorer.set_audio_pin(pico_explorer.GP0);
+
   uint32_t i = 0;
   while(true) {
     pico_explorer.set_pen(120, 40, 60);
@@ -121,7 +122,27 @@ int main() {
     pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, bv);
     pico_explorer.set_motor(pico_explorer.MOTOR2, pico_explorer.FORWARD, rv);
 
-    pico_explorer.set_tone(100 + (bv * 1000), rv);
+    pico_explorer.set_tone(440, 0.5);
+
+    if(pico_explorer.is_pressed(pico_explorer.A)) {
+      pico_explorer.set_pen(255, 255, 255);
+      pico_explorer.character('A', point(120, 180), 5);
+    }
+
+    if(pico_explorer.is_pressed(pico_explorer.B)) {
+      pico_explorer.set_pen(255, 255, 255);
+      pico_explorer.character('B', point(120, 180), 5);
+    }
+
+    if(pico_explorer.is_pressed(pico_explorer.X)) {
+      pico_explorer.set_pen(255, 255, 255);
+      pico_explorer.character('X', point(120, 180), 5);
+    }
+
+    if(pico_explorer.is_pressed(pico_explorer.Y)) {
+      pico_explorer.set_pen(255, 255, 255);
+      pico_explorer.character('Y', point(120, 180), 5);
+    }
 
     float tyoff = cos(i / 20.0f) * 50.0f - 50.0f;
     rect text_box(10, 10, 150, 150);
