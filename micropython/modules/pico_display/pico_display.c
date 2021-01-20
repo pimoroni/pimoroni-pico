@@ -15,7 +15,7 @@ enum buttons
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Module Functions *****/
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_init_obj, picodisplay_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(picodisplay_init_obj, picodisplay_init);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_get_width_obj, picodisplay_get_width);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_get_height_obj, picodisplay_get_height);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_update_obj, picodisplay_update);

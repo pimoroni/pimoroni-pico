@@ -14,12 +14,12 @@ namespace pimoroni {
     static const uint8_t X = 14;
     static const uint8_t Y = 15;
 
+    uint16_t *__fb;
   private:
-    uint16_t __fb[WIDTH * HEIGHT];
     ST7789 screen;
 
   public:
-    PicoDisplay();
+    PicoDisplay(uint16_t *buf);
 
     void init();
     void update();

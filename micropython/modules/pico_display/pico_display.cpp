@@ -6,14 +6,20 @@
 
 using namespace pimoroni;
 
-PicoDisplay display;
+PicoDisplay *display;
 
 
 extern "C" {
 #include "pico_display.h"
 
-mp_obj_t picodisplay_init() {
-    display.init();
+mp_obj_t buf_obj;
+
+mp_obj_t picodisplay_init(mp_obj_t buf) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(buf, &bufinfo, MP_BUFFER_RW);
+    buf_obj = buf;
+    display = new PicoDisplay((uint16_t *)bufinfo.buf);
+    display->init();
     return mp_const_none;
 }
 
@@ -26,7 +32,7 @@ mp_obj_t picodisplay_get_height() {
 }
 
 mp_obj_t picodisplay_update() {
-    display.update();
+    display->update();
     return mp_const_none;
 }
 
@@ -36,7 +42,7 @@ mp_obj_t picodisplay_set_backlight(mp_obj_t brightness_obj) {
     if(brightness < 0 || brightness > 1.0f)
         mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
     else
-        display.set_backlight((uint8_t)(brightness * 255.0f));
+        display->set_backlight((uint8_t)(brightness * 255.0f));
 
     return mp_const_none;
 }
@@ -53,7 +59,7 @@ mp_obj_t picodisplay_set_led(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) {
     else if(b < 0 || b > 255)
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
-        display.set_led(r, g, b);
+        display->set_led(r, g, b);
 
     return mp_const_none;
 }
@@ -65,19 +71,19 @@ mp_obj_t picodisplay_is_pressed(mp_obj_t button_obj) {
     switch(buttonID)
     {
     case 0:
-        buttonPressed = display.is_pressed(PicoDisplay::A);
+        buttonPressed = display->is_pressed(PicoDisplay::A);
         break;
 
     case 1:
-        buttonPressed = display.is_pressed(PicoDisplay::B);
+        buttonPressed = display->is_pressed(PicoDisplay::B);
         break;
 
     case 2:
-        buttonPressed = display.is_pressed(PicoDisplay::X);
+        buttonPressed = display->is_pressed(PicoDisplay::X);
         break;
 
     case 3:
-        buttonPressed = display.is_pressed(PicoDisplay::Y);
+        buttonPressed = display->is_pressed(PicoDisplay::Y);
         break;
 
     default:
