@@ -18,8 +18,7 @@ namespace pimoroni {
                  ((g & 0b11111100) << 3) |
                  ((b & 0b11111000) >> 3);
 
-    // endian swap, this should be possible another way...
-    return ((p & 0xff00) >> 8) | ((p & 0xff) << 8);
+    return __builtin_bswap16(p);
   }
 
   void PicoGraphics::set_clip(const rect &r) {

@@ -3,7 +3,7 @@
 #include "py/objstr.h"
 
 // Declare the functions we'll make available in Python
-extern mp_obj_t picodisplay_init();
+extern mp_obj_t picodisplay_init(mp_obj_t buf);
 extern mp_obj_t picodisplay_get_width();
 extern mp_obj_t picodisplay_get_height();
 extern mp_obj_t picodisplay_set_backlight(mp_obj_t brightness_obj);

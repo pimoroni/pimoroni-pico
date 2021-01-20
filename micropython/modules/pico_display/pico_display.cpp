@@ -6,14 +6,20 @@
 
 using namespace pimoroni;
 
-PicoDisplay display;
+PicoDisplay *display;
 
 
 extern "C" {
 #include "pico_display.h"
 
-mp_obj_t picodisplay_init() {
-    display.init();
+mp_obj_t buf_obj;
+
+mp_obj_t picodisplay_init(mp_obj_t buf) {
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(buf, &bufinfo, MP_BUFFER_RW);
+    buf_obj = buf;
+    display = new PicoDisplay((uint16_t *)bufinfo.buf);
+    display->init();
     return mp_const_none;
 }
 
@@ -26,7 +32,7 @@ mp_obj_t picodisplay_get_height() {
 }
 
 mp_obj_t picodisplay_update() {
-    display.update();
+    display->update();
     return mp_const_none;
 }
 
@@ -36,7 +42,7 @@ mp_obj_t picodisplay_set_backlight(mp_obj_t brightness_obj) {
     if(brightness < 0 || brightness > 1.0f)
         mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
     else
-        display.set_backlight((uint8_t)(brightness * 255.0f));
+        display->set_backlight((uint8_t)(brightness * 255.0f));
 
     return mp_const_none;
 }
@@ -53,7 +59,7 @@ mp_obj_t picodisplay_set_led(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) {
     else if(b < 0 || b > 255)
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
-        display.set_led(r, g, b);
+        display->set_led(r, g, b);
 
     return mp_const_none;
 }
@@ -65,19 +71,19 @@ mp_obj_t picodisplay_is_pressed(mp_obj_t button_obj) {
     switch(buttonID)
     {
     case 0:
-        buttonPressed = display.is_pressed(PicoDisplay::A);
+        buttonPressed = display->is_pressed(PicoDisplay::A);
         break;
 
     case 1:
-        buttonPressed = display.is_pressed(PicoDisplay::B);
+        buttonPressed = display->is_pressed(PicoDisplay::B);
         break;
 
     case 2:
-        buttonPressed = display.is_pressed(PicoDisplay::X);
+        buttonPressed = display->is_pressed(PicoDisplay::X);
         break;
 
     case 3:
-        buttonPressed = display.is_pressed(PicoDisplay::Y);
+        buttonPressed = display->is_pressed(PicoDisplay::Y);
         break;
 
     default:
@@ -97,7 +103,7 @@ mp_obj_t picodisplay_set_pen(mp_uint_t n_args, const mp_obj_t *args) {
             if(p < 0 || p > 0xffff)
                 mp_raise_ValueError("p is not a valid pen.");
             else
-                display.set_pen(p);
+                display->set_pen(p);
         } break;
 
     case 3: {
@@ -112,7 +118,7 @@ mp_obj_t picodisplay_set_pen(mp_uint_t n_args, const mp_obj_t *args) {
             else if(b < 0 || b > 255)
                 mp_raise_ValueError("b out of range. Expected 0 to 255");
             else
-                display.set_pen(r, g, b);
+                display->set_pen(r, g, b);
         } break;
 
     default: {
@@ -139,7 +145,7 @@ mp_obj_t picodisplay_create_pen(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) 
     else if(b < 0 || b > 255)
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
-        pen = display.create_pen(r, g, b);
+        pen = display->create_pen(r, g, b);
     
     return mp_obj_new_int(pen);
 }
@@ -153,18 +159,18 @@ mp_obj_t picodisplay_set_clip(mp_uint_t n_args, const mp_obj_t *args) {
     int h = mp_obj_get_int(args[3]);
 
     rect r(x, y, w, h);
-    display.set_clip(r);
+    display->set_clip(r);
 
     return mp_const_none;
 }
 
 mp_obj_t picodisplay_remove_clip() {
-    display.remove_clip();
+    display->remove_clip();
     return mp_const_none;
 }
 
 mp_obj_t picodisplay_clear() {
-    display.clear();
+    display->clear();
     return mp_const_none;
 }
 
@@ -173,7 +179,7 @@ mp_obj_t picodisplay_pixel(mp_obj_t x_obj, mp_obj_t y_obj) {
     int y = mp_obj_get_int(y_obj);
 
     point p(x, y);
-    display.pixel(p);
+    display->pixel(p);
  
     return mp_const_none;
 }
@@ -184,7 +190,7 @@ mp_obj_t picodisplay_pixel_span(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t l_obj) 
     int l = mp_obj_get_int(l_obj);
 
     point p(x, y);
-    display.pixel_span(p, l);
+    display->pixel_span(p, l);
 
     return mp_const_none;
 }
@@ -198,7 +204,7 @@ mp_obj_t picodisplay_rectangle(mp_uint_t n_args, const mp_obj_t *args) {
     int h = mp_obj_get_int(args[3]);
 
     rect r(x, y, w, h);
-    display.rectangle(r);
+    display->rectangle(r);
 
     return mp_const_none;
 }
@@ -209,7 +215,7 @@ mp_obj_t picodisplay_circle(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t r_obj) {
     int r = mp_obj_get_int(r_obj);
 
     point p(x, y);
-    display.circle(p, r);
+    display->circle(p, r);
 
     return mp_const_none;
 }
@@ -223,10 +229,10 @@ mp_obj_t picodisplay_character(mp_uint_t n_args, const mp_obj_t *args) {
     point p(x, y);
     if(n_args == 4) {
         int scale = mp_obj_get_int(args[3]);
-        display.character((char)c, p, scale);
+        display->character((char)c, p, scale);
     }
     else
-        display.character((char)c, p);
+        display->character((char)c, p);
 
     return mp_const_none;
 }
@@ -246,10 +252,10 @@ mp_obj_t picodisplay_text(mp_uint_t n_args, const mp_obj_t *args) {
     point p(x, y);
     if(n_args == 5) {
         int scale = mp_obj_get_int(args[4]);
-        display.text(t, p, wrap, scale);
+        display->text(t, p, wrap, scale);
     }
     else
-        display.text(t, p, wrap);
+        display->text(t, p, wrap);
 
     return mp_const_none;
 }
