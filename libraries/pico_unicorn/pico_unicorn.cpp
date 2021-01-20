@@ -135,10 +135,10 @@ namespace pimoroni {
       float r_gamma = 2.8f;
       r_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
 
-      float g_gamma = 3.5f;
+      float g_gamma = 2.8f;
       g_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
 
-      float b_gamma = 2.6f;
+      float b_gamma = 2.8f;
       b_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
     }
 
