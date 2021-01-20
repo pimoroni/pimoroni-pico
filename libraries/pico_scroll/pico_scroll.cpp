@@ -32,13 +32,6 @@ enum reg {
   COLOR_OFFSET        = 0x24
 };
 
-void i2c_write(uint8_t reg, const char *data, uint8_t len) {
-  uint8_t buffer[256];
-  buffer[0] = reg;
-  memcpy(&buffer[1], data, len);
-  i2c_write_blocking(i2c0, 0x74, buffer, len + 1, true);
-}
-
 namespace pimoroni {
 
   void PicoScroll::init() {
@@ -65,17 +58,17 @@ namespace pimoroni {
   }
 
   void PicoScroll::set_pixel(uint8_t x, uint8_t y, uint8_t v) {
-    if(x < 0 || x > 16 || y < 0 || y > 6) return;
+    if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
-    y = 6 - y;
+    y = (HEIGHT - 1) - y;
     if(x > 8) {
       x = x - 8;
-      y = 6 - (y + 8);
+      y = (HEIGHT - 1) - (y + 8);
     }else{
       x = 8 - x;
     }
 
-    uint8_t o = x * 16 + y;
+    uint8_t o = x * (WIDTH - 1) + y;
     __fb[o] = v;
   }
 
@@ -84,10 +77,17 @@ namespace pimoroni {
   }
 
   void PicoScroll::clear() {
-    memset(__fb, 0, 144);
+    memset(__fb, 0, BUFFER_SIZE);
   }
 
   void PicoScroll::update() {
-    i2c_write(COLOR_OFFSET, (const char *)__fb, 144);
+    i2c_write(COLOR_OFFSET, (const char *)__fb, BUFFER_SIZE);
+  }
+
+  void PicoScroll::i2c_write(uint8_t reg, const char *data, uint8_t len) {
+    uint8_t buffer[256];
+    buffer[0] = reg;
+    memcpy(&buffer[1], data, len);
+    i2c_write_blocking(i2c0, DEFAULT_ADDRESS, buffer, len + 1, true);
   }
 }
