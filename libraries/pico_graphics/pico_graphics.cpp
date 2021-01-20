@@ -131,10 +131,8 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap) {
+  void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap, uint8_t scale) {
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
-
-    uint8_t scale = 2;
 
     size_t i = 0;
     while(i < t.length()) {
