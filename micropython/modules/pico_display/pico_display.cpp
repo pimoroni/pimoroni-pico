@@ -221,7 +221,6 @@ mp_obj_t picodisplay_circle(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t r_obj) {
 }
 
 mp_obj_t picodisplay_character(mp_uint_t n_args, const mp_obj_t *args) {
-
     int c = mp_obj_get_int(args[0]);
     int x = mp_obj_get_int(args[1]);
     int y = mp_obj_get_int(args[2]);
@@ -238,8 +237,6 @@ mp_obj_t picodisplay_character(mp_uint_t n_args, const mp_obj_t *args) {
 }
 
 mp_obj_t picodisplay_text(mp_uint_t n_args, const mp_obj_t *args) {
-    (void)n_args; //Unused input parameter, we know it's 4
-
     mp_check_self(mp_obj_is_str_or_bytes(args[0]));
     GET_STR_DATA_LEN(args[0], str, str_len);
 
