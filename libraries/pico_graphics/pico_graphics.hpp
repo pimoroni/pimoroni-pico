@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <cstdint>
 #include <algorithm>
 
@@ -39,10 +40,10 @@ namespace pimoroni {
 
   class PicoGraphics {
   public:
+    uint16_t *frame_buffer;
+
     rect      bounds;
     rect      clip;
-
-    uint16_t *frame_buffer;
 
     uint16_t  pen;
 

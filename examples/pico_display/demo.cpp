@@ -70,6 +70,7 @@ void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c) {
 }*/
 
 int main() {
+  pico_display.init();
   pico_display.set_backlight(100);
 
   // uint16_t white = pico_display.create_pen(255, 255, 255);

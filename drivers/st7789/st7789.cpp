@@ -140,7 +140,7 @@ namespace pimoroni {
     // gamma correct the provided 0-255 brightness value onto a
     // 0-65535 range for the pwm counter
     float gamma = 2.8;
-    uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65536.0f + 0.5f);
+    uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
   }
 
