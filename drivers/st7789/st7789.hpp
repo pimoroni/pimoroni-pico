@@ -16,11 +16,11 @@ namespace pimoroni {
     uint16_t row_stride;
 
     // interface pins with our standard defaults where appropriate
+    int8_t cs     = 17;
+    int8_t dc     = 16;
     int8_t sck    = 18;
     int8_t mosi   = 19;
     int8_t miso   = -1; // we generally don't use this pin
-    int8_t cs     = 17;
-    int8_t dc     = 16;
     int8_t bl     = 20;
     int8_t vsync  = -1; // only available on some products
 
@@ -37,9 +37,9 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
            uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
-      width(width), height(height), frame_buffer(frame_buffer),
       spi(spi),
-      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso) {}
+      width(width), height(height),      
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), frame_buffer(frame_buffer) {}
 
     void init(bool auto_init_sequence = true);
 

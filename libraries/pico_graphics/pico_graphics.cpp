@@ -18,8 +18,7 @@ namespace pimoroni {
                  ((g & 0b11111100) << 3) |
                  ((b & 0b11111000) >> 3);
 
-    // endian swap, this should be possible another way...
-    return ((p & 0xff00) >> 8) | ((p & 0xff) << 8);
+    return __builtin_bswap16(p);
   }
 
   void PicoGraphics::set_clip(const rect &r) {
@@ -131,10 +130,8 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap) {
+  void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap, uint8_t scale) {
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
-
-    uint8_t scale = 2;
 
     size_t i = 0;
     while(i < t.length()) {

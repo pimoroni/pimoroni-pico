@@ -55,6 +55,10 @@ namespace pimoroni {
     gpio_set_function(pin::B, GPIO_FUNC_SIO); gpio_set_dir(pin::B, GPIO_IN); gpio_pull_up(pin::B);
     gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
     gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
+
+    // reset the screen
+    clear();
+    update();
   }
 
   void PicoScroll::set_pixel(uint8_t x, uint8_t y, uint8_t v) {

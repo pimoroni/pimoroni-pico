@@ -6,25 +6,9 @@
 namespace pimoroni {
 
   class PicoExplorer : public PicoGraphics {
-    uint16_t __fb[240 * 240];
-    ST7789 screen;
-    int8_t audio_pin = -1;
-
   public:
-    PicoExplorer();
-
-    void set_backlight(uint8_t brightness) {screen.set_backlight(brightness);}
-    void update() {screen.update();}
-
-    bool is_pressed(uint8_t button);
-
-    float get_adc(uint8_t channel);
-
-    void set_motor(uint8_t channel, uint8_t action, float speed = 0.0f);
-
-    void set_audio_pin(uint8_t pin);
-    void set_tone(uint16_t frequency, float duty = 0.2f);
-
+    static const int WIDTH = 240;
+    static const int HEIGHT = 240;
     static const uint8_t A = 12;
     static const uint8_t B = 13;
     static const uint8_t X = 14;
@@ -50,6 +34,25 @@ namespace pimoroni {
     static const uint8_t GP6 = 6;
     static const uint8_t GP7 = 7;
 
+    uint16_t *__fb;
+  private:
+    ST7789 screen;
+    int8_t audio_pin = -1;
+
+  public:
+    PicoExplorer(uint16_t *buf);
+
+    void init();
+    void update();
+    void set_backlight(uint8_t brightness);
+    bool is_pressed(uint8_t button);
+
+    float get_adc(uint8_t channel);
+
+    void set_motor(uint8_t channel, uint8_t action, float speed = 0.0f);
+
+    void set_audio_pin(uint8_t pin);
+    void set_tone(uint16_t frequency, float duty = 0.2f);
   };
 
 }

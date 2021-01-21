@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
@@ -12,9 +13,12 @@ const uint8_t MOTOR2P = 11;
 
 namespace pimoroni {
 
-  PicoExplorer::PicoExplorer()
-    : screen(240, 240, __fb), PicoGraphics(240, 240, __fb) {
+  PicoExplorer::PicoExplorer(uint16_t *buf)
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf)  {
+    __fb = buf;
+  }
 
+  void PicoExplorer::init() {
     // setup button inputs
     gpio_set_function(A, GPIO_FUNC_SIO); gpio_set_dir(A, GPIO_IN); gpio_pull_up(A);
     gpio_set_function(B, GPIO_FUNC_SIO); gpio_set_dir(B, GPIO_IN); gpio_pull_up(B);
@@ -46,6 +50,14 @@ namespace pimoroni {
 
     // initialise the screen
     screen.init();
+  }
+
+  void PicoExplorer::update() {
+    screen.update();
+  }
+
+  void PicoExplorer::set_backlight(uint8_t brightness) {
+    screen.set_backlight(brightness);
   }
 
   bool PicoExplorer::is_pressed(uint8_t button) {

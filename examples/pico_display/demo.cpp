@@ -10,7 +10,8 @@ using namespace pimoroni;
 extern unsigned char image_tif[];
 extern unsigned int image_tif_len;
 
-PicoDisplay pico_display;
+uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
+PicoDisplay pico_display(buffer);
 /*
 void pixel(int x, int y, uint16_t c) {
   x *= 2;
@@ -70,6 +71,7 @@ void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c) {
 }*/
 
 int main() {
+  pico_display.init();
   pico_display.set_backlight(100);
 
   // uint16_t white = pico_display.create_pen(255, 255, 255);
