@@ -10,7 +10,8 @@ using namespace pimoroni;
 
 extern unsigned char _binary_fox_tga_start[];
 
-PicoExplorer pico_explorer;
+uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
+PicoExplorer pico_explorer(buffer);
 MSA301 msa301;
 
 uint8_t arrow[] = {
@@ -54,6 +55,7 @@ void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c) {
 }*/
 
 int main() {
+  pico_explorer.init();
   msa301.init();
 
   bool a_pressed = false;
