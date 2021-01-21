@@ -20,7 +20,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_get_width_obj, picoscroll_get_width)
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_get_height_obj, picoscroll_get_height);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_update_obj, picoscroll_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(picoscroll_set_pixel_obj, picoscroll_set_pixel);
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_clear_obj, picoscroll_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_clear_obj, picoscroll_clear);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_is_pressed_obj, picoscroll_is_pressed);
 
 /***** Globals Table *****/
