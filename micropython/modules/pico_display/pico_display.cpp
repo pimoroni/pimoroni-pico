@@ -12,10 +12,12 @@ PicoDisplay *display;
 extern "C" {
 #include "pico_display.h"
 
-mp_obj_t picodisplay_init() {
-    mp_obj_t ba = alloc_new_bytearray(PicoDisplay::WIDTH * PicoDisplay::HEIGHT * sizeof(uint16_t));
+mp_obj_t buf_obj;
+
+mp_obj_t picodisplay_init(mp_obj_t buf) {
     mp_buffer_info_t bufinfo;
-    mp_get_buffer_raise(ba, &bufinfo, MP_BUFFER_RW);
+    mp_get_buffer_raise(buf, &bufinfo, MP_BUFFER_RW);
+    buf_obj = buf;
     display = new PicoDisplay((uint16_t *)bufinfo.buf);
     display->init();
     return mp_const_none;
