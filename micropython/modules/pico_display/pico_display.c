@@ -1,6 +1,4 @@
 #include "pico_display.h"
-#include "py/binary.h"
-#include "py/objarray.h"
 
 /***** Constants *****/
 enum buttons
@@ -11,25 +9,13 @@ enum buttons
     BUTTON_Y,
 };
 
-mp_obj_t alloc_new_bytearray(int len) {
-    int typecode_size = mp_binary_get_size('@', BYTEARRAY_TYPECODE, NULL);
-    mp_obj_array_t *o = m_new_obj(mp_obj_array_t);
-    o->base.type = &mp_type_bytearray;
-    o->typecode = BYTEARRAY_TYPECODE;
-    o->free = 0;
-    o->len = len;
-    o->items = m_new(byte, typecode_size * o->len);
-    memset(o->items, 0, len);
-    return MP_OBJ_FROM_PTR(o);
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // picodisplay Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Module Functions *****/
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_init_obj, picodisplay_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(picodisplay_init_obj, picodisplay_init);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_get_width_obj, picodisplay_get_width);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_get_height_obj, picodisplay_get_height);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_update_obj, picodisplay_update);
