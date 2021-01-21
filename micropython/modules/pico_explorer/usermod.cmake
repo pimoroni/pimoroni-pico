@@ -15,7 +15,7 @@ target_include_directories(usermod_pico_explorer INTERFACE
 )
 
 target_compile_definitions(usermod_pico_explorer INTERFACE
-    -DMODULE_PICODISPLAY_ENABLED=1
+    -DMODULE_PICOEXPLORER_ENABLED=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_explorer)
