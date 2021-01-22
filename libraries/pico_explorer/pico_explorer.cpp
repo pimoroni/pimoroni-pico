@@ -1,6 +1,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "hardware/adc.h"
 
