@@ -1,6 +1,6 @@
 # Pico Explorer Pack <!-- omit in toc -->
 
-Our Pico Explorer Pack offers a vibrant 1.14" (240x135) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
+Our Pico Explorer Pack offers a vibrant 1.14" (240x240) IPS LCD screen for your Raspberry Pi Pico it also includes four switches, a piezo and a DRV8833 motor driver.
 
 We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons, piezo and motor driver. [See the library reference](#reference) for details.
 
