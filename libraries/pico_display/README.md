@@ -69,7 +69,7 @@ int main() {
 
 ### PicoGraphics
 
-Pico Display uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics fucntion reference.](../pico_graphics/README.md#function-reference).
+Pico Display uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
 
 ### init
 

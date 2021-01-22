@@ -2,7 +2,7 @@
 
 Our Pico Explorer Pack offers a vibrant 1.14" (240x135) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
 
-We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons, piezo and motor driver. See the [function reference](#function-reference) for details.
+We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons, piezo and motor driver. [See the library reference](#reference) for details.
 
 - [Example Program](#example-program)
 - [Reference](#reference)
@@ -11,7 +11,7 @@ We've included helper functions to handle every aspect of drawing to the screen 
     - [Buttons](#buttons)
     - [ADC Channels](#adc-channels)
     - [GPIO](#gpio)
-  - [Fuctions](#fuctions)
+  - [Functions](#functions)
     - [init](#init)
     - [set_backlight](#set_backlight)
     - [set_motor](#set_motor)
@@ -53,7 +53,7 @@ int main() {
 
 ### PicoGraphics
 
-Pico Explorer uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics fucntion reference.](../pico_graphics/README.md#function-reference).
+Pico Explorer uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
 
 ### Constants
 
@@ -81,7 +81,7 @@ The 8 general purpose IO pins on the lower Pico Explorer are GP0 through GP7, we
 bool pin_state = gpio_get(pico_explorer.GP0);
 ```
 
-### Fuctions
+### Functions
 
 #### init
 
