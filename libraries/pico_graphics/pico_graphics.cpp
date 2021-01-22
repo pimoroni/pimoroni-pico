@@ -14,7 +14,7 @@ namespace pimoroni {
   }
 
   void PicoGraphics::set_clip(const rect &r) {
-    clip = r;
+    clip = bounds.intersection(r);
   }
 
   void PicoGraphics::remove_clip() {
