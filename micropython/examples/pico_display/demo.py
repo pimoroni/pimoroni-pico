@@ -1,6 +1,11 @@
 import time, random
-import picodisplay as display             
-display.init()
+import picodisplay as display 
+
+WIDTH = 240
+HEIGHT = 135
+
+display_buffer = bytearray(WIDTH * HEIGHT)            
+display.init(display_buffer)
 display.set_backlight(1.0)
 i = 0
 width = display.get_width()
