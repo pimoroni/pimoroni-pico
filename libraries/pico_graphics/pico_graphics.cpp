@@ -6,19 +6,11 @@ extern uint8_t character_widths[96];
 namespace pimoroni {
 
   void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    pen = create_pen(r, g, b);
+    _pen = create_pen(r, g, b);
   }
 
-  void PicoGraphics::set_pen(uint16_t p) {
-    pen = p;
-  }
-
-  uint16_t PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-    uint16_t p = ((r & 0b11111000) << 8) |
-                 ((g & 0b11111100) << 3) |
-                 ((b & 0b11111000) >> 3);
-
-    return __builtin_bswap16(p);
+  void PicoGraphics::set_pen(pen p) {
+    _pen = p;
   }
 
   void PicoGraphics::set_clip(const rect &r) {
@@ -47,7 +39,7 @@ namespace pimoroni {
 
   void PicoGraphics::pixel(const point &p) {
     if(!clip.contains(p)) return;
-    *ptr(p) = pen;
+    *ptr(p) = _pen;
   }
 
   void PicoGraphics::pixel_span(const point &p, int32_t l) {
@@ -62,7 +54,7 @@ namespace pimoroni {
 
     uint16_t *dest = ptr(clipped);
     while(l--) {
-      *dest++ = pen;
+      *dest++ = _pen;
     }
   }
 
@@ -76,7 +68,7 @@ namespace pimoroni {
     while(clipped.h--) {
       // draw span of pixels for this row
       for(uint32_t i = 0; i < clipped.w; i++) {
-        *dest++ = pen;
+        *dest++ = _pen;
       }
 
       // move to next scanline
