@@ -68,9 +68,9 @@ namespace pimoroni {
     void set_clip(const Rect &r);
     void remove_clip();
 
-    uint16_t* ptr(const Point &p);
-    uint16_t* ptr(const Rect &r);
-    uint16_t* ptr(int32_t x, int32_t y);
+    Pen* ptr(const Point &p);
+    Pen* ptr(const Rect &r);
+    Pen* ptr(int32_t x, int32_t y);
 
     void clear();
     void pixel(const Point &p);

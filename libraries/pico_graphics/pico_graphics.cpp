@@ -21,15 +21,15 @@ namespace pimoroni {
     clip = bounds;
   }
 
-  uint16_t* PicoGraphics::ptr(const Rect &r) {
+  Pen* PicoGraphics::ptr(const Rect &r) {
     return frame_buffer + r.x + r.y * bounds.w;
   }
 
-  uint16_t* PicoGraphics::ptr(const Point &p) {
+  Pen* PicoGraphics::ptr(const Point &p) {
     return frame_buffer + p.x + p.y * bounds.w;
   }
 
-  uint16_t* PicoGraphics::ptr(int32_t x, int32_t y) {
+  Pen* PicoGraphics::ptr(int32_t x, int32_t y) {
     return frame_buffer + x + y * bounds.w;
   }
 
@@ -52,7 +52,7 @@ namespace pimoroni {
     if(clipped.x     <  clip.x)           {l += clipped.x - clip.x; clipped.x = clip.x;}
     if(clipped.x + l >= clip.x + clip.w)  {l  = clip.x + clip.w - clipped.x;}
 
-    uint16_t *dest = ptr(clipped);
+    Pen *dest = ptr(clipped);
     while(l--) {
       *dest++ = pen;
     }
@@ -64,7 +64,7 @@ namespace pimoroni {
 
     if(clipped.empty()) return;
 
-    uint16_t *dest = ptr(clipped);
+    Pen *dest = ptr(clipped);
     while(clipped.h--) {
       // draw span of pixels for this row
       for(uint32_t i = 0; i < clipped.w; i++) {
@@ -208,7 +208,7 @@ namespace pimoroni {
       int32_t w1 = w1row;
       int32_t w2 = w2row;
 
-      uint16_t *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
+      Pen *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
       for (uint32_t x = 0; x < triangle_bounds.w; x++) {
         if ((w0 | w1 | w2) >= 0) {
           *dest = pen;
