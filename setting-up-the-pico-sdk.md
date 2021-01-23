@@ -14,11 +14,16 @@ cd pico
 
 ```bash
 git clone -b master https://github.com/raspberrypi/pico-sdk.git
+
+# Set the PICO_SDK_PATH environment variable to where you just cloned the repo.
+export PICO_SDK_PATH=/path/to/pico-sdk
+
 cd pico-sdk
 git submodule update --init
 cd ..
 git clone -b master https://github.com/raspberrypi/pico-examples.git
 ```
+
 
 **Step 3.** Install the MicroPython port (optional):
 
@@ -33,9 +38,24 @@ cd ../../..
 
 **Step 4.** Install the toolchain needed to build Pico projects.
 
+
+**Debian Linux**
 ```bash
 sudo apt update
 sudo apt install cmake gcc-arm-none-eabi build-essential
+```
+
+**macos** (Using Homebrew)
+```bash
+# Install cmake
+brew install cmake
+
+# Install the arm eabi toolchain
+brew tap ArmMbed/homebrew-formulae
+brew install arm-none-eabi-gcc
+
+# The equivalent to build-essential on linux, you probably already have this.
+xcode-select --install
 ```
 
 **Step 5.** Install the Pimoroni Pico libraries:
