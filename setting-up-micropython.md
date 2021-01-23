@@ -18,7 +18,7 @@ Plug the USB cable back into your Raspberry Pi Pico (making sure to keep the "BO
 This should put your Raspberry Pi Pico into firmware update mode. It will appear as a new disk drive on your computer with the name **RPI-RP2**.
 
 ## Step 4
-Download our custom MicroPython firmware image. [Click here to download]()
+Download our custom MicroPython firmware image from [the releases page](https://github.com/pimoroni/pimoroni-pico/releases).
 
 ## Step 5
 Copy the downloaded firmware image onto the **RPI-RP** drive.
