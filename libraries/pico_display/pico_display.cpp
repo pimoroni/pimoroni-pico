@@ -1,6 +1,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "hardware/gpio.h"  // Workaround SDK bug - https://github.com/raspberrypi/pico-sdk/issues/3
 #include "hardware/pwm.h"
 
 #include "pico_display.hpp"
