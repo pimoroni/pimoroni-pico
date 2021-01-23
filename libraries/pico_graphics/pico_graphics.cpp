@@ -158,4 +158,118 @@ namespace pimoroni {
     }
   }
 
+  int32_t orient2d(Point p1, Point p2, Point p3) {
+    return (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x);
+  }
+
+  bool is_top_left(const Point &p1, const Point &p2) {
+    return (p1.y == p2.y && p1.x > p2.x) || (p1.y < p2.y);
+  }
+
+  void PicoGraphics::triangle(Point p1, Point p2, Point p3) {
+    Rect triangle_bounds(
+      Point(std::min(p1.x, std::min(p2.x, p3.x)), std::min(p1.y, std::min(p2.y, p3.y))),
+      Point(std::max(p1.x, std::max(p2.x, p3.x)), std::max(p1.y, std::max(p2.y, p3.y))));
+
+    // clip extremes to frame buffer size
+    triangle_bounds = clip.intersection(triangle_bounds);
+
+    // if triangle completely out of bounds then don't bother!
+    if (triangle_bounds.empty()) {
+      return;
+    }
+
+    // fix "winding" of vertices if needed
+    int32_t winding = orient2d(p1, p2, p3);
+    if (winding < 0) {
+      Point t;
+      t = p1; p1 = p3; p3 = t;
+    }
+
+    // bias ensures no overdraw between neighbouring triangles
+    int8_t bias0 = is_top_left(p2, p3) ? 0 : -1;
+    int8_t bias1 = is_top_left(p3, p1) ? 0 : -1;
+    int8_t bias2 = is_top_left(p1, p2) ? 0 : -1;
+
+    int32_t a01 = p1.y - p2.y;
+    int32_t b01 = p2.x - p1.x;
+    int32_t a12 = p2.y - p3.y;
+    int32_t b12 = p3.x - p2.x;
+    int32_t a20 = p3.y - p1.y;
+    int32_t b20 = p1.x - p3.x;
+
+    Point tl(triangle_bounds.x, triangle_bounds.y);
+    int32_t w0row = orient2d(p2, p3, tl) + bias0;
+    int32_t w1row = orient2d(p3, p1, tl) + bias1;
+    int32_t w2row = orient2d(p1, p2, tl) + bias2;
+
+    for (uint32_t y = 0; y < triangle_bounds.h; y++) {
+      int32_t w0 = w0row;
+      int32_t w1 = w1row;
+      int32_t w2 = w2row;
+
+      uint16_t *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
+      for (uint32_t x = 0; x < triangle_bounds.w; x++) {
+        if ((w0 | w1 | w2) >= 0) {
+          *dest = pen;
+        }
+
+        dest++;
+
+        w0 += a12;
+        w1 += a20;
+        w2 += a01;
+      }
+
+      w0row += b12;
+      w1row += b20;
+      w2row += b01;
+    }
+  }
+
+  void PicoGraphics::polygon(const std::vector<Point> &points) {
+    static int32_t nodes[64]; // maximum allowed number of nodes per scanline for polygon rendering
+
+    int32_t miny = points[0].y, maxy = points[0].y;
+
+    for (uint16_t i = 1; i < points.size(); i++) {
+      miny = std::min(miny, points[i].y);
+      maxy = std::max(maxy, points[i].y);
+    }
+
+    // for each scanline within the polygon bounds (clipped to clip rect)
+    Point p;
+
+    for (p.y = std::max(clip.y, miny); p.y <= std::min(clip.y + clip.h, maxy); p.y++) {
+      uint8_t n = 0;
+      for (uint16_t i = 0; i < points.size(); i++) {
+        uint16_t j = (i + 1) % points.size();
+        int32_t sy = points[i].y;
+        int32_t ey = points[j].y;
+        int32_t fy = p.y;
+        if ((sy < fy && ey >= fy) || (ey < fy && sy >= fy)) {
+          int32_t sx = points[i].x;
+          int32_t ex = points[j].x;
+          int32_t px = int32_t(sx + float(fy - sy) / float(ey - sy) * float(ex - sx));
+
+          nodes[n++] = px < clip.x ? clip.x : (px >= clip.x + clip.w ? clip.x + clip.w - 1 : px);// clamp(int32_t(sx + float(fy - sy) / float(ey - sy) * float(ex - sx)), clip.x, clip.x + clip.w);
+        }
+      }
+
+      uint16_t i = 0;
+      while (i < n - 1) {
+        if (nodes[i] > nodes[i + 1]) {
+          int32_t s = nodes[i]; nodes[i] = nodes[i + 1]; nodes[i + 1] = s;
+          if (i) i--;
+        }
+        else {
+          i++;
+        }
+      }
+
+      for (uint16_t i = 0; i < n; i += 2) {
+        pixel_span(Point(nodes[i], p.y), nodes[i + 1] - nodes[i] + 1);
+      }
+    }
+  }
 }

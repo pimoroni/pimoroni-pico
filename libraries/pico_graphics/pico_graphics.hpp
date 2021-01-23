@@ -29,6 +29,7 @@ namespace pimoroni {
 
     Rect() = default;
     Rect(int32_t x, int32_t y, int32_t w, int32_t h) : x(x), y(y), w(w), h(h) {}
+    Rect(const Point &tl, const Point &br) : x(tl.x), y(tl.y), w(br.x - tl.x), h(br.y - tl.y) {}
 
     bool empty() const;
     bool contains(const Point &p) const;
@@ -78,7 +79,8 @@ namespace pimoroni {
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, uint8_t scale = 2);
     void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
-    //void polygon(std::vector);
+    void polygon(const std::vector<Point> &points);
+    void triangle(Point p1, Point p2, Point p3);
   };
 
 }

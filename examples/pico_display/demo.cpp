@@ -129,6 +129,22 @@ int main() {
     int r = (sin(led_step) * 25.0f) + 25.0f;
     pico_display.set_led(r, r / 1.2f, r);
 
+
+    std::vector<Point> poly;
+    poly.push_back(Point(30, 30));
+    poly.push_back(Point(50, 35));
+    poly.push_back(Point(70, 25));
+    poly.push_back(Point(80, 65));
+    poly.push_back(Point(50, 85));
+    poly.push_back(Point(30, 45));
+
+    pico_display.set_pen(255, 255, 0);
+    pico_display.polygon(poly);
+
+
+    pico_display.set_pen(0, 255, 255);
+    pico_display.triangle(Point(50, 50), Point(370, 80), Point(80, 110));
+
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);
