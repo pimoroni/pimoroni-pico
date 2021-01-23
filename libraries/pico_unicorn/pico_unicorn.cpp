@@ -87,9 +87,6 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   // join fifos as only tx needed (gives 8 deep fifo instead of 4)
   sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
-  // set clock divider
-  //sm_config_set_clkdiv(&c, 4);
-
   pio_sm_init(pio, sm, offset, &c);
   pio_sm_set_enabled(pio, sm, true);
 }
@@ -110,6 +107,21 @@ namespace pimoroni {
     }
   }
 
+  PicoUnicorn::~PicoUnicorn() {
+    // stop and release the dma channel
+    irq_set_enabled(DMA_IRQ_0, false);
+    dma_channel_set_irq0_enabled(dma_channel, false);
+    irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), false);
+    irq_remove_handler(DMA_IRQ_0, dma_complete);
+
+    dma_channel_wait_for_finish_blocking(dma_channel);
+    dma_channel_unclaim(dma_channel);
+
+    // release the pio and sm
+    pio_sm_unclaim(bitstream_pio, bitstream_sm);
+    pio_clear_instruction_memory(bitstream_pio);
+    pio_sm_restart(bitstream_pio, bitstream_sm);
+  }
 
   void PicoUnicorn::init() {
     // setup pins
@@ -171,7 +183,7 @@ namespace pimoroni {
 
     // setup the pio
     bitstream_pio = pio0;
-    bitstream_sm = 0;
+    bitstream_sm = pio_claim_unused_sm(pio0, true);
     uint offset = pio_add_program(bitstream_pio, &unicorn_program);
     unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, offset);
 

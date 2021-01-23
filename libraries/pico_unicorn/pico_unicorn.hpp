@@ -18,6 +18,8 @@ namespace pimoroni {
     uint bitstream_sm = 0;
 
   public:
+    ~PicoUnicorn();
+
     void init();
 
     void clear();
