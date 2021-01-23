@@ -82,6 +82,7 @@ namespace pimoroni {
     void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
+    void line(Point p1, Point p2);
   };
 
 }

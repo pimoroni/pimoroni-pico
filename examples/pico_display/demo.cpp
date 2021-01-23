@@ -143,8 +143,23 @@ int main() {
 
 
     pico_display.set_pen(0, 255, 255);
-    pico_display.triangle(Point(50, 50), Point(370, 80), Point(80, 110));
+    pico_display.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
 
+    pico_display.set_pen(255, 255, 255);
+    pico_display.line(Point(50, 50), Point(120, 80));
+    pico_display.line(Point(20, 20), Point(120, 20));
+    pico_display.line(Point(20, 20), Point(20, 120));
+
+    for(int r = 0; r < 30; r++) {
+      for(int j = 0; j < 10; j++) {
+        float rads = ((M_PI * 2) / 30.0f) * float(r);
+        rads += (float(i) / 100.0f);
+        rads += (float(j) / 100.0f);
+        float cx = sin(rads) * 300.0f;
+        float cy = cos(rads) * 300.0f;
+        pico_display.line(Point(120, 67), Point(cx + 120, cy + 67));
+      }
+    }
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);

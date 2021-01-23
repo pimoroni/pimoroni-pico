@@ -272,4 +272,58 @@ namespace pimoroni {
       }
     }
   }
+
+  void PicoGraphics::line(Point p1, Point p2) {
+    // fast horizontal line
+    if(p1.y == p2.y) {
+      int32_t start = std::max(clip.x, std::min(p1.x, p2.x));
+      int32_t end   = std::min(clip.x + clip.w, std::max(p1.x, p2.x));
+      pixel_span(Point(start, p1.y), end - start);
+      return;
+    }
+
+    // fast vertical line
+    if(p1.x == p2.x) {
+      int32_t start  = std::max(clip.y, std::min(p1.y, p2.y));
+      int32_t length = std::min(clip.y + clip.h, std::max(p1.y, p2.y)) - start;
+      Pen *dest = ptr(p1.x, start);
+      while(length--) {
+        *dest = pen;
+        dest += bounds.w;
+      }
+      return;
+    }
+
+    // general purpose line
+    // lines are either "shallow" or "steep" based on whether the x delta
+    // is greater than the y delta
+    int32_t dx = p2.x - p1.x;
+    int32_t dy = p2.y - p1.y;
+    bool shallow = std::abs(dx) > std::abs(dy);
+    if(shallow) {
+      // shallow version
+      int32_t s = std::abs(dx);       // number of steps
+      int32_t sx = dx < 0 ? -1 : 1;   // x step value
+      int32_t sy = (dy << 16) / s;    // y step value in fixed 16:16
+      int32_t x = p1.x;
+      int32_t y = p1.y << 16;
+      while(s--) {
+        pixel(Point(x, y >> 16));
+        y += sy;
+        x += sx;
+      }
+    }else{
+      // steep version
+      int32_t s = std::abs(dy);       // number of steps
+      int32_t sy = dy < 0 ? -1 : 1;   // x step value
+      int32_t sx = (dx << 16) / s;    // y step value in fixed 16:16
+      int32_t y = p1.y;
+      int32_t x = p1.x << 16;
+      while(s--) {
+        pixel(Point(x >> 16, y));
+        y += sy;
+        x += sx;
+      }
+    }
+  }
 }
