@@ -122,13 +122,44 @@ int main() {
       if(shape.y >= pico_display.bounds.h) shape.dy *= -1;
 
       pico_display.set_pen(shape.pen);
-      pico_display.circle(point(shape.x, shape.y), shape.r);
+      pico_display.circle(Point(shape.x, shape.y), shape.r);
     }
 
     float led_step = fmod(i / 20.0f, M_PI * 2.0f);
     int r = (sin(led_step) * 25.0f) + 25.0f;
     pico_display.set_led(r, r / 1.2f, r);
 
+
+    std::vector<Point> poly;
+    poly.push_back(Point(30, 30));
+    poly.push_back(Point(50, 35));
+    poly.push_back(Point(70, 25));
+    poly.push_back(Point(80, 65));
+    poly.push_back(Point(50, 85));
+    poly.push_back(Point(30, 45));
+
+    pico_display.set_pen(255, 255, 0);
+    pico_display.polygon(poly);
+
+
+    pico_display.set_pen(0, 255, 255);
+    pico_display.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
+
+    pico_display.set_pen(255, 255, 255);
+    pico_display.line(Point(50, 50), Point(120, 80));
+    pico_display.line(Point(20, 20), Point(120, 20));
+    pico_display.line(Point(20, 20), Point(20, 120));
+
+    for(int r = 0; r < 30; r++) {
+      for(int j = 0; j < 10; j++) {
+        float rads = ((M_PI * 2) / 30.0f) * float(r);
+        rads += (float(i) / 100.0f);
+        rads += (float(j) / 100.0f);
+        float cx = sin(rads) * 300.0f;
+        float cy = cos(rads) * 300.0f;
+        pico_display.line(Point(120, 67), Point(cx + 120, cy + 67));
+      }
+    }
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);
