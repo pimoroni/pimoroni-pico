@@ -122,7 +122,7 @@ int main() {
       if(shape.y >= pico_display.bounds.h) shape.dy *= -1;
 
       pico_display.set_pen(shape.pen);
-      pico_display.circle(point(shape.x, shape.y), shape.r);
+      pico_display.circle(Point(shape.x, shape.y), shape.r);
     }
 
     float led_step = fmod(i / 20.0f, M_PI * 2.0f);

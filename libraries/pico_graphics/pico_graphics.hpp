@@ -8,33 +8,33 @@
 // supports only 16-bit (565) RGB framebuffers
 namespace pimoroni {
 
-  typedef uint16_t pen;
+  typedef uint16_t Pen;
 
-  struct rect;
+  struct Rect;
 
-  struct point {
+  struct Point {
     int32_t x = 0, y = 0;
 
-    point() = default;
-    point(int32_t x, int32_t y) : x(x), y(y) {}
+    Point() = default;
+    Point(int32_t x, int32_t y) : x(x), y(y) {}
 
-    inline point& operator-= (const point &a) { x -= a.x; y -= a.y; return *this; }
-    inline point& operator+= (const point &a) { x += a.x; y += a.y; return *this; }
+    inline Point& operator-= (const Point &a) { x -= a.x; y -= a.y; return *this; }
+    inline Point& operator+= (const Point &a) { x += a.x; y += a.y; return *this; }
 
-    point clamp(const rect &r) const;
+    Point clamp(const Rect &r) const;
   };
 
-  struct rect {
+  struct Rect {
     int32_t x = 0, y = 0, w = 0, h = 0;
 
-    rect() = default;
-    rect(int32_t x, int32_t y, int32_t w, int32_t h) : x(x), y(y), w(w), h(h) {}
+    Rect() = default;
+    Rect(int32_t x, int32_t y, int32_t w, int32_t h) : x(x), y(y), w(w), h(h) {}
 
     bool empty() const;
-    bool contains(const point &p) const;
-    bool contains(const rect &p) const;
-    bool intersects(const rect &r) const;
-    rect intersection(const rect &r) const;
+    bool contains(const Point &p) const;
+    bool contains(const Rect &p) const;
+    bool intersects(const Rect &r) const;
+    Rect intersection(const Rect &r) const;
 
     void inflate(int32_t v);
     void deflate(int32_t v);
@@ -44,19 +44,19 @@ namespace pimoroni {
   public:
     uint16_t *frame_buffer;
 
-    rect      bounds;
-    rect      clip;
+    Rect      bounds;
+    Rect      clip;
 
-    pen       _pen;
+    Pen       pen;
 
   public:
     PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer)
       : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {}
 
     void set_pen(uint8_t r, uint8_t g, uint8_t b);
-    void set_pen(pen p);
+    void set_pen(Pen p);
 
-    constexpr pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
+    constexpr Pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
       uint16_t p = ((r & 0b11111000) << 8) |
                   ((g & 0b11111100) << 3) |
                   ((b & 0b11111000) >> 3);
@@ -64,20 +64,20 @@ namespace pimoroni {
       return __builtin_bswap16(p);
     };
 
-    void set_clip(const rect &r);
+    void set_clip(const Rect &r);
     void remove_clip();
 
-    uint16_t* ptr(const point &p);
-    uint16_t* ptr(const rect &r);
+    uint16_t* ptr(const Point &p);
+    uint16_t* ptr(const Rect &r);
     uint16_t* ptr(int32_t x, int32_t y);
 
     void clear();
-    void pixel(const point &p);
-    void pixel_span(const point &p, int32_t l);
-    void rectangle(const rect &r);
-    void circle(const point &p, int32_t r);
-    void character(const char c, const point &p, uint8_t scale = 2);
-    void text(const std::string &t, const point &p, int32_t wrap, uint8_t scale = 2);
+    void pixel(const Point &p);
+    void pixel_span(const Point &p, int32_t l);
+    void rectangle(const Rect &r);
+    void circle(const Point &p, int32_t r);
+    void character(const char c, const Point &p, uint8_t scale = 2);
+    void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
     //void polygon(std::vector);
   };
 
