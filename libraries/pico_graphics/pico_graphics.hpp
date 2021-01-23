@@ -3,6 +3,7 @@
 #include <string>
 #include <cstdint>
 #include <algorithm>
+#include <vector>
 
 // a tiny little graphics library for our Pico products
 // supports only 16-bit (565) RGB framebuffers

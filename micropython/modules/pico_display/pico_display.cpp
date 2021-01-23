@@ -146,7 +146,7 @@ mp_obj_t picodisplay_create_pen(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) 
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
         pen = display->create_pen(r, g, b);
-    
+
     return mp_obj_new_int(pen);
 }
 
@@ -158,7 +158,7 @@ mp_obj_t picodisplay_set_clip(mp_uint_t n_args, const mp_obj_t *args) {
     int w = mp_obj_get_int(args[2]);
     int h = mp_obj_get_int(args[3]);
 
-    rect r(x, y, w, h);
+    Rect r(x, y, w, h);
     display->set_clip(r);
 
     return mp_const_none;
@@ -178,9 +178,9 @@ mp_obj_t picodisplay_pixel(mp_obj_t x_obj, mp_obj_t y_obj) {
     int x = mp_obj_get_int(x_obj);
     int y = mp_obj_get_int(y_obj);
 
-    point p(x, y);
+    Point p(x, y);
     display->pixel(p);
- 
+
     return mp_const_none;
 }
 
@@ -189,7 +189,7 @@ mp_obj_t picodisplay_pixel_span(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t l_obj) 
     int y = mp_obj_get_int(y_obj);
     int l = mp_obj_get_int(l_obj);
 
-    point p(x, y);
+    Point p(x, y);
     display->pixel_span(p, l);
 
     return mp_const_none;
@@ -203,7 +203,7 @@ mp_obj_t picodisplay_rectangle(mp_uint_t n_args, const mp_obj_t *args) {
     int w = mp_obj_get_int(args[2]);
     int h = mp_obj_get_int(args[3]);
 
-    rect r(x, y, w, h);
+    Rect r(x, y, w, h);
     display->rectangle(r);
 
     return mp_const_none;
@@ -214,7 +214,7 @@ mp_obj_t picodisplay_circle(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t r_obj) {
     int y = mp_obj_get_int(y_obj);
     int r = mp_obj_get_int(r_obj);
 
-    point p(x, y);
+    Point p(x, y);
     display->circle(p, r);
 
     return mp_const_none;
@@ -225,7 +225,7 @@ mp_obj_t picodisplay_character(mp_uint_t n_args, const mp_obj_t *args) {
     int x = mp_obj_get_int(args[1]);
     int y = mp_obj_get_int(args[2]);
 
-    point p(x, y);
+    Point p(x, y);
     if(n_args == 4) {
         int scale = mp_obj_get_int(args[3]);
         display->character((char)c, p, scale);
@@ -246,7 +246,7 @@ mp_obj_t picodisplay_text(mp_uint_t n_args, const mp_obj_t *args) {
     int y = mp_obj_get_int(args[2]);
     int wrap = mp_obj_get_int(args[3]);
 
-    point p(x, y);
+    Point p(x, y);
     if(n_args == 5) {
         int scale = mp_obj_get_int(args[4]);
         display->text(t, p, wrap, scale);
