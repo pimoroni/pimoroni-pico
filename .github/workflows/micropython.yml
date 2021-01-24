@@ -54,10 +54,10 @@ jobs:
 
     - name: Build mpy-cross
       shell: bash
-      working-directory: mpy-cross
+      working-directory: micropython/mpy-cross
       run: make
 
     - name: Build MicroPython
       shell: bash
-      working-directory: ports/rp2
+      working-directory: micropython/ports/rp2
       run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules -j2
