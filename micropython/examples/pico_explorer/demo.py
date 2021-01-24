@@ -42,17 +42,17 @@ while True:
 
     if i > 600:        
         explorer.text("Motor 1: Forwards", 20, 180, 200)    
-        explorer.set_motor(0, 0, .5)
+        explorer.set_motor(0, 0, 1)
     else:
         explorer.text("Motor 1: Backwards", 20, 180, 200)    
-        explorer.set_motor(0, 1, .5)
+        explorer.set_motor(0, 1, 1)
     
     if i > 600:
         explorer.text("Motor 2: Forwards", 20, 200, 200)    
-        explorer.set_motor(1, 0, .5)
+        explorer.set_motor(1, 0, 1)
     else:
         explorer.text("Motor 2: Backwards", 20, 200, 200)    
-        explorer.set_motor(1, 1, .5)
+        explorer.set_motor(1, 1, 1)
 
     i = i + 20
     if i > 1000:
