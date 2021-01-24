@@ -110,9 +110,13 @@ int main() {
 
   uint32_t i = 0;
   while(true) {
-    pico_display.set_pen(120, 40, 60);
+    pico_display.set_pen(20, 30, 40);
     pico_display.clear();
 
+    pico_display.set_pen(200, 220, 240);
+    pico_display.text("Markdown? *Zoiks!*\n\nIt _helps_ to /emphasize/.\n\n-a bulleted list?\n-sure, why not!?\n\nMade a mistake? ~Fix it~.", Point(5, 5), 230);
+
+    /*
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
@@ -159,7 +163,7 @@ int main() {
         float cy = cos(rads) * 300.0f;
         pico_display.line(Point(120, 67), Point(cx + 120, cy + 67));
       }
-    }
+    }*/
 /*
     if(pico_display.is_pressed(pico_display.A)) {
       pico_display.rectangle(0, 0, 18, 18);

@@ -78,8 +78,8 @@ namespace pimoroni {
     void pixel_span(const Point &p, int32_t l);
     void rectangle(const Rect &r);
     void circle(const Point &p, int32_t r);
-    void character(const char c, const Point &p, uint8_t scale = 2);
-    void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
+    void character(const char c, const Point &p, uint32_t flags = 0);
+    void text(const std::string &t, const Point &p, int32_t wrap);
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
