@@ -198,6 +198,14 @@ namespace pimoroni {
     gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
     gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
 
+    // todo: shouldn't need to do this if things were cleaned up properly but without
+    // this any attempt to run a micropython script twice will fail
+    static bool already_init = false;
+
+    if(already_init) {
+      return;
+    }
+
     // setup dma transfer for pixel data to the pio
     dma_channel = dma_claim_unused_channel(true);
     dma_channel_config config = dma_channel_get_default_config(dma_channel);
@@ -212,6 +220,8 @@ namespace pimoroni {
 
     dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
     dma_channel_set_read_addr(dma_channel, bitstream, true);
+
+    already_init = true;
   }
 
   void PicoUnicorn::clear() {
