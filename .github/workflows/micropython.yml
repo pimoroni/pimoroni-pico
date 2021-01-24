@@ -26,6 +26,7 @@ jobs:
       PICO_SDK_PATH: $GITHUB_WORKSPACE/libs/pico-sdk
       USER_C_MODULES: $GITHUB_WORKSPACE/pimoroni-pico/micropython/modules
 
+    steps:
     # Check out MicroPython
     - name: Checkout MicroPython
       uses: actions/checkout@v2
@@ -34,7 +35,6 @@ jobs:
         ref: usermod-rescue
         submodules: true
 
-    steps:
     - uses: actions/checkout@v2
       with:
         path: pimoroni-pico
