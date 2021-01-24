@@ -36,19 +36,22 @@ while True:
     explorer.circle(90 + adc2, 66, 10)
 
     explorer.set_pen(255, 255, 255)
-    explorer.text("Plug a jumper wire from GP0 to AUDIO to hear noise!", 20, 120, 200)    
+    explorer.text("Plug a jumper wire from GP0 to AUDIO to hear noise!", 20, 110, 200)    
+
     explorer.set_tone(i)
 
-    explorer.set_pen(0, 0, adc2 * 2) 
-
-    if i > 600:
+    if i > 600:        
+        explorer.text("Motor 1: Forwards", 20, 180, 200)    
         explorer.set_motor(0, 0, .5)
     else:
+        explorer.text("Motor 1: Backwards", 20, 180, 200)    
         explorer.set_motor(0, 1, .5)
     
     if i > 600:
+        explorer.text("Motor 2: Forwards", 20, 200, 200)    
         explorer.set_motor(1, 0, .5)
     else:
+        explorer.text("Motor 2: Backwards", 20, 200, 200)    
         explorer.set_motor(1, 1, .5)
 
     i = i + 20
