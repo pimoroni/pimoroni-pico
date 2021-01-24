@@ -33,7 +33,7 @@ jobs:
       with:
         repository: pimoroni/micropython
         ref: usermod-rescue
-        submodules: true
+        submodules: false  # MicroPython submodules are hideously broken
 
     - uses: actions/checkout@v2
       with:
@@ -44,6 +44,10 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
+
+    - name: Fetch base MicroPython submodules
+      shell: bash
+      run: git submodule update --init
 
     - name: Fetch Pico SDK submodules
       shell: bash
