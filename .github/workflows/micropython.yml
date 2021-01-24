@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     env:
-      PICO_SDK_PATH: $GITHUB_WORKSPACE/libs/pico-sdk
+      PICO_SDK_PATH: $GITHUB_WORKSPACE/micropython/libs/pico-sdk
       USER_C_MODULES: $GITHUB_WORKSPACE/pimoroni-pico/micropython/modules
 
     steps:
@@ -34,6 +34,7 @@ jobs:
         repository: pimoroni/micropython
         ref: usermod-rescue
         submodules: false  # MicroPython submodules are hideously broken
+        path: micropython
 
     - uses: actions/checkout@v2
       with:
@@ -47,6 +48,7 @@ jobs:
 
     - name: Fetch base MicroPython submodules
       shell: bash
+      working-directory: micropython
       run: git submodule update --init
 
     - name: Fetch Pico SDK submodules
