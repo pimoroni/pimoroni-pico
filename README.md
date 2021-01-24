@@ -19,8 +19,8 @@ The table below shows the current state of compatibly and some notes to set expe
 |---|---|---|---
 |[Pico Explorer Base](https://shop.pimoroni.com/products/pico-explorer-base)|Yes|Yes|
 |[Pico RGB Keypad](https://shop.pimoroni.com/products/pico-rgb-keypad-base)|Yes|Yes|
-|[Pico Unicorn Pack](https://shop.pimoroni.com/products/pico-unicorn-pack)|Yes|Yes|
-|[Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack)|Yes|No|Limited Support for MicroPython planned
+|[Pico Unicorn Pack](https://shop.pimoroni.com/products/pico-unicorn-pack)|Yes|Yes|MicroPython support added in v0.0.3 Alpha
+|[Pico Audio Pack](https://shop.pimoroni.com/products/pico-audio-pack)|Yes|No|Limited support for MicroPython planned
 |[Pico Scroll Pack](https://shop.pimoroni.com/products/pico-scroll-pack)|Yes|Yes|
 |[Pico Display Pack](https://shop.pimoroni.com/products/pico-display-pack)|Yes|Yes|
 
