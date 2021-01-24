@@ -50,7 +50,8 @@ constexpr uint32_t ROW_BYTES = 12;
 constexpr uint32_t BCD_FRAMES = 15; // includes fet discharge frame
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
 
-uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+// must be aligned for 32bit dma transfer
+alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
 
 uint16_t r_gamma_lut[256] = {0};
 uint16_t g_gamma_lut[256] = {0};
@@ -165,11 +166,15 @@ namespace pimoroni {
 
         // the last bcd frame is used to allow the fets to discharge to avoid ghosting
         if(frame == BCD_FRAMES - 1) {
-          bitstream[row_select_offset] = 0b01111111;
+          bitstream[row_select_offset] = 0b11111111;
 
           uint16_t bcd_ticks = 65535;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
+
+          for(uint8_t col = 0; col < 6; col++) {
+            bitstream[offset + col] = 0xff;
+          }
         }else{
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
