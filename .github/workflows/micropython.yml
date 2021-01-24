@@ -3,6 +3,8 @@ name: MicroPython
 on:
   push:
   pull_request:
+  release:
+    types: [created]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
@@ -61,3 +63,14 @@ jobs:
       shell: bash
       working-directory: micropython/ports/rp2
       run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules -j2
+
+    - name: Upload .uf2
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build/firmware.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: pimoroni-pico-micropython.uf2
+        asset_content_type: application/octet-stream
