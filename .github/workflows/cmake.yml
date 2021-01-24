@@ -17,7 +17,7 @@ jobs:
           - os: ubuntu-20.04
             name: Linux
             cache-key: linux
-            cmake-args: '"-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DCMAKE_CXX_CLANG_TIDY=clang-tidy;-header-filter=pimoroni;-checks=performance-*,portability-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-modernize-use-nodiscard" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache'
+            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk "-DCMAKE_CXX_CLANG_TIDY=clang-tidy;-header-filter=pimoroni;-checks=performance-*,portability-*,modernize-*,-modernize-use-trailing-return-type,-modernize-avoid-c-arrays,-modernize-use-nodiscard" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache'
             apt-packages: ccache clang-tidy gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
 
     runs-on: ${{matrix.os}}
@@ -34,6 +34,7 @@ jobs:
       with:
         repository: raspberrypi/pico-sdk
         path: pico-sdk
+        submodules: true
 
     - name: Cache
       uses: actions/cache@v2
