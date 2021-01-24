@@ -22,10 +22,6 @@ jobs:
 
     runs-on: ${{matrix.os}}
 
-    env:
-      PICO_SDK_PATH: $GITHUB_WORKSPACE/micropython/lib/pico-sdk
-      USER_C_MODULES: $GITHUB_WORKSPACE/pimoroni-pico/micropython/modules
-
     steps:
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -53,7 +49,7 @@ jobs:
 
     - name: Fetch Pico SDK submodules
       shell: bash
-      working-directory: ${{env.PICO_SDK_PATH}}
+      working-directory: micropython/lib/pico-sdk
       run: git submodule update --init
 
     - name: Build mpy-cross
@@ -64,4 +60,4 @@ jobs:
     - name: Build MicroPython
       shell: bash
       working-directory: ports/rp2
-      run: make USER_C_MODULES=$USER_C_MODULES -j2
+      run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules -j2
