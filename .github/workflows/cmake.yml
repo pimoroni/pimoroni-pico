@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     env:
-      PICO_SDK_PATH: ${{runner.workspace}}/pico-sdk
+      PICO_SDK_PATH: $GITHUB_WORKSPACE/pico-sdk
 
     steps:
     - uses: actions/checkout@v2
