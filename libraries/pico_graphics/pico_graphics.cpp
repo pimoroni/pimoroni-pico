@@ -109,31 +109,83 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
-    uint8_t char_index = c - 32;
-    Rect char_bounds(p.x, p.y, font->widths[char_index] * scale, font->height * scale);
+  const uint8_t *PicoGraphics::character_data(const char c) {
+    return &font->data[(c - 32) * font->max_width];
+  }
 
+  uint8_t PicoGraphics::character_width(const char c) {
+    return font->widths[c - 32];
+  }
+
+  void PicoGraphics::character(const char c, const Point &p, uint32_t flags) {
+    uint32_t character_height = font->height;
+    uint32_t bytes_per_row = font->max_width;
+
+    // check the character is visible at all before continuing
+    Rect char_bounds(p.x, p.y, character_width(c), character_height);
     if(!clip.intersects(char_bounds)) return;
 
-    const uint8_t *d = &font->data[char_index * font->max_width];
-    for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
-      for(uint8_t cy = 0; cy < font->height; cy++) {
-        if((1U << cy) & *d) {
-          rectangle(Rect(p.x + (cx * scale), p.y + (cy * scale), scale, scale));
+    for(int8_t cy = 0; cy < character_height; cy++) {
+      const uint8_t *data = character_data(c) + (cy * bytes_per_row) + 1;
+      uint8_t  bit = 0;
+
+      for(int8_t cx = 0; cx < character_width(c); cx++) {
+        // move on to next byte of character data
+        if(cx != 0 && cx % 8 == 0) {
+          data++;
+          bit = 0;
+        }
+
+        if((1U << (7 - bit)) & *data) {
+          int8_t italic = 0;
+          if(flags & flags::ITALIC) {
+            italic = ((character_height - cy) >> 1) - 1;
+          }
+          pixel(Point(p.x + cx + italic, p.y + cy));
+          if(flags & flags::BOLD) {
+            pixel(Point(p.x + cx + 1, p.y + cy));
+            pixel(Point(p.x + cx - 1, p.y + cy));
+          }
+        }
+
+        bit++;
+      }
+    }
+
+    if(flags & flags::UNDERLINE || flags & flags::STRIKETHROUGH) {
+      for(int8_t cx = -1; cx < character_width(c) + 1; cx++) {
+        if(flags & flags::UNDERLINE) {
+          pixel(Point(p.x + cx, p.y + character_height));
+        }
+
+        if(flags & flags::STRIKETHROUGH) {
+          pixel(Point(p.x + cx, p.y + character_height / 2));
         }
       }
-
-      d++;
     }
   }
 
-  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
+  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap) {
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
 
+    uint32_t character_height = font->height - 2;
+
     size_t i = 0;
+
+    uint32_t flags = 0;
+
     while(i < t.length()) {
+      if(t[i] == '\n') {
+        co = 0;
+        lo += character_height;
+        i++;
+        continue;
+      }else if(t[i] == ' '){
+        i++;
+      }
+
       // find length of current word
-      size_t next_space = t.find(' ', i + 1);
+      size_t next_space = std::min(t.find(' ', i + 1), t.find('\n', i + 1));
 
       if(next_space == std::string::npos) {
         next_space = t.length();
@@ -141,25 +193,46 @@ namespace pimoroni {
 
       uint16_t word_width = 0;
       for(size_t j = i; j < next_space; j++) {
-        word_width += font->widths[t[j] - 32] * scale;
+        char c = t[j];
+        if(c != '*' && c != '_' && c != '/' && c != '~') {
+          uint8_t bold = flags & flags::BOLD ? 1 : 0;
+          word_width += (character_width(c) + bold);
+        }
       }
 
       // if this word would exceed the wrap limit then
       // move to the next line
       if(co != 0 && co + word_width > (uint32_t)wrap) {
         co = 0;
-        lo += (font->height + 1) * scale;
+        lo += character_height;
       }
 
       // draw word
       for(size_t j = i; j < next_space; j++) {
-        character(t[j], Point(p.x + co, p.y + lo), scale);
-        co += font->widths[t[j] - 32] * scale;
+        char c = t[j];
+        if(c == '*') {
+          flags ^= flags::BOLD;
+        }else if(c == '_') {
+          flags ^= flags::UNDERLINE;
+        }else if(c == '/') {
+          flags ^= flags::ITALIC;
+        }else if(c == '~') {
+          flags ^= flags::STRIKETHROUGH;
+        }else if(c == '-') {
+          character(249, Point(p.x + co, p.y + lo), flags); // kinda bullet point thingy
+          co += 7;
+          i++;
+        }else{
+          character(t[j], Point(p.x + co, p.y + lo), flags);
+          uint8_t bold = flags & flags::BOLD ? 1 : 0;
+          co += (character_width(c) + bold) + 2;
+        }
       }
 
       // move character offset to end of word and add a space
-      co += font->widths[0] * scale;
-      i = next_space + 1;
+      character(' ', Point(p.x + co, p.y + lo), flags);
+      co += (character_width(' '));
+      i = next_space;
     }
   }
 
