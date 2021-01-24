@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{matrix.os}}
 
     env:
-      PICO_SDK_PATH: $GITHUB_WORKSPACE/micropython/libs/pico-sdk
+      PICO_SDK_PATH: $GITHUB_WORKSPACE/micropython/lib/pico-sdk
       USER_C_MODULES: $GITHUB_WORKSPACE/pimoroni-pico/micropython/modules
 
     steps:
