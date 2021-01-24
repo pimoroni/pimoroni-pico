@@ -85,7 +85,7 @@ extern mp_obj_t picoexplorer_get_adc(mp_obj_t channel_obj) {
         mp_raise_ValueError("adc channel not valid. Expected 0 to 2");
     else
         reading = explorer->get_adc(channel);
-    
+
     return mp_obj_new_float(reading);
 }
 
@@ -180,7 +180,7 @@ mp_obj_t picoexplorer_create_pen(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj)
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
         pen = explorer->create_pen(r, g, b);
-    
+
     return mp_obj_new_int(pen);
 }
 
@@ -192,7 +192,7 @@ mp_obj_t picoexplorer_set_clip(mp_uint_t n_args, const mp_obj_t *args) {
     int w = mp_obj_get_int(args[2]);
     int h = mp_obj_get_int(args[3]);
 
-    rect r(x, y, w, h);
+    Rect r(x, y, w, h);
     explorer->set_clip(r);
 
     return mp_const_none;
@@ -212,9 +212,9 @@ mp_obj_t picoexplorer_pixel(mp_obj_t x_obj, mp_obj_t y_obj) {
     int x = mp_obj_get_int(x_obj);
     int y = mp_obj_get_int(y_obj);
 
-    point p(x, y);
+    Point p(x, y);
     explorer->pixel(p);
- 
+
     return mp_const_none;
 }
 
@@ -223,7 +223,7 @@ mp_obj_t picoexplorer_pixel_span(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t l_obj)
     int y = mp_obj_get_int(y_obj);
     int l = mp_obj_get_int(l_obj);
 
-    point p(x, y);
+    Point p(x, y);
     explorer->pixel_span(p, l);
 
     return mp_const_none;
@@ -237,7 +237,7 @@ mp_obj_t picoexplorer_rectangle(mp_uint_t n_args, const mp_obj_t *args) {
     int w = mp_obj_get_int(args[2]);
     int h = mp_obj_get_int(args[3]);
 
-    rect r(x, y, w, h);
+    Rect r(x, y, w, h);
     explorer->rectangle(r);
 
     return mp_const_none;
@@ -248,7 +248,7 @@ mp_obj_t picoexplorer_circle(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t r_obj) {
     int y = mp_obj_get_int(y_obj);
     int r = mp_obj_get_int(r_obj);
 
-    point p(x, y);
+    Point p(x, y);
     explorer->circle(p, r);
 
     return mp_const_none;
@@ -259,7 +259,7 @@ mp_obj_t picoexplorer_character(mp_uint_t n_args, const mp_obj_t *args) {
     int x = mp_obj_get_int(args[1]);
     int y = mp_obj_get_int(args[2]);
 
-    point p(x, y);
+    Point p(x, y);
     if(n_args == 4) {
         int scale = mp_obj_get_int(args[3]);
         explorer->character((char)c, p, scale);
@@ -280,7 +280,7 @@ mp_obj_t picoexplorer_text(mp_uint_t n_args, const mp_obj_t *args) {
     int y = mp_obj_get_int(args[2]);
     int wrap = mp_obj_get_int(args[3]);
 
-    point p(x, y);
+    Point p(x, y);
     if(n_args == 5) {
         int scale = mp_obj_get_int(args[4]);
         explorer->text(t, p, wrap, scale);
