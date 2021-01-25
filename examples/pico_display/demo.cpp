@@ -22,7 +22,7 @@ void pixel(int x, int y, uint16_t c) {
   pico_display.frame_buffer[x + (y + 1) * 240] = c;
 }
 
-void rect(int x, int y, int w, int h, uint16_t c) {
+void rect(int x, int y, int w, int h, uint16_t c = pico_display.create_pen(rand() % 255, rand() % 255, rand() % 255)) {
   for(int rx = x; rx < x + w; rx++) {
     for(int ry = y; ry < y + h; ry++) {
       pixel(rx, ry, c);
@@ -162,14 +162,14 @@ int main() {
     }
 /*
     if(pico_display.is_pressed(pico_display.A)) {
-      pico_display.rectangle(0, 0, 18, 18);
+      pico_display.rect(0, 0, 18, 18);
       //sprite(tick, 5, 5, true, green);
     }else{
       //sprite(arrow, 10 + bounce, 10, true, white);
     }
 
     if(pico_display.is_pressed(pico_display.B)) {
-      pico_display.rectangle(0, 49, 18, 18);
+      pico_display.rect(0, 49, 18, 18);
       //sprite(tick, 5, 54, true, green);
     }else{
       //sprite(arrow, 10 - bounce, 50, true, white);
@@ -177,14 +177,14 @@ int main() {
 
 
     if(pico_display.is_pressed(pico_display.X)) {
-      pico_display.rectangle(102, 0, 18, 18);
+      pico_display.rect(102, 0, 18, 18);
       //sprite(tick, 107, 5, true, green);
     }else{
       //sprite(arrow, 102 - bounce, 10, false, white);
     }
 
     if(pico_display.is_pressed(pico_display.Y)) {
-      pico_display.rectangle(102, 49, 18, 18);
+      pico_display.rect(102, 49, 18, 18);
       //sprite(tick, 107, 54, true, green);
     }else{
       //sprite(arrow, 102 + bounce, 50, false, white);
