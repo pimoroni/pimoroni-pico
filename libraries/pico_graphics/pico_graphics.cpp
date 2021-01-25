@@ -144,7 +144,6 @@ namespace pimoroni {
           pixel(Point(p.x + cx + italic, p.y + cy));
           if(flags & flags::BOLD) {
             pixel(Point(p.x + cx + 1, p.y + cy));
-            pixel(Point(p.x + cx - 1, p.y + cy));
           }
         }
 
@@ -155,7 +154,7 @@ namespace pimoroni {
     if(flags & flags::UNDERLINE || flags & flags::STRIKETHROUGH) {
       for(int8_t cx = -1; cx < character_width(c) + 1; cx++) {
         if(flags & flags::UNDERLINE) {
-          pixel(Point(p.x + cx, p.y + character_height));
+          pixel(Point(p.x + cx, p.y + character_height - 1));
         }
 
         if(flags & flags::STRIKETHROUGH) {
@@ -165,74 +164,98 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap) {
+  void PicoGraphics::text(const std::string &text, const Point &p, int32_t wrap) {
+    uint32_t flags = 0;      // style flags
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
 
-    uint32_t character_height = font->height - 2;
-
-    size_t i = 0;
-
-    uint32_t flags = 0;
-
-    while(i < t.length()) {
-      if(t[i] == '\n') {
-        co = 0;
-        lo += character_height;
-        i++;
-        continue;
-      }else if(t[i] == ' '){
-        i++;
-      }
-
-      // find length of current word
-      size_t next_space = std::min(t.find(' ', i + 1), t.find('\n', i + 1));
-
-      if(next_space == std::string::npos) {
-        next_space = t.length();
-      }
-
-      uint16_t word_width = 0;
-      for(size_t j = i; j < next_space; j++) {
-        char c = t[j];
-        if(c != '*' && c != '_' && c != '/' && c != '~') {
-          uint8_t bold = flags & flags::BOLD ? 1 : 0;
-          word_width += (character_width(c) + bold);
-        }
-      }
-
-      // if this word would exceed the wrap limit then
-      // move to the next line
-      if(co != 0 && co + word_width > (uint32_t)wrap) {
-        co = 0;
-        lo += character_height;
-      }
-
-      // draw word
-      for(size_t j = i; j < next_space; j++) {
-        char c = t[j];
-        if(c == '*') {
+    for (std::string::size_type i = 0; i < text.size(); i++) {
+      char c = text[i];
+      // handle special characters
+      switch(c) {
+        case '\n': { // line break
+          co = 0;
+          lo += font->height - 2;
+          flags &= ~flags::BULLET;
+          continue;
+        } break;
+        case '-': { // bulleted list
+          if(co == 0) { // only if first character on line
+            co += font->height - 2; // line height as indent for bullet
+            character(249, Point(p.x + co, p.y + lo), flags); // kinda bullet point thingy
+            co += character_width(249) + character_width(32); // bullet + space
+            flags |= flags::BULLET;
+            continue;
+          }
+        } break;
+        case '*': { // bold
           flags ^= flags::BOLD;
-        }else if(c == '_') {
-          flags ^= flags::UNDERLINE;
-        }else if(c == '/') {
+          continue;
+        } break;
+        case '/': { // italic
           flags ^= flags::ITALIC;
-        }else if(c == '~') {
+          continue;
+        } break;
+        case '_': { // underline
+          flags ^= flags::UNDERLINE;
+          continue;
+        } break;
+        case '~': { // strikethrough
           flags ^= flags::STRIKETHROUGH;
-        }else if(c == '-') {
-          character(249, Point(p.x + co, p.y + lo), flags); // kinda bullet point thingy
-          co += 7;
-          i++;
-        }else{
-          character(t[j], Point(p.x + co, p.y + lo), flags);
-          uint8_t bold = flags & flags::BOLD ? 1 : 0;
-          co += (character_width(c) + bold) + 2;
-        }
+          continue;
+        } break;
+        case '\\': { // escaped character
+          // skip forward to escaped character so that it is
+          // rendered in this iteration of the loop and
+          // isn't evaluated for special behaviour
+          if(i < text.size() - 1) {
+            i++;
+            c = text[i + 1];
+          }
+        } break;
+        case ' ': { // space
+          // determine if we need to wordwrap
+          size_t next_whitespace = std::min(text.find(' ', i + 1), text.find('\n', i + 1));
+          if(next_whitespace == std::string::npos) { // not found, use end of text
+            next_whitespace = text.size();
+          }
+
+          // calculate width of the word including this leading space
+          uint16_t word_width = character_width(' ');
+          for(std::string::size_type j = i + 1; j < next_whitespace; j++) {
+            if(text[j] == '\\') {
+              if(j < next_whitespace - 1) {
+                j++;
+                // skip forward to escaped character so that it is
+                // rendered in this iteration of the loop and
+                // isn't evaluated for special behaviour
+                word_width += character_width(text[j]);
+                continue;
+              }
+            }
+
+            if(text[j] == '*' || text[j] == '~') {
+              continue;
+            }
+
+            word_width += character_width(c);
+          }
+
+          // if word too long for this line then wrap
+          if(co + word_width >= wrap) {
+            if(flags & flags::BULLET) {
+              co = font->height + character_width(249) + character_width(32); // bullet + space
+            }else{
+              co = 0;
+            }
+
+            lo += font->height;
+            continue;
+          }
+        } break;
       }
 
-      // move character offset to end of word and add a space
-      character(' ', Point(p.x + co, p.y + lo), flags);
-      co += (character_width(' '));
-      i = next_space;
+      character(text[i], Point(p.x + co, p.y + lo), flags);
+      co += character_width(c);
     }
   }
 

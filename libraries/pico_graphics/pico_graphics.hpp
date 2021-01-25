@@ -49,7 +49,8 @@ namespace pimoroni {
       BOLD = 1,
       ITALIC = 2,
       UNDERLINE = 4,
-      STRIKETHROUGH = 8
+      STRIKETHROUGH = 8,
+      BULLET = 16,
     };
 
     uint16_t *frame_buffer;
