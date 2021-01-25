@@ -97,26 +97,25 @@ int main() {
   };
 
   std::vector<pt> shapes;
-  for(int i = 0; i < 1000; i++) {
+  for(int i = 0; i < 250; i++) {
     pt shape;
     shape.x = rand() % 240;
     shape.y = rand() % 135;
-    shape.r = (rand() % 10) + 3;
+    shape.r = (rand() % 10) + 5;
     shape.dx = float(rand() % 255) / 128.0f;
     shape.dy = float(rand() % 255) / 128.0f;
-    shape.pen = pico_display.create_pen(rand() % 255, rand() % 255, rand() % 255);
+    shape.pen = pico_display.create_pen(rand() % 100, rand() % 100, rand() % 100);
     shapes.push_back(shape);
   }
 
   uint32_t i = 0;
   while(true) {
+    pico_display.remove_clip();
+
     pico_display.set_pen(20, 30, 40);
     pico_display.clear();
 
-    pico_display.set_pen(200, 220, 240);
-    pico_display.text("Markdown? *Zoiks!*\n\nIt _helps_ to /emphasize/.\n\n-a bulleted list?\n-sure, why not!?\n\nMade a mistake? ~Fix it~.", Point(5, 5), 230);
 
-    /*
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
@@ -129,11 +128,41 @@ int main() {
       pico_display.circle(Point(shape.x, shape.y), shape.r);
     }
 
+    pico_display.set_pen(200, 220, 240);
+
+    std::string text =
+    "We've sourced a new LCD screen especially for our Pico Display Pack - "
+    "it's a lovely, bright *18-bit capable 240x135 pixel IPS display* and fits "
+    "the Pico perfectly.\n\nWe've surrounded it with *four tactile buttons* so you "
+    "can easily interface your Pico with your human fingers and an *RGB LED* that "
+    "you can use as an indicator, for notifications or just for adding extra rainbows."
+    "\n\n"
+    "*Features:*\n\n"
+    "-1.14\" 240x135 pixel IPS LCD screen\n"
+    "-4 x tactile buttons\n"
+    "-RGB LED\n"
+    "-Pre-soldered female headers for attaching to Pico\n"
+    "-Compatible with Raspberry Pi Pico.\n"
+    "-Fully assembled\n"
+    "-No soldering required (as long as your Pico has header pins attached).\n"
+    "-Dimensions: approx 53mm x 25mm x 9mm (L x W x H)\n"
+    "-Programmable with C/C++ and MicroPython"
+    ;
+
+    pico_display.set_clip(Rect(10, 10, 220, 115));
+
+    int32_t y = cos(float(i) / 100.0f) * 200.0f - 200.0f;
+    pico_display.text(text, Point(10, y + 10), pico_display.clip.w - 2);
+
+
+    // "Markdown? *Zoiks!*\n\nIt _helps_ to /emphasize/.\n\n-a bulleted list?\n-sure, why not!?\n\nMade a mistake? ~Fix it~."
+
+
     float led_step = fmod(i / 20.0f, M_PI * 2.0f);
     int r = (sin(led_step) * 25.0f) + 25.0f;
     pico_display.set_led(r, r / 1.2f, r);
 
-
+/*
     std::vector<Point> poly;
     poly.push_back(Point(30, 30));
     poly.push_back(Point(50, 35));
