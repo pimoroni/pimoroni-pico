@@ -1,5 +1,6 @@
 add_subdirectory(pico_display)
 add_subdirectory(pico_unicorn)
+add_subdirectory(pico_unicorn_plasma)
 add_subdirectory(pico_scroll)
 add_subdirectory(pico_explorer)
 add_subdirectory(pico_rgb_keypad)
