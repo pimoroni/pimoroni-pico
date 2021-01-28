@@ -104,7 +104,7 @@ picodisplay.update()
 Sets the colour to be used by subsequent calls to drawing functions.  The values for `r`, `g` and `b` should be from 0-255 inclusive.
 
 ```python
-picodisplay.set_pen(r,g,b)
+picodisplay.set_pen(r, g, b)
 ```
 
 ### create_pen
@@ -112,7 +112,7 @@ picodisplay.set_pen(r,g,b)
 Creates a pen which can be stored as a variable for faster re-use of the same colour through calls to `set_pen`.  The values for `r`, `g` and `b` should be from 0-255 inclusive.
 
 ```python
-penColour = picodisplay.create_pen(r,g,b)
+pen_colour = picodisplay.create_pen(r, g, b)
 picodisplay.set_pen(penColour)
 ```
 
@@ -129,7 +129,7 @@ picodisplay.clear()
 Sets a single pixel in the display buffer to the current pen colour.  The `x` and `y` parameters determine the X and Y coordinates of the drawn pixel in the buffer.
 
 ```python
-picodisplay.pixel(x,y)
+picodisplay.pixel(x, y)
 ```
 
 ### pixel_span
@@ -137,7 +137,7 @@ picodisplay.pixel(x,y)
 Draws a horixontal line of pixels to the buffer.  The `x` and `y` parameters specify the coordinates of the first pixel of the line.  The `l` parameter describes the length of the line in pixels.  This function will only extend the line towards the end of the screen, i.e. the `x` coordinate should specify the left hand extreme of the line.
 
 ```python
-picodisplay.span(x,y,l)
+picodisplay.span(x, y, l)
 ```
 
 ### rectangle
@@ -145,7 +145,7 @@ picodisplay.span(x,y,l)
 Draws a rectangle filled with the current pen colour to the buffer.  The `x` and `y` parameters specify the upper left corner of the rectangle, `w` specifies the width in pixels, and `h` the height.
 
 ```python
-picodisplay.rectangle(x,y,w,h)
+picodisplay.rectangle(x, y, w, h)
 ```
 
 ### circle
@@ -153,7 +153,7 @@ picodisplay.rectangle(x,y,w,h)
 Draws a circle filled with the current pen colour to the buffer.  The `x` and `y` parameters specify the centre of the circle, `r` specifies the radius in pixels.
 
 ```python
-picodisplay.rectangle(x,y,w,h)
+picodisplay.rectangle(x, y, w, h)
 ```
 
 ### character
@@ -161,8 +161,9 @@ picodisplay.rectangle(x,y,w,h)
 Draws a single character to the display buffer in the current pen colour.  The `c` parameter should be the ASCII numerical representation of the character to be printed, `x` and `y` describe the top-left corner of the character's drawing field.  The `character` function can also be given an optional 4th parameter, `scale`, describing the scale of the character to be drawn.  Default value is 2.
 
 ```python
-picodisplay.character(c,x,y)
-picodisplay.character(c,x,y,scale)
+char_a = ord('a')
+picodisplay.character(char_a, x, y)
+picodisplay.character(char_a, x, y, scale)
 ```
 
 ### text
@@ -170,8 +171,8 @@ picodisplay.character(c,x,y,scale)
 Draws a string of text to the display buffer in the current pen colour.  The `string` parameter is the string of text to be drawn, and `x` and `y` specify the upper left corner of the drawing field.  The `wrap` parameter describes the width, in pixels, after which the next word in the string will be drawn on a new line underneath the current text.  This will wrap the string over multiple lines if required.  This function also has an optional parameter, `scale`, which describes the size of the characters to be drawn.  The default `scale` is 2.
 
 ```python
-picodisplay.text(string,x,y, wrap)
-picodisplay.text(string,x,y,wrap, scale)
+picodisplay.text(string, x, y, wrap)
+picodisplay.text(string, x, y, wrap, scale)
 ```
 
 ### set_clip
@@ -179,7 +180,7 @@ picodisplay.text(string,x,y,wrap, scale)
 This function defines a rectangular area outside which no drawing actions will take effect.  If a drawing action crosses the boundary of the clip then only the pixels inside the clip will be drawn.  Note that `clip` does not remove pixels which have already been drawn, it only prevents new pixels being drawn outside the described area.  A more visual description of the function of clips can be found below.  Only one clip can be active at a time, and defining a new clip replaces any previous clips.  The `x` and `y` parameters describe the upper-left corner of the clip area, `w` and `h` describe the width and height in pixels.
 
 ```python
-picodisplay.set_clip(x,y,w,h)
+picodisplay.set_clip(x, y, w, h)
 ```
 
 ![A diagram explaining clips](/micropython/modules/pico_display/clip.jpg)
