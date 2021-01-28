@@ -183,8 +183,6 @@ This function defines a rectangular area outside which no drawing actions will t
 picodisplay.set_clip(x, y, w, h)
 ```
 
-![A diagram explaining clips](/micropython/modules/pico_display/clip.jpg)
-
 ### remove_clip
 
 This function removes any currently implemented clip.
