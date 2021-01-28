@@ -106,7 +106,7 @@ Reads the GPIO pin connected to one of Pico Unicorn's buttons, returning `True` 
 picounicorn.is_pressed(button)
 ```
 
-The button vaule should be a number denoting a pin, and constants `picounicorn.BUTTON_A`, `picounicorn.BUTTON_B`, `picounicorn.BUTTON_X` and `picounicorn.BUTTON_Y` are supplied to make it easier. e:
+The button value should be a number denoting a pin, and constants `picounicorn.BUTTON_A`, `picounicorn.BUTTON_B`, `picounicorn.BUTTON_X` and `picounicorn.BUTTON_Y` are supplied to make it easier. e:
 
 ```python
 is_a_button_pressed = picounicorn.is_pressed(picounicorn.BUTTON_A)
