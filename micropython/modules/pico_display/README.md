@@ -148,6 +148,8 @@ Draws a rectangle filled with the current pen colour to the buffer.  The `x` and
 picodisplay.rectangle(x, y, w, h)
 ```
 
+![Rectangle function explanation image](/micropython/modules/pico_display/images/rectangle.png)
+
 ### circle
 
 Draws a circle filled with the current pen colour to the buffer.  The `x` and `y` parameters specify the centre of the circle, `r` specifies the radius in pixels.
@@ -155,6 +157,8 @@ Draws a circle filled with the current pen colour to the buffer.  The `x` and `y
 ```python
 picodisplay.rectangle(x, y, w, h)
 ```
+
+![Circle function explanation image](/micropython/modules/pico_display/images/circle.png)
 
 ### character
 
@@ -175,6 +179,8 @@ picodisplay.text(string, x, y, wrap)
 picodisplay.text(string, x, y, wrap, scale)
 ```
 
+![Text scale explanation image](/micropython/modules/pico_display/images/text_scale.png)
+
 ### set_clip
 
 This function defines a rectangular area outside which no drawing actions will take effect.  If a drawing action crosses the boundary of the clip then only the pixels inside the clip will be drawn.  Note that `clip` does not remove pixels which have already been drawn, it only prevents new pixels being drawn outside the described area.  A more visual description of the function of clips can be found below.  Only one clip can be active at a time, and defining a new clip replaces any previous clips.  The `x` and `y` parameters describe the upper-left corner of the clip area, `w` and `h` describe the width and height in pixels.
@@ -182,6 +188,8 @@ This function defines a rectangular area outside which no drawing actions will t
 ```python
 picodisplay.set_clip(x, y, w, h)
 ```
+
+![Clip function explanation image](/micropython/modules/pico_display/images/clip.png)
 
 ### remove_clip
 
