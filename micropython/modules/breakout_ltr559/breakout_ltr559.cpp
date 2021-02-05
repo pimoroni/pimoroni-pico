@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../libraries/breakout_ltr559/breakout_ltr559.hpp"
+//#include "../../../libraries/breakout_ltr559/breakout_ltr559.hpp"
 
 //using namespace pimoroni;
 
