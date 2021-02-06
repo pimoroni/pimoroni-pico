@@ -27,3 +27,5 @@ The table below shows the current state of compatibly and some notes to set expe
 We will keep this information updated as things develop.
 
 **Note:** It's very early days for Raspberry Pi Pico and it's likely that our libraries will undergo quite a lot of changes over the next couple of weeks as we take in feedback and expand the functionality.
+
+**Personal clone**
