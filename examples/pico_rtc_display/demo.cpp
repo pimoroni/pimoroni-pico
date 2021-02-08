@@ -14,12 +14,17 @@
 // (There are on-screen reminders of the active buttons)
 // **************************************************************************
 
-// To use Explorer,
-// - replace pico_display.hpp include with pico_explorer.hpp
-// - replace all PicoDisplay with PicoExplorer
-// - in CMakeLists.txt replace pico_display with pico_explorer
-// - Comment out the .set_led() calls in flash_led()
+// To use PicoExplorer rather than PicoDisplay, uncomment the following line
+// #define USE_PICO_EXPLORER 1
+// This:
+// - Includes pico_explorer.hpp rather than pico_display.hpp
+// - Replaces all PicoDisplay references with PicoExplorer
+// - Leaves out the .set_led() calls in flash_led()
+#ifdef USE_PICO_EXPLORER
+#include "pico_explorer.hpp"
+#else
 #include "pico_display.hpp"
+#endif
 #include "rv3028.hpp"
 
 #define MODE_DISP_CLOCK 0
@@ -30,8 +35,17 @@
 
 using namespace pimoroni;
 
+#ifdef USE_PICO_EXPLORER
+uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
+PicoExplorer pico_display(buffer);
+uint16_t screen_width = PicoExplorer::WIDTH;
+uint16_t screen_height = PicoExplorer::HEIGHT;
+#else
 uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
 PicoDisplay pico_display(buffer);
+uint16_t screen_width = PicoDisplay::WIDTH;
+uint16_t screen_height = PicoDisplay::HEIGHT;
+#endif
 
 RV3028 rv3028;
 
@@ -50,6 +64,7 @@ bool repeat_count_reached(uint16_t curr_count) {
 void flash_led(uint32_t curr_count) {
   // Flash the LED based on the current loop counter
   // curr_count=0 will turn LED off
+#ifndef USE_PICO_EXPLORER
   if ((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
     // value less than half modded number - LED off
     pico_display.set_led(0, 0, 0);
@@ -57,6 +72,7 @@ void flash_led(uint32_t curr_count) {
     // value more than half modded number - LED on
     pico_display.set_led(128, 128, 128);
   }
+#endif
 }
 
 int main() {
@@ -160,7 +176,7 @@ int main() {
       y_pressed = 0;
     }
 
-    Rect text_box(5, 5, PicoDisplay::WIDTH-10, PicoDisplay::HEIGHT-10);
+    Rect text_box(5, 5, screen_width-10, screen_height-10);
     pico_display.set_pen(55, 65, 75);
     pico_display.rectangle(text_box);
     // text_box.deflate(10);
@@ -181,7 +197,7 @@ int main() {
               Point(text_box.x, text_box.y+60), 230, 6);
           pico_display.set_pen(255, 255, 255);
           pico_display.text("Clock",
-              Point(text_box.x, text_box.y+PicoDisplay::HEIGHT-20), 230, 1);
+              Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         } else {
           sprintf(buf, "Time: rv3028.updateTime() ret err");
           pico_display.text(buf,
@@ -205,22 +221,22 @@ int main() {
               Point(text_box.x, text_box.y+30), 230, 3);
         }
         pico_display.text("Clock",
-            Point(text_box.x, text_box.y+PicoDisplay::HEIGHT-20), 230, 1);
+            Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         break;
       case MODE_SET_TIMER:
         flash_led(0);
         pico_display.text("Run Timer",
             Point(text_box.x, text_box.y+2), 230, 1);
         pico_display.text("+ Time",
-            Point(text_box.x+PicoDisplay::WIDTH-42, text_box.y+2), 230, 1);
+            Point(text_box.x+screen_width-42, text_box.y+2), 230, 1);
         sprintf(buf, "Time %d secs", timer_count);
         pico_display.text(buf,
             Point(text_box.x, text_box.y+30), 230, 3);
         pico_display.text("Clock",
-            Point(text_box.x, text_box.y+PicoDisplay::HEIGHT-20), 230, 1);
+            Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         pico_display.text("- Time",
-            Point(text_box.x+PicoDisplay::WIDTH-42,
-              text_box.y+PicoDisplay::HEIGHT-20), 230, 1);
+            Point(text_box.x+screen_width-42,
+              text_box.y+screen_height-20), 230, 1);
         break;
     }
 
