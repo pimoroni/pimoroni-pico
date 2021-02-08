@@ -1,0 +1,12 @@
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  README.md
+  libraries/pico_display/README.md
+  libraries/pico_explorer/README.md
+  libraries/pico_graphics/README.md
+  libraries/pico_rgb_keypad/README.md
+  libraries/pico_unicorn/README.md
