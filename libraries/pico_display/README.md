@@ -51,13 +51,13 @@ int main() {
 
         // draw a box to put some text in
         pico_display.set_pen(10, 20, 30);
-        Rect text_rect(10, 10, 150, 150);
+        rect text_rect(10, 10, 150, 150);
         pico_display.rectangle(text_rect);
 
         // write some text inside the box with 10 pixels of margin
         // automatically word wrapping
         text_rect.deflate(10);
-        pico_display.text("This is a message", Point(text_rect.x, text_rect.y), text_rect.w);
+        pico_display.text("This is a message", point(text_rect.x, text_rect.y), text_rect.w);
 
         // now we've done our drawing let's update the screen
         pico_display.update();
