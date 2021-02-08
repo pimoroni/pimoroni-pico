@@ -528,7 +528,7 @@ namespace pimoroni {
   {
     // Reads the number of remaining timer ticks
     uint8_t r0 =readRegister(RV3028_TIMERSTAT_0);
-    return(r0 + (readRegister(RV3028_TIMERSTAT_1) >> 8));
+    return(r0 + (readRegister(RV3028_TIMERSTAT_1) << 8));
   }
 
   void RV3028::enableTimerInterrupt()
