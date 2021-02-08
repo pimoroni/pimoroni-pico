@@ -202,7 +202,7 @@ int main() {
         } else {
           sprintf(buf, "%s %d", "Timer running", rv3028.getTimerCount());
           pico_display.text(buf,
-              Point(text_box.x, text_box.y+30), 230, 4);
+              Point(text_box.x, text_box.y+30), 230, 3);
         }
         pico_display.text("Clock",
             Point(text_box.x, text_box.y+PicoDisplay::HEIGHT-20), 230, 1);
