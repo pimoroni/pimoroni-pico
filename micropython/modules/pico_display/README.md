@@ -134,7 +134,7 @@ picodisplay.pixel(x, y)
 
 ### pixel_span
 
-Draws a horixontal line of pixels to the buffer.  The `x` and `y` parameters specify the coordinates of the first pixel of the line.  The `l` parameter describes the length of the line in pixels.  This function will only extend the line towards the end of the screen, i.e. the `x` coordinate should specify the left hand extreme of the line.
+Draws a horizontal line of pixels to the buffer.  The `x` and `y` parameters specify the coordinates of the first pixel of the line.  The `l` parameter describes the length of the line in pixels.  This function will only extend the line towards the end of the screen, i.e. the `x` coordinate should specify the left hand extreme of the line.
 
 ```python
 picodisplay.span(x, y, l)
