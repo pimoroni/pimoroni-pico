@@ -35,7 +35,7 @@ namespace pimoroni {
 
     // setup motor pins
     pwm_config motor_pwm_cfg = pwm_get_default_config();
-    pwm_config_set_wrap(&motor_pwm_cfg, 255);
+    pwm_config_set_wrap(&motor_pwm_cfg, 5500);
 
     pwm_init(pwm_gpio_to_slice_num(MOTOR1N), &motor_pwm_cfg, true);
     gpio_set_function(MOTOR1N, GPIO_FUNC_PWM);
@@ -80,20 +80,20 @@ namespace pimoroni {
 
     switch(action) {
       case FORWARD: {
-        pwm_set_gpio_level(p, speed * 255);
-        pwm_set_gpio_level(n, 0);
+        pwm_set_gpio_level(n, (1 - speed) * 5500);
+        pwm_set_gpio_level(p, 5500);
         break;
       }
 
       case REVERSE: {
-        pwm_set_gpio_level(p, 0);
-        pwm_set_gpio_level(n, speed * 255);
+        pwm_set_gpio_level(n, 5500);
+        pwm_set_gpio_level(p, (1 - speed) * 5500);
         break;
       }
 
       case STOP: {
-        pwm_set_gpio_level(p, 0);
-        pwm_set_gpio_level(n, 0);
+        pwm_set_gpio_level(p, 5500);
+        pwm_set_gpio_level(n, 5500);
         break;
       }
     }
