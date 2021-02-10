@@ -1,9 +1,5 @@
-#include <math.h>
-#include <bitset>
 #include <iomanip>
 #include <sstream>
-#include <climits>
-#include <float.h>
 #include "pico_explorer.hpp"
 #include "pico/stdlib.h"
 #include "encoder.hpp"
