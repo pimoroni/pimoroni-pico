@@ -1,0 +1,44 @@
+; --------------------------------------------------
+;            Quadrature Output using PIO
+;      by Christopher (@ZodiusInfuser) Parrott
+; --------------------------------------------------
+;
+; A simple PIO that will create a quadrature output signal
+; for use with testing quadrature decoder code
+
+
+; Constants
+; --------------------------------------------------
+.define public QUAD_OUT_SET_CYCLES      10
+
+
+.program quadrature_out
+.wrap_target
+    set pins, 0 [QUAD_OUT_SET_CYCLES - 1]
+    set pins, 1 [QUAD_OUT_SET_CYCLES - 1]
+    set pins, 3 [QUAD_OUT_SET_CYCLES - 1]
+    set pins, 2 [QUAD_OUT_SET_CYCLES - 1]
+.wrap
+
+
+; Initialisation Code
+; --------------------------------------------------
+% c-sdk {
+#include "hardware/clocks.h"
+
+void quadrature_out_program_init(PIO pio, uint sm, uint offset, uint pin, float freq)
+{
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin + 1);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
+    pio_sm_config c = quadrature_out_program_get_default_config(offset);
+    sm_config_set_set_pins(&c, pin, 2);
+
+    int cycles_per_bit = QUAD_OUT_SET_CYCLES * 4;
+    float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+    sm_config_set_clkdiv(&c, div);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
