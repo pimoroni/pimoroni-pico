@@ -7,7 +7,6 @@ height = explorer.get_height()
 display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
 explorer.init(display_buffer)
 
-explorer.set_backlight(1.0)
 explorer.set_audio_pin(0)
 
 i = 1

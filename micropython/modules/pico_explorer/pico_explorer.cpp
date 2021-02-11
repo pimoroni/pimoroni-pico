@@ -43,21 +43,6 @@ mp_obj_t picoexplorer_update() {
     return mp_const_none;
 }
 
-mp_obj_t picoexplorer_set_backlight(mp_obj_t brightness_obj) {
-    if(explorer != nullptr) {
-        float brightness = mp_obj_get_float(brightness_obj);
-
-        if(brightness < 0 || brightness > 1.0f)
-            mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
-        else
-            explorer->set_backlight((uint8_t)(brightness * 255.0f));
-    }
-    else
-        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
-
-    return mp_const_none;
-}
-
 mp_obj_t picoexplorer_is_pressed(mp_obj_t button_obj) {
     bool buttonPressed = false;
 
