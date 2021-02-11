@@ -57,10 +57,6 @@ namespace pimoroni {
     screen.update();
   }
 
-  void PicoExplorer::set_backlight(uint8_t brightness) {
-    screen.set_backlight(brightness);
-  }
-
   bool PicoExplorer::is_pressed(uint8_t button) {
     return !gpio_get(button);
   }
