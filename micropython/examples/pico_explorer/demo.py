@@ -7,7 +7,6 @@ height = explorer.get_height()
 display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
 explorer.init(display_buffer)
 
-explorer.set_backlight(1.0)
 explorer.set_audio_pin(0)
 
 i = 1
@@ -35,8 +34,26 @@ while True:
     explorer.set_pen(0, 0, adc2 * 2) 
     explorer.circle(90 + adc2, 66, 10)
 
-    explorer.set_pen(255, 255, 255)
-    explorer.text("Plug a jumper wire from GP0 to AUDIO to hear noise!", 20, 110, 200)    
+    # example for the on-board A/B/X/Y buttons
+    if explorer.is_pressed(explorer.BUTTON_A):
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Button A pressed", 20, 110, 200)
+    elif explorer.is_pressed(explorer.BUTTON_B):
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Button B pressed", 20, 110, 200)
+    elif explorer.is_pressed(explorer.BUTTON_X) and explorer.is_pressed(explorer.BUTTON_Y):
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Buttons X and Y pressed", 20, 110, 200)
+    elif explorer.is_pressed(explorer.BUTTON_X):
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Button X pressed", 20, 110, 200)
+    elif explorer.is_pressed(explorer.BUTTON_Y):
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Button Y pressed", 20, 110, 200)
+    else:
+        # no button press was detected
+        explorer.set_pen(255, 255, 255)
+        explorer.text("Plug a jumper wire from GP0 to AUDIO to hear noise!", 20, 110, 200)    
 
     explorer.set_tone(i)
 
