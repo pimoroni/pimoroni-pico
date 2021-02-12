@@ -44,7 +44,6 @@ namespace pimoroni {
 
     void init();
     void update();
-    void set_backlight(uint8_t brightness);
     bool is_pressed(uint8_t button);
 
     float get_adc(uint8_t channel);

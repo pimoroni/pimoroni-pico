@@ -50,7 +50,6 @@ enum gps
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoexplorer_init_obj, picoexplorer_init);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoexplorer_get_width_obj, picoexplorer_get_width);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoexplorer_get_height_obj, picoexplorer_get_height);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoexplorer_set_backlight_obj, picoexplorer_set_backlight);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoexplorer_update_obj, picoexplorer_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoexplorer_is_pressed_obj, picoexplorer_is_pressed);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoexplorer_get_adc_obj, picoexplorer_get_adc);
@@ -78,7 +77,6 @@ STATIC const mp_map_elem_t picoexplorer_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&picoexplorer_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&picoexplorer_get_width_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&picoexplorer_get_height_obj) },
-    { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&picoexplorer_set_backlight_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&picoexplorer_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picoexplorer_is_pressed_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_adc), MP_ROM_PTR(&picoexplorer_get_adc_obj) },
