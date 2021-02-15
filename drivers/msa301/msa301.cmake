@@ -1,10 +1,10 @@
-add_library(msa301 INTERFACE)
+set(DRIVER_NAME msa301)
+add_library(${DRIVER_NAME} INTERFACE)
 
-target_sources(msa301 INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/msa301.cpp
-)
+target_sources(${DRIVER_NAME} INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/${DRIVER_NAME}.cpp)
 
-target_include_directories(msa301 INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${DRIVER_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 # Pull in pico libraries that we need
-target_link_libraries(msa301 INTERFACE pico_stdlib hardware_i2c)
+target_link_libraries(${DRIVER_NAME} INTERFACE pico_stdlib hardware_i2c)

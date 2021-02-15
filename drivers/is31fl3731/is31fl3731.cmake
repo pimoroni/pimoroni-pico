@@ -1,4 +1,4 @@
-set(DRIVER_NAME bh1745)
+set(DRIVER_NAME is31fl3731)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

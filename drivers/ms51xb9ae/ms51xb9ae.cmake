@@ -1,10 +1,10 @@
-add_library(ms51xb9ae INTERFACE)
+set(DRIVER_NAME ms51xb9ae)
+add_library(${DRIVER_NAME} INTERFACE)
 
-target_sources(ms51xb9ae INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/ms51xb9ae.cpp
-)
+target_sources(${DRIVER_NAME} INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}/${DRIVER_NAME}.cpp)
 
-target_include_directories(ms51xb9ae INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${DRIVER_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 # Pull in pico libraries that we need
-target_link_libraries(ms51xb9ae INTERFACE pico_stdlib hardware_i2c)
+target_link_libraries(${DRIVER_NAME} INTERFACE pico_stdlib hardware_i2c)
