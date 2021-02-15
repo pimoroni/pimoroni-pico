@@ -3,7 +3,7 @@
 #include <math.h>
 #include "pico/stdlib.h"
 
-#include "bh1745.hpp"
+#include "breakout_bh1745.hpp"
 
 using namespace pimoroni;
 

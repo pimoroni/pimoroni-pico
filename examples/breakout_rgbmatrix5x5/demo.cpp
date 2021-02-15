@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "is31fl3731.hpp"
+#include "breakout_rgbmatrix5x5.hpp"
 
 using namespace pimoroni;
 

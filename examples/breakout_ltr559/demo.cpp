@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include "pico/stdlib.h"
-#include "ltr559.hpp"
+
+#include "breakout_ltr559.hpp"
 
 using namespace pimoroni;
 

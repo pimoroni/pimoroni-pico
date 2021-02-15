@@ -1,10 +1,12 @@
+set(OUTPUT_NAME bh1745_demo)
+
 add_executable(
-  breakout_bh1745
+  ${OUTPUT_NAME}
   demo.cpp
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(breakout_bh1745 pico_stdlib hardware_spi bh1745)
+target_link_libraries(${OUTPUT_NAME} pico_stdlib hardware_i2c breakout_bh1745)
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(breakout_bh1745)
+pico_add_extra_outputs(${OUTPUT_NAME})
