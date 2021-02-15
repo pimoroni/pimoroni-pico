@@ -41,12 +41,12 @@ namespace pimoroni {
         // Constructors/Destructor
         //--------------------------------------------------
     public:
-        DriverTemplate() {}
+        DRV8830() {}
 
-        DriverTemplate(uint8_t address) :
+        DRV8830(uint8_t address) :
             address(address) {}
 
-        DriverTemplate(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
+        DRV8830(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
             i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
 
 

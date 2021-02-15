@@ -4,7 +4,7 @@ namespace pimoroni {
 
     /***** Device registers and masks here *****/
 
-    bool DriverTemplate::init() {
+    bool SH1107::init() {
         bool succeeded = false;
 
         i2c_init(i2c, 400000);
