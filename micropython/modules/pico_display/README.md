@@ -163,7 +163,7 @@ picodisplay.rectangle(x, y, w, h)
 Draws a circle filled with the current pen colour to the buffer.  The `x` and `y` parameters specify the centre of the circle, `r` specifies the radius in pixels.
 
 ```python
-picodisplay.rectangle(x, y, w, h)
+picodisplay.circle(x, y, r)
 ```
 
 ![Circle function explanation image](/micropython/modules/pico_display/images/circle.png)
