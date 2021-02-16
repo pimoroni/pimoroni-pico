@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-ADS1015 ads1015;
+BreakoutADS1015 ads1015;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

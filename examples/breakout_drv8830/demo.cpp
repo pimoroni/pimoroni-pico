@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-DRV8830 drv8830;
+BreakoutDRV8830 drv8830;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

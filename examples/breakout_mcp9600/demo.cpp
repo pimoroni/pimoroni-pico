@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-MCP9600 mcp9600;
+BreakoutMCP9600 mcp9600;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

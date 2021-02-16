@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-SGP30 sgp30;
+BreakoutSGP30 sgp30;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

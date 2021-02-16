@@ -7,7 +7,7 @@
 
 using namespace pimoroni;
 
-BH1745 bh1745(0x39);
+BreakoutBH1745 bh1745(0x39);
 
 int main() {
   setup_default_uart();

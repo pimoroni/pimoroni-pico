@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-IS31FL3731 is31fl3731;
+BreakoutMatrix11x7 matrix11x7;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  is31fl3731.init();   
+  matrix11x7.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

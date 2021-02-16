@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-PMW3901 pmw3901;
+BreakoutPMW3901 pmw3901;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

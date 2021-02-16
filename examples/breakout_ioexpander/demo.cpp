@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-MS51XB9AE ms51xb9ae;
+BreakoutIOExpander ioe;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  ms51xb9ae.init();   
+  ioe.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-VL53L1X vl53l1x;
+BreakoutTOF tof;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  vl53l1x.init();   
+  tof.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

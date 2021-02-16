@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-RV3028 rv3028;
+BreakoutRTC rtc;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  rv3028.init();   
+  rtc.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

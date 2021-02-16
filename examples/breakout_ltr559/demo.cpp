@@ -6,7 +6,7 @@
 
 using namespace pimoroni;
 
-LTR559 ltr559;
+BreakoutLTR559 ltr559;
 
 int main() {
     setup_default_uart();

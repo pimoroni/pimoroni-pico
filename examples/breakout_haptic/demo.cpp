@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-DRV2605L drv2605l;
+BreakoutHaptic haptic;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  drv2605l.init();   
+  haptic.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

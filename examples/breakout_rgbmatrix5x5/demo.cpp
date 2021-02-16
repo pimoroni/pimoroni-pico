@@ -7,7 +7,7 @@
 
 using namespace pimoroni;
 
-IS31FL3731 rgbmatrix5x5;
+BreakoutRGBMatrix5x5 rgbmatrix5x5;
 
 struct RGB {
     uint8_t r;

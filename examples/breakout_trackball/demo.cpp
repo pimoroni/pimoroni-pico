@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-Trackball trackball;
+BreakoutTrackball trackball;
 
 int main() {
   setup_default_uart();

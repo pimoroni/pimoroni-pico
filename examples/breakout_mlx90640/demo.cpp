@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-MLX90640 mlx90640;
+BreakoutMLX90640 mlx90640;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

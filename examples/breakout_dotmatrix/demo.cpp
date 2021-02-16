@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-IS31FL3730 is31fl3730;
+BreakoutDotMatrix dotmatrix;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  is31fl3730.init();   
+  dotmatrix.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

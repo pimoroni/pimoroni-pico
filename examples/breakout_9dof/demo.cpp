@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-ICM20948 icm20948;
+Breakout9DOF dof;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  icm20948.init();   
+  dof.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

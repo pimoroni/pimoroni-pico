@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-SH1107 sh1107;
+BreakoutOLED128x128i2c oled;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  sh1107.init();   
+  oled.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

@@ -4,4 +4,5 @@
 
 namespace pimoroni {
   
+    typedef LSM303D Breakout6DOF;
 }

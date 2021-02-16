@@ -4,13 +4,13 @@
 
 using namespace pimoroni;
 
-PA1010D pa1010d;
+BreakoutGPS gps;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  pa1010d.init();   
+  gps.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

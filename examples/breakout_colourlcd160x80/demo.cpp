@@ -6,13 +6,12 @@ using namespace pimoroni;
 
 uint16_t buffer[BreakoutColourLCD240x240::WIDTH * BreakoutColourLCD240x240::HEIGHT];
 BreakoutColourLCD240x240 lcd(buffer);
-DriverTemplate temp;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  temp.init();   
+  lcd.init();   
 
   while(true) {
     gpio_put(PICO_DEFAULT_LED_PIN, true);

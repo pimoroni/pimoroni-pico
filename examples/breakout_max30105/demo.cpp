@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-MAX30105 max30105;
+BreakoutMAX30105 max30105;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

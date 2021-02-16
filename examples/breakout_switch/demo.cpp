@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-HT0740 ht0740;
+BreakoutSwitch ht0740;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

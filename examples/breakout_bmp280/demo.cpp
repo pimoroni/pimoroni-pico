@@ -4,7 +4,7 @@
 
 using namespace pimoroni;
 
-BMP280 bmp280;
+BreakoutBMP280 bmp280;
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
