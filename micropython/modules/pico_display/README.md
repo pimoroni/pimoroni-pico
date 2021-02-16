@@ -4,6 +4,8 @@ Pico Display Pack is a vibrant 1.14", 240 x 135 pixel IPS LCD screen for your Ra
 
 We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons and LED. See the [function reference](#function-reference) for details.
 
+Check out [UnfinishedStuff's excellent Display Pack guide](https://github.com/UnfinishedStuff/Pimoroni_Pico_Display_Pack_documentation) for more detail on the functions and code examples, and [tonygo2's Display Pack Workout](https://www.instructables.com/Pimoroni-Pico-Display-Workout/) for a comprehensive demo!
+
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
   - [init](#init)
