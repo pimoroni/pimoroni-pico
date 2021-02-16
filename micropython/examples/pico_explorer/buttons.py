@@ -6,7 +6,6 @@ import utime
 # Initialise display with a bytearray display buffer
 buf = bytearray(display.get_width() * display.get_height() * 2)
 display.init(buf)
-display.set_backlight(0.5)
 
 # sets up a handy function we can call to clear the screen
 def clear():  
