@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef BMP280 BreakoutBMP280;
+  typedef BMP280 BreakoutBMP280;
 }

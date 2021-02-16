@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef ICM20948 Breakout9DOF;
+  typedef ICM20948 Breakout9DOF;
 }

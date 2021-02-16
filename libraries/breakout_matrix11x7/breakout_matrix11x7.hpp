@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef IS31FL3731 BreakoutMatrix11x7;
+  typedef IS31FL3731 BreakoutMatrix11x7;
 }

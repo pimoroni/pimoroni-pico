@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef BH1745 BreakoutBH1745;
+  typedef BH1745 BreakoutBH1745;
 }

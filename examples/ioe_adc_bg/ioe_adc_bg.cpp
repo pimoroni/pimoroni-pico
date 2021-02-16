@@ -39,8 +39,7 @@ void HSVtoRGB(float hue, float sat, float val, uint8_t& rOut, uint8_t& gOut, uin
   // This method was found at:
   // https://www.codespeedy.com/hsv-to-rgb-in-cpp/
   ////////////////////////////////
-  if(hue > 360.0f || hue < 0.0f || sat > 100.0f || sat < 0.0f || val > 100.0f || val < 0.0f)
-  {
+  if(hue > 360.0f || hue < 0.0f || sat > 100.0f || sat < 0.0f || val > 100.0f || val < 0.0f) {
     //The given HSV values are not in valid range
     rOut = 0;
     gOut = 0;
@@ -56,17 +55,17 @@ void HSVtoRGB(float hue, float sat, float val, uint8_t& rOut, uint8_t& gOut, uin
   
   float r, g, b;
   if(hue >= 0.0f && hue < 60.0f)
-      r = c, g = x, b = 0.0f;
+    r = c, g = x, b = 0.0f;
   else if(hue >= 60.0f && hue < 120.0f)
-      r = x, g = c, b = 0.0f;
+    r = x, g = c, b = 0.0f;
   else if(hue >= 120.0f && hue < 180.0f)
-      r = 0.0f, g = c, b = x;
+    r = 0.0f, g = c, b = x;
   else if(hue >= 180.0f && hue < 240.0f)
-      r = 0.0f, g = x, b = c;
+    r = 0.0f, g = x, b = c;
   else if(hue >= 240.0f && hue < 300.0f)
-      r = x, g = 0.0f, b = c;
+    r = x, g = 0.0f, b = c;
   else
-      r = c, g = 0.0f, b = x;
+    r = c, g = 0.0f, b = x;
 
   rOut = (uint8_t)((r + m) * 255.0f);
   gOut = (uint8_t)((g + m) * 255.0f);
@@ -166,7 +165,7 @@ int main() {
   else {
     printf("IOExpander not found :'(\n");
 
-    while (true) {
+    while(true) {
       gpio_put(LED_PIN, 1);
       sleep_ms(250);
       gpio_put(LED_PIN, 0);

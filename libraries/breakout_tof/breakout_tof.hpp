@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef VL53L1X BreakoutTOF;
+  typedef VL53L1X BreakoutTOF;
 }

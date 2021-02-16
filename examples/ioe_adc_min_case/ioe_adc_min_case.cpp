@@ -30,7 +30,7 @@ int main() {
     ioe.output(PIN_TERM_B, 1);
 
     bool toggle = false;
-    while (true) {
+    while(true) {
       gpio_put(LED_PIN, toggle);
       toggle = !toggle;
 

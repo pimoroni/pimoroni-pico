@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef Trackball BreakoutTrackball;
+  typedef Trackball BreakoutTrackball;
 }

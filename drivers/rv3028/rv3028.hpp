@@ -179,17 +179,16 @@ Distributed as-is; no warranty is given.
 namespace pimoroni {
 
   enum time_order {
-          TIME_SECONDS,    // 0
-          TIME_MINUTES,    // 1
-          TIME_HOURS,      // 2
-          TIME_WEEKDAY,    // 3
-          TIME_DATE,       // 4
-          TIME_MONTH,      // 5
-          TIME_YEAR,       // 6
+    TIME_SECONDS,    // 0
+    TIME_MINUTES,    // 1
+    TIME_HOURS,      // 2
+    TIME_WEEKDAY,    // 3
+    TIME_DATE,       // 4
+    TIME_MONTH,      // 5
+    TIME_YEAR,       // 6
   };
 
-  class RV3028
-  {
+  class RV3028 {
     i2c_inst_t *i2c = i2c0;
     // interface pins with our standard defaults where appropriate
     int8_t sda       = 20;

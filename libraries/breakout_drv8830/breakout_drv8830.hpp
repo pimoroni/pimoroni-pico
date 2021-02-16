@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef DRV8830 BreakoutDRV8830;
+  typedef DRV8830 BreakoutDRV8830;
 }

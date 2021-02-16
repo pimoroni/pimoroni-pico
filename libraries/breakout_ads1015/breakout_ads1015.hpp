@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef ADS1015 BreakoutADS1015;
+  typedef ADS1015 BreakoutADS1015;
 }

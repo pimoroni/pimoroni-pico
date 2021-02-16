@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef PMW3901 BreakoutPMW3901;
+  typedef PMW3901 BreakoutPMW3901;
 }

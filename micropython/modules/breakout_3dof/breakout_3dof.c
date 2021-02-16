@@ -15,7 +15,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_init_obj, breakout_3dof_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_init_obj, breakout_3dof_init);
 // STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_get_width_obj, breakout_3dof_get_width);
 // STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_get_height_obj, breakout_3dof_get_height);
 // STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_update_obj, breakout_3dof_update);
@@ -26,7 +26,7 @@
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_3dof_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_3dof) },
-//     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_3dof_init_obj) },    
+    { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_3dof_init_obj) },    
 //     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_3dof_get_width_obj) },
 //     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_3dof_get_height_obj) },
 //     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_3dof_update_obj) },

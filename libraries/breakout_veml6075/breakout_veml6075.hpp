@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef VEML6075 BreakoutVEML6075;
+  typedef VEML6075 BreakoutVEML6075;
 }

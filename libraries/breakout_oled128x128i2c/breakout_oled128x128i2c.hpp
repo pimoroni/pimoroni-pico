@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef SH1107 BreakoutOLED128x128i2c;
+  typedef SH1107 BreakoutOLED128x128i2c;
 }

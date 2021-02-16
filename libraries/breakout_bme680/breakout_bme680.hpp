@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef BME680 BreakoutBME680;
+  typedef BME680 BreakoutBME680;
 }

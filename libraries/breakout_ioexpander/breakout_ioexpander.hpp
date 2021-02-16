@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MS51XB9AE BreakoutIOExpander;
+  typedef MS51XB9AE BreakoutIOExpander;
 }

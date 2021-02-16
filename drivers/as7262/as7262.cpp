@@ -60,23 +60,23 @@ namespace pimoroni {
   }
 
   bool AS7262::data_ready() {
-      return i2c_reg_read_uint8(reg::CONTROL) & 0b00000010;
+    return i2c_reg_read_uint8(reg::CONTROL) & 0b00000010;
   }
 
   AS7262::reading AS7262::read() {
-      while(!data_ready()) {}
-      return AS7262::reading {
-          i2c_reg_read_float(reg::R_CAL_F),
-          i2c_reg_read_float(reg::O_CAL_F),
-          i2c_reg_read_float(reg::Y_CAL_F),
-          i2c_reg_read_float(reg::G_CAL_F),
-          i2c_reg_read_float(reg::B_CAL_F),
-          i2c_reg_read_float(reg::V_CAL_F)
-      };
+    while(!data_ready()) {}
+    return AS7262::reading {
+      i2c_reg_read_float(reg::R_CAL_F),
+      i2c_reg_read_float(reg::O_CAL_F),
+      i2c_reg_read_float(reg::Y_CAL_F),
+      i2c_reg_read_float(reg::G_CAL_F),
+      i2c_reg_read_float(reg::B_CAL_F),
+      i2c_reg_read_float(reg::V_CAL_F)
+    };
   }
 
   uint8_t AS7262::temperature() {
-      return i2c_reg_read_uint8(reg::TEMP);
+    return i2c_reg_read_uint8(reg::TEMP);
   }
 
   // i2c IO wrappers around the weird virtual i2c nonsense
@@ -117,25 +117,25 @@ namespace pimoroni {
   }
 
   uint8_t AS7262::_i2c_status() {
-      return _i2c_reg_read_uint8(0x00);
+    return _i2c_reg_read_uint8(0x00);
   }
 
   int AS7262::_i2c_read(uint8_t reg, uint8_t *values, int len) {
     for (auto i = 0u; i < len; i++){
-        while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
-        _i2c_reg_write_uint8(0x01, reg + i);     // Set address pointer
-        while((_i2c_status() & 0b01) != 1) {};   // Wait for read-ready
-        values[i] = _i2c_reg_read_uint8(0x02);   // Read *one* byte :|
+      while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, reg + i);     // Set address pointer
+      while((_i2c_status() & 0b01) != 1) {};   // Wait for read-ready
+      values[i] = _i2c_reg_read_uint8(0x02);   // Read *one* byte :|
     }
     return 0;
   }
 
   int AS7262::_i2c_write(uint8_t reg, uint8_t *values, int len) {
     for (auto i = 0u; i < len; i++){
-        while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
-        _i2c_reg_write_uint8(0x01, reg | 0x80);  // Set address pointer
-        while ((_i2c_status() & 0b10) != 0) {};  // Wait for write-ready
-        _i2c_reg_write_uint8(0x01, values[i]);   // Write *one* byte :|
+      while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, reg | 0x80);  // Set address pointer
+      while ((_i2c_status() & 0b10) != 0) {};  // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, values[i]);   // Write *one* byte :|
     }
     return 0;
   }

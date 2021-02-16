@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef HT0740 BreakoutSwitch;
+  typedef HT0740 BreakoutSwitch;
 }

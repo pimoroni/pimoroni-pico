@@ -28,12 +28,12 @@ int main() {
 
     AS7262::reading reading = as7262.read();
     printf("R: %f O: %f Y: %f G: %f B: %f V: %f \n",
-        reading.red,
-        reading.orange,
-        reading.yellow,
-        reading.green,
-        reading.blue,
-        reading.violet
+      reading.red,
+      reading.orange,
+      reading.yellow,
+      reading.green,
+      reading.blue,
+      reading.violet
     );
 
     sleep_ms(1000);

@@ -86,80 +86,81 @@
 
 
 namespace pimoroni {
-    typedef struct  {
-        uint16_t proximity;
-        uint16_t als0;
-        uint16_t als1;
-	    uint16_t integration_time;
-	    uint16_t gain;
-	    float ratio;
-        uint16_t lux;
-    } ltr559_reading;
+  typedef struct  {
+    uint16_t proximity;
+    uint16_t als0;
+    uint16_t als1;
+	  uint16_t integration_time;
+	  uint16_t gain;
+	  float ratio;
+    uint16_t lux;
+  } ltr559_reading;
 
-    class lookup {
-        private:
-            std::vector<uint16_t> lut;
-        public:
-            lookup(std::initializer_list<uint16_t> values);
-            uint8_t index(uint16_t value);
-            uint16_t value(uint8_t index);
-    };
+  class lookup {
+    private:
+      std::vector<uint16_t> lut;
+    public:
+      lookup(std::initializer_list<uint16_t> values);
+      uint8_t index(uint16_t value);
+      uint16_t value(uint8_t index);
+  };
 
-    class LTR559 {
-        public:
-            ltr559_reading data;
+  class LTR559 {
+  public:
+    ltr559_reading data;
 
-            LTR559() {};
+    LTR559() {};
 
-            LTR559(uint8_t addr) : address(addr) {};
+    LTR559(uint8_t addr) : address(addr) {};
 
-            LTR559(i2c_inst_t *i2c, uint8_t addr, uint8_t sda, uint8_t scl, uint8_t interrupt) :
-                i2c(i2c), address(addr), sda(sda), scl(scl), interrupt(interrupt) {};
+    LTR559(i2c_inst_t *i2c, uint8_t addr, uint8_t sda, uint8_t scl, uint8_t interrupt) :
+      i2c(i2c), address(addr), sda(sda), scl(scl), interrupt(interrupt) {};
 
-            int init();
-            void reset();
+    int init();
+    void reset();
 
-            uint8_t part_id();
-            uint8_t revision_id();
-	        uint8_t manufacturer_id();
-	        void interrupts(bool light, bool proximity);
-	        void proximity_led(uint8_t current, uint8_t duty_cycle, uint8_t pulse_freq, uint8_t num_pulses);
-	        void light_control(bool active, uint8_t gain);
-	        void proximity_control(bool active, bool saturation_indicator);
-	        void light_threshold(uint16_t lower, uint16_t upper);
-	        void proximity_threshold(uint16_t lower, uint16_t upper);
-	        void light_measurement_rate(uint16_t integration_time, uint16_t rate);
-	        void proximity_measurement_rate(uint16_t rate);
-	        void proximity_offset(uint16_t offset);
-	        bool get_reading();
+    uint8_t part_id();
+    uint8_t revision_id();
+    uint8_t manufacturer_id();
+    void interrupts(bool light, bool proximity);
+    void proximity_led(uint8_t current, uint8_t duty_cycle, uint8_t pulse_freq, uint8_t num_pulses);
+    void light_control(bool active, uint8_t gain);
+    void proximity_control(bool active, bool saturation_indicator);
+    void light_threshold(uint16_t lower, uint16_t upper);
+    void proximity_threshold(uint16_t lower, uint16_t upper);
+    void light_measurement_rate(uint16_t integration_time, uint16_t rate);
+    void proximity_measurement_rate(uint16_t rate);
+    void proximity_offset(uint16_t offset);
+    bool get_reading();
 
-        private:
-            i2c_inst_t *i2c = i2c0;
+  private:
+    i2c_inst_t *i2c = i2c0;
 
-            // interface pins with our standard defaults where appropriate
-            int8_t address   = LTR559_I2C_ADDR;
-            int8_t sda       = 4;
-            int8_t scl       = 5;
-            int8_t interrupt = 22;
+    // interface pins with our standard defaults where appropriate
+    int8_t address   = LTR559_I2C_ADDR;
+    int8_t sda       = 4;
+    int8_t scl       = 5;
+    int8_t interrupt = 22;
 
-            uint16_t bit12_to_uint16(uint16_t value);
-	        uint16_t uint16_to_bit12(uint16_t value);
-            const uint8_t lookup(uint16_t *lookup_table, uint16_t value, uint8_t length);
-	        const int ch0_c[4] = {17743, 42785, 5926, 0};
-	        const int ch1_c[4] = {-11059, 19548, -1185, 0};
-            static pimoroni::lookup lookup_led_current; 
-            static pimoroni::lookup lookup_led_duty_cycle;
-            static pimoroni::lookup lookup_led_pulse_freq;
-            static pimoroni::lookup lookup_proximity_meas_rate;
-            static pimoroni::lookup lookup_light_integration_time;
-            static pimoroni::lookup lookup_light_repeat_rate;
-            static pimoroni::lookup lookup_light_gain;
+    uint16_t bit12_to_uint16(uint16_t value);
+    uint16_t uint16_to_bit12(uint16_t value);
+    const uint8_t lookup(uint16_t *lookup_table, uint16_t value, uint8_t length);
+    const int ch0_c[4] = {17743, 42785, 5926, 0};
+    const int ch1_c[4] = {-11059, 19548, -1185, 0};
+    static pimoroni::lookup lookup_led_current; 
+    static pimoroni::lookup lookup_led_duty_cycle;
+    static pimoroni::lookup lookup_led_pulse_freq;
+    static pimoroni::lookup lookup_proximity_meas_rate;
+    static pimoroni::lookup lookup_light_integration_time;
+    static pimoroni::lookup lookup_light_repeat_rate;
+    static pimoroni::lookup lookup_light_gain;
 
-            // From i2cdevice
-            int write_bytes(uint8_t reg, uint8_t *buf, int len);
-            int read_bytes(uint8_t reg, uint8_t *buf, int len);
-            uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-            void set_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-            void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-    };
+    // From i2cdevice
+    int write_bytes(uint8_t reg, uint8_t *buf, int len);
+    int read_bytes(uint8_t reg, uint8_t *buf, int len);
+    uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
+    void set_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
+    void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
+  };
+
 }

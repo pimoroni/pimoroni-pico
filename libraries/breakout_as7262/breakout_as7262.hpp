@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef AS7262 BreakoutAS7262;
+  typedef AS7262 BreakoutAS7262;
 }

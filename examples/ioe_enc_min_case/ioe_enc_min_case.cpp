@@ -28,7 +28,7 @@ int main() {
 
     bool toggle = false;
     int16_t count = 0;
-    while (true) {
+    while(true) {
       gpio_put(LED_PIN, toggle);
       toggle = !toggle;
 

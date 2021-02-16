@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MLX90640 BreakoutMLX90640;
+  typedef MLX90640 BreakoutMLX90640;
 }

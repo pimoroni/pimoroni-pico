@@ -33,9 +33,9 @@ namespace pimoroni {
     222, 224, 227, 229, 231, 233, 235, 237, 239, 241, 244, 246, 248, 250, 252, 255};
   
   enum mode {
-      PICTURE   = 0x00,
-      AUTOPLAY  = 0x08,
-      AUDIOPLAY = 0x18
+    PICTURE   = 0x00,
+    AUTOPLAY  = 0x08,
+    AUDIOPLAY = 0x18
   };
 
   enum reg {
@@ -72,7 +72,7 @@ namespace pimoroni {
 
   void IS31FL3731::clear() {
     for(auto i = 0u; i < sizeof(buf); i++) {
-        buf[i] = 0;
+      buf[i] = 0;
     }
   }
 
@@ -95,7 +95,7 @@ namespace pimoroni {
     enable_buf[0] = ENABLE_OFFSET;
     ptr++;
     for(auto byte : pattern) {
-        *ptr++ = byte;
+      *ptr++ = byte;
     }
     i2c_write_blocking(i2c, address, enable_buf, sizeof(enable_buf), false);
   }

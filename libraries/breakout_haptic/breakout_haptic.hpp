@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef DRV2605L BreakoutHaptic;
+  typedef DRV2605L BreakoutHaptic;
 }

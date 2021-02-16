@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MSA301 Breakout3DOF;  
+  typedef MSA301 Breakout3DOF;  
 }

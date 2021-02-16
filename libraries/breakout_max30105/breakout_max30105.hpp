@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MAX30105 BreakoutMAX30105;
+  typedef MAX30105 BreakoutMAX30105;
 }

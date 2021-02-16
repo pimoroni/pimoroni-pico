@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef LTR559 BreakoutLTR559;
+  typedef LTR559 BreakoutLTR559;
 }

@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MCP9600 BreakoutMCP9600;
+  typedef MCP9600 BreakoutMCP9600;
 }

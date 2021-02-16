@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef PA1010D BreakoutGPS;
+  typedef PA1010D BreakoutGPS;
 }

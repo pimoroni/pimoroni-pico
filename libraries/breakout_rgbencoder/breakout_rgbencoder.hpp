@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef MS51XB9AE BreakoutRGBEncoder;
+  typedef MS51XB9AE BreakoutRGBEncoder;
 }

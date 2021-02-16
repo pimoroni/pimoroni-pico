@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef RV3028 BreakoutRTC;  
+  typedef RV3028 BreakoutRTC;  
 }

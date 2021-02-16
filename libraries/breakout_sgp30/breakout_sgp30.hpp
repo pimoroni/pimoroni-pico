@@ -4,5 +4,5 @@
 
 namespace pimoroni {
 
-    typedef SGP30 BreakoutSGP30;
+  typedef SGP30 BreakoutSGP30;
 }
