@@ -117,7 +117,7 @@ def playtone(frequency):            # this function tells your program how to ma
     explorer.set_tone(frequency)
 
 def bequiet():                      # this function tells your program how not to make noise
-    explorer.set_tone(-1000)
+    explorer.set_tone(-1)
 
 def playsong(song):                 # this function plays your song
     a = 0                           # this variable keeps track of the visualiser bars
