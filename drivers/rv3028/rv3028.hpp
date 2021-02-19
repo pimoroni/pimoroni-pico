@@ -189,116 +189,142 @@ namespace pimoroni {
   };
 
   class RV3028 {
-    i2c_inst_t *i2c = i2c0;
-    // interface pins with our standard defaults where appropriate
-    int8_t sda       = 20;
-    int8_t scl       = 21;
-    int8_t interrupt = 22;
-    public:
-      RV3028() {}
-
-      RV3028(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt) :
-              i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
-
-      void init();
-
-      bool setup(bool set_24Hour = true, bool disable_TrickleCharge = true, bool set_LevelSwitchingMode = true);
-      bool setTime(uint8_t sec, uint8_t min, uint8_t hour, uint8_t weekday, uint8_t date, uint8_t month, uint16_t year);
-      bool setTime(uint8_t * time, uint8_t len);
-      bool setSeconds(uint8_t value);
-      bool setMinutes(uint8_t value);
-      bool setHours(uint8_t value);
-      bool setWeekday(uint8_t value);
-      bool setDate(uint8_t value);
-      bool setMonth(uint8_t value);
-      bool setYear(uint16_t value);
-      bool setToCompilerTime();        //Uses the hours, mins, etc from compile time to set RTC
-
-      bool updateTime()        ;        //Update the local array with the RTC registers
-
-      char* stringDateUSA();        //Return date in mm-dd-yyyy
-      char* stringDate();                //Return date in dd-mm-yyyy
-      char* stringTime();                //Return time hh:mm:ss with AM/PM if in 12 hour mode
-      char* stringTimeStamp();        //Return timeStamp in ISO 8601 format yyyy-mm-ddThh:mm:ss
-
-      uint8_t getSeconds();
-      uint8_t getMinutes();
-      uint8_t getHours();
-      uint8_t getWeekday();
-      uint8_t getDate();
-      uint8_t getMonth();
-      uint16_t getYear();
+    //--------------------------------------------------
+    // Constants
+    //--------------------------------------------------
+  public:
+    static const uint8_t DEFAULT_I2C_ADDRESS  = RV3028_ADDR;
+    static const uint8_t DEFAULT_SDA_PIN      = 20;
+    static const uint8_t DEFAULT_SCL_PIN      = 21;
+    static const uint8_t DEFAULT_INT_PIN      = 22;
+    static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
 
-      bool is12Hour();        //Returns true if 12hour bit is set
-      bool isPM();                //Returns true if is12Hour and PM bit is set
-      void set12Hour();
-      void set24Hour();
-
-      bool setUNIX(uint32_t value);//Set the UNIX Time (Real Time and UNIX Time are INDEPENDENT!)
-      uint32_t getUNIX();
-
-      void enableAlarmInterrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool setWeekdayAlarm_not_Date, uint8_t mode, bool enable_clock_output = false);
-      void enableAlarmInterrupt();
-      void disableAlarmInterrupt();
-      bool readAlarmInterruptFlag();
-      void clearAlarmInterruptFlag();
-
-      void setTimer(bool timer_repeat, uint16_t timer_frequency, uint16_t timer_value, bool setInterrupt, bool start_timer, bool enable_clock_output = false);
-      uint16_t getTimerCount(void);
-      void enableTimer();
-      void disableTimer();
-      void enableTimerInterrupt();
-      void disableTimerInterrupt();
-      bool readTimerInterruptFlag();
-      void clearTimerInterruptFlag();
-
-      void enablePeriodicUpdateInterrupt(bool every_second, bool enable_clock_output = false);
-      void disablePeriodicUpdateInterrupt();
-      bool readPeriodicUpdateInterruptFlag();
-      void clearPeriodicUpdateInterruptFlag();
-
-      void enableTrickleCharge(uint8_t tcr = TCR_15K); //Trickle Charge Resistor default 15k
-      void disableTrickleCharge();
-      bool setBackupSwitchoverMode(uint8_t val);
-
-      void enableClockOut(uint8_t freq);
-      void enableInterruptControlledClockout(uint8_t freq);
-      void disableClockOut();
-      bool readClockOutputInterruptFlag();
-      void clearClockOutputInterruptFlag();
-
-      uint8_t status(); //Returns the status byte
-      void clearInterrupts();
-
-      //Values in RTC are stored in Binary Coded Decimal. These functions convert to/from Decimal
-      uint8_t BCDtoDEC(uint8_t val);
-      uint8_t DECtoBCD(uint8_t val);
-
-      uint8_t readRegister(uint8_t addr);
-      bool writeRegister(uint8_t addr, uint8_t val);
-      bool readMultipleRegisters(uint8_t addr, uint8_t * dest, uint8_t len);
-      bool writeMultipleRegisters(uint8_t addr, uint8_t * values, uint8_t len);
-
-      bool writeConfigEEPROM_RAMmirror(uint8_t eepromaddr, uint8_t val);
-      uint8_t readConfigEEPROM_RAMmirror(uint8_t eepromaddr);
-      bool waitforEEPROM();
-      void reset();
-
-      void setBit(uint8_t reg_addr, uint8_t bit_num);
-      void clearBit(uint8_t reg_addr, uint8_t bit_num);
-      bool readBit(uint8_t reg_addr, uint8_t bit_num);
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
   private:
-      uint8_t _time[TIME_ARRAY_LENGTH];
-      i2c_inst_t *_i2cPort;
-      int8_t address = RV3028_ADDR;
+    i2c_inst_t *i2c = i2c0;
 
-      // From i2cdevice
-      int write_bytes(uint8_t reg, uint8_t *buf, int len);
-      int read_bytes(uint8_t reg, uint8_t *buf, int len);
-      uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-      void set_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-      void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
+    // interface pins with our standard defaults where appropriate
+    int8_t address    = DEFAULT_I2C_ADDRESS;
+    int8_t sda        = DEFAULT_SDA_PIN;
+    int8_t scl        = DEFAULT_SCL_PIN;
+    int8_t interrupt  = DEFAULT_INT_PIN;
+
+    uint8_t times[TIME_ARRAY_LENGTH];
+
+
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
+  public:
+    RV3028() {}
+
+    RV3028(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
+            i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
+    bool init();
+
+    bool setup(bool set_24Hour = true, bool disable_TrickleCharge = true, bool set_LevelSwitchingMode = true);
+    bool set_time(uint8_t sec, uint8_t min, uint8_t hour, uint8_t weekday, uint8_t date, uint8_t month, uint16_t year);
+    bool set_time(uint8_t *time, uint8_t len);
+    bool set_seconds(uint8_t value);
+    bool set_minutes(uint8_t value);
+    bool set_hours(uint8_t value);
+    bool set_weekday(uint8_t value);
+    bool set_date(uint8_t value);
+    bool set_month(uint8_t value);
+    bool set_year(uint16_t value);
+    bool set_to_compiler_time();  //Uses the hours, mins, etc from compile time to set RTC
+
+    bool update_time();            //Update the local array with the RTC registers
+
+    char* string_date_usa();      //Return date in mm-dd-yyyy
+    char* string_date();          //Return date in dd-mm-yyyy
+    char* string_time();          //Return time hh:mm:ss with AM/PM if in 12 hour mode
+    char* string_time_stamp();    //Return timeStamp in ISO 8601 format yyyy-mm-ddThh:mm:ss
+
+    uint8_t get_seconds();
+    uint8_t get_minutes();
+    uint8_t get_hours();
+    uint8_t get_weekday();
+    uint8_t get_date();
+    uint8_t get_month();
+    uint16_t get_year();
+
+
+    bool is_12_hour();              //Returns true if 12hour bit is set
+    bool is_pm();                  //Returns true if is12Hour and PM bit is set
+    void set_12_hour();
+    void set_24_hour();
+
+    bool set_unix(uint32_t value); //Set the UNIX Time (Real Time and UNIX Time are INDEPENDENT!)
+    uint32_t get_unix();
+
+    void enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool setWeekdayAlarm_not_Date, uint8_t mode, bool enable_clock_output = false);
+    void enable_alarm_interrupt();
+    void disable_alarm_interrupt();
+    bool read_alarm_interrupt_flag();
+    void clear_alarm_interrupt_flag();
+
+    void set_timer(bool timer_repeat, uint16_t timer_frequency, uint16_t timer_value, bool setInterrupt, bool start_timer, bool enable_clock_output = false);
+    uint16_t get_timer_count(void);
+    void enable_timer();
+    void disable_timer();
+    void enable_timer_interrupt();
+    void disable_timer_interrupt();
+    bool read_timer_interrupt_flag();
+    void clear_timer_interrupt_flag();
+
+    void enable_periodic_update_interrupt(bool every_second, bool enable_clock_output = false);
+    void disable_periodic_update_interrupt();
+    bool read_periodic_update_interrupt_flag();
+    void clear_periodic_update_interrupt_flag();
+
+    void enable_trickle_charge(uint8_t tcr = TCR_15K); //Trickle Charge Resistor default 15k
+    void disable_trickle_charge();
+    bool set_backup_switchover_mode(uint8_t val);
+
+    void enable_clock_out(uint8_t freq);
+    void enable_interrupt_controlled_clockout(uint8_t freq);
+    void disable_clock_out();
+    bool read_clock_output_interrupt_flag();
+    void clear_clock_output_interrupt_flag();
+
+    uint8_t status(); //Returns the status byte
+    void clear_interrupts();
+
+    //Values in RTC are stored in Binary Coded Decimal. These functions convert to/from Decimal
+    uint8_t bcd_to_dec(uint8_t val);
+    uint8_t dec_to_bcd(uint8_t val);
+
+    uint8_t read_register(uint8_t addr);
+    bool write_register(uint8_t addr, uint8_t val);
+    bool read_multiple_registers(uint8_t addr, uint8_t *dest, uint8_t len);
+    bool write_multiple_registers(uint8_t addr, uint8_t *values, uint8_t len);
+
+    bool write_config_eeprom_ram_mirror(uint8_t eepromaddr, uint8_t val);
+    uint8_t read_config_eeprom_ram_mirror(uint8_t eepromaddr);
+    bool wait_for_eeprom();
+    void reset();
+
+    void set_bit(uint8_t reg_addr, uint8_t bit_num);
+    void clear_bit(uint8_t reg_addr, uint8_t bit_num);
+    bool read_bit(uint8_t reg_addr, uint8_t bit_num);
+
+  private:
+    // From i2cdevice
+    int write_bytes(uint8_t reg, uint8_t *buf, int len);
+    int read_bytes(uint8_t reg, uint8_t *buf, int len);
+    uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
+    void set_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
+    void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
   };
 
   //POSSIBLE ENHANCEMENTS :
