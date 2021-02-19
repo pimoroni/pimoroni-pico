@@ -1,4 +1,4 @@
-set(DRIVER_NAME is31fl3730)
+set(DRIVER_NAME ltp305)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

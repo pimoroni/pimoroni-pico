@@ -10,16 +10,15 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
+    static const uint8_t DEFAULT_I2C_ADDRESS    = 0x76;
+    static const uint8_t I2C_ADDRESS_ALTERNATE  = 0x77;
+    static const uint8_t DEFAULT_SDA_PIN        = 20;
+    static const uint8_t DEFAULT_SCL_PIN        = 21;
 
     /***** More public constants here *****/
 
   private:
-    /***** Private constants here *****/
+    static const uint8_t CHIP_ID  = 0x60;
 
 
     //--------------------------------------------------
@@ -32,7 +31,6 @@ namespace pimoroni {
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
 
     /***** More variables here *****/
 
@@ -46,9 +44,8 @@ namespace pimoroni {
     BME280(uint8_t address) :
       address(address) {}
 
-    BME280(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
-
+    BME280(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) :
+      i2c(i2c), address(address), sda(sda), scl(scl) {}
 
 
     //--------------------------------------------------
@@ -57,7 +54,14 @@ namespace pimoroni {
   public:
     bool init(); //This should be present in all drivers
 
-    /***** More public methods here *****/
+    void setup(uint8_t mode/*='normal'*/, uint16_t temperature_oversampling/*=16*/, uint16_t pressure_oversampling/*=16*/,
+      uint16_t humidity_oversampling/*=16*/, uint16_t temperature_standby/*=500*/);
+
+    void update_sensor();
+    float get_temperature();
+    float get_pressure();
+    float get_humidity();
+    float get_altitude(float qnh = 1013.25f);
 
   private:
     /***** Private methods here *****/

@@ -10,7 +10,7 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x29;
     static const uint8_t DEFAULT_SDA_PIN      = 20;
     static const uint8_t DEFAULT_SCL_PIN      = 21;
     static const uint8_t DEFAULT_INT_PIN      = 22;
@@ -50,12 +50,20 @@ namespace pimoroni {
       i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
 
 
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
     bool init(); //This should be present in all drivers
+
+    uint8_t set_address(uint8_t address);
+    uint8_t set_distance_mode(uint8_t mode);
+    uint8_t set_user_roi(uint8_t topLeftX, uint8_t topLeftY, uint8_t botRightX, uint8_t botRightY);
+    uint8_t start_ranging(uint8_t mode);
+    uint8_t set_measurement_timing_budget_microseconds(uint8_t timing_budget);
+    uint8_t set_inter_measurement_period_milliseconds(uint8_t period);
+    int32_t get_distance();
+    void stop_ranging();
 
     /***** More public methods here *****/
 

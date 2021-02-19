@@ -10,11 +10,12 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
+    static const uint8_t DEFAULT_I2C_ADDRESS      = 0x1D;
+    static const uint8_t I2C_ADDRESS_ALTERNATE1   = 0x1E;
+    static const uint8_t DEFAULT_SDA_PIN          = 20;
+    static const uint8_t DEFAULT_SCL_PIN          = 21;
+    static const uint8_t DEFAULT_INT_PIN          = 22;
+    static const uint8_t PIN_UNUSED               = UINT8_MAX;
 
     /***** More public constants here *****/
 
@@ -50,14 +51,18 @@ namespace pimoroni {
       i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
 
 
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
     bool init(); //This should be present in all drivers
 
-    /***** More public methods here *****/
+    void setup();
+    void set_accel_full_scale_g(uint8_t scale);
+    void set_mag_full_scale_guass(uint8_t scale);    
+    uint8_t get_magnetometer();
+    uint8_t get_accelerometer();
+    uint8_t get_temperature();
 
   private:
     /***** Private methods here *****/

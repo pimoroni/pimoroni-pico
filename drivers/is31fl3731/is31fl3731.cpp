@@ -53,7 +53,7 @@ namespace pimoroni {
     BANK      = 0xfd
   };
 
-  void IS31FL3731::init() {
+  bool IS31FL3731::init() {
     i2c_init(i2c, 100000);
 
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
@@ -68,6 +68,8 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg::AUDIOSYNC, 0);
 
     clear();
+
+    return true;
   }
 
   void IS31FL3731::clear() {
@@ -111,5 +113,4 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg::BANK, CONFIG_BANK); // Switch back to config bank
     i2c_reg_write_uint8(reg::FRAME, frame); // Set the desired frame as active
   }
-
 }

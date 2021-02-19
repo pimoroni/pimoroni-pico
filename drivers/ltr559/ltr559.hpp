@@ -80,7 +80,6 @@
 #define LTR559_INTERRUPT_PERSIST_PS_SHIFT 4
 #define LTR559_INTERRUPT_PERSIST_ALS_MASK 0b1111
 
-#define LTR559_I2C_ADDR 0x23
 #define LTR559_VALID_PART_ID 0x09
 #define LTR559_VALID_REVISION_ID 0x02
 
@@ -106,17 +105,51 @@ namespace pimoroni {
   };
 
   class LTR559 {
+    //--------------------------------------------------
+    // Constants
+    //--------------------------------------------------
+  public:
+    static const uint8_t DEFAULT_I2C_ADDRESS    = 0x23;
+    static const uint8_t DEFAULT_SDA_PIN        = 20;
+    static const uint8_t DEFAULT_SCL_PIN        = 21;
+    static const uint8_t DEFAULT_INT_PIN        = 22;
+    static const uint8_t PIN_UNUSED             = UINT8_MAX;
+
+
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
   public:
     ltr559_reading data;
 
-    LTR559() {};
+  private:
+    i2c_inst_t *i2c = i2c0;
 
-    LTR559(uint8_t addr) : address(addr) {};
+    // interface pins with our standard defaults where appropriate
+    int8_t address    = DEFAULT_I2C_ADDRESS;
+    int8_t sda        = DEFAULT_SDA_PIN;
+    int8_t scl        = DEFAULT_SCL_PIN;
+    int8_t interrupt  = DEFAULT_INT_PIN;
 
-    LTR559(i2c_inst_t *i2c, uint8_t addr, uint8_t sda, uint8_t scl, uint8_t interrupt) :
-      i2c(i2c), address(addr), sda(sda), scl(scl), interrupt(interrupt) {};
 
-    int init();
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
+  public:
+    LTR559() {}
+
+    LTR559(uint8_t address) :
+      address(address) {}
+
+    LTR559(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
+      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
+
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
+    bool init();
     void reset();
 
     uint8_t part_id();
@@ -134,14 +167,6 @@ namespace pimoroni {
     bool get_reading();
 
   private:
-    i2c_inst_t *i2c = i2c0;
-
-    // interface pins with our standard defaults where appropriate
-    int8_t address   = LTR559_I2C_ADDR;
-    int8_t sda       = 4;
-    int8_t scl       = 5;
-    int8_t interrupt = 22;
-
     uint16_t bit12_to_uint16(uint16_t value);
     uint16_t uint16_to_bit12(uint16_t value);
     const uint8_t lookup(uint16_t *lookup_table, uint16_t value, uint8_t length);

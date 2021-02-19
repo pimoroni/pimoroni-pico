@@ -27,4 +27,24 @@ namespace pimoroni {
 
     return succeeded;
   }
+
+  void HT0740::on() {
+
+  }
+  
+  void HT0740::off() {
+
+  }
+
+  void HT0740::disable() {
+
+  }
+
+  void HT0740::enable() {
+
+  }
+
+  void HT0740::toggle() {
+
+  }
 }

@@ -10,11 +10,9 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x58;
     static const uint8_t DEFAULT_SDA_PIN      = 20;
     static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
     /***** More public constants here *****/
 
@@ -32,7 +30,6 @@ namespace pimoroni {
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
 
     /***** More variables here *****/
 
@@ -43,12 +40,8 @@ namespace pimoroni {
   public:
     SGP30() {}
 
-    SGP30(uint8_t address) :
-      address(address) {}
-
-    SGP30(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
-
+    SGP30(i2c_inst_t *i2c, uint8_t sda, uint8_t scl) :
+      i2c(i2c), sda(sda), scl(scl) {}
 
 
     //--------------------------------------------------
@@ -57,7 +50,12 @@ namespace pimoroni {
   public:
     bool init(); //This should be present in all drivers
 
-    /***** More public methods here *****/
+    uint8_t command(uint8_t command_name, uint8_t parameters/*=None*/);
+    uint8_t calculate_crc(uint8_t data);
+    uint8_t get_unique_id();
+    void start_measurement(uint8_t run_while_waiting/*=None*/);
+    uint8_t get_air_quality();
+    void set_baseline(uint8_t eco2, uint8_t tvoc);
 
   private:
     /***** Private methods here *****/

@@ -8,14 +8,58 @@
 namespace pimoroni {
 
   class AS7262 {
-    i2c_inst_t *i2c = i2c0;
+    //--------------------------------------------------
+    // Constants
+    //--------------------------------------------------
+  public:
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x49;
+    static const uint8_t DEFAULT_SDA_PIN      = 20;
+    static const uint8_t DEFAULT_SCL_PIN      = 21;
+    static const uint8_t DEFAULT_INT_PIN      = 22;
+    static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
-    // interface pins with our standard defaults where appropriate
-    int8_t address   = 0x49;
-    int8_t sda       = 4;
-    int8_t scl       = 5;
-    int8_t interrupt = 22;
+    /***** More public constants here *****/
 
+  private:
+    /***** Private constants here *****/
+
+
+    //--------------------------------------------------
+    // Enums
+    //--------------------------------------------------
+  public:
+    enum class gain : uint8_t {
+      X1   = 0b00,
+      X3_7 = 0b01,
+      X16  = 0b10,
+      X64  = 0b11
+    };
+
+    enum class illumination_current : uint8_t {
+      ma12  = 0b00,
+      ma25  = 0b01,
+      ma50  = 0b10,
+      ma100 = 0b11
+    };
+
+    enum class indicator_current : uint8_t {
+      ma1 = 0b00,
+      ma2 = 0b01,
+      ma4 = 0b10,
+      ma8 = 0b11,
+    };
+
+    enum class measurement_mode : uint8_t {
+      cont_ygnv   = 0b00, // yellow, green, blue, violet - continuous
+      cont_royg   = 0b01, // red, orange, yellow, green - continuous
+      cont_roygbr = 0b10, // red, orange, yellow, green, violet - continuous
+      oneshot     = 0b11  // everything - one-shot
+    };
+
+
+    //--------------------------------------------------
+    // Substructures
+    //--------------------------------------------------
   public:
     struct reading {
         float red;
@@ -26,68 +70,35 @@ namespace pimoroni {
         float violet;
     };
 
-    enum reg {
-        DEVICE      = 0x00,
-        HW_VERSION  = 0x01,
-        FW_VERSION  = 0x02, // + 0x03
-        CONTROL     = 0x04,
-        INT_T       = 0x05,
-        TEMP        = 0x06,
-        LED_CONTROL = 0x07,
-        V_HIGH      = 0x08, // Violet
-        V_LOW       = 0x09,
-        B_HIGH      = 0x0A, // Blue
-        B_LOW       = 0x0B,
-        G_HIGH      = 0x0C, // Green
-        G_LOW       = 0x0D,
-        Y_HIGH      = 0x0E, // Yellow
-        Y_LOW       = 0x0F,
-        O_HIGH      = 0x10, // Orange
-        O_LOW       = 0x11,
-        R_HIGH      = 0x12, // Red
-        R_LOW       = 0x13,
-        V_CAL_F     = 0x14, // -> 0x17 Float (Violet)
-        B_CAL_F     = 0x18, // -> 0x1B Float (Blue)
-        G_CAL_F     = 0x1C, // -> 0x1F Float (Green)
-        Y_CAL_F     = 0x20, // -> 0x23 Float (Yellow)
-        O_CAL_F     = 0x24, // -> 0x27 Float (Orange)
-        R_CAL_F     = 0x28, // -> 0x27 Float (Red)
-    };
 
-    enum class gain : uint8_t {
-        X1   = 0b00,
-        X3_7 = 0b01,
-        X16  = 0b10,
-        X64  = 0b11
-    };
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
+  private:
+    i2c_inst_t *i2c = i2c0;
 
-    enum class illumination_current : uint8_t {
-        ma12  = 0b00,
-        ma25  = 0b01,
-        ma50  = 0b10,
-        ma100 = 0b11
-    };
+    // interface pins with our standard defaults where appropriate
+    int8_t address    = DEFAULT_I2C_ADDRESS;
+    int8_t sda        = DEFAULT_SDA_PIN;
+    int8_t scl        = DEFAULT_SCL_PIN;
+    int8_t interrupt  = DEFAULT_INT_PIN;
 
-    enum class indicator_current : uint8_t {
-        ma1 = 0b00,
-        ma2 = 0b01,
-        ma4 = 0b10,
-        ma8 = 0b11,
-    };
 
-    enum class measurement_mode : uint8_t {
-        cont_ygnv   = 0b00, // yellow, green, blue, violet - continuous
-        cont_royg   = 0b01, // red, orange, yellow, green - continuous
-        cont_roygbr = 0b10, // red, orange, yellow, green, violet - continuous
-        oneshot     = 0b11  // everything - one-shot
-    };
-
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
+  public:
     AS7262() {}
 
-    AS7262(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupmeasurement_modet) :
+    AS7262(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
       i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
 
-    void init();
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
+    bool init();
     void reset();
 
     uint8_t device_type();

@@ -34,8 +34,16 @@ namespace pimoroni {
   void DRV2605L::init() {
     i2c_init(i2c, 400000);
 
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
+    gpio_set_function(sda, GPIO_FUNC_I2C);
+    gpio_pull_up(sda);
+    gpio_set_function(scl, GPIO_FUNC_I2C);
+    gpio_pull_up(scl);
+
+    if(trigger != PIN_UNUSED) {
+      gpio_set_function(trigger, GPIO_FUNC_SIO);
+      gpio_set_dir(trigger, GPIO_IN);
+      gpio_pull_up(trigger);
+    }
 
     reset();
   }
@@ -135,5 +143,4 @@ namespace pimoroni {
   bool DRV2605L::busy() {
     return i2c_reg_read_uint8(reg::GO) != 0;
   }
-
 }

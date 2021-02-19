@@ -6,6 +6,9 @@
 namespace pimoroni {
 
   class MS51XB9AE {
+    //--------------------------------------------------
+    // Constants
+    //--------------------------------------------------
   private:
     //These values encode our desired pin function: IO, ADC, PWM
     //alongwide the GPIO MODE for that port and pin (section 8.1)
@@ -38,6 +41,11 @@ namespace pimoroni {
     static const uint8_t PIN_ADC = PIN_MODE_ADC;        //0b01010
 
     static const uint8_t NUM_PINS = 14;
+
+
+    //--------------------------------------------------
+    // Subclasses
+    //--------------------------------------------------
   private:
     class Pin {
     public:
@@ -126,14 +134,19 @@ namespace pimoroni {
       bool mode_supported(uint8_t mode);
     };
 
+  
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
   private:
     i2c_inst_t *i2c;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address;
-    int8_t sda;
-    int8_t scl;
-    int8_t interrupt;
+    int8_t address    = DEFAULT_I2C_ADDRESS;
+    int8_t sda        = DEFAULT_SDA_PIN;
+    int8_t scl        = DEFAULT_SCL_PIN;
+    int8_t interrupt  = DEFAULT_INT_PIN;
+
     uint32_t timeout;
     bool debug;
     float vref;    
@@ -141,10 +154,19 @@ namespace pimoroni {
     int16_t encoder_last[4];
     Pin pins[NUM_PINS];
 
+  
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
   public:
     MS51XB9AE(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt, uint8_t address = DEFAULT_I2C_ADDRESS, uint32_t timeout = 1, bool debug = false);
     MS51XB9AE(uint8_t address = DEFAULT_I2C_ADDRESS, uint32_t timeout = 1, bool debug = false);
 
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
     bool init(bool skip_chip_id_check = false);
 
     //--------------------------------------------------

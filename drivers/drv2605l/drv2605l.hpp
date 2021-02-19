@@ -6,6 +6,16 @@
 namespace pimoroni {
 
   class DRV2605L {
+    //--------------------------------------------------
+    // Constants
+    //--------------------------------------------------
+  public:
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x5A;
+    static const uint8_t DEFAULT_SDA_PIN      = 20;
+    static const uint8_t DEFAULT_SCL_PIN      = 21;
+    static const uint8_t DEFAULT_TRIG_PIN     = 22;
+    static const uint8_t PIN_UNUSED           = UINT8_MAX;
+
   public:
     static const uint8_t FB_MODE_ERM = 0x00;
     static const uint8_t FB_MODE_LRA = 0x80;    
@@ -55,22 +65,35 @@ namespace pimoroni {
     static const uint8_t ZERO_CROSS_TIME_200 = 1 << 6;
     static const uint8_t ZERO_CROSS_TIME_300 = 2 << 6;
     static const uint8_t ZERO_CROSS_TIME_390 = 3 << 6;
+    
 
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
   private:
     i2c_inst_t *i2c = i2c0;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address   = 0x5a;
-    int8_t sda       = 20;
-    int8_t scl       = 21;
-    int8_t interrupt = 22;
+    int8_t address   = DEFAULT_I2C_ADDRESS;
+    int8_t sda       = DEFAULT_SDA_PIN;
+    int8_t scl       = DEFAULT_SCL_PIN;
+    int8_t trigger   = DEFAULT_TRIG_PIN;
 
+
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
   public:
     DRV2605L() {}
 
-    DRV2605L(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt) :
-      i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    DRV2605L(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t trigger) :
+      i2c(i2c), sda(sda), scl(scl), trigger(trigger) {}
 
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
     void init();
     void reset();
 
@@ -78,10 +101,10 @@ namespace pimoroni {
     void set_library(uint8_t library = LIB_LRA);
     void set_mode(uint8_t mode);
     void auto_calibrate(uint8_t loop_gain = LOOP_GAIN_HIGH,
-                       uint8_t feedback_brake_factor = FBF_2,
-                       uint8_t auto_calibration_time = AUTO_CALIB_TIME_1000,
-                       uint8_t zero_crossing_detection_time = ZERO_CROSS_TIME_100,
-                       uint8_t idiss_time = 1);
+                        uint8_t feedback_brake_factor = FBF_2,
+                        uint8_t auto_calibration_time = AUTO_CALIB_TIME_1000,
+                        uint8_t zero_crossing_detection_time = ZERO_CROSS_TIME_100,
+                        uint8_t idiss_time = 1);
 
     void set_realtime_input(uint8_t value);
     void set_realtime_data_format(uint8_t value);
@@ -90,7 +113,8 @@ namespace pimoroni {
     void go();
     void stop();
     bool busy();
-
+  
+  private:
     void i2c_reg_write_uint8(uint8_t reg, uint8_t value);
     uint8_t i2c_reg_read_uint8(uint8_t reg);
     int16_t i2c_reg_read_int16(uint8_t reg);

@@ -10,13 +10,9 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x10;
     static const uint8_t DEFAULT_SDA_PIN      = 20;
     static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
-
-    /***** More public constants here *****/
 
   private:
     /***** Private constants here *****/
@@ -32,7 +28,6 @@ namespace pimoroni {
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
 
     /***** More variables here *****/
 
@@ -46,8 +41,8 @@ namespace pimoroni {
     PA1010D(uint8_t address) :
       address(address) {}
 
-    PA1010D(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
+    PA1010D(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) :
+      i2c(i2c), address(address), sda(sda), scl(scl) {}
 
 
 
@@ -57,10 +52,13 @@ namespace pimoroni {
   public:
     bool init(); //This should be present in all drivers
 
-    /***** More public methods here *****/
+    uint8_t data();    
+    void send_command(uint8_t command, bool add_checksum = true);
+    uint8_t read_sentence(uint8_t timeout = 5);
+    bool update(uint8_t wait_for/*="GGA"*/, uint8_t timeout = 5);
 
   private:
-    /***** Private methods here *****/
+    void write_sentence(uint8_t bytestring);
   };
 
 }

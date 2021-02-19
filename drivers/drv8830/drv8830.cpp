@@ -27,4 +27,48 @@ namespace pimoroni {
 
     return succeeded;
   }
+
+  void DRV8830::select_i2c_address(uint8_t i2c_addr) {
+
+  }
+  
+  void DRV8830::set_outputs(bool out1, bool out2) {
+
+  }
+
+  void DRV8830::brake() {
+
+  }
+
+  void DRV8830::coast() {
+
+  }
+
+  void DRV8830::forward() {
+
+  }
+
+  void DRV8830::reverse() {
+
+  }
+
+  void DRV8830::set_direction(uint8_t direction) {
+
+  }
+
+  void DRV8830::set_voltage(uint8_t voltage) {
+    
+  }
+
+  uint8_t DRV8830::get_voltage() {
+    return 0;  
+  }
+
+  uint8_t DRV8830::get_fault() {
+    return 0;
+  }
+
+  void DRV8830::clear_fault() {
+
+  }
 }

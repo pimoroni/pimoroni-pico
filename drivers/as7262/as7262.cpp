@@ -7,13 +7,61 @@
 
 namespace pimoroni {
 
-  void AS7262::init() {
+  /***** Device registers and masks here *****/
+
+  enum reg {
+    DEVICE      = 0x00,
+    HW_VERSION  = 0x01,
+    FW_VERSION  = 0x02, // + 0x03
+    CONTROL     = 0x04,
+    INT_T       = 0x05,
+    TEMP        = 0x06,
+    LED_CONTROL = 0x07,
+    V_HIGH      = 0x08, // Violet
+    V_LOW       = 0x09,
+    B_HIGH      = 0x0A, // Blue
+    B_LOW       = 0x0B,
+    G_HIGH      = 0x0C, // Green
+    G_LOW       = 0x0D,
+    Y_HIGH      = 0x0E, // Yellow
+    Y_LOW       = 0x0F,
+    O_HIGH      = 0x10, // Orange
+    O_LOW       = 0x11,
+    R_HIGH      = 0x12, // Red
+    R_LOW       = 0x13,
+    V_CAL_F     = 0x14, // -> 0x17 Float (Violet)
+    B_CAL_F     = 0x18, // -> 0x1B Float (Blue)
+    G_CAL_F     = 0x1C, // -> 0x1F Float (Green)
+    Y_CAL_F     = 0x20, // -> 0x23 Float (Yellow)
+    O_CAL_F     = 0x24, // -> 0x27 Float (Orange)
+    R_CAL_F     = 0x28, // -> 0x27 Float (Red)
+  };
+
+
+  bool AS7262::init() {
+    bool succeeded = false;
+
     i2c_init(i2c, 400000);
 
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
+    gpio_set_function(sda, GPIO_FUNC_I2C);
+    gpio_pull_up(sda);
+    gpio_set_function(scl, GPIO_FUNC_I2C);
+    gpio_pull_up(scl);
+
+    if(interrupt != PIN_UNUSED) {
+      gpio_set_function(interrupt, GPIO_FUNC_SIO);
+      gpio_set_dir(interrupt, GPIO_IN);
+      gpio_pull_up(interrupt);
+    }
 
     reset();
+
+    /***** Replace if(true) with any operations needed to initialise the device *****/
+    if(true) {
+      succeeded = true;
+    }
+
+    return succeeded;
   }
 
   void AS7262::reset() {
@@ -139,5 +187,4 @@ namespace pimoroni {
     }
     return 0;
   }
-
 }

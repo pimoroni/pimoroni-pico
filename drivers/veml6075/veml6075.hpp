@@ -10,11 +10,9 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0A;
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x10;
     static const uint8_t DEFAULT_SDA_PIN      = 20;
     static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
     /***** More public constants here *****/
 
@@ -32,7 +30,6 @@ namespace pimoroni {
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
 
     /***** More variables here *****/
 
@@ -43,12 +40,8 @@ namespace pimoroni {
   public:
     VEML6075() {}
 
-    VEML6075(uint8_t address) :
-      address(address) {}
-
-    VEML6075(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
-
+    VEML6075(i2c_inst_t *i2c, uint8_t sda, uint8_t scl) :
+      i2c(i2c), sda(sda), scl(scl) {}
 
 
     //--------------------------------------------------
@@ -57,7 +50,15 @@ namespace pimoroni {
   public:
     bool init(); //This should be present in all drivers
 
-    /***** More public methods here *****/
+    uint8_t get_integration_time();
+    void set_integration_time(uint8_t value);
+    uint8_t get_id();
+    uint8_t get_shutdown();
+    void set_shutdown(uint8_t value);
+    void set_high_dynamic_range(uint8_t value);
+    uint8_t get_measurements();
+    uint8_t get_comparitor_readings();
+    uint8_t convert_to_index(uint8_t uva, uint8_t uvb, uint8_t uv_comp1, uint8_t uv_comp2);
 
   private:
     /***** Private methods here *****/

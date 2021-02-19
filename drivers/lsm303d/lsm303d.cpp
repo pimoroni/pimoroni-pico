@@ -27,4 +27,28 @@ namespace pimoroni {
 
     return succeeded;
   }
+
+  void LSM303D::setup() {
+
+  }
+
+  void LSM303D::set_accel_full_scale_g(uint8_t scale) {
+
+  }
+
+  void LSM303D::set_mag_full_scale_guass(uint8_t scale) {
+
+  }
+
+  uint8_t LSM303D::get_magnetometer() {
+    return 0;
+  }
+
+  uint8_t LSM303D::get_accelerometer() {
+    return 0;
+  }
+
+  uint8_t LSM303D::get_temperature() {
+    return 0;
+  }
 }

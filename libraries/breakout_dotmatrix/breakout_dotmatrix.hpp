@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../drivers/is31fl3730/is31fl3730.hpp"
+#include "../../drivers/ltp305/ltp305.hpp"
 
 namespace pimoroni {
 
-  typedef IS31FL3730 BreakoutDotMatrix;
+  typedef LTP305 BreakoutDotMatrix;
 }
