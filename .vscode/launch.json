@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Pico Debug",
+          "type":"cortex-debug",
+          "cwd": "${workspaceRoot}",
+          "executable": "${command:cmake.launchTargetPath}",
+          "request": "launch",
+          "servertype": "external",
+          // This may need to be arm-none-eabi-gdb depending on your system
+          "gdbpath" : "arm-none-eabi-gdb",
+          // Connect to an already running OpenOCD instance
+          "gdbTarget": "localhost:3333",
+          "svdFile": "/Volumes/Samsung_T5/Development/pico/pico-sdk/src/rp2040/hardware_regs/rp2040.svd",
+          "runToMain": true,
+          // Work around for stopping at main on restart
+          "postRestartCommands": [
+              "break main",Î
+              "continue"
+          ]
+      }
+  ]
+}
