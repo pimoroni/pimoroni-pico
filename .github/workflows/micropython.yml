@@ -1,0 +1,76 @@
+name: MicroPython
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: ${{matrix.name}}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: Linux
+            cache-key: linux
+            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk'
+            apt-packages: clang-tidy gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    # Check out MicroPython
+    - name: Checkout MicroPython
+      uses: actions/checkout@v2
+      with:
+        repository: pimoroni/micropython
+        ref: continuous-integration
+        submodules: false  # MicroPython submodules are hideously broken
+        path: micropython
+
+    - uses: actions/checkout@v2
+      with:
+        path: pimoroni-pico
+
+    # Linux deps
+    - name: Install deps
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ${{matrix.apt-packages}}
+
+    - name: Fetch base MicroPython submodules
+      shell: bash
+      working-directory: micropython
+      run: git submodule update --init
+
+    - name: Fetch Pico SDK submodules
+      shell: bash
+      working-directory: micropython/lib/pico-sdk
+      run: git submodule update --init
+
+    - name: Build mpy-cross
+      shell: bash
+      working-directory: micropython/mpy-cross
+      run: make
+
+    - name: Build MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules -j2
+
+    - name: Upload .uf2
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build/firmware.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: pimoroni-pico-micropython.uf2
+        asset_content_type: application/octet-stream

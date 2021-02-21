@@ -1,15 +1,14 @@
 import time, random
 import picodisplay as display 
 
-WIDTH = 240
-HEIGHT = 135
-
-display_buffer = bytearray(WIDTH * HEIGHT)            
-display.init(display_buffer)
-display.set_backlight(1.0)
-i = 0
 width = display.get_width()
 height = display.get_height()
+
+display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
+display.init(display_buffer)
+
+display.set_backlight(1.0)
+
 
 class Ball:
     def __init__(self, x, y, r, dx, dy, pen):

@@ -6,7 +6,6 @@
 extern mp_obj_t picoexplorer_init(mp_obj_t buf_obj);
 extern mp_obj_t picoexplorer_get_width();
 extern mp_obj_t picoexplorer_get_height();
-extern mp_obj_t picoexplorer_set_backlight(mp_obj_t brightness_obj);
 extern mp_obj_t picoexplorer_update();
 extern mp_obj_t picoexplorer_is_pressed(mp_obj_t button_obj);
 extern mp_obj_t picoexplorer_get_adc(mp_obj_t channel_obj);

@@ -50,7 +50,8 @@ constexpr uint32_t ROW_BYTES = 12;
 constexpr uint32_t BCD_FRAMES = 15; // includes fet discharge frame
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
 
-uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+// must be aligned for 32bit dma transfer
+alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
 
 uint16_t r_gamma_lut[256] = {0};
 uint16_t g_gamma_lut[256] = {0};
@@ -87,9 +88,6 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   // join fifos as only tx needed (gives 8 deep fifo instead of 4)
   sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
-  // set clock divider
-  //sm_config_set_clkdiv(&c, 4);
-
   pio_sm_init(pio, sm, offset, &c);
   pio_sm_set_enabled(pio, sm, true);
 }
@@ -110,6 +108,21 @@ namespace pimoroni {
     }
   }
 
+  PicoUnicorn::~PicoUnicorn() {
+    // stop and release the dma channel
+    irq_set_enabled(DMA_IRQ_0, false);
+    dma_channel_set_irq0_enabled(dma_channel, false);
+    irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), false);
+    irq_remove_handler(DMA_IRQ_0, dma_complete);
+
+    dma_channel_wait_for_finish_blocking(dma_channel);
+    dma_channel_unclaim(dma_channel);
+
+    // release the pio and sm
+    pio_sm_unclaim(bitstream_pio, bitstream_sm);
+    pio_clear_instruction_memory(bitstream_pio);
+    pio_sm_restart(bitstream_pio, bitstream_sm);
+  }
 
   void PicoUnicorn::init() {
     // setup pins
@@ -153,11 +166,15 @@ namespace pimoroni {
 
         // the last bcd frame is used to allow the fets to discharge to avoid ghosting
         if(frame == BCD_FRAMES - 1) {
-          bitstream[row_select_offset] = 0b01111111;
+          bitstream[row_select_offset] = 0b11111111;
 
           uint16_t bcd_ticks = 65535;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
+
+          for(uint8_t col = 0; col < 6; col++) {
+            bitstream[offset + col] = 0xff;
+          }
         }else{
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
@@ -171,7 +188,7 @@ namespace pimoroni {
 
     // setup the pio
     bitstream_pio = pio0;
-    bitstream_sm = 0;
+    bitstream_sm = pio_claim_unused_sm(pio0, true);
     uint offset = pio_add_program(bitstream_pio, &unicorn_program);
     unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, offset);
 
@@ -180,6 +197,14 @@ namespace pimoroni {
     gpio_set_function(pin::B, GPIO_FUNC_SIO); gpio_set_dir(pin::B, GPIO_IN); gpio_pull_up(pin::B);
     gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
     gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
+
+    // todo: shouldn't need to do this if things were cleaned up properly but without
+    // this any attempt to run a micropython script twice will fail
+    static bool already_init = false;
+
+    if(already_init) {
+      return;
+    }
 
     // setup dma transfer for pixel data to the pio
     dma_channel = dma_claim_unused_channel(true);
@@ -195,6 +220,8 @@ namespace pimoroni {
 
     dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
     dma_channel_set_read_addr(dma_channel, bitstream, true);
+
+    already_init = true;
   }
 
   void PicoUnicorn::clear() {
