@@ -163,8 +163,8 @@ int main() {
       uint16_t *dest = pico_explorer.frame_buffer + (y * 240);
       uint8_t *src = _binary_fox_tga_start + 18 + (y * 81 * 3);
       for(int x = 0; x < 81; x++) {
-        uint8_t g = *src++;
         uint8_t b = *src++;
+        uint8_t g = *src++;
         uint8_t r = *src++;
 
         pico_explorer.set_pen(r, g, b);
