@@ -1,6 +1,7 @@
 add_subdirectory(breakout_roundlcd)
 add_subdirectory(breakout_rgbmatrix5x5)
 add_subdirectory(breakout_matrix11x7)
+add_subdirectory(breakout_tof)
 add_subdirectory(pico_graphics)
 add_subdirectory(pico_display)
 add_subdirectory(pico_unicorn)
