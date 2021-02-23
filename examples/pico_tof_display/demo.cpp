@@ -13,7 +13,7 @@
 // **************************************************************************
 
 // To use PicoExplorer rather than PicoDisplay, uncomment the following line
-// #define USE_PICO_EXPLORER 1
+#define USE_PICO_EXPLORER 1
 // This:
 // - Includes pico_explorer.hpp rather than pico_display.hpp
 // - Replaces all PicoDisplay references with PicoExplorer
@@ -26,6 +26,54 @@
 #include "vl53l1x.hpp"
 
 using namespace pimoroni;
+
+class AutoRepeat {
+  public:
+    AutoRepeat(uint32_t repeat_time=200, uint32_t hold_time=1000) {
+      this->repeat_time = repeat_time;
+      this->hold_time = hold_time;
+    }
+    bool next(uint32_t time, bool state) {
+      bool changed = state != last_state;
+      last_state = state;
+
+      if(changed) {
+        if(state) {
+          pressed_time = time;
+          pressed = true;
+          last_time = time;
+          return true;
+        }
+        else {
+          pressed_time = 0;
+          pressed = false;
+          last_time = 0;
+        }
+      }
+      // Shortcut for no auto-repeat
+      if(repeat_time == 0) return false;
+
+      if(pressed) {
+        uint32_t repeat_rate = repeat_time;
+        if(hold_time > 0 && time - pressed_time > hold_time) {
+          repeat_rate /= 3;
+        }
+        if(time - last_time > repeat_rate) {
+          last_time = time;
+          return true;
+        }
+      }
+
+      return false;
+    }
+  private:
+    uint32_t repeat_time;
+    uint32_t hold_time;
+    bool pressed = false;
+    bool last_state = false;
+    uint32_t pressed_time = 0;
+    uint32_t last_time = 0;
+};
 
 #ifdef USE_PICO_EXPLORER
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
@@ -69,18 +117,17 @@ uint16_t disptext_dist_size = 4;
 
 VL53L1X vl53l1x;
 
-char * mode_to_text[4];
+const char mode_to_text[4][7] = {
+  "Auto",
+  "Short",
+  "Medium",
+  "Long"
+};
 
-#define LOW_COUNT_MOD 40
-#define HIGH_COUNT_MOD 20
-bool repeat_count_reached(uint16_t curr_count) {
-  // Check whether the current counter means that a key has repeated
-  if (curr_count <= 10*LOW_COUNT_MOD) {
-    return (0 == (curr_count % LOW_COUNT_MOD));
-  } else {
-    return (0 == (curr_count % HIGH_COUNT_MOD));
-  }
-}
+AutoRepeat ar_button_a;
+AutoRepeat ar_button_b;
+AutoRepeat ar_button_x;
+AutoRepeat ar_button_y;
 
 #define FLASH_MOD 20
 void flash_led(uint32_t curr_count) {
@@ -105,28 +152,6 @@ int main() {
 
   vl53_present = vl53l1x.init();
 
-  // Use these variables to make the buttons single-shot
-  // Counts number of loops pressed, 0 if not pressed
-  // Only for x and y - a and b are single-shot
-  uint16_t a_pressed = 0;
-  uint16_t b_pressed = 0;
-  uint16_t x_pressed = 0;
-  uint16_t y_pressed = 0;
-
-  mode_to_text[0] = "Auto";
-  mode_to_text[1] = "Short";
-  mode_to_text[2] = "Medium";
-  mode_to_text[3] = "Long";
-
-  struct pt {
-    float      x;
-    float      y;
-    uint8_t    r;
-    float     dx;
-    float     dy;
-    uint16_t pen;
-  };
-
   uint32_t i = 0;
   char buf[256];
   if (vl53_present) {
@@ -145,47 +170,25 @@ int main() {
   bool dist_held = false;
 
   while(true) {
+    bool a_pressed = ar_button_a.next(i, pico_display.is_pressed(pico_display.A));
+    bool b_pressed = ar_button_b.next(i, pico_display.is_pressed(pico_display.B));
+    bool x_pressed = ar_button_x.next(i, pico_display.is_pressed(pico_display.X));
+    bool y_pressed = ar_button_y.next(i, pico_display.is_pressed(pico_display.Y));
 
-    if (a_pressed == 0 && pico_display.is_pressed(pico_display.A)) {
-      a_pressed = 1;
-    } else if (a_pressed >= 1 && !pico_display.is_pressed(pico_display.A)) {
-      a_pressed = 0;
+    if (b_pressed) {
+      dist_held = !dist_held;
     }
 
-    if (b_pressed == 0 && pico_display.is_pressed(pico_display.B)) {
-      b_pressed = 1;
-      dist_held = true;
-    } else if (b_pressed >= 1 && !pico_display.is_pressed(pico_display.B)) {
-      b_pressed = 0;
-      dist_held = false;
-    }
-
-    if (x_pressed == 0 && pico_display.is_pressed(pico_display.X)) {
-      x_pressed = 1;
+    if (x_pressed) {
       units_metric = !units_metric;
-    } else if (x_pressed >= 1 && pico_display.is_pressed(pico_display.X)) {
-      // Button still pressed - check if has reached repeat count
-      if (repeat_count_reached(x_pressed++)) {
-        // Do nothing for now - may need this later!
-      }
-    } else if (x_pressed >= 1 && !pico_display.is_pressed(pico_display.X)) {
-      x_pressed = 0;
     }
 
-    if (y_pressed == 0 && pico_display.is_pressed(pico_display.Y)) {
-      y_pressed = 1;
+    if (y_pressed) {
       if (vl53_present) {
         vl53_mode++;
         if (vl53_mode > 3) vl53_mode = 1;
         vl53l1x.setDistanceModeInt(vl53_mode);
       }
-    } else if (y_pressed >= 1 && pico_display.is_pressed(pico_display.Y)) {
-      // Button still pressed - check if has reached repeat count
-      if (repeat_count_reached(y_pressed++)) {
-        // Do nothing for now - may need this later!
-      }
-    } else if (y_pressed >= 1 && !pico_display.is_pressed(pico_display.Y)) {
-      y_pressed = 0;
     }
 
     Rect text_box(5, 5, screen_width-10, screen_height-10);
@@ -203,9 +206,13 @@ int main() {
       pico_display.text("+Mode",
           Point(text_box.x+disptext_y_reminder_xoff,
             text_box.y+disptext_y_reminder_yoff), 230, disptext_reminder_size);
+      if(dist_held) {
+        pico_display.set_pen(255, 64, 64);
+      }
       pico_display.text("Hold",
           Point(text_box.x+disptext_b_reminder_xoff,
             text_box.y+disptext_b_reminder_yoff), 230, disptext_reminder_size);
+      pico_display.set_pen(255, 255, 255);
 
       sprintf(buf, "Mode: %s", mode_to_text[vl53_mode]);
       pico_display.text(buf,
@@ -213,7 +220,7 @@ int main() {
             text_box.y+disptext_mode_yoff), 230, disptext_mode_size);
 
       // Get the distance (use previous distance if number is held)
-      if (!dist_held) dist = vl53l1x.read();
+      if (!dist_held) dist = vl53l1x.read(false);
       if (units_metric) {
         sprintf(buf, "%dmm", dist);
       } else {
