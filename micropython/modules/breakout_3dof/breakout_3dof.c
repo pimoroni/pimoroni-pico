@@ -1,42 +1,40 @@
 #include "breakout_3dof.h"
 
-/***** Constants *****/
-// enum buttons
-// {
-//     BUTTON_A = 0,
-//     BUTTON_B,
-//     BUTTON_X,
-//     BUTTON_Y,
-// };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Breakout3DOF Class
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_KW(Breakout3DOF_get_axis_obj, 1, Breakout3DOF_get_axis);
+
+/***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t Breakout3DOF_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_get_axis), MP_ROM_PTR(&Breakout3DOF_get_axis_obj) },
+    { MP_ROM_QSTR(MP_QSTR_X), MP_ROM_INT(AXIS_X) },
+    { MP_ROM_QSTR(MP_QSTR_Y), MP_ROM_INT(AXIS_Y) },
+    { MP_ROM_QSTR(MP_QSTR_Z), MP_ROM_INT(AXIS_Z) },
+};
+STATIC MP_DEFINE_CONST_DICT(Breakout3DOF_locals_dict, Breakout3DOF_locals_dict_table);
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_3dof_Breakout3DOF_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_3dof,
+    .print = Breakout3DOF_print,
+    .make_new = Breakout3DOF_make_new,
+    .locals_dict = (mp_obj_dict_t*)&Breakout3DOF_locals_dict,
+};
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_3dof Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_init_obj, breakout_3dof_init);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_get_width_obj, breakout_3dof_get_width);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_get_height_obj, breakout_3dof_get_height);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_update_obj, breakout_3dof_update);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_3(breakout_3dof_set_pixel_obj, breakout_3dof_set_pixel);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_3dof_clear_obj, breakout_3dof_clear);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(breakout_3dof_is_pressed_obj, breakout_3dof_is_pressed);
-
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_3dof_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_3dof) },
-//    { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_3dof_init_obj) },    
-//     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_3dof_get_width_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_3dof_get_height_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_3dof_update_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&breakout_3dof_set_pixel_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&breakout_3dof_clear_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&breakout_3dof_is_pressed_obj) },        
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_3dof) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Breakout3DOF), (mp_obj_t)&breakout_3dof_Breakout3DOF_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_3dof_globals, breakout_3dof_globals_table);
 

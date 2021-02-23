@@ -51,6 +51,11 @@ namespace pimoroni {
     bool init();
     void reset();
 
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_interrupt() const;
+
     float get_axis(uint8_t axis, uint8_t sample_count = 1);
 
     uint8_t twos_comp_conversion(uint8_t val, uint8_t bits = 14);

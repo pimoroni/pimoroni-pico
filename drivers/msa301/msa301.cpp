@@ -34,6 +34,22 @@ namespace pimoroni {
     sleep_ms(1);
   }
 
+  i2c_inst_t* MSA301::get_i2c() const {
+    return i2c;
+  }
+
+  int MSA301::get_sda() const {
+    return sda;
+  }
+
+  int MSA301::get_scl() const {
+    return scl;
+  }
+
+  int MSA301::get_interrupt() const {
+    return interrupt;
+  }
+
   float MSA301::get_axis(uint8_t axis, uint8_t sample_count) {
     if(sample_count > 1) {
       int32_t total = 0;
