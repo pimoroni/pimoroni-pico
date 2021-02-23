@@ -26,6 +26,7 @@ It supports drawing text, primitive and individual pixels and includes basic typ
     - [rectangle](#rectangle)
     - [circle](#circle)
   - [Text](#text)
+  - [Change Font](#change-font)
 
 ## Function Reference
 
@@ -232,7 +233,23 @@ void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap, uint
 
 `text` allows you to draw a string at `point p`, with a maximum line-width of `int32_t wrap`.
 
-The 6x6 pixel font characters are encoded in `font_data.cpp` along with their character widths so that text can be drawn variable-width.
+The 6x6 and 6x8 pixel font characters are encoded in `font6_data.hpp` and `font8_data.hpp` along with their character widths so that text can be drawn variable-width.
 
 You can scale text with `uint8_t scale` for 12x12, 18x18, etc character sizes.
 
+### Change Font
+
+```c++
+void PicoGraphics::set_font(const Font *font);
+```
+
+
+`set_font` allows you to change the font that PicoGraphics uses to draw text.
+
+If you:
+
+```c++
+#include "font8_data.hpp"
+```
+
+Then you can: `set_font(&font8);` to use a font with upper/lowercase characters.
