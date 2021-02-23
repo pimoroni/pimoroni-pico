@@ -29,10 +29,10 @@ int main() {
     pico_explorer.set_pen(255, 255, 255);
     pico_explorer.set_font(&font6);
     pico_explorer.text("6x6: The quick, brown fox jumps over the lazy dog! UPPER. lower.", Point(10, 10), 220);
-    pico_explorer.text("0123456789 !£$%^&*()", Point(10, 70), 220);
+    pico_explorer.text("0123456789 !$%^&*()", Point(10, 70), 220);
     pico_explorer.set_font(&font8);
     pico_explorer.text("6x8: The quick, brown fox jumps over the lazy dog! UPPER. lower.", Point(10, 120), 220);
-    pico_explorer.text("0123456789 !£$%^&*()", Point(10, 180), 220);
+    pico_explorer.text("0123456789 !$%^&*()", Point(10, 180), 220);
 
     pico_explorer.update();
 
