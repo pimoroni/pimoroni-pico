@@ -13,7 +13,12 @@ const uint8_t LED_B = 8;
 namespace pimoroni {
 
   PicoDisplay::PicoDisplay(uint16_t *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf)  {
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf) {
+      __fb = buf;
+  }
+
+  PicoDisplay::PicoDisplay(uint16_t *buf, int width, int height)
+    : PicoGraphics(width, height, buf), screen(width, height, buf)  {
       __fb = buf;
   }
 

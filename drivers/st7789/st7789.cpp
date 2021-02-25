@@ -60,6 +60,11 @@ namespace pimoroni {
         command(reg::COLMOD,    1, "\x05");
       }
 
+      if(width == 135 && height == 240) {
+        command(reg::MADCTL,    1, "\x00"); // Setting this to 0xC0 flips the display upside-down
+        command(reg::COLMOD,    1, "\x05");
+      }
+
       command(reg::INVON);   // set inversion mode
       command(reg::SLPOUT);  // leave sleep mode
       command(reg::DISPON);  // turn display on
@@ -75,6 +80,11 @@ namespace pimoroni {
       if(width == 240 && height == 135) {
         command(reg::RASET,     4, "\x00\x35\x00\xbb"); // 53 .. 187 (135 rows)
         command(reg::CASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
+      }
+
+      if(width == 135 && height == 240) {
+        command(reg::CASET,     4, "\x00\x34\x00\xba"); // 52 .. 186 (135 rows)
+        command(reg::RASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
       }
     }
 
