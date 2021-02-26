@@ -38,7 +38,7 @@ namespace pimoroni {
     AUDIOPLAY = 0x18
   };
 
-  enum reg {
+  enum reg : uint8_t {
     MODE      = 0x00,
     FRAME     = 0x01,
     AUTPLAY1  = 0x02,
@@ -93,11 +93,11 @@ namespace pimoroni {
   void IS31FL3731::enable(std::initializer_list<uint8_t> pattern, uint8_t frame) {
     i2c_reg_write_uint8(reg::BANK, frame);
     uint8_t enable_buf[19];
-    uint8_t *ptr = enable_buf;
     enable_buf[0] = ENABLE_OFFSET;
-    ptr++;
+    uint8_t offset = 1;
     for(auto byte : pattern) {
-      *ptr++ = byte;
+      enable_buf[offset] = byte;
+      offset++;
     }
     i2c_write_blocking(i2c, address, enable_buf, sizeof(enable_buf), false);
   }
