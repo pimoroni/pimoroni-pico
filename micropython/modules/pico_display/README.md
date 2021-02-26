@@ -1,8 +1,10 @@
 # Pico Display Pack - MicroPython <!-- omit in toc -->
 
-Our Pico Display Pack offers a vibrant 1.14" (240x135) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
+Pico Display Pack is a vibrant 1.14", 240 x 135 pixel IPS LCD screen for your Raspberry Pi Pico, with four useful buttons and a RGB LED. [Click here](https://shop.pimoroni.com/products/pico-display-pack) to find out more!
 
 We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons and LED. See the [function reference](#function-reference) for details.
+
+Check out [UnfinishedStuff's excellent Display Pack guide](https://github.com/UnfinishedStuff/Pimoroni_Pico_Display_Pack_documentation) for more detail on the functions and code examples, and [tonygo2's Display Pack Workout](https://www.instructables.com/Pimoroni-Pico-Display-Workout/) for a comprehensive demo!
 
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
@@ -25,25 +27,33 @@ We've included helper functions to handle every aspect of drawing to the screen 
 
 ## Example Program
 
-The following example sets up Pico Display, displays some basic demo text and graphics and will illuminate the RGB LED green if the A button is presse
+The following example sets up Pico Display, displays some basic demo text and illuminates the RGB LED green when the A button is pressed.
 
 ```python
+import utime
 import picodisplay
 
 # Initialise Picodisplay with a bytearray display buffer
 buf = bytearray(picodisplay.get_width() * picodisplay.get_height() * 2)
 picodisplay.init(buf)
+picodisplay.set_backlight(1.0)
 
-picodisplay.set_pen(255, 0, 0)  # Set a red pen
-picodisplay.clear()             # Clear the display buffer
-picodisplay.update()            # Update the display with our changes
+picodisplay.set_pen(255, 0, 0)                    # Set a red pen
+picodisplay.clear()                               # Clear the display buffer
+picodisplay.set_pen(255, 255, 255)                # Set a white pen
+picodisplay.text("pico display", 10, 10, 240, 6)  # Add some text
+picodisplay.update()                              # Update the display with our changes
 
-picodisplay.set_led(255, 0, 0)  # Set the RGB LED to Red
-picodisplay.set_led(0, 255, 0)  # Set the RGB LED to Green
-picodisplay.set_led(0, 0, 255)  # Set the RGB LED to Blue
+picodisplay.set_led(255, 0, 0)   # Set the RGB LED to red
+utime.sleep(1)                   # Wait for a second
+picodisplay.set_led(0, 255, 0)   # Set the RGB LED to green
+utime.sleep(1)                   # Wait for a second
+picodisplay.set_led(0, 0, 255)   # Set the RGB LED to blue
 
-while not picodisplay.is_pressed(picodisplay.BUTTON_A):  # Wait for Button A to be pressed
+while picodisplay.is_pressed(picodisplay.BUTTON_A) == False:
     pass
+
+picodisplay.set_led(0, 255, 0)  # Set the RGB LED to green
 ```
 
 ## Function Reference
@@ -59,7 +69,7 @@ picodisplay.init(buf)
 
 ### set_backlight
 
-Set the display backlight from 0.0 to 1.0
+Sets the display backlight from 0.0 to 1.0.
 
 ```python
 picodisplay.set_backlight(brightness)
@@ -69,7 +79,7 @@ Uses hardware PWM to dim the display backlight, dimming values are gamma-correct
 
 ### set_led
 
-Sets the RGB LED on Pico Display with an RGB triplet:
+Sets the RGB LED on Pico Display with an RGB triplet.
 
 ```python
 picodisplay.set_led(r, g, b)
@@ -85,7 +95,7 @@ Reads the GPIO pin connected to one of Pico Display's buttons, returning `True` 
 picodisplay.is_pressed(button)
 ```
 
-The button vaule should be a number denoting a pin, and constants `picodisplay.BUTTON_A`, `picodisplay.BUTTON_B`, `picodisplay.BUTTON_X` and `picodisplay.BUTTON_Y` are supplied to make it easier. e:
+The button value should be a number denoting a pin, and constants `picodisplay.BUTTON_A`, `picodisplay.BUTTON_B`, `picodisplay.BUTTON_X` and `picodisplay.BUTTON_Y` are supplied to make it easier. e:
 
 ```python
 is_a_button_pressed = picodisplay.is_pressed(picodisplay.BUTTON_A)
@@ -93,7 +103,7 @@ is_a_button_pressed = picodisplay.is_pressed(picodisplay.BUTTON_A)
 
 ### update
 
-To display your changes on Pico Display's screen you need to call `update`:
+To display your changes on Pico Display's screen you need to call `update`.
 
 ```python
 picodisplay.update()
@@ -155,7 +165,7 @@ picodisplay.rectangle(x, y, w, h)
 Draws a circle filled with the current pen colour to the buffer.  The `x` and `y` parameters specify the centre of the circle, `r` specifies the radius in pixels.
 
 ```python
-picodisplay.rectangle(x, y, w, h)
+picodisplay.circle(x, y, r)
 ```
 
 ![Circle function explanation image](/micropython/modules/pico_display/images/circle.png)

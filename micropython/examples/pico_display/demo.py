@@ -22,30 +22,37 @@ class Ball:
 # initialise shapes
 balls = []
 for i in range(0, 100):
+    r = random.randint(0, 10) + 3
     balls.append(
         Ball(
-            random.randint(0, width),
-            random.randint(0, height),
-            random.randint(0, 10) + 3,
-            random.randint(0, 255) / 128,
-            random.randint(0, 255) / 128,
+            random.randint(r, r + (width - 2 * r)),
+            random.randint(r, r + (height - 2 * r)),
+            r,
+            (14 - r) / 2,
+            (14 - r) / 2,
             display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),            
         )
     )
     
 while True:
-    display.set_pen(120, 40, 60)    
+    display.set_pen(40, 40, 40)
     display.clear()
     
-    for ball in balls:        
+    for ball in balls:
         ball.x += ball.dx
         ball.y += ball.dy
         
-        if ball.x < 0 or ball.x > width:
+        xmax = width - ball.r
+        xmin = ball.r
+        ymax = height - ball.r
+        ymin = ball.r
+
+        if ball.x < xmin or ball.x > xmax:
             ball.dx *= -1
-        if ball.y < 0 or ball.y > height:
+
+        if ball.y < ymin or ball.y > ymax:
             ball.dy *= -1
-            
+
         display.set_pen(ball.pen)
         display.circle(int(ball.x), int(ball.y), int(ball.r))
         

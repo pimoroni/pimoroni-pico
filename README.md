@@ -5,7 +5,7 @@ Welcome to the brave new world of Pico! This repository contains the C/C++ and M
 First of all you need to decide if your project is going to be done in MicroPython or using C/C++ with the Pico SDK. We have instructions for both here:
 
 - **MicroPython**: The easiest way to get start, setup is a breeze! [Click here to view instructions for MicroPython](setting-up-micropython.md)
-- **C/C++**: For more advanced users that want to unlease the full power of Pico! [Click here to view instructions for C/C++](setting-up-the-pico-sdk.md)
+- **C/C++**: For more advanced users that want to unleash the full power of Pico! [Click here to view instructions for C/C++](setting-up-the-pico-sdk.md)
 
 # Software support for our Pico range
 
