@@ -1,5 +1,6 @@
 // Very simple example that turns the pico_rgb_keypad into a MIDI device 
-// where each pad sends midi note messages
+// where each pad sends midi note messages.
+// works with pico on the right hand side, notes ascending from bottom left.
 //
 // Based on:
 //   https://github.com/pimoroni/pimoroni-pico/blob/main/examples/pico_rgb_keypad
@@ -34,12 +35,13 @@ public:
   ButtonNote(uint8_t btn_num, NoteState note_state) : m_btn_num(btn_num), m_btn_state(note_state) {};
 
   const uint8_t   GetButtonNum(void)   const { return m_btn_num; };
-  const uint8_t   GetButtonNote(void)  const { return 60 + m_btn_num; };
   const NoteState GetButtonState(void) const { return m_btn_state; };
+  const uint8_t   GetButtonNote(void)  const { return 60 + m_btn_note_map[m_btn_num]; };
   
 private:
   uint8_t     m_btn_num;
   NoteState   m_btn_state;
+  uint8_t     m_btn_note_map[16] = {15, 11, 7, 3, 14, 10, 6, 2, 13, 9, 5, 1, 12, 8, 4, 0};
 };
 
 // button_notes vector contains the note data to send over MIDI
@@ -143,12 +145,12 @@ void midi_task(void)
     if(note.GetButtonState() == ButtonNote::nsOn)
     {
       // Send Note On at full velocity (127) on channel 1.
-      tudi_midi_write24(cable_num, 0x90 | channel, note.GetButtonNum(), 127);
+      tudi_midi_write24(cable_num, 0x90 | channel, note.GetButtonNote(), 127);
     }
     else
     {
       // Send Note Off
-      tudi_midi_write24(cable_num, 0x80 | channel, note.GetButtonNum(), 0);
+      tudi_midi_write24(cable_num, 0x80 | channel, note.GetButtonNote(), 0);
     }
   }
 
