@@ -59,15 +59,17 @@ namespace pimoroni {
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
     gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
 
-    i2c_reg_write_uint8(reg::SHUTDOWN, 0b00000001);
-
     i2c_reg_write_uint8(reg::BANK, CONFIG_BANK);
+    i2c_reg_write_uint8(reg::SHUTDOWN, 0b00000000);
+
+    clear();
+    update(0);
+
+    i2c_reg_write_uint8(reg::SHUTDOWN, 0b00000001);    
 
     i2c_reg_write_uint8(reg::MODE, mode::PICTURE);
 
     i2c_reg_write_uint8(reg::AUDIOSYNC, 0);
-
-    clear();
 
     return true;
   }
