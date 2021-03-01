@@ -7,30 +7,45 @@
 
 using namespace pimoroni;
 
+static const uint8_t NUM_COLORS = 4;
+
+
 BreakoutRGBMatrix5x5 rgbmatrix5x5;
+
+const pimoroni::RGBLookup colors[NUM_COLORS] = {
+  {255, 0, 0},
+  {0, 255, 0},
+  {0, 0, 255},
+  {128, 128, 128}
+};
 
 int main() {
   rgbmatrix5x5.init();
 
-  const pimoroni::RGBLookup colors[4] = {
-    {255, 0, 0},
-    {0, 255, 0},
-    {0, 0, 255},
-    {128, 128, 128}
-  };
-
+  int x = 0;
+  int y = 0;
   uint8_t col = 0;
+
   while(1) {
     pimoroni::RGBLookup color = colors[col];
-    for(auto x = 0u; x < 5; x++) {
-      for(auto y = 0u; y < 5; y++) {
-        rgbmatrix5x5.set_pixel(x, y, color.r, color.g, color.b);
+    rgbmatrix5x5.set_pixel(x, y, color.r, color.g, color.b);
+    rgbmatrix5x5.update();
+
+    x++;
+    if(x >= BreakoutRGBMatrix5x5::WIDTH) {
+      x = 0;
+      y++;
+      if(y >= BreakoutRGBMatrix5x5::HEIGHT) {
+        y = 0;
+        col++;
+        if(col >= NUM_COLORS)
+          col = 0;
+        sleep_ms(500);
       }
     }
-    rgbmatrix5x5.update(0);
-    sleep_ms(1000);
-    col++;
-    col %= 4;
+    sleep_ms(50);
   }
+
+
   return 0;
 }
