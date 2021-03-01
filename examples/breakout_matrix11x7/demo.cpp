@@ -17,20 +17,20 @@ int main() {
   bool light = true;
 
   while(1) {
-      matrix11x7.set_pixel(x, y, light ? ON_BRIGHTNESS : 0);
-      matrix11x7.update();
+    matrix11x7.set_pixel(x, y, light ? ON_BRIGHTNESS : 0);
+    matrix11x7.update();
 
-      x++;
-      if(x >= BreakoutMatrix11x7::WIDTH) {
-          x = 0;
-          y++;
-          if(y >= BreakoutMatrix11x7::HEIGHT) {
-              y = 0;
-              light = !light;
-              sleep_ms(500);
-          }
+    x++;
+    if(x >= BreakoutMatrix11x7::WIDTH) {
+      x = 0;
+      y++;
+      if(y >= BreakoutMatrix11x7::HEIGHT) {
+        y = 0;
+        light = !light;
+        sleep_ms(500);
       }
-      sleep_ms(10);
+    }
+    sleep_ms(10);
   }
 
   return 0;
