@@ -48,7 +48,12 @@ namespace pimoroni {
   public:
     bool init();
 
-    void set_pixel(uint8_t x, uint8_t y, uint8_t brightness);
+    // For print access in micropython
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+
+    void set_pixel(uint8_t x, uint8_t y, uint8_t val);
     void update();
     void clear();
 

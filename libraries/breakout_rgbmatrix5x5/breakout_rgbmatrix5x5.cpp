@@ -54,6 +54,18 @@ namespace pimoroni {
     return true;
   }
 
+  i2c_inst_t* BreakoutRGBMatrix5x5::get_i2c() const {
+    return matrix.get_i2c();
+  }
+
+  int BreakoutRGBMatrix5x5::get_sda() const {
+    return matrix.get_sda();
+  }
+
+  int BreakoutRGBMatrix5x5::get_scl() const {
+    return matrix.get_scl();
+  }
+
   void BreakoutRGBMatrix5x5::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t index = x + (y * WIDTH);
     RGBLookup rgb = lookup_pixel(index);

@@ -52,6 +52,10 @@ namespace pimoroni {
   public:
     bool init();
 
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    
     void enable(std::initializer_list<uint8_t> pattern, uint8_t frame = 0);
     void set(uint8_t index, uint8_t brightness);
     void update(uint8_t frame = 0);

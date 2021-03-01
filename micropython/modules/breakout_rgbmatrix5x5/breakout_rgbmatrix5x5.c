@@ -1,42 +1,42 @@
 #include "breakout_rgbmatrix5x5.h"
 
-/***** Constants *****/
-// enum buttons
-// {
-//     BUTTON_A = 0,
-//     BUTTON_B,
-//     BUTTON_X,
-//     BUTTON_Y,
-// };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// BreakoutRGBMatrix5x5 Class
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutRGBMatrix5x5_set_pixel_obj, 1, BreakoutRGBMatrix5x5_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRGBMatrix5x5_update_obj, BreakoutRGBMatrix5x5_update);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRGBMatrix5x5_clear_obj, BreakoutRGBMatrix5x5_clear);
+
+/***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t BreakoutRGBMatrix5x5_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&BreakoutRGBMatrix5x5_set_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&BreakoutRGBMatrix5x5_update_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&BreakoutRGBMatrix5x5_clear_obj) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(WIDTH) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(HEIGHT) },
+};
+STATIC MP_DEFINE_CONST_DICT(BreakoutRGBMatrix5x5_locals_dict, BreakoutRGBMatrix5x5_locals_dict_table);
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_rgbmatrix5x5,
+    .print = BreakoutRGBMatrix5x5_print,
+    .make_new = BreakoutRGBMatrix5x5_make_new,
+    .locals_dict = (mp_obj_dict_t*)&BreakoutRGBMatrix5x5_locals_dict,
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_rgbmatrix5x5 Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_rgbmatrix5x5_init_obj, breakout_rgbmatrix5x5_init);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_rgbmatrix5x5_get_width_obj, breakout_rgbmatrix5x5_get_width);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_rgbmatrix5x5_get_height_obj, breakout_rgbmatrix5x5_get_height);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_rgbmatrix5x5_update_obj, breakout_rgbmatrix5x5_update);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_3(breakout_rgbmatrix5x5_set_pixel_obj, breakout_rgbmatrix5x5_set_pixel);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_rgbmatrix5x5_clear_obj, breakout_rgbmatrix5x5_clear);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(breakout_rgbmatrix5x5_is_pressed_obj, breakout_rgbmatrix5x5_is_pressed);
-
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_rgbmatrix5x5_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_rgbmatrix5x5) },
-//     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_rgbmatrix5x5_init_obj) },    
-//     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_rgbmatrix5x5_get_width_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_rgbmatrix5x5_get_height_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_rgbmatrix5x5_update_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&breakout_rgbmatrix5x5_set_pixel_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&breakout_rgbmatrix5x5_clear_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&breakout_rgbmatrix5x5_is_pressed_obj) },        
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_rgbmatrix5x5) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutRGBMatrix5x5), (mp_obj_t)&breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_rgbmatrix5x5_globals, breakout_rgbmatrix5x5_globals_table);
 

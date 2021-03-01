@@ -1,42 +1,42 @@
 #include "breakout_matrix11x7.h"
 
-/***** Constants *****/
-// enum buttons
-// {
-//     BUTTON_A = 0,
-//     BUTTON_B,
-//     BUTTON_X,
-//     BUTTON_Y,
-// };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// BreakoutMatrix11x7 Class
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutMatrix11x7_set_pixel_obj, 1, BreakoutMatrix11x7_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutMatrix11x7_update_obj, BreakoutMatrix11x7_update);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutMatrix11x7_clear_obj, BreakoutMatrix11x7_clear);
+
+/***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t BreakoutMatrix11x7_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&BreakoutMatrix11x7_set_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&BreakoutMatrix11x7_update_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&BreakoutMatrix11x7_clear_obj) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(WIDTH) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(HEIGHT) },
+};
+STATIC MP_DEFINE_CONST_DICT(BreakoutMatrix11x7_locals_dict, BreakoutMatrix11x7_locals_dict_table);
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_matrix11x7_BreakoutMatrix11x7_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_matrix11x7,
+    .print = BreakoutMatrix11x7_print,
+    .make_new = BreakoutMatrix11x7_make_new,
+    .locals_dict = (mp_obj_dict_t*)&BreakoutMatrix11x7_locals_dict,
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_matrix11x7 Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_matrix11x7_init_obj, breakout_matrix11x7_init);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_matrix11x7_get_width_obj, breakout_matrix11x7_get_width);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_matrix11x7_get_height_obj, breakout_matrix11x7_get_height);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_matrix11x7_update_obj, breakout_matrix11x7_update);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_3(breakout_matrix11x7_set_pixel_obj, breakout_matrix11x7_set_pixel);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_matrix11x7_clear_obj, breakout_matrix11x7_clear);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(breakout_matrix11x7_is_pressed_obj, breakout_matrix11x7_is_pressed);
-
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_matrix11x7_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_matrix11x7) },
-//     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_matrix11x7_init_obj) },    
-//     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_matrix11x7_get_width_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_matrix11x7_get_height_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_matrix11x7_update_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&breakout_matrix11x7_set_pixel_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&breakout_matrix11x7_clear_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&breakout_matrix11x7_is_pressed_obj) },        
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_matrix11x7) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutMatrix11x7), (mp_obj_t)&breakout_matrix11x7_BreakoutMatrix11x7_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_matrix11x7_globals, breakout_matrix11x7_globals_table);
 

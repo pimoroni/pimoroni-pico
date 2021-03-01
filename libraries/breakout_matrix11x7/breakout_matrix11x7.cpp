@@ -32,10 +32,22 @@ namespace pimoroni {
     return true;
   }
 
-  void BreakoutMatrix11x7::set_pixel(uint8_t x, uint8_t y, uint8_t v) {
+  i2c_inst_t* BreakoutMatrix11x7::get_i2c() const {
+    return matrix.get_i2c();
+  }
+
+  int BreakoutMatrix11x7::get_sda() const {
+    return matrix.get_sda();
+  }
+
+  int BreakoutMatrix11x7::get_scl() const {
+    return matrix.get_scl();
+  }
+
+  void BreakoutMatrix11x7::set_pixel(uint8_t x, uint8_t y, uint8_t val) {
     uint8_t index = x + (y * WIDTH);
     uint8_t pixel = lookup_pixel(index);
-    matrix.set(pixel, v);
+    matrix.set(pixel, val);
   }
 
   void BreakoutMatrix11x7::update() {

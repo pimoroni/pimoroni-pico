@@ -74,6 +74,18 @@ namespace pimoroni {
     return true;
   }
 
+  i2c_inst_t* IS31FL3731::get_i2c() const {
+    return i2c;
+  }
+
+  int IS31FL3731::get_sda() const {
+    return sda;
+  }
+
+  int IS31FL3731::get_scl() const {
+    return scl;
+  }
+
   void IS31FL3731::clear() {
     for(auto i = 0u; i < sizeof(buf); i++) {
       buf[i] = 0;
