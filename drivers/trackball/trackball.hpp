@@ -77,7 +77,7 @@ namespace pimoroni {
 
     void change_address(uint8_t new_address);
         
-    void enable_interrupt(bool interrupt = true);
+    void enable_interrupt(bool use_interrupt = true);
     bool get_interrupt();
     void set_rgbw(uint8_t r, uint8_t g, uint8_t b, uint8_t w);
     void set_red(uint8_t value);

@@ -64,15 +64,31 @@ namespace pimoroni {
     return succeeded;
   }
 
+  i2c_inst_t* Trackball::get_i2c() const {
+    return i2c;
+  }
+
+  int Trackball::get_sda() const {
+    return sda;
+  }
+
+  int Trackball::get_scl() const {
+    return scl;
+  }
+
+  int Trackball::get_interrupt() const {
+    return interrupt;
+  }
+
   void Trackball::change_address(uint8_t new_address) {
     i2c_reg_write_uint8(reg::I2C_ADDR, new_address);
     wait_for_flash();
   }
   
-  void Trackball::enable_interrupt(bool interrupt) {
+  void Trackball::enable_interrupt(bool use_interrupt) {
     uint8_t value = i2c_reg_read_uint8(reg::INT);
     value &= ~MSK_INT_OUT_EN;
-    if(interrupt)
+    if(use_interrupt)
       value |= MSK_INT_OUT_EN;
 
     i2c_reg_write_uint8(reg::INT, value);
@@ -122,7 +138,7 @@ namespace pimoroni {
     state.up = i2c_reg_read_uint8(reg::UP);
     state.down = i2c_reg_read_uint8(reg::DOWN);
     sw_state = i2c_reg_read_uint8(reg::SWITCH);
-    
+
     state.sw_changed = sw_state & ~MSK_SWITCH_STATE;
     state.sw_pressed = (sw_state  & MSK_SWITCH_STATE) > 0;
     return state;

@@ -1,39 +1,58 @@
 #include "breakout_trackball.h"
 
-/***** Constants *****/
-// enum buttons
-// {
-//     BUTTON_A = 0,
-//     BUTTON_B,
-//     BUTTON_X,
-//     BUTTON_Y,
-// };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// BreakoutTrackball Class
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_change_address_obj, 1, BreakoutTrackball_change_address);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_enable_interrupt_obj, 1, BreakoutTrackball_change_address);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutTrackball_get_interrupt_obj, BreakoutTrackball_get_interrupt);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_rgbw_obj, 1, BreakoutTrackball_set_rgbw);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_red_obj, 1, BreakoutTrackball_set_red);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_green_obj, 1, BreakoutTrackball_set_green);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_blue_obj, 1, BreakoutTrackball_set_blue);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_white_obj, 1, BreakoutTrackball_set_white);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutTrackball_read_obj, BreakoutTrackball_read);
+
+/***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t BreakoutTrackball_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_change_address), MP_ROM_PTR(&BreakoutTrackball_change_address_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable_interrupt), MP_ROM_PTR(&BreakoutTrackball_enable_interrupt_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_interrupt), MP_ROM_PTR(&BreakoutTrackball_get_interrupt_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_rgbw), MP_ROM_PTR(&BreakoutTrackball_set_rgbw_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_red), MP_ROM_PTR(&BreakoutTrackball_set_red_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_green), MP_ROM_PTR(&BreakoutTrackball_set_green_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_blue), MP_ROM_PTR(&BreakoutTrackball_set_blue_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_white), MP_ROM_PTR(&BreakoutTrackball_set_white_obj) },
+    { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutTrackball_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_LEFT), MP_ROM_INT(LEFT) },
+    { MP_ROM_QSTR(MP_QSTR_RIGHT), MP_ROM_INT(RIGHT) },
+    { MP_ROM_QSTR(MP_QSTR_UP), MP_ROM_INT(UP) },
+    { MP_ROM_QSTR(MP_QSTR_DOWN), MP_ROM_INT(DOWN) },
+    { MP_ROM_QSTR(MP_QSTR_SW_CHANGED), MP_ROM_INT(SW_CHANGED) },
+    { MP_ROM_QSTR(MP_QSTR_SW_PRESSED), MP_ROM_INT(SW_PRESSED) },
+};
+STATIC MP_DEFINE_CONST_DICT(BreakoutTrackball_locals_dict, BreakoutTrackball_locals_dict_table);
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_trackball_BreakoutTrackball_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_trackball,
+    .print = BreakoutTrackball_print,
+    .make_new = BreakoutTrackball_make_new,
+    .locals_dict = (mp_obj_dict_t*)&BreakoutTrackball_locals_dict,
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_trackball Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_trackball_init_obj, breakout_trackball_init);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_trackball_get_width_obj, breakout_trackball_get_width);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_trackball_get_height_obj, breakout_trackball_get_height);
-// STATIC MP_DEFINE_CONST_FUN_OBJpicoscroll(breakout_trackball_is_pressed_obj, breakout_trackball_is_pressed);
-
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_trackball_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_trackball) },
-//     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_trackball_init_obj) },    
-//     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_trackball_get_width_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_trackball_get_height_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_trackball_update_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&breakout_trackball_set_pixel_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&breakout_trackball_clear_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&breakout_trackball_is_pressed_obj) },        
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_trackball) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutTrackball), (mp_obj_t)&breakout_trackball_BreakoutTrackball_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_trackball_globals, breakout_trackball_globals_table);
 
