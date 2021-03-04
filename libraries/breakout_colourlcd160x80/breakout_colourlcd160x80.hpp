@@ -7,8 +7,8 @@ namespace pimoroni {
 
   class BreakoutColourLCD160x80 : public PicoGraphics {
   public:
-    static const int WIDTH = 80;
-    static const int HEIGHT = 160;
+    static const int WIDTH = 160;
+    static const int HEIGHT = 80;
 
     uint16_t *__fb;
   private:

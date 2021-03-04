@@ -11,8 +11,8 @@ namespace pimoroni {
     uint32_t dma_channel;
 
     // screen properties
-    uint16_t width = 80;
-    uint16_t height = 160;
+    uint16_t width = 160;
+    uint16_t height = 80;
     uint16_t row_stride;
 
     // interface pins with our standard defaults where appropriate

@@ -71,11 +71,11 @@ namespace pimoroni {
       // else
       command(reg::INVON);
 
-      command(reg::MADCTL, 1, "\xc8"); // 0b11001000 (0xc8)
+      command(reg::MADCTL, 1, "\x68"); // 0b0110 1000 (0x68)
       command(reg::COLMOD, 1, "\x05");
 
-      offset_cols = (COLS - width) / 2;
-      offset_rows = (ROWS - height) / 2;
+      offset_cols = (ROWS - width) / 2;
+      offset_rows = (COLS - height) / 2;
 
       char buf[4];
       buf[0] = 0; 

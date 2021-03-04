@@ -7,7 +7,7 @@ using namespace pimoroni;
 uint16_t buffer[BreakoutColourLCD160x80::WIDTH * BreakoutColourLCD160x80::HEIGHT];
 BreakoutColourLCD160x80 lcd(buffer);
 
-int main() {
+ int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
@@ -23,6 +23,9 @@ int main() {
     uint16_t x = (sinf(float(t) / 100.0f) * 30) + 30;
     lcd.set_pen(0, 255, 0);
     lcd.clear();
+    lcd.set_pen(255, 255, 0);
+    lcd.rectangle(Rect(10, 10, 160-20, 80-20));
+
     lcd.set_pen(0, 0, 255);
     lcd.rectangle(Rect(10, 10, 30, 30));
     lcd.set_pen(255, 0, 0);
