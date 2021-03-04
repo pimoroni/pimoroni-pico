@@ -22,10 +22,10 @@ namespace pimoroni {
     CHIP_ID_H   = 0xFB,
     VERSION     = 0xFC,
     I2C_ADDR    = 0xFD,
-    CTRL       = 0xFE,
+    CTRL        = 0xFE,
   };
 
-  static const uint8_t SWITCH_STATE = 0b10000000;
+  static const uint8_t MSK_SWITCH_STATE = 0b10000000;
 
   enum int_mask {
     MSK_INT_TRIGGERED = 0b00000001,
@@ -70,10 +70,24 @@ namespace pimoroni {
   }
   
   void Trackball::enable_interrupt(bool interrupt) {
+    uint8_t value = i2c_reg_read_uint8(reg::INT);
+    value &= ~MSK_INT_OUT_EN;
+    if(interrupt)
+      value |= MSK_INT_OUT_EN;
 
+    i2c_reg_write_uint8(reg::INT, value);
   }
   
   bool Trackball::get_interrupt() {
+    bool value = false;
+    
+    if(interrupt != PIN_UNUSED) {
+      value = !gpio_get(interrupt);
+    }
+    else {
+      value = i2c_reg_read_uint8(reg::INT);
+      value &= MSK_INT_TRIGGERED;
+    }
     return false;
   }
 
@@ -100,8 +114,18 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg::LED_WHT, value);
   }
 
-  uint32_t Trackball::read() {
-    return 0;
+  Trackball::State Trackball::read() {
+    State state;
+    uint8_t sw_state;
+    state.left = i2c_reg_read_uint8(reg::LEFT);
+    state.right = i2c_reg_read_uint8(reg::RIGHT);
+    state.up = i2c_reg_read_uint8(reg::UP);
+    state.down = i2c_reg_read_uint8(reg::DOWN);
+    sw_state = i2c_reg_read_uint8(reg::SWITCH);
+    
+    state.sw_changed = sw_state & ~MSK_SWITCH_STATE;
+    state.sw_pressed = (sw_state  & MSK_SWITCH_STATE) > 0;
+    return state;
   }
 
   uint8_t Trackball::i2c_reg_read_uint8(uint8_t reg) {
@@ -128,11 +152,11 @@ namespace pimoroni {
 
     start_time = millis();
     while(!get_interrupt()) {
-        if(millis() - start_time > timeout) {
+      if(millis() - start_time > timeout) {
         printf("Timed out waiting for interrupt!\n");
         return;
-        }
-        sleep_ms(1);
+      }
+      sleep_ms(1);
     }
   }
 
