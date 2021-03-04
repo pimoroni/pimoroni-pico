@@ -78,11 +78,12 @@ namespace pimoroni {
     static const uint8_t I2C_ADDRESS_ALTERNATE  = 0x77;
     static const uint8_t DEFAULT_SDA_PIN        = 20;
     static const uint8_t DEFAULT_SCL_PIN        = 21;
+    bool has_humidity = true;
 
     /***** More public constants here *****/
 
   private:
-    static const uint8_t CHIP_ID  = 0x60;
+    //static const uint8_t CHIP_ID  = 0x60;
 
 
     //--------------------------------------------------

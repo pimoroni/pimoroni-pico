@@ -48,8 +48,14 @@ namespace pimoroni {
     uint8_t val;
 
     read_bytes(BME280_CHIP_ID, &val, 1);
-    if(val != 0x60) {
+    if(val != 0x60 && val != 0x58) {
+      // 0x60 == BME280
+      // 0x58 == BMP280
       return false;
+    }
+
+    if(val == 0x58) {
+      has_humidity = false;
     }
 
     val = 0xb6;
@@ -69,21 +75,23 @@ namespace pimoroni {
 
     read_bytes(BME280_CALIBRATION, (uint8_t *)&calibration_data, 25); // t1 to h1
 
-    uint8_t test[3];
-    read_bytes(BME280_CALIBRATION2, test, 3); // h2, h3
-    //read_bytes(BME280_CALIBRATION2, (uint8_t *)(&calibration_data + 25), 3); // h2, h3
+    if(has_humidity) {
+      uint8_t test[3];
+      read_bytes(BME280_CALIBRATION2, test, 3); // h2, h3
+      //read_bytes(BME280_CALIBRATION2, (uint8_t *)(&calibration_data + 25), 3); // h2, h3
 
-    calibration_data.h2 = (test[1] << 8) | test[0];
-    calibration_data.h3 = test[2];
+      calibration_data.h2 = (test[1] << 8) | test[0];
+      calibration_data.h3 = test[2];
 
-    uint8_t buf[4];
-    read_bytes(BME280_CALIBRATION2 + 3, buf, 4); // h4, h5, h6 (0xE4 to 0xE7)
-    // h4 = buf[0]   = 0xe4
-    // h5 = buf[1:2] = 0xe5 0xe6
-    // h6 = buf[3]   = 0xe7
-    calibration_data.h4 = (buf[0] << 4) | (buf[1] & 0xF);
-    calibration_data.h5 = (buf[2] << 4) | (buf[1] >> 4);
-    calibration_data.h6 = (int8_t)buf[3];
+      uint8_t buf[4];
+      read_bytes(BME280_CALIBRATION2 + 3, buf, 4); // h4, h5, h6 (0xE4 to 0xE7)
+      // h4 = buf[0]   = 0xe4
+      // h5 = buf[1:2] = 0xe5 0xe6
+      // h6 = buf[3]   = 0xe7
+      calibration_data.h4 = (buf[0] << 4) | (buf[1] & 0xF);
+      calibration_data.h5 = (buf[2] << 4) | (buf[1] >> 4);
+      calibration_data.h6 = (int8_t)buf[3];
+    }
 
     return true;
   }
@@ -141,6 +149,8 @@ namespace pimoroni {
       pressure = (float)p / 256;
     }
 
+    if(!has_humidity) return;
+  
     // Humidity Compensation
     var1 = (((((raw_humidity << 14) - (((int32_t)calibration_data.h4) << 20) -
                     (((int32_t)calibration_data.h5) * var1)) +
