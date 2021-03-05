@@ -5,7 +5,7 @@ namespace pimoroni {
 
   /***** Device registers and masks here *****/
 
-  bool MAX30105::init(float led_power, enum FIFO_CONFIG sample_average, int leds_enabled,
+  bool MAX30105::init(int leds_enabled, float led_power, enum FIFO_CONFIG sample_average,
     enum SPO2_CONFIG sample_rate, enum SPO2_CONFIG pulse_width, enum SPO2_CONFIG adc_range, int timeout) {
 
     this->leds_enabled = leds_enabled;

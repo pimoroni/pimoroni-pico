@@ -3,6 +3,7 @@ set(OUTPUT_NAME max30105_demo)
 add_executable(
   ${OUTPUT_NAME}
   demo.cpp
+  heartrate.cpp
 )
 
 # Pull in pico libraries that we need

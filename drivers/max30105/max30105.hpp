@@ -113,9 +113,9 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     bool init(
+    int leds_enabled = 3,
     float led_power = 6.4,
     enum FIFO_CONFIG sample_average = sample_average_1x,
-    int leds_enabled = 3,
     enum SPO2_CONFIG sample_rate = sample_rate_400sps,
     enum SPO2_CONFIG pulse_width = led_pulse_width_215us,
     enum SPO2_CONFIG adc_range = adc_range_16384nA,
