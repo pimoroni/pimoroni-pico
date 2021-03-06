@@ -26,6 +26,7 @@ namespace pimoroni {
     void set_backlight(uint8_t brightness);
     void set_led(uint8_t r, uint8_t g, uint8_t b);
     bool is_pressed(uint8_t button);
+    void flip();
   };
 
 }
