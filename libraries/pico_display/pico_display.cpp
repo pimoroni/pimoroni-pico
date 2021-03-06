@@ -79,4 +79,7 @@ namespace pimoroni {
     return !gpio_get(button);
   }
 
+  void PicoDisplay::flip() {
+    screen.flip();
+  }
 }

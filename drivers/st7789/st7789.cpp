@@ -7,7 +7,8 @@
 #include "hardware/pwm.h"
 
 namespace pimoroni {
-
+  char madctl[2];
+  
   void ST7789::init(bool auto_init_sequence) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
@@ -50,16 +51,17 @@ namespace pimoroni {
       sleep_ms(150);
 
       if(width == 240 && height == 240) {
-        command(reg::MADCTL,    1, "\x04");  // row/column addressing order - rgb pixel order
-        command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
-        command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
+        madctl[0] = 0x04;  // row/column addressing order - rgb pixel order
       }
 
       if(width == 240 && height == 135) {
-        command(reg::MADCTL,    1, "\x70");
-        command(reg::COLMOD,    1, "\x05");
+        madctl[0] = 0x70;
       }
 
+      command(reg::MADCTL,    1, "\x04");  // row/column addressing order - rgb pixel order
+      command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
+      command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
+  
       command(reg::INVON);   // set inversion mode
       command(reg::SLPOUT);  // leave sleep mode
       command(reg::DISPON);  // turn display on
@@ -146,5 +148,10 @@ namespace pimoroni {
 
   void ST7789::vsync_callback(gpio_irq_callback_t callback) {
     gpio_set_irq_enabled_with_callback(vsync, GPIO_IRQ_EDGE_RISE, true, callback);
+  }
+
+  void ST7789::flip(){
+    madctl[0] ^= 0xC0;
+    command(reg::MADCTL,    1, madctl);
   }
 }
