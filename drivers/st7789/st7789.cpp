@@ -51,11 +51,11 @@ namespace pimoroni {
       sleep_ms(150);
 
       if(width == 240 && height == 240) {
-        madctl = 0x04;
+        madctl[0] = 0x04;
       }
 
       if(width == 240 && height == 135) {
-        madctl = 0x70;
+        madctl[0] = 0x70;
       }
       
       command(reg::MADCTL,    1, madctl);  // row/column addressing order - rgb pixel order
