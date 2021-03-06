@@ -47,6 +47,7 @@ namespace pimoroni {
     void vsync_callback(gpio_irq_callback_t callback);
     void update(bool dont_block = false);
     void set_backlight(uint8_t brightness);
+    void flip();
 
     enum reg {
       SWRESET   = 0x01,
