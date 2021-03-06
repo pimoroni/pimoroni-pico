@@ -9,7 +9,9 @@ namespace pimoroni {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 135;
-    static const uint8_t A = 12;
+    static const int PORTRAIT_WIDTH  = 135;
+    static const int PORTRAIT_HEIGHT = 240;
+     static const uint8_t A = 12;
     static const uint8_t B = 13;
     static const uint8_t X = 14;
     static const uint8_t Y = 15;
@@ -20,6 +22,7 @@ namespace pimoroni {
 
   public:
     PicoDisplay(uint16_t *buf);
+    PicoDisplay(uint16_t *buf, int width, int height);
 
     void init();
     void update();
