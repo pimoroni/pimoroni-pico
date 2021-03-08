@@ -129,7 +129,7 @@ mp_obj_t BreakoutTrackball_enable_interrupt(size_t n_args, const mp_obj_t *pos_a
     enum { ARG_self, ARG_interrupt };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_interrupt, MP_ARG_INT, {.u_bool = false} },
+        { MP_QSTR_interrupt, MP_ARG_BOOL, {.u_bool = false} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -152,10 +152,10 @@ mp_obj_t BreakoutTrackball_set_rgbw(size_t n_args, const mp_obj_t *pos_args, mp_
     enum { ARG_self, ARG_r, ARG_g, ARG_b, ARG_w };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_r, MP_ARG_INT },
-        { MP_QSTR_g, MP_ARG_INT },
-        { MP_QSTR_b, MP_ARG_INT },
-        { MP_QSTR_w, MP_ARG_INT },
+        { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -186,7 +186,7 @@ mp_obj_t BreakoutTrackball_set_red(size_t n_args, const mp_obj_t *pos_args, mp_m
     enum { ARG_self, ARG_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_value, MP_ARG_INT },
+        { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -208,7 +208,7 @@ mp_obj_t BreakoutTrackball_set_green(size_t n_args, const mp_obj_t *pos_args, mp
     enum { ARG_self, ARG_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_value, MP_ARG_INT },
+        { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -230,7 +230,7 @@ mp_obj_t BreakoutTrackball_set_blue(size_t n_args, const mp_obj_t *pos_args, mp_
     enum { ARG_self, ARG_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_value, MP_ARG_INT },
+        { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -252,7 +252,7 @@ mp_obj_t BreakoutTrackball_set_white(size_t n_args, const mp_obj_t *pos_args, mp
     enum { ARG_self, ARG_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_value, MP_ARG_INT },
+        { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
