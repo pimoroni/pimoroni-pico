@@ -6,14 +6,23 @@
 namespace pimoroni {
 
   class ST7789 {
-    spi_inst_t *spi = spi0;
-
-    uint32_t dma_channel;
-
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
+  private:
     // screen properties
     uint16_t width;
     uint16_t height;
     uint16_t row_stride;
+
+  public:
+    // frame buffer where pixel data is stored
+    uint16_t *frame_buffer;
+
+  private:
+    spi_inst_t *spi = spi0;
+
+    uint32_t dma_channel;
 
     // interface pins with our standard defaults where appropriate
     int8_t cs     = 17;
@@ -26,10 +35,10 @@ namespace pimoroni {
 
     uint32_t spi_baud = 64 * 1024 * 1024;
 
-  public:
-    // frame buffer where pixel data is stored
-    uint16_t *frame_buffer;
 
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
   public:
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer) :
       width(width), height(height), frame_buffer(frame_buffer) {}
@@ -37,44 +46,28 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
            uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
-      spi(spi),
-      width(width), height(height),      
-      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), frame_buffer(frame_buffer) {}
+      width(width), height(height), frame_buffer(frame_buffer),
+      spi(spi),      
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso) {}
 
+
+    //--------------------------------------------------
+    // Methods
+    //--------------------------------------------------
+  public:
     void init(bool auto_init_sequence = true);
+
+    spi_inst_t* get_spi() const;
+    int get_cs() const;
+    int get_dc() const;    
+    int get_sck() const;
+    int get_mosi() const;
+    int get_miso() const;
 
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void vsync_callback(gpio_irq_callback_t callback);
     void update(bool dont_block = false);
     void set_backlight(uint8_t brightness);
-
-    enum reg {
-      SWRESET   = 0x01,
-      TEON      = 0x35,
-      MADCTL    = 0x36,
-      COLMOD    = 0x3A,
-      GCTRL     = 0xB7,
-      VCOMS     = 0xBB,
-      LCMCTRL   = 0xC0,
-      VDVVRHEN  = 0xC2,
-      VRHS      = 0xC3,
-      VDVS      = 0xC4,
-      FRCTRL2   = 0xC6,
-      PWRCTRL1  = 0xD0,
-      FRMCTR1   = 0xB1,
-      FRMCTR2   = 0xB2,
-      GMCTRP1   = 0xE0,
-      GMCTRN1   = 0xE1,
-      INVOFF    = 0x20,
-      SLPOUT    = 0x11,
-      DISPON    = 0x29,
-      GAMSET    = 0x26,
-      DISPOFF   = 0x28,
-      RAMWR     = 0x2C,
-      INVON     = 0x21,
-      CASET     = 0x2A,
-      RASET     = 0x2B
-    };
   };
 
 }

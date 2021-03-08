@@ -8,6 +8,34 @@
 
 namespace pimoroni {
 
+  enum reg {
+    SWRESET   = 0x01,
+    TEON      = 0x35,
+    MADCTL    = 0x36,
+    COLMOD    = 0x3A,
+    GCTRL     = 0xB7,
+    VCOMS     = 0xBB,
+    LCMCTRL   = 0xC0,
+    VDVVRHEN  = 0xC2,
+    VRHS      = 0xC3,
+    VDVS      = 0xC4,
+    FRCTRL2   = 0xC6,
+    PWRCTRL1  = 0xD0,
+    FRMCTR1   = 0xB1,
+    FRMCTR2   = 0xB2,
+    GMCTRP1   = 0xE0,
+    GMCTRN1   = 0xE1,
+    INVOFF    = 0x20,
+    SLPOUT    = 0x11,
+    DISPON    = 0x29,
+    GAMSET    = 0x26,
+    DISPOFF   = 0x28,
+    RAMWR     = 0x2C,
+    INVON     = 0x21,
+    CASET     = 0x2A,
+    RASET     = 0x2B
+  };
+
   void ST7789::init(bool auto_init_sequence) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
@@ -97,6 +125,30 @@ namespace pimoroni {
     // channel_config_set_dreq(&config, spi_get_index(spi) ? DREQ_SPI1_TX : DREQ_SPI0_TX);
     // dma_channel_configure(
     //   dma_channel, &config, &spi_get_hw(spi)->dr, frame_buffer, width * height, false);
+  }
+
+  spi_inst_t* ST7789::get_spi() const {
+    return spi;
+  }
+
+  int ST7789::get_cs() const {
+    return cs;
+  }
+
+  int ST7789::get_dc() const {
+    return dc;
+  }
+
+  int ST7789::get_sck() const {
+    return sck;
+  }
+
+  int ST7789::get_mosi() const {
+    return mosi;
+  }
+
+  int ST7789::get_miso() const {
+    return miso;
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data) {
