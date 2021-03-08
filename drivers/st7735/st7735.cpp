@@ -8,6 +8,64 @@
 
 namespace pimoroni {
 
+  enum reg : uint8_t {
+    SWRESET   = 0x01,
+    RDDID     = 0x04,
+    RDDRST    = 0x09,
+    RDDPM     = 0x0A,
+    RDDMADCTL = 0x0B,
+    RDDCOLMOD = 0x0C,
+    RDDIM     = 0x0D,
+    RDDSM     = 0x0E,
+    RDDSDR    = 0x0F,
+    SLPIN     = 0x10,
+    SLPOUT    = 0x11,
+    PTLON     = 0x12,
+    NORON     = 0x13,
+    INVOFF    = 0x20,
+    INVON     = 0x21,
+    GAMSET    = 0x26,
+    DISPOFF   = 0x28,
+    DISPON    = 0x29,
+    CASET     = 0x2A,
+    RASET     = 0x2B,
+    RAMWR     = 0x2C,
+    RGBSET    = 0x2D,
+    RAMRD     = 0x2E,
+    PTLAR     = 0x30,
+    SCRLAR    = 0x33,
+    TEOFF     = 0x34,
+    TEON      = 0x35,
+    MADCTL    = 0x36,  // Memory Data Access Control
+    VSCSAD    = 0x37,
+    IDMOFF    = 0x38,  // Idle Mode Off
+    IDMON     = 0x39,  // Idle Mode On
+    COLMOD    = 0x3A,
+
+    FRMCTR1   = 0xB1,
+    FRMCTR2   = 0xB2,
+    FRMCTR3   = 0xB3,
+    INVCTR    = 0xB4,
+    DISSET5   = 0xB6,
+
+    PWCTR1    = 0xC0,
+    PWCTR2    = 0xC1,
+    PWCTR3    = 0xC2,
+    PWCTR4    = 0xC3,
+    PWCTR5    = 0xC4,
+    VMCTR1    = 0xC5,
+
+    RDID1     = 0xDA,
+    RDID2     = 0xDB,
+    RDID3     = 0xDC,
+    RDID4     = 0xDD,
+
+    GMCTRP1   = 0xE0,
+    GMCTRN1   = 0xE1,
+
+    PWMTR6    = 0xFC
+  };
+
   void ST7735::init(bool auto_init_sequence) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
@@ -97,6 +155,30 @@ namespace pimoroni {
       command(reg::DISPON);
       sleep_ms(100);
     }
+  }
+
+  spi_inst_t* ST7735::get_spi() const {
+    return spi;
+  }
+
+  int ST7735::get_cs() const {
+    return cs;
+  }
+
+  int ST7735::get_dc() const {
+    return dc;
+  }
+
+  int ST7735::get_sck() const {
+    return sck;
+  }
+
+  int ST7735::get_mosi() const {
+    return mosi;
+  }
+
+  int ST7735::get_miso() const {
+    return miso;
   }
 
   void ST7735::command(uint8_t command, size_t len, const char *data) {
