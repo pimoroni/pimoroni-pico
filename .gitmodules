@@ -1,0 +1,3 @@
+[submodule "micropython/modules/ulab"]
+	path = micropython/modules/ulab
+	url = https://github.com/pimoroni/micropython-ulab.git
