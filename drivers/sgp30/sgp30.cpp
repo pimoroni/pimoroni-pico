@@ -8,12 +8,6 @@ This code is released under the [MIT License](http://opensource.org/licenses/MIT
 Please review the LICENSE file included with this example.
 Distributed as-is; no warranty is given.
 ******************************************************************************/
-#define SGP30_I2CADDR      0x58     // SGP30 I2C address
-
-// commands and constants
-#define SGP30_REQ_FEATURES 0x0020  // The required feature set
-#define SGP30_CRC_SEED     0x31    // CRC Seed
-#define SGP30_CRC_BASE     0xFF    // Base value for calculating CRC
 
 #include "sgp30.hpp"
 
@@ -69,7 +63,7 @@ namespace pimoroni {
 
   // Write a soft reset - writes globally, so all devices on this
   // I2C bus receive the request
-  bool SGP30::soft_reset(){
+  bool SGP30::soft_reset() {
     return write_global(SOFT_RESET, 10);
   }
 
@@ -101,28 +95,28 @@ namespace pimoroni {
 
   // get the air quality values - will be 400 and 0 respectively for the
   // first 15 seconds after starting measurement
-  bool SGP30::get_air_quality(uint16_t * eCO2, uint16_t * TVOC){
+  bool SGP30::get_air_quality(uint16_t * eCO2, uint16_t * TVOC) {
     return read_reg_2_words(MEASURE_AIR_QUALITY, 12, eCO2, TVOC);
   }
 
   // Get the raw readings - not useful in real-world settings
-  bool SGP30::get_air_quality_raw(uint16_t * rawH2, uint16_t * rawEthanol){
+  bool SGP30::get_air_quality_raw(uint16_t * rawH2, uint16_t * rawEthanol) {
     return read_reg_2_words(MEASURE_RAW_SIGNALS, 25, rawH2, rawEthanol);
   }
 
 
   // Get the baseline compensation values for eCO2 and VOC
-  bool SGP30::get_baseline(uint16_t *eco2, uint16_t *tvoc){
+  bool SGP30::get_baseline(uint16_t *eco2, uint16_t *tvoc) {
     return read_reg_2_words(GET_BASELINE, 10, eco2, tvoc);
   }
 
   // Write the baseline compensation values for eCO2 and VOC
-  void SGP30::set_baseline(uint16_t eco2, uint16_t tvoc){
+  void SGP30::set_baseline(uint16_t eco2, uint16_t tvoc) {
     write_reg_2_words(SET_BASELINE, 10, eco2, tvoc);
   }
 
   // Set the absolute humidity, e.g. from an SHTxx chip
-  bool SGP30::set_humidity(uint32_t absolute_humidity){
+  bool SGP30::set_humidity(uint32_t absolute_humidity) {
     if (absolute_humidity > 256000) {
       return false;
     }
