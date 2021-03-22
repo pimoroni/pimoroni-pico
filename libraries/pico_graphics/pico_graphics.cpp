@@ -67,7 +67,7 @@ namespace pimoroni {
     Pen *dest = ptr(clipped);
     while(clipped.h--) {
       // draw span of pixels for this row
-      for(uint32_t i = 0; i < clipped.w; i++) {
+      for(int32_t i = 0; i < clipped.w; i++) {
         *dest++ = pen;
       }
 
@@ -141,7 +141,7 @@ namespace pimoroni {
 
       // if this word would exceed the wrap limit then
       // move to the next line
-      if(co != 0 && co + word_width > wrap) {
+      if(co != 0 && co + word_width > (uint32_t)wrap) {
         co = 0;
         lo += 7 * scale;
       }
@@ -203,13 +203,13 @@ namespace pimoroni {
     int32_t w1row = orient2d(p3, p1, tl) + bias1;
     int32_t w2row = orient2d(p1, p2, tl) + bias2;
 
-    for (uint32_t y = 0; y < triangle_bounds.h; y++) {
+    for (int32_t y = 0; y < triangle_bounds.h; y++) {
       int32_t w0 = w0row;
       int32_t w1 = w1row;
       int32_t w2 = w2row;
 
       Pen *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
-      for (uint32_t x = 0; x < triangle_bounds.w; x++) {
+      for (int32_t x = 0; x < triangle_bounds.w; x++) {
         if ((w0 | w1 | w2) >= 0) {
           *dest = pen;
         }
