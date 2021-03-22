@@ -18,11 +18,8 @@
 
 namespace pimoroni {
 
-  // Enumeration for screen colors
-  enum class SH1107_COLOR : uint8_t {
-      Black = 0, // Black color, no pixel
-      White = 1  // Pixel is set. Color depends on OLED
-  };
+  #define SH1107_SET true     // Pixel is set. Color depends on OLED and invert setting
+  #define SH1107_CLEAR false  // Black color by default, no pixel
 
   typedef enum {
       SH1107_OK = 0x00,
@@ -37,6 +34,7 @@ namespace pimoroni {
       uint8_t Initialized;
       uint8_t DisplayOn;
   } SH1107_t;
+
   typedef struct {
       uint8_t x;
       uint8_t y;
@@ -72,7 +70,7 @@ namespace pimoroni {
 
     // spi interface pins
     spi_inst_t *spi   = nullptr;
-    uint32_t spi_baud = 64 * 1024 * 1024;
+    uint32_t spi_baud = 32 * 1024 * 1024;
 
     int8_t cs         = 17;
     int8_t dc         = 16;
@@ -132,22 +130,22 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    bool init(); //This should be present in all drivers
+    bool init(bool h_flip=true, bool v_flip=true, bool invert=false); //This should be present in all drivers
 
     /***** More public methods here *****/
     // Procedure definitions
-    void Screen_Init(void);
-    void Fill(SH1107_COLOR color);
+    void Screen_Init(bool h_flip, bool v_flip, bool invert);
+    void Fill(bool color);
     void UpdateScreen(void);
-    void DrawPixel(uint8_t x, uint8_t y, SH1107_COLOR color);
-    char WriteChar(char ch, FontDef Font, SH1107_COLOR color);
-    char WriteString(const char* str, FontDef Font, SH1107_COLOR color);
+    void DrawPixel(uint8_t x, uint8_t y, bool color);
+    char WriteChar(char ch, FontDef Font, bool color);
+    char WriteString(const char* str, FontDef Font, bool color);
     void SetCursor(uint8_t x, uint8_t y);
-    void Line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, SH1107_COLOR color);
-    void DrawArc(uint8_t x, uint8_t y, uint8_t radius, uint16_t start_angle, uint16_t sweep, SH1107_COLOR color);
-    void DrawCircle(uint8_t par_x, uint8_t par_y, uint8_t par_r, SH1107_COLOR color);
-    void Polyline(const SH1107_VERTEX *par_vertex, uint16_t par_size, SH1107_COLOR color);
-    void DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, SH1107_COLOR color);
+    void Line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, bool color);
+    void DrawArc(uint8_t x, uint8_t y, uint8_t radius, uint16_t start_angle, uint16_t sweep, bool color);
+    void DrawCircle(uint8_t par_x, uint8_t par_y, uint8_t par_r, bool color);
+    void Polyline(const SH1107_VERTEX *par_vertex, uint16_t par_size, bool color);
+    void DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, bool color);
     /**
      * @brief Sets the contrast of the display.
      * @param[in] value contrast to set.

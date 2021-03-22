@@ -6,27 +6,14 @@
 #ifndef __SH1107_CONF_H__
 #define __SH1107_CONF_H__
 
-//Choose a bus - default to I2C
-//uncomment next line to use SPI
-// #define SH1107_USE_SPI
-#ifndef SH1107_USE_I2C
-#ifndef SH1107_USE_SPI
-#define SH1107_USE_I2C
-#endif
-#endif
-
-// Mirror the screen if needed
-#define SH1107_MIRROR_VERT
-#define SH1107_MIRROR_HORIZ
-
-// Set inverse color if needed
-// # define SH1107_INVERSE_COLOR
-
 // Include only needed fonts
 #define SH1107_INCLUDE_FONT_6x8
 #define SH1107_INCLUDE_FONT_7x10
 #define SH1107_INCLUDE_FONT_11x18
 #define SH1107_INCLUDE_FONT_16x26
+
+// DEPRECATED:
+// Below values must be specified in display constructor
 
 // Some OLEDs don't display anything in first two columns.
 // In this case change the following macro to 130.

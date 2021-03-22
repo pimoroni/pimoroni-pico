@@ -15,7 +15,7 @@ namespace pimoroni {
 
   /***** Device registers and masks here *****/
 
-  bool SH1107::init() {
+  bool SH1107::init(bool h_flip, bool v_flip, bool invert) {
     bool succeeded = false;
 
     if(spi) {
@@ -46,7 +46,7 @@ namespace pimoroni {
       }
     }
 
-    Screen_Init();
+    Screen_Init(h_flip, v_flip, invert);
 
     return true;
   }
@@ -107,7 +107,7 @@ namespace pimoroni {
   }
 
   // Initialize the oled screen
-  void SH1107::Screen_Init(void) {
+  void SH1107::Screen_Init(bool h_flip, bool v_flip, bool invert) {
       // Reset OLED
       Reset();
 
@@ -123,11 +123,11 @@ namespace pimoroni {
 
       WriteCommand(0xB0); //Set Page Start Address for Page Addressing Mode,0-7
 
-#ifdef SH1107_MIRROR_VERT
-      WriteCommand(0xC0); // Mirror vertically
-#else
-      WriteCommand(0xC8); //Set COM Output Scan Direction
-#endif
+      if (h_flip) {
+        WriteCommand(0xC0); // Mirror vertically
+      } else {
+        WriteCommand(0xC8); //Set COM Output Scan Direction
+      }
 
       WriteCommand(0x00); //---set low column address
       WriteCommand(0x10); //---set high column address
@@ -136,17 +136,18 @@ namespace pimoroni {
 
       SetContrast(0xFF);
 
-#ifdef SH1107_MIRROR_HORIZ
-      WriteCommand(0xA0); // Mirror horizontally
-#else
-      WriteCommand(0xA1); //--set segment re-map 0 to 127 - CHECK
-#endif
+      if (v_flip) {
+        WriteCommand(0xA0); // Mirror horizontally
+      } else {
+        WriteCommand(0xA1); //--set segment re-map 0 to 127 - CHECK
+      }
 
-#ifdef SH1107_INVERSE_COLOR
-      WriteCommand(0xA7); //--set inverse color
-#else
-      WriteCommand(0xA6); //--set normal color
-#endif
+
+      if (invert) {
+        WriteCommand(0xA7); //--set inverse color
+      } else {
+        WriteCommand(0xA6); //--set normal color
+      }
 
     // Set multiplex ratio.
       if (height == 128) {
@@ -192,7 +193,7 @@ namespace pimoroni {
       SetDisplayOn(1); //--turn on SH1107 panel
 
       // Clear screen
-      Fill(SH1107_COLOR::Black);
+      Fill(SH1107_CLEAR);
       
       // Flush buffer to screen
       UpdateScreen();
@@ -205,9 +206,9 @@ namespace pimoroni {
   }
 
   // Fill the whole screen with the given color
-  void SH1107::Fill(SH1107_COLOR color) {
+  void SH1107::Fill(bool color) {
       /* Set memory */
-      memset(frame_buffer, (color == SH1107_COLOR::Black) ? 0x00 : 0xFF, width * height / 8);
+      memset(frame_buffer, (color == SH1107_CLEAR) ? 0x00 : 0xFF, width * height / 8);
   }
 
   // Write the screenbuffer with changed to the screen
@@ -230,7 +231,7 @@ namespace pimoroni {
   //    X => X Coordinate
   //    Y => Y Coordinate
   //    color => Pixel color
-  void SH1107::DrawPixel(uint8_t x, uint8_t y, SH1107_COLOR color) {
+  void SH1107::DrawPixel(uint8_t x, uint8_t y, bool color) {
       if(x >= width || y >= height) {
           // Don't write outside the buffer
           return;
@@ -238,11 +239,11 @@ namespace pimoroni {
       
       // Check if pixel should be inverted
       if(SH1107_State.Inverted) {
-          color = color == SH1107_COLOR::White ? SH1107_COLOR::Black : SH1107_COLOR::White;
+          color = !color;
       }
       
       // Draw in the right color
-      if(color == SH1107_COLOR::White) {
+      if(color == SH1107_SET) {
           frame_buffer[x + (y / 8) * width] |= 1 << (y % 8);
       } else { 
           frame_buffer[x + (y / 8) * width] &= ~(1 << (y % 8));
@@ -253,7 +254,7 @@ namespace pimoroni {
   // ch       => char om weg te schrijven
   // Font     => Font waarmee we gaan schrijven
   // color    => Black or White
-  char SH1107::WriteChar(char ch, FontDef Font, SH1107_COLOR color) {
+  char SH1107::WriteChar(char ch, FontDef Font, bool color) {
       uint32_t i, b, j;
       
       // Check if character is valid
@@ -267,18 +268,15 @@ namespace pimoroni {
           // Not enough space on current line
           return 0;
       }
-      
-      SH1107_COLOR fg = color;
-      SH1107_COLOR bg = color == SH1107_COLOR::White ? SH1107_COLOR::Black : SH1107_COLOR::White;
 
       // Use the font to write
       for(i = 0; i < Font.FontHeight; i++) {
           b = Font.data[(ch - 32) * Font.FontHeight + i];
           for(j = 0; j < Font.FontWidth; j++) {
               if((b << j) & 0x8000)  {
-                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), fg);
+                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), color);
               } else {
-                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), bg);
+                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), !color);
               }
           }
       }
@@ -291,7 +289,7 @@ namespace pimoroni {
   }
 
   // Write full string to screenbuffer
-  char SH1107::WriteString(const char* str, FontDef Font, SH1107_COLOR color) {
+  char SH1107::WriteString(const char* str, FontDef Font, bool color) {
       // Write until null-byte
       while (*str) {
           if (WriteChar(*str, Font, color) != *str) {
@@ -314,7 +312,7 @@ namespace pimoroni {
   }
 
   // Draw line by Bresenhem's algorithm
-  void SH1107::Line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, SH1107_COLOR color) {
+  void SH1107::Line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, bool color) {
     int32_t deltaX = abs(x2 - x1);
     int32_t deltaY = abs(y2 - y1);
     int32_t signX = ((x1 < x2) ? 1 : -1);
@@ -350,7 +348,7 @@ namespace pimoroni {
     return;
   }
   //Draw polyline
-  void SH1107::Polyline(const SH1107_VERTEX *par_vertex, uint16_t par_size, SH1107_COLOR color) {
+  void SH1107::Polyline(const SH1107_VERTEX *par_vertex, uint16_t par_size, bool color) {
     uint16_t i;
     if(par_vertex != 0){
       for(i = 1; i < par_size; i++){
@@ -385,7 +383,7 @@ namespace pimoroni {
    * start_angle in degree
    * sweep in degree
    */
-  void SH1107::DrawArc(uint8_t x, uint8_t y, uint8_t radius, uint16_t start_angle, uint16_t sweep, SH1107_COLOR color) {
+  void SH1107::DrawArc(uint8_t x, uint8_t y, uint8_t radius, uint16_t start_angle, uint16_t sweep, bool color) {
       #define CIRCLE_APPROXIMATION_SEGMENTS 36
       float approx_degree;
       uint32_t approx_segments;
@@ -422,7 +420,7 @@ namespace pimoroni {
       return;
   }
   //Draw circle by Bresenhem's algorithm
-  void SH1107::DrawCircle(uint8_t par_x,uint8_t par_y,uint8_t par_r,SH1107_COLOR par_color) {
+  void SH1107::DrawCircle(uint8_t par_x,uint8_t par_y,uint8_t par_r,bool par_color) {
     int32_t x = -par_r;
     int32_t y = 0;
     int32_t err = 2 - 2 * par_r;
@@ -467,7 +465,7 @@ namespace pimoroni {
   }
 
   //Draw rectangle
-  void SH1107::DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, SH1107_COLOR color) {
+  void SH1107::DrawRectangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, bool color) {
     Line(x1,y1,x2,y1,color);
     Line(x2,y1,x2,y2,color);
     Line(x2,y2,x1,y2,color);
