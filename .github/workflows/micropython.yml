@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: pimoroni/micropython
-        ref: continuous-integration
+        ref: continuous-integration-broken
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
 
