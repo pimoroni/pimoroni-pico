@@ -15,3 +15,9 @@ target_compile_definitions(usermod_pico_scroll INTERFACE
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_scroll)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/pico_scroll.c
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-discarded-qualifiers -Wno-implicit-int"
+)

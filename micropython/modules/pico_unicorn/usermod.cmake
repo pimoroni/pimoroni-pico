@@ -17,3 +17,9 @@ target_compile_definitions(usermod_pico_unicorn INTERFACE
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_unicorn)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/pico_unicorn.c
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-discarded-qualifiers -Wno-implicit-int"
+)
