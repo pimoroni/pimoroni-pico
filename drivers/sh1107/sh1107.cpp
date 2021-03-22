@@ -18,95 +18,92 @@ namespace pimoroni {
   bool SH1107::init() {
     bool succeeded = false;
 
-    i2c_init(i2c, 400000);
+    if(spi) {
+      spi_init(spi, spi_baud);
 
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(scl);
+      gpio_set_function(dc, GPIO_FUNC_SIO);
+      gpio_set_dir(dc, GPIO_OUT);
 
-    if(interrupt != PIN_UNUSED) {
-      gpio_set_function(interrupt, GPIO_FUNC_SIO);
-      gpio_set_dir(interrupt, GPIO_IN);
-      gpio_pull_up(interrupt);
+      gpio_set_function(cs, GPIO_FUNC_SIO);
+      gpio_set_dir(cs, GPIO_OUT);
+
+      gpio_set_function(sck,  GPIO_FUNC_SPI);
+      gpio_set_function(mosi, GPIO_FUNC_SPI);
+    }
+    else
+    {
+      i2c_init(i2c, i2c_baud);
+
+      gpio_set_function(sda, GPIO_FUNC_I2C);
+      gpio_pull_up(sda);
+      gpio_set_function(scl, GPIO_FUNC_I2C);
+      gpio_pull_up(scl);
+
+      if(interrupt != PIN_UNUSED) {
+        gpio_set_function(interrupt, GPIO_FUNC_SIO);
+        gpio_set_dir(interrupt, GPIO_IN);
+        gpio_pull_up(interrupt);
+      }
     }
 
     Screen_Init();
 
-    /***** Replace if(true) with any operations needed to initialise the device *****/
-    if(true) {
-      succeeded = true;
-    }
-
-    return succeeded;
+    return true;
   }
 
-#if defined(SH1107_USE_I2C)
-
   void SH1107::Reset(void) {
-      /* for I2C - do nothing */
+      if(spi && rst > -1) {
+        gpio_put(cs, 1);
+        gpio_put(rst, 0);
+        sleep_ms(10);
+        gpio_put(rst, 1);
+        sleep_ms(10);
+      } else {
+        /* for I2C - do nothing */
+      }
   }
 
   // Send a byte to the command register
   void SH1107::WriteCommand(uint8_t byte) {
-      //HAL_I2C_Mem_Write(&SH1107_I2C_PORT, SH1107_I2C_ADDR, 0x00, 1, &byte, 1, HAL_MAX_DELAY);
-      uint8_t buffer[2] = {0x00, byte};
-      uint8_t len = 1;
-      i2c_write_blocking(i2c, address, buffer, len + 1, false);
+      if(spi) {
+        gpio_put(cs, 0);
+        gpio_put(dc, 0);
+        spi_write_blocking(spi, &byte, 1);
+        gpio_put(cs, 1);
+      }
+      else {
+        uint8_t buffer[2] = {0x00, byte};
+        i2c_write_blocking(i2c, address, buffer, 2, false);
+      }
   }
 
   // Send data
   void SH1107::WriteData(uint8_t* buffer, size_t buff_size) {
-      //HAL_I2C_Mem_Write(&SH1107_I2C_PORT, SH1107_I2C_ADDR, 0x40, 1, buffer, buff_size, HAL_MAX_DELAY);
-      SH1107_drawBuffer[0] = 0x40;
-      memcpy(SH1107_drawBuffer+1, buffer, buff_size);
-      i2c_write_blocking(i2c, address, SH1107_drawBuffer, buff_size + 1, false);
-      //SAR uint8_t reg = 0x40;
-      //SAR i2c_write_blocking(i2c, address, &reg, 0 + 1, false);
-      //SAR i2c_write_blocking(i2c, address, buffer, buff_size, false);
+      if(spi) {
+        gpio_put(cs, 0);
+        gpio_put(dc, 1);
+        spi_write_blocking(spi, buffer, buff_size);
+        gpio_put(cs, 1);
+      }
+      else {
+        uint8_t addr = 0x40;
+    
+        uint8_t temp[129];
+        temp[0] = addr;
+        memcpy(temp + 1, buffer, buff_size);
+    
+        //i2c_write_blocking(i2c, address, &addr, 1, true);
+        i2c_write_blocking(i2c, address, temp, buff_size + 1, false);
+      }
   }
-
-#elif defined(SH1107_USE_SPI)
-
-  void SH1107::Reset(void) {
-      // CS = High (not selected)
-      GPIO_WritePin(SH1107_CS_Port, SH1107_CS_Pin, GPIO_PIN_SET);
-
-      // Reset the OLED
-      GPIO_WritePin(SH1107_Reset_Port, SH1107_Reset_Pin, GPIO_PIN_RESET);
-      Delay(10);
-      GPIO_WritePin(SH1107_Reset_Port, SH1107_Reset_Pin, GPIO_PIN_SET);
-      sleep_ms(10);
-  }
-
-  // Send a byte to the command register
-  void SH1107::WriteCommand(uint8_t byte) {
-      GPIO_WritePin(SH1107_CS_Port, SH1107_CS_Pin, GPIO_PIN_RESET); // select OLED
-      GPIO_WritePin(SH1107_DC_Port, SH1107_DC_Pin, GPIO_PIN_RESET); // command
-      SPI_Transmit(&SH1107_SPI_PORT, (uint8_t *) &byte, 1, HAL_MAX_DELAY);
-      GPIO_WritePin(SH1107_CS_Port, SH1107_CS_Pin, GPIO_PIN_SET); // un-select OLED
-  }
-
-  // Send data
-  void SH1107::WriteData(uint8_t* buffer, size_t buff_size) {
-      GPIO_WritePin(SH1107_CS_Port, SH1107_CS_Pin, GPIO_PIN_RESET); // select OLED
-      GPIO_WritePin(SH1107_DC_Port, SH1107_DC_Pin, GPIO_PIN_SET); // data
-      SPI_Transmit(&SH1107_SPI_PORT, buffer, buff_size, HAL_MAX_DELAY);
-      GPIO_WritePin(SH1107_CS_Port, SH1107_CS_Pin, GPIO_PIN_SET); // un-select OLED
-  }
-
-#else
-#error "You should define SH1107_USE_SPI or SH1107_USE_I2C macro"
-#endif
 
   /* Fills the Screenbuffer with values from a given buffer of a fixed length */
   SH1107_Error_t SH1107::FillBuffer(uint8_t* buf, uint32_t len) {
-      SH1107_Error_t ret = SH1107_ERR;
-      if (len <= SH1107_BUFFER_SIZE) {
-          memcpy(SH1107_Buffer,buf,len);
-          ret = SH1107_OK;
+      if (len <= width * height / 8) {
+          memcpy(frame_buffer, buf, len);
+          return SH1107_OK;
       }
-      return ret;
+      return SH1107_ERR;
   }
 
   // Initialize the oled screen
@@ -122,7 +119,7 @@ namespace pimoroni {
 
       WriteCommand(0x20); //Set Memory Addressing Mode
       WriteCommand(0x00); // 00b,Horizontal Addressing Mode; 01b,Vertical Addressing Mode;
-                                  // 10b,Page Addressing Mode (RESET); 11b,Invalid
+                          // 10b,Page Addressing Mode (RESET); 11b,Invalid
 
       WriteCommand(0xB0); //Set Page Start Address for Page Addressing Mode,0-7
 
@@ -151,23 +148,21 @@ namespace pimoroni {
       WriteCommand(0xA6); //--set normal color
 #endif
 
-  // Set multiplex ratio.
-#if (SH1107_HEIGHT == 128)
-      // Found in the Luma Python lib for SH1106.
-      WriteCommand(0xFF);
-#else
-      WriteCommand(0xA8); //--set multiplex ratio(1 to 64) - CHECK
-#endif
+    // Set multiplex ratio.
+      if (height == 128) {
+        // Found in the Luma Python lib for SH1106.
+        WriteCommand(0xFF);
+      } else {
+        WriteCommand(0xA8); //--set multiplex ratio(1 to 64) - CHECK
+      }
 
-#if (SH1107_HEIGHT == 32)
-      WriteCommand(0x1F); //
-#elif (SH1107_HEIGHT == 64)
-      WriteCommand(0x3F); //
-#elif (SH1107_HEIGHT == 128)
-      WriteCommand(0x3F); // Seems to work for 128px high displays too.
-#else
-#error "Only 32, 64, or 128 lines of height are supported!"
-#endif
+      if (height == 32) {
+        WriteCommand(0x1F); //
+      } else if (height == 64) {
+        WriteCommand(0x3F); //
+      } else if (height == 128) {
+        WriteCommand(0x3F); // Seems to work for 128px high displays too.
+      }
 
       WriteCommand(0xA4); //0xa4,Output follows RAM content;0xa5,Output ignores RAM content
 
@@ -181,15 +176,13 @@ namespace pimoroni {
       WriteCommand(0x22); //
 
       WriteCommand(0xDA); //--set com pins hardware configuration - CHECK
-#if (SH1107_HEIGHT == 32)
-      WriteCommand(0x02);
-#elif (SH1107_HEIGHT == 64)
-      WriteCommand(0x12);
-#elif (SH1107_HEIGHT == 128)
-      WriteCommand(0x12);
-#else
-#error "Only 32, 64, or 128 lines of height are supported!"
-#endif
+      if (height == 32) {
+        WriteCommand(0x02); //
+      } else if (height == 64) {
+        WriteCommand(0x12); //
+      } else if (height == 128) {
+        WriteCommand(0x12); // Seems to work for 128px high displays too.
+      }
 
       WriteCommand(0xDB); //--set vcomh
       WriteCommand(0x20); //0x20,0.77xVcc
@@ -199,7 +192,7 @@ namespace pimoroni {
       SetDisplayOn(1); //--turn on SH1107 panel
 
       // Clear screen
-      Fill(Black);
+      Fill(SH1107_COLOR::Black);
       
       // Flush buffer to screen
       UpdateScreen();
@@ -214,7 +207,7 @@ namespace pimoroni {
   // Fill the whole screen with the given color
   void SH1107::Fill(SH1107_COLOR color) {
       /* Set memory */
-      memset(SH1107_Buffer, (color == Black) ? 0x00 : 0xFF, SH1107_BUFFER_SIZE);
+      memset(frame_buffer, (color == SH1107_COLOR::Black) ? 0x00 : 0xFF, width * height / 8);
   }
 
   // Write the screenbuffer with changed to the screen
@@ -225,11 +218,11 @@ namespace pimoroni {
       //  * 32px   ==  4 pages
       //  * 64px   ==  8 pages
       //  * 128px  ==  16 pages
-      for(uint8_t i = 0; i < SH1107_HEIGHT/8; i++) {
+      for(uint8_t i = 0; i < height / 8; i++) {
           WriteCommand(0xB0 + i); // Set the current RAM page address.
           WriteCommand(0x00);
           WriteCommand(0x10);
-          WriteData(SH1107_Buffer+SH1107_WIDTH*i,SH1107_WIDTH);
+          WriteData(frame_buffer + width * i, width);
       }
   }
 
@@ -238,21 +231,21 @@ namespace pimoroni {
   //    Y => Y Coordinate
   //    color => Pixel color
   void SH1107::DrawPixel(uint8_t x, uint8_t y, SH1107_COLOR color) {
-      if(x >= SH1107_WIDTH || y >= SH1107_HEIGHT) {
+      if(x >= width || y >= height) {
           // Don't write outside the buffer
           return;
       }
       
       // Check if pixel should be inverted
       if(SH1107_State.Inverted) {
-          color = (SH1107_COLOR)!color;
+          color = color == SH1107_COLOR::White ? SH1107_COLOR::Black : SH1107_COLOR::White;
       }
       
       // Draw in the right color
-      if(color == White) {
-          SH1107_Buffer[x + (y / 8) * SH1107_WIDTH] |= 1 << (y % 8);
+      if(color == SH1107_COLOR::White) {
+          frame_buffer[x + (y / 8) * width] |= 1 << (y % 8);
       } else { 
-          SH1107_Buffer[x + (y / 8) * SH1107_WIDTH] &= ~(1 << (y % 8));
+          frame_buffer[x + (y / 8) * width] &= ~(1 << (y % 8));
       }
   }
 
@@ -268,21 +261,24 @@ namespace pimoroni {
           return 0;
       
       // Check remaining space on current line
-      if (SH1107_WIDTH < (SH1107_State.CurrentX + Font.FontWidth) ||
-          SH1107_HEIGHT < (SH1107_State.CurrentY + Font.FontHeight))
+      if (width < (SH1107_State.CurrentX + Font.FontWidth) ||
+          height < (SH1107_State.CurrentY + Font.FontHeight))
       {
           // Not enough space on current line
           return 0;
       }
       
+      SH1107_COLOR fg = color;
+      SH1107_COLOR bg = color == SH1107_COLOR::White ? SH1107_COLOR::Black : SH1107_COLOR::White;
+
       // Use the font to write
       for(i = 0; i < Font.FontHeight; i++) {
           b = Font.data[(ch - 32) * Font.FontHeight + i];
           for(j = 0; j < Font.FontWidth; j++) {
               if((b << j) & 0x8000)  {
-                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), (SH1107_COLOR) color);
+                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), fg);
               } else {
-                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), (SH1107_COLOR)!color);
+                  DrawPixel(SH1107_State.CurrentX + j, (SH1107_State.CurrentY + i), bg);
               }
           }
       }
@@ -295,7 +291,7 @@ namespace pimoroni {
   }
 
   // Write full string to screenbuffer
-  char SH1107::WriteString(char* str, FontDef Font, SH1107_COLOR color) {
+  char SH1107::WriteString(const char* str, FontDef Font, SH1107_COLOR color) {
       // Write until null-byte
       while (*str) {
           if (WriteChar(*str, Font, color) != *str) {
@@ -432,7 +428,7 @@ namespace pimoroni {
     int32_t err = 2 - 2 * par_r;
     int32_t e2;
 
-    if (par_x >= SH1107_WIDTH || par_y >= SH1107_HEIGHT) {
+    if (par_x >= width || par_y >= height) {
       return;
     }
 

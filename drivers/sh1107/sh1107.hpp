@@ -11,6 +11,7 @@
 
 
 #include "hardware/i2c.h"
+#include "hardware/spi.h"
 #include "hardware/gpio.h"
 
 #include "sh1107_fonts.h"
@@ -18,10 +19,10 @@
 namespace pimoroni {
 
   // Enumeration for screen colors
-  typedef enum {
-      Black = 0x00, // Black color, no pixel
-      White = 0x01  // Pixel is set. Color depends on OLED
-  } SH1107_COLOR;
+  enum class SH1107_COLOR : uint8_t {
+      Black = 0, // Black color, no pixel
+      White = 1  // Pixel is set. Color depends on OLED
+  };
 
   typedef enum {
       SH1107_OK = 0x00,
@@ -52,21 +53,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_INT_PIN      = 22;
     static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
-    /***** More public constants here *****/
-  // SH1107 OLED height in pixels
-#ifndef SH1107_HEIGHT
-#define SH1107_HEIGHT          128
-#endif
-
-  // SH1107 width in pixels
-#ifndef SH1107_WIDTH
-#define SH1107_WIDTH           128
-#endif
-
-#ifndef SH1107_BUFFER_SIZE
-#define SH1107_BUFFER_SIZE   SH1107_WIDTH * SH1107_HEIGHT / 8
-#endif
-
   private:
     /***** Private constants here *****/
 
@@ -75,56 +61,72 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-#if defined(SH1107_USE_I2C)
-    i2c_inst_t *i2c   = i2c0;
+    i2c_inst_t *i2c   = nullptr;
+    uint32_t i2c_baud = 400000;
 
-    // interface pins with our standard defaults where appropriate
+    // i2c interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
     int8_t interrupt  = DEFAULT_INT_PIN;
 
-#elif defined(SH1107_USE_SPI)
+    // spi interface pins
+    spi_inst_t *spi   = nullptr;
+    uint32_t spi_baud = 64 * 1024 * 1024;
 
-    // Set appropriate variables to use these values:
-    //#define SSD1306_SPI_PORT        hspi1
-    //#define SSD1306_CS_Port         OLED_CS_GPIO_Port
-    //#define SSD1306_CS_Pin          OLED_CS_Pin
-    //#define SSD1306_DC_Port         OLED_DC_GPIO_Port
-    //#define SSD1306_DC_Pin          OLED_DC_Pin
-    //#define SSD1306_Reset_Port      OLED_Res_GPIO_Port
-    //#define SSD1306_Reset_Pin       OLED_Res_Pin
-
-#else
-
-#error "You must define SH1107_USE_SPI or SH1107_USE_I2C macro!"
-
-#endif
-
-    /***** More variables here *****/
-    // Screenbuffer
-    // Buffer to hold data while scren is being designed
-    uint8_t SH1107_Buffer[SH1107_BUFFER_SIZE];
-    // Copy to use to write the to the display (needs register address at start)
-    // (May only really need to be SH1107_WIDTH bytes, but play safe)
-    uint8_t SH1107_drawBuffer[SH1107_BUFFER_SIZE+1];
+    int8_t cs         = 17;
+    int8_t dc         = 16;
+    int8_t sck        = 18;
+    int8_t mosi       = 19;
+    int8_t miso       = -1; // we generally don't use this pin
+    int8_t rst        = -1; // Not broken out on BG breakouts
 
     // Screen object
     SH1107_t SH1107_State;
+
+    uint16_t width;
+    uint16_t height;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    SH1107() {}
+    // frame buffer where pixel data is stored
+    uint8_t *frame_buffer;
 
-    SH1107(uint8_t address) :
-      address(address) {}
+    SH1107(uint16_t width, uint16_t height, uint8_t *frame_buffer,
+          i2c_inst_t *i2c,
+          uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
+      i2c(i2c), 
+      width(width), height(height), 
+      address(address), sda(sda), scl(scl), interrupt(interrupt),
+      frame_buffer(frame_buffer) {}
 
-    SH1107(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
+    SH1107(uint16_t width, uint16_t height,
+          i2c_inst_t *i2c,
+          uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
+      i2c(i2c), 
+      width(width), height(height), 
+      address(address), sda(sda), scl(scl), interrupt(interrupt) {
+        frame_buffer = new uint8_t[width * height / 8];
+      }
 
+    SH1107(uint16_t width, uint16_t height, uint8_t *frame_buffer,
+           spi_inst_t *spi,
+           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
+      spi(spi),
+      width(width), height(height),      
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso),
+      frame_buffer(frame_buffer) {}
 
+    SH1107(uint16_t width, uint16_t height,
+           spi_inst_t *spi,
+           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
+      spi(spi),
+      width(width), height(height),      
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso) {
+        frame_buffer = new uint8_t[width * height / 8];
+      }
 
     //--------------------------------------------------
     // Methods
@@ -139,7 +141,7 @@ namespace pimoroni {
     void UpdateScreen(void);
     void DrawPixel(uint8_t x, uint8_t y, SH1107_COLOR color);
     char WriteChar(char ch, FontDef Font, SH1107_COLOR color);
-    char WriteString(char* str, FontDef Font, SH1107_COLOR color);
+    char WriteString(const char* str, FontDef Font, SH1107_COLOR color);
     void SetCursor(uint8_t x, uint8_t y);
     void Line(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, SH1107_COLOR color);
     void DrawArc(uint8_t x, uint8_t y, uint8_t radius, uint16_t start_angle, uint16_t sweep, SH1107_COLOR color);
