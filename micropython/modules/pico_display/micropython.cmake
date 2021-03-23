@@ -15,7 +15,7 @@ target_include_directories(usermod_pico_display INTERFACE
 )
 
 target_compile_definitions(usermod_pico_display INTERFACE
-    -DMODULE_PICODISPLAY_ENABLED=1
+    MODULE_PICODISPLAY_ENABLED=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_display)

@@ -11,7 +11,7 @@ target_include_directories(usermod_pico_scroll INTERFACE
 )
 
 target_compile_definitions(usermod_pico_scroll INTERFACE
-    -DMODULE_PICOSCROLL_ENABLED=1
+    MODULE_PICOSCROLL_ENABLED=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_scroll)
