@@ -63,7 +63,7 @@ jobs:
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
-      run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules -j2
+      run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules/micropython.cmake -j2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
