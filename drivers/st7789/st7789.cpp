@@ -7,9 +7,11 @@
 #include "hardware/pwm.h"
 
 namespace pimoroni {
-  char madctl[2];
+  uint8_t madctl;
+  uint16_t caset[2] = {0, 0};
+  uint16_t raset[2] = {0, 0};
 
-  void ST7789::init(bool auto_init_sequence) {
+  void ST7789::init(bool auto_init_sequence, bool round) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
 
@@ -50,19 +52,6 @@ namespace pimoroni {
 
       sleep_ms(150);
 
-      if(width == 240 && height == 240) {
-        madctl[0] = 0x04;
-      }
-
-      if(width == 240 && height == 135) {
-        madctl[0] = 0x70;
-      }
-      
-      if(width == 135 && height == 240) {
-		madctl[0] = 0x00;
-      }
-
-      command(reg::MADCTL,    1, madctl);  // row/column addressing order - rgb pixel order
       command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
       command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
 
@@ -74,19 +63,38 @@ namespace pimoroni {
 
       // setup correct addressing window
       if(width == 240 && height == 240) {
-        command(reg::CASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 columns
-        command(reg::RASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 rows
+        caset[0] = 0;
+        caset[1] = 239;
+        raset[0] = round ? 40 : 0;
+        raset[1] = round ? 279 : 239;
+        madctl = MADCTL::HORIZ_ORDER;
       }
 
       if(width == 240 && height == 135) {
-        command(reg::RASET,     4, "\x00\x35\x00\xbb"); // 53 .. 187 (135 rows)
-        command(reg::CASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
+        caset[0] = 40;   // 240 cols
+        caset[1] = 279;
+        raset[0] = 53;   // 135 rows
+        raset[1] = 187;
+        madctl = MADCTL::COL_ORDER | MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
       }
 
       if(width == 135 && height == 240) {
-        command(reg::CASET,     4, "\x00\x34\x00\xba"); // 52 .. 186 (135 rows)
-        command(reg::RASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
+        caset[0] = 52;   // 135 cols
+        caset[1] = 186;
+        raset[0] = 40;   // 240 rows
+        raset[1] = 279;
+        madctl = 0;
       }
+
+      // Byte swap the 16bit rows/cols values
+      caset[0] = __builtin_bswap16(caset[0]);
+      caset[1] = __builtin_bswap16(caset[1]);
+      raset[0] = __builtin_bswap16(raset[0]);
+      raset[1] = __builtin_bswap16(raset[1]);
+
+      command(reg::CASET,     4, (char *)caset);
+      command(reg::RASET,     4, (char *)raset);
+      command(reg::MADCTL,    1, (char *)&madctl);
     }
 
     // the dma transfer works but without vsync it's not that useful as you could
@@ -160,7 +168,7 @@ namespace pimoroni {
   }
 
   void ST7789::flip(){
-    madctl[0] ^= 0xC0;
-    command(reg::MADCTL,    1, madctl);
+    madctl ^= MADCTL::ROW_ORDER | MADCTL::COL_ORDER;
+    command(reg::MADCTL,    1, (char *)&madctl);
   }
 }

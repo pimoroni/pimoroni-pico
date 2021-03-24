@@ -21,7 +21,7 @@ namespace pimoroni {
     int8_t sck    = 18;
     int8_t mosi   = 19;
     int8_t miso   = -1; // we generally don't use this pin
-    int8_t bl     = 20;
+    int8_t bl     = 21;
     int8_t vsync  = -1; // only available on some products
 
     uint32_t spi_baud = 64 * 1024 * 1024;
@@ -41,13 +41,27 @@ namespace pimoroni {
       width(width), height(height),      
       cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), frame_buffer(frame_buffer) {}
 
-    void init(bool auto_init_sequence = true);
+    void init(bool auto_init_sequence = true, bool round = false);
 
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void vsync_callback(gpio_irq_callback_t callback);
     void update(bool dont_block = false);
     void set_backlight(uint8_t brightness);
     void flip();
+
+    enum MADCTL : uint8_t {
+      ROW_ORDER   = 0b10000000,
+      COL_ORDER   = 0b01000000,
+      SWAP_XY     = 0b00100000,  // AKA "MV"
+      SCAN_ORDER  = 0b00010000,
+      RGB         = 0b00001000,
+      HORIZ_ORDER = 0b00000100
+    };
+
+    #define ROT_240_240_0      0
+    #define ROT_240_240_90     MADCTL::SWAP_XY | MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER
+    #define ROT_240_240_180    MADCTL::SCAN_ORDER | MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::ROW_ORDER
+    #define ROT_240_240_270    MADCTL::SWAP_XY | MADCTL::HORIZ_ORDER | MADCTL::ROW_ORDER
 
     enum reg {
       SWRESET   = 0x01,
