@@ -15,7 +15,13 @@ target_include_directories(usermod_pico_display INTERFACE
 )
 
 target_compile_definitions(usermod_pico_display INTERFACE
-    -DMODULE_PICODISPLAY_ENABLED=1
+    MODULE_PICODISPLAY_ENABLED=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_display)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/pico_display.c
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-discarded-qualifiers -Wno-implicit-int"
+)

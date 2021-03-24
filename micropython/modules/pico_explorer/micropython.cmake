@@ -15,7 +15,13 @@ target_include_directories(usermod_pico_explorer INTERFACE
 )
 
 target_compile_definitions(usermod_pico_explorer INTERFACE
-    -DMODULE_PICOEXPLORER_ENABLED=1
+    MODULE_PICOEXPLORER_ENABLED=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_pico_explorer)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/pico_explorer.c
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-discarded-qualifiers -Wno-implicit-int"
+)
