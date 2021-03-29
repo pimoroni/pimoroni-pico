@@ -1,6 +1,6 @@
-# Pico Explorer Pack <!-- omit in toc -->
+# Pico Explorer Base <!-- omit in toc -->
 
-Our Pico Explorer Pack offers a vibrant 1.14" (240x240) IPS LCD screen for your Raspberry Pi Pico it also includes four switches, a piezo and a DRV8833 motor driver.
+Pico Explorer Base straps a whole host of physical computing goodies to your Pico - a vibrant 1.14" (240x240) IPS LCD screen, four switches, a piezo buzzer/speaker and a DRV8833 motor driver, as well as handy accessible general purpose inputs and outputs and a built in breadboard.
 
 We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons, piezo and motor driver. [See the library reference](#reference) for details.
 
@@ -36,11 +36,6 @@ PicoExplorer pico_explorer(buffer);
 int main() {
     pico_explorer.init();
 
-    // set the backlight to a value between 0 and 255
-    // the backlight is driven via PWM and is gamma corrected by our
-    // library to give a gorgeous linear brightness range.
-    pico_explorer.set_backlight(100);
-
     while(true) {
 
         // now we've done our drawing let's update the screen
@@ -55,11 +50,13 @@ int main() {
 
 Pico Explorer uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
 
+Please note that the backlight on Pico Explorer is not dimmable (we needed the pins to hook up other functions) so the `set_backlight` function is not available for this board.
+
 ### Constants
 
 #### Buttons
 
-The four buttons, A, B, X and Y have correponding constants set to their respective GPIO pins. For example:
+The four buttons, A, B, X and Y have corresponding constants set to their respective GPIO pins. For example:
 
 ```c++
 bool a_is_pressed = pico_explorer.is_pressed(pico_explorer.A);
@@ -90,21 +87,6 @@ Sets up Pico Explorer. `init` must be called before any other functions since it
 ```c++
 pico_explorer.init();
 ```
-
-#### set_backlight
-
-```c++
-void set_backlight(uint8_t brightness);
-```
-
-Set the display backlight from 0-255.
-
-```c++
-uint8_t brightness = 128;
-pico_explorer.set_backlight(brightness);
-```
-
-Uses hardware PWM to dim the display backlight, dimming values are gamma-corrected to provide smooth brightness transitions across the full range of intensity. This may result in some low values mapping as "off."
 
 #### set_motor
 
