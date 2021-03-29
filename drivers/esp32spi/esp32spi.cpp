@@ -1,4 +1,4 @@
-#include "esp32wireless.hpp"
+#include "esp32spi.hpp"
 
 namespace pimoroni {
 
@@ -42,7 +42,7 @@ namespace pimoroni {
     GET_IDX_RSSI            = 0x32,
     GET_IDX_ENCT            = 0x33,
     REQ_HOST_BY_NAME        = 0x34,
-    GET_HOST_BY_NAME        = 0x35,         //FIXME No Matching Function yet (code exists)
+    GET_HOST_BY_NAME        = 0x35,
     START_SCAN_NETWORKS     = 0x36,
     GET_FW_VERSION          = 0x37,
     //NULL,
@@ -55,39 +55,39 @@ namespace pimoroni {
     GET_SOCKET              = 0x3f,
 
     // 0x40 -> 0x4f
-    SET_CLIENT_CERT         = 0x40,         //BUG No Matching Function
-    SET_CERT_KEY            = 0x41,         //BUG No Matching Function
+    SET_CLIENT_CERT         = 0x40,         //TODO No Matching Function
+    SET_CERT_KEY            = 0x41,         //TODO No Matching Function
     //NULL, NULL,
     SEND_DATA_TCP           = 0x44,
     GET_DATABUF_TCP         = 0x45,
     INSERT_DATABUF          = 0x46,
     //NULL, NULL, NULL,
-    WPA2_ENT_SET_IDENTITY   = 0x4a,         //BUG No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_USERNAME   = 0x4b,         //BUG No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_PASSWORD   = 0x4c,         //BUG No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_CA_CERT    = 0x4d,         //BUG No Matching Function
-    WPA2_ENT_SET_CERT_KEY   = 0x4e,         //BUG No Matching Function
-    WPA2_ENT_ENABLE         = 0x4f,         //BUG No Matching Function //NOTE Exposed in CPy
+    WPA2_ENT_SET_IDENTITY   = 0x4a,         //TODO No Matching Function //NOTE Exposed in CPy
+    WPA2_ENT_SET_USERNAME   = 0x4b,         //TODO No Matching Function //NOTE Exposed in CPy
+    WPA2_ENT_SET_PASSWORD   = 0x4c,         //TODO No Matching Function //NOTE Exposed in CPy
+    WPA2_ENT_SET_CA_CERT    = 0x4d,         //TODO No Matching Function
+    WPA2_ENT_SET_CERT_KEY   = 0x4e,         //TODO No Matching Function
+    WPA2_ENT_ENABLE         = 0x4f,         //TODO No Matching Function //NOTE Exposed in CPy
 
     // 0x50 -> 0x5f
     SET_PIN_MODE            = 0x50,
     SET_DIGITAL_WRITE       = 0x51,
     SET_ANALOG_WRITE        = 0x52,
-    SET_DIGITAL_READ        = 0x53,         //BUG No Matching Function //NOTE Exposed in CPy
-    SET_ANALOG_READ         = 0x54,         //BUG No Matching Function //NOTE Exposed in CPy
+    SET_DIGITAL_READ        = 0x53,         //TODO No Matching Function //NOTE Exposed in CPy
+    SET_ANALOG_READ         = 0x54,         //TODO No Matching Function //NOTE Exposed in CPy
   };
 
-  bool WifiNINA::init() {
+  bool Esp32Spi::init() {
     driver.init();
     driver.reset();
 
     return true;
   }
 
-  void WifiNINA::get_network_data(uint8_t *ip, uint8_t *mask, uint8_t *gwip) {
-    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_3] = { {0, ip},
-                                                    {0, mask},
-                                                    {0, gwip} };
+  void Esp32Spi::get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out) {
+    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_3] = { {0, ip_out},
+                                                    {0, mask_out},
+                                                    {0, gwip_out} };
     driver.wait_for_esp_select();
 
     // Send Command
@@ -106,9 +106,9 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::get_remote_data(uint8_t sock, uint8_t *ip, uint8_t *port) {
-    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_2] = { {0, ip},
-                                                    {0, port} };
+  void Esp32Spi::get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out) {
+    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_2] = { {0, ip_out},
+                                                    {0, port_out} };
     driver.wait_for_esp_select();
 
     // Send Command
@@ -127,7 +127,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t WifiNINA::wifi_set_network(const char* ssid, uint8_t ssid_len) {
+  int8_t Esp32Spi::wifi_set_network(const char* ssid, uint8_t ssid_len) {
   	driver.wait_for_esp_select();
 
     // Send Command
@@ -149,7 +149,7 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t WifiNINA::wifi_set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len) {
+  int8_t Esp32Spi::wifi_set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -172,7 +172,7 @@ namespace pimoroni {
     return data;
   }
 
-  int8_t WifiNINA::wifi_set_key(const char* ssid, uint8_t ssid_len, uint8_t key_idx, const void *key, const uint8_t len) {
+  int8_t Esp32Spi::wifi_set_key(const char* ssid, uint8_t ssid_len, uint8_t key_idx, const void *key, const uint8_t len) {
 	  driver.wait_for_esp_select();
 
     //Send Command
@@ -196,7 +196,7 @@ namespace pimoroni {
     return data;
   }
 
-  void WifiNINA::config(uint8_t valid_params, uint32_t local_ip, uint32_t gateway, uint32_t subnet) {
+  void Esp32Spi::config(uint8_t valid_params, uint32_t local_ip, uint32_t gateway, uint32_t subnet) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -223,7 +223,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::set_dns(uint8_t valid_params, uint32_t dns_server1, uint32_t dns_server2) {
+  void Esp32Spi::set_dns(uint8_t valid_params, uint32_t dns_server1, uint32_t dns_server2) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -245,7 +245,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::set_hostname(const char* hostname) {
+  void Esp32Spi::set_hostname(const char* hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -265,7 +265,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t WifiNINA::disconnect() {
+  int8_t Esp32Spi::disconnect() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -287,7 +287,7 @@ namespace pimoroni {
     return result;
   }
 
-  uint8_t WifiNINA::get_connection_status() {
+  uint8_t Esp32Spi::get_connection_status() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -305,7 +305,7 @@ namespace pimoroni {
     return data;
   }
 
-  uint8_t* WifiNINA::get_mac_address() {
+  uint8_t* Esp32Spi::get_mac_address() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -321,33 +321,29 @@ namespace pimoroni {
 
     // Wait for reply
     uint8_t data_len = 0;
-    //TODO Decide what to do with _mac
-    driver.wait_response_cmd(GET_MAC_ADDR, SpiDrv::PARAM_NUMS_1, _mac, &data_len);
+    driver.wait_response_cmd(GET_MAC_ADDR, SpiDrv::PARAM_NUMS_1, mac, &data_len);
 
     driver.esp_deselect();
 
-    return _mac;
+    return mac;
   }
 
-  void WifiNINA::get_ip_address(uint8_t *ip_out) {
-	  get_network_data(ip_out, _subnetMask, _gatewayIp);
-    //TODO Sort this out
-	  //_localIp = ip_out;
+  void Esp32Spi::get_ip_address(IPAddress &ip_out) {
+	  get_network_data(local_ip, subnet_mask, gateway_ip);
+	  ip_out = local_ip;
   }
 
-  void WifiNINA::get_subnet_mask(uint8_t *mask_out) {
-	  get_network_data(_localIp, _subnetMask, _gatewayIp);
-    //TODO Sort this out
-	  mask_out = _subnetMask;
+  void Esp32Spi::get_subnet_mask(IPAddress &mask_out) {
+	  get_network_data(local_ip, subnet_mask, gateway_ip);
+	  mask_out = subnet_mask;
   }
 
-  void WifiNINA::get_gateway_ip(uint8_t *ip_out) {
-  	get_network_data(_localIp, _subnetMask, _gatewayIp);
-    //TODO Sort this out
-    ip_out = _gatewayIp;
+  void Esp32Spi::get_gateway_ip(IPAddress &ip_out) {
+  	get_network_data(local_ip, subnet_mask, gateway_ip);
+    ip_out = gateway_ip;
   }
 
-  const char* WifiNINA::get_current_ssid() {
+  const char* Esp32Spi::get_current_ssid() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -361,18 +357,17 @@ namespace pimoroni {
     driver.esp_deselect();
     driver.wait_for_esp_select();
 
-    //TODO decide what to do with _ssid
-    memset(_ssid, 0x00, sizeof(_ssid));
+    memset(ssid, 0x00, sizeof(ssid));
 
     // Wait for reply
     uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_CURR_SSID, SpiDrv::PARAM_NUMS_1, (uint8_t*)_ssid, &data_len);
+    driver.wait_response_cmd(GET_CURR_SSID, SpiDrv::PARAM_NUMS_1, (uint8_t*)ssid, &data_len);
     driver.esp_deselect();
 
-    return _ssid;
+    return ssid;
   }
 
-  uint8_t* WifiNINA::get_current_bssid() {
+  uint8_t* Esp32Spi::get_current_bssid() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -388,14 +383,13 @@ namespace pimoroni {
 
     // Wait for reply
     uint8_t data_len = 0;
-    //TODO decide what to do with _bssid
-    driver.wait_response_cmd(GET_CURR_BSSID, SpiDrv::PARAM_NUMS_1, _bssid, &data_len);
+    driver.wait_response_cmd(GET_CURR_BSSID, SpiDrv::PARAM_NUMS_1, bssid, &data_len);
     driver.esp_deselect();
 
-    return _bssid;
+    return bssid;
   }
 
-  int32_t WifiNINA::get_current_rssi() {
+  int32_t Esp32Spi::get_current_rssi() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -418,7 +412,7 @@ namespace pimoroni {
     return rssi;
   }
 
-  uint8_t WifiNINA::get_current_encryption_type() {
+  uint8_t Esp32Spi::get_current_encryption_type() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -440,7 +434,7 @@ namespace pimoroni {
     return enc_type;
   }
 
-  int8_t WifiNINA::start_scan_networks() {
+  int8_t Esp32Spi::start_scan_networks() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -460,7 +454,7 @@ namespace pimoroni {
     return ((int8_t)data == WL_FAILURE) ? data : (int8_t)WL_SUCCESS;
   }
 
-  uint8_t WifiNINA::get_scan_networks() {
+  uint8_t Esp32Spi::get_scan_networks() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -471,21 +465,20 @@ namespace pimoroni {
 
     // Wait for reply
     uint8_t ssid_list_num = 0;
-    //TODO _network_ssid something
     driver.wait_response(SCAN_NETWORKS, &ssid_list_num, (uint8_t**)network_ssid, WL_NETWORKS_LIST_MAXNUM);
     driver.esp_deselect();
 
     return ssid_list_num;
   }
 
-  const char* WifiNINA::get_ssid_networks(uint8_t network_item) {
+  const char* Esp32Spi::get_ssid_networks(uint8_t network_item) {
 	  if(network_item >= WL_NETWORKS_LIST_MAXNUM)
 		  return nullptr;
 
 	  return network_ssid[network_item];
   }
 
-  uint8_t WifiNINA::get_enc_type_networks(uint8_t network_item) {
+  uint8_t Esp32Spi::get_enc_type_networks(uint8_t network_item) {
     if(network_item >= WL_NETWORKS_LIST_MAXNUM)
 		  return ENC_TYPE_UNKNOWN;
 
@@ -510,7 +503,7 @@ namespace pimoroni {
     return enc_type;
   }
 
-  uint8_t* WifiNINA::get_bssid_networks(uint8_t network_item, uint8_t* bssid_out) {
+  uint8_t* Esp32Spi::get_bssid_networks(uint8_t network_item, uint8_t* bssid_out) {
     if(network_item >= WL_NETWORKS_LIST_MAXNUM)
       return nullptr;
 
@@ -535,7 +528,7 @@ namespace pimoroni {
     return bssid_out;  
   }
 
-  uint8_t WifiNINA::get_channel_networks(uint8_t network_item) {
+  uint8_t Esp32Spi::get_channel_networks(uint8_t network_item) {
     if(network_item >= WL_NETWORKS_LIST_MAXNUM)
       return 0;
 
@@ -560,7 +553,7 @@ namespace pimoroni {
     return channel;  
   }
 
-  int32_t WifiNINA::get_rssi_networks(uint8_t network_item) {
+  int32_t Esp32Spi::get_rssi_networks(uint8_t network_item) {
     if(network_item >= WL_NETWORKS_LIST_MAXNUM)
   		return 0;
 
@@ -586,7 +579,7 @@ namespace pimoroni {
 	  return network_rssi;
   }
 
-  uint8_t WifiNINA::req_host_by_name(const char* hostname) {
+  uint8_t Esp32Spi::req_host_by_name(const char* hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -608,13 +601,44 @@ namespace pimoroni {
 
     return result;
   }
-/*
-  //TODO GET_HOST_BY_NAME
-  int WifiNINA::get_host_by_name(IPAddress& aResult);
-  int WifiNINA::get_host_by_name(const char* aHostname, IPAddress& aResult); //Calls req_host_by_name and get_host_by_name
-  //def get_host_by_name(self, hostname):   //Calls REQ_HOST_BY_NAME and GET_HOST_BY_NAME
-*/
-  const char* WifiNINA::get_fw_version() {
+
+  int Esp32Spi::get_host_by_name(IPAddress& ip_out) {
+    IPAddress dummy(0xFF,0xFF,0xFF,0xFF);
+    int result = 0;
+
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(GET_HOST_BY_NAME, SpiDrv::PARAM_NUMS_0);
+
+    driver.esp_deselect();    
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t ip_addr[WL_IPV4_LENGTH];
+    uint8_t data_len = 0;
+    if(!driver.wait_response_cmd(GET_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, ip_addr, &data_len)) {
+      printf("error waitResponse/n");
+    }
+    else {
+      ip_out = ip_addr;
+      result = (ip_out != dummy);
+    }
+    driver.esp_deselect();  
+
+    return result;
+  }
+
+  int Esp32Spi::get_host_by_name(const char* hostname, IPAddress& ip_out) {
+    if(req_host_by_name(hostname)) {
+      return get_host_by_name(ip_out);
+    }
+    else {
+      return 0;
+    }
+  }
+
+  const char* Esp32Spi::get_fw_version() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -625,16 +649,15 @@ namespace pimoroni {
 
     // Wait for reply
     uint8_t data_len = 0;
-    //TODO Decide what to do with fwVersion
-    if(!driver.wait_response_cmd(GET_FW_VERSION, SpiDrv::PARAM_NUMS_1, (uint8_t*)fwVersion, &data_len)) {
+    if(!driver.wait_response_cmd(GET_FW_VERSION, SpiDrv::PARAM_NUMS_1, (uint8_t*)fw_version, &data_len)) {
       printf("error waitResponse\n");
     }
     driver.esp_deselect();
 
-    return fwVersion;
+    return fw_version;
   }
 
-  uint32_t WifiNINA::get_time() {
+  uint32_t Esp32Spi::get_time() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -654,7 +677,7 @@ namespace pimoroni {
     return data;
   }
 
-  void WifiNINA::set_power_mode(uint8_t mode) {
+  void Esp32Spi::set_power_mode(uint8_t mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -674,7 +697,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t WifiNINA::wifi_set_ap_network(const char* ssid, uint8_t ssid_len, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_network(const char* ssid, uint8_t ssid_len, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -697,7 +720,7 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t WifiNINA::wifi_set_ap_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -721,7 +744,7 @@ namespace pimoroni {
     return data;
   }
 
-  int16_t WifiNINA::ping(uint32_t ip_address, uint8_t ttl) {
+  int16_t Esp32Spi::ping(uint32_t ip_address, uint8_t ttl) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -747,7 +770,7 @@ namespace pimoroni {
     return data;  
   }
 
-  void WifiNINA::debug(uint8_t on) {
+  void Esp32Spi::debug(uint8_t on) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -767,7 +790,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  float WifiNINA::get_temperature() {
+  float Esp32Spi::get_temperature() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -787,7 +810,7 @@ namespace pimoroni {
     return data;
   }
 
-  void WifiNINA::pin_mode(uint8_t pin, uint8_t mode) {
+  void Esp32Spi::pin_mode(uint8_t pin, uint8_t mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -810,7 +833,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::digital_write(uint8_t pin, uint8_t value) {
+  void Esp32Spi::digital_write(uint8_t pin, uint8_t value) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -833,7 +856,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::analog_write(uint8_t pin, uint8_t value) {
+  void Esp32Spi::analog_write(uint8_t pin, uint8_t value) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -856,7 +879,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::start_server(uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_server(uint16_t port, uint8_t sock, uint8_t prot_mode) {
 	  driver.wait_for_esp_select();
     
     // Send Command
@@ -879,7 +902,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -900,7 +923,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -921,7 +944,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void WifiNINA::start_client(const char* host, uint8_t host_len, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_client(const char* host, uint8_t host_len, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -944,7 +967,7 @@ namespace pimoroni {
     driver.esp_deselect();  
   }
 
-  void WifiNINA::stop_client(uint8_t sock) {
+  void Esp32Spi::stop_client(uint8_t sock) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -966,7 +989,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  uint8_t WifiNINA::get_server_state(uint8_t sock) {
+  uint8_t Esp32Spi::get_server_state(uint8_t sock) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -990,7 +1013,7 @@ namespace pimoroni {
     return data;
   }
 
-  uint8_t WifiNINA::get_client_state(uint8_t sock) {
+  uint8_t Esp32Spi::get_client_state(uint8_t sock) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1014,7 +1037,7 @@ namespace pimoroni {
     return data;
   }
 
-  uint16_t WifiNINA::avail_data(uint8_t sock) {
+  uint16_t Esp32Spi::avail_data(uint8_t sock) {
     if(!driver.available()) {
       return 0;
     }
@@ -1042,7 +1065,7 @@ namespace pimoroni {
   }
 
 
-  uint8_t WifiNINA::avail_server(uint8_t sock) {
+  uint8_t Esp32Spi::avail_server(uint8_t sock) {
     if(!driver.available()) {
       return 255;
     }
@@ -1069,7 +1092,7 @@ namespace pimoroni {
     return socket;
   }
 
-  bool WifiNINA::get_data(uint8_t sock, uint8_t *data_out, uint8_t peek) {
+  bool Esp32Spi::get_data(uint8_t sock, uint8_t *data_out, uint8_t peek) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1099,7 +1122,7 @@ namespace pimoroni {
     return false;
   }
 
-  bool WifiNINA::get_data_buf(uint8_t sock, uint8_t *data_out, uint16_t *data_len_out) {
+  bool Esp32Spi::get_data_buf(uint8_t sock, uint8_t *data_out, uint16_t *data_len_out) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1125,7 +1148,7 @@ namespace pimoroni {
     return false;
   }
 
-  bool WifiNINA::insert_data_buf(uint8_t sock, const uint8_t *data_in, uint16_t len) {
+  bool Esp32Spi::insert_data_buf(uint8_t sock, const uint8_t *data_in, uint16_t len) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1150,7 +1173,7 @@ namespace pimoroni {
     return false;
   }
 
-  bool WifiNINA::send_udp_data(uint8_t sock) {
+  bool Esp32Spi::send_udp_data(uint8_t sock) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1177,7 +1200,7 @@ namespace pimoroni {
     return false;
   }
 
-  uint16_t WifiNINA::send_data(uint8_t sock, const uint8_t *data_in, uint16_t len) {
+  uint16_t Esp32Spi::send_data(uint8_t sock, const uint8_t *data_in, uint16_t len) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -1200,7 +1223,7 @@ namespace pimoroni {
     return data;
   }
 
-  uint8_t WifiNINA::check_data_sent(uint8_t sock) {
+  uint8_t Esp32Spi::check_data_sent(uint8_t sock) {
     const uint16_t TIMEOUT_DATA_SENT = 25;
 
     uint16_t timeout = 0;
@@ -1237,7 +1260,7 @@ namespace pimoroni {
     return (timeout == TIMEOUT_DATA_SENT) ? 0 : 1;
   }
 
-  uint8_t WifiNINA::get_socket() {
+  uint8_t Esp32Spi::get_socket() {
     driver.wait_for_esp_select();
 
     // Send Command

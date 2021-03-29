@@ -1,4 +1,4 @@
-add_subdirectory(esp32wireless)
+add_subdirectory(esp32spi)
 add_subdirectory(st7789)
 add_subdirectory(msa301)
 add_subdirectory(rv3028)

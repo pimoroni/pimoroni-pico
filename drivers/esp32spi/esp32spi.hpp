@@ -1,9 +1,9 @@
 #pragma once
 
-
 #include <string.h>
 #include "pico/stdlib.h"
 #include "spi_drv.hpp"
+#include "ip_address.hpp"
 
 
 
@@ -68,11 +68,7 @@ enum wl_error_code_t {
 
 namespace pimoroni {
 
-  struct IPAddress {
-      uint32_t a;
-  };
-
-  class WifiNINA {
+  class Esp32Spi {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -85,18 +81,18 @@ namespace pimoroni {
   private:
     SpiDrv driver;
 
-    char 	network_ssid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
+    char network_ssid[WL_NETWORKS_LIST_MAXNUM][WL_SSID_MAX_LENGTH];
 
-  	// firmware version string in the format a.b.c
-	  char 	fwVersion[WL_FW_VER_LENGTH];
+  	// Firmware version string in the format a.b.c
+	  char fw_version[WL_FW_VER_LENGTH];
 
-	  // settings of current selected network
-	  char 	_ssid[WL_SSID_MAX_LENGTH];
-	  uint8_t 	_bssid[WL_MAC_ADDR_LENGTH];
-	  uint8_t 	_mac[WL_MAC_ADDR_LENGTH];
-	  uint8_t  _localIp[WL_IPV4_LENGTH];
-	  uint8_t  _subnetMask[WL_IPV4_LENGTH];
-	  uint8_t  _gatewayIp[WL_IPV4_LENGTH];
+	  // Settings of current selected network
+	  char ssid[WL_SSID_MAX_LENGTH];
+	  uint8_t bssid[WL_MAC_ADDR_LENGTH];
+	  uint8_t mac[WL_MAC_ADDR_LENGTH];
+	  uint8_t local_ip[WL_IPV4_LENGTH];
+	  uint8_t subnet_mask[WL_IPV4_LENGTH];
+	  uint8_t gateway_ip[WL_IPV4_LENGTH];
   public:
     //PicoWireless();
 
@@ -111,8 +107,8 @@ namespace pimoroni {
     //From https://github.com/adafruit/WiFiNINA/blob/master/src/utility/wifi_drv.cpp
     //--------------------------------------------------
 
-    void get_network_data(uint8_t *ip, uint8_t *mask, uint8_t *gwip);
-    void get_remote_data(uint8_t sock, uint8_t *ip, uint8_t *port);
+    void get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out);
+    void get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out);
 
     int8_t wifi_set_network(const char* ssid, uint8_t ssid_len);
     int8_t wifi_set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len);
@@ -127,9 +123,9 @@ namespace pimoroni {
     uint8_t get_connection_status();
     uint8_t* get_mac_address();
 
-    void get_ip_address(uint8_t *ip_out);
-    void get_subnet_mask(uint8_t *mask_out);
-    void get_gateway_ip(uint8_t *ip_out);
+    void get_ip_address(IPAddress &ip_out);
+    void get_subnet_mask(IPAddress &mask_out);
+    void get_gateway_ip(IPAddress &ip_out);
 
     const char* get_current_ssid();
     uint8_t* get_current_bssid();
@@ -146,8 +142,8 @@ namespace pimoroni {
     int32_t get_rssi_networks(uint8_t network_item);
 
     uint8_t req_host_by_name(const char* hostname);
-    int get_host_by_name(IPAddress& aResult); //TODO
-    int get_host_by_name(const char* aHostname, IPAddress& aResult); //Calls req_host_by_name and get_host_by_name
+    int get_host_by_name(IPAddress& ip_out);
+    int get_host_by_name(const char* hostname, IPAddress& ip_out);
 
     const char* get_fw_version();
     uint32_t get_time();

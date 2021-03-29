@@ -6,7 +6,6 @@
 #include "hardware/gpio.h"
 #include "hardware/spi.h"
 #include "pico_wireless.hpp"
-#include "../../drivers/esp32wireless/spi_drv.hpp"
 #include <chrono>
 #include <sstream>
 #include <iomanip>
@@ -96,10 +95,13 @@ int main() {
       printf("still waiting\n");
     }
 
-    uint8_t ip[4];
-    memset(ip, 0x00, sizeof(ip));
+    IPAddress ip;
     wireless.get_ip_address(ip);
     printf("ip address: %d.%d.%d.%d\n", ip[0], ip[1], ip[2], ip[3]);
+
+    IPAddress gateway;
+    wireless.get_gateway_ip(gateway);
+    printf("gateway address: %d.%d.%d.%d\n", gateway[0], gateway[1], gateway[2], gateway[3]);
 
     printf("SSID = %s\n", wireless.get_current_ssid());
     printf("RSSI = %d\n", wireless.get_current_rssi());
