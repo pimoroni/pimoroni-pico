@@ -1,12 +1,12 @@
 #pragma once
 
 #include "pico/stdlib.h"
-#include "../../drivers/esp32wireless/esp32wireless.hpp"
+#include "../../drivers/esp32spi/esp32spi.hpp"
 
 namespace pimoroni {
 
-  class PicoWireless : public WifiNINA {
-    typedef WifiNINA parent;
+  class PicoWireless : public Esp32Spi {
+    typedef Esp32Spi parent;
     
     //--------------------------------------------------
     // Constants
