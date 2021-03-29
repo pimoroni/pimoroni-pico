@@ -10,6 +10,7 @@ extern mp_obj_t picodisplay_set_backlight(mp_obj_t brightness_obj);
 extern mp_obj_t picodisplay_update();
 extern mp_obj_t picodisplay_set_led(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj);
 extern mp_obj_t picodisplay_is_pressed(mp_obj_t button_obj);
+extern mp_obj_t picodisplay_flip();
 
 // From PicoGraphics parent class
 extern mp_obj_t picodisplay_set_pen(mp_uint_t n_args, const mp_obj_t *args);

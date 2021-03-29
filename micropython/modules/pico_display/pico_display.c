@@ -22,6 +22,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_update_obj, picodisplay_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picodisplay_set_backlight_obj, picodisplay_set_backlight);
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(picodisplay_set_led_obj, picodisplay_set_led);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picodisplay_is_pressed_obj, picodisplay_is_pressed);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picodisplay_flip_obj, picodisplay_flip);
 
 //From PicoGraphics parent class
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picodisplay_set_pen_obj, 1, 3, picodisplay_set_pen);
@@ -47,6 +48,7 @@ STATIC const mp_map_elem_t picodisplay_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&picodisplay_set_backlight_obj) },    
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&picodisplay_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picodisplay_is_pressed_obj) },
+    { MP_ROM_QSTR(MP_QSTR_flip), MP_ROM_PTR(&picodisplay_flip_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&picodisplay_set_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_create_pen), MP_ROM_PTR(&picodisplay_create_pen_obj) },

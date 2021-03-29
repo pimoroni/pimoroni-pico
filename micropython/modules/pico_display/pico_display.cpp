@@ -43,6 +43,15 @@ mp_obj_t picodisplay_update() {
     return mp_const_none;
 }
 
+mp_obj_t picodisplay_flip() {
+    if(display != nullptr)
+        display->flip();
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return mp_const_none;
+}
+
 mp_obj_t picodisplay_set_backlight(mp_obj_t brightness_obj) {
     if(display != nullptr) {
         float brightness = mp_obj_get_float(brightness_obj);
