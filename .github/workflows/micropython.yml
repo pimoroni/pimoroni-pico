@@ -29,8 +29,8 @@ jobs:
     - name: Checkout MicroPython
       uses: actions/checkout@v2
       with:
-        repository: pimoroni/micropython
-        ref: continuous-integration
+        repository: micropython/micropython
+        ref: master
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
 
