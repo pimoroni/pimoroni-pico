@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../pimoroni-pico/libraries/pico_rgb_keypad/pico_rgb_keypad.hpp"
+#include "../../../libraries/pico_rgb_keypad/pico_rgb_keypad.hpp"
 
 using namespace pimoroni;
 
