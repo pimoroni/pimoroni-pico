@@ -39,12 +39,12 @@ namespace pimoroni {
   public:
     void init();
 
-    // spi_inst_t* get_spi() const;
-    // int get_cs() const;
-    // int get_dc() const;
-    // int get_sck() const;
-    // int get_mosi() const;
-    // int get_miso() const;
+    spi_inst_t* get_spi() const;
+    int get_cs() const;
+    int get_dc() const;
+    int get_sck() const;
+    int get_mosi() const;
+    int get_bl() const;
 
     void update();
     void set_backlight(uint8_t brightness);

@@ -18,29 +18,29 @@ namespace pimoroni {
     screen.init(true, true);
   }
 
-  // spi_inst_t* BreakoutRoundLCD::get_spi() const {
-  //   return screen.get_spi();
-  // }
+  spi_inst_t* BreakoutRoundLCD::get_spi() const {
+    return screen.get_spi();
+  }
 
-  // int BreakoutRoundLCD::get_cs() const {
-  //   return screen.get_cs();
-  // }
+  int BreakoutRoundLCD::get_cs() const {
+    return screen.get_cs();
+  }
 
-  // int BreakoutRoundLCD::get_dc() const {
-  //   return screen.get_dc();
-  // }
+  int BreakoutRoundLCD::get_dc() const {
+    return screen.get_dc();
+  }
 
-  // int BreakoutRoundLCD::get_sck() const {
-  //   return screen.get_sck();
-  // }
+  int BreakoutRoundLCD::get_sck() const {
+    return screen.get_sck();
+  }
 
-  // int BreakoutRoundLCD::get_mosi() const {
-  //   return screen.get_mosi();
-  // }
+  int BreakoutRoundLCD::get_mosi() const {
+    return screen.get_mosi();
+  }
 
-  // int BreakoutRoundLCD::get_miso() const {
-  //   return screen.get_miso();
-  // }
+  int BreakoutRoundLCD::get_bl() const {
+    return screen.get_bl();
+  }
 
   void BreakoutRoundLCD::update() {
     screen.update();
