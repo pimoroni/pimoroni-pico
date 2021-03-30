@@ -303,22 +303,35 @@ mp_obj_t picodisplay_character(mp_uint_t n_args, const mp_obj_t *args) {
 
 mp_obj_t picodisplay_text(mp_uint_t n_args, const mp_obj_t *args) {
     if(display != nullptr) {
-        mp_check_self(mp_obj_is_str_or_bytes(args[0]));
-        GET_STR_DATA_LEN(args[0], str, str_len);
+        if(mp_obj_is_str_or_bytes(args[0])) {
+            GET_STR_DATA_LEN(args[0], str, str_len);
 
-        std::string t((const char*)str);
+            std::string t((const char*)str);
 
-        int x = mp_obj_get_int(args[1]);
-        int y = mp_obj_get_int(args[2]);
-        int wrap = mp_obj_get_int(args[3]);
+            int x = mp_obj_get_int(args[1]);
+            int y = mp_obj_get_int(args[2]);
+            int wrap = mp_obj_get_int(args[3]);
 
-        Point p(x, y);
-        if(n_args == 5) {
-            int scale = mp_obj_get_int(args[4]);
-            display->text(t, p, wrap, scale);
+            Point p(x, y);
+            if(n_args == 5) {
+                int scale = mp_obj_get_int(args[4]);
+                display->text(t, p, wrap, scale);
+            }
+            else
+                display->text(t, p, wrap);
         }
-        else
-            display->text(t, p, wrap);
+        else if(mp_obj_is_float(args[0])) {
+            mp_raise_TypeError("can't convert 'float' object to str implicitly");
+        }
+        else if(mp_obj_is_int(args[0])) {
+            mp_raise_TypeError("can't convert 'int' object to str implicitly");
+        }
+        else if(mp_obj_is_bool(args[0])) {
+            mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+        }
+        else {
+            mp_raise_TypeError("can't convert object to str implicitly");
+        }
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
