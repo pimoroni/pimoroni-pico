@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../pimoroni-pico/libraries/pico_unicorn/pico_unicorn.hpp"
+#include "../../../libraries/pico_unicorn/pico_unicorn.hpp"
 
 using namespace pimoroni;
 

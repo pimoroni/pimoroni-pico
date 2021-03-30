@@ -3,54 +3,18 @@
 #include <vector>
 #include <cstdlib>
 
-#include "st7789.hpp"
-#include "pico_graphics.hpp"
+#include "breakout_roundlcd.hpp"
 #include "time.h"
 
 // Place a 1.3 Round SPI LCD in the *front* slot of breakout garden.
 
-#define CS 17
-#define DC 16
-#define SCK 18
-#define MOSI 19
-#define MISO -1
-
-// "true" to init the screen in "round" mode
-#define ROUND true
-
 using namespace pimoroni;
 
-// Create a PicoDisplay to bind PicoGraphics with our ST7789 display
-class PicoDisplay : public PicoGraphics {
-  public:
-    static const int WIDTH = 240;
-    static const int HEIGHT = 240;
 
-    uint16_t *__fb;
-  private:
-    ST7789 screen;
+uint16_t buffer[BreakoutRoundLCD::WIDTH * BreakoutRoundLCD::HEIGHT];
+BreakoutRoundLCD display(buffer);
 
-  public:
-    PicoDisplay(uint16_t *buf) : PicoGraphics(WIDTH, HEIGHT, buf),
-    screen(WIDTH, HEIGHT, buf,
-            spi0,
-            CS, DC, SCK, MOSI, MISO) {
-        __fb = buf;
-    }
-
-    void init() {
-      screen.init(true, ROUND);
-    };
-    void update() {
-      screen.update();
-    }
-};
-
-
-uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
-PicoDisplay display(buffer);
-
-constexpr float RADIUS = PicoDisplay::WIDTH / 2;
+constexpr float RADIUS = BreakoutRoundLCD::WIDTH / 2;
 
 Pen from_hsv(float h, float s, float v) {
   uint8_t r, g, b;

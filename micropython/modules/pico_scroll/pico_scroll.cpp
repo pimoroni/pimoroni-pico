@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../pimoroni-pico/libraries/pico_scroll/pico_scroll.hpp"
+#include "../../../libraries/pico_scroll/pico_scroll.hpp"
 
 using namespace pimoroni;
 

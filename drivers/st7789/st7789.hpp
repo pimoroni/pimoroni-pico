@@ -43,6 +43,13 @@ namespace pimoroni {
 
     void init(bool auto_init_sequence = true, bool round = false);
 
+    spi_inst_t* get_spi() const;
+    int get_cs() const;
+    int get_dc() const;    
+    int get_sck() const;
+    int get_mosi() const;
+    int get_bl() const;
+
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void vsync_callback(gpio_irq_callback_t callback);
     void update(bool dont_block = false);

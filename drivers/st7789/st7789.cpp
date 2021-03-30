@@ -118,6 +118,30 @@ namespace pimoroni {
     //   dma_channel, &config, &spi_get_hw(spi)->dr, frame_buffer, width * height, false);
   }
 
+  spi_inst_t* ST7789::get_spi() const {
+    return spi;
+  }
+
+  int ST7789::get_cs() const {
+    return cs;
+  }
+
+  int ST7789::get_dc() const {
+    return dc;
+  }
+
+  int ST7789::get_sck() const {
+    return sck;
+  }
+
+  int ST7789::get_mosi() const {
+    return mosi;
+  }
+
+  int ST7789::get_bl() const {
+    return bl;
+  }
+
   void ST7789::command(uint8_t command, size_t len, const char *data) {
     //dma_channel_wait_for_finish_blocking(dma_channel);
 
