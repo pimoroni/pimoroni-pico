@@ -21,7 +21,7 @@ namespace pimoroni {
     int8_t sck    = 18;
     int8_t mosi   = 19;
     int8_t miso   = -1; // we generally don't use this pin
-    int8_t bl     = 21;
+    int8_t bl     = 20;
     int8_t vsync  = -1; // only available on some products
 
     uint32_t spi_baud = 64 * 1024 * 1024;
