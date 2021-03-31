@@ -9,6 +9,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  RELEASE_FILE: ${{github.event.repository.name}}-micropython-${{github.event.release.tag_name}}.uf2
 
 jobs:
   build:
@@ -73,5 +74,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: pimoroni-pico-micropython.uf2
+        asset_name: ${{env.RELEASE_FILE}}
         asset_content_type: application/octet-stream
