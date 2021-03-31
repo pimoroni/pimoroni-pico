@@ -6,6 +6,7 @@ if (TARGET pico_audio_i2s)
     add_executable(
     audio
     demo.cpp
+    synth.cpp
     )
 
     # Pull in pico libraries that we need
