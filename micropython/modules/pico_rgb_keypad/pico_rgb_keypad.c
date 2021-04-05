@@ -13,7 +13,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picokeypad_update_obj, picokeypad_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picokeypad_set_brightness_obj, picokeypad_set_brightness);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picokeypad_illuminate_xy_obj, 5, 5, picokeypad_illuminate_xy);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picokeypad_illuminate_obj, 4, 4, picokeypad_illuminate);
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(picokeypad_clear_obj, picokeypad_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picokeypad_clear_obj, picokeypad_clear);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picokeypad_get_button_states_obj, picokeypad_get_button_states);
 
 /***** Globals Table *****/
