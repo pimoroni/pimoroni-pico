@@ -46,7 +46,7 @@ int main() {
 
     while(1) {
         absolute_time_t at = get_absolute_time();
-        uint64_t t = at._private_us_since_boot / 100000;
+        uint64_t t = to_us_since_boot(at) / 100000;
         float angle = (t % 360) * M_PI / 180.0f;
 
         display.set_pen(0, 0, 0);
