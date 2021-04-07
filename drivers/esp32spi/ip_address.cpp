@@ -6,6 +6,12 @@ namespace pimoroni {
     addr.dword = 0;
   }
 
+  std::string IPAddress::to_string() {
+    char buf[16] = {0};
+    snprintf(buf, 16, "%d.%d.%d.%d", addr.bytes[0], addr.bytes[1], addr.bytes[2], addr.bytes[3]);
+    return std::string(buf, 16);
+  }
+
   IPAddress::IPAddress(uint8_t first_octet, uint8_t second_octet, uint8_t third_octet, uint8_t fourth_octet) {
     addr.bytes[0] = first_octet;
     addr.bytes[1] = second_octet;
