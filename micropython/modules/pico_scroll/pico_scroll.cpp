@@ -58,6 +58,25 @@ mp_obj_t picoscroll_set_pixel(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t v_obj) {
     return mp_const_none;
 }
 
+mp_obj_t picoscroll_set_pixels(mp_obj_t image_obj) {
+    if(scroll != nullptr) {
+        mp_buffer_info_t bufinfo;
+	mp_get_buffer_raise(image_obj, &bufinfo, MP_BUFFER_RW);
+	unsigned char * values = (unsigned char *) bufinfo.buf;
+
+        for (int y = 0; y < PicoScroll::HEIGHT; y++) {
+	    for (int x = 0; x < PicoScroll::WIDTH; x++) {
+	        int val = values[y * PicoScroll::WIDTH + x];
+                scroll->set_pixel(x, y, val);
+	    }
+        }
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return mp_const_none;
+}
+
 mp_obj_t picoscroll_clear() {
     if(scroll != nullptr)
         scroll->clear();

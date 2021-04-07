@@ -10,6 +10,7 @@ We've included helper functions to handle every aspect of drawing to the matrix 
   - [get_width](#get_width)
   - [get_height](#get_height)
   - [set_pixel](#set_pixel)
+  - [set_pixels](#set_pixels)
   - [update](#update)
   - [clear](#clear)
   - [is_pressed](#is_pressed)
@@ -71,6 +72,17 @@ This function sets a pixel at the `x` and `y` coordinates to a brightness level 
 
 ```python
 picoscroll.set_pixel(x, y, l)
+```
+
+### set_pixels
+
+This function sets all pixel at once from a `bytearray` image indexed
+as `y * picoscroll.get_width() + x`, containing brightness levels
+between 0 and 255. Changes will not be visible until `update()` is called.
+
+```python
+image = bytearray(0 for j in range(width * height))
+picoscroll.set_pixels(image)
 ```
 
 ### update
