@@ -87,10 +87,10 @@ int main() {
 
     printf("starting connection\n");
 
-    bool connected = wireless.wifi_set_passphrase(NETWORK, sizeof(NETWORK), PASSWORD, sizeof(PASSWORD));
+    bool connected = wireless.wifi_set_passphrase(NETWORK, PASSWORD);
 
     printf("waiting to establish connection status\n");
-    while(wireless.get_connection_status() != 3) {
+    while(wireless.get_connection_status() != WL_CONNECTED) {
       sleep_ms(1000);
       printf("still waiting\n");
     }

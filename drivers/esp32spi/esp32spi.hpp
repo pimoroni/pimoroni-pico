@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string.h>
+#include <string>
 #include "pico/stdlib.h"
 #include "spi_drv.hpp"
 #include "ip_address.hpp"
@@ -110,14 +111,14 @@ namespace pimoroni {
     void get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out);
     void get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out);
 
-    int8_t wifi_set_network(const char* ssid, uint8_t ssid_len);
-    int8_t wifi_set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len);
-    int8_t wifi_set_key(const char* ssid, uint8_t ssid_len, uint8_t key_idx, const void *key, const uint8_t len);
+    int8_t wifi_set_network(const std::string ssid);
+    int8_t wifi_set_passphrase(const std::string ssid, const std::string passphrase);
+    int8_t wifi_set_key(const std::string ssid, uint8_t key_idx, const std::string key);
 
     void config(uint8_t valid_params, uint32_t local_ip, uint32_t gateway, uint32_t subnet);
 
     void set_dns(uint8_t valid_params, uint32_t dns_server1, uint32_t dns_server2);
-    void set_hostname(const char* hostname);
+    void set_hostname(std::string hostname);
     int8_t disconnect();
 
     uint8_t get_connection_status();
@@ -127,7 +128,7 @@ namespace pimoroni {
     void get_subnet_mask(IPAddress &mask_out);
     void get_gateway_ip(IPAddress &ip_out);
 
-    const char* get_current_ssid();
+    std::string get_current_ssid();
     uint8_t* get_current_bssid();
     int32_t get_current_rssi();
     uint8_t get_current_encryption_type();
@@ -149,8 +150,8 @@ namespace pimoroni {
     uint32_t get_time();
     void set_power_mode(uint8_t mode);
 
-    int8_t wifi_set_ap_network(const char* ssid, uint8_t ssid_len, uint8_t channel);
-    int8_t wifi_set_ap_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len, uint8_t channel);
+    int8_t wifi_set_ap_network(const std::string ssid, uint8_t channel);
+    int8_t wifi_set_ap_passphrase(const std::string ssid, const std::string passphrase, uint8_t channel);
 
     int16_t ping(uint32_t ip_address, uint8_t ttl);
 
@@ -169,7 +170,7 @@ namespace pimoroni {
     void start_server(uint16_t port, uint8_t sock, uint8_t prot_mode);
     void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
     void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
-    void start_client(const char* host, uint8_t host_len, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
+    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
     void stop_client(uint8_t sock);
     
     uint8_t get_server_state(uint8_t sock);
