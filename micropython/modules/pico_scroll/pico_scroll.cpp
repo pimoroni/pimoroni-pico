@@ -14,6 +14,8 @@ extern "C" {
 
 #define NOT_INITIALISED_MSG     "Cannot call this function, as picoscroll is not initialised. Call picoscroll.init() first."
 
+#define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
+
 mp_obj_t picoscroll_init() {
     if(scroll == nullptr)
         scroll = new PicoScroll();
@@ -62,6 +64,11 @@ mp_obj_t picoscroll_set_pixels(mp_obj_t image_obj) {
     if(scroll != nullptr) {
         mp_buffer_info_t bufinfo;
 	mp_get_buffer_raise(image_obj, &bufinfo, MP_BUFFER_RW);
+
+	if (bufinfo.len < (PicoScroll::WIDTH * PicoScroll::HEIGHT)) {
+	    mp_raise_msg(&mp_type_IndexError, BUFFER_TOO_SMALL_MSG);
+	}
+
 	unsigned char * values = (unsigned char *) bufinfo.buf;
 
         for (int y = 0; y < PicoScroll::HEIGHT; y++) {
