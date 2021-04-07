@@ -127,13 +127,13 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t Esp32Spi::wifi_set_network(const char* ssid, uint8_t ssid_len) {
+  int8_t Esp32Spi::wifi_set_network(const std::string ssid) {
   	driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(SET_NET, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((const uint8_t*)ssid, ssid_len, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + ssid_len);
+    driver.send_param((const uint8_t*)ssid.data(), ssid.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + ssid.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -149,14 +149,14 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t Esp32Spi::wifi_set_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len) {
+  int8_t Esp32Spi::wifi_set_passphrase(const std::string ssid, const std::string passphrase) {
 	  driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(SET_PASSPHRASE, SpiDrv::PARAM_NUMS_2);
-    driver.send_param((const uint8_t*)ssid, ssid_len, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((const uint8_t*)passphrase, len, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(6 + ssid_len + len);
+    driver.send_param((const uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
+    driver.send_param((const uint8_t*)passphrase.data(), passphrase.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(6 + ssid.length() + passphrase.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -172,15 +172,15 @@ namespace pimoroni {
     return data;
   }
 
-  int8_t Esp32Spi::wifi_set_key(const char* ssid, uint8_t ssid_len, uint8_t key_idx, const void *key, const uint8_t len) {
+  int8_t Esp32Spi::wifi_set_key(const std::string ssid, uint8_t key_idx, const std::string key) {
 	  driver.wait_for_esp_select();
 
     //Send Command
     driver.send_cmd(SET_KEY, SpiDrv::PARAM_NUMS_3);
-    driver.send_param((uint8_t*)ssid, ssid_len, SpiDrv::NO_LAST_PARAM);
+    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
     driver.send_param(&key_idx, KEY_IDX_LEN, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)key, len, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(8 + ssid_len + len);
+    driver.send_param((uint8_t*)key.data(), key.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(8 + ssid.length() + key.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -245,13 +245,13 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::set_hostname(const char* hostname) {
+  void Esp32Spi::set_hostname(const std::string hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(SET_HOSTNAME, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)hostname, strlen(hostname), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + strlen(hostname));
+    driver.send_param((uint8_t*)hostname.data(), hostname.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + hostname.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -343,7 +343,7 @@ namespace pimoroni {
     ip_out = gateway_ip;
   }
 
-  const char* Esp32Spi::get_current_ssid() {
+  std::string Esp32Spi::get_current_ssid() {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -697,14 +697,14 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t Esp32Spi::wifi_set_ap_network(const char* ssid, uint8_t ssid_len, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_network(const std::string ssid, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(SET_AP_NET, SpiDrv::PARAM_NUMS_2);
-    driver.send_param((uint8_t*)ssid, ssid_len, SpiDrv::NO_LAST_PARAM);
+    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
     driver.send_param(&channel, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(3 + ssid_len);
+    driver.pad_to_multiple_of_4(3 + ssid.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -720,15 +720,15 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t Esp32Spi::wifi_set_ap_passphrase(const char* ssid, uint8_t ssid_len, const char *passphrase, const uint8_t len, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_passphrase(const std::string ssid, const std::string passphrase, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(SET_AP_PASSPHRASE, SpiDrv::PARAM_NUMS_3);
-    driver.send_param((uint8_t*)ssid, ssid_len, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)passphrase, len, SpiDrv::NO_LAST_PARAM);
+    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
+    driver.send_param((uint8_t*)passphrase.data(), passphrase.length(), SpiDrv::NO_LAST_PARAM);
     driver.send_param(&channel, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(4 + ssid_len + len);
+    driver.pad_to_multiple_of_4(4 + ssid.length() + passphrase.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -944,17 +944,17 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_client(const char* host, uint8_t host_len, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_client(std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_5);
-    driver.send_param((uint8_t*)host, host_len, SpiDrv::NO_LAST_PARAM);
+    driver.send_param((uint8_t*)host.data(), host.length(), SpiDrv::NO_LAST_PARAM);
     driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
     driver.send_param(port, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&prot_mode, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(17 + host_len);
+    driver.pad_to_multiple_of_4(17 + host.length());
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
