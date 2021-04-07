@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pico/stdlib.h"
+#include <string>
 
 namespace pimoroni {
 
@@ -35,6 +36,7 @@ namespace pimoroni {
     uint8_t& operator[](int index);
     IPAddress& operator=(uint32_t address);
     operator uint32_t() const;
+    std::string to_string();
   };
 
 }
