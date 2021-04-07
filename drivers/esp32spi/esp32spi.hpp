@@ -7,7 +7,7 @@
 #include "ip_address.hpp"
 
 
-
+#define WARN(message) {}
 
 #define WL_FW_VER_LENGTH 6
 
@@ -45,6 +45,21 @@ enum wl_status_t {
   WL_AP_FAILED
 };
 
+
+enum wl_tcp_state {
+  CLOSED      = 0,
+  LISTEN      = 1,
+  SYN_SENT    = 2,
+  SYN_RCVD    = 3,
+  ESTABLISHED = 4,
+  FIN_WAIT_1  = 5,
+  FIN_WAIT_2  = 6,
+  CLOSE_WAIT  = 7,
+  CLOSING     = 8,
+  LAST_ACK    = 9,
+  TIME_WAIT   = 10
+};
+
 enum wl_enc_type {  /* Values map to 802.11 encryption suites... */
     ENC_TYPE_WEP  = 5,
     ENC_TYPE_TKIP = 2,
@@ -61,6 +76,13 @@ enum wl_error_code_t {
     WL_SUCCESS = 1,
 };
 
+enum sv_protocol_mode {
+    TCP_MODE,
+    UDP_MODE,
+    TLS_MODE,
+    UDP_MULTICAST_MODE,
+    TLS_BEARSSL_MODE
+};
 
 
 #define KEY_IDX_LEN     1
@@ -167,10 +189,10 @@ namespace pimoroni {
     //From https://github.com/adafruit/WiFiNINA/blob/master/src/utility/server_drv.cpp
     //--------------------------------------------------
 
-    void start_server(uint16_t port, uint8_t sock, uint8_t prot_mode);
-    void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
-    void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
-    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode);
+    void start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
+    void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
+    void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
+    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
     void stop_client(uint8_t sock);
     
     uint8_t get_server_state(uint8_t sock);

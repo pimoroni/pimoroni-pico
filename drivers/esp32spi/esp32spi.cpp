@@ -141,7 +141,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_NET, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_NET\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -164,7 +164,7 @@ namespace pimoroni {
     //Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_PASSPHRASE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_PASSPHRASE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -188,7 +188,7 @@ namespace pimoroni {
     //Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_KEY, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_KEY\n");
       data = WL_FAILURE;
     }    
     driver.esp_deselect();
@@ -217,7 +217,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_IP_CONFIG, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_IP_CONFIG\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -238,7 +238,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_DNS_CONFIG, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_DNS_CONFIG\n");
       data = WL_FAILURE;
     }
 
@@ -259,7 +259,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0 , data_len = 0;
     if(!driver.wait_response_cmd(SET_HOSTNAME, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_HOSTNAME\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -446,7 +446,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(START_SCAN_NETWORKS, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: START_SCAN_NETWORKS\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -618,7 +618,7 @@ namespace pimoroni {
     uint8_t ip_addr[WL_IPV4_LENGTH];
     uint8_t data_len = 0;
     if(!driver.wait_response_cmd(GET_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, ip_addr, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: GET_HOST_BY_NAME\n");
     }
     else {
       ip_out = ip_addr;
@@ -650,7 +650,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data_len = 0;
     if(!driver.wait_response_cmd(GET_FW_VERSION, SpiDrv::PARAM_NUMS_1, (uint8_t*)fw_version, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: GET_FW_VERSION\n");
     }
     driver.esp_deselect();
 
@@ -670,7 +670,7 @@ namespace pimoroni {
     uint32_t data = 0;
     uint8_t data_len = 0;
     if(!driver.wait_response_cmd(GET_TIME, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: GET_TIME\n");
     }
     driver.esp_deselect();
 
@@ -712,7 +712,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_AP_NET, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_AP_NET\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -736,7 +736,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_AP_PASSPHRASE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: SET_AP_PASSPHRASE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -762,7 +762,7 @@ namespace pimoroni {
     uint16_t data;
     uint8_t data_len = 0;
     if(!driver.wait_response_cmd(PING, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: PING\n");
       data = WL_PING_ERROR;
     }
     driver.esp_deselect();
@@ -827,7 +827,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_PIN_MODE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse\n");
+      WARN("Response Err: WL_FAILURE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -879,14 +879,14 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_server(uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode) {
 	  driver.wait_for_esp_select();
     
     // Send Command
     driver.send_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_3);
     driver.send_param(port, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&prot_mode, 1, SpiDrv::LAST_PARAM);
+    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
 
     // Pad to multiple of 4
     driver.read_byte();
@@ -902,7 +902,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -910,7 +910,7 @@ namespace pimoroni {
     driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
     driver.send_param(port, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&prot_mode, 1, SpiDrv::LAST_PARAM);
+    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -918,12 +918,12 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: START_SERVER_TCP\n");
     }
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -931,7 +931,7 @@ namespace pimoroni {
     driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
     driver.send_param(port, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&prot_mode, 1, SpiDrv::LAST_PARAM);
+    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
 
     driver.esp_deselect();
     driver.wait_for_esp_select();
@@ -939,12 +939,12 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: START_CLIENT_TCP\n");
     }
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_client(std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t prot_mode) {
+  void Esp32Spi::start_client(std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -953,7 +953,7 @@ namespace pimoroni {
     driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
     driver.send_param(port, SpiDrv::NO_LAST_PARAM);
     driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&prot_mode, 1, SpiDrv::LAST_PARAM);
+    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
     driver.pad_to_multiple_of_4(17 + host.length());
 
     driver.esp_deselect();
@@ -962,7 +962,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: START_CLIENT_TCP\n");
     }
     driver.esp_deselect();  
   }
@@ -984,7 +984,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(STOP_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: STOP_CLIENT_TCP\n");
     }
     driver.esp_deselect();
   }
@@ -1006,7 +1006,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(GET_STATE_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: GET_STATE_TCP\n");
     }
     driver.esp_deselect();
 
@@ -1030,7 +1030,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(GET_CLIENT_STATE_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: GET_CLIENT_STATE_TCP\n");
     }
     driver.esp_deselect();
 
@@ -1111,7 +1111,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_data8(GET_DATA_TCP, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: GET_DATA_TCP\n");
     }
     driver.esp_deselect();
     
@@ -1127,7 +1127,7 @@ namespace pimoroni {
 
     // Send Command
     driver.send_cmd(GET_DATABUF_TCP, SpiDrv::PARAM_NUMS_2);
-    driver.send_buffer(&sock, 1, SpiDrv::NO_LAST_PARAM);
+    driver.send_buffer(&sock, 1);
     driver.send_buffer((uint8_t *)data_len_out, sizeof(*data_len_out), SpiDrv::LAST_PARAM);
 
     // Pad to multiple of 4
@@ -1138,7 +1138,7 @@ namespace pimoroni {
 
     // Wait for reply
     if(!driver.wait_response_data16(GET_DATABUF_TCP, data_out, data_len_out)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: GET_DATABUF_TCP\n");
     }
     driver.esp_deselect();
 
@@ -1163,7 +1163,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_data8(INSERT_DATABUF, &data, &data_len)) {
-      printf("error waitResponse");
+      WARN("Response Err: INSERT_DATABUF\n");
     }
     driver.esp_deselect();
 
@@ -1190,7 +1190,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_data8(SEND_DATA_UDP, &data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: SEND_DATA_UDP\n");
     }
     driver.esp_deselect();
 
@@ -1216,7 +1216,7 @@ namespace pimoroni {
     uint16_t data = 0;
     uint8_t data_len = 0;
     if(!driver.wait_response_data8(SEND_DATA_TCP, (uint8_t*)&data, &data_len)) {
-      printf("error waitResponse/n");
+      WARN("Response Err: SEND_DATA_TCP\n");
     }
     driver.esp_deselect();
 
@@ -1244,7 +1244,7 @@ namespace pimoroni {
 
       // Wait for reply
       if(!driver.wait_response_cmd(DATA_SENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-        printf("error waitResponse isDataSent/n");
+        WARN("Response Err: DATA_SENT_TCP/n");
       }
       driver.esp_deselect();
 
