@@ -13,8 +13,8 @@ extern "C" {
 #include "pico_scroll.h"
 
 #define NOT_INITIALISED_MSG     "Cannot call this function, as picoscroll is not initialised. Call picoscroll.init() first."
-
 #define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
+#define INCORRECT_SIZE_MSG "Scroll height wrong: > 8 pixels."
 
 mp_obj_t picoscroll_init() {
     if(scroll == nullptr)
@@ -80,6 +80,47 @@ mp_obj_t picoscroll_set_pixels(mp_obj_t image_obj) {
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return mp_const_none;
+}
+
+mp_obj_t picoscroll_show_bitmap_1d(mp_obj_t bitmap_obj, mp_obj_t brightness_obj, mp_obj_t offset_obj) {
+    if(scroll != nullptr) {
+        mp_buffer_info_t bufinfo;
+	mp_get_buffer_raise(bitmap_obj, &bufinfo, MP_BUFFER_RW);
+        int offset = mp_obj_get_int(offset_obj);
+        int brightness = mp_obj_get_int(brightness_obj);
+	int length = bufinfo.len;
+	int width = PicoScroll::WIDTH;
+	int height = PicoScroll::HEIGHT;
+
+	// this obviously shouldn't happen as the scroll is 17x7 pixels
+	if (height > (int) sizeof(unsigned char)) {
+	    mp_raise_msg(&mp_type_RuntimeError, INCORRECT_SIZE_MSG);
+	}
+
+	unsigned char * values = (unsigned char *) bufinfo.buf;
+
+	// clear the scroll, so only need to write visible bytes
+	scroll->clear();
+
+	if ((offset < -width) || (offset > length)) {
+	    return mp_const_none;
+	}
+
+	for (int x = 0; x < width; x++) {
+	    int k = offset + x;
+	    if ((k >= 0) && (k <= length)) {
+	        unsigned char col = values[k];
+		for (int y = 0; y < height; y++) {
+		    int val = brightness * ((col >> y) & 1);
+		    scroll->set_pixel(x, height - 1 - y, val);
+		}
+	    }
+	}
+    } else {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    }
 
     return mp_const_none;
 }

@@ -85,6 +85,24 @@ image = bytearray(0 for j in range(width * height))
 picoscroll.set_pixels(image)
 ```
 
+### show_bitmap_1d
+
+Show a view of a bitmap stored as the 7 least significant bits of
+bytes in a `bytearray`, top-down. Individual pixels are set to
+`brightness` based on individual bit values, with the view defined by
+the offset and the width of the scroll (i.e. 17 columns). Changes will
+not be visible until `update()` is called.
+
+```python
+bitmap = bytearray(j for j in range 127)
+for offset in range(-17, 127):
+    picoscroll.show_bitmap_1d(bitmap, 16, offset)
+    picoscroll.update()
+```
+
+will scroll a binary counter across the display (i.e. show `0x00` to
+`0x7f` in binary).
+
 ### update
 
 Pushes pixel data from the Pico to the Scroll Pack.  Until this function is called any `set_pixel` or `clear` calls won't have any visible effect.
