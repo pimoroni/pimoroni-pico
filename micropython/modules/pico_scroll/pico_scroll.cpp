@@ -95,7 +95,8 @@ mp_obj_t picoscroll_show_bitmap_1d(mp_obj_t bitmap_obj, mp_obj_t brightness_obj,
 	int height = PicoScroll::HEIGHT;
 
 	// this obviously shouldn't happen as the scroll is 17x7 pixels
-	if (height > (int) sizeof(unsigned char)) {
+	// would fall off end of byte if this the case
+	if (height > 8) {
 	    mp_raise_msg(&mp_type_RuntimeError, INCORRECT_SIZE_MSG);
 	}
 
