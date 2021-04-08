@@ -111,7 +111,7 @@ mp_obj_t picoscroll_show_bitmap_1d(mp_obj_t bitmap_obj, mp_obj_t brightness_obj,
 
 	for (int x = 0; x < width; x++) {
 	    int k = offset + x;
-	    if ((k >= 0) && (k <= length)) {
+	    if ((k >= 0) && (k < length)) {
 	        unsigned char col = values[k];
 		for (int y = 0; y < height; y++) {
 		    int val = brightness * ((col >> y) & 1);
