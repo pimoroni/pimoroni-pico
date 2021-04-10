@@ -88,7 +88,7 @@ picoscroll.set_pixels(image)
 ### show_bitmap_1d
 
 Show a view of a bitmap stored as the 7 least significant bits of
-bytes in a `bytearray`, bottom-up. Individual pixels are set to
+bytes in a `bytearray`, top-down. Individual pixels are set to
 `brightness` based on individual bit values, with the view defined by
 the offset and the width of the scroll (i.e. 17 columns). Changes will
 not be visible until `update()` is called.
