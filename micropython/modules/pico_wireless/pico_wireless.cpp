@@ -36,20 +36,44 @@ mp_obj_t picowireless_init() {
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_network_data(mp_obj_t ip_out, mp_obj_t mask_out, mp_obj_t gwip_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_network_data() {
+    if(wireless != nullptr) {
+        uint8_t *ip = nullptr;
+        uint8_t *mask = nullptr;
+        uint8_t *gwip = nullptr;
+        wireless->get_network_data(ip, mask, gwip);
+
+        mp_obj_t tuple[3];
+        tuple[0] = mp_obj_new_bytes(ip, WL_IPV4_LENGTH);
+        tuple[1] = mp_obj_new_bytes(mask, WL_IPV4_LENGTH);
+        tuple[2] = mp_obj_new_bytes(gwip, WL_IPV4_LENGTH);
+        return mp_obj_new_tuple(3, tuple);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_remote_data(mp_obj_t sock, mp_obj_t ip_out, mp_obj_t port_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_remote_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_sock };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t *ip = nullptr;
+        uint8_t *port = nullptr;
+        wireless->get_remote_data(args[ARG_sock].u_int, ip, port);
+
+        mp_obj_t tuple[2];
+        tuple[0] = mp_obj_new_bytes(ip, WL_IPV4_LENGTH);
+        tuple[1] = mp_obj_new_int((uint16_t)port[0] << 8 | (uint16_t)port[1]); //TODO verify size and ordering of port
+        return mp_obj_new_tuple(2, tuple);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -210,39 +234,46 @@ mp_obj_t picowireless_get_connection_status() {
 }
 
 mp_obj_t picowireless_get_mac_address() {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+    if(wireless != nullptr) {
+        uint8_t* mac = wireless->get_mac_address();
+        return mp_obj_new_bytes(mac, WL_MAC_ADDR_LENGTH);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_ip_address(mp_obj_t ip_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_ip_address() {
+    if(wireless != nullptr) {
+        IPAddress ip;
+        wireless->get_ip_address(ip);
+        return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_subnet_mask(mp_obj_t mask_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_subnet_mask() {
+    if(wireless != nullptr) {
+        IPAddress mask;
+        wireless->get_subnet_mask(mask);
+        return mp_obj_new_bytes(mask.to_bytes(), WL_IPV4_LENGTH);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_gateway_ip(mp_obj_t ip_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_gateway_ip() {
+    if(wireless != nullptr) {
+        IPAddress mask;
+        wireless->get_gateway_ip(mask);
+        return mp_obj_new_bytes(mask.to_bytes(), WL_IPV4_LENGTH);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -250,9 +281,10 @@ mp_obj_t picowireless_get_gateway_ip(mp_obj_t ip_out) {
 }
 
 mp_obj_t picowireless_get_current_ssid() {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+    if(wireless != nullptr) {
+        std::string ssid = wireless->get_current_ssid();
+        return mp_obj_new_str(ssid.c_str(), ssid.length());
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -260,9 +292,10 @@ mp_obj_t picowireless_get_current_ssid() {
 }
 
 mp_obj_t picowireless_get_current_bssid() {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+    if(wireless != nullptr) {
+        uint8_t* bssid = wireless->get_current_bssid();
+        return mp_obj_new_bytes(bssid, WL_MAC_ADDR_LENGTH);
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -305,17 +338,30 @@ mp_obj_t picowireless_get_scan_networks() {
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_ssid_networks(mp_obj_t network_item) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_ssid_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_network_item };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_network_item, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t network_item = args[ARG_network_item].u_int;
+        const char* ssid = wireless->get_ssid_networks(network_item);
+        if(ssid != nullptr) {
+            std::string str_ssid(ssid, WL_SSID_MAX_LENGTH);
+            return mp_obj_new_str(str_ssid.c_str(), str_ssid.length());
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_enc_type_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_get_enc_type_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_network_item };
         static const mp_arg_t allowed_args[] = {
@@ -334,17 +380,30 @@ mp_obj_t picowireless_get_enc_type_networks(size_t n_args, const mp_obj_t *pos_a
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_bssid_networks(mp_obj_t network_item, mp_obj_t bssid_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_bssid_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_network_item };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_network_item, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t network_item = args[ARG_network_item].u_int;
+        uint8_t* bssid = nullptr;
+        wireless->get_bssid_networks(network_item, bssid);
+        if(bssid != nullptr) {
+            return mp_obj_new_bytes(bssid, WL_MAC_ADDR_LENGTH);
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_channel_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_get_channel_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_network_item };
         static const mp_arg_t allowed_args[] = {
@@ -363,7 +422,7 @@ mp_obj_t picowireless_get_channel_networks(size_t n_args, const mp_obj_t *pos_ar
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_rssi_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_get_rssi_networks(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_network_item };
         static const mp_arg_t allowed_args[] = {
@@ -382,22 +441,53 @@ mp_obj_t picowireless_get_rssi_networks(size_t n_args, const mp_obj_t *pos_args,
     return mp_const_none;
 }
 
-mp_obj_t picowireless_req_host_by_name(mp_obj_t hostname) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_req_host_by_name(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_hostname };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_hostname, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        std::string hostname;
+        mp_obj_to_string(args[ARG_hostname].u_obj, hostname);
+
+        return mp_obj_new_bool(wireless->req_host_by_name(hostname));
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
-    return mp_const_none;
+    return mp_const_false;
 }
 
-mp_obj_t picowireless_get_host_by_name(mp_uint_t n_args, const mp_obj_t *args) {
-//mp_obj_t picowireless_get_host_by_name(mp_obj_t ip_out) {
-//mp_obj_t picowireless_get_host_by_name(mp_obj_t hostname, mp_obj_t ip_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_host_by_name(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        if(n_args == 0) {
+            IPAddress ip;
+            if(wireless->get_host_by_name(ip)) {
+                return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+            }
+        }
+        else {
+            enum { ARG_hostname };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_hostname, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            std::string hostname;
+            mp_obj_to_string(args[ARG_hostname].u_obj, hostname);
+
+            IPAddress ip;
+            if(wireless->get_host_by_name(hostname, ip)) {
+                return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+            }
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -405,9 +495,11 @@ mp_obj_t picowireless_get_host_by_name(mp_uint_t n_args, const mp_obj_t *args) {
 }
 
 mp_obj_t picowireless_get_fw_version() {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+    if(wireless != nullptr) {
+        const char* fw_ver = wireless->get_fw_version();
+        std::string str_fw_ver(fw_ver, WL_FW_VER_LENGTH);
+        return mp_obj_new_str(str_fw_ver.c_str(), str_fw_ver.length());
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
@@ -490,7 +582,7 @@ mp_obj_t picowireless_wifi_set_ap_passphrase(size_t n_args, const mp_obj_t *pos_
     return mp_const_none;
 }
 
-mp_obj_t picowireless_ping(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_ping(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_ip_address, ARG_ttl };
         static const mp_arg_t allowed_args[] = {
@@ -602,31 +694,99 @@ mp_obj_t picowireless_analog_write(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
-mp_obj_t picowireless_server_start(mp_uint_t n_args, const mp_obj_t *args) {
-//mp_obj_t picowireless_start_server(mp_obj_t port, mp_obj_t sock, mp_obj_t protocol_mode/*=TCP_MODE*/) {
-//mp_obj_t picowireless_start_server(mp_uint_t n_args, const mp_obj_t *args) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_server_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        if(n_args == 3) {
+            enum { ARG_port, ARG_sock, ARG_protocol_mode };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            uint16_t port = args[ARG_port].u_int;
+            uint8_t sock = args[ARG_sock].u_int;
+            uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
+            wireless->start_server(port, sock, protocol_mode);
+        }
+        else {
+            enum { ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            uint32_t ip_address = args[ARG_ip_address].u_int;
+            uint16_t port = args[ARG_port].u_int;
+            uint8_t sock = args[ARG_sock].u_int;
+            uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
+            wireless->start_server(ip_address, port, sock, protocol_mode);
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_client_start(mp_uint_t n_args, const mp_obj_t *args) {
-//(mp_obj_t ip_address, mp_obj_t port, mp_obj_t sock, mp_obj_t protocol_mode/*=TCP_MODE*/)
-//(mp_obj_t host, mp_obj_t ip_address, mp_obj_t port, mp_obj_t sock, mp_obj_t protocol_mode/*=TCP_MODE*/) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        if(n_args == 4) {
+            enum { ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            uint32_t ip_address = args[ARG_ip_address].u_int;
+            uint16_t port = args[ARG_port].u_int;
+            uint8_t sock = args[ARG_sock].u_int;
+            uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
+            wireless->start_client(ip_address, port, sock, protocol_mode);
+        }
+        else {
+            enum { ARG_hostname, ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_hostname, MP_ARG_REQUIRED | MP_ARG_OBJ },
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            std::string hostname;
+            mp_obj_to_string(args[ARG_hostname].u_obj, hostname);
+
+            uint32_t ip_address = args[ARG_ip_address].u_int;
+            uint16_t port = args[ARG_port].u_int;
+            uint8_t sock = args[ARG_sock].u_int;
+            uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
+            wireless->start_client(hostname, ip_address, port, sock, protocol_mode);
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_client_stop(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_client_stop(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -645,7 +805,7 @@ mp_obj_t picowireless_client_stop(size_t n_args, const mp_obj_t *pos_args, mp_ma
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_server_state(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_get_server_state(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -664,7 +824,7 @@ mp_obj_t picowireless_get_server_state(size_t n_args, const mp_obj_t *pos_args, 
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_client_state(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_get_client_state(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -683,7 +843,7 @@ mp_obj_t picowireless_get_client_state(size_t n_args, const mp_obj_t *pos_args, 
     return mp_const_none;
 }
 
-mp_obj_t picowireless_avail_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_avail_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -702,7 +862,7 @@ mp_obj_t picowireless_avail_data(size_t n_args, const mp_obj_t *pos_args, mp_map
     return mp_const_none;
 }
 
-mp_obj_t picowireless_avail_server(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_avail_server(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -721,37 +881,73 @@ mp_obj_t picowireless_avail_server(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_data(mp_obj_t sock, mp_obj_t data_out, mp_obj_t peek) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_sock, ARG_peek };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_peek, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t *data = nullptr;
+        if(wireless->get_data(args[ARG_sock].u_int, data, args[ARG_peek].u_int)) {
+            return mp_obj_new_int(*data);
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_get_data_buf(mp_obj_t sock, mp_obj_t data_out, mp_obj_t data_len_out) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_get_data_buf(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_sock };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t *data = nullptr;
+        uint16_t *data_len = nullptr;
+        if(wireless->get_data_buf(args[ARG_sock].u_int, data, data_len)) {
+            return mp_obj_new_bytes(data, *data_len);
+        }
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_insert_data_buf(mp_obj_t sock, mp_obj_t data_in, mp_obj_t len) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_insert_data_buf(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_sock, ARG_data};
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_data, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_READ);
+
+        return mp_obj_new_bool(wireless->insert_data_buf(args[ARG_sock].u_int, (uint8_t *)bufinfo.buf, bufinfo.len));
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_send_udp_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_send_udp_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -770,17 +966,29 @@ mp_obj_t picowireless_send_udp_data(size_t n_args, const mp_obj_t *pos_args, mp_
     return mp_const_none;
 }
 
-mp_obj_t picowireless_send_data(mp_obj_t sock, mp_obj_t data_in, mp_obj_t len) {
-    if(wireless != nullptr)
-        //TODO implement
-        mp_raise_NotImplementedError("Please avoid using this function for now");
+mp_obj_t picowireless_send_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_sock, ARG_data};
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_data, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_READ);
+
+        return mp_obj_new_int(wireless->send_data(args[ARG_sock].u_int, (uint8_t *)bufinfo.buf, bufinfo.len));
+    }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     
     return mp_const_none;
 }
 
-mp_obj_t picowireless_check_data_sent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)  {
+mp_obj_t picowireless_check_data_sent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_sock };
         static const mp_arg_t allowed_args[] = {
@@ -790,8 +998,7 @@ mp_obj_t picowireless_check_data_sent(size_t n_args, const mp_obj_t *pos_args, m
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        uint8_t sock = args[ARG_sock].u_int;
-        return mp_obj_new_int(wireless->check_data_sent(sock));
+        return mp_obj_new_int(wireless->check_data_sent(args[ARG_sock].u_int));
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);

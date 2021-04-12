@@ -12,7 +12,7 @@
 #define WL_WEP_KEY_MAX_LENGTH 13
 // Size of a MAC-address or BSSID
 #define WL_MAC_ADDR_LENGTH 6
-// Size of a MAC-address or BSSID
+// Size of a IP address
 #define WL_IPV4_LENGTH 4
 // Maximum size of a SSID list
 #define WL_NETWORKS_LIST_MAXNUM	10

@@ -117,7 +117,7 @@ namespace pimoroni {
 	  uint8_t subnet_mask[WL_IPV4_LENGTH];
 	  uint8_t gateway_ip[WL_IPV4_LENGTH];
   public:
-    //PicoWireless();
+    //Esp32Spi();
 
 
     //--------------------------------------------------
@@ -164,9 +164,9 @@ namespace pimoroni {
     uint8_t get_channel_networks(uint8_t network_item);
     int32_t get_rssi_networks(uint8_t network_item);
 
-    uint8_t req_host_by_name(const char* hostname);
-    int get_host_by_name(IPAddress& ip_out);
-    int get_host_by_name(const char* hostname, IPAddress& ip_out);
+    bool req_host_by_name(const std::string hostname);
+    bool get_host_by_name(IPAddress& ip_out);
+    bool get_host_by_name(const std::string hostname, IPAddress& ip_out);
 
     const char* get_fw_version();
     uint32_t get_time();

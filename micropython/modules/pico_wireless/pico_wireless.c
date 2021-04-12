@@ -6,8 +6,8 @@
 
 /***** Module Functions *****/
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_init_obj, picowireless_init);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_get_network_data_obj, picowireless_get_network_data);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_get_remote_data_obj, picowireless_get_remote_data);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_network_data_obj, picowireless_get_network_data);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_remote_data_obj, 1, picowireless_get_remote_data);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_network_obj, 1, picowireless_wifi_set_network);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_passphrase_obj, 2, picowireless_wifi_set_passphrase);
@@ -22,9 +22,9 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_disconnect_obj, picowireless_disco
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_connection_status_obj, picowireless_get_connection_status);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_mac_address_obj, picowireless_get_mac_address);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picowireless_get_ip_address_obj, picowireless_get_ip_address);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picowireless_get_subnet_mask_obj, picowireless_get_subnet_mask);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picowireless_get_gateway_ip_obj, picowireless_get_gateway_ip);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_ip_address_obj, picowireless_get_ip_address);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_subnet_mask_obj, picowireless_get_subnet_mask);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_gateway_ip_obj, picowireless_get_gateway_ip);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_current_ssid_obj, picowireless_get_current_ssid);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_current_bssid_obj, picowireless_get_current_bssid);
@@ -33,15 +33,15 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_current_encryption_type_obj, p
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_start_scan_networks_obj, picowireless_start_scan_networks);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_scan_networks_obj, picowireless_get_scan_networks);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picowireless_get_ssid_networks_obj, picowireless_get_ssid_networks);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_ssid_networks_obj, 1, picowireless_get_ssid_networks);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_enc_type_networks_obj, 1, picowireless_get_enc_type_networks);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picowireless_get_bssid_networks_obj, picowireless_get_bssid_networks);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_bssid_networks_obj, 1, picowireless_get_bssid_networks);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_channel_networks_obj, 1, picowireless_get_channel_networks);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_rssi_networks_obj, 1, picowireless_get_rssi_networks);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picowireless_req_host_by_name_obj, picowireless_req_host_by_name);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picowireless_get_host_by_name_obj, 1, 2, picowireless_get_host_by_name);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_req_host_by_name_obj, 1, picowireless_req_host_by_name);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_host_by_name_obj, 0, picowireless_get_host_by_name);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_fw_version_obj, picowireless_get_fw_version);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_time_obj, picowireless_get_time);
@@ -59,8 +59,8 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_pin_mode_obj, 2, picowireless_pin
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_digital_write_obj, 2, picowireless_digital_write);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_analog_write_obj, 2, picowireless_analog_write);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picowireless_server_start_obj, 3, 4, picowireless_server_start);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picowireless_client_start_obj, 4, 5, picowireless_client_start);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_server_start_obj, 3, picowireless_server_start);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_client_start_obj, 4, picowireless_client_start);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_client_stop_obj, 1, picowireless_client_stop);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_server_state_obj, 1, picowireless_get_server_state);
@@ -68,12 +68,12 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_client_state_obj, 1, picowire
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_avail_data_obj, 1, picowireless_avail_data);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_avail_server_obj, 1, picowireless_avail_server);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_get_data_obj, picowireless_get_data);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_get_data_buf_obj, picowireless_get_data_buf);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_insert_data_buf_obj, picowireless_insert_data_buf);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_data_obj, 2, picowireless_get_data);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_get_data_buf_obj, 1, picowireless_get_data_buf);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_insert_data_buf_obj, 2, picowireless_insert_data_buf);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_send_udp_data_obj, 1, picowireless_send_udp_data);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(picowireless_send_data_obj, picowireless_send_data);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_send_data_obj, 2, picowireless_send_data);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_check_data_sent_obj, 1, picowireless_check_data_sent);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_socket_obj, picowireless_get_socket);
 

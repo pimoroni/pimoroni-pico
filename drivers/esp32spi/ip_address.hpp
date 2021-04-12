@@ -2,6 +2,7 @@
 
 #include "pico/stdlib.h"
 #include <string>
+#include "spi_drv.hpp"
 
 namespace pimoroni {
 
@@ -11,7 +12,7 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     union {
-      uint8_t bytes[4];
+      uint8_t bytes[WL_IPV4_LENGTH];
       uint32_t dword;
     } addr;
 
@@ -36,7 +37,8 @@ namespace pimoroni {
     uint8_t& operator[](int index);
     IPAddress& operator=(uint32_t address);
     operator uint32_t() const;
-    std::string to_string();
+    std::string to_string() const;
+    const uint8_t* to_bytes() const;
   };
 
 }
