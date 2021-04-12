@@ -6,12 +6,6 @@ namespace pimoroni {
     addr.dword = 0;
   }
 
-  std::string IPAddress::to_string() {
-    char buf[16] = {0};
-    snprintf(buf, 16, "%d.%d.%d.%d", addr.bytes[0], addr.bytes[1], addr.bytes[2], addr.bytes[3]);
-    return std::string(buf, 16);
-  }
-
   IPAddress::IPAddress(uint8_t first_octet, uint8_t second_octet, uint8_t third_octet, uint8_t fourth_octet) {
     addr.bytes[0] = first_octet;
     addr.bytes[1] = second_octet;
@@ -54,4 +48,15 @@ namespace pimoroni {
   IPAddress::operator uint32_t() const {
     return addr.dword;
   }
+
+  std::string IPAddress::to_string() const {
+    char buf[16] = {0};
+    snprintf(buf, 16, "%d.%d.%d.%d", addr.bytes[0], addr.bytes[1], addr.bytes[2], addr.bytes[3]);
+    return std::string(buf, 16);
+  }
+
+  const uint8_t* IPAddress::to_bytes() const {
+    return addr.bytes;
+  }
+
 }

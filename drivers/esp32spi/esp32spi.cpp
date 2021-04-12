@@ -579,20 +579,20 @@ namespace pimoroni {
 	  return network_rssi;
   }
 
-  uint8_t Esp32Spi::req_host_by_name(const char* hostname) {
+  bool Esp32Spi::req_host_by_name(const std::string hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
     driver.send_cmd(REQ_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)hostname, strlen(hostname), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + strlen(hostname));
+    driver.send_param((uint8_t*)hostname.data(), hostname.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + hostname.length());
 
     driver.esp_deselect();    
     driver.wait_for_esp_select();
 
     // Wait for reply
     uint8_t data = 0, data_len = 0;
-    uint8_t result = driver.wait_response_cmd(REQ_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, &data, &data_len);
+    bool result = driver.wait_response_cmd(REQ_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, &data, &data_len);
     driver.esp_deselect();    
 
     if(result) {
@@ -602,9 +602,9 @@ namespace pimoroni {
     return result;
   }
 
-  int Esp32Spi::get_host_by_name(IPAddress& ip_out) {
+  bool Esp32Spi::get_host_by_name(IPAddress& ip_out) {
     IPAddress dummy(0xFF,0xFF,0xFF,0xFF);
-    int result = 0;
+    bool result = false;
 
     driver.wait_for_esp_select();
 
@@ -629,12 +629,12 @@ namespace pimoroni {
     return result;
   }
 
-  int Esp32Spi::get_host_by_name(const char* hostname, IPAddress& ip_out) {
+  bool Esp32Spi::get_host_by_name(const std::string hostname, IPAddress& ip_out) {
     if(req_host_by_name(hostname)) {
       return get_host_by_name(ip_out);
     }
     else {
-      return 0;
+      return false;
     }
   }
 
