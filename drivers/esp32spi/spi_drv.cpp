@@ -93,7 +93,7 @@ namespace pimoroni {
 
   bool SpiDrv::wait_response_params(uint8_t cmd, uint8_t num_param, tParam *params_out) {
     uint8_t data = 0;
-    int i = 0, ii = 0;
+    int i = 0;
 
     IF_CHECK_START_CMD() {
       CHECK_DATA(cmd | REPLY_FLAG, data){};
@@ -142,7 +142,6 @@ namespace pimoroni {
 
   bool SpiDrv::wait_response_data8(uint8_t cmd, uint8_t *param_out, uint8_t *param_len_out) {
     uint8_t data = 0;
-    int ii = 0;
 
     IF_CHECK_START_CMD() {
       CHECK_DATA(cmd | REPLY_FLAG, data){};
@@ -161,7 +160,6 @@ namespace pimoroni {
      
   bool SpiDrv::wait_response_data16(uint8_t cmd, uint8_t* param_out, uint16_t *param_len_out) {
     uint8_t data = 0;
-    uint16_t ii = 0;
 
     IF_CHECK_START_CMD() {
       CHECK_DATA(cmd | REPLY_FLAG, data){};
@@ -180,7 +178,7 @@ namespace pimoroni {
 
   bool SpiDrv::wait_response(uint8_t cmd, uint8_t *num_param_out, uint8_t **params_out, uint8_t max_num_params) {
     uint8_t data = 0;
-    int i = 0, ii = 0;
+    int i = 0;
 
     uint8_t* index[WL_SSID_MAX_LENGTH];
 

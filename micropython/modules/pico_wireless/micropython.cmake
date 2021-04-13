@@ -7,6 +7,8 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/${MOD_NAME}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/esp32spi/esp32spi.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/esp32spi/spi_drv.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/esp32spi/ip_address.cpp
 )
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
