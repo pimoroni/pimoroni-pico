@@ -21,9 +21,9 @@ static void mp_obj_to_string(const mp_obj_t &obj, std::string &string_out) {
     }
     else if(mp_obj_is_float(obj))
         mp_raise_TypeError("can't convert 'float' object to str implicitly");
-    if(mp_obj_is_int(obj))
+    else if(mp_obj_is_int(obj))
         mp_raise_TypeError("can't convert 'int' object to str implicitly");
-    if(mp_obj_is_bool(obj))
+    else if(mp_obj_is_bool(obj))
         mp_raise_TypeError("can't convert 'bool' object to str implicitly");
     else
         mp_raise_TypeError("can't convert object to str implicitly");
