@@ -77,6 +77,9 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_send_data_obj, 2, picowireless_se
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_check_data_sent_obj, 1, picowireless_check_data_sent);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_socket_obj, picowireless_get_socket);
 
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_led_obj, 3, picowireless_set_led);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_is_pressed_obj, picowireless_is_pressed);
+
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t picowireless_globals_table[] = {
@@ -145,7 +148,10 @@ STATIC const mp_map_elem_t picowireless_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_send_data), MP_ROM_PTR(&picowireless_send_data_obj) },
     { MP_ROM_QSTR(MP_QSTR_check_data_sent), MP_ROM_PTR(&picowireless_check_data_sent_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_socket), MP_ROM_PTR(&picowireless_get_socket_obj) },
-    //TODO Add functions for LED, button and SD card detect
+    
+    { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&picowireless_set_led_obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picowireless_is_pressed_obj) },
+    //TODO Add function for SD card detect
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_picowireless_globals, picowireless_globals_table);
 

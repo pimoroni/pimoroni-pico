@@ -74,3 +74,6 @@ extern mp_obj_t picowireless_send_udp_data(size_t n_args, const mp_obj_t *pos_ar
 extern mp_obj_t picowireless_send_data(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t picowireless_check_data_sent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t picowireless_get_socket();
+
+extern mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t picowireless_is_pressed();
