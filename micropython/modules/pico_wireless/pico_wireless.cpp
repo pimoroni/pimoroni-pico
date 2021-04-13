@@ -1014,4 +1014,47 @@ mp_obj_t picowireless_get_socket() {
     
     return mp_const_none;
 }
+
+mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_r, ARG_g, ARG_b };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        int r = args[ARG_r].u_int;
+        int g = args[ARG_g].u_int;
+        int b = args[ARG_b].u_int;
+
+        if(r < 0 || r > 255)
+            mp_raise_ValueError("r out of range. Expected 0 to 255");
+        else if(g < 0 || g > 255)
+            mp_raise_ValueError("g out of range. Expected 0 to 255");
+        else if(b < 0 || b > 255)
+            mp_raise_ValueError("b out of range. Expected 0 to 255");
+        else
+            wireless->set_led(r, g, b);
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return mp_const_none;
+}
+
+mp_obj_t picowireless_is_pressed() {
+    bool buttonPressed = false;
+    
+    if(wireless != nullptr) {
+        buttonPressed = wireless->is_pressed(PicoWireless::A);
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return buttonPressed ? mp_const_true : mp_const_false;
+}
 }
