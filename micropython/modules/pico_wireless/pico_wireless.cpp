@@ -913,10 +913,12 @@ mp_obj_t picowireless_get_data_buf(size_t n_args, const mp_obj_t *pos_args, mp_m
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        uint8_t *data = nullptr;
-        uint16_t *data_len = nullptr;
-        if(wireless->get_data_buf(args[ARG_sock].u_int, data, data_len)) {
-            return mp_obj_new_bytes(data, *data_len);
+        uint8_t *data = (uint8_t *)malloc(512);
+        uint16_t data_len = 512;
+        if(wireless->get_data_buf(args[ARG_sock].u_int, data, &data_len)) {
+            mp_obj_t response = mp_obj_new_bytes(data, data_len);
+            free(data);
+            return response;
         }
     }
     else
