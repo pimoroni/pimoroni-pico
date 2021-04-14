@@ -29,6 +29,26 @@ static void mp_obj_to_string(const mp_obj_t &obj, std::string &string_out) {
         mp_raise_TypeError("can't convert object to str implicitly");
 }
 
+uint32_t mp_obj_to_ip(mp_obj_t obj) {
+    uint len;
+    mp_obj_t *items;
+    mp_obj_tuple_get(obj, &len, &items);
+    uint a = mp_obj_get_int(items[0]) & 0xff;
+    uint b = mp_obj_get_int(items[1]) & 0xff;
+    uint c = mp_obj_get_int(items[2]) & 0xff;
+    uint d = mp_obj_get_int(items[3]) & 0xff;
+    return (d << 24) | (c << 16) | (b << 8) | a;
+}
+
+mp_obj_t mp_ip_to_obj(IPAddress ip) {
+    mp_obj_t tuple[4];
+    tuple[0] = mp_obj_new_int(ip[0]);
+    tuple[1] = mp_obj_new_int(ip[1]);
+    tuple[2] = mp_obj_new_int(ip[2]);
+    tuple[3] = mp_obj_new_int(ip[3]);
+    return mp_obj_new_tuple(4, tuple);
+}
+
 mp_obj_t picowireless_init() {
     if(wireless == nullptr)
         wireless = new PicoWireless();
@@ -152,18 +172,18 @@ mp_obj_t picowireless_config(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
         enum { ARG_valid_params, ARG_local_ip, ARG_gateway, ARG_subnet };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_valid_params, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_local_ip, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_gateway, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_subnet, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_local_ip, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_gateway, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_subnet, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
         uint8_t valid_params = args[ARG_valid_params].u_int;
-        uint32_t local_ip = args[ARG_local_ip].u_int;
-        uint32_t gateway = args[ARG_gateway].u_int;
-        uint32_t subnet = args[ARG_subnet].u_int;
+        uint32_t local_ip = mp_obj_to_ip(args[ARG_local_ip].u_obj);
+        uint32_t gateway = mp_obj_to_ip(args[ARG_gateway].u_obj);
+        uint32_t subnet = mp_obj_to_ip(args[ARG_subnet].u_obj);
         wireless->config(valid_params, local_ip, gateway, subnet);
     }
     else
@@ -177,16 +197,16 @@ mp_obj_t picowireless_set_dns(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         enum { ARG_valid_params, ARG_dns_server1, ARG_dns_server2 };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_valid_params, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_dns_server1, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_dns_server2, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_dns_server1, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_dns_server2, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
         uint8_t valid_params = args[ARG_valid_params].u_int;
-        uint32_t dns_server1 = args[ARG_dns_server1].u_int;
-        uint32_t dns_server2 = args[ARG_dns_server2].u_int;
+        uint32_t dns_server1 = mp_obj_to_ip(args[ARG_dns_server1].u_obj);
+        uint32_t dns_server2 = mp_obj_to_ip(args[ARG_dns_server2].u_obj);
         wireless->set_dns(valid_params, dns_server1, dns_server2);
     }
     else
@@ -248,7 +268,7 @@ mp_obj_t picowireless_get_ip_address() {
     if(wireless != nullptr) {
         IPAddress ip;
         wireless->get_ip_address(ip);
-        return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+        return mp_ip_to_obj(ip);
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
@@ -260,7 +280,7 @@ mp_obj_t picowireless_get_subnet_mask() {
     if(wireless != nullptr) {
         IPAddress mask;
         wireless->get_subnet_mask(mask);
-        return mp_obj_new_bytes(mask.to_bytes(), WL_IPV4_LENGTH);
+        return mp_ip_to_obj(mask);
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
@@ -272,7 +292,7 @@ mp_obj_t picowireless_get_gateway_ip() {
     if(wireless != nullptr) {
         IPAddress mask;
         wireless->get_gateway_ip(mask);
-        return mp_obj_new_bytes(mask.to_bytes(), WL_IPV4_LENGTH);
+        return mp_ip_to_obj(mask);
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
@@ -467,7 +487,7 @@ mp_obj_t picowireless_get_host_by_name(size_t n_args, const mp_obj_t *pos_args, 
         if(n_args == 0) {
             IPAddress ip;
             if(wireless->get_host_by_name(ip)) {
-                return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+                return mp_ip_to_obj(ip);
             }
         }
         else {
@@ -484,7 +504,7 @@ mp_obj_t picowireless_get_host_by_name(size_t n_args, const mp_obj_t *pos_args, 
 
             IPAddress ip;
             if(wireless->get_host_by_name(hostname, ip)) {
-                return mp_obj_new_bytes(ip.to_bytes(), WL_IPV4_LENGTH);
+                return mp_ip_to_obj(ip);
             }
         }
     }
@@ -586,14 +606,14 @@ mp_obj_t picowireless_ping(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
     if(wireless != nullptr) {
         enum { ARG_ip_address, ARG_ttl };
         static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_ttl, MP_ARG_REQUIRED | MP_ARG_INT },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        uint32_t ip_address = args[ARG_ip_address].u_int;
+        uint32_t ip_address = mp_obj_to_ip(args[ARG_ip_address].u_obj);
         uint8_t ttl = args[ARG_ttl].u_int;
         return mp_obj_new_int(wireless->ping(ip_address, ttl));
     }
@@ -715,7 +735,7 @@ mp_obj_t picowireless_server_start(size_t n_args, const mp_obj_t *pos_args, mp_m
         else {
             enum { ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
             static const mp_arg_t allowed_args[] = {
-                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_OBJ },
                 { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -724,7 +744,7 @@ mp_obj_t picowireless_server_start(size_t n_args, const mp_obj_t *pos_args, mp_m
             mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
             mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-            uint32_t ip_address = args[ARG_ip_address].u_int;
+            uint32_t ip_address = mp_obj_to_ip(args[ARG_ip_address].u_obj);
             uint16_t port = args[ARG_port].u_int;
             uint8_t sock = args[ARG_sock].u_int;
             uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
@@ -742,7 +762,7 @@ mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_m
         if(n_args == 4) {
             enum { ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
             static const mp_arg_t allowed_args[] = {
-                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_OBJ },
                 { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -751,7 +771,8 @@ mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_m
             mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
             mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-            uint32_t ip_address = args[ARG_ip_address].u_int;
+
+            uint32_t ip_address = mp_obj_to_ip(args[ARG_ip_address].u_obj);
             uint16_t port = args[ARG_port].u_int;
             uint8_t sock = args[ARG_sock].u_int;
             uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
@@ -761,7 +782,7 @@ mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_m
             enum { ARG_hostname, ARG_ip_address, ARG_port, ARG_sock, ARG_protocol_mode };
             static const mp_arg_t allowed_args[] = {
                 { MP_QSTR_hostname, MP_ARG_REQUIRED | MP_ARG_OBJ },
-                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_ip_address, MP_ARG_REQUIRED | MP_ARG_OBJ },
                 { MP_QSTR_prt, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_sock, MP_ARG_REQUIRED | MP_ARG_INT },
                 { MP_QSTR_protocol_mode, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -773,7 +794,7 @@ mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_m
             std::string hostname;
             mp_obj_to_string(args[ARG_hostname].u_obj, hostname);
 
-            uint32_t ip_address = args[ARG_ip_address].u_int;
+            uint32_t ip_address = mp_obj_to_ip(args[ARG_ip_address].u_obj);
             uint16_t port = args[ARG_port].u_int;
             uint8_t sock = args[ARG_sock].u_int;
             uint8_t protocol_mode = args[ARG_protocol_mode].u_int;
