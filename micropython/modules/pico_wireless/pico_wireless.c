@@ -15,7 +15,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_key_obj, 3, picowireless
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_config_obj, 4, picowireless_config);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_dns_obj, 3, picowireless_set_dns);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_dns_obj, 1, picowireless_set_dns);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_hostname_obj, 1, picowireless_set_hostname);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_disconnect_obj, picowireless_disconnect);
 
