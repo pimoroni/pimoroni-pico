@@ -194,19 +194,18 @@ mp_obj_t picowireless_config(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
 
 mp_obj_t picowireless_set_dns(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
-        enum { ARG_valid_params, ARG_dns_server1, ARG_dns_server2 };
+        enum { ARG_dns_server1, ARG_dns_server2 };
         static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_valid_params, MP_ARG_REQUIRED | MP_ARG_INT },
             { MP_QSTR_dns_server1, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_dns_server2, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_dns_server2 | MP_ARG_OBJ },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        uint8_t valid_params = args[ARG_valid_params].u_int;
+        uint8_t valid_params = n_args;
         uint32_t dns_server1 = mp_obj_to_ip(args[ARG_dns_server1].u_obj);
-        uint32_t dns_server2 = mp_obj_to_ip(args[ARG_dns_server2].u_obj);
+        uint32_t dns_server2 = n_args == 1 ? 0 : mp_obj_to_ip(args[ARG_dns_server2].u_obj);
         wireless->set_dns(valid_params, dns_server1, dns_server2);
     }
     else
