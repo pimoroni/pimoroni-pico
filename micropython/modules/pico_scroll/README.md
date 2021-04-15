@@ -85,6 +85,35 @@ image = bytearray(0 for j in range(width * height))
 picoscroll.set_pixels(image)
 ```
 
+### show_text
+
+Show a text string with given brightness and offset - allowing you to
+scroll text across the display. Can also be passed a `bytearray`. Font
+is 5x7 pixels, with a 1 pixel space between characters, so to scroll a
+phrase across the entire display involves offsets from -17 pixels to
+`6 x len(str)`:
+
+```python
+word = "Hello, world!"
+l = len(word) * 6
+for j in range(-17, l):
+    scroll.show_text(word, 8, j)
+    scroll.update()
+    time.sleep(0.1)
+```
+
+The full 256 characters can be displayed with:
+
+```python
+b = bytearray(range(256))
+for j in range(256*6):
+    scroll.show_text(b, 8, j)
+    scroll.update()
+    time.sleep(0.1)
+```
+
+N.B. the first 32 characters are white space... 
+
 ### show_bitmap_1d
 
 Show a view of a bitmap stored as the 7 least significant bits of
