@@ -1,0 +1,35 @@
+name: Python
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: ${{matrix.name}}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: Linux
+            cache-key: linux
+            apt-packages: python3 python3-pip
+            python-packages: flake8
+
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v2
+
+    # Linux deps
+    - name: Install deps
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ${{matrix.apt-packages}}
+
+    - name: Install Python Deps
+      run: python3 -m pip install ${{matrix.python-packages}}
+
+    - name: Lint
+      shell: bash
+      run: |
+        python3 -m flake8 --ignore E501 micropython/examples

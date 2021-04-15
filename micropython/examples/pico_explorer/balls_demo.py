@@ -1,11 +1,12 @@
 # adapted from demo.py in examples/pico_display
 # runs full screen on a pico explorer
-# all credit to orignal author(s) - 
+# all credit to orignal author(s) -
 # I just changed the import statement to import picoexplorer instaead of picodisplay
 
 
-import time, random
-import picoexplorer as display 
+import time
+import random
+import picoexplorer as display
 
 width = display.get_width()
 height = display.get_height()
@@ -25,6 +26,7 @@ class Ball:
         self.dy = dy
         self.pen = pen
 
+
 # initialise shapes
 balls = []
 for i in range(0, 100):
@@ -36,18 +38,18 @@ for i in range(0, 100):
             r,
             (14 - r) / 2,
             (14 - r) / 2,
-            display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),            
+            display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
         )
     )
-    
+
 while True:
     display.set_pen(40, 40, 40)
     display.clear()
-    
+
     for ball in balls:
         ball.x += ball.dx
         ball.y += ball.dy
-        
+
         xmax = width - ball.r
         xmin = ball.r
         ymax = height - ball.r
@@ -61,6 +63,7 @@ while True:
 
         display.set_pen(ball.pen)
         display.circle(int(ball.x), int(ball.y), int(ball.r))
-        
+
     display.update()
+
 time.sleep(0.01)

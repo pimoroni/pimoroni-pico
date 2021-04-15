@@ -7,12 +7,14 @@ import utime
 buf = bytearray(display.get_width() * display.get_height() * 2)
 display.init(buf)
 
+
 # sets up a handy function we can call to clear the screen
-def clear():  
+def clear():
     display.set_pen(0, 0, 0)
     display.clear()
     display.update()
-    
+
+
 while True:
     if display.is_pressed(display.BUTTON_A):              # if a button press is detected then...
         clear()                                           # clear to black
@@ -43,8 +45,7 @@ while True:
         utime.sleep(1)
         clear()
     else:
-        display.set_pen(255, 0, 0)                    
+        display.set_pen(255, 0, 0)
         display.text("Press any button!", 10, 10, 240, 4)
         display.update()
     utime.sleep(0.1)  # this number is how frequently the Pico checks for button presses
-    
