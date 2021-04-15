@@ -11,6 +11,7 @@ PicoScroll *scroll = nullptr;
 
 extern "C" {
 #include "pico_scroll.h"
+#include "pico_scroll_font.h"
 
 #define NOT_INITIALISED_MSG     "Cannot call this function, as picoscroll is not initialised. Call picoscroll.init() first."
 #define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
@@ -60,6 +61,57 @@ mp_obj_t picoscroll_set_pixel(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t v_obj) {
     return mp_const_none;
 }
 
+
+  mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj, mp_obj_t offset_obj) {
+    if(scroll != nullptr) {
+        mp_buffer_info_t bufinfo;
+	unsigned char * buffer;
+	int text_len, bfr_len;
+	
+	mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_RW);
+	unsigned char * values = (unsigned char *) bufinfo.buf;
+        int brightness = mp_obj_get_int(brightness_obj);
+        int offset = mp_obj_get_int(offset_obj);
+	
+	text_len = bufinfo.len;
+	bfr_len = 6 * text_len;
+	
+	int width = PicoScroll::WIDTH;
+	int height = PicoScroll::HEIGHT;
+
+	// clear the scroll, so only need to write visible bytes
+	scroll->clear();
+
+	if ((offset < -width) || (offset > bfr_len)) {
+	    return mp_const_none;
+	}
+
+	// allocate buffer, render text, free buffer #TODO probably can do
+	// without the buffer here
+	
+	buffer = (unsigned char *) m_malloc (sizeof(unsigned char) * bfr_len);
+	render(values, text_len, buffer, bfr_len);
+	
+	for (int x = 0; x < width; x++) {
+	    int k = offset + x;
+	    if ((k >= 0) && (k < bfr_len)) {
+	        unsigned char col = buffer[k];
+		for (int y = 0; y < height; y++) {
+		    int val = brightness * ((col >> y) & 1);
+		    scroll->set_pixel(x, y, val);
+		}
+	    }
+	}
+	m_free(buffer);
+    } else {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    }
+
+    return mp_const_none;
+}
+	
+  
+  
 mp_obj_t picoscroll_set_pixels(mp_obj_t image_obj) {
     if(scroll != nullptr) {
         mp_buffer_info_t bufinfo;

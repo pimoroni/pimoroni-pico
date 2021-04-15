@@ -143,4 +143,5 @@ int render(unsigned char *text, int nchr, unsigned char *buffer, int nbfr) {
 	}
 	buffer[i * 6 + 6] = 0x0;
     }
+    return 0;
 }

@@ -2,6 +2,7 @@ add_library(usermod_pico_scroll INTERFACE)
 
 target_sources(usermod_pico_scroll INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/pico_scroll.c
+    ${CMAKE_CURRENT_LIST_DIR}/pico_scroll_font.c
     ${CMAKE_CURRENT_LIST_DIR}/pico_scroll.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_scroll/pico_scroll.cpp
 )
