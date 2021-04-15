@@ -68,7 +68,7 @@ mp_obj_t picoscroll_set_pixel(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t v_obj) {
 	unsigned char * buffer;
 	int text_len, bfr_len;
 	
-	mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_RW);
+	mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_READ);
 	unsigned char * values = (unsigned char *) bufinfo.buf;
         int brightness = mp_obj_get_int(brightness_obj);
         int offset = mp_obj_get_int(offset_obj);
