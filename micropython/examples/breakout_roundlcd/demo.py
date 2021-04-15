@@ -1,4 +1,5 @@
-import time, random, math
+import time
+import math
 from breakout_roundlcd import BreakoutRoundLCD
 
 width = BreakoutRoundLCD.WIDTH
@@ -11,10 +12,11 @@ display.set_backlight(1.0)
 
 RADIUS = width // 2
 
+
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
         return v, v, v
-    i = int(h * 6.0) # XXX assume int() truncates!
+    i = int(h * 6.0)  # XXX assume int() truncates!
     f = (h * 6.0) - i
     p = v * (1.0 - s)
     q = v * (1.0 - s * f)
@@ -33,19 +35,21 @@ def hsv_to_rgb(h, s, v):
     if i == 5:
         return v, p, q
 
+
 t = 0
+
 while True:
     display.set_pen(0, 0, 0)
     display.clear()
 
     angle = t % (math.pi * 2)
-    
+
     prev_x = RADIUS
     prev_y = RADIUS
 
     steps = 30.0
     angle_step = 0.5
-        
+
     for step in range(int(steps)):
         angle += angle_step
 
@@ -57,13 +61,13 @@ while True:
         x = RADIUS + int(distance * math.cos(angle))
         y = RADIUS + int(distance * math.sin(angle))
 
-        l = ((math.sin(t + angle) + 1) / 2.0) * 10
+        radius = ((math.sin(t + angle) + 1) / 2.0) * 10
         display.set_pen(r, g, b)
-        display.circle(int(x), int(y), int(l))
+        display.circle(int(x), int(y), int(radius))
 
         prev_x = x
         prev_y = y
- 
+
     display.update()
     time.sleep(0.02)
     t += 0.02
