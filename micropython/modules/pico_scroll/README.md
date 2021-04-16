@@ -114,6 +114,14 @@ for j in range(256*6):
 
 N.B. the first 32 characters are white space... 
 
+### scroll_text
+
+Scroll a string across the picoscroll, starting off the right hand side, to the left, with a given delay in ms.
+
+```python
+picoscroll.scroll_text("Hello, world!", 8, 100)
+```
+
 ### show_bitmap_1d
 
 Show a view of a bitmap stored as the 7 least significant bits of

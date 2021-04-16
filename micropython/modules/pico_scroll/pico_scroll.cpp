@@ -1,6 +1,7 @@
 #include "hardware/spi.h"
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
+#include "pico/stdlib.h"
 
 #include "../../../libraries/pico_scroll/pico_scroll.hpp"
 
@@ -60,6 +61,53 @@ mp_obj_t picoscroll_set_pixel(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t v_obj) {
     return mp_const_none;
 }
 
+mp_obj_t picoscroll_scroll_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
+                                mp_obj_t delay_ms_obj) {
+    if (scroll != nullptr) {
+        mp_buffer_info_t bufinfo;
+        unsigned char *buffer;
+        int text_len, bfr_len;
+
+        mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_READ);
+        unsigned char *values = (unsigned char *)bufinfo.buf;
+        int brightness = mp_obj_get_int(brightness_obj);
+        int delay_ms = mp_obj_get_int(delay_ms_obj);
+
+        text_len = bufinfo.len;
+        bfr_len = 6 * text_len;
+
+        int width = PicoScroll::WIDTH;
+        int height = PicoScroll::HEIGHT;
+
+        buffer = (unsigned char *)m_malloc(sizeof(unsigned char) * bfr_len);
+        render(values, text_len, buffer, bfr_len);
+
+        for (int offset = -width; offset < bfr_len; offset++) {
+            scroll->clear();
+
+            for (int x = 0; x < width; x++) {
+                int k = offset + x;
+                if ((k >= 0) && (k < bfr_len)) {
+                    unsigned char col = buffer[k];
+                    for (int y = 0; y < height; y++) {
+                        int val = brightness * ((col >> y) & 1);
+                        scroll->set_pixel(x, y, val);
+                    }
+                }
+            }
+	    scroll->update();
+	    sleep_ms(delay_ms);
+	}
+        m_free(buffer);
+    } else {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    }
+
+    return mp_const_none;
+}
+
+// TODO refactor this to not need a buffer - should be able to render
+// view into static 17 bytes
 mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                               mp_obj_t offset_obj) {
     if (scroll != nullptr) {
