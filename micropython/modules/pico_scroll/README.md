@@ -112,7 +112,7 @@ for j in range(256*6):
     time.sleep(0.1)
 ```
 
-N.B. the first 32 characters are white space... 
+N.B. the first 16 characters are white space... 
 
 ### scroll_text
 
