@@ -138,10 +138,10 @@ int render(unsigned char *text, int nchr, unsigned char *buffer, int nbfr) {
 
     for (int i = 0; i < nchr; i++) {
         unsigned char *symbol = __bitmap[text[i]];
-	for (int j = 0; j < 5; j++) {
-	    buffer[i * 6 + j] = symbol[j];
-	}
-	buffer[i * 6 + 6] = 0x0;
+        for (int j = 0; j < 5; j++) {
+            buffer[i * 6 + j] = symbol[j];
+        }
+        buffer[i * 6 + 6] = 0x0;
     }
     return 0;
 }
