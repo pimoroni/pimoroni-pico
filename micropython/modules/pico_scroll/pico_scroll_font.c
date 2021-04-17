@@ -141,7 +141,7 @@ int render(unsigned char *text, int nchr, unsigned char *buffer, int nbfr) {
         for (int j = 0; j < 5; j++) {
             buffer[i * 6 + j] = symbol[j];
         }
-        buffer[i * 6 + 6] = 0x0;
+        buffer[i * 6 + 5] = 0x0;
     }
     return 0;
 }

@@ -95,9 +95,9 @@ mp_obj_t picoscroll_scroll_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                     }
                 }
             }
-	    scroll->update();
-	    sleep_ms(delay_ms);
-	}
+            scroll->update();
+            sleep_ms(delay_ms);
+        }
         m_free(buffer);
     } else {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
@@ -106,13 +106,11 @@ mp_obj_t picoscroll_scroll_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
     return mp_const_none;
 }
 
-// TODO refactor this to not need a buffer - should be able to render
-// view into static 17 bytes
 mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                               mp_obj_t offset_obj) {
     if (scroll != nullptr) {
         mp_buffer_info_t bufinfo;
-        unsigned char *buffer;
+        unsigned char buffer[PicoScroll::WIDTH + 7];
         int text_len, bfr_len;
 
         mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_READ);
@@ -121,7 +119,7 @@ mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
         int offset = mp_obj_get_int(offset_obj);
 
         text_len = bufinfo.len;
-        bfr_len = 6 * text_len;
+        bfr_len = PicoScroll::WIDTH + 7;
 
         int width = PicoScroll::WIDTH;
         int height = PicoScroll::HEIGHT;
@@ -129,14 +127,30 @@ mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
         // clear the scroll, so only need to write visible bytes
         scroll->clear();
 
-        if ((offset < -width) || (offset > bfr_len)) {
+        if ((offset < -width) || (offset > 6 * text_len)) {
             return mp_const_none;
         }
 
-        // allocate buffer, render text, free buffer #TODO probably can do
-        // without the buffer here
+        // compute what can actually be seen, render only that...
+        // modify offset and bfr_len accordingly
+        if (offset < 0) {
+            int space = 1 + (width + offset) / 6;
+            if (space < text_len) {
+                text_len = space;
+            }
+        } else {
+            int start = offset / 6;
+            offset -= start * 6;
+            text_len = text_len - start;
+            if (text_len > 4) {
+                text_len = 4;
+            }
+        }
 
-        buffer = (unsigned char *)m_malloc(sizeof(unsigned char) * bfr_len);
+        if (bfr_len > 6 * text_len) {
+            bfr_len = 6 * text_len;
+        }
+
         render(values, text_len, buffer, bfr_len);
 
         for (int x = 0; x < width; x++) {
@@ -149,7 +163,7 @@ mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                 }
             }
         }
-        m_free(buffer);
+
     } else {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     }
