@@ -11,6 +11,9 @@ We've included helper functions to handle every aspect of drawing to the matrix 
   - [get_height](#get_height)
   - [set_pixel](#set_pixel)
   - [set_pixels](#set_pixels)
+  - [show_text](#show_text)
+  - [scroll_texr](#scroll_text)
+  - [show_bitmap_1d](#show_bitmap_1d)
   - [update](#update)
   - [clear](#clear)
   - [is_pressed](#is_pressed)
@@ -112,14 +115,19 @@ for j in range(256*6):
     time.sleep(0.1)
 ```
 
-N.B. the first 16 characters are white space... 
-
 ### scroll_text
 
 Scroll a string across the picoscroll, starting off the right hand side, to the left, with a given delay in ms.
 
 ```python
 picoscroll.scroll_text("Hello, world!", 8, 100)
+```
+
+The full 256 characters can be displayed with:
+
+```python
+b = bytearray(range(256))
+scroll.scroll_text(b, 8, 100)
 ```
 
 ### show_bitmap_1d
