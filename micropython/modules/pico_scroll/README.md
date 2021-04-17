@@ -115,6 +115,8 @@ for j in range(256*6):
     time.sleep(0.1)
 ```
 
+![Font map](./bitmap.png)
+
 ### scroll_text
 
 Scroll a string across the picoscroll, starting off the right hand side, to the left, with a given delay in ms.
