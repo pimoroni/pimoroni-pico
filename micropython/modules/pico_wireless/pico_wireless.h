@@ -56,6 +56,8 @@ extern mp_obj_t picowireless_pin_mode(size_t n_args, const mp_obj_t *pos_args, m
 
 extern mp_obj_t picowireless_digital_write(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t picowireless_analog_write(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t picowireless_digital_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t picowireless_analog_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
 extern mp_obj_t picowireless_server_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t picowireless_client_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
@@ -77,3 +79,4 @@ extern mp_obj_t picowireless_get_socket();
 
 extern mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t picowireless_is_pressed();
+extern mp_obj_t picowireless_is_sdcard_detected();

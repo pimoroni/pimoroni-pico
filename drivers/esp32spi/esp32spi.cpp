@@ -73,8 +73,8 @@ namespace pimoroni {
     SET_PIN_MODE            = 0x50,
     SET_DIGITAL_WRITE       = 0x51,
     SET_ANALOG_WRITE        = 0x52,
-    SET_DIGITAL_READ        = 0x53,         //TODO No Matching Function //NOTE Exposed in CPy
-    SET_ANALOG_READ         = 0x54,         //TODO No Matching Function //NOTE Exposed in CPy
+    SET_DIGITAL_READ        = 0x53,
+    SET_ANALOG_READ         = 0x54,
   };
 
   bool Esp32Spi::init() {
@@ -803,7 +803,7 @@ namespace pimoroni {
     float data = 0;
     uint8_t data_len = 0;
     if(!driver.wait_response_cmd(GET_TEMPERATURE, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      printf("error get_temperature\n");
+      WARN("Response Err: GET_TEMPERATURE\n");
     }
     driver.esp_deselect();
 
@@ -827,7 +827,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_PIN_MODE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: WL_FAILURE\n");
+      WARN("Response Err: SET_PIN_MODE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -850,7 +850,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_DIGITAL_WRITE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error digital_write\n");
+      WARN("Response Err: SET_DIGITAL_WRITE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
@@ -873,10 +873,59 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(SET_ANALOG_WRITE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("error analog_write\n");
+      WARN("Response Err: SET_ANALOG_WRITE\n");
       data = WL_FAILURE;
     }
     driver.esp_deselect();
+  }
+
+  bool Esp32Spi::digital_read(uint8_t pin) {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(SET_DIGITAL_READ, SpiDrv::PARAM_NUMS_1);
+    driver.send_param(&pin, 1, SpiDrv::LAST_PARAM);
+
+    // Pad to multiple of 4
+    driver.read_byte();
+    driver.read_byte();
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t data = 0, data_len = 0;
+    if(!driver.wait_response_cmd(SET_DIGITAL_READ, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
+      WARN("Response Err: SET_DIGITAL_READ\n");
+    }
+    driver.esp_deselect();
+
+    return (data == 1);
+  }
+
+  uint16_t Esp32Spi::analog_read(uint8_t pin, uint8_t atten) {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(SET_ANALOG_READ, SpiDrv::PARAM_NUMS_2);
+    driver.send_param(&pin, 1, SpiDrv::NO_LAST_PARAM);
+    driver.send_param(&atten, 1, SpiDrv::LAST_PARAM);
+
+    // Pad to multiple of 4
+    driver.read_byte();
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint32_t data = 0;
+    uint8_t data_len = 0;
+    if(!driver.wait_response_cmd(SET_ANALOG_READ, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
+      WARN("Response Err: SET_ANALOG_READ\n");
+    }
+    driver.esp_deselect();
+
+    return (uint16_t)data; //ESP only has a 12-bit ADC
   }
 
   void Esp32Spi::start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode) {
@@ -897,7 +946,7 @@ namespace pimoroni {
     // Wait for reply
     uint8_t data = 0, data_len = 0;
     if(!driver.wait_response_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      printf("No response to server start/n");
+      WARN("Response Err: START_SERVER_TCP\n");
     }
     driver.esp_deselect();
   }
@@ -1255,7 +1304,7 @@ namespace pimoroni {
         sleep_ms(100);
       }
 
-    } while((data==0) && (timeout < TIMEOUT_DATA_SENT));
+    } while((data == 0) && (timeout < TIMEOUT_DATA_SENT));
 
     return (timeout == TIMEOUT_DATA_SENT) ? 0 : 1;
   }

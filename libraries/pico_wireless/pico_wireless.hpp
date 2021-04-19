@@ -18,6 +18,8 @@ namespace pimoroni {
     static const uint8_t ESP_LED_G = 26;
     static const uint8_t ESP_LED_B = 27;
 
+    static const uint8_t ESP_SD_DETECT = 15;
+
 
     //--------------------------------------------------
     // Variables
@@ -37,6 +39,7 @@ namespace pimoroni {
 
     void set_led(uint8_t r, uint8_t g, uint8_t b);
     bool is_pressed(uint8_t button);
+    bool is_sdcard_detected();
   };
 
 }

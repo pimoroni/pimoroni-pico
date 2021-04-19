@@ -96,6 +96,9 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
+    static const uint8_t INPUT = 0;
+    static const uint8_t OUTPUT = 1;
+    static const uint8_t INPUT_PULLUP = 2;
 
 
     //--------------------------------------------------
@@ -116,8 +119,6 @@ namespace pimoroni {
 	  uint8_t local_ip[WL_IPV4_LENGTH];
 	  uint8_t subnet_mask[WL_IPV4_LENGTH];
 	  uint8_t gateway_ip[WL_IPV4_LENGTH];
-  public:
-    //Esp32Spi();
 
 
     //--------------------------------------------------
@@ -183,16 +184,17 @@ namespace pimoroni {
 
     void digital_write(uint8_t pin, uint8_t value);
     void analog_write(uint8_t pin, uint8_t value);
-
+    bool digital_read(uint8_t pin);
+    uint16_t analog_read(uint8_t pin, uint8_t atten = 3);
 
     //--------------------------------------------------
     //From https://github.com/adafruit/WiFiNINA/blob/master/src/utility/server_drv.cpp
     //--------------------------------------------------
 
-    void start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
-    void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
-    void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
-    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode=TCP_MODE);
+    void start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
+    void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
+    void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
+    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
     void stop_client(uint8_t sock);
     
     uint8_t get_server_state(uint8_t sock);
@@ -212,11 +214,6 @@ namespace pimoroni {
     //--------------------------------------------------
     // TODO Sort below ones out, particularly wpa2s from CPy
     //--------------------------------------------------
-
-    //Unknown how to implement these
-    // uint8_t digital_read(uint8_t pin);
-    // uint8_t analog_read(uint8_t pin);
-
 
     // void wifi_set_entidentity();    //SET_ENT_IDENT
     // void wifi_set_entusername();    //SET_ENT_UNAME

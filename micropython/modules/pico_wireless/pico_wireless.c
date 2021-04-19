@@ -58,6 +58,8 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_pin_mode_obj, 2, picowireless_pin
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_digital_write_obj, 2, picowireless_digital_write);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_analog_write_obj, 2, picowireless_analog_write);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_digital_read_obj, 1, picowireless_digital_read);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_analog_read_obj, 1, picowireless_analog_read);
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_server_start_obj, 3, picowireless_server_start);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_client_start_obj, 4, picowireless_client_start);
@@ -79,6 +81,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_socket_obj, picowireless_get_s
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_led_obj, 3, picowireless_set_led);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_is_pressed_obj, picowireless_is_pressed);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_is_sdcard_detected_obj, picowireless_is_sdcard_detected);
 
 
 /***** Globals Table *****/
@@ -131,6 +134,8 @@ STATIC const mp_map_elem_t picowireless_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_digital_write), MP_ROM_PTR(&picowireless_digital_write_obj) },
     { MP_ROM_QSTR(MP_QSTR_analog_write), MP_ROM_PTR(&picowireless_analog_write_obj) },
+    { MP_ROM_QSTR(MP_QSTR_digital_read), MP_ROM_PTR(&picowireless_digital_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_analog_read), MP_ROM_PTR(&picowireless_analog_read_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_server_start), MP_ROM_PTR(&picowireless_server_start_obj) },
     { MP_ROM_QSTR(MP_QSTR_client_start), MP_ROM_PTR(&picowireless_client_start_obj) },
@@ -151,7 +156,7 @@ STATIC const mp_map_elem_t picowireless_globals_table[] = {
     
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&picowireless_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picowireless_is_pressed_obj) },
-    //TODO Add function for SD card detect
+    { MP_ROM_QSTR(MP_QSTR_is_sdcard_detected), MP_ROM_PTR(&picowireless_is_sdcard_detected_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_picowireless_globals, picowireless_globals_table);
 

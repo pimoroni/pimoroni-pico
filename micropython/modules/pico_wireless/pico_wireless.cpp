@@ -713,6 +713,61 @@ mp_obj_t picowireless_analog_write(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
+mp_obj_t picowireless_digital_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_pin, ARG_value };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_esp_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        uint8_t pin = args[ARG_pin].u_int;
+        return mp_obj_new_bool(wireless->digital_read(pin));
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
+mp_obj_t picowireless_analog_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        if(n_args == 1) {
+            enum { ARG_pin };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_esp_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            uint8_t pin = args[ARG_pin].u_int;
+            return mp_obj_new_int(wireless->analog_read(pin) * 16); //Returns a 16 bit-ish* number as per CircuitPython
+        }
+        else {
+            enum { ARG_pin, ARG_atten };
+            static const mp_arg_t allowed_args[] = {
+                { MP_QSTR_esp_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+                { MP_QSTR_atten, MP_ARG_REQUIRED | MP_ARG_INT },
+            };
+
+            mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+            mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+            uint8_t pin = args[ARG_pin].u_int;
+            uint8_t atten = args[ARG_atten].u_int;
+            return mp_obj_new_int(wireless->analog_read(pin, atten) * 16); //Returns a 16 bit-ish* number as per CircuitPython
+        }
+        //NOTE *better way would be to mult by 65535 then div by 4095
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
 mp_obj_t picowireless_server_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         if(n_args == 3) {
@@ -1069,14 +1124,26 @@ mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 }
 
 mp_obj_t picowireless_is_pressed() {
-    bool buttonPressed = false;
+    bool pressed = false;
     
     if(wireless != nullptr) {
-        buttonPressed = wireless->is_pressed(PicoWireless::A);
+        pressed = wireless->is_pressed(PicoWireless::A);
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
 
-    return buttonPressed ? mp_const_true : mp_const_false;
+    return pressed ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t picowireless_is_sdcard_detected() {
+    bool detected = false;
+    
+    if(wireless != nullptr) {
+        detected = wireless->is_sdcard_detected();
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+
+    return detected ? mp_const_true : mp_const_false;
 }
 }

@@ -13,6 +13,8 @@ namespace pimoroni {
 
     set_led(0, 0, 0);
 
+    pin_mode(ESP_SD_DETECT, Esp32Spi::INPUT_PULLUP);
+
     return success;
   }
 
@@ -24,6 +26,10 @@ namespace pimoroni {
 
   bool PicoWireless::is_pressed(uint8_t button) {
     return !gpio_get(button);
+  }
+
+  bool PicoWireless::is_sdcard_detected() {
+    return digital_read(ESP_SD_DETECT);
   }
 
 }
