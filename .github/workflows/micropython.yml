@@ -8,8 +8,8 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  MICROPYTHON_VERSION: v1.15
   BUILD_TYPE: Release
-  RELEASE_FILE: ${{github.event.repository.name}}-micropython-${{github.event.release.tag_name}}.uf2
 
 jobs:
   build:
@@ -31,7 +31,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: micropython/micropython
-        ref: master
+        ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
 
@@ -74,5 +74,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}
+        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
         asset_content_type: application/octet-stream
