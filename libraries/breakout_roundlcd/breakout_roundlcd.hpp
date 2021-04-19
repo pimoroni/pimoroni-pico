@@ -12,7 +12,6 @@ namespace pimoroni {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 240;
-    static const uint8_t PIN_UNUSED   = UINT8_MAX;
 
 
     //--------------------------------------------------
@@ -30,7 +29,8 @@ namespace pimoroni {
   public:
     BreakoutRoundLCD(uint16_t *buf);
     BreakoutRoundLCD(uint16_t *buf,  spi_inst_t *spi,
-      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = PIN_UNUSED);
+      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1);
+    BreakoutRoundLCD(uint16_t *buf,  ST7789::BG_SPI_SLOT slot);
     
 
     //--------------------------------------------------

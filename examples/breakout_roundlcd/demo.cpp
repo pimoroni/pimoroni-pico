@@ -12,7 +12,7 @@ using namespace pimoroni;
 
 
 uint16_t buffer[BreakoutRoundLCD::WIDTH * BreakoutRoundLCD::HEIGHT];
-BreakoutRoundLCD display(buffer);
+BreakoutRoundLCD display(buffer, ST7789::BG_SPI_FRONT);
 
 constexpr float RADIUS = BreakoutRoundLCD::WIDTH / 2;
 
@@ -40,6 +40,7 @@ Pen from_hsv(float h, float s, float v) {
 
 int main() {
     display.init();
+    display.set_backlight(255);
 
     uint32_t steps = 70;
     float angle_step = 0.5f;
@@ -71,5 +72,6 @@ int main() {
         }
 
         display.update();
+        sleep_ms(10);
     }
 }
