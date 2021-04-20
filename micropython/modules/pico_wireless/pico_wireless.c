@@ -79,6 +79,11 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_send_data_obj, 2, picowireless_se
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_check_data_sent_obj, 1, picowireless_check_data_sent);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_get_socket_obj, picowireless_get_socket);
 
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_ent_identity_obj, 1, picowireless_wifi_set_ent_identity);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_ent_username_obj, 1, picowireless_wifi_set_ent_username);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_wifi_set_ent_password_obj, 1, picowireless_wifi_set_ent_password);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_wifi_set_ent_enable_obj, picowireless_wifi_set_ent_enable);
+
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(picowireless_set_led_obj, 3, picowireless_set_led);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_is_pressed_obj, picowireless_is_pressed);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picowireless_is_sdcard_detected_obj, picowireless_is_sdcard_detected);
@@ -153,6 +158,11 @@ STATIC const mp_map_elem_t picowireless_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_send_data), MP_ROM_PTR(&picowireless_send_data_obj) },
     { MP_ROM_QSTR(MP_QSTR_check_data_sent), MP_ROM_PTR(&picowireless_check_data_sent_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_socket), MP_ROM_PTR(&picowireless_get_socket_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_wifi_set_ent_identity), MP_ROM_PTR(&picowireless_wifi_set_ent_identity_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wifi_set_ent_username), MP_ROM_PTR(&picowireless_wifi_set_ent_username_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wifi_set_ent_password), MP_ROM_PTR(&picowireless_wifi_set_ent_password_obj) },
+    { MP_ROM_QSTR(MP_QSTR_wifi_set_ent_enable), MP_ROM_PTR(&picowireless_wifi_set_ent_enable_obj) },
     
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&picowireless_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picowireless_is_pressed_obj) },

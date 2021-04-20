@@ -212,19 +212,11 @@ namespace pimoroni {
     uint8_t get_socket();
 
     //--------------------------------------------------
-    // TODO Sort below ones out, particularly wpa2s from CPy
-    //--------------------------------------------------
 
-    // void wifi_set_entidentity();    //SET_ENT_IDENT
-    // void wifi_set_entusername();    //SET_ENT_UNAME
-    // void wifi_set_entpassword();    //SET_ENT_PASSWD
-
-    // void wifi_set_entenable();      //SET_ENT_ENABLE
-
-    // void is_connected(void);     //Reads an internal status var for WL_CONNECTED
-
-    // void connect(void);         //Calls connect_ap
-    // void connect_ap(void);      //Calls wifi_set_network and wifi_set_passphrase
+    void wifi_set_ent_identity(const std::string identity);
+    void wifi_set_ent_username(const std::string username);
+    void wifi_set_ent_password(const std::string password);
+    void wifi_set_ent_enable();
   };
 
 }

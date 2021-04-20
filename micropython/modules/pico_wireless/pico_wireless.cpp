@@ -1092,6 +1092,75 @@ mp_obj_t picowireless_get_socket() {
     return mp_const_none;
 }
 
+mp_obj_t picowireless_wifi_set_ent_identity(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_identity };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_identity, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        std::string identity;
+        mp_obj_to_string(args[ARG_identity].u_obj, identity);
+        wireless->wifi_set_ent_identity(identity);
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
+mp_obj_t picowireless_wifi_set_ent_username(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_username };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_username, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        std::string username;
+        mp_obj_to_string(args[ARG_username].u_obj, username);
+        wireless->wifi_set_ent_username(username);
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
+mp_obj_t picowireless_wifi_set_ent_password(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(wireless != nullptr) {
+        enum { ARG_password };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_password, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        std::string password;
+        mp_obj_to_string(args[ARG_password].u_obj, password);
+        wireless->wifi_set_ent_password(password);
+    }
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
+mp_obj_t picowireless_wifi_set_ent_enable() {
+    if(wireless != nullptr)
+        wireless->wifi_set_ent_enable();
+    else
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    
+    return mp_const_none;
+}
+
 mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(wireless != nullptr) {
         enum { ARG_r, ARG_g, ARG_b };

@@ -55,19 +55,19 @@ namespace pimoroni {
     GET_SOCKET              = 0x3f,
 
     // 0x40 -> 0x4f
-    SET_CLIENT_CERT         = 0x40,         //TODO No Matching Function
-    SET_CERT_KEY            = 0x41,         //TODO No Matching Function
+    SET_CLIENT_CERT         = 0x40,         //NOTE No matching function
+    SET_CERT_KEY            = 0x41,         //NOTE No matching function
     //NULL, NULL,
     SEND_DATA_TCP           = 0x44,
     GET_DATABUF_TCP         = 0x45,
     INSERT_DATABUF          = 0x46,
     //NULL, NULL, NULL,
-    WPA2_ENT_SET_IDENTITY   = 0x4a,         //TODO No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_USERNAME   = 0x4b,         //TODO No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_PASSWORD   = 0x4c,         //TODO No Matching Function //NOTE Exposed in CPy
-    WPA2_ENT_SET_CA_CERT    = 0x4d,         //TODO No Matching Function
-    WPA2_ENT_SET_CERT_KEY   = 0x4e,         //TODO No Matching Function
-    WPA2_ENT_ENABLE         = 0x4f,         //TODO No Matching Function //NOTE Exposed in CPy
+    WPA2_ENT_SET_IDENTITY   = 0x4a,
+    WPA2_ENT_SET_USERNAME   = 0x4b,
+    WPA2_ENT_SET_PASSWORD   = 0x4c,
+    WPA2_ENT_SET_CA_CERT    = 0x4d,         //NOTE Not functional in Nina FW
+    WPA2_ENT_SET_CERT_KEY   = 0x4e,         //NOTE Not functional in Nina FW
+    WPA2_ENT_ENABLE         = 0x4f,
 
     // 0x50 -> 0x5f
     SET_PIN_MODE            = 0x50,
@@ -993,7 +993,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_client(std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
+  void Esp32Spi::start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -1324,5 +1324,82 @@ namespace pimoroni {
     driver.esp_deselect();
 
     return data;
+  }
+
+  void Esp32Spi::wifi_set_ent_identity(const std::string identity) {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(WPA2_ENT_SET_IDENTITY, SpiDrv::PARAM_NUMS_1);
+    driver.send_param((uint8_t*)identity.data(), identity.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + identity.length());
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t data = 0 , data_len = 0;
+    if(!driver.wait_response_cmd(WPA2_ENT_SET_IDENTITY, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
+      WARN("Response Err: WPA2_ENT_SET_IDENTITY\n");
+      data = WL_FAILURE;
+    }
+    driver.esp_deselect();
+  }
+
+  void Esp32Spi::wifi_set_ent_username(const std::string username) {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(WPA2_ENT_SET_USERNAME, SpiDrv::PARAM_NUMS_1);
+    driver.send_param((uint8_t*)username.data(), username.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + username.length());
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t data = 0 , data_len = 0;
+    if(!driver.wait_response_cmd(WPA2_ENT_SET_USERNAME, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
+      WARN("Response Err: WPA2_ENT_SET_USERNAME\n");
+      data = WL_FAILURE;
+    }
+    driver.esp_deselect();
+  }
+
+  void Esp32Spi::wifi_set_ent_password(const std::string password) {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(WPA2_ENT_SET_PASSWORD, SpiDrv::PARAM_NUMS_1);
+    driver.send_param((uint8_t*)password.data(), password.length(), SpiDrv::LAST_PARAM);
+    driver.pad_to_multiple_of_4(5 + password.length());
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t data = 0 , data_len = 0;
+    if(!driver.wait_response_cmd(WPA2_ENT_SET_PASSWORD, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
+      WARN("Response Err: WPA2_ENT_SET_PASSWORD\n");
+      data = WL_FAILURE;
+    }
+    driver.esp_deselect();
+  }
+
+  void Esp32Spi::wifi_set_ent_enable() {
+    driver.wait_for_esp_select();
+
+    // Send Command
+    driver.send_cmd(WPA2_ENT_ENABLE, SpiDrv::PARAM_NUMS_0);
+
+    driver.esp_deselect();
+    driver.wait_for_esp_select();
+
+    // Wait for reply
+    uint8_t data = 0, data_len = 0;
+    if(!driver.wait_response_cmd(WPA2_ENT_ENABLE, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
+      WARN("Response Err: WPA2_ENT_ENABLE\n");
+    }
+    driver.esp_deselect();
   }
 }
