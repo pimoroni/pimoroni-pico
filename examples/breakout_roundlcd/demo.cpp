@@ -12,7 +12,7 @@ using namespace pimoroni;
 
 
 uint16_t buffer[BreakoutRoundLCD::WIDTH * BreakoutRoundLCD::HEIGHT];
-BreakoutRoundLCD display(buffer, ST7789::BG_SPI_FRONT);
+BreakoutRoundLCD display(buffer, BG_SPI_FRONT);
 
 constexpr float RADIUS = BreakoutRoundLCD::WIDTH / 2;
 

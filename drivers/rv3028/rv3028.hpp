@@ -12,6 +12,7 @@ Distributed as-is; no warranty is given.
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -206,13 +207,13 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c = i2c0;
+    i2c_inst_t *i2c = PIMORONI_I2C_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    int8_t address  = DEFAULT_I2C_ADDRESS;
+    uint sda        = DEFAULT_SDA_PIN;
+    uint scl        = DEFAULT_SCL_PIN;
+    uint interrupt  = DEFAULT_INT_PIN;
 
     uint8_t times[TIME_ARRAY_LENGTH];
 

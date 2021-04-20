@@ -2,6 +2,7 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni.hpp"
 
 namespace pimoroni {
 
@@ -110,9 +111,10 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    uint sda       = I2C_DEFAULT_SDA;
+    uint scl       = I2C_DEFAULT_SCL;
+    uint interrupt = I2C_DEFAULT_INT;
+    i2c_inst_t *i2c = PIMORONI_I2C_DEFAULT_INSTANCE;
 
 
     //--------------------------------------------------
@@ -121,7 +123,7 @@ namespace pimoroni {
   public:
     MSA301() {}
 
-    MSA301(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt) :
+    MSA301(i2c_inst_t *i2c, uint sda, uint scl, uint interrupt) :
       i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
 
 

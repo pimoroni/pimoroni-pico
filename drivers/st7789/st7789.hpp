@@ -2,29 +2,12 @@
 
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
+#include "../../common/pimoroni.hpp"
 
 namespace pimoroni {
 
   class ST7789 {
-    //--------------------------------------------------
-    // Constants
-    //--------------------------------------------------
-  public:
-    static const uint8_t DEFAULT_CS_PIN     = 17;
-    static const uint8_t DEFAULT_DC_PIN     = 16;
-    static const uint8_t DEFAULT_SCK_PIN    = 18;
-    static const uint8_t DEFAULT_MOSI_PIN   = 19;
-    static const uint8_t DEFAULT_BL_PIN     = 20;
-
-
-    //--------------------------------------------------
-    // Enums
-    //--------------------------------------------------
-  public:
-    enum BG_SPI_SLOT {
-      BG_SPI_FRONT,
-      BG_SPI_BACK
-    };
+    spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
 
     //--------------------------------------------------
@@ -35,42 +18,33 @@ namespace pimoroni {
     uint16_t width;
     uint16_t height;
     uint16_t row_stride;
+    uint32_t dma_channel;
+
+    // interface pins with our standard defaults where appropriate
+    uint cs     = SPI_BG_FRONT_CS;
+    uint dc     = SPI_DEFAULT_MISO;
+    uint sck    = SPI_DEFAULT_SCK;
+    uint mosi   = SPI_DEFAULT_MOSI;
+    uint miso   = PIN_UNUSED; // used as data/command
+    uint bl     = SPI_BG_FRONT_PWM;
+    uint vsync  = PIN_UNUSED; // only available on some products
+
+    uint32_t spi_baud = 16 * 1000 * 1000;
 
   public:
     // frame buffer where pixel data is stored
     uint16_t *frame_buffer;
 
-  private:
-    spi_inst_t *spi = spi0;
-
-    uint32_t dma_channel;
-
-    // interface pins with our standard defaults where appropriate
-    int8_t cs     = DEFAULT_CS_PIN;
-    int8_t dc     = DEFAULT_DC_PIN;
-    int8_t sck    = DEFAULT_SCK_PIN;
-    int8_t mosi   = DEFAULT_MOSI_PIN;
-    int8_t miso   = -1; // we generally don't use this pin
-    int8_t bl     = DEFAULT_BL_PIN;
-    int8_t vsync  = -1; // only available on some products
-
-    uint32_t spi_baud = 16 * 1000 * 1000;
-
-
-    //--------------------------------------------------
-    // Constructors/Destructor
-    //--------------------------------------------------
-  public:
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
       width(width), height(height), frame_buffer(frame_buffer) {
       switch(slot) {
         case BG_SPI_FRONT:
-          cs = 17;
-          bl = 20;
+          cs = SPI_BG_FRONT_CS;
+          bl = SPI_BG_FRONT_PWM;
           break;
         case BG_SPI_BACK:
-          cs = 22;
-          bl = 21;
+          cs = SPI_BG_BACK_CS;
+          bl = SPI_BG_BACK_PWM;
           break;
       }
     }
@@ -80,9 +54,10 @@ namespace pimoroni {
 
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
-           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1) :
-      width(width), height(height), frame_buffer(frame_buffer),
-      spi(spi), cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl) {}
+           uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED) :
+      spi(spi),
+      width(width), height(height),      
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl), frame_buffer(frame_buffer) {}
 
 
     //--------------------------------------------------
@@ -92,11 +67,11 @@ namespace pimoroni {
     void init(bool auto_init_sequence = true, bool round = false);
 
     spi_inst_t* get_spi() const;
-    int get_cs() const;
-    int get_dc() const;
-    int get_sck() const;
-    int get_mosi() const;
-    int get_bl() const;
+    uint get_cs() const;
+    uint get_dc() const;
+    uint get_sck() const;
+    uint get_mosi() const;
+    uint get_bl() const;
 
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void vsync_callback(gpio_irq_callback_t callback);

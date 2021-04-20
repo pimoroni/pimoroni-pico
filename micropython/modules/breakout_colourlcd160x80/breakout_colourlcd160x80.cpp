@@ -63,14 +63,14 @@ mp_obj_t BreakoutColourLCD160x80_make_new(const mp_obj_type_t *type, size_t n_ar
         mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
         int slot = args[ARG_slot].u_int;
-        if(slot == ST7735::BG_SPI_FRONT || slot == ST7735::BG_SPI_BACK) {
+        if(slot == BG_SPI_FRONT || slot == BG_SPI_BACK) {
             self = m_new_obj(breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
             self->base.type = &breakout_colourlcd160x80_BreakoutColourLCD160x80_type;
 
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
-            self->breakout = new BreakoutColourLCD160x80((uint16_t *)bufinfo.buf, (ST7735::BG_SPI_SLOT)slot);
+            self->breakout = new BreakoutColourLCD160x80((uint16_t *)bufinfo.buf, (BG_SPI_SLOT)slot);
         }
         else {
             mp_raise_ValueError("slot not a valid value. Expected 0 to 1");

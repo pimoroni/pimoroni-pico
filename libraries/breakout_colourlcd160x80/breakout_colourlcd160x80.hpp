@@ -2,6 +2,7 @@
 
 #include "drivers/st7735/st7735.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
+#include "common/pimoroni.hpp"
 
 namespace pimoroni {
 
@@ -31,7 +32,7 @@ namespace pimoroni {
     BreakoutColourLCD160x80(uint16_t *buf);
     BreakoutColourLCD160x80(uint16_t *buf, spi_inst_t *spi,
       uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = PIN_UNUSED, uint8_t bl = PIN_UNUSED);
-    BreakoutColourLCD160x80(uint16_t *buf, ST7735::BG_SPI_SLOT slot);
+    BreakoutColourLCD160x80(uint16_t *buf, BG_SPI_SLOT slot);
 
 
     //--------------------------------------------------

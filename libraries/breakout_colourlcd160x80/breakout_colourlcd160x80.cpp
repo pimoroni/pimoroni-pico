@@ -13,7 +13,7 @@ namespace pimoroni {
     __fb = buf;
   }
 
-  BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf, ST7735::BG_SPI_SLOT slot)
+  BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf, BG_SPI_SLOT slot)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, slot) {
     __fb = buf;
   }
