@@ -8,8 +8,12 @@ namespace pimoroni {
   }
 
   BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  spi_inst_t *spi,
-      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, spi, cs, dc, sck, mosi, miso)  {
+      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso, uint8_t bl)
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, spi, cs, dc, sck, mosi, miso, bl)  {
+    __fb = buf;
+  }
+
+  BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  ST7789::BG_SPI_SLOT slot) : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, slot) {
     __fb = buf;
   }
 

@@ -30,16 +30,35 @@ namespace pimoroni {
     // frame buffer where pixel data is stored
     uint16_t *frame_buffer;
 
+    enum BG_SPI_SLOT {
+      BG_SPI_FRONT,
+      BG_SPI_BACK
+    };
+
   public:
+    ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
+      width(width), height(height), frame_buffer(frame_buffer) {
+      switch(slot) {
+        case BG_SPI_FRONT:
+          cs = 17;
+          bl = 20;
+          break;
+        case BG_SPI_BACK:
+          cs = 22;
+          bl = 21;
+          break;
+      }
+    }
+
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer) :
       width(width), height(height), frame_buffer(frame_buffer) {}
 
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
-           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1) :
+           uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1) :
       spi(spi),
       width(width), height(height),      
-      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), frame_buffer(frame_buffer) {}
+      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl), frame_buffer(frame_buffer) {}
 
     void init(bool auto_init_sequence = true, bool round = false);
 
