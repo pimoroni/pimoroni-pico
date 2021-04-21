@@ -12,7 +12,6 @@ PicoScroll *scroll = nullptr;
 
 extern "C" {
 #include "pico_scroll.h"
-#include "pico_scroll_font.h"
 
 #define NOT_INITIALISED_MSG     "Cannot call this function, as picoscroll is not initialised. Call picoscroll.init() first."
 #define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
@@ -65,40 +64,12 @@ mp_obj_t picoscroll_scroll_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                                 mp_obj_t delay_ms_obj) {
     if (scroll != nullptr) {
         mp_buffer_info_t bufinfo;
-        unsigned char *buffer;
-        int text_len, bfr_len;
-
         mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_READ);
-        unsigned char *values = (unsigned char *)bufinfo.buf;
         int brightness = mp_obj_get_int(brightness_obj);
         int delay_ms = mp_obj_get_int(delay_ms_obj);
 
-        text_len = bufinfo.len;
-        bfr_len = 6 * text_len;
+        scroll->scroll_text((const char *)bufinfo.buf, bufinfo.len, brightness, delay_ms);
 
-        int width = PicoScroll::WIDTH;
-        int height = PicoScroll::HEIGHT;
-
-        buffer = (unsigned char *)m_malloc(sizeof(unsigned char) * bfr_len);
-        render(values, text_len, buffer, bfr_len);
-
-        for (int offset = -width; offset < bfr_len; offset++) {
-            scroll->clear();
-
-            for (int x = 0; x < width; x++) {
-                int k = offset + x;
-                if ((k >= 0) && (k < bfr_len)) {
-                    unsigned char col = buffer[k];
-                    for (int y = 0; y < height; y++) {
-                        int val = brightness * ((col >> y) & 1);
-                        scroll->set_pixel(x, y, val);
-                    }
-                }
-            }
-            scroll->update();
-            sleep_ms(delay_ms);
-        }
-        m_free(buffer);
     } else {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     }
@@ -110,60 +81,11 @@ mp_obj_t picoscroll_show_text(mp_obj_t text_obj, mp_obj_t brightness_obj,
                               mp_obj_t offset_obj) {
     if (scroll != nullptr) {
         mp_buffer_info_t bufinfo;
-        unsigned char buffer[PicoScroll::WIDTH + 7];
-        int text_len, bfr_len;
-
         mp_get_buffer_raise(text_obj, &bufinfo, MP_BUFFER_READ);
-        unsigned char *values = (unsigned char *)bufinfo.buf;
         int brightness = mp_obj_get_int(brightness_obj);
         int offset = mp_obj_get_int(offset_obj);
 
-        text_len = bufinfo.len;
-        bfr_len = PicoScroll::WIDTH + 7;
-
-        int width = PicoScroll::WIDTH;
-        int height = PicoScroll::HEIGHT;
-
-        // clear the scroll, so only need to write visible bytes
-        scroll->clear();
-
-        if ((offset < -width) || (offset > 6 * text_len)) {
-            return mp_const_none;
-        }
-
-        // compute what can actually be seen, render only that...
-        // modify offset and bfr_len accordingly
-        if (offset < 0) {
-            int space = 1 + (width + offset) / 6;
-            if (space < text_len) {
-                text_len = space;
-            }
-        } else {
-            int start = offset / 6;
-            offset -= start * 6;
-            text_len = text_len - start;
-            if (text_len > 4) {
-                text_len = 4;
-            }
-        }
-
-        if (bfr_len > 6 * text_len) {
-            bfr_len = 6 * text_len;
-        }
-
-        render(values, text_len, buffer, bfr_len);
-
-        for (int x = 0; x < width; x++) {
-            int k = offset + x;
-            if ((k >= 0) && (k < bfr_len)) {
-                unsigned char col = buffer[k];
-                for (int y = 0; y < height; y++) {
-                    int val = brightness * ((col >> y) & 1);
-                    scroll->set_pixel(x, y, val);
-                }
-            }
-        }
-
+        scroll->set_text((const char *)bufinfo.buf, bufinfo.len, brightness, offset);
     } else {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     }
@@ -180,14 +102,7 @@ mp_obj_t picoscroll_set_pixels(mp_obj_t image_obj) {
             mp_raise_msg(&mp_type_IndexError, BUFFER_TOO_SMALL_MSG);
         }
 
-        unsigned char *values = (unsigned char *)bufinfo.buf;
-
-        for (int y = 0; y < PicoScroll::HEIGHT; y++) {
-            for (int x = 0; x < PicoScroll::WIDTH; x++) {
-                int val = values[y * PicoScroll::WIDTH + x];
-                scroll->set_pixel(x, y, val);
-            }
-        }
+        scroll->set_pixels((const char*)bufinfo.buf);
     } else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
 
@@ -202,34 +117,15 @@ mp_obj_t picoscroll_show_bitmap_1d(mp_obj_t bitmap_obj, mp_obj_t brightness_obj,
         int offset = mp_obj_get_int(offset_obj);
         int brightness = mp_obj_get_int(brightness_obj);
         int length = bufinfo.len;
-        int width = PicoScroll::WIDTH;
-        int height = PicoScroll::HEIGHT;
-
-        // this obviously shouldn't happen as the scroll is 17x7 pixels
-        // would fall off end of byte if this the case
-        if (height > 8) {
-            mp_raise_msg(&mp_type_RuntimeError, INCORRECT_SIZE_MSG);
-        }
-
-        unsigned char *values = (unsigned char *)bufinfo.buf;
 
         // clear the scroll, so only need to write visible bytes
         scroll->clear();
 
-        if ((offset < -width) || (offset > length)) {
+        if ((offset < -PicoScroll::WIDTH) || (offset > length)) {
             return mp_const_none;
         }
 
-        for (int x = 0; x < width; x++) {
-            int k = offset + x;
-            if ((k >= 0) && (k < length)) {
-                unsigned char col = values[k];
-                for (int y = 0; y < height; y++) {
-                    int val = brightness * ((col >> y) & 1);
-                    scroll->set_pixel(x, y, val);
-                }
-            }
-        }
+        scroll->set_bitmap_1d((const char *)bufinfo.buf, bufinfo.len, brightness, offset);
     } else {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
     }
