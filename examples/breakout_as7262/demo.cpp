@@ -14,6 +14,7 @@ int main() {
 
   as7262.init();
 
+  //TODO replace with nice accessors
   int16_t hw_version = as7262.i2c_reg_read_uint16(0x00);
   int16_t fw_version = as7262.i2c_reg_read_uint16(0x02);
   printf("%04x %04x \n", hw_version, fw_version);

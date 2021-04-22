@@ -18,11 +18,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_INT_PIN      = 22;
     static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
-    /***** More public constants here *****/
-
-  private:
-    /***** Private constants here *****/
-
 
     //--------------------------------------------------
     // Enums
@@ -101,8 +96,14 @@ namespace pimoroni {
     bool init();
     void reset();
 
-    uint8_t device_type();
-    uint8_t hardware_version();
+    // For print access in micropython
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_int() const;
+
+    uint8_t device_type();      //TODO implement
+    uint8_t hardware_version(); //TODO implement
     std::string firmware_version();
     reading read();
     uint8_t temperature();
@@ -113,17 +114,17 @@ namespace pimoroni {
     void set_illumination_current(illumination_current current);
     void set_leds(bool illumination, bool indicator);
 
+    //TODO make these below functions private
     // Virtual i2c transfers, routed through read/write/status regs
     uint8_t i2c_reg_read_uint8(uint8_t reg);
     void i2c_reg_write_uint8(uint8_t reg, uint8_t value);
     uint16_t i2c_reg_read_uint16(uint8_t reg);
     float i2c_reg_read_float(uint8_t reg);
-
   private:
     bool data_ready();
     uint8_t _i2c_status(); 
-    int _i2c_read(uint8_t reg, uint8_t *values, int len);
-    int _i2c_write(uint8_t reg, uint8_t *values, int len);
+    uint8_t _i2c_read(uint8_t reg, uint8_t *values, uint8_t len);
+    uint8_t _i2c_write(uint8_t reg, uint8_t *values, uint8_t len);
 
     // *Real* single-byte i2c transfers
     uint8_t _i2c_reg_read_uint8(uint8_t reg);

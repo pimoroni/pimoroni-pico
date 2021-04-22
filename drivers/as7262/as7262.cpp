@@ -69,6 +69,22 @@ namespace pimoroni {
     sleep_ms(1000);
   }
 
+  i2c_inst_t* AS7262::get_i2c() const {
+    return i2c;
+  }
+
+  int AS7262::get_sda() const {
+    return sda;
+  }
+
+  int AS7262::get_scl() const {
+    return scl;
+  }
+
+  int AS7262::get_int() const {
+    return interrupt;
+  }
+
   void AS7262::set_gain(gain gain) {
     uint8_t temp = i2c_reg_read_uint8(reg::CONTROL) & ~0b00110000;
     temp |= (uint8_t)gain << 4;
@@ -168,8 +184,8 @@ namespace pimoroni {
     return _i2c_reg_read_uint8(0x00);
   }
 
-  int AS7262::_i2c_read(uint8_t reg, uint8_t *values, int len) {
-    for (auto i = 0u; i < len; i++){
+  uint8_t AS7262::_i2c_read(uint8_t reg, uint8_t *values, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++){
       while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
       _i2c_reg_write_uint8(0x01, reg + i);     // Set address pointer
       while((_i2c_status() & 0b01) != 1) {};   // Wait for read-ready
@@ -178,11 +194,11 @@ namespace pimoroni {
     return 0;
   }
 
-  int AS7262::_i2c_write(uint8_t reg, uint8_t *values, int len) {
-    for (auto i = 0u; i < len; i++){
+  uint8_t AS7262::_i2c_write(uint8_t reg, uint8_t *values, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++){
       while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
       _i2c_reg_write_uint8(0x01, reg | 0x80);  // Set address pointer
-      while ((_i2c_status() & 0b10) != 0) {};  // Wait for write-ready
+      while((_i2c_status() & 0b10) != 0) {};  // Wait for write-ready
       _i2c_reg_write_uint8(0x01, values[i]);   // Write *one* byte :|
     }
     return 0;
