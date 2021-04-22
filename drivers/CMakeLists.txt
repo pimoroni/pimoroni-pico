@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 add_subdirectory(ads1015)
 add_subdirectory(as7262)
 add_subdirectory(bh1745)
