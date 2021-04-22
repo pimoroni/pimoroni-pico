@@ -8,7 +8,9 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  MICROPYTHON_VERSION: v1.15
   BUILD_TYPE: Release
+  BOARD_TYPE: PICO
 
 jobs:
   build:
@@ -29,8 +31,8 @@ jobs:
     - name: Checkout MicroPython
       uses: actions/checkout@v2
       with:
-        repository: pimoroni/micropython
-        ref: continuous-integration
+        repository: micropython/micropython
+        ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
 
@@ -71,7 +73,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        asset_path: micropython/ports/rp2/build/firmware.uf2
+        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: pimoroni-pico-micropython.uf2
+        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
         asset_content_type: application/octet-stream

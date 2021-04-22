@@ -7,36 +7,11 @@
 #include "hardware/pwm.h"
 
 namespace pimoroni {
+  uint8_t madctl;
+  uint16_t caset[2] = {0, 0};
+  uint16_t raset[2] = {0, 0};
 
-  enum reg {
-    SWRESET   = 0x01,
-    TEON      = 0x35,
-    MADCTL    = 0x36,
-    COLMOD    = 0x3A,
-    GCTRL     = 0xB7,
-    VCOMS     = 0xBB,
-    LCMCTRL   = 0xC0,
-    VDVVRHEN  = 0xC2,
-    VRHS      = 0xC3,
-    VDVS      = 0xC4,
-    FRCTRL2   = 0xC6,
-    PWRCTRL1  = 0xD0,
-    FRMCTR1   = 0xB1,
-    FRMCTR2   = 0xB2,
-    GMCTRP1   = 0xE0,
-    GMCTRN1   = 0xE1,
-    INVOFF    = 0x20,
-    SLPOUT    = 0x11,
-    DISPON    = 0x29,
-    GAMSET    = 0x26,
-    DISPOFF   = 0x28,
-    RAMWR     = 0x2C,
-    INVON     = 0x21,
-    CASET     = 0x2A,
-    RASET     = 0x2B
-  };
-
-  void ST7789::init(bool auto_init_sequence) {
+  void ST7789::init(bool auto_init_sequence, bool round) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
 
@@ -68,6 +43,7 @@ namespace pimoroni {
       pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
       pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
       gpio_set_function(bl, GPIO_FUNC_PWM);
+      set_backlight(255); // Turn backlight on by default to avoid nasty surprises
     }
 
     // if auto_init_sequence then send initialisation sequence
@@ -77,16 +53,8 @@ namespace pimoroni {
 
       sleep_ms(150);
 
-      if(width == 240 && height == 240) {
-        command(reg::MADCTL,    1, "\x04");  // row/column addressing order - rgb pixel order
-        command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
-        command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
-      }
-
-      if(width == 240 && height == 135) {
-        command(reg::MADCTL,    1, "\x70");
-        command(reg::COLMOD,    1, "\x05");
-      }
+      command(reg::TEON,      1, "\x00");  // enable frame sync signal if used
+      command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
 
       command(reg::INVON);   // set inversion mode
       command(reg::SLPOUT);  // leave sleep mode
@@ -96,14 +64,38 @@ namespace pimoroni {
 
       // setup correct addressing window
       if(width == 240 && height == 240) {
-        command(reg::CASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 columns
-        command(reg::RASET,     4, "\x00\x00\x00\xef");  // 0 .. 239 rows
+        caset[0] = 0;
+        caset[1] = 239;
+        raset[0] = round ? 40 : 0;
+        raset[1] = round ? 279 : 239;
+        madctl = MADCTL::HORIZ_ORDER;
       }
 
       if(width == 240 && height == 135) {
-        command(reg::RASET,     4, "\x00\x35\x00\xbb"); // 53 .. 187 (135 rows)
-        command(reg::CASET,     4, "\x00\x28\x01\x17"); // 40 .. 279 (240 columns)
+        caset[0] = 40;   // 240 cols
+        caset[1] = 279;
+        raset[0] = 53;   // 135 rows
+        raset[1] = 187;
+        madctl = MADCTL::COL_ORDER | MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
       }
+
+      if(width == 135 && height == 240) {
+        caset[0] = 52;   // 135 cols
+        caset[1] = 186;
+        raset[0] = 40;   // 240 rows
+        raset[1] = 279;
+        madctl = 0;
+      }
+
+      // Byte swap the 16bit rows/cols values
+      caset[0] = __builtin_bswap16(caset[0]);
+      caset[1] = __builtin_bswap16(caset[1]);
+      raset[0] = __builtin_bswap16(raset[0]);
+      raset[1] = __builtin_bswap16(raset[1]);
+
+      command(reg::CASET,     4, (char *)caset);
+      command(reg::RASET,     4, (char *)raset);
+      command(reg::MADCTL,    1, (char *)&madctl);
     }
 
     // the dma transfer works but without vsync it's not that useful as you could
@@ -147,8 +139,8 @@ namespace pimoroni {
     return mosi;
   }
 
-  int ST7789::get_miso() const {
-    return miso;
+  int ST7789::get_bl() const {
+    return bl;
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data) {
@@ -198,5 +190,10 @@ namespace pimoroni {
 
   void ST7789::vsync_callback(gpio_irq_callback_t callback) {
     gpio_set_irq_enabled_with_callback(vsync, GPIO_IRQ_EDGE_RISE, true, callback);
+  }
+
+  void ST7789::flip(){
+    madctl ^= MADCTL::ROW_ORDER | MADCTL::COL_ORDER;
+    command(reg::MADCTL,    1, (char *)&madctl);
   }
 }

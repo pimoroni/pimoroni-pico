@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 add_subdirectory(ads1015)
 add_subdirectory(as7262)
 add_subdirectory(bh1745)
@@ -6,6 +7,7 @@ add_subdirectory(bme680)
 add_subdirectory(bmp280)
 add_subdirectory(drv2605l)
 add_subdirectory(drv8830)
+add_subdirectory(esp32spi)
 add_subdirectory(ht0740)
 add_subdirectory(icm20948)
 add_subdirectory(is31fl3731)

@@ -1,9 +1,14 @@
 #include "pico_graphics.hpp"
 
-extern uint8_t font_data[96][6];
-extern uint8_t character_widths[96];
-
 namespace pimoroni {
+  PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer)
+  : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
+    set_font(&font6);
+  };
+
+  void PicoGraphics::set_font(const Font *font){
+    this->font = font;
+  }
 
   void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
     pen = create_pen(r, g, b);
@@ -106,13 +111,13 @@ namespace pimoroni {
 
   void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
     uint8_t char_index = c - 32;
-    Rect char_bounds(p.x, p.y, character_widths[char_index] * scale, 6 * scale);
+    Rect char_bounds(p.x, p.y, font->widths[char_index] * scale, font->height * scale);
 
     if(!clip.intersects(char_bounds)) return;
 
-    const uint8_t *d = &font_data[char_index][0];
-    for(uint8_t cx = 0; cx < character_widths[char_index]; cx++) {
-      for(uint8_t cy = 0; cy < 6; cy++) {
+    const uint8_t *d = &font->data[char_index * font->max_width];
+    for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
+      for(uint8_t cy = 0; cy < font->height; cy++) {
         if((1U << cy) & *d) {
           rectangle(Rect(p.x + (cx * scale), p.y + (cy * scale), scale, scale));
         }
@@ -136,24 +141,24 @@ namespace pimoroni {
 
       uint16_t word_width = 0;
       for(size_t j = i; j < next_space; j++) {
-        word_width += character_widths[t[j] - 32] * scale;
+        word_width += font->widths[t[j] - 32] * scale;
       }
 
       // if this word would exceed the wrap limit then
       // move to the next line
       if(co != 0 && co + word_width > (uint32_t)wrap) {
         co = 0;
-        lo += 7 * scale;
+        lo += (font->height + 1) * scale;
       }
 
       // draw word
       for(size_t j = i; j < next_space; j++) {
         character(t[j], Point(p.x + co, p.y + lo), scale);
-        co += character_widths[t[j] - 32] * scale;
+        co += font->widths[t[j] - 32] * scale;
       }
 
       // move character offset to end of word and add a space
-      co += character_widths[0] * scale;
+      co += font->widths[0] * scale;
       i = next_space + 1;
     }
   }
@@ -315,8 +320,8 @@ namespace pimoroni {
     }else{
       // steep version
       int32_t s = std::abs(dy);       // number of steps
-      int32_t sy = dy < 0 ? -1 : 1;   // x step value
-      int32_t sx = (dx << 16) / s;    // y step value in fixed 16:16
+      int32_t sy = dy < 0 ? -1 : 1;   // y step value
+      int32_t sx = (dx << 16) / s;    // x step value in fixed 16:16
       int32_t y = p1.y;
       int32_t x = p1.x << 16;
       while(s--) {

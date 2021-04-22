@@ -1,19 +1,18 @@
-import math
-import time
 import picounicorn
 
 picounicorn.init()
+
 
 # From CPython Lib/colorsys.py
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
         return v, v, v
-    i = int(h*6.0)
-    f = (h*6.0) - i
-    p = v*(1.0 - s)
-    q = v*(1.0 - s*f)
-    t = v*(1.0 - s*(1.0-f))
-    i = i%6
+    i = int(h * 6.0)
+    f = (h * 6.0) - i
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
+    i = i % 6
     if i == 0:
         return v, t, p
     if i == 1:
@@ -26,6 +25,7 @@ def hsv_to_rgb(h, s, v):
         return t, p, v
     if i == 5:
         return v, p, q
+
 
 w = picounicorn.get_width()
 h = picounicorn.get_height()

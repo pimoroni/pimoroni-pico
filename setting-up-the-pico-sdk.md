@@ -25,18 +25,7 @@ git clone -b master https://github.com/raspberrypi/pico-examples.git
 ```
 
 
-**Step 3.** Install the MicroPython port (optional):
-
-```bash
-git clone -b pico https://github.com/raspberrypi/micropython.git
-cd micropython
-git submodule update --init -- lib/pico-sdk
-cd lib/pico-sdk
-git submodule update --init
-cd ../../..
-```
-
-**Step 4.** Install the toolchain needed to build Pico projects.
+**Step 3.** Install the toolchain needed to build Pico projects.
 
 
 **Debian Linux**
@@ -58,6 +47,17 @@ brew install arm-none-eabi-gcc
 xcode-select --install
 ```
 
+**Step 4.** Install the MicroPython port (optional):
+
+```bash
+git clone -b master https://github.com/micropython/micropython.git
+cd micropython
+git submodule update --init -- lib/pico-sdk lib/tinyusb
+make -C mpy-cross
+cd ports/rp2
+make
+cd ../../../
+```
 **Step 5.** Install the Pimoroni Pico libraries:
 
 ```bash

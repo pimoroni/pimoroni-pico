@@ -17,7 +17,7 @@ jobs:
           - os: ubuntu-20.04
             name: Linux
             cache-key: linux
-            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk'
+            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras'
             apt-packages: clang-tidy gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
 
     runs-on: ${{matrix.os}}
@@ -35,6 +35,14 @@ jobs:
         repository: raspberrypi/pico-sdk
         path: pico-sdk
         submodules: true
+
+    # Check out the Pico Extras
+    - name: Checkout Pico Extras
+      uses: actions/checkout@v2
+      with:
+        repository: raspberrypi/pico-extras
+        path: pico-extras
+        submodules: false  # lwip breaks audio submodule fetchin
 
     # Linux deps
     - name: Install deps

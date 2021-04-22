@@ -17,6 +17,11 @@ namespace pimoroni {
       __fb = buf;
   }
 
+  PicoDisplay::PicoDisplay(uint16_t *buf, int width, int height)
+    : PicoGraphics(width, height, buf), screen(width, height, buf)  {
+      __fb = buf;
+  }
+
   void PicoDisplay::init() {
     // setup the rgb led for pwm control
     pwm_config cfg = pwm_get_default_config();
@@ -79,4 +84,7 @@ namespace pimoroni {
     return !gpio_get(button);
   }
 
+  void PicoDisplay::flip() {
+    screen.flip();
+  }
 }
