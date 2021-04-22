@@ -19,8 +19,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_SDA_PIN      = 20;
     static const uint8_t DEFAULT_SCL_PIN      = 21;
 
-    /***** More public constants here *****/
-
   private:
     /***** Private constants here *****/
     const uint16_t SOFT_RESET                 = 0x0006;
@@ -33,6 +31,7 @@ namespace pimoroni {
     const uint16_t GET_FEATURE_SET_VERSION    = 0x202f;
     const uint16_t MEASURE_RAW_SIGNALS        = 0x2050;
     const uint16_t GET_SERIAL_ID              = 0x3682;
+    
 
     //--------------------------------------------------
     // Variables
@@ -40,12 +39,9 @@ namespace pimoroni {
   private:
     i2c_inst_t *i2c   = i2c0;
 
-    // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
-
-    /***** More variables here *****/
 
 
     //--------------------------------------------------
@@ -62,7 +58,12 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    bool init(); //This should be present in all drivers
+    bool init();
+
+    // For print access in micropython
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
 
     // uint8_t command(uint8_t command_name, uint8_t parameters/*=None*/);
     // Get the unique ID from the chip and store locally
@@ -108,7 +109,6 @@ namespace pimoroni {
     //
     uint8_t calculate_crc(uint16_t value);
     uint8_t calculate_crc(uint8_t value1, uint8_t value2);
-
   };
 
 }
