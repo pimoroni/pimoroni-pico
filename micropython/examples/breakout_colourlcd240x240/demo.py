@@ -1,4 +1,5 @@
-import time, random
+import time
+import random
 from breakout_colourlcd240x240 import BreakoutColourLCD240x240
 
 width = BreakoutColourLCD240x240.WIDTH
@@ -19,6 +20,7 @@ class Ball:
         self.dy = dy
         self.pen = pen
 
+
 # initialise shapes
 balls = []
 for i in range(0, 100):
@@ -30,18 +32,18 @@ for i in range(0, 100):
             r,
             (14 - r) / 2,
             (14 - r) / 2,
-            display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),            
+            display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
         )
     )
-    
+
 while True:
     display.set_pen(40, 40, 40)
     display.clear()
-    
+
     for ball in balls:
         ball.x += ball.dx
         ball.y += ball.dy
-        
+
         xmax = width - ball.r
         xmin = ball.r
         ymax = height - ball.r
