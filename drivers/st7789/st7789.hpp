@@ -31,10 +31,6 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    spi_inst_t *spi = spi0;
-
-    uint32_t dma_channel;
-
     // screen properties
     uint16_t width;
     uint16_t height;
@@ -45,6 +41,10 @@ namespace pimoroni {
     uint16_t *frame_buffer;
 
   private:
+    spi_inst_t *spi = spi0;
+
+    uint32_t dma_channel;
+
     // interface pins with our standard defaults where appropriate
     int8_t cs     = DEFAULT_CS_PIN;
     int8_t dc     = DEFAULT_DC_PIN;
@@ -81,8 +81,8 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
            uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1) :
-      spi(spi), width(width), height(height), frame_buffer(frame_buffer),
-      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl) {}
+      width(width), height(height), frame_buffer(frame_buffer),
+      spi(spi), cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl) {}
 
 
     //--------------------------------------------------
