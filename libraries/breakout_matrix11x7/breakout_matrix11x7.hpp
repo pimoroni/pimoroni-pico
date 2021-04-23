@@ -22,7 +22,7 @@ namespace pimoroni {
         uint8_t lookup_pixel(uint8_t index);
 
         // This wonderful lookup table maps the LEDs on Matrix 11x7
-        const int8_t lookup_table[WIDTH * HEIGHT] = {
+        const uint8_t lookup_table[WIDTH * HEIGHT] = {
             6, 22, 38, 54, 70, 86, 14, 30, 46, 62, 78,
             5, 21, 37, 53, 69, 85, 13, 29, 45, 61, 77,
             4, 20, 36, 52, 68, 84, 12, 28, 44, 60, 76,
