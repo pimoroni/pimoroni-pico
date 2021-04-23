@@ -11,6 +11,48 @@ namespace pimoroni {
   uint16_t caset[2] = {0, 0};
   uint16_t raset[2] = {0, 0};
 
+  enum MADCTL : uint8_t {
+    ROW_ORDER   = 0b10000000,
+    COL_ORDER   = 0b01000000,
+    SWAP_XY     = 0b00100000,  // AKA "MV"
+    SCAN_ORDER  = 0b00010000,
+    RGB         = 0b00001000,
+    HORIZ_ORDER = 0b00000100
+  };
+
+  #define ROT_240_240_0      0
+  #define ROT_240_240_90     MADCTL::SWAP_XY | MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER
+  #define ROT_240_240_180    MADCTL::SCAN_ORDER | MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::ROW_ORDER
+  #define ROT_240_240_270    MADCTL::SWAP_XY | MADCTL::HORIZ_ORDER | MADCTL::ROW_ORDER
+
+  enum reg {
+    SWRESET   = 0x01,
+    TEON      = 0x35,
+    MADCTL    = 0x36,
+    COLMOD    = 0x3A,
+    GCTRL     = 0xB7,
+    VCOMS     = 0xBB,
+    LCMCTRL   = 0xC0,
+    VDVVRHEN  = 0xC2,
+    VRHS      = 0xC3,
+    VDVS      = 0xC4,
+    FRCTRL2   = 0xC6,
+    PWRCTRL1  = 0xD0,
+    FRMCTR1   = 0xB1,
+    FRMCTR2   = 0xB2,
+    GMCTRP1   = 0xE0,
+    GMCTRN1   = 0xE1,
+    INVOFF    = 0x20,
+    SLPOUT    = 0x11,
+    DISPON    = 0x29,
+    GAMSET    = 0x26,
+    DISPOFF   = 0x28,
+    RAMWR     = 0x2C,
+    INVON     = 0x21,
+    CASET     = 0x2A,
+    RASET     = 0x2B
+  };
+
   void ST7789::init(bool auto_init_sequence, bool round) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);

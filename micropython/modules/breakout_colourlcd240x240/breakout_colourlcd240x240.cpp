@@ -21,7 +21,7 @@ typedef struct _breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t {
 
 /***** Print *****/
 void BreakoutColourLCD240x240_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter    
+    (void)kind; //Unused input parameter
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
     BreakoutColourLCD240x240* breakout = self->breakout;
     mp_print_str(print, "BreakoutColourLCD240x240(");
@@ -63,7 +63,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
 
         self = m_new_obj(breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
         self->base.type = &breakout_colourlcd240x240_BreakoutColourLCD240x240_type;
-        
+
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
@@ -84,7 +84,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
         if(slot == ST7789::BG_SPI_FRONT || slot == ST7789::BG_SPI_BACK) {
             self = m_new_obj(breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
             self->base.type = &breakout_colourlcd240x240_BreakoutColourLCD240x240_type;
-        
+
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
@@ -122,7 +122,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
         int sck = args[ARG_sck].u_int;
         if(!IS_VALID_SCK(spi_id, sck)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCK pin"));
-        }       
+        }
 
         int mosi = args[ARG_mosi].u_int;
         if(!IS_VALID_SCK(spi_id, mosi)) {
@@ -131,7 +131,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
 
         self = m_new_obj(breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
         self->base.type = &breakout_colourlcd240x240_BreakoutColourLCD240x240_type;
-        
+
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
         self->breakout = new BreakoutColourLCD240x240((uint16_t *)bufinfo.buf, spi,
             args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, BreakoutColourLCD240x240::PIN_UNUSED, args[ARG_bl].u_int);
@@ -159,7 +159,7 @@ mp_obj_t BreakoutColourLCD240x240_set_backlight(size_t n_args, const mp_obj_t *p
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
@@ -183,7 +183,7 @@ mp_obj_t BreakoutColourLCD240x240_set_pen(size_t n_args, const mp_obj_t *pos_arg
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
         breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
         int pen = args[ARG_pen].u_int;
@@ -204,7 +204,7 @@ mp_obj_t BreakoutColourLCD240x240_set_pen(size_t n_args, const mp_obj_t *pos_arg
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
         breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
         int r = args[ARG_r].u_int;
@@ -268,7 +268,7 @@ mp_obj_t BreakoutColourLCD240x240_set_clip(size_t n_args, const mp_obj_t *pos_ar
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x = args[ARG_x].u_int;
@@ -306,7 +306,7 @@ mp_obj_t BreakoutColourLCD240x240_pixel(size_t n_args, const mp_obj_t *pos_args,
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x = args[ARG_x].u_int;
@@ -329,7 +329,7 @@ mp_obj_t BreakoutColourLCD240x240_pixel_span(size_t n_args, const mp_obj_t *pos_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x = args[ARG_x].u_int;
@@ -354,7 +354,7 @@ mp_obj_t BreakoutColourLCD240x240_rectangle(size_t n_args, const mp_obj_t *pos_a
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x = args[ARG_x].u_int;
@@ -379,7 +379,7 @@ mp_obj_t BreakoutColourLCD240x240_circle(size_t n_args, const mp_obj_t *pos_args
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x = args[ARG_x].u_int;
@@ -404,7 +404,7 @@ mp_obj_t BreakoutColourLCD240x240_character(size_t n_args, const mp_obj_t *pos_a
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int c = mp_obj_get_int(args[ARG_char].u_obj);
@@ -435,7 +435,7 @@ mp_obj_t BreakoutColourLCD240x240_text(size_t n_args, const mp_obj_t *pos_args, 
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     mp_check_self(mp_obj_is_str_or_bytes(args[ARG_text].u_obj));
@@ -469,7 +469,7 @@ mp_obj_t BreakoutColourLCD240x240_polygon(size_t n_args, const mp_obj_t *pos_arg
 
     // mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     // mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     // breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     // int x = args[ARG_x].u_int;
@@ -498,7 +498,7 @@ mp_obj_t BreakoutColourLCD240x240_triangle(size_t n_args, const mp_obj_t *pos_ar
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x1 = args[ARG_x1].u_int;
@@ -528,7 +528,7 @@ mp_obj_t BreakoutColourLCD240x240_line(size_t n_args, const mp_obj_t *pos_args, 
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
     int x1 = args[ARG_x1].u_int;
