@@ -9,7 +9,7 @@ namespace pimoroni {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
-  private:
+  public:
     static const uint8_t DEFAULT_CS_PIN     = 17;
     static const uint8_t DEFAULT_DC_PIN     = 16;
     static const uint8_t DEFAULT_SCK_PIN    = 18;
