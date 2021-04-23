@@ -9,6 +9,13 @@ namespace pimoroni {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
+  public:
+    static const uint8_t DEFAULT_CS_PIN     = 17;
+    static const uint8_t DEFAULT_DC_PIN     = 16;
+    static const uint8_t DEFAULT_SCK_PIN    = 18;
+    static const uint8_t DEFAULT_MOSI_PIN   = 19;
+    static const uint8_t DEFAULT_BL_PIN     = 20;
+
   private:
     static const uint8_t ROWS = 162;
     static const uint8_t COLS = 132;
@@ -43,12 +50,12 @@ namespace pimoroni {
     uint32_t dma_channel;
 
     // interface pins with our standard defaults where appropriate
-    int8_t cs     = 17;
-    int8_t dc     = 16;
-    int8_t sck    = 18;
-    int8_t mosi   = 19;
+    int8_t cs     = DEFAULT_CS_PIN;
+    int8_t dc     = DEFAULT_DC_PIN;
+    int8_t sck    = DEFAULT_SCK_PIN;
+    int8_t mosi   = DEFAULT_MOSI_PIN;
     int8_t miso   = -1; // we generally don't use this pin
-    int8_t bl     = 20;
+    int8_t bl     = DEFAULT_BL_PIN;
     int8_t vsync  = -1; // only available on some products
 
     uint32_t spi_baud = 30 * 1024 * 1024;
@@ -81,9 +88,8 @@ namespace pimoroni {
     ST7735(uint16_t width, uint16_t height, uint16_t *frame_buffer,
            spi_inst_t *spi,
            uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1) :
-      width(width), height(height), frame_buffer(frame_buffer) ,
-      spi(spi),
-      cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl) {}
+      width(width), height(height), frame_buffer(frame_buffer),
+      spi(spi), cs(cs), dc(dc), sck(sck), mosi(mosi), miso(miso), bl(bl) {}
 
 
     //--------------------------------------------------
@@ -94,7 +100,7 @@ namespace pimoroni {
 
     spi_inst_t* get_spi() const;
     int get_cs() const;
-    int get_dc() const;    
+    int get_dc() const;
     int get_sck() const;
     int get_mosi() const;
     int get_bl() const;
