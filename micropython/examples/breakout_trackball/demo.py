@@ -8,7 +8,7 @@ trackball = BreakoutTrackball()
 trackball.set_rgbw(0, 0, 0, 64)
 
 while True:
-    state = trackball.read();
+    state = trackball.read()
     if state[BreakoutTrackball.SW_PRESSED]:
         trackball.set_rgbw(0, 0, 0, 255)
     elif state[BreakoutTrackball.LEFT] > sensitivity:
