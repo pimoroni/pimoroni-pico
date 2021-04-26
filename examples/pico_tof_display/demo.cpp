@@ -23,7 +23,7 @@
 #else
 #include "pico_display.hpp"
 #endif
-#include "vl53l1x.hpp"
+#include "breakout_tof.hpp"
 
 using namespace pimoroni;
 
@@ -115,7 +115,7 @@ uint16_t disptext_dist_size = 4;
 
 #define MM_TO_INCH 25.4
 
-VL53L1X vl53l1x;
+BreakoutTOF vl53l1x;
 
 const char mode_to_text[4][7] = {
   "Auto",
@@ -155,9 +155,9 @@ int main() {
   uint32_t i = 0;
   char buf[256];
   if (vl53_present) {
-    vl53l1x.startContinuous(1000);
-    vl53l1x.setMeasurementTimingBudget(50000);
-    vl53l1x.setDistanceModeInt(vl53_mode);
+    vl53l1x.start_continuous(1000);
+    vl53l1x.set_measurement_timing_budget(50000);
+    vl53l1x.set_distance_mode_int(vl53_mode);
   }
 
   // The distance (in millimetres)
@@ -187,7 +187,7 @@ int main() {
       if (vl53_present) {
         vl53_mode++;
         if (vl53_mode > 3) vl53_mode = 1;
-        vl53l1x.setDistanceModeInt(vl53_mode);
+        vl53l1x.set_distance_mode_int(vl53_mode);
       }
     }
 

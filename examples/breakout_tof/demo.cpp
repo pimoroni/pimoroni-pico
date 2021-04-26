@@ -20,9 +20,9 @@ int main() {
 
   printf("VL53L1X found...\n");
 
-  tof.startContinuous(1000);
-  tof.setMeasurementTimingBudget(50000);
-  tof.setDistanceModeInt(1);
+  tof.start_continuous(1000);
+  tof.set_measurement_timing_budget(50000);
+  tof.set_distance_mode_int(1);
 
   while(true) {
     uint16_t distance = tof.read(true);
