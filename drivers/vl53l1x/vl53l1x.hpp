@@ -1387,6 +1387,11 @@ namespace pimoroni {
   public:
     bool init(bool io_2v8 = true);
 
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_int() const;
+
     uint16_t get_id();
     uint16_t get_osc();
     void set_osc(uint16_t value);

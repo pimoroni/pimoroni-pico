@@ -153,7 +153,23 @@ namespace pimoroni {
 
     return true;
   }
-  
+
+  i2c_inst_t* VL53L1X::get_i2c() const {
+    return i2c;
+  }
+
+  int VL53L1X::get_sda() const {
+    return sda;
+  }
+
+  int VL53L1X::get_scl() const {
+    return scl;
+  }
+
+  int VL53L1X::get_int() const {
+    return interrupt;
+  }
+
   // Initialize sensor using settings taken mostly from VL53L1_DataInit() and
   // VL53L1_StaticInit().
   // We are running a breakout, so will definitely configure the sensor for 2V8 mode
