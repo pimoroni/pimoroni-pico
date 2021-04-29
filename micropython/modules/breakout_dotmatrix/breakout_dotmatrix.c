@@ -1,42 +1,50 @@
 #include "breakout_dotmatrix.h"
 
-/***** Constants *****/
-// enum buttons
-// {
-//     BUTTON_A = 0,
-//     BUTTON_B,
-//     BUTTON_X,
-//     BUTTON_Y,
-// };
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// BreakoutDotMatrix Class
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutDotMatrix_set_brightness_obj, 2, BreakoutDotMatrix_set_brightness);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutDotMatrix_set_decimal_obj, 1, BreakoutDotMatrix_set_decimal);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutDotMatrix_set_pixel_obj, 4, BreakoutDotMatrix_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutDotMatrix_set_character_obj, 3, BreakoutDotMatrix_set_character);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutDotMatrix_set_image_obj, 4, BreakoutDotMatrix_set_image);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutDotMatrix_clear_obj, BreakoutDotMatrix_clear);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutDotMatrix_show_obj, BreakoutDotMatrix_show);
+
+/***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t BreakoutDotMatrix_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&BreakoutDotMatrix_set_brightness_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_decimal), MP_ROM_PTR(&BreakoutDotMatrix_set_decimal_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&BreakoutDotMatrix_set_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_character), MP_ROM_PTR(&BreakoutDotMatrix_set_character_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_image), MP_ROM_PTR(&BreakoutDotMatrix_set_image_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&BreakoutDotMatrix_clear_obj) },
+    { MP_ROM_QSTR(MP_QSTR_show), MP_ROM_PTR(&BreakoutDotMatrix_show_obj) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(WIDTH) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(HEIGHT) },
+};
+STATIC MP_DEFINE_CONST_DICT(BreakoutDotMatrix_locals_dict, BreakoutDotMatrix_locals_dict_table);
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_dotmatrix_BreakoutDotMatrix_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_dotmatrix,
+    .print = BreakoutDotMatrix_print,
+    .make_new = BreakoutDotMatrix_make_new,
+    .locals_dict = (mp_obj_dict_t*)&BreakoutDotMatrix_locals_dict,
+};
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_dotmatrix Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/***** Module Functions *****/
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_dotmatrix_init_obj, breakout_dotmatrix_init);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_dotmatrix_get_width_obj, breakout_dotmatrix_get_width);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_dotmatrix_get_height_obj, breakout_dotmatrix_get_height);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_dotmatrix_update_obj, breakout_dotmatrix_update);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_3(breakout_dotmatrix_set_pixel_obj, breakout_dotmatrix_set_pixel);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_0(breakout_dotmatrix_clear_obj, breakout_dotmatrix_clear);
-// STATIC MP_DEFINE_CONST_FUN_OBJ_1(breakout_dotmatrix_is_pressed_obj, breakout_dotmatrix_is_pressed);
-
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_dotmatrix_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_dotmatrix) },
-//     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&breakout_dotmatrix_init_obj) },    
-//     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&breakout_dotmatrix_get_width_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&breakout_dotmatrix_get_height_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&breakout_dotmatrix_update_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&breakout_dotmatrix_set_pixel_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&breakout_dotmatrix_clear_obj) },
-//     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&breakout_dotmatrix_is_pressed_obj) },        
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-//     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_dotmatrix) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutDotMatrix), (mp_obj_t)&breakout_dotmatrix_BreakoutDotMatrix_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_dotmatrix_globals, breakout_dotmatrix_globals_table);
 

@@ -1,27 +1,31 @@
 #include "ltp305.hpp"
 #include <algorithm>
+#include "dotfont.hpp"
 
 namespace pimoroni {
 
-  /***** Device registers and masks here *****/
-
-  bool LTP305::init(uint8_t brightness) {
+  bool LTP305::init() {
     i2c_init(i2c, 400000);
 
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
     gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
 
-    set_brightness(brightness);
+    set_brightness(DEFAULT_BRIGHTNESS);
     clear();
 
     return true;
   }
 
-  void LTP305::clear() {
-    for(uint8_t i = 0; i < BUFFER_LENGTH; i++) {
-      buf_matrix_left[i + 1] = 0x00;
-      buf_matrix_right[i + 1] = 0x00;
-    }
+  i2c_inst_t* LTP305::get_i2c() const {
+    return i2c;
+  }
+
+  int LTP305::get_sda() const {
+    return sda;
+  }
+
+  int LTP305::get_scl() const {
+    return scl;
   }
 
   void LTP305::set_brightness(uint8_t brightness, bool update) {
@@ -99,6 +103,13 @@ namespace pimoroni {
 
         set_pixel(x, y, p);
       }
+    }
+  }
+
+  void LTP305::clear() {
+    for(uint8_t i = 0; i < BUFFER_LENGTH; i++) {
+      buf_matrix_left[i + 1] = 0x00;
+      buf_matrix_right[i + 1] = 0x00;
     }
   }
 

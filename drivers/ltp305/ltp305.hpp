@@ -2,7 +2,6 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
-#include "dotfont.hpp"
 
 namespace pimoroni {
 
@@ -22,6 +21,7 @@ namespace pimoroni {
 
     static const uint8_t DEFAULT_BRIGHTNESS       = 64;
     static const uint8_t MAX_BRIGHTNESS           = 127;
+    static const uint8_t DEFAULT_ON_LEVEL         = 0x7f;
 
   private:
     static const uint8_t MODE = 0b00011000;
@@ -99,15 +99,19 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    bool init(uint8_t brightness = DEFAULT_BRIGHTNESS);
+    bool init();
 
-    void clear();
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+
     void set_brightness(uint8_t brightness, bool update = false);
     void set_decimal(bool left = false, bool right = false);
     void set_pixel(uint8_t x, uint8_t y, bool c);
     void set_character(uint8_t x, uint16_t ch);
     void set_image(const uint8_t *image, uint16_t image_width, uint16_t image_height,
-                   uint16_t offset_x, uint16_t offset_y, bool wrap = false, bool bg = false, uint8_t on_level = 0x7f);
+                   uint16_t offset_x, uint16_t offset_y, bool wrap = false, bool bg = false, uint8_t on_level = DEFAULT_ON_LEVEL);
+    void clear();
     void show();
 
   private:
