@@ -99,8 +99,8 @@ def handler(head, body):
     if head["Status"] == "200 OK":
         color = body[1:]
         r = int(color[0:2], 16)
-        g = int(color[3:4], 16)
-        b = int(color[5:6], 16)
+        g = int(color[2:4], 16)
+        b = int(color[4:6], 16)
         picowireless.set_led(r, g, b)
         print("Set LED to {} {} {}".format(r, g, b))
     else:
