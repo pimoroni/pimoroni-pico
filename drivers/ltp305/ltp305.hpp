@@ -110,7 +110,7 @@ namespace pimoroni {
     void set_pixel(uint8_t x, uint8_t y, bool c);
     void set_character(uint8_t x, uint16_t ch);
     void set_image(const uint8_t *image, uint16_t image_width, uint16_t image_height,
-                   uint16_t offset_x, uint16_t offset_y, bool wrap = false, bool bg = false, uint8_t on_level = DEFAULT_ON_LEVEL);
+                   uint16_t offset_x, uint16_t offset_y, bool wrap = false, bool bg = false, uint8_t on_level = DEFAULT_ON_LEVEL, uint8_t padding = 0);
     void clear();
     void show();
 

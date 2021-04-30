@@ -19,7 +19,7 @@ while True:
     else:
         left = second[0]
         right = second[1]
-        
+
     display.set_character(0, ord(left))
     display.set_character(5, ord(right))
     display.show()

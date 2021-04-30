@@ -188,7 +188,7 @@ mp_obj_t BreakoutDotMatrix_set_character(size_t n_args, const mp_obj_t *pos_args
 }
 
 mp_obj_t BreakoutDotMatrix_set_image(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_image, ARG_width, ARG_height, ARG_offset_x, ARG_offset_y, ARG_wrap, ARG_bg, ARG_on_level };
+    enum { ARG_self, ARG_image, ARG_width, ARG_height, ARG_offset_x, ARG_offset_y, ARG_wrap, ARG_bg, ARG_on_level, ARG_padding };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_image, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -199,6 +199,7 @@ mp_obj_t BreakoutDotMatrix_set_image(size_t n_args, const mp_obj_t *pos_args, mp
         { MP_QSTR_wr, MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_bg, MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_on_level, MP_ARG_INT, {.u_int = BreakoutDotMatrix::DEFAULT_ON_LEVEL} },
+        { MP_QSTR_padding, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -211,6 +212,7 @@ mp_obj_t BreakoutDotMatrix_set_image(size_t n_args, const mp_obj_t *pos_args, mp
     int offset_x = args[ARG_offset_x].u_int;
     int offset_y = args[ARG_offset_y].u_int;
     int on_level = args[ARG_on_level].u_int;
+    int padding = args[ARG_padding].u_int;
 
     if(width <= 0 || height <= 0)
         mp_raise_ValueError("width or height less than or equal to zero.");
@@ -218,13 +220,15 @@ mp_obj_t BreakoutDotMatrix_set_image(size_t n_args, const mp_obj_t *pos_args, mp
         mp_raise_ValueError("offset_x or offset_y less than zero.");
     else if(on_level < 0 || offset_y > 255)
         mp_raise_ValueError("on_level out of range. Expected 0 to 255");
+    else if(padding < 0 || padding > 255)
+        mp_raise_ValueError("padding out of range. Expected 0 to 255");
     else {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_image].u_obj, &bufinfo, MP_BUFFER_READ);
 
         self->breakout->set_image((const uint8_t *)bufinfo.buf, width, height,
                                   offset_x, offset_y, args[ARG_wrap].u_bool,
-                                  args[ARG_bg].u_bool, on_level);
+                                  args[ARG_bg].u_bool, on_level, padding);
     }
 
     return mp_const_none;

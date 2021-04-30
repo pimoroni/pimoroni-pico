@@ -32,5 +32,5 @@ while True:
             # Right
             display.set_pixel(x + (width // 2), y, values[x] <= y)
 
-    time.sleep(1.0 / height)
     display.show()
+    time.sleep(1.0 / height)

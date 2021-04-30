@@ -80,13 +80,16 @@ namespace pimoroni {
   }
 
   void LTP305::set_image(const uint8_t *image, uint16_t image_width, uint16_t image_height,
-                         uint16_t offset_x, uint16_t offset_y, bool wrap, bool bg, uint8_t on_level) {
+                         uint16_t offset_x, uint16_t offset_y, bool wrap, bool bg, uint8_t on_level, uint8_t padding) {
 
     for(uint8_t y = 0; y < HEIGHT; y++) {
       for(uint8_t x = 0; x < WIDTH; x++) {
         bool p = bg;
         uint16_t i_x = x + offset_x;
         uint16_t i_y = y + offset_y;
+
+        if(x >= 5)
+          i_x += padding;
 
         if(wrap) {
           while(i_x >= image_width) {
