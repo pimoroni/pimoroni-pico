@@ -15,7 +15,7 @@ image = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
          0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0]
 
 image_height = 7
-image_padding = 3 # 3 columns of padding
+image_padding = 3  # 3 columns of padding
 image_width = math.floor(len(image) / image_height)
 
 arr = bytearray(image)

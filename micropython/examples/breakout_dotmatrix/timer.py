@@ -1,4 +1,3 @@
-import sys
 import time
 
 from breakout_dotmatrix import BreakoutDotMatrix

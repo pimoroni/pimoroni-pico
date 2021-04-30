@@ -14,6 +14,7 @@ def eye(x, y):
     display.set_pixel(x + 1, y, True)
     display.set_pixel(x + 1, y + 1, True)
 
+
 while True:
     t = (time.time() - start_time) * math.pi
 
