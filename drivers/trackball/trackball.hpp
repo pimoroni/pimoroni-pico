@@ -73,7 +73,7 @@ namespace pimoroni {
     i2c_inst_t* get_i2c() const;
     int get_sda() const;
     int get_scl() const;
-    int get_interrupt() const;
+    int get_int() const;
 
     void change_address(uint8_t new_address);
         

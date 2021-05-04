@@ -76,7 +76,7 @@ namespace pimoroni {
     return scl;
   }
 
-  int Trackball::get_interrupt() const {
+  int Trackball::get_int() const {
     return interrupt;
   }
 

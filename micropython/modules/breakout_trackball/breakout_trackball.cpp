@@ -34,8 +34,8 @@ void BreakoutTrackball_print(const mp_print_t *print, mp_obj_t self_in, mp_print
     mp_print_str(print, ", scl = ");
     mp_obj_print_helper(print, mp_obj_new_int(breakout->get_scl()), PRINT_REPR);
 
-    mp_print_str(print, ", interrupt = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_interrupt()), PRINT_REPR);
+    mp_print_str(print, ", int = ");
+    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_int()), PRINT_REPR);
 
     mp_print_str(print, ")");
 }
