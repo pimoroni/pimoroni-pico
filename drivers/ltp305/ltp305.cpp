@@ -29,8 +29,7 @@ namespace pimoroni {
   }
 
   void LTP305::set_brightness(uint8_t brightness, bool update) {
-
-    brightness = std::min(MAX_BRIGHTNESS, brightness);
+    brightness = std::min((uint8_t)MAX_BRIGHTNESS, brightness);
     if(update)
       i2c_reg_write_uint8(CMD_BRIGHTNESS, brightness);
   }
