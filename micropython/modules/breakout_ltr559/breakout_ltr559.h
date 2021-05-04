@@ -2,13 +2,23 @@
 #include "py/runtime.h"
 #include "py/objstr.h"
 
+/***** Constants *****/
+enum {
+    PROXIMITY = 0,
+    ALS_0,
+    ALS_1,
+    INTEGRATION_TIME,
+    GAIN,
+    RATIO,
+    LUX
+};
+
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t breakout_ltr559_BreakoutLTR559_type;
 
 /***** Extern of Class Methods *****/
 extern void BreakoutLTR559_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
-extern mp_obj_t BreakoutLTR559_reset(mp_obj_t self_in);
 extern mp_obj_t BreakoutLTR559_part_id(mp_obj_t self_in);
 extern mp_obj_t BreakoutLTR559_revision_id(mp_obj_t self_in);
 extern mp_obj_t BreakoutLTR559_manufacturer_id(mp_obj_t self_in);

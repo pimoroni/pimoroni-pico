@@ -85,7 +85,7 @@
 
 
 namespace pimoroni {
-  typedef struct  {
+  typedef struct {
     uint16_t proximity;
     uint16_t als0;
     uint16_t als1;
@@ -116,8 +116,8 @@ namespace pimoroni {
     static const uint8_t PIN_UNUSED             = UINT8_MAX;
 
   private:
-    static constexpr int ch0_c[4] = {17743, 42785, 5926, 0};
-    static constexpr int ch1_c[4] = {-11059, 19548, -1185, 0};
+    const int ch0_c[4] = {17743, 42785, 5926, 0};
+    const int ch1_c[4] = {-11059, 19548, -1185, 0};
 
 
     //--------------------------------------------------
