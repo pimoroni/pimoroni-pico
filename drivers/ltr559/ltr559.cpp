@@ -32,6 +32,12 @@ namespace pimoroni {
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
     gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
 
+    if(interrupt != PIN_UNUSED) {
+      gpio_set_function(interrupt, GPIO_FUNC_SIO);
+      gpio_set_dir(interrupt, GPIO_IN);
+      gpio_pull_up(interrupt);
+    }
+
     reset();
     interrupts(true, true);
 
@@ -57,6 +63,31 @@ namespace pimoroni {
     return true;
   }
 
+  void LTR559::reset() {
+    set_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT);
+
+    while(get_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT)) {
+      sleep_ms(100);
+    }
+  }
+
+  i2c_inst_t* LTR559::get_i2c() const {
+    return i2c;
+  }
+
+  int LTR559::get_sda() const {
+    return sda;
+  }
+
+  int LTR559::get_scl() const {
+    return scl;
+  }
+
+  int LTR559::get_int() const {
+    return interrupt;
+  }
+
+
   uint8_t LTR559::part_id() {
     uint8_t part_id;
     read_bytes(LTR559_PART_ID, &part_id, 1);
@@ -73,22 +104,6 @@ namespace pimoroni {
     uint8_t manufacturer;
     read_bytes(LTR559_MANUFACTURER_ID, &manufacturer, 1);
     return manufacturer;
-  }
-
-  void LTR559::reset() {
-    set_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT);
-
-    while(get_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT)) {
-      sleep_ms(100);
-    }
-  }
-
-  uint16_t LTR559::bit12_to_uint16(uint16_t value) {
-    return ((value & 0xFF00) >> 8) | ((value & 0x000F) << 8);
-  }
-
-  uint16_t LTR559::uint16_to_bit12(uint16_t value) {
-    return ((value & 0xFF) << 8) | ((value & 0xF00) >> 8);
   }
 
   bool LTR559::get_reading() {
@@ -225,6 +240,14 @@ namespace pimoroni {
   void LTR559::proximity_offset(uint16_t offset) {
     offset &= LTR559_PS_OFFSET_MASK;
     write_bytes(LTR559_PS_OFFSET, (uint8_t *)&offset, 1);
+  }
+
+  uint16_t LTR559::bit12_to_uint16(uint16_t value) {
+    return ((value & 0xFF00) >> 8) | ((value & 0x000F) << 8);
+  }
+
+  uint16_t LTR559::uint16_to_bit12(uint16_t value) {
+    return ((value & 0xFF) << 8) | ((value & 0xF00) >> 8);
   }
 
   // i2c functions

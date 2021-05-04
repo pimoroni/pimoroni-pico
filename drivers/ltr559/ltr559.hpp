@@ -115,6 +115,10 @@ namespace pimoroni {
     static const uint8_t DEFAULT_INT_PIN        = 22;
     static const uint8_t PIN_UNUSED             = UINT8_MAX;
 
+  private:
+    static constexpr int ch0_c[4] = {17743, 42785, 5926, 0};
+    static constexpr int ch1_c[4] = {-11059, 19548, -1185, 0};
+
 
     //--------------------------------------------------
     // Variables
@@ -130,6 +134,14 @@ namespace pimoroni {
     int8_t sda        = DEFAULT_SDA_PIN;
     int8_t scl        = DEFAULT_SCL_PIN;
     int8_t interrupt  = DEFAULT_INT_PIN;
+
+    static pimoroni::lookup lookup_led_current; 
+    static pimoroni::lookup lookup_led_duty_cycle;
+    static pimoroni::lookup lookup_led_pulse_freq;
+    static pimoroni::lookup lookup_proximity_meas_rate;
+    static pimoroni::lookup lookup_light_integration_time;
+    static pimoroni::lookup lookup_light_repeat_rate;
+    static pimoroni::lookup lookup_light_gain;
 
 
     //--------------------------------------------------
@@ -152,9 +164,16 @@ namespace pimoroni {
     bool init();
     void reset();
 
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_int() const;
+
     uint8_t part_id();
     uint8_t revision_id();
     uint8_t manufacturer_id();
+
+    bool get_reading();
     void interrupts(bool light, bool proximity);
     void proximity_led(uint8_t current, uint8_t duty_cycle, uint8_t pulse_freq, uint8_t num_pulses);
     void light_control(bool active, uint8_t gain);
@@ -164,21 +183,10 @@ namespace pimoroni {
     void light_measurement_rate(uint16_t integration_time, uint16_t rate);
     void proximity_measurement_rate(uint16_t rate);
     void proximity_offset(uint16_t offset);
-    bool get_reading();
 
   private:
     uint16_t bit12_to_uint16(uint16_t value);
     uint16_t uint16_to_bit12(uint16_t value);
-    const uint8_t lookup(uint16_t *lookup_table, uint16_t value, uint8_t length);
-    const int ch0_c[4] = {17743, 42785, 5926, 0};
-    const int ch1_c[4] = {-11059, 19548, -1185, 0};
-    static pimoroni::lookup lookup_led_current; 
-    static pimoroni::lookup lookup_led_duty_cycle;
-    static pimoroni::lookup lookup_led_pulse_freq;
-    static pimoroni::lookup lookup_proximity_meas_rate;
-    static pimoroni::lookup lookup_light_integration_time;
-    static pimoroni::lookup lookup_light_repeat_rate;
-    static pimoroni::lookup lookup_light_gain;
 
     // From i2cdevice
     int write_bytes(uint8_t reg, uint8_t *buf, int len);
