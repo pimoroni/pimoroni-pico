@@ -1,7 +1,5 @@
-#include <string.h>
 #include <math.h>
 #include <vector>
-#include <cstdlib>
 
 #include "breakout_colourlcd160x80.hpp"
 
@@ -55,5 +53,5 @@ int main() {
     lcd.update();
   }
 
-    return 0;
+  return 0;
 }
