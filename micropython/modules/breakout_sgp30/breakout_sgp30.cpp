@@ -45,7 +45,7 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
         self->base.type = &breakout_sgp30_BreakoutSGP30_type;
-        self->breakout = new BreakoutSGP30();        
+        self->breakout = new BreakoutSGP30();
     }
     else {
         enum { ARG_i2c, ARG_sda, ARG_scl };
@@ -73,7 +73,7 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
         self->base.type = &breakout_sgp30_BreakoutSGP30_type;
@@ -82,7 +82,9 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         self->breakout = new BreakoutSGP30(i2c, sda, scl);
     }
 
-    self->breakout->init();
+    if(!self->breakout->init()) {
+        mp_raise_msg(&mp_type_RuntimeError, "SGP30 not found when initialising");
+    }
 
     return MP_OBJ_FROM_PTR(self);
 }

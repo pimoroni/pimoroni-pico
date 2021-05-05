@@ -94,18 +94,18 @@ namespace pimoroni {
 
   private:
     /***** Private methods here *****/
-    bool write_global(uint16_t reg, uint16_t delayms);
-    bool write_reg(uint16_t reg, uint16_t delayms);
-    bool write_reg_1_word(uint16_t reg, uint16_t delayms, uint16_t value);
-    bool write_reg_2_words(uint16_t reg, uint16_t delayms, uint16_t value1, uint16_t value2);
-    bool read_reg_1_word(uint16_t reg, uint16_t delayms, uint16_t * value);
-    bool read_reg_2_words(uint16_t reg, uint16_t delayms, uint16_t * value1, uint16_t * value2);
-    bool read_reg_3_words(uint16_t reg, uint16_t delayms, uint16_t * value1, uint16_t * value2, uint16_t * value3);
+    bool write_global(uint16_t reg, uint16_t delay_ms);
+    bool write_reg(uint16_t reg, uint16_t delay_ms);
+    bool write_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t value);
+    bool write_reg_2_words(uint16_t reg, uint16_t delay_ms, uint16_t value1, uint16_t value2);
+    bool read_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t *value);
+    bool read_reg_2_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2);
+    bool read_reg_3_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2, uint16_t *value3);
 
-    // bool readWordFromCommand(uint8_t command[], uint8_t commandLength,
-    //                          uint16_t delay, uint16_t *readdata = NULL,
-    //                          uint8_t readlen = 0);
-    // uint8_t generateCRC(uint8_t data[], uint8_t datalen);
+    // bool read_word_from_command(uint8_t command[], uint8_t commandLength,
+    //                             uint16_t delay, uint16_t *readdata = NULL,
+    //                             uint8_t readlen = 0);
+    // uint8_t generate_crc(uint8_t data[], uint8_t datalen);
     //
     uint8_t calculate_crc(uint16_t value);
     uint8_t calculate_crc(uint8_t value1, uint8_t value2);

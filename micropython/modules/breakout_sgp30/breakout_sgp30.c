@@ -26,6 +26,10 @@ STATIC const mp_rom_map_elem_t BreakoutSGP30_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_baseline), MP_ROM_PTR(&BreakoutSGP30_get_baseline_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_baseline), MP_ROM_PTR(&BreakoutSGP30_set_baseline_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_humidity), MP_ROM_PTR(&BreakoutSGP30_set_humidity_obj) },
+    { MP_ROM_QSTR(MP_QSTR_ECO2), MP_ROM_INT(ECO2) },
+    { MP_ROM_QSTR(MP_QSTR_TVOC), MP_ROM_INT(TVOC) },
+    { MP_ROM_QSTR(MP_QSTR_H2), MP_ROM_INT(H2) },
+    { MP_ROM_QSTR(MP_QSTR_ETHANOL), MP_ROM_INT(ETHANOL) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutSGP30_locals_dict, BreakoutSGP30_locals_dict_table);
 

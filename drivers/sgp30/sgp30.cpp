@@ -13,8 +13,6 @@ Distributed as-is; no warranty is given.
 
 namespace pimoroni {
 
-  /***** Device registers and masks here *****/
-
   bool SGP30::init() {
 
     i2c_init(i2c, 400000);
@@ -62,8 +60,7 @@ namespace pimoroni {
   // Get the unique ID from the Chip. Will fail if no chip attached
   bool SGP30::retrieve_unique_id() {
     // return the Chip ID, in three separate 16-bit values
-    return read_reg_3_words(GET_SERIAL_ID, 10,
-            serial_number, serial_number+1, serial_number+2);
+    return read_reg_3_words(GET_SERIAL_ID, 10, serial_number, serial_number + 1, serial_number + 2);
   }
 
   // get the previously-retreved Chip ID as the lower 48 bits of a 64-bit uint
@@ -87,7 +84,7 @@ namespace pimoroni {
     bool rc = write_reg(INIT_AIR_QUALITY, 10);
 
     // Optionally wait up to 20 seconds for the measurement process to initiate
-    if( wait_for_setup) {
+    if(wait_for_setup) {
       // It takes 15 seconds to start the measurement process but allow 20.
       // Ignore the first 2 readings completely.
       uint16_t eCO2, TVOC;
@@ -138,46 +135,46 @@ namespace pimoroni {
   }
 
   // Write a single byte globally (not to a specifc I2c address)
-  bool SGP30::write_global(uint16_t reg, uint16_t delayms) {
+  bool SGP30::write_global(uint16_t reg, uint16_t delay_ms) {
     uint8_t buffer[1] = { (uint8_t)(reg & 0xFF)};
     i2c_write_blocking(i2c, 0, buffer, 1, false);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     return true;
   }
 
   // Write just the register to the i2c address, no parameter
-  bool SGP30::write_reg(uint16_t reg, uint16_t delayms) {
+  bool SGP30::write_reg(uint16_t reg, uint16_t delay_ms) {
     uint8_t buffer[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF)};
     i2c_write_blocking(i2c, address, buffer, 2, false);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     return true;
   }
 
   // Write one 16-bit word (+CRC)
-  bool SGP30::write_reg_1_word(uint16_t reg, uint16_t delayms, uint16_t value) {
+  bool SGP30::write_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t value) {
     uint8_t buffer[5] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF),
                           (uint8_t)((value >> 8) & 0xFF), (uint8_t)(value & 0xFF), calculate_crc(value)};
     i2c_write_blocking(i2c, address, buffer, 5, false);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     return true;
   }
 
   // Write two 16-bit words (+CRC)
-  bool SGP30::write_reg_2_words(uint16_t reg, uint16_t delayms, uint16_t value1, uint16_t value2) {
+  bool SGP30::write_reg_2_words(uint16_t reg, uint16_t delay_ms, uint16_t value1, uint16_t value2) {
     uint8_t buffer[8] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF),
                           (uint8_t)((value1 >> 8) & 0xFF), (uint8_t)(value1 & 0xFF), calculate_crc(value1),
                           (uint8_t)((value2 >> 8) & 0xFF), (uint8_t)(value2 & 0xFF), calculate_crc(value2)};
     i2c_write_blocking(i2c, address, buffer, 8, false);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     return true;
   }
 
   // Write register and read one 16-bit word in response
-  bool SGP30::read_reg_1_word(uint16_t reg, uint16_t delayms, uint16_t * value) {
+  bool SGP30::read_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t *value) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[3];
     i2c_write_blocking(i2c, address, regbuf, 2, true);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     i2c_read_blocking(i2c, address, buffer, 3, false);
     if(buffer[2] != calculate_crc(buffer[0], buffer[1]))
       return false;
@@ -186,11 +183,11 @@ namespace pimoroni {
   }
 
   // Write register and read two 16-bit words
-  bool SGP30::read_reg_2_words(uint16_t reg, uint16_t delayms, uint16_t * value1, uint16_t * value2) {
+  bool SGP30::read_reg_2_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[6];
     i2c_write_blocking(i2c, address, regbuf, 2, true);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     i2c_read_blocking(i2c, address, buffer, 6, false);
     if((buffer[2] != calculate_crc(buffer[0], buffer[1])) || (buffer[5] != calculate_crc(buffer[3], buffer[4]))) {
       return false;
@@ -201,11 +198,11 @@ namespace pimoroni {
   }
 
   // Write register and read three 16-bit words
-  bool SGP30::read_reg_3_words(uint16_t reg, uint16_t delayms, uint16_t * value1, uint16_t * value2, uint16_t * value3) {
+  bool SGP30::read_reg_3_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2, uint16_t *value3) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[9];
     i2c_write_blocking(i2c, address, regbuf, 2, true);
-    sleep_ms(delayms);
+    sleep_ms(delay_ms);
     i2c_read_blocking(i2c, address, buffer, 9, false);
     if(buffer[2] != calculate_crc(buffer[0], buffer[1])) {
       return false;

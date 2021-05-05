@@ -1,6 +1,17 @@
 // Include MicroPython API.
 #include "py/runtime.h"
 
+/***** Constants *****/
+enum {
+    ECO2 = 0,
+    TVOC,
+};
+
+enum {
+    H2 = 0,
+    ETHANOL,
+};
+
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t breakout_sgp30_BreakoutSGP30_type;
 
