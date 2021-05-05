@@ -1,7 +1,5 @@
-#include <string.h>
 #include <math.h>
 #include <vector>
-#include <cstdlib>
 
 #include "breakout_colourlcd240x240.hpp"
 
