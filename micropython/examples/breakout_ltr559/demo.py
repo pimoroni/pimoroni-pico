@@ -8,7 +8,7 @@ y = 0
 light = True
 
 part_id = ltr.part_id()
-print("Found LTR559. Part ID: 0x", hex(part_id), sep="")
+print("Found LTR559. Part ID: 0x", '{:02x}'.format(part_id), sep="")
 
 while True:
     reading = ltr.get_reading()
