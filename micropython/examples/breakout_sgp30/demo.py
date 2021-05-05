@@ -2,11 +2,11 @@ import time
 from breakout_sgp30 import BreakoutSGP30
 
 sgp30 = BreakoutSGP30()
-print("SGP30 initialised - about to start measuring without waiting");
+print("SGP30 initialised - about to start measuring without waiting")
 
 sgp30.start_measurement(False)
 id = sgp30.get_unique_id()
-print("Started measuring for id 0x", hex(id[0]), hex(id[1]), hex(id[2]), sep="")
+print("Started measuring for id 0x", '{:04x}'.format(id[0]), '{:04x}'.format(id[1]), '{:04x}'.format(id[2]), sep="")
 
 j = 0
 while True:
@@ -19,10 +19,10 @@ while True:
     H2 = air_quality_raw[BreakoutSGP30.H2]
     ETHANOL = air_quality_raw[BreakoutSGP30.ETHANOL]
 
-    print(j,": CO2 ", eCO2," TVOC ", TVOC,", raw ", H2," ", ETHANOL, sep="");
+    print(j, ": CO2 ", eCO2, " TVOC ", TVOC, ", raw ", H2, " ", ETHANOL, sep="")
     if j == 30:
         print("Resetting device")
-        sgp30.soft_reset();
+        sgp30.soft_reset()
         time.sleep(0.5)
         print("Restarting measurement, waiting 15 secs before returning")
         sgp30.start_measurement(True)
