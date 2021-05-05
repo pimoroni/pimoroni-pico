@@ -1,5 +1,8 @@
-#include "pico/stdlib.h"
-#include "math.h"
+#include <string.h>
+#include <math.h>
+#include <vector>
+#include <cstdlib>
+
 #include "breakout_colourlcd240x240.hpp"
 
 using namespace pimoroni;
@@ -7,36 +10,50 @@ using namespace pimoroni;
 uint16_t buffer[BreakoutColourLCD240x240::WIDTH * BreakoutColourLCD240x240::HEIGHT];
 BreakoutColourLCD240x240 lcd(buffer);
 
- int main() {
-  gpio_init(PICO_DEFAULT_LED_PIN);
-  gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
+int main() {
   lcd.init();
   lcd.set_backlight(255);
 
-  Pen my_pen = lcd.create_pen(255, 0, 0);
+  struct pt {
+    float      x;
+    float      y;
+    uint8_t    r;
+    float     dx;
+    float     dy;
+    uint16_t pen;
+  };
 
-
-  uint32_t t = 0;
-
-  while(true) {
-    uint16_t x = (sinf(float(t) / 100.0f) * 60) + 60;
-    lcd.set_pen(0, 255, 0);
-    lcd.clear();
-    lcd.set_pen(255, 255, 0);
-    lcd.rectangle(Rect(10, 10, 240-20, 240-20));
-
-    lcd.set_pen(0, 0, 255);
-    lcd.rectangle(Rect(10, 10, 30, 30));
-    lcd.set_pen(255, 0, 0);
-    lcd.rectangle(Rect(x, x, 20, 20));
-    lcd.update();
-    gpio_put(PICO_DEFAULT_LED_PIN, true);
-    sleep_ms(8);
-    gpio_put(PICO_DEFAULT_LED_PIN, false);
-    sleep_ms(8);    
-    t++;
+  std::vector<pt> shapes;
+  for(int i = 0; i < 1000; i++) {
+    pt shape;
+    shape.x = rand() % lcd.bounds.w;
+    shape.y = rand() % lcd.bounds.h;
+    shape.r = (rand() % 10) + 3;
+    shape.dx = float(rand() % 255) / 128.0f;
+    shape.dy = float(rand() % 255) / 128.0f;
+    shape.pen = lcd.create_pen(rand() % 255, rand() % 255, rand() % 255);
+    shapes.push_back(shape);
   }
 
-  return 0;
+  while(true) {
+    lcd.set_pen(120, 40, 60);
+    lcd.clear();
+
+    for(auto &shape : shapes) {
+      shape.x += shape.dx;
+      shape.y += shape.dy;
+      if(shape.x < 0) shape.dx *= -1;
+      if(shape.x >= lcd.bounds.w) shape.dx *= -1;
+      if(shape.y < 0) shape.dy *= -1;
+      if(shape.y >= lcd.bounds.h) shape.dy *= -1;
+
+      lcd.set_pen(shape.pen);
+      lcd.circle(Point(shape.x, shape.y), shape.r);
+    }
+
+    // update screen
+    lcd.update();
+  }
+
+    return 0;
 }
