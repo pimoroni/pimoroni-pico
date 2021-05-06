@@ -1,6 +1,7 @@
 add_subdirectory(esp32spi)
 add_subdirectory(ltp305)
 add_subdirectory(ltr559)
+add_subdirectory(sgp30)
 add_subdirectory(st7789)
 add_subdirectory(msa301)
 add_subdirectory(rv3028)
