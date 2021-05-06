@@ -22,13 +22,13 @@ int main() {
   };
 
   std::vector<pt> shapes;
-  for(int i = 0; i < 1000; i++) {
+  for(int i = 0; i < 100; i++) {
     pt shape;
     shape.x = rand() % lcd.bounds.w;
     shape.y = rand() % lcd.bounds.h;
     shape.r = (rand() % 10) + 3;
-    shape.dx = float(rand() % 255) / 128.0f;
-    shape.dy = float(rand() % 255) / 128.0f;
+    shape.dx = float(rand() % 255) / 64.0f;
+    shape.dy = float(rand() % 255) / 64.0f;
     shape.pen = lcd.create_pen(rand() % 255, rand() % 255, rand() % 255);
     shapes.push_back(shape);
   }
