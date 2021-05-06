@@ -1,4 +1,5 @@
 add_subdirectory(breakout_dotmatrix)
+add_subdirectory(breakout_ltr559)
 add_subdirectory(breakout_roundlcd)
 add_subdirectory(breakout_rgbmatrix5x5)
 add_subdirectory(breakout_matrix11x7)
