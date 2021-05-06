@@ -54,7 +54,7 @@ namespace pimoroni {
     int8_t bl     = DEFAULT_BL_PIN;
     int8_t vsync  = -1; // only available on some products
 
-    uint32_t spi_baud = 64 * 1024 * 1024;
+    uint32_t spi_baud = 16 * 1000 * 1000;
 
 
     //--------------------------------------------------
