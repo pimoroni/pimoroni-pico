@@ -1,9 +1,11 @@
+include(${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_scroll/pico_scroll.cmake)
+
 add_library(usermod_pico_scroll INTERFACE)
 
 target_sources(usermod_pico_scroll INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/pico_scroll.c
     ${CMAKE_CURRENT_LIST_DIR}/pico_scroll.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_scroll/pico_scroll.cpp
+    ${PICO_SCROLL_SOURCES}
 )
 
 target_include_directories(usermod_pico_scroll INTERFACE

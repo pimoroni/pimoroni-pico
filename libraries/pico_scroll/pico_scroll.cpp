@@ -5,6 +5,7 @@
 #include "hardware/i2c.h"
 
 #include "pico_scroll.hpp"
+#include "pico_scroll_font.hpp"
 
 enum pin {
   SDA   =  4,
@@ -82,6 +83,77 @@ namespace pimoroni {
 
   void PicoScroll::clear() {
     memset(__fb, 0, BUFFER_SIZE);
+  }
+
+  void PicoScroll::set_pixels(const char *pixels) {
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            set_pixel(x, y, pixels[y * WIDTH + x]);
+        }
+    }
+  }
+
+  void PicoScroll::set_bitmap_1d(const char *bitmap, size_t bitmap_len, int brightness, int offset) {
+    for (int x = 0; x < WIDTH; x++) {
+      int k = offset + x;
+      if ((k >= 0) && (k < (int)bitmap_len)) {
+        unsigned char col = bitmap[k];
+        for (int y = 0; y < HEIGHT; y++) {
+          int val = brightness * ((col >> y) & 1);
+          set_pixel(x, y, val);
+        }
+      }
+    }
+  }
+
+  void PicoScroll::set_text(const char *text, size_t text_len, int brightness, int offset) {
+        int draw_buffer_len = PicoScroll::WIDTH + 7;
+        unsigned char draw_buffer[draw_buffer_len];
+
+        // clear the scroll, so only need to write visible bytes
+        clear();
+
+        if ((offset < -WIDTH) || (offset > (int)(6 * text_len))) {
+            return;
+        }
+
+        // compute what can actually be seen, render only that...
+        // modify offset and bfr_len accordingly
+        if (offset < 0) {
+            int space = 1 + (WIDTH + offset) / 6;
+            if (space < (int)text_len) {
+                text_len = space;
+            }
+        } else {
+            int start = offset / 6;
+            offset -= start * 6;
+            text_len = text_len - start;
+            if (text_len > 4) {
+                text_len = 4;
+            }
+        }
+
+        if (draw_buffer_len > (int)(6 * text_len)) {
+            draw_buffer_len = 6 * text_len;
+        }
+
+        render_text(text, text_len, draw_buffer, draw_buffer_len);
+        set_bitmap_1d((const char *)draw_buffer, draw_buffer_len, brightness, offset);
+  }
+
+  void PicoScroll::scroll_text(const char *text, size_t text_len, int brightness, int delay_ms) {
+    int draw_buffer_len = 6 * text_len;
+
+    unsigned char *draw_buffer = (unsigned char *)malloc(sizeof(unsigned char) * draw_buffer_len);
+    render_text(text, text_len, draw_buffer, draw_buffer_len);
+
+    for (int offset = -WIDTH; offset < draw_buffer_len; offset++) {
+        clear();
+        set_bitmap_1d((const char *)draw_buffer, draw_buffer_len, brightness, offset);
+        update();
+        sleep_ms(delay_ms);
+    }
+    free(draw_buffer);
   }
 
   void PicoScroll::update() {

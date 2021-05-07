@@ -12,6 +12,7 @@ PicoScroll pico_scroll;
 int main() {
 
   pico_scroll.init();
+  pico_scroll.scroll_text("Hello World, how are you today?", 255, 100);
 
 
   bool a_pressed = false;

@@ -20,6 +20,10 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_get_width_obj, picoscroll_get_width)
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_get_height_obj, picoscroll_get_height);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_update_obj, picoscroll_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(picoscroll_set_pixel_obj, picoscroll_set_pixel);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_set_pixels_obj, picoscroll_set_pixels);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(picoscroll_show_text_obj, picoscroll_show_text);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(picoscroll_scroll_text_obj, picoscroll_scroll_text);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(picoscroll_show_bitmap_1d_obj, picoscroll_show_bitmap_1d);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(picoscroll_clear_obj, picoscroll_clear);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_is_pressed_obj, picoscroll_is_pressed);
 
@@ -31,6 +35,10 @@ STATIC const mp_map_elem_t picoscroll_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&picoscroll_get_height_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&picoscroll_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&picoscroll_set_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_pixels), MP_ROM_PTR(&picoscroll_set_pixels_obj) },
+    { MP_ROM_QSTR(MP_QSTR_show_text), MP_ROM_PTR(&picoscroll_show_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_scroll_text), MP_ROM_PTR(&picoscroll_scroll_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_show_bitmap_1d), MP_ROM_PTR(&picoscroll_show_bitmap_1d_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&picoscroll_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picoscroll_is_pressed_obj) },        
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },

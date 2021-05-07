@@ -10,6 +10,10 @@ We've included helper functions to handle every aspect of drawing to the matrix 
   - [get_width](#get_width)
   - [get_height](#get_height)
   - [set_pixel](#set_pixel)
+  - [set_pixels](#set_pixels)
+  - [show_text](#show_text)
+  - [scroll_texr](#scroll_text)
+  - [show_bitmap_1d](#show_bitmap_1d)
   - [update](#update)
   - [clear](#clear)
   - [is_pressed](#is_pressed)
@@ -72,6 +76,79 @@ This function sets a pixel at the `x` and `y` coordinates to a brightness level 
 ```python
 picoscroll.set_pixel(x, y, l)
 ```
+
+### set_pixels
+
+This function sets all pixel at once from a `bytearray` image indexed
+as `y * picoscroll.get_width() + x`, containing brightness levels
+between 0 and 255. Changes will not be visible until `update()` is called.
+
+```python
+image = bytearray(0 for j in range(width * height))
+picoscroll.set_pixels(image)
+```
+
+### show_text
+
+Show a text string with given brightness and offset - allowing you to
+scroll text across the display. Can also be passed a `bytearray`. Font
+is 5x7 pixels, with a 1 pixel space between characters, so to scroll a
+phrase across the entire display involves offsets from -17 pixels to
+`6 x len(str)`:
+
+```python
+word = "Hello, world!"
+l = len(word) * 6
+for j in range(-17, l):
+    scroll.show_text(word, 8, j)
+    scroll.update()
+    time.sleep(0.1)
+```
+
+The full 256 characters can be displayed with:
+
+```python
+b = bytearray(range(256))
+for j in range(256*6):
+    scroll.show_text(b, 8, j)
+    scroll.update()
+    time.sleep(0.1)
+```
+
+![Font map](./bitmap.png)
+
+### scroll_text
+
+Scroll a string across the picoscroll, starting off the right hand side, to the left, with a given delay in ms.
+
+```python
+picoscroll.scroll_text("Hello, world!", 8, 100)
+```
+
+The full 256 characters can be displayed with:
+
+```python
+b = bytearray(range(256))
+scroll.scroll_text(b, 8, 100)
+```
+
+### show_bitmap_1d
+
+Show a view of a bitmap stored as the 7 least significant bits of
+bytes in a `bytearray`, top-down. Individual pixels are set to
+`brightness` based on individual bit values, with the view defined by
+the offset and the width of the scroll (i.e. 17 columns). Changes will
+not be visible until `update()` is called.
+
+```python
+bitmap = bytearray(j for j in range 127)
+for offset in range(-17, 127):
+    picoscroll.show_bitmap_1d(bitmap, 16, offset)
+    picoscroll.update()
+```
+
+will scroll a binary counter across the display (i.e. show `0x00` to
+`0x7f` in binary).
 
 ### update
 
