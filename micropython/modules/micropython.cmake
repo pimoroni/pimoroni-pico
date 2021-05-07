@@ -1,5 +1,6 @@
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_dotmatrix/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_ltr559/micropython.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/breakout_colourlcd160x80/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_roundlcd/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_rgbmatrix5x5/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_matrix11x7/micropython.cmake)
