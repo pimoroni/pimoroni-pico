@@ -74,6 +74,12 @@ namespace pimoroni {
       gpio_pull_up(interrupt);
     }
 
+    uint8_t chip_id = 0;
+    read_bytes(RV3028_ID, &chip_id, 1);
+    if(chip_id != (RV3028_CHIP_ID | RV3028_VERSION)) {
+      return false;
+    }
+
     return true;
   }
 

@@ -84,6 +84,8 @@ Distributed as-is; no warranty is given.
 
 //ID register
 #define RV3028_ID                0x28
+#define RV3028_CHIP_ID           0x30
+#define RV3028_VERSION           0x03
 
 //EEPROM Registers
 #define EEPROM_Clkout_Register        0x35
