@@ -13,7 +13,8 @@ namespace pimoroni {
     __fb = buf;
   }
 
-  BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  ST7789::BG_SPI_SLOT slot) : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, slot) {
+  BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  ST7789::BG_SPI_SLOT slot)
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, slot) {
     __fb = buf;
   }
 

@@ -1,4 +1,4 @@
-set(MOD_NAME breakout_roundlcd)
+set(MOD_NAME breakout_colourlcd240x240)
 BREAKOUT_MOD_DIR := $(USERMOD_DIR)
 
 # Add our source files to the respective variables.
