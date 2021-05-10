@@ -48,7 +48,7 @@ mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_as7262_BreakoutAS7262_obj_t);
         self->base.type = &breakout_as7262_BreakoutAS7262_type;
-        self->breakout = new BreakoutAS7262();        
+        self->breakout = new BreakoutAS7262();
     }
     else {
         enum { ARG_i2c, ARG_sda, ARG_scl, ARG_int };
@@ -70,14 +70,14 @@ mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_
         }
 
         int sda = args[ARG_sda].u_int;
-        if (!IS_VALID_SDA(i2c_id, sda)) {
+        if(!IS_VALID_SDA(i2c_id, sda)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
         }
 
         int scl = args[ARG_scl].u_int;
-        if (!IS_VALID_SCL(i2c_id, scl)) {
+        if(!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_as7262_BreakoutAS7262_obj_t);
         self->base.type = &breakout_as7262_BreakoutAS7262_type;
@@ -99,26 +99,27 @@ mp_obj_t BreakoutAS7262_reset(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-//TODO
-/*mp_obj_t BreakoutAS7262_device_type(mp_obj_t self_in) {
+mp_obj_t BreakoutAS7262_device_type(mp_obj_t self_in) {
     breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
-    self->breakout->reset();
+    return mp_obj_new_int(self->breakout->device_type());
+}
 
-    return mp_const_none;
-}*/
-
-//TODO
-/*mp_obj_t BreakoutAS7262_hardware_version(mp_obj_t self_in) {
+mp_obj_t BreakoutAS7262_hardware_version(mp_obj_t self_in) {
     breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
-    self->breakout->reset();
-
-    return mp_const_none;
-}*/
+    return mp_obj_new_int(self->breakout->hardware_version());
+}
 
 mp_obj_t BreakoutAS7262_firmware_version(mp_obj_t self_in) {
     breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
-    std::string fw = self->breakout->firmware_version();
-    return mp_obj_new_str(fw.c_str(), fw.length());
+
+    uint8_t major, minor, sub;
+    self->breakout->firmware_version(major, minor, sub);
+
+    mp_obj_t tuple[3];
+    tuple[0] = mp_obj_new_int(major);
+    tuple[1] = mp_obj_new_float(minor);
+    tuple[2] = mp_obj_new_float(sub);
+    return mp_obj_new_tuple(3, tuple);
 }
 
 mp_obj_t BreakoutAS7262_read(mp_obj_t self_in) {
@@ -150,10 +151,9 @@ mp_obj_t BreakoutAS7262_set_gain(size_t n_args, const mp_obj_t *pos_args, mp_map
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    //TODO expose values as constants
     int gain = args[ARG_gain].u_int;
     if(gain < 0 || gain > 3) {
-        mp_raise_ValueError("mode not a valid value. Expected 0 to 3");
+        mp_raise_ValueError("mode not a valid value. Expected 0 to 3 (X1, X3_7, X16, X64)");
     }
     else {
         breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
@@ -173,10 +173,9 @@ mp_obj_t BreakoutAS7262_set_measurement_mode(size_t n_args, const mp_obj_t *pos_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    //TODO expose values as constants
     int mode = args[ARG_mode].u_int;
     if(mode < 0 || mode > 3) {
-        mp_raise_ValueError("mode not a valid value. Expected 0 to 3");
+        mp_raise_ValueError("mode not a valid value. Expected 0 to 3 (CONT_YGNV, CONT_ROYG, CONT_ROYGBR, ONESHOT)");
     }
     else {
         breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
@@ -196,10 +195,9 @@ mp_obj_t BreakoutAS7262_set_indicator_current(size_t n_args, const mp_obj_t *pos
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
     
-    //TODO expose values as constants
     int current = args[ARG_current].u_int;
     if(current < 0 || current > 3) {
-        mp_raise_ValueError("current not a valid value. Expected 0 to 3");
+        mp_raise_ValueError("current not a valid value. Expected 0 to 3 (MA1, MA2, MA4, MA8)");
     }
     else {
         breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
@@ -219,10 +217,9 @@ mp_obj_t BreakoutAS7262_set_illumination_current(size_t n_args, const mp_obj_t *
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    //TODO expose values as constants
     int current = args[ARG_current].u_int;
     if(current < 0 || current > 3) {
-        mp_raise_ValueError("current not a valid value. Expected 0 to 3");
+        mp_raise_ValueError("current not a valid value. Expected 0 to 3 (MA12, MA25, MA50, MA100)");
     }
     else {  
         breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);

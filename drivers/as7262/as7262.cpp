@@ -85,6 +85,37 @@ namespace pimoroni {
     return interrupt;
   }
 
+  uint8_t AS7262::device_type() {
+    return i2c_reg_read_uint8(reg::DEVICE);
+  }
+
+  uint8_t AS7262::hardware_version() {
+    return i2c_reg_read_uint8(reg::HW_VERSION);
+  }
+
+  void AS7262::firmware_version(uint8_t &major_out, uint8_t &minor_out, uint8_t &sub_out) {
+    uint16_t fw_version = i2c_reg_read_uint16(reg::FW_VERSION);
+    major_out = (fw_version & 0x00F0) >> 4;
+    minor_out = ((fw_version & 0x000F) << 2) | ((fw_version & 0xC000) >> 14);
+    sub_out = (fw_version & 0x3F00) >> 8;
+  }
+
+  AS7262::reading AS7262::read() {
+    while(!data_ready()) {}
+    return AS7262::reading {
+      i2c_reg_read_float(reg::R_CAL_F),
+      i2c_reg_read_float(reg::O_CAL_F),
+      i2c_reg_read_float(reg::Y_CAL_F),
+      i2c_reg_read_float(reg::G_CAL_F),
+      i2c_reg_read_float(reg::B_CAL_F),
+      i2c_reg_read_float(reg::V_CAL_F)
+    };
+  }
+
+  uint8_t AS7262::temperature() {
+    return i2c_reg_read_uint8(reg::TEMP);
+  }
+
   void AS7262::set_gain(gain gain) {
     uint8_t temp = i2c_reg_read_uint8(reg::CONTROL) & ~0b00110000;
     temp |= (uint8_t)gain << 4;
@@ -116,58 +147,58 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg::LED_CONTROL, temp);
   }
 
-  std::string AS7262::firmware_version() {
-    std::string buf;
-    uint16_t fw_version = i2c_reg_read_uint16(reg::FW_VERSION);
-    buf += std::to_string(fw_version);
-    return buf;
-  }
-
   bool AS7262::data_ready() {
     return i2c_reg_read_uint8(reg::CONTROL) & 0b00000010;
   }
 
-  AS7262::reading AS7262::read() {
-    while(!data_ready()) {}
-    return AS7262::reading {
-      i2c_reg_read_float(reg::R_CAL_F),
-      i2c_reg_read_float(reg::O_CAL_F),
-      i2c_reg_read_float(reg::Y_CAL_F),
-      i2c_reg_read_float(reg::G_CAL_F),
-      i2c_reg_read_float(reg::B_CAL_F),
-      i2c_reg_read_float(reg::V_CAL_F)
-    };
-  }
-
-  uint8_t AS7262::temperature() {
-    return i2c_reg_read_uint8(reg::TEMP);
-  }
-
   // i2c IO wrappers around the weird virtual i2c nonsense
-
   void AS7262::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
-    _i2c_write(reg, &value, 1);
+    i2c_write(reg, &value, 1);
   }
 
   float AS7262::i2c_reg_read_float(uint8_t reg) {
     float value;
-    _i2c_read(reg, (uint8_t *)&value, 4);
+    i2c_read(reg, (uint8_t *)&value, 4);
     return __builtin_bswap32(value);
   }
 
   uint8_t AS7262::i2c_reg_read_uint8(uint8_t reg) {
     uint8_t value;
-    _i2c_read(reg, &value, 1);
+    i2c_read(reg, &value, 1);
     return value;
   }
 
   uint16_t AS7262::i2c_reg_read_uint16(uint8_t reg) {
     uint16_t value;
-    _i2c_read(reg, (uint8_t *)&value, 2);
+    i2c_read(reg, (uint8_t *)&value, 2);
     return value;
   }
 
-  // Plumbing for virtual i2c
+  uint8_t AS7262::i2c_status() {
+    return _i2c_reg_read_uint8(0x00);
+  }
+
+  uint8_t AS7262::i2c_read(uint8_t reg, uint8_t *values, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++){
+      while((i2c_status() & 0b10) != 0) {};   // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, reg + i);     // Set address pointer
+      while((i2c_status() & 0b01) != 1) {};   // Wait for read-ready
+      values[i] = _i2c_reg_read_uint8(0x02);   // Read *one* byte :|
+    }
+    return 0;
+  }
+
+  uint8_t AS7262::i2c_write(uint8_t reg, uint8_t *values, uint8_t len) {
+    for(uint8_t i = 0; i < len; i++){
+      while((i2c_status() & 0b10) != 0) {};   // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, reg | 0x80);  // Set address pointer
+      while((i2c_status() & 0b10) != 0) {};  // Wait for write-ready
+      _i2c_reg_write_uint8(0x01, values[i]);   // Write *one* byte :|
+    }
+    return 0;
+  }
+
+    // Plumbing for virtual i2c
   void AS7262::_i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
     uint8_t buffer[2] = {reg, value};
     i2c_write_blocking(i2c, address, buffer, 2, false);
@@ -178,29 +209,5 @@ namespace pimoroni {
     i2c_write_blocking(i2c, address, &reg, 1, false);
     i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
     return value;
-  }
-
-  uint8_t AS7262::_i2c_status() {
-    return _i2c_reg_read_uint8(0x00);
-  }
-
-  uint8_t AS7262::_i2c_read(uint8_t reg, uint8_t *values, uint8_t len) {
-    for(uint8_t i = 0; i < len; i++){
-      while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
-      _i2c_reg_write_uint8(0x01, reg + i);     // Set address pointer
-      while((_i2c_status() & 0b01) != 1) {};   // Wait for read-ready
-      values[i] = _i2c_reg_read_uint8(0x02);   // Read *one* byte :|
-    }
-    return 0;
-  }
-
-  uint8_t AS7262::_i2c_write(uint8_t reg, uint8_t *values, uint8_t len) {
-    for(uint8_t i = 0; i < len; i++){
-      while((_i2c_status() & 0b10) != 0) {};   // Wait for write-ready
-      _i2c_reg_write_uint8(0x01, reg | 0x80);  // Set address pointer
-      while((_i2c_status() & 0b10) != 0) {};  // Wait for write-ready
-      _i2c_reg_write_uint8(0x01, values[i]);   // Write *one* byte :|
-    }
-    return 0;
   }
 }

@@ -6,8 +6,8 @@
 
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_reset_obj, BreakoutAS7262_reset);
-//MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_device_type_obj, BreakoutAS7262_device_type); //TODO
-//MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_hardware_version_obj, 2, BreakoutAS7262_hardware_version); //TODO
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_device_type_obj, BreakoutAS7262_device_type);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_hardware_version_obj, BreakoutAS7262_hardware_version);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_firmware_version_obj, BreakoutAS7262_firmware_version);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_read_obj, BreakoutAS7262_read);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutAS7262_temperature_obj, BreakoutAS7262_temperature);
@@ -20,8 +20,8 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_leds_obj, 1, BreakoutAS7262_set_le
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutAS7262_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&BreakoutAS7262_reset_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_device_type), MP_ROM_PTR(&BreakoutAS7262_device_type_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_hardware_version), MP_ROM_PTR(&BreakoutAS7262_hardware_version_obj) },
+    { MP_ROM_QSTR(MP_QSTR_device_type), MP_ROM_PTR(&BreakoutAS7262_device_type_obj) },
+    { MP_ROM_QSTR(MP_QSTR_hardware_version), MP_ROM_PTR(&BreakoutAS7262_hardware_version_obj) },
     { MP_ROM_QSTR(MP_QSTR_firmware_version), MP_ROM_PTR(&BreakoutAS7262_firmware_version_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutAS7262_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_temperature), MP_ROM_PTR(&BreakoutAS7262_temperature_obj) },
@@ -30,6 +30,22 @@ STATIC const mp_rom_map_elem_t BreakoutAS7262_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_indicator_current), MP_ROM_PTR(&BreakoutAS7262_set_indicator_current_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_illumination_current), MP_ROM_PTR(&BreakoutAS7262_set_illumination_current_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_leds), MP_ROM_PTR(&BreakoutAS7262_set_leds_obj) },
+    { MP_ROM_QSTR(MP_QSTR_X1), MP_ROM_INT(MP_X1) },
+    { MP_ROM_QSTR(MP_QSTR_X3_7), MP_ROM_INT(MP_X3_7) },
+    { MP_ROM_QSTR(MP_QSTR_X16), MP_ROM_INT(MP_X16) },
+    { MP_ROM_QSTR(MP_QSTR_X64), MP_ROM_INT(MP_X64) },
+    { MP_ROM_QSTR(MP_QSTR_MA12), MP_ROM_INT(MP_MA12) },
+    { MP_ROM_QSTR(MP_QSTR_MA25), MP_ROM_INT(MP_MA25) },
+    { MP_ROM_QSTR(MP_QSTR_MA50), MP_ROM_INT(MP_MA50) },
+    { MP_ROM_QSTR(MP_QSTR_MA100), MP_ROM_INT(MP_MA100) },
+    { MP_ROM_QSTR(MP_QSTR_MA1), MP_ROM_INT(MP_MA1) },
+    { MP_ROM_QSTR(MP_QSTR_MA2), MP_ROM_INT(MP_MA2) },
+    { MP_ROM_QSTR(MP_QSTR_MA4), MP_ROM_INT(MP_MA4) },
+    { MP_ROM_QSTR(MP_QSTR_MA8), MP_ROM_INT(MP_MA8) },
+    { MP_ROM_QSTR(MP_QSTR_CONT_YGNV), MP_ROM_INT(MP_CONT_YGNV) },
+    { MP_ROM_QSTR(MP_QSTR_CONT_ROYG), MP_ROM_INT(MP_CONT_ROYG) },
+    { MP_ROM_QSTR(MP_QSTR_CONT_ROYGBR), MP_ROM_INT(MP_CONT_ROYGBR) },
+    { MP_ROM_QSTR(MP_QSTR_ONESHOT), MP_ROM_INT(MP_ONESHOT) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutAS7262_locals_dict, BreakoutAS7262_locals_dict_table);
 
@@ -49,7 +65,7 @@ const mp_obj_type_t breakout_as7262_BreakoutAS7262_type = {
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_as7262_globals_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_as7262) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_as7262) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutAS7262), (mp_obj_t)&breakout_as7262_BreakoutAS7262_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_as7262_globals, breakout_as7262_globals_table);
