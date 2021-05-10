@@ -77,6 +77,26 @@ namespace pimoroni {
     return true;
   }
 
+  void RV3028::reset() {
+    set_bit(RV3028_CTRL2, CTRL2_RESET);
+  }
+
+  i2c_inst_t* RV3028::get_i2c() const {
+    return i2c;
+  }
+
+  int RV3028::get_sda() const {
+    return sda;
+  }
+
+  int RV3028::get_scl() const {
+    return scl;
+  }
+
+  int RV3028::get_int() const {
+    return interrupt;
+  }
+
   bool RV3028::setup(bool set_24Hour, bool disable_TrickleCharge, bool set_LevelSwitchingMode) {
     sleep_ms(1000);
     if(set_24Hour) {
@@ -215,14 +235,14 @@ namespace pimoroni {
 
   //Returns a pointer to array of chars that are the date in mm/dd/yyyy format because they're weird
   char* RV3028::string_date_usa() {
-    static char date[11]; //Max of mm/dd/yyyy with \0 terminator
+    static char date[11 + 3]; //Max of mm/dd/yyyy with \0 terminator (plus extra for worst case conversion)
     sprintf(date, "%02hhu/%02hhu/20%02hhu", bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_YEAR]));
     return date;
   }
 
   //Returns a pointer to array of chars that are the date in dd/mm/yyyy format
   char* RV3028::string_date() {
-    static char date[11]; //Max of dd/mm/yyyy with \0 terminator
+    static char date[11 + 3]; //Max of dd/mm/yyyy with \0 terminator (plus extra for worst case conversion)
     sprintf(date, "%02hhu/%02hhu/20%02hhu", bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_YEAR]));
     return date;
   }
@@ -230,7 +250,7 @@ namespace pimoroni {
   //Returns a pointer to array of chars that represents the time in hh:mm:ss format
   //Adds AM/PM if in 12 hour mode
   char* RV3028::string_time() {
-    static char time[11]; //Max of hh:mm:ssXM with \0 terminator
+    static char time[11 + 3]; //Max of hh:mm:ssXM with \0 terminator (plus extra for worst case conversion)
 
     if(is_12_hour() == true) {
       char half = 'A';
@@ -245,18 +265,18 @@ namespace pimoroni {
   }
 
   char* RV3028::string_time_stamp() {
-    static char timeStamp[25]; //Max of yyyy-mm-ddThh:mm:ss.ss with \0 terminator
+    static char time_stamp[25 + 4]; //Max of yyyy-mm-ddThh:mm:ss.ss with \0 terminator (plus extra for worst case conversion)
 
     if(is_12_hour() == true) {
       char half = 'A';
       if(is_pm()) half = 'P';
 
-      sprintf(timeStamp, "20%02hhu-%02hhu-%02hhu  %02hhu:%02hhu:%02hhu%cM", bcd_to_dec(times[TIME_YEAR]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_HOURS]), bcd_to_dec(times[TIME_MINUTES]), bcd_to_dec(times[TIME_SECONDS]), half);
+      sprintf(time_stamp, "20%02hhu-%02hhu-%02hhu  %02hhu:%02hhu:%02hhu%cM", bcd_to_dec(times[TIME_YEAR]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_HOURS]), bcd_to_dec(times[TIME_MINUTES]), bcd_to_dec(times[TIME_SECONDS]), half);
     }
     else
-      sprintf(timeStamp, "20%02hhu-%02hhu-%02hhu  %02hhu:%02hhu:%02hhu", bcd_to_dec(times[TIME_YEAR]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_HOURS]), bcd_to_dec(times[TIME_MINUTES]), bcd_to_dec(times[TIME_SECONDS]));
+      sprintf(time_stamp, "20%02hhu-%02hhu-%02hhu  %02hhu:%02hhu:%02hhu", bcd_to_dec(times[TIME_YEAR]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_HOURS]), bcd_to_dec(times[TIME_MINUTES]), bcd_to_dec(times[TIME_SECONDS]));
 
-    return timeStamp;
+    return time_stamp;
   }
 
   uint8_t RV3028::get_seconds() {
@@ -394,7 +414,7 @@ namespace pimoroni {
   7: All disabled � Default value
   If you want to set a weekday alarm (setWeekdayAlarm_not_Date = true), set 'date_or_weekday' from 0 (Sunday) to 6 (Saturday)
   ********************************/
-  void RV3028::enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool setWeekdayAlarm_not_Date, uint8_t mode, bool enable_clock_output) {
+  void RV3028::enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool set_weekday_alarm_not_date, uint8_t mode, bool enable_clock_output) {
     //disable Alarm Interrupt to prevent accidental interrupts during configuration
     disable_alarm_interrupt();
     clear_alarm_interrupt_flag();
@@ -403,7 +423,7 @@ namespace pimoroni {
     set_24_hour();
 
     //Set WADA bit (Weekday/Date Alarm)
-    if(setWeekdayAlarm_not_Date)
+    if(set_weekday_alarm_not_date)
       clear_bit(RV3028_CTRL1, CTRL1_WADA);
     else
       set_bit(RV3028_CTRL1, CTRL1_WADA);
@@ -467,10 +487,12 @@ namespace pimoroni {
     uint8_t ctrl1_val = read_register(RV3028_CTRL1);
     if(timer_repeat) {
       ctrl1_val |= 1 << CTRL1_TRPT;
-    } else {
+    }
+    else {
       ctrl1_val &= ~(1 << CTRL1_TRPT);
     }
-    switch (timer_frequency) {
+
+    switch(timer_frequency) {
       case 4096:    // 4096Hz (default)    // up to 122us error on first time
         ctrl1_val &= ~3; // Clear both the bits
         break;
@@ -505,10 +527,10 @@ namespace pimoroni {
       clear_bit(RV3028_INT_MASK, IMT_MASK_CTIE);
   }
 
-  uint16_t RV3028::get_timer_count(void) {
+  uint16_t RV3028::get_timer_count() {
     // Reads the number of remaining timer ticks
     uint8_t r0 = read_register(RV3028_TIMERSTAT_0);
-    return(r0 + (read_register(RV3028_TIMERSTAT_1) << 8));
+    return (r0 + (read_register(RV3028_TIMERSTAT_1) << 8));
   }
 
   void RV3028::enable_timer_interrupt() {
@@ -542,12 +564,10 @@ namespace pimoroni {
     disable_periodic_update_interrupt();
     clear_periodic_update_interrupt_flag();
 
-    if(every_second) {
+    if(every_second)
       clear_bit(RV3028_CTRL1, CTRL1_USEL);
-    }
-    else {  // every minute
+    else  // every minute
       set_bit(RV3028_CTRL1, CTRL1_USEL);
-    }
 
     set_bit(RV3028_CTRL2, CTRL2_UIE);
 
@@ -686,7 +706,6 @@ namespace pimoroni {
     clear_bit(RV3028_STATUS, STATUS_CLKF);
   }
 
-
   //Returns the status byte
   uint8_t RV3028::status(void) {
     return(read_register(RV3028_STATUS));
@@ -694,46 +713,6 @@ namespace pimoroni {
 
   void RV3028::clear_interrupts() { //Read the status register to clear the current interrupt flags
     write_register(RV3028_STATUS, 0);
-  }
-
-
-
-
-  // i2c functions
-
-  int RV3028::write_bytes(uint8_t reg, uint8_t *buf, int len) {
-    uint8_t buffer[len + 1];
-    buffer[0] = reg;
-    for(int x = 0; x < len; x++) {
-      buffer[x + 1] = buf[x];
-    }
-    return i2c_write_blocking(i2c, address, buffer, len + 1, false);
-  };
-
-  int RV3028::read_bytes(uint8_t reg, uint8_t *buf, int len) {
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, buf, len, false);
-    return len;
-  };
-
-  uint8_t RV3028::get_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    return value & (mask << shift);
-  }
-
-  void RV3028::set_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value |= mask << shift;
-    write_bytes(reg, &value, 1);
-  }
-
-  void RV3028::clear_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value &= ~(mask << shift);
-    write_bytes(reg, &value, 1);
   }
 
   /*********************************
@@ -750,7 +729,7 @@ namespace pimoroni {
 
   uint8_t RV3028::read_register(uint8_t addr) {
     uint8_t b1[2];
-    if( 1 == RV3028::read_bytes(addr, b1, 1))
+    if(1 == RV3028::read_bytes(addr, b1, 1))
       return b1[0];
     else
       return 0xFF; //Error
@@ -849,10 +828,6 @@ namespace pimoroni {
  
   }
 
-  void RV3028::reset() {
-    set_bit(RV3028_CTRL2, CTRL2_RESET);
-  }
-
   void RV3028::set_bit(uint8_t reg_addr, uint8_t bit_num) {
     RV3028::set_bits(reg_addr, bit_num, 0x01);
   }
@@ -865,4 +840,41 @@ namespace pimoroni {
     uint8_t value = RV3028::get_bits(reg_addr, bit_num, 0x01);
     return value;
   }
+
+  // i2c functions
+  int RV3028::write_bytes(uint8_t reg, uint8_t *buf, int len) {
+    uint8_t buffer[len + 1];
+    buffer[0] = reg;
+    for(int x = 0; x < len; x++) {
+      buffer[x + 1] = buf[x];
+    }
+    return i2c_write_blocking(i2c, address, buffer, len + 1, false);
+  };
+
+  int RV3028::read_bytes(uint8_t reg, uint8_t *buf, int len) {
+    i2c_write_blocking(i2c, address, &reg, 1, true);
+    i2c_read_blocking(i2c, address, buf, len, false);
+    return len;
+  };
+
+  uint8_t RV3028::get_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
+    uint8_t value;
+    read_bytes(reg, &value, 1);
+    return value & (mask << shift);
+  }
+
+  void RV3028::set_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
+    uint8_t value;
+    read_bytes(reg, &value, 1);
+    value |= mask << shift;
+    write_bytes(reg, &value, 1);
+  }
+
+  void RV3028::clear_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
+    uint8_t value;
+    read_bytes(reg, &value, 1);
+    value &= ~(mask << shift);
+    write_bytes(reg, &value, 1);
+  }
+
 }

@@ -230,6 +230,12 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     bool init();
+    void reset();
+
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_int() const;
 
     bool setup(bool set_24Hour = true, bool disable_TrickleCharge = true, bool set_LevelSwitchingMode = true);
     bool set_time(uint8_t sec, uint8_t min, uint8_t hour, uint8_t weekday, uint8_t date, uint8_t month, uint16_t year);
@@ -243,7 +249,7 @@ namespace pimoroni {
     bool set_year(uint16_t value);
     bool set_to_compiler_time();  //Uses the hours, mins, etc from compile time to set RTC
 
-    bool update_time();            //Update the local array with the RTC registers
+    bool update_time();           //Update the local array with the RTC registers
 
     char* string_date_usa();      //Return date in mm-dd-yyyy
     char* string_date();          //Return date in dd-mm-yyyy
@@ -258,23 +264,22 @@ namespace pimoroni {
     uint8_t get_month();
     uint16_t get_year();
 
-
-    bool is_12_hour();              //Returns true if 12hour bit is set
-    bool is_pm();                  //Returns true if is12Hour and PM bit is set
+    bool is_12_hour();            //Returns true if 12hour bit is set
+    bool is_pm();                 //Returns true if is12Hour and PM bit is set
     void set_12_hour();
     void set_24_hour();
 
     bool set_unix(uint32_t value); //Set the UNIX Time (Real Time and UNIX Time are INDEPENDENT!)
     uint32_t get_unix();
 
-    void enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool setWeekdayAlarm_not_Date, uint8_t mode, bool enable_clock_output = false);
+    void enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool set_weekday_alarm_not_date, uint8_t mode, bool enable_clock_output = false);
     void enable_alarm_interrupt();
     void disable_alarm_interrupt();
     bool read_alarm_interrupt_flag();
     void clear_alarm_interrupt_flag();
 
-    void set_timer(bool timer_repeat, uint16_t timer_frequency, uint16_t timer_value, bool setInterrupt, bool start_timer, bool enable_clock_output = false);
-    uint16_t get_timer_count(void);
+    void set_timer(bool timer_repeat, uint16_t timer_frequency, uint16_t timer_value, bool set_interrupt, bool start_timer, bool enable_clock_output = false);
+    uint16_t get_timer_count();
     void enable_timer();
     void disable_timer();
     void enable_timer_interrupt();
@@ -300,6 +305,7 @@ namespace pimoroni {
     uint8_t status(); //Returns the status byte
     void clear_interrupts();
 
+private:
     //Values in RTC are stored in Binary Coded Decimal. These functions convert to/from Decimal
     uint8_t bcd_to_dec(uint8_t val);
     uint8_t dec_to_bcd(uint8_t val);
@@ -312,13 +318,11 @@ namespace pimoroni {
     bool write_config_eeprom_ram_mirror(uint8_t eepromaddr, uint8_t val);
     uint8_t read_config_eeprom_ram_mirror(uint8_t eepromaddr);
     bool wait_for_eeprom();
-    void reset();
 
     void set_bit(uint8_t reg_addr, uint8_t bit_num);
     void clear_bit(uint8_t reg_addr, uint8_t bit_num);
     bool read_bit(uint8_t reg_addr, uint8_t bit_num);
 
-  private:
     // From i2cdevice
     int write_bytes(uint8_t reg, uint8_t *buf, int len);
     int read_bytes(uint8_t reg, uint8_t *buf, int len);
