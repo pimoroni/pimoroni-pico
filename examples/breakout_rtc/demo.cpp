@@ -28,11 +28,11 @@ int main() {
   rtc.enable_periodic_update_interrupt(true);
 
   while(true) {
-    //Has a second passed?
+    // Has a second passed?
     if(rtc.read_periodic_update_interrupt_flag()) {
       rtc.clear_periodic_update_interrupt_flag();
 
-      //Update the locally stored time from the RTC
+      // Update the locally stored time from the RTC
       if(rtc.update_time()) {
         printf("Date: %s, Time: %s\n", rtc.string_date(), rtc.string_time());
         gpio_put(PICO_DEFAULT_LED_PIN, true);

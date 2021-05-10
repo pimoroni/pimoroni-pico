@@ -183,14 +183,13 @@ namespace pimoroni {
     return set_time(times, TIME_ARRAY_LENGTH);
   }
 
-  //Takes the time from the last build and uses it as the current time
-  //Works very well as an arduino sketch
+  // Takes the time from the last build and uses it as the current time
   bool RV3028::set_to_compiler_time() {
     times[TIME_SECONDS] = dec_to_bcd(BUILD_SECOND);
     times[TIME_MINUTES] = dec_to_bcd(BUILD_MINUTE);
     times[TIME_HOURS] = dec_to_bcd(BUILD_HOUR);
 
-    //Build_Hour is 0-23, convert to 1-12 if needed
+    // Build_Hour is 0-23, convert to 1-12 if needed
     if(is_12_hour()) {
       uint8_t hour = BUILD_HOUR;
 
@@ -205,10 +204,10 @@ namespace pimoroni {
         pm = true;
       }
 
-      times[TIME_HOURS] = dec_to_bcd(hour); //Load the modified hours
+      times[TIME_HOURS] = dec_to_bcd(hour); // Load the modified hours
 
       if(pm == true)
-        times[TIME_HOURS] |= (1 << HOURS_AM_PM); //Set AM/PM bit if needed
+        times[TIME_HOURS] |= (1 << HOURS_AM_PM); // Set AM/PM bit if needed
     }
 
     // Calculate weekday (from here: http://stackoverflow.com/a/21235587)
@@ -221,42 +220,42 @@ namespace pimoroni {
 
     times[TIME_DATE] = dec_to_bcd(BUILD_DATE);
     times[TIME_MONTH] = dec_to_bcd(BUILD_MONTH);
-    times[TIME_YEAR] = dec_to_bcd(BUILD_YEAR - 2000); //! Not Y2K (or Y2.1K)-proof :(
+    times[TIME_YEAR] = dec_to_bcd(BUILD_YEAR - 2000); // ! Not Y2K (or Y2.1K)-proof :(
 
     return set_time(times, TIME_ARRAY_LENGTH);
   }
 
-  //Move the hours, mins, sec, etc registers from RV-3028-C7 into the _time array
-  //Needs to be called before printing time or date
-  //We do not protect the GPx registers. They will be overwritten. The user has plenty of RAM if they need it.
+  // Move the hours, mins, sec, etc registers from RV-3028-C7 into the _time array
+  // Needs to be called before printing time or date
+  // We do not protect the GPx registers. They will be overwritten. The user has plenty of RAM if they need it.
   bool RV3028::update_time() {
     if(read_multiple_registers(RV3028_SECONDS, times, TIME_ARRAY_LENGTH) == false)
-      return false; //Something went wrong
+      return false; // Something went wrong
 
     if(is_12_hour())
-      times[TIME_HOURS] &= ~(1 << HOURS_AM_PM); //Remove this bit from value
+      times[TIME_HOURS] &= ~(1 << HOURS_AM_PM); // Remove this bit from value
 
     return true;
   }
 
-  //Returns a pointer to array of chars that are the date in mm/dd/yyyy format because they're weird
+  // Returns a pointer to array of chars that are the date in mm/dd/yyyy format because they're weird
   char* RV3028::string_date_usa() {
-    static char date[11 + 3]; //Max of mm/dd/yyyy with \0 terminator (plus extra for worst case conversion)
+    static char date[11 + 3]; // Max of mm/dd/yyyy with \0 terminator (plus extra for worst case conversion)
     sprintf(date, "%02hhu/%02hhu/20%02hhu", bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_YEAR]));
     return date;
   }
 
-  //Returns a pointer to array of chars that are the date in dd/mm/yyyy format
+  // Returns a pointer to array of chars that are the date in dd/mm/yyyy format
   char* RV3028::string_date() {
-    static char date[11 + 3]; //Max of dd/mm/yyyy with \0 terminator (plus extra for worst case conversion)
+    static char date[11 + 3]; // Max of dd/mm/yyyy with \0 terminator (plus extra for worst case conversion)
     sprintf(date, "%02hhu/%02hhu/20%02hhu", bcd_to_dec(times[TIME_DATE]), bcd_to_dec(times[TIME_MONTH]), bcd_to_dec(times[TIME_YEAR]));
     return date;
   }
 
-  //Returns a pointer to array of chars that represents the time in hh:mm:ss format
-  //Adds AM/PM if in 12 hour mode
+  // Returns a pointer to array of chars that represents the time in hh:mm:ss format
+  // Adds AM/PM if in 12 hour mode
   char* RV3028::string_time() {
-    static char time[11 + 3]; //Max of hh:mm:ssXM with \0 terminator (plus extra for worst case conversion)
+    static char time[11 + 3]; // Max of hh:mm:ssXM with \0 terminator (plus extra for worst case conversion)
 
     if(is_12_hour() == true) {
       char half = 'A';
@@ -271,7 +270,7 @@ namespace pimoroni {
   }
 
   char* RV3028::string_time_stamp() {
-    static char time_stamp[25 + 4]; //Max of yyyy-mm-ddThh:mm:ss.ss with \0 terminator (plus extra for worst case conversion)
+    static char time_stamp[25 + 4]; // Max of yyyy-mm-ddThh:mm:ss.ss with \0 terminator (plus extra for worst case conversion)
 
     if(is_12_hour() == true) {
       char half = 'A';
@@ -313,13 +312,13 @@ namespace pimoroni {
     return bcd_to_dec(times[TIME_YEAR]) + 2000;
   }
 
-  //Returns true if RTC has been configured for 12 hour mode
+  // Returns true if RTC has been configured for 12 hour mode
   bool RV3028::is_12_hour() {
     uint8_t controlRegister2 = read_register(RV3028_CTRL2);
     return (controlRegister2 & (1 << CTRL2_12_24));
   }
 
-  //Returns true if RTC has PM bit set and 12Hour bit set
+  // Returns true if RTC has PM bit set and 12Hour bit set
   bool RV3028::is_pm() {
     uint8_t hourRegister = read_register(RV3028_HOURS);
     if(is_12_hour() && (hourRegister & (1 << HOURS_AM_PM)))
@@ -327,19 +326,19 @@ namespace pimoroni {
     return false;
   }
 
-  //Configure RTC to output 1-12 hours
-  //Converts any current hour setting to 12 hour
+  // Configure RTC to output 1-12 hours
+  // Converts any current hour setting to 12 hour
   void RV3028::set_12_hour() {
-    //Do we need to change anything?
+    // Do we need to change anything?
     if(is_12_hour() == false) {
-      uint8_t hour = bcd_to_dec(read_register(RV3028_HOURS)); //Get the current hour in the RTC
+      uint8_t hour = bcd_to_dec(read_register(RV3028_HOURS)); // Get the current hour in the RTC
 
-      //Set the 12/24 hour bit
+      // Set the 12/24 hour bit
       uint8_t setting = read_register(RV3028_CTRL2);
       setting |= (1 << CTRL2_12_24);
       write_register(RV3028_CTRL2, setting);
 
-      //Take the current hours and convert to 12, complete with AM/PM bit
+      // Take the current hours and convert to 12, complete with AM/PM bit
       bool pm = false;
 
       if(hour == 0)
@@ -351,46 +350,46 @@ namespace pimoroni {
         pm = true;
       }
 
-      hour = dec_to_bcd(hour); //Convert to BCD
+      hour = dec_to_bcd(hour); // Convert to BCD
 
-      if(pm == true) hour |= (1 << HOURS_AM_PM); //Set AM/PM bit if needed
+      if(pm == true) hour |= (1 << HOURS_AM_PM); // Set AM/PM bit if needed
 
-      write_register(RV3028_HOURS, hour); //Record this to hours register
+      write_register(RV3028_HOURS, hour); // Record this to hours register
     }
   }
 
-  //Configure RTC to output 0-23 hours
-  //Converts any current hour setting to 24 hour
+  // Configure RTC to output 0-23 hours
+  // Converts any current hour setting to 24 hour
   void RV3028::set_24_hour() {
-    //Do we need to change anything?
+    // Do we need to change anything?
     if(is_12_hour() == true) {
-      //Not sure what changing the CTRL2 register will do to hour register so let's get a copy
+      // Not sure what changing the CTRL2 register will do to hour register so let's get a copy
       uint8_t hour = read_register(RV3028_HOURS); //Get the current 12 hour formatted time in BCD
       bool pm = false;
-      if(hour & (1 << HOURS_AM_PM)) { //Is the AM/PM bit set?
+      if(hour & (1 << HOURS_AM_PM)) { // Is the AM/PM bit set?
         pm = true;
-        hour &= ~(1 << HOURS_AM_PM); //Clear the bit
+        hour &= ~(1 << HOURS_AM_PM); // Clear the bit
       }
 
-      //Change to 24 hour mode
+      // Change to 24 hour mode
       uint8_t setting = read_register(RV3028_CTRL2);
-      setting &= ~(1 << CTRL2_12_24); //Clear the 12/24 hr bit
+      setting &= ~(1 << CTRL2_12_24); // Clear the 12/24 hr bit
       write_register(RV3028_CTRL2, setting);
 
-      //Given a BCD hour in the 1-12 range, make it 24
-      hour = bcd_to_dec(hour); //Convert core of register to DEC
+      // Given a BCD hour in the 1-12 range, make it 24
+      hour = bcd_to_dec(hour); // Convert core of register to DEC
 
-      if(pm == true) hour += 12; //2PM becomes 14
-      if(hour == 12) hour = 0; //12AM stays 12, but should really be 0
-      if(hour == 24) hour = 12; //12PM becomes 24, but should really be 12
+      if(pm == true) hour += 12; // 2PM becomes 14
+      if(hour == 12) hour = 0;   // 12AM stays 12, but should really be 0
+      if(hour == 24) hour = 12;  // 12PM becomes 24, but should really be 12
 
-      hour = dec_to_bcd(hour); //Convert to BCD
+      hour = dec_to_bcd(hour);   // Convert to BCD
 
-      write_register(RV3028_HOURS, hour); //Record this to hours register
+      write_register(RV3028_HOURS, hour); // Record this to hours register
     }
   }
 
-  //ATTENTION: Real Time and UNIX Time are INDEPENDENT!
+  // ATTENTION: Real Time and UNIX Time are INDEPENDENT!
   bool RV3028::set_unix(uint32_t value) {
     uint8_t unix_reg[4];
     unix_reg[0] = value;
@@ -401,7 +400,7 @@ namespace pimoroni {
     return write_multiple_registers(RV3028_UNIX_TIME0, unix_reg, 4);
   }
 
-  //ATTENTION: Real Time and UNIX Time are INDEPENDENT!
+  // ATTENTION: Real Time and UNIX Time are INDEPENDENT!
   uint32_t RV3028::get_unix() {
     uint8_t unix_reg[4];
     read_multiple_registers(RV3028_UNIX_TIME0, unix_reg, 4);
@@ -421,27 +420,27 @@ namespace pimoroni {
   If you want to set a weekday alarm (setWeekdayAlarm_not_Date = true), set 'date_or_weekday' from 0 (Sunday) to 6 (Saturday)
   ********************************/
   void RV3028::enable_alarm_interrupt(uint8_t min, uint8_t hour, uint8_t date_or_weekday, bool set_weekday_alarm_not_date, uint8_t mode, bool enable_clock_output) {
-    //disable Alarm Interrupt to prevent accidental interrupts during configuration
+    // disable Alarm Interrupt to prevent accidental interrupts during configuration
     disable_alarm_interrupt();
     clear_alarm_interrupt_flag();
 
-    //ENHANCEMENT: Add Alarm in 12 hour mode
+    // ENHANCEMENT: Add Alarm in 12 hour mode
     set_24_hour();
 
-    //Set WADA bit (Weekday/Date Alarm)
+    // Set WADA bit (Weekday/Date Alarm)
     if(set_weekday_alarm_not_date)
       clear_bit(RV3028_CTRL1, CTRL1_WADA);
     else
       set_bit(RV3028_CTRL1, CTRL1_WADA);
 
-    //Write alarm settings in registers 0x07 to 0x09
+    // Write alarm settings in registers 0x07 to 0x09
     uint8_t alarmTime[3];
     alarmTime[0] = dec_to_bcd(min);        //minutes
     alarmTime[1] = dec_to_bcd(hour);        //hours
     alarmTime[2] = dec_to_bcd(date_or_weekday);  //date or weekday
-    //shift alarm enable bits
+    // shift alarm enable bits
     if(mode > 0b111)
-      mode = 0b111; //0 to 7 is valid
+      mode = 0b111; // 0 to 7 is valid
 
     if(mode & 0b001)
       alarmTime[0] |= 1 << MINUTESALM_AE_M;
@@ -449,13 +448,12 @@ namespace pimoroni {
       alarmTime[1] |= 1 << HOURSALM_AE_H;
     if(mode & 0b100)
       alarmTime[2] |= 1 << DATE_AE_WD;
-    //Write registers
+
     write_multiple_registers(RV3028_MINUTES_ALM, alarmTime, 3);
 
-    //enable Alarm Interrupt
     enable_alarm_interrupt();
 
-    //Clock output?
+    // Clock output?
     if(enable_clock_output)
       set_bit(RV3028_INT_MASK, IMT_MASK_CAIE);
     else
@@ -466,7 +464,7 @@ namespace pimoroni {
     set_bit(RV3028_CTRL2, CTRL2_AIE);
   }
 
-  //Only disables the interrupt (not the alarm flag)
+  // Only disables the interrupt (not the alarm flag)
   void RV3028::disable_alarm_interrupt() {
     clear_bit(RV3028_CTRL2, CTRL2_AIE);
   }
@@ -499,21 +497,21 @@ namespace pimoroni {
     }
 
     switch(timer_frequency) {
-      case 4096:    // 4096Hz (default)    // up to 122us error on first time
+      case 4096:         // 4096Hz (default)    // up to 122us error on first time
         ctrl1_val &= ~3; // Clear both the bits
         break;
 
-      case 64:    // 64Hz          // up to 7.813ms error on first time
+      case 64:           // 64Hz          // up to 7.813ms error on first time
         ctrl1_val &= ~3; // Clear both the bits
         ctrl1_val |= 1;
         break;
 
-      case 1:      // 1Hz          // up to 7.813ms error on first time
+      case 1:            // 1Hz          // up to 7.813ms error on first time
         ctrl1_val &= ~3; // Clear both the bits
         ctrl1_val |= 2;
         break;
 
-      case 60000:    // 1/60Hz        // up to 7.813ms error on first time
+      case 60000:       // 1/60Hz        // up to 7.813ms error on first time
         ctrl1_val |= 3; // Set both bits
         break;
     }
@@ -526,7 +524,7 @@ namespace pimoroni {
     }
     write_register(RV3028_CTRL1, ctrl1_val);
 
-    //Clock output?
+    // Clock output?
     if(enable_clock_output)
       set_bit(RV3028_INT_MASK, IMT_MASK_CTIE);
     else
@@ -577,7 +575,7 @@ namespace pimoroni {
 
     set_bit(RV3028_CTRL2, CTRL2_UIE);
 
-    //Clock output?
+    // Clock output?
     if(enable_clock_output)
       set_bit(RV3028_INT_MASK, IMT_MASK_CUIE);
     else
@@ -607,23 +605,23 @@ namespace pimoroni {
     if(tcr > 3)
       return;
 
-    //Read EEPROM Backup Register (0x37)
+    // Read EEPROM Backup Register (0x37)
     uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
-    //Set TCR Bits (Trickle Charge Resistor)
-    eeprom_backup &= EEPROMBackup_TCR_CLEAR;    //Clear TCR Bits
-    eeprom_backup |= tcr << EEPROMBackup_TCR_SHIFT;  //Shift values into EEPROM Backup Register
-    //Write 1 to TCE Bit
+    // Set TCR Bits (Trickle Charge Resistor)
+    eeprom_backup &= EEPROMBackup_TCR_CLEAR;         // Clear TCR Bits
+    eeprom_backup |= tcr << EEPROMBackup_TCR_SHIFT;  // Shift values into EEPROM Backup Register
+    // Write 1 to TCE Bit
     eeprom_backup |= 1 << EEPROMBackup_TCE_BIT;
-    //Write EEPROM Backup Register
+    // Write EEPROM Backup Register
     write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup);
   }
 
   void RV3028::disable_trickle_charge() {
-    //Read EEPROM Backup Register (0x37)
+    // Read EEPROM Backup Register (0x37)
     uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
-    //Write 0 to TCE Bit
+    // Write 0 to TCE Bit
     eeprom_backup &= ~(1 << EEPROMBackup_TCE_BIT);
-    //Write EEPROM Backup Register
+    // Write EEPROM Backup Register
     write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup);
   }
 
@@ -640,19 +638,19 @@ namespace pimoroni {
 
     bool success = true;
 
-    //Read EEPROM Backup Register (0x37)
+    // Read EEPROM Backup Register (0x37)
     uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
     if(eeprom_backup == 0xFF)
       success = false;
 
-    //Ensure FEDE Bit is set to 1
+    // Ensure FEDE Bit is set to 1
     eeprom_backup |= 1 << EEPROMBackup_FEDE_BIT;
 
-    //Set BSM Bits (Backup Switchover Mode)
-    eeprom_backup &= EEPROMBackup_BSM_CLEAR;    //Clear BSM Bits of EEPROM Backup Register
-    eeprom_backup |= val << EEPROMBackup_BSM_SHIFT;  //Shift values into EEPROM Backup Register
+    // Set BSM Bits (Backup Switchover Mode)
+    eeprom_backup &= EEPROMBackup_BSM_CLEAR;         // Clear BSM Bits of EEPROM Backup Register
+    eeprom_backup |= val << EEPROMBackup_BSM_SHIFT;  // Shift values into EEPROM Backup Register
 
-    //Write EEPROM Backup Register
+    // Write EEPROM Backup Register
     if(!write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup))
       success = false;
 
@@ -667,13 +665,13 @@ namespace pimoroni {
     if(freq > 7)
       return; // check out of bounds
 
-    //Read EEPROM CLKOUT Register (0x35)
+    // Read EEPROM CLKOUT Register (0x35)
     uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
-    //Ensure CLKOE Bit is set to 1
+    // Ensure CLKOE Bit is set to 1
     eeprom_clkout |= 1 << EEPROMClkout_CLKOE_BIT;
-    //Shift values into EEPROM Backup Register
+    // Shift values into EEPROM Backup Register
     eeprom_clkout |= freq << EEPROMClkout_FREQ_SHIFT;
-    //Write EEPROM Backup Register
+    // Write EEPROM Backup Register
     write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
   }
 
@@ -681,26 +679,26 @@ namespace pimoroni {
     if(freq > 7)
       return; // check out of bounds
 
-    //Read EEPROM CLKOUT Register (0x35)
+    // Read EEPROM CLKOUT Register (0x35)
     uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
-    //Shift values into EEPROM Backup Register
+    // Shift values into EEPROM Backup Register
     eeprom_clkout |= freq << EEPROMClkout_FREQ_SHIFT;
-    //Write EEPROM Backup Register
+    // Write EEPROM Backup Register
     write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
 
-    //Set CLKIE Bit
+    // Set CLKIE Bit
     set_bit(RV3028_CTRL2, CTRL2_CLKIE);
   }
 
   void RV3028::disable_clock_out() {
-    //Read EEPROM CLKOUT Register (0x35)
+    // Read EEPROM CLKOUT Register (0x35)
     uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
-    //Clear CLKOE Bit
+    // Clear CLKOE Bit
     eeprom_clkout &= ~(1 << EEPROMClkout_CLKOE_BIT);
-    //Write EEPROM CLKOUT Register
+    // Write EEPROM CLKOUT Register
     write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
 
-    //Clear CLKIE Bit
+    // Clear CLKIE Bit
     clear_bit(RV3028_CTRL2, CTRL2_CLKIE);
   }
 
@@ -712,12 +710,12 @@ namespace pimoroni {
     clear_bit(RV3028_STATUS, STATUS_CLKF);
   }
 
-  //Returns the status byte
+  // Returns the status byte
   uint8_t RV3028::status(void) {
     return(read_register(RV3028_STATUS));
   }
 
-  void RV3028::clear_interrupts() { //Read the status register to clear the current interrupt flags
+  void RV3028::clear_interrupts() { // Read the status register to clear the current interrupt flags
     write_register(RV3028_STATUS, 0);
   }
 
@@ -759,24 +757,24 @@ namespace pimoroni {
   bool RV3028::write_config_eeprom_ram_mirror(uint8_t eeprom_addr, uint8_t val) {
     bool success = wait_for_eeprom();
 
-    //Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
+    // Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
     uint8_t ctrl1 = read_register(RV3028_CTRL1);
     ctrl1 |= 1 << CTRL1_EERD;
 
     if(!write_register(RV3028_CTRL1, ctrl1))
       success = false;
     
-    //Write Configuration RAM Register
+    // Write Configuration RAM Register
     write_register(eeprom_addr, val);
 
-    //Update EEPROM (All Configuration RAM -> EEPROM)
+    // Update EEPROM (All Configuration RAM -> EEPROM)
     write_register(RV3028_EEPROM_CMD, EEPROMCMD_First);
     write_register(RV3028_EEPROM_CMD, EEPROMCMD_Update);
     
     if(!wait_for_eeprom())
       success = false;
     
-    //Reenable auto refresh by writing 0 to EERD control bit in CTRL1 register
+    // Reenable auto refresh by writing 0 to EERD control bit in CTRL1 register
     ctrl1 = read_register(RV3028_CTRL1);
     if(ctrl1 == 0x00)
       success = false;
@@ -793,13 +791,13 @@ namespace pimoroni {
   uint8_t RV3028::read_config_eeprom_ram_mirror(uint8_t eeprom_addr) {
     bool success = wait_for_eeprom();
 
-    //Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
+    // Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
     uint8_t ctrl1 = read_register(RV3028_CTRL1);
     ctrl1 |= 1 << CTRL1_EERD;
     if(!write_register(RV3028_CTRL1, ctrl1))
       success = false;
 
-    //Read EEPROM Register
+    // Read EEPROM Register
     write_register(RV3028_EEPROM_ADDR, eeprom_addr);
     write_register(RV3028_EEPROM_CMD, EEPROMCMD_First);
     write_register(RV3028_EEPROM_CMD, EEPROMCMD_ReadSingle);
@@ -811,7 +809,7 @@ namespace pimoroni {
     if(!wait_for_eeprom())
       success = false;
 
-    //Reenable auto refresh by writing 0 to EERD control bit in CTRL1 register
+    // Reenable auto refresh by writing 0 to EERD control bit in CTRL1 register
     ctrl1 = read_register(RV3028_CTRL1);
     if(ctrl1 == 0x00)
       success = false;
@@ -825,7 +823,7 @@ namespace pimoroni {
     return eeprom_data;
   }
  
-  //True if success, false if timeout occured
+  // True if success, false if timeout occured
   bool RV3028::wait_for_eeprom() {
     // Timeout is number of loops round while - don't have access to millisecond counter
     unsigned long timeout = 500;
