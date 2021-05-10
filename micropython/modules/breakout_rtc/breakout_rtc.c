@@ -128,6 +128,10 @@ STATIC const mp_rom_map_elem_t BreakoutRTC_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear_clock_output_interrupt_flag), MP_ROM_PTR(&BreakoutRTC_clear_clock_output_interrupt_flag_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_status), MP_ROM_PTR(&BreakoutRTC_status_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_interrupts), MP_ROM_PTR(&BreakoutRTC_clear_interrupts_obj) },
+    { MP_ROM_QSTR(MP_QSTR_TCR_3K), MP_ROM_INT(MP_TCR_3K) },
+    { MP_ROM_QSTR(MP_QSTR_TCR_5K), MP_ROM_INT(MP_TCR_5K) },
+    { MP_ROM_QSTR(MP_QSTR_TCR_9K), MP_ROM_INT(MP_TCR_9K) },
+    { MP_ROM_QSTR(MP_QSTR_TCR_15K), MP_ROM_INT(MP_TCR_15K) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutRTC_locals_dict, BreakoutRTC_locals_dict_table);
 

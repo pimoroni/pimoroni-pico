@@ -1,6 +1,14 @@
 // Include MicroPython API.
 #include "py/runtime.h"
-#include "py/objstr.h"
+//#include "py/objstr.h"
+
+/***** Constants *****/
+enum TCR {
+    MP_TCR_3K  = 0b00,     //Trickle Charge Resistor 3kOhm
+    MP_TCR_5K  = 0b01,     //Trickle Charge Resistor 5kOhm
+    MP_TCR_9K  = 0b10,     //Trickle Charge Resistor 9kOhm
+    MP_TCR_15K = 0b11,     //Trickle Charge Resistor 15kOhm
+};
 
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t breakout_rtc_BreakoutRTC_type;

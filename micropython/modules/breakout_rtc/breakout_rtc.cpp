@@ -1,4 +1,6 @@
 #include "../../../libraries/breakout_rtc/breakout_rtc.hpp"
+#include <string>
+#include <cstring>
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
@@ -91,77 +93,6 @@ mp_obj_t BreakoutRTC_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
     return MP_OBJ_FROM_PTR(self);
 }
-
-// mp_obj_t picoscroll_init() {
-//     scroll.init();
-//     return mp_const_none;
-// }
-
-// mp_obj_t picoscroll_get_width() {
-//     return mp_obj_new_int(PicoScroll::WIDTH);
-// }
-
-// mp_obj_t picoscroll_get_height() {
-//     return mp_obj_new_int(PicoScroll::HEIGHT);
-// }
-
-// mp_obj_t picoscroll_update() {
-//     scroll.update();
-//     return mp_const_none;
-// }
-
-// mp_obj_t picoscroll_set_pixel(mp_obj_t x_obj, mp_obj_t y_obj, mp_obj_t v_obj) {
-//     int x = mp_obj_get_int(x_obj);
-//     int y = mp_obj_get_int(y_obj);
-//     int val = mp_obj_get_int(v_obj);
-
-//     if(x < 0 || x >= PicoScroll::WIDTH || y < 0 || y >= PicoScroll::HEIGHT)
-//         mp_raise_ValueError("x or y out of range.");
-//     else
-//     {
-//         if(val < 0 || val > 255)
-//             mp_raise_ValueError("val out of range. Expected 0 to 255");
-//         else
-//             scroll.set_pixel(x, y, val);
-//     }
-
-//     return mp_const_none;
-// }
-
-// mp_obj_t picoscroll_clear() {
-//     scroll.clear();
-//     return mp_const_none;
-// }
-
-// mp_obj_t picoscroll_is_pressed(mp_obj_t button_obj) {
-//     int buttonID = mp_obj_get_int(button_obj);
-
-//     bool buttonPressed = false;
-//     switch(buttonID)
-//     {
-//     case 0:
-//         buttonPressed = scroll.is_pressed(PicoScroll::A);
-//         break;
-
-//     case 1:
-//         buttonPressed = scroll.is_pressed(PicoScroll::B);
-//         break;
-
-//     case 2:
-//         buttonPressed = scroll.is_pressed(PicoScroll::X);
-//         break;
-
-//     case 3:
-//         buttonPressed = scroll.is_pressed(PicoScroll::Y);
-//         break;
-
-//     default:
-//         mp_raise_ValueError("button not valid. Expected 0 to 3");
-//         break;
-//     }
-
-//     return buttonPressed ? mp_const_true : mp_const_false;
-// }
 
 mp_obj_t BreakoutRTC_reset(mp_obj_t self_in) {
     breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
@@ -388,27 +319,35 @@ mp_obj_t BreakoutRTC_update_time(mp_obj_t self_in) {
 }
 
 mp_obj_t BreakoutRTC_string_date_usa(mp_obj_t self_in) {
-    //TODO
-    //breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
-    return mp_const_none;
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
+
+    const char* date = self->breakout->string_date_usa();
+    std::string str_date(date, strlen(date));
+    return mp_obj_new_str(str_date.c_str(), str_date.length());
 }
 
 mp_obj_t BreakoutRTC_string_date(mp_obj_t self_in) {
-    //TODO
-    //breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
-    return mp_const_none;
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
+
+    const char* date = self->breakout->string_date();
+    std::string str_date(date, strlen(date));
+    return mp_obj_new_str(str_date.c_str(), str_date.length());
 }
 
 mp_obj_t BreakoutRTC_string_time(mp_obj_t self_in) {
-    //TODO
-    //breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
-    return mp_const_none;
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
+
+    const char* time = self->breakout->string_time();
+    std::string str_time(time, strlen(time));
+    return mp_obj_new_str(str_time.c_str(), str_time.length());
 }
 
 mp_obj_t BreakoutRTC_string_time_stamp(mp_obj_t self_in) {
-    //TODO
-    //breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
-    return mp_const_none;
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRTC_obj_t);
+
+    const char* time_stamp = self->breakout->string_time_stamp();
+    std::string str_time_stamp(time_stamp, strlen(time_stamp));
+    return mp_obj_new_str(str_time_stamp.c_str(), str_time_stamp.length());
 }
 
 mp_obj_t BreakoutRTC_get_seconds(mp_obj_t self_in) {
@@ -570,16 +509,46 @@ mp_obj_t BreakoutRTC_clear_alarm_interrupt_flag(mp_obj_t self_in) {
 }
 
 mp_obj_t BreakoutRTC_set_timer(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //TODO
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_timer_repeat, ARG_timer_frequency, ARG_timer_value, ARG_set_interrupt, ARG_start_timer, ARG_enable_clock_output };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_timer_repeat, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_timer_frequency, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_timer_value, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_set_interrupt, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_start_timer, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_enable_clock_output, MP_ARG_BOOL, {.u_bool = false} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    bool timer_repeat = args[ARG_timer_repeat].u_bool;
+    int timer_frequency = args[ARG_timer_frequency].u_int;
+    int timer_value = args[ARG_timer_value].u_int;
+    bool set_interrupt = args[ARG_set_interrupt].u_bool;
+    bool start_timer = args[ARG_start_timer].u_bool;
+    bool enable_clock_output = args[ARG_enable_clock_output].u_bool;
+
+    if(timer_value < 0 || timer_value > 4065) {
+        mp_raise_ValueError("timer_value out of range. Expected 0 to 4095");
+    }
+    else {
+        switch(timer_frequency) {
+            case 4096:    // 4096Hz (default)    // up to 122us error on first time
+            case 64:    // 64Hz          // up to 7.813ms error on first time
+            case 1:      // 1Hz          // up to 7.813ms error on first time
+            case 60000:    // 1/60Hz        // up to 7.813ms error on first time
+                self->breakout->set_timer(timer_repeat, timer_frequency, timer_value, set_interrupt, start_timer, enable_clock_output);
+                break;
+
+            default:
+                mp_raise_ValueError("timer_frequency not valid. Expected, 4096, 64, 1, or 60000");
+                break;
+        }
+    }
 
     return mp_const_none;
 }
@@ -630,16 +599,21 @@ mp_obj_t BreakoutRTC_clear_timer_interrupt_flag(mp_obj_t self_in) {
 }
 
 mp_obj_t BreakoutRTC_enable_periodic_update_interrupt(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //TODO
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_every_second, ARG_enable_clock_output };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_every_second, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_enable_clock_output, MP_ARG_BOOL, {.u_bool = false} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    bool every_second = args[ARG_every_second].u_bool;
+    bool enable_clock_output = args[ARG_enable_clock_output].u_bool;
+    self->breakout->enable_periodic_update_interrupt(every_second, enable_clock_output);
 
     return mp_const_none;
 }
@@ -664,17 +638,24 @@ mp_obj_t BreakoutRTC_clear_periodic_update_interrupt_flag(mp_obj_t self_in) {
 }
 
 mp_obj_t BreakoutRTC_enable_trickle_charge(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //TODO
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_tcr };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_tcr, MP_ARG_INT, {.u_int = TCR_15K} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    int tcr = args[ARG_tcr].u_int;
+
+    if(tcr < 0 || tcr > 3)
+        mp_raise_ValueError("tcr out of range. Expected 0 to 3 (TCR_3K, TCR_5K, TCR_9K, TCR_15K)");
+    else
+        self->breakout->enable_trickle_charge(tcr);
+
     return mp_const_none;
 }
 
@@ -686,44 +667,68 @@ mp_obj_t BreakoutRTC_disable_trickle_charge(mp_obj_t self_in) {
 }
 
 mp_obj_t BreakoutRTC_set_backup_switchover_mode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_val };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_val, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    int val = args[ARG_val].u_int;
+
+    if(val < 0 || val > 3)
+        mp_raise_ValueError("tcr out of range. Expected 0 to 3");
+    else
+        self->breakout->set_backup_switchover_mode(val);
+
     return mp_const_none;
 }
 
 mp_obj_t BreakoutRTC_enable_clock_out(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_freq };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_freq, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    int freq = args[ARG_freq].u_int;
+
+    if(freq < 0 || freq > 7)
+        mp_raise_ValueError("freq out of range. Expected 0 to 7");
+    else
+        self->breakout->enable_clock_out(freq);
+
     return mp_const_none;
 }
 
 mp_obj_t BreakoutRTC_enable_interrupt_controlled_clockout(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_light, ARG_proximity };
+    enum { ARG_self, ARG_freq };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_light, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_proximity, MP_ARG_REQUIRED | MP_ARG_BOOL },
+        { MP_QSTR_freq, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
+    breakout_rtc_BreakoutRTC_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rtc_BreakoutRTC_obj_t);
+
+    int freq = args[ARG_freq].u_int;
+
+    if(freq < 0 || freq > 7)
+        mp_raise_ValueError("freq out of range. Expected 0 to 7");
+    else
+        self->breakout->enable_interrupt_controlled_clockout(freq);
+
     return mp_const_none;
 }
 
