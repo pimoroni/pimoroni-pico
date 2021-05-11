@@ -32,7 +32,7 @@ namespace pimoroni {
     //--------------------------------------------------
     // Substructures
     //--------------------------------------------------
-  private:
+  public:
     struct Reading {
       float ref;
       float reducing;
