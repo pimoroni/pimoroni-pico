@@ -102,7 +102,9 @@ mp_obj_t BreakoutMICS6814_make_new(const mp_obj_type_t *type, size_t n_args, siz
         self->breakout = new BreakoutMICS6814(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
     }
 
-    self->breakout->init();
+    if(!self->breakout->init()) {
+        mp_raise_msg(&mp_type_RuntimeError, "MICS6814 breakout not found when initialising");
+    }
 
     return MP_OBJ_FROM_PTR(self);
 }
