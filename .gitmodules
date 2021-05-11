@@ -1,3 +1,6 @@
 [submodule "micropython/modules/ulab"]
 	path = micropython/modules/ulab
 	url = https://github.com/v923z/micropython-ulab.git
+[submodule "drivers/bme68x-sensor-api/src"]
+	path = drivers/bme68x/src
+	url = https://github.com/BoschSensortec/BME68x-Sensor-API
