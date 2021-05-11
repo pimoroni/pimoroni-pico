@@ -62,8 +62,8 @@ mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size
 
         self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
         self->base.type = &breakout_encoder_BreakoutEncoder_type;
-        
-        self->breakout = new BreakoutEncoder(args[ARG_address].u_int);     
+
+        self->breakout = new BreakoutEncoder(args[ARG_address].u_int);
     }
     else {
         enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
@@ -93,11 +93,11 @@ mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
         self->base.type = &breakout_encoder_BreakoutEncoder_type;
-        
+
         i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
         self->breakout = new BreakoutEncoder(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
     }
@@ -117,7 +117,7 @@ mp_obj_t BreakoutEncoder_set_addr(size_t n_args, const mp_obj_t *pos_args, mp_ma
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_BreakoutEncoder_obj_t);
 
     self->breakout->set_addr(args[ARG_address].u_int);
@@ -139,7 +139,7 @@ mp_obj_t BreakoutEncoder_set_direction(size_t n_args, const mp_obj_t *pos_args, 
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_BreakoutEncoder_obj_t);
 
     self->breakout->set_direction(args[ARG_clockwise].u_bool);
@@ -179,7 +179,7 @@ mp_obj_t BreakoutEncoder_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_BreakoutEncoder_obj_t);
 
     int r = args[ARG_r].u_int;

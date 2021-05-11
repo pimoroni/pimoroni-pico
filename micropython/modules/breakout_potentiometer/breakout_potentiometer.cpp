@@ -62,8 +62,8 @@ mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args
 
         self = m_new_obj(breakout_potentiometer_BreakoutPotentiometer_obj_t);
         self->base.type = &breakout_potentiometer_BreakoutPotentiometer_type;
-        
-        self->breakout = new BreakoutPotentiometer(args[ARG_address].u_int);     
+
+        self->breakout = new BreakoutPotentiometer(args[ARG_address].u_int);
     }
     else {
         enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
@@ -93,11 +93,11 @@ mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_potentiometer_BreakoutPotentiometer_obj_t);
         self->base.type = &breakout_potentiometer_BreakoutPotentiometer_type;
-        
+
         i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
         self->breakout = new BreakoutPotentiometer(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
     }
@@ -117,7 +117,7 @@ mp_obj_t BreakoutPotentiometer_set_addr(size_t n_args, const mp_obj_t *pos_args,
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
     self->breakout->set_addr(args[ARG_address].u_int);
@@ -139,7 +139,7 @@ mp_obj_t BreakoutPotentiometer_set_adc_vref(size_t n_args, const mp_obj_t *pos_a
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
     float vref = mp_obj_get_float(args[ARG_vref].u_obj);
@@ -162,7 +162,7 @@ mp_obj_t BreakoutPotentiometer_set_direction(size_t n_args, const mp_obj_t *pos_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
     self->breakout->set_direction(args[ARG_clockwise].u_bool);
@@ -179,7 +179,7 @@ mp_obj_t BreakoutPotentiometer_set_brightness(size_t n_args, const mp_obj_t *pos
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
     float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
@@ -202,7 +202,7 @@ mp_obj_t BreakoutPotentiometer_set_led(size_t n_args, const mp_obj_t *pos_args, 
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
     int r = args[ARG_r].u_int;
