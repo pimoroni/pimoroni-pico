@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../../drivers/nuvoton/nuvoton.hpp"
+#include "../../drivers/ioexpander/ioexpander.hpp"
 
 namespace pimoroni {
 
-  typedef Nuvoton BreakoutIOExpander;
+  typedef IOExpander BreakoutIOExpander;
 }

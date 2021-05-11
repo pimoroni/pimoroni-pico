@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "nuvoton.hpp"
+#include "ioexpander.hpp"
 
 namespace pimoroni {
 
@@ -220,61 +220,61 @@ namespace pimoroni {
   static const uint8_t ENC_CFG[4] = {reg::ENC_1_CFG, reg::ENC_2_CFG, reg::ENC_3_CFG, reg::ENC_4_CFG};
   static const uint8_t ENC_COUNT[4] = {reg::ENC_1_COUNT, reg::ENC_2_COUNT, reg::ENC_3_COUNT, reg::ENC_4_COUNT};
 
-  const uint8_t Nuvoton::Pin::PxM1[4] = {reg::P0M1, reg::P1M1, (uint8_t)-1, reg::P3M1};
-  const uint8_t Nuvoton::Pin::PxM2[4] = {reg::P0M2, reg::P1M2, (uint8_t)-1, reg::P3M2};
-  const uint8_t Nuvoton::Pin::Px[4] = {reg::P0, reg::P1, (uint8_t)-1, reg::P3};
+  const uint8_t IOExpander::Pin::PxM1[4] = {reg::P0M1, reg::P1M1, (uint8_t)-1, reg::P3M1};
+  const uint8_t IOExpander::Pin::PxM2[4] = {reg::P0M2, reg::P1M2, (uint8_t)-1, reg::P3M2};
+  const uint8_t IOExpander::Pin::Px[4] = {reg::P0, reg::P1, (uint8_t)-1, reg::P3};
 
-  const uint8_t Nuvoton::Pin::PxS[4] = {reg::P0S, reg::P1S, (uint8_t)-1, reg::P3S};
-  const uint8_t Nuvoton::Pin::MASK_P[4] = {reg::INT_MASK_P0, reg::INT_MASK_P1, (uint8_t)-1, reg::INT_MASK_P3};
+  const uint8_t IOExpander::Pin::PxS[4] = {reg::P0S, reg::P1S, (uint8_t)-1, reg::P3S};
+  const uint8_t IOExpander::Pin::MASK_P[4] = {reg::INT_MASK_P0, reg::INT_MASK_P1, (uint8_t)-1, reg::INT_MASK_P3};
 
-  const uint8_t Nuvoton::Pin::PWML[6] = {reg::PWM0L, reg::PWM1L, reg::PWM2L, reg::PWM3L, reg::PWM4L, reg::PWM5L};
-  const uint8_t Nuvoton::Pin::PWMH[6] = {reg::PWM0H, reg::PWM1H, reg::PWM2H, reg::PWM3H, reg::PWM4H, reg::PWM5H};
+  const uint8_t IOExpander::Pin::PWML[6] = {reg::PWM0L, reg::PWM1L, reg::PWM2L, reg::PWM3L, reg::PWM4L, reg::PWM5L};
+  const uint8_t IOExpander::Pin::PWMH[6] = {reg::PWM0H, reg::PWM1H, reg::PWM2H, reg::PWM3H, reg::PWM4H, reg::PWM5H};
 
   static const char* MODE_NAMES[3] = {"IO", "PWM", "ADC"};
   static const char* GPIO_NAMES[4] = {"QB", "PP", "IN", "OD"};
   static const char* STATE_NAMES[2] = {"LOW", "HIGH"};
 
-  Nuvoton::Pin::Pin(uint8_t port, uint8_t pin) :
+  IOExpander::Pin::Pin(uint8_t port, uint8_t pin) :
     type(TYPE_IO), mode(0), port(port), pin(pin), adc_channel(0), pwm_channel(0),
     reg_m1(PxM1[port]), reg_m2(PxM2[port]), reg_p(Px[port]), reg_ps(PxS[port]), reg_int_mask_p(MASK_P[port]),
     reg_io_pwm(0), reg_pwml(0), reg_pwmh(0) {
   }
 
-  Nuvoton::Pin::Pin(uint8_t port, uint8_t pin, uint8_t pwm_channel, uint8_t reg_io_pwm) :
+  IOExpander::Pin::Pin(uint8_t port, uint8_t pin, uint8_t pwm_channel, uint8_t reg_io_pwm) :
     type(TYPE_PWM), mode(0), port(port), pin(pin), adc_channel(0), pwm_channel(pwm_channel),
     reg_m1(PxM1[port]), reg_m2(PxM2[port]), reg_p(Px[port]), reg_ps(PxS[port]), reg_int_mask_p(MASK_P[port]),
     reg_io_pwm(reg_io_pwm), reg_pwml(PWML[pwm_channel]), reg_pwmh(PWMH[pwm_channel]) {
   }
 
-  Nuvoton::Pin::Pin(uint8_t port, uint8_t pin, uint8_t adc_channel) :
+  IOExpander::Pin::Pin(uint8_t port, uint8_t pin, uint8_t adc_channel) :
     type(TYPE_ADC), mode(0), port(port), pin(pin), adc_channel(adc_channel), pwm_channel(0),
     reg_m1(PxM1[port]), reg_m2(PxM2[port]), reg_p(Px[port]), reg_ps(PxS[port]), reg_int_mask_p(MASK_P[port]),
     reg_io_pwm(0), reg_pwml(0), reg_pwmh(0) {
   }
 
-  Nuvoton::Pin::Pin(uint8_t port, uint8_t pin, uint8_t adc_channel, uint8_t pwm_channel, uint8_t reg_io_pwm) :
+  IOExpander::Pin::Pin(uint8_t port, uint8_t pin, uint8_t adc_channel, uint8_t pwm_channel, uint8_t reg_io_pwm) :
     type(TYPE_ADC_OR_PWM), mode(0), port(port), pin(pin), adc_channel(adc_channel), pwm_channel(pwm_channel),
     reg_m1(PxM1[port]), reg_m2(PxM2[port]), reg_p(Px[port]), reg_ps(PxS[port]), reg_int_mask_p(MASK_P[port]),
     reg_io_pwm(reg_io_pwm), reg_pwml(PWML[pwm_channel]), reg_pwmh(PWMH[pwm_channel]) {
   }
 
-  Nuvoton::Pin Nuvoton::Pin::io(uint8_t port, uint8_t pin) {
+  IOExpander::Pin IOExpander::Pin::io(uint8_t port, uint8_t pin) {
     return Pin(port, pin);
   }
 
-  Nuvoton::Pin Nuvoton::Pin::pwm(uint8_t port, uint8_t pin, uint8_t channel, uint8_t reg_iopwm) {
+  IOExpander::Pin IOExpander::Pin::pwm(uint8_t port, uint8_t pin, uint8_t channel, uint8_t reg_iopwm) {
     return Pin(port, pin, channel, reg_iopwm);
   }
 
-  Nuvoton::Pin Nuvoton::Pin::adc(uint8_t port, uint8_t pin, uint8_t channel) {
+  IOExpander::Pin IOExpander::Pin::adc(uint8_t port, uint8_t pin, uint8_t channel) {
     return Pin(port, pin, channel);
   }
 
-  Nuvoton::Pin Nuvoton::Pin::adc_or_pwm(uint8_t port, uint8_t pin, uint8_t adc_channel, uint8_t pwm_channel, uint8_t reg_iopwm) {
+  IOExpander::Pin IOExpander::Pin::adc_or_pwm(uint8_t port, uint8_t pin, uint8_t adc_channel, uint8_t pwm_channel, uint8_t reg_iopwm) {
     return Pin(port, pin, adc_channel, pwm_channel, reg_iopwm);
   }
 
-  bool Nuvoton::Pin::mode_supported(uint8_t mode) {
+  bool IOExpander::Pin::mode_supported(uint8_t mode) {
     bool supported = false;
     if((type & TYPE_PWM) && (mode == PIN_MODE_PWM)) {
       supported = true;
@@ -285,19 +285,19 @@ namespace pimoroni {
     return supported;
   }
 
-  Nuvoton::Pin::IOType Nuvoton::Pin::get_type() {
+  IOExpander::Pin::IOType IOExpander::Pin::get_type() {
     return type;
   }
 
-  uint8_t Nuvoton::Pin::get_mode() {
+  uint8_t IOExpander::Pin::get_mode() {
     return mode;
   }
 
-  void Nuvoton::Pin::set_mode(uint8_t mode) {
+  void IOExpander::Pin::set_mode(uint8_t mode) {
     this->mode = mode;
   }
 
-  Nuvoton::Nuvoton(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt, uint8_t address, uint32_t timeout, bool debug) :
+  IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt, uint8_t address, uint32_t timeout, bool debug) :
     i2c(i2c), sda(sda), scl(scl), interrupt(interrupt),
     address(address), timeout(timeout), debug(debug), vref(3.3f),
     encoder_offset{0,0,0,0},
@@ -318,11 +318,11 @@ namespace pimoroni {
           Pin::adc(1, 7, 0)} {
   }
 
-  Nuvoton::Nuvoton(uint8_t address, uint32_t timeout, bool debug) :
-    Nuvoton(i2c0, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN, address, timeout, debug) {
+  IOExpander::IOExpander(uint8_t address, uint32_t timeout, bool debug) :
+    IOExpander(i2c0, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN, address, timeout, debug) {
   }
   
-  bool Nuvoton::init(bool skipChipIdCheck) {
+  bool IOExpander::init(bool skipChipIdCheck) {
     bool succeeded = true;
 
     i2c_init(i2c, 400000);
@@ -348,11 +348,27 @@ namespace pimoroni {
     return succeeded;
   }
 
-  uint16_t Nuvoton::get_chip_id() {
+  i2c_inst_t* IOExpander::get_i2c() const {
+    return i2c;
+  }
+
+  int IOExpander::get_sda() const {
+    return sda;
+  }
+
+  int IOExpander::get_scl() const {
+    return scl;
+  }
+
+  int IOExpander::get_int() const {
+    return interrupt;
+  }
+
+  uint16_t IOExpander::get_chip_id() {
       return ((uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_H) << 8) | (uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_L);
   }
   
-  void Nuvoton::set_addr(uint8_t address) {
+  void IOExpander::set_addr(uint8_t address) {
     set_bit(reg::CTRL, 4);
     i2c_reg_write_uint8(reg::ADDR, address);
     this->address = address;
@@ -361,35 +377,35 @@ namespace pimoroni {
     clr_bit(reg::CTRL, 4);
   }
 
-  float Nuvoton::get_adc_vref() {
+  float IOExpander::get_adc_vref() {
     return vref;
   }
 
-  void Nuvoton::set_adc_vref(float vref) {
+  void IOExpander::set_adc_vref(float vref) {
     this->vref = vref;
   }
     
-  void Nuvoton::enable_interrupt_out(bool pin_swap) {
+  void IOExpander::enable_interrupt_out(bool pin_swap) {
     set_bit(reg::INT, int_bit::OUT_EN);
     change_bit(reg::INT, int_bit::PIN_SWAP, pin_swap);
   }
 
-  void Nuvoton::disable_interrupt_out() {
+  void IOExpander::disable_interrupt_out() {
     clr_bit(reg::INT, int_bit::OUT_EN);
   }
 
-  uint8_t Nuvoton::get_interrupt_flag() {
+  uint8_t IOExpander::get_interrupt_flag() {
     if(interrupt != 0)
       return !gpio_get(interrupt);
     else
       return get_bit(reg::INT, int_bit::TRIGD);
   }
 
-  void Nuvoton::clear_interrupt_flag() {
+  void IOExpander::clear_interrupt_flag() {
     clr_bit(reg::INT, int_bit::TRIGD);
   }
 
-  bool Nuvoton::set_pin_interrupt(uint8_t pin, bool enabled) {
+  bool IOExpander::set_pin_interrupt(uint8_t pin, bool enabled) {
     bool succeeded = false;
     if(pin >= 1 && pin <= NUM_PINS) {
       Pin& io_pin = pins[pin - 1];
@@ -401,14 +417,14 @@ namespace pimoroni {
     return succeeded;
   }
 
-  void Nuvoton::set_interrupt_callback(void (*callback)()) {
+  void IOExpander::set_interrupt_callback(void (*callback)()) {
     if(interrupt != 0 && callback != nullptr) {
       //attachInterrupt(digitalPinToInterrupt(_interruptPin), callback, FALLING);
       clear_interrupt_flag();
     }
   }
 
-  void Nuvoton::pwm_load(bool wait_for_load) {
+  void IOExpander::pwm_load(bool wait_for_load) {
   //Load new period and duty registers into buffer
     uint32_t start_time = millis();
     set_bit(reg::PWMCON0, 6);  //Set the "LOAD" bit of PWMCON0
@@ -425,11 +441,11 @@ namespace pimoroni {
     }
   }
 
-  bool Nuvoton::pwm_loading() {
+  bool IOExpander::pwm_loading() {
     return get_bit(reg::PWMCON0, 6);
   }
 
-  void Nuvoton::pwm_clear(bool wait_for_clear) {
+  void IOExpander::pwm_clear(bool wait_for_clear) {
     uint32_t start_time = millis();
     set_bit(reg::PWMCON0, 4);  //Set the "CLRPWM" bit of PWMCON0
     if(wait_for_clear) {
@@ -444,11 +460,11 @@ namespace pimoroni {
     }
   }
 
-  bool Nuvoton::pwm_clearing() {
+  bool IOExpander::pwm_clearing() {
     return get_bit(reg::PWMCON0, 4);
   }
 
-  bool Nuvoton::set_pwm_control(uint8_t divider) {
+  bool IOExpander::set_pwm_control(uint8_t divider) {
     bool divider_good = true;
     uint8_t pwmdiv2 = 0;
     switch(divider) {
@@ -482,7 +498,7 @@ namespace pimoroni {
     return divider_good;
   }
 
-  void Nuvoton::set_pwm_period(uint16_t value, bool load) {
+  void IOExpander::set_pwm_period(uint16_t value, bool load) {
     value &= 0xffff;
     i2c_reg_write_uint8(reg::PWMPL, (uint8_t)(value & 0xff));
     i2c_reg_write_uint8(reg::PWMPH, (uint8_t)(value >> 8));
@@ -491,11 +507,11 @@ namespace pimoroni {
       pwm_load();
   }
 
-  uint8_t Nuvoton::get_mode(uint8_t pin) {
+  uint8_t IOExpander::get_mode(uint8_t pin) {
     return pins[pin - 1].get_mode();
   }
 
-  void Nuvoton::set_mode(uint8_t pin, uint8_t mode, bool schmitt_trigger, bool invert) {
+  void IOExpander::set_mode(uint8_t pin, uint8_t mode, bool schmitt_trigger, bool invert) {
     if(pin < 1 || pin > NUM_PINS)
     {
       printf("ValueError: Pin should be in range 1-14.\n");
@@ -559,7 +575,7 @@ namespace pimoroni {
     i2c_reg_write_uint8(io_pin.reg_p, (initial_state << 3) | io_pin.pin);
   }
 
-  int16_t Nuvoton::input(uint8_t pin, uint32_t adc_timeout) {
+  int16_t IOExpander::input(uint8_t pin, uint32_t adc_timeout) {
     if(pin < 1 || pin > NUM_PINS)
     {
       if(debug)
@@ -608,7 +624,7 @@ namespace pimoroni {
     }
   }
 
-  float Nuvoton::input_as_voltage(uint8_t pin, uint32_t adc_timeout) {
+  float IOExpander::input_as_voltage(uint8_t pin, uint32_t adc_timeout) {
     if(pin < 1 || pin > NUM_PINS)
     {
       if(debug)
@@ -658,7 +674,7 @@ namespace pimoroni {
     }
   }
   
-  void Nuvoton::output(uint8_t pin, uint16_t value, bool load) {
+  void IOExpander::output(uint8_t pin, uint16_t value, bool load) {
     if(pin < 1 || pin > NUM_PINS) {
       printf("Pin should be in range 1-14.");
       return;
@@ -677,14 +693,14 @@ namespace pimoroni {
         pwm_load();
     }
     else {
-      if(value == 0) {
+      if(value == LOW) {
         if(debug) {
           printf("Outputting LOW to pin: %d\n", pin);
         }
         
         clr_bit(io_pin.reg_p, io_pin.pin);
       }
-      else if(value == 1) {
+      else if(value == HIGH) {
         if(debug) {
           printf("Outputting HIGH to pin: %d\n", pin);
         }
@@ -694,7 +710,7 @@ namespace pimoroni {
     }
   }
 
-  void Nuvoton::setup_rotary_encoder(uint8_t channel, uint8_t pinA, uint8_t pinB, uint8_t pinC, bool count_microsteps) {
+  void IOExpander::setup_rotary_encoder(uint8_t channel, uint8_t pinA, uint8_t pinB, uint8_t pinC, bool count_microsteps) {
     channel -= 1;
     set_mode(pinA, PIN_MODE_PU, true);
     set_mode(pinB, PIN_MODE_PU, true);
@@ -713,7 +729,7 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg, 0x00);
   }
 
-  int16_t Nuvoton::read_rotary_encoder(uint8_t channel) {
+  int16_t IOExpander::read_rotary_encoder(uint8_t channel) {
     channel -= 1;
     int16_t last = encoder_last[channel];
     uint8_t reg = ENC_COUNT[channel];
@@ -732,24 +748,24 @@ namespace pimoroni {
     return encoder_offset[channel] + value;
   }
 
-  uint8_t Nuvoton::i2c_reg_read_uint8(uint8_t reg) {
+  uint8_t IOExpander::i2c_reg_read_uint8(uint8_t reg) {
     uint8_t value;
     i2c_write_blocking(i2c, address, &reg, 1, true);
     i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
     return value;
   }
   
-  void Nuvoton::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
+  void IOExpander::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
     uint8_t buffer[2] = {reg, value};
     i2c_write_blocking(i2c, address, buffer, 2, false);
   }
 
-  uint8_t Nuvoton::get_bit(uint8_t reg, uint8_t bit) {
+  uint8_t IOExpander::get_bit(uint8_t reg, uint8_t bit) {
     //Returns the specified bit (nth position from right) from a register
     return i2c_reg_read_uint8(reg) & (1 << bit);
   }
 
-  void Nuvoton::set_bits(uint8_t reg, uint8_t bits) {
+  void IOExpander::set_bits(uint8_t reg, uint8_t bits) {
     //Set the specified bits (using a mask) in a register.
 
     //Deal with special case registers first
@@ -773,12 +789,12 @@ namespace pimoroni {
     }
   }
 
-  void Nuvoton::set_bit(uint8_t reg, uint8_t bit) {
+  void IOExpander::set_bit(uint8_t reg, uint8_t bit) {
     //Set the specified bit (nth position from right) in a register.
     set_bits(reg, (1 << bit));
   }
 
-  void Nuvoton::clr_bits(uint8_t reg, uint8_t bits) {
+  void IOExpander::clr_bits(uint8_t reg, uint8_t bits) {
     bool reg_in_bit_addressed_regs = false;
     for(uint8_t i = 0; i < NUM_BIT_ADDRESSED_REGISTERS; i++) {
       if(BIT_ADDRESSED_REGS[i] == reg) {
@@ -799,12 +815,12 @@ namespace pimoroni {
     }
   }
 
-  void Nuvoton::clr_bit(uint8_t reg, uint8_t bit) {
+  void IOExpander::clr_bit(uint8_t reg, uint8_t bit) {
     //Clear the specified bit (nth position from right) in a register.
     clr_bits(reg, (1 << bit));
   }
 
-  void Nuvoton::change_bit(uint8_t reg, uint8_t bit, bool state) {
+  void IOExpander::change_bit(uint8_t reg, uint8_t bit, bool state) {
     //Toggle one register bit on/off.
     if(state)
       set_bit(reg, bit);
@@ -812,7 +828,7 @@ namespace pimoroni {
       clr_bit(reg, bit);
   }
 
-  void Nuvoton::wait_for_flash(void) {
+  void IOExpander::wait_for_flash(void) {
   //Wait for the IOE to finish writing non-volatile memory.
     unsigned long start_time = millis();
     while(get_interrupt_flag()) {
@@ -833,7 +849,7 @@ namespace pimoroni {
     }
   }
 
-  uint32_t Nuvoton::millis() {
+  uint32_t IOExpander::millis() {
     return to_ms_since_boot(get_absolute_time());
   }
 }

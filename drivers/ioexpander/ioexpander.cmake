@@ -1,4 +1,4 @@
-set(DRIVER_NAME nuvoton)
+set(DRIVER_NAME ioexpander)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE
