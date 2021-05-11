@@ -187,10 +187,9 @@ namespace pimoroni {
 
     void enable_interrupt_out(bool pin_swap = false);
     void disable_interrupt_out();
-    uint8_t get_interrupt_flag();
+    bool get_interrupt_flag();
     void clear_interrupt_flag();
     bool set_pin_interrupt(uint8_t pin, bool enabled);
-    void set_interrupt_callback(void (*callback)());
 
     void pwm_load(bool wait_for_load = true);
     bool pwm_loading();
@@ -207,7 +206,7 @@ namespace pimoroni {
 
     void output(uint8_t pin, uint16_t value, bool load = true);
 
-    void setup_rotary_encoder(uint8_t channel, uint8_t pinA, uint8_t pinB, uint8_t pinC = 0, bool count_microsteps = false);
+    void setup_rotary_encoder(uint8_t channel, uint8_t pin_a, uint8_t pin_b, uint8_t pin_c = 0, bool count_microsteps = false);
     int16_t read_rotary_encoder(uint8_t channel);
 
   private:

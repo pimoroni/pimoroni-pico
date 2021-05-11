@@ -334,8 +334,11 @@ namespace pimoroni {
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
     gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
 
-    if(interrupt != -1) {
-      gpio_set_function(interrupt, GPIO_FUNC_SIO); gpio_set_dir(interrupt, GPIO_IN);  gpio_pull_up(interrupt);
+    if(interrupt != PIN_UNUSED) {
+      gpio_set_function(interrupt, GPIO_FUNC_SIO);
+      gpio_set_dir(interrupt, GPIO_IN);
+      gpio_pull_up(interrupt);
+
       enable_interrupt_out(true);
     }
 
@@ -398,11 +401,11 @@ namespace pimoroni {
     clr_bit(reg::INT, int_bit::OUT_EN);
   }
 
-  uint8_t IOExpander::get_interrupt_flag() {
-    if(interrupt != 0)
+  bool IOExpander::get_interrupt_flag() {
+    if(interrupt != PIN_UNUSED)
       return !gpio_get(interrupt);
     else
-      return get_bit(reg::INT, int_bit::TRIGD);
+      return (get_bit(reg::INT, int_bit::TRIGD) != 0);
   }
 
   void IOExpander::clear_interrupt_flag() {
@@ -421,21 +424,14 @@ namespace pimoroni {
     return succeeded;
   }
 
-  void IOExpander::set_interrupt_callback(void (*callback)()) {
-    if(interrupt != 0 && callback != nullptr) {
-      //attachInterrupt(digitalPinToInterrupt(_interruptPin), callback, FALLING);
-      clear_interrupt_flag();
-    }
-  }
-
   void IOExpander::pwm_load(bool wait_for_load) {
-  //Load new period and duty registers into buffer
+    // Load new period and duty registers into buffer
     uint32_t start_time = millis();
-    set_bit(reg::PWMCON0, 6);  //Set the "LOAD" bit of PWMCON0
+    set_bit(reg::PWMCON0, 6);  // Set the "LOAD" bit of PWMCON0
 
     if(wait_for_load) {
       while(pwm_loading()) {
-        sleep_ms(1); //Wait for "LOAD" to complete
+        sleep_ms(1); // Wait for "LOAD" to complete
         if(millis() - start_time >= timeout) {
           if(debug)
             printf("Timed out waiting for PWM load!");
@@ -451,10 +447,10 @@ namespace pimoroni {
 
   void IOExpander::pwm_clear(bool wait_for_clear) {
     uint32_t start_time = millis();
-    set_bit(reg::PWMCON0, 4);  //Set the "CLRPWM" bit of PWMCON0
+    set_bit(reg::PWMCON0, 4);  // Set the "CLRPWM" bit of PWMCON0
     if(wait_for_clear) {
       while(pwm_clearing()) {
-        sleep_ms(1); //Wait for "CLRPWM" to complete
+        sleep_ms(1); // Wait for "CLRPWM" to complete
         if(millis() - start_time >= timeout) {
           if(debug)
             printf("Timed out waiting for PWM clear!");
@@ -491,10 +487,10 @@ namespace pimoroni {
 
     if(divider_good) {
       //TODO: This currently sets GP, PWMTYP and FBINEN to 0
-      //It might be desirable to make these available to the user
-      //GP - Group mode enable (changes first three pairs of pAM to PWM01H and PWM01L)
-      //PWMTYP - PWM type select: 0 edge-aligned, 1 center-aligned
-      //FBINEN - Fault-break input enable
+      // It might be desirable to make these available to the user
+      // GP - Group mode enable (changes first three pairs of pAM to PWM01H and PWM01L)
+      // PWMTYP - PWM type select: 0 edge-aligned, 1 center-aligned
+      // FBINEN - Fault-break input enable
 
       i2c_reg_write_uint8(reg::PWMCON1, pwmdiv2);
     }
@@ -512,12 +508,16 @@ namespace pimoroni {
   }
 
   uint8_t IOExpander::get_mode(uint8_t pin) {
+    if(pin < 1 || pin > NUM_PINS) {
+      printf("ValueError: Pin should be in range 1-14.\n");
+      return UINT8_MAX;
+    }
+
     return pins[pin - 1].get_mode();
   }
 
   void IOExpander::set_mode(uint8_t pin, uint8_t mode, bool schmitt_trigger, bool invert) {
-    if(pin < 1 || pin > NUM_PINS)
-    {
+    if(pin < 1 || pin > NUM_PINS) {
       printf("ValueError: Pin should be in range 1-14.\n");
       return;
     }
@@ -527,7 +527,7 @@ namespace pimoroni {
     uint8_t gpio_mode = mode & 0b11;
     uint8_t io_type = (mode >> 2) & 0b11;
     uint8_t initial_state = mode >> 4;
-    
+
     if(io_pin.get_mode() == mode) {
       if(debug) {
         printf("Mode already is %s\n", MODE_NAMES[io_type]);
@@ -550,7 +550,7 @@ namespace pimoroni {
     if(mode == PIN_MODE_PWM) {
       set_bit(io_pin.reg_io_pwm, io_pin.pwm_channel);
       change_bit(reg::PNP, io_pin.pwm_channel, invert);
-      set_bit(reg::PWMCON0, 7);  //Set PWMRUN bit
+      set_bit(reg::PWMCON0, 7);  // Set PWMRUN bit
     }
     else {
       if(io_pin.get_type() & Pin::TYPE_PWM)
@@ -560,28 +560,27 @@ namespace pimoroni {
     uint8_t pm1 = i2c_reg_read_uint8(io_pin.reg_m1);
     uint8_t pm2 = i2c_reg_read_uint8(io_pin.reg_m2);
 
-    //Clear the pm1 and pm2 bits
+    // Clear the pm1 and pm2 bits
     pm1 &= 255 - (1 << io_pin.pin);
     pm2 &= 255 - (1 << io_pin.pin);
 
-    //Set the new pm1 and pm2 bits according to our gpio_mode
+    // Set the new pm1 and pm2 bits according to our gpio_mode
     pm1 |= (gpio_mode >> 1) << io_pin.pin;
     pm2 |= (gpio_mode & 0b1) << io_pin.pin;
 
     i2c_reg_write_uint8(io_pin.reg_m1, pm1);
     i2c_reg_write_uint8(io_pin.reg_m2, pm2);
 
-    //Set up Schmitt trigger mode on inputs
+    // Set up Schmitt trigger mode on inputs
     if(mode == PIN_MODE_PU || mode == PIN_MODE_IN)
       change_bit(io_pin.reg_ps, io_pin.pin, schmitt_trigger);
 
-    //5th bit of mode encodes default output pin state
+    // 5th bit of mode encodes default output pin state
     i2c_reg_write_uint8(io_pin.reg_p, (initial_state << 3) | io_pin.pin);
   }
 
   int16_t IOExpander::input(uint8_t pin, uint32_t adc_timeout) {
-    if(pin < 1 || pin > NUM_PINS)
-    {
+    if(pin < 1 || pin > NUM_PINS) {
       if(debug)
         printf("ValueError: Pin should be in range 1-14.\n");
       return -1;
@@ -600,10 +599,10 @@ namespace pimoroni {
       set_bit(reg::AINDIDS, io_pin.adc_channel);
       set_bit(reg::ADCCON1, 0);
 
-      clr_bit(reg::ADCCON0, 7);  //ADCF - Clear the conversion complete flag
-      set_bit(reg::ADCCON0, 6);  //ADCS - Set the ADC conversion start flag
+      clr_bit(reg::ADCCON0, 7);  // ADCF - Clear the conversion complete flag
+      set_bit(reg::ADCCON0, 6);  // ADCS - Set the ADC conversion start flag
 
-      //Wait for the ADCF conversion complete flag to be set
+      // Wait for the ADCF conversion complete flag to be set
       unsigned long start_time = millis();
       while(!get_bit(reg::ADCCON0, 7)) {
         sleep_ms(10);
@@ -629,8 +628,7 @@ namespace pimoroni {
   }
 
   float IOExpander::input_as_voltage(uint8_t pin, uint32_t adc_timeout) {
-    if(pin < 1 || pin > NUM_PINS)
-    {
+    if(pin < 1 || pin > NUM_PINS) {
       if(debug)
         printf("ValueError: Pin should be in range 1-14.\n");
       return -1;
@@ -650,10 +648,10 @@ namespace pimoroni {
       set_bit(reg::ADCCON1, 0);
 
 
-      clr_bit(reg::ADCCON0, 7);  //ADCF - Clear the conversion complete flag
-      set_bit(reg::ADCCON0, 6);  //ADCS - Set the ADC conversion start flag
+      clr_bit(reg::ADCCON0, 7);  // ADCF - Clear the conversion complete flag
+      set_bit(reg::ADCCON0, 6);  // ADCS - Set the ADC conversion start flag
 
-      //Wait for the ADCF conversion complete flag to be set
+      // Wait for the ADCF conversion complete flag to be set
       unsigned long start_time = millis();
       while(!get_bit(reg::ADCCON0, 7)) {
         sleep_ms(1);
@@ -714,21 +712,21 @@ namespace pimoroni {
     }
   }
 
-  void IOExpander::setup_rotary_encoder(uint8_t channel, uint8_t pinA, uint8_t pinB, uint8_t pinC, bool count_microsteps) {
+  void IOExpander::setup_rotary_encoder(uint8_t channel, uint8_t pin_a, uint8_t pin_b, uint8_t pin_c, bool count_microsteps) {
     channel -= 1;
-    set_mode(pinA, PIN_MODE_PU, true);
-    set_mode(pinB, PIN_MODE_PU, true);
+    set_mode(pin_a, PIN_MODE_PU, true);
+    set_mode(pin_b, PIN_MODE_PU, true);
 
-    if(pinC != 0) {
-      set_mode(pinC, PIN_MODE_OD);
-      output(pinC, 0);
+    if(pin_c != 0) {
+      set_mode(pin_c, PIN_MODE_OD);
+      output(pin_c, 0);
     }
 
-    i2c_reg_write_uint8(ENC_CFG[channel], pinA | (pinB << 4));
+    i2c_reg_write_uint8(ENC_CFG[channel], pin_a | (pin_b << 4));
     change_bit(reg::ENC_EN, (channel * 2) + 1, count_microsteps);
     set_bit(reg::ENC_EN, channel * 2);
     
-    //Reset internal encoder count to zero
+    // Reset internal encoder count to zero
     uint8_t reg = ENC_COUNT[channel];
     i2c_reg_write_uint8(reg, 0x00);
   }
@@ -765,14 +763,14 @@ namespace pimoroni {
   }
 
   uint8_t IOExpander::get_bit(uint8_t reg, uint8_t bit) {
-    //Returns the specified bit (nth position from right) from a register
+    // Returns the specified bit (nth position from right) from a register
     return i2c_reg_read_uint8(reg) & (1 << bit);
   }
 
   void IOExpander::set_bits(uint8_t reg, uint8_t bits) {
-    //Set the specified bits (using a mask) in a register.
+    // Set the specified bits (using a mask) in a register.
 
-    //Deal with special case registers first
+    // Deal with special case registers first
     bool reg_in_bit_addressed_regs = false;
     for(uint8_t i = 0; i < NUM_BIT_ADDRESSED_REGISTERS; i++) {
       if(BIT_ADDRESSED_REGS[i] == reg) {
@@ -785,7 +783,7 @@ namespace pimoroni {
       }
     }
 
-    //Now deal with any other registers
+    // Now deal with any other registers
     if(!reg_in_bit_addressed_regs) {
       uint8_t value = i2c_reg_read_uint8(reg);
       sleep_us(10);
@@ -794,7 +792,7 @@ namespace pimoroni {
   }
 
   void IOExpander::set_bit(uint8_t reg, uint8_t bit) {
-    //Set the specified bit (nth position from right) in a register.
+    // Set the specified bit (nth position from right) in a register.
     set_bits(reg, (1 << bit));
   }
 
@@ -811,7 +809,7 @@ namespace pimoroni {
       }
     }
 
-    //Now deal with any other registers
+    // Now deal with any other registers
     if(!reg_in_bit_addressed_regs) {
       uint8_t value = i2c_reg_read_uint8(reg);
       sleep_us(10);
@@ -820,12 +818,12 @@ namespace pimoroni {
   }
 
   void IOExpander::clr_bit(uint8_t reg, uint8_t bit) {
-    //Clear the specified bit (nth position from right) in a register.
+    // Clear the specified bit (nth position from right) in a register.
     clr_bits(reg, (1 << bit));
   }
 
   void IOExpander::change_bit(uint8_t reg, uint8_t bit, bool state) {
-    //Toggle one register bit on/off.
+    // Toggle one register bit on/off.
     if(state)
       set_bit(reg, bit);
     else
@@ -833,7 +831,7 @@ namespace pimoroni {
   }
 
   void IOExpander::wait_for_flash(void) {
-  //Wait for the IOE to finish writing non-volatile memory.
+    // Wait for the IOE to finish writing non-volatile memory.
     unsigned long start_time = millis();
     while(get_interrupt_flag()) {
       if(millis() - start_time > timeout) {

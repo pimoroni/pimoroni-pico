@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
 
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_dotmatrix/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_encoder/micropython.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/breakout_ioexpander/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_ltr559/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_colourlcd160x80/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_as7262/micropython.cmake)
