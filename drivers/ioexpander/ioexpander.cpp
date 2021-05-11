@@ -297,9 +297,17 @@ namespace pimoroni {
     this->mode = mode;
   }
 
-  IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt, uint8_t address, uint32_t timeout, bool debug) :
-    i2c(i2c), sda(sda), scl(scl), interrupt(interrupt),
-    address(address), timeout(timeout), debug(debug), vref(3.3f),
+  IOExpander::IOExpander() :
+    IOExpander(i2c0, DEFAULT_I2C_ADDRESS, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN) {
+  }
+
+  IOExpander::IOExpander(uint8_t address, uint32_t timeout, bool debug) :
+    IOExpander(i2c0, address, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN, timeout, debug) {
+  }
+
+  IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt, uint32_t timeout, bool debug) :
+    i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt),
+    timeout(timeout), debug(debug), vref(3.3f),
     encoder_offset{0,0,0,0},
     encoder_last{0,0,0,0},
     pins{ Pin::pwm(1, 5, 5, reg::PIOCON1),
@@ -318,10 +326,6 @@ namespace pimoroni {
           Pin::adc(1, 7, 0)} {
   }
 
-  IOExpander::IOExpander(uint8_t address, uint32_t timeout, bool debug) :
-    IOExpander(i2c0, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN, address, timeout, debug) {
-  }
-  
   bool IOExpander::init(bool skipChipIdCheck) {
     bool succeeded = true;
 

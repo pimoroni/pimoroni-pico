@@ -29,6 +29,7 @@ namespace pimoroni {
     static const uint8_t DEFAULT_SDA_PIN = 20;
     static const uint8_t DEFAULT_SCL_PIN = 21;
     static const uint8_t DEFAULT_INT_PIN = 22;
+    static const uint8_t PIN_UNUSED      = UINT8_MAX;
 
     static const uint16_t CHIP_ID = 0xE26A;
     static const uint8_t CHIP_VERSION = 2;
@@ -151,7 +152,7 @@ namespace pimoroni {
     uint32_t timeout;
     bool debug;
     float vref;
-    int16_t encoder_offset[4];;
+    int16_t encoder_offset[4];
     int16_t encoder_last[4];
     Pin pins[NUM_PINS];
 
@@ -160,8 +161,9 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    IOExpander(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt, uint8_t address = DEFAULT_I2C_ADDRESS, uint32_t timeout = 1, bool debug = false);
-    IOExpander(uint8_t address = DEFAULT_I2C_ADDRESS, uint32_t timeout = 1, bool debug = false);
+    IOExpander();
+    IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false);
+    IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
 
 
     //--------------------------------------------------
