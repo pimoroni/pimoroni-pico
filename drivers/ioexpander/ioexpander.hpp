@@ -180,7 +180,7 @@ namespace pimoroni {
 
     uint16_t get_chip_id();
 
-    void set_addr(uint8_t address);
+    void set_address(uint8_t address);
 
     float get_adc_vref();
     void set_adc_vref(float vref);

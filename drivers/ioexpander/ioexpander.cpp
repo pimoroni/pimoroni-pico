@@ -372,7 +372,7 @@ namespace pimoroni {
       return ((uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_H) << 8) | (uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_L);
   }
   
-  void IOExpander::set_addr(uint8_t address) {
+  void IOExpander::set_address(uint8_t address) {
     set_bit(reg::CTRL, 4);
     i2c_reg_write_uint8(reg::ADDR, address);
     this->address = address;

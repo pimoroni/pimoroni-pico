@@ -110,7 +110,7 @@ mp_obj_t BreakoutMICS6814_make_new(const mp_obj_type_t *type, size_t n_args, siz
 }
 
 /***** Methods *****/
-mp_obj_t BreakoutMICS6814_set_addr(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t BreakoutMICS6814_set_address(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_address };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -122,7 +122,7 @@ mp_obj_t BreakoutMICS6814_set_addr(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     breakout_mics6814_BreakoutMICS6814_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_mics6814_BreakoutMICS6814_obj_t);
 
-    self->breakout->set_addr(args[ARG_address].u_int);
+    self->breakout->set_address(args[ARG_address].u_int);
 
     return mp_const_none;
 }

@@ -74,7 +74,7 @@ namespace pimoroni {
     int get_int() const;
 
     // Calls through to IOExpander class
-    void set_addr(uint8_t i2c_addr);
+    void set_address(uint8_t address);
 
     float get_adc_vref();
     void set_adc_vref(float vref);

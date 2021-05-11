@@ -44,8 +44,8 @@ namespace pimoroni {
     return ioe.get_int();
   }
 
-  void BreakoutEncoder::set_addr(uint8_t i2c_addr) {
-    ioe.set_addr(i2c_addr);
+  void BreakoutEncoder::set_address(uint8_t address) {
+    ioe.set_address(address);
   }
 
   bool BreakoutEncoder::get_direction(void) {

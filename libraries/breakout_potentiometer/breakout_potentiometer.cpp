@@ -54,8 +54,8 @@ namespace pimoroni {
     return ioe.get_int();
   }
 
-  void BreakoutPotentiometer::set_addr(uint8_t i2c_addr) {
-    ioe.set_addr(i2c_addr);
+  void BreakoutPotentiometer::set_address(uint8_t address) {
+    ioe.set_address(address);
   }
 
   float BreakoutPotentiometer::get_adc_vref(void) {

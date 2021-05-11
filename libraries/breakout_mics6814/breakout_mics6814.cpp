@@ -47,8 +47,8 @@ namespace pimoroni {
     return ioe.get_int();
   }
 
-  void BreakoutMICS6814::set_addr(uint8_t i2c_addr) {
-    ioe.set_addr(i2c_addr);
+  void BreakoutMICS6814::set_address(uint8_t address) {
+    ioe.set_address(address);
   }
 
   float BreakoutMICS6814::get_adc_vref(void) {

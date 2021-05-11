@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Methods *****/
-MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_addr_obj, 2, BreakoutEncoder_set_addr);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_address_obj, 2, BreakoutEncoder_set_address);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoder_get_direction_obj, BreakoutEncoder_get_direction);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_direction_obj, 2, BreakoutEncoder_set_direction);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_brightness_obj, 2, BreakoutEncoder_set_brightness);
@@ -15,7 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoder_read_obj, BreakoutEncoder_read);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutEncoder_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_set_addr), MP_ROM_PTR(&BreakoutEncoder_set_addr_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_address), MP_ROM_PTR(&BreakoutEncoder_set_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_direction), MP_ROM_PTR(&BreakoutEncoder_get_direction_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_direction), MP_ROM_PTR(&BreakoutEncoder_set_direction_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&BreakoutEncoder_set_brightness_obj) },
