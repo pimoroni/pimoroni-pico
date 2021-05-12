@@ -15,4 +15,4 @@ extern mp_obj_t BreakoutPotentiometer_set_direction(size_t n_args, const mp_obj_
 extern mp_obj_t BreakoutPotentiometer_set_brightness(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutPotentiometer_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutPotentiometer_read(mp_obj_t self_in);
-extern mp_obj_t BreakoutPotentiometer_read_as_percent(mp_obj_t self_in);
+extern mp_obj_t BreakoutPotentiometer_read_raw(mp_obj_t self_in);

@@ -13,7 +13,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutPotentiometer_set_direction_obj, 2, BreakoutP
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutPotentiometer_set_brightness_obj, 2, BreakoutPotentiometer_set_brightness);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutPotentiometer_set_led_obj, 4, BreakoutPotentiometer_set_led);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutPotentiometer_read_obj, BreakoutPotentiometer_read);
-MP_DEFINE_CONST_FUN_OBJ_1(BreakoutPotentiometer_read_as_percent_obj, BreakoutPotentiometer_read_as_percent);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutPotentiometer_read_raw_obj, BreakoutPotentiometer_read_raw);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
@@ -25,7 +25,7 @@ STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&BreakoutPotentiometer_set_brightness_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&BreakoutPotentiometer_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutPotentiometer_read_obj) },
-    { MP_ROM_QSTR(MP_QSTR_read_as_percent), MP_ROM_PTR(&BreakoutPotentiometer_read_as_percent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_read_raw), MP_ROM_PTR(&BreakoutPotentiometer_read_raw_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutPotentiometer_locals_dict, BreakoutPotentiometer_locals_dict_table);
 

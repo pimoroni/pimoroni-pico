@@ -225,11 +225,11 @@ mp_obj_t BreakoutPotentiometer_set_led(size_t n_args, const mp_obj_t *pos_args, 
 
 mp_obj_t BreakoutPotentiometer_read(mp_obj_t self_in) {
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_potentiometer_BreakoutPotentiometer_obj_t);
-    return mp_obj_new_bool(self->breakout->read());
+    return mp_obj_new_float(self->breakout->read());
 }
 
-mp_obj_t BreakoutPotentiometer_read_as_percent(mp_obj_t self_in) {
+mp_obj_t BreakoutPotentiometer_read_raw(mp_obj_t self_in) {
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_potentiometer_BreakoutPotentiometer_obj_t);
-    return mp_obj_new_float(self->breakout->read_as_percent());
+    return mp_obj_new_int(self->breakout->read_raw());
 }
 }

@@ -86,8 +86,8 @@ namespace pimoroni {
     void set_brightness(float brightness);
     void set_led(uint8_t r, uint8_t g, uint8_t b);
 
-    int16_t read(uint32_t adc_timeout = DEFAULT_ADC_TIMEOUT);
-    float read_as_percent(uint32_t adc_timeout = DEFAULT_ADC_TIMEOUT);
+    float read(uint32_t adc_timeout = DEFAULT_ADC_TIMEOUT);
+    int16_t read_raw(uint32_t adc_timeout = DEFAULT_ADC_TIMEOUT);
   };
 
 }

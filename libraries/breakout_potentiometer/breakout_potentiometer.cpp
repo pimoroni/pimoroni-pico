@@ -99,11 +99,11 @@ namespace pimoroni {
     ioe.output(LED_B, b);           // Loads all 3 pwms
   }
 
-  int16_t BreakoutPotentiometer::read(uint32_t adc_timeout) {
-    return ioe.input(POT_INPUT, adc_timeout);
+float BreakoutPotentiometer::read(uint32_t adc_timeout) {
+    return (ioe.input_as_voltage(POT_INPUT, adc_timeout) / ioe.get_adc_vref());
   }
 
-  float BreakoutPotentiometer::read_as_percent(uint32_t adc_timeout) {
-    return (ioe.input_as_voltage(POT_INPUT, adc_timeout) / ioe.get_adc_vref());
+  int16_t BreakoutPotentiometer::read_raw(uint32_t adc_timeout) {
+    return ioe.input(POT_INPUT, adc_timeout);
   }
 }
