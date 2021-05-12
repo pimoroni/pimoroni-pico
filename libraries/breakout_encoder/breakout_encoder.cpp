@@ -47,6 +47,14 @@ namespace pimoroni {
   void BreakoutEncoder::set_address(uint8_t address) {
     ioe.set_address(address);
   }
+  
+  bool BreakoutEncoder::get_interrupt_flag() {
+    return ioe.get_interrupt_flag();
+  }
+
+  void BreakoutEncoder::clear_interrupt_flag() {
+    ioe.clear_interrupt_flag();
+  }
 
   BreakoutEncoder::Direction BreakoutEncoder::get_direction() {
     return direction;

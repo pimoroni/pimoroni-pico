@@ -78,6 +78,8 @@ namespace pimoroni {
 
     // Calls through to IOExpander class
     void set_address(uint8_t address);
+    bool get_interrupt_flag();
+    void clear_interrupt_flag();
 
     // Encoder breakout specific
     Direction get_direction();

@@ -127,6 +127,18 @@ mp_obj_t BreakoutEncoder_set_address(size_t n_args, const mp_obj_t *pos_args, mp
     return mp_const_none;
 }
 
+mp_obj_t BreakoutEncoder_get_interrupt_flag(mp_obj_t self_in) {
+    breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_BreakoutEncoder_obj_t);
+    return mp_obj_new_bool(self->breakout->get_interrupt_flag());
+}
+
+mp_obj_t BreakoutEncoder_clear_interrupt_flag(mp_obj_t self_in) {
+    breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_BreakoutEncoder_obj_t);
+    self->breakout->clear_interrupt_flag();
+
+    return mp_const_none;
+}
+
 mp_obj_t BreakoutEncoder_get_direction(mp_obj_t self_in) {
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_BreakoutEncoder_obj_t);
     return mp_obj_new_bool(self->breakout->get_direction());
