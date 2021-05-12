@@ -1,4 +1,4 @@
-#include "../../../pimoroni-pico/libraries/breakout_mics6814/breakout_mics6814.hpp"
+#include "../../../libraries/breakout_mics6814/breakout_mics6814.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

@@ -1,4 +1,4 @@
-#include "../../../pimoroni-pico/libraries/breakout_encoder/breakout_encoder.hpp"
+#include "../../../libraries/breakout_encoder/breakout_encoder.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
