@@ -18,11 +18,12 @@ int main() {
   as7262.firmware_version(major, minor, sub);
   printf("Device: %d, HW: %d, FW: %d.%d.%d\n", dev_type, hw_version, major, minor, sub);
 
-  as7262.set_gain(AS7262::gain::X16);
+  as7262.set_gain(AS7262::gain::X64);
+  as7262.set_integration_time(17.857);
   as7262.set_measurement_mode(AS7262::measurement_mode::cont_roygbr);
   as7262.set_illumination_current(AS7262::illumination_current::ma12);
   as7262.set_indicator_current(AS7262::indicator_current::ma4);
-  //as7262.set_leds(false, false);
+  as7262.set_leds(true, true);
 
   while(true) {
 
