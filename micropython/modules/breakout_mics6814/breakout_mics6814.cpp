@@ -166,7 +166,7 @@ mp_obj_t BreakoutMICS6814_set_brightness(size_t n_args, const mp_obj_t *pos_args
     if(brightness < 0 || brightness > 1.0f)
         mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
     else
-        self->breakout->set_brightness((uint8_t)(brightness * 255.0f));
+        self->breakout->set_brightness(brightness);
 
     return mp_const_none;
 }
