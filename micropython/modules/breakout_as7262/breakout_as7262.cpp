@@ -229,6 +229,24 @@ mp_obj_t BreakoutAS7262_set_illumination_current(size_t n_args, const mp_obj_t *
     return mp_const_none;
 }
 
+mp_obj_t BreakoutAS7262_set_integration_time(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_integration_time };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_integration_time, MP_ARG_REQUIRED | MP_ARG_OBJ },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    float integration_time = mp_obj_get_float(args[ARG_integration_time].u_obj);
+
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
+    self->breakout->set_integration_time(integration_time);
+
+    return mp_const_none;
+}
+
 mp_obj_t BreakoutAS7262_set_leds(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_illumination, ARG_indicator };
     static const mp_arg_t allowed_args[] = {

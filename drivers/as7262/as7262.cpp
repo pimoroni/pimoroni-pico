@@ -147,6 +147,11 @@ namespace pimoroni {
     i2c_reg_write_uint8(reg::LED_CONTROL, temp);
   }
 
+  void AS7262::set_integration_time(float integration_time_ms) {
+    uint8_t integration_time = uint8_t(integration_time_ms * 2.88);
+    i2c_reg_write_uint8(reg::INT_T, integration_time);
+  }
+
   bool AS7262::data_ready() {
     return i2c_reg_read_uint8(reg::CONTROL) & 0b00000010;
   }

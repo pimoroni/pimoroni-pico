@@ -46,4 +46,5 @@ extern mp_obj_t BreakoutAS7262_set_gain(size_t n_args, const mp_obj_t *pos_args,
 extern mp_obj_t BreakoutAS7262_set_measurement_mode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutAS7262_set_indicator_current(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutAS7262_set_illumination_current(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t BreakoutAS7262_set_integration_time(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutAS7262_set_leds(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);

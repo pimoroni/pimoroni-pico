@@ -15,6 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_gain_obj, 1, BreakoutAS7262_set_ga
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_measurement_mode_obj, 1, BreakoutAS7262_set_measurement_mode);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_indicator_current_obj, 1, BreakoutAS7262_set_indicator_current);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_illumination_current_obj, 1, BreakoutAS7262_set_illumination_current);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_integration_time_obj, 1, BreakoutAS7262_set_integration_time);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutAS7262_set_leds_obj, 1, BreakoutAS7262_set_leds);
 
 /***** Binding of Methods *****/
@@ -29,6 +30,7 @@ STATIC const mp_rom_map_elem_t BreakoutAS7262_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_measurement_mode), MP_ROM_PTR(&BreakoutAS7262_set_measurement_mode_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_indicator_current), MP_ROM_PTR(&BreakoutAS7262_set_indicator_current_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_illumination_current), MP_ROM_PTR(&BreakoutAS7262_set_illumination_current_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_integration_time), MP_ROM_PTR(&BreakoutAS7262_set_integration_time_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_leds), MP_ROM_PTR(&BreakoutAS7262_set_leds_obj) },
     { MP_ROM_QSTR(MP_QSTR_X1), MP_ROM_INT(MP_X1) },
     { MP_ROM_QSTR(MP_QSTR_X3_7), MP_ROM_INT(MP_X3_7) },
@@ -52,7 +54,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutAS7262_locals_dict, BreakoutAS7262_locals_di
 /***** Class Definition *****/
 const mp_obj_type_t breakout_as7262_BreakoutAS7262_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_matrix11x7,
+    .name = MP_QSTR_breakout_as7262,
     .print = BreakoutAS7262_print,
     .make_new = BreakoutAS7262_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutAS7262_locals_dict,

@@ -112,6 +112,7 @@ namespace pimoroni {
     void set_measurement_mode(measurement_mode mode);
     void set_indicator_current(indicator_current current);
     void set_illumination_current(illumination_current current);
+    void set_integration_time(float integration_time_ms);
     void set_leds(bool illumination, bool indicator);
 
 private:
