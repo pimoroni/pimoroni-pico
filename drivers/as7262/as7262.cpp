@@ -2,6 +2,7 @@
 #include <math.h>
 #include <map>
 #include <vector>
+#include <cstring>
 
 #include "as7262.hpp"
 
@@ -161,10 +162,19 @@ namespace pimoroni {
     i2c_write(reg, &value, 1);
   }
 
+  // convert the AS7262s 4-byte big-endian float value into a native float
   float AS7262::i2c_reg_read_float(uint8_t reg) {
-    float value;
+    uint32_t value;
     i2c_read(reg, (uint8_t *)&value, 4);
-    return __builtin_bswap32(value);
+    value = __builtin_bswap32(value);
+
+    // Fails due to -Werror=strict-aliasing in MicroPython build
+    // return reinterpret_cast<float &>(value);
+
+    // Assumes sizeof(uint32_t) == sizeof(float)
+    float result;
+    memcpy(&result, &value, sizeof(float));
+    return result;
   }
 
   uint8_t AS7262::i2c_reg_read_uint8(uint8_t reg) {
