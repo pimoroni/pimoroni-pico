@@ -21,7 +21,7 @@ namespace pimoroni {
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0E;
     static constexpr float DEFAULT_BRIGHTNESS = 1.0f; //Effectively the maximum fraction of the period that the LED will be on
-    static const bool DEFAULT_DIRECTION       = DIRECTION_CW;
+    static const Direction DEFAULT_DIRECTION  = DIRECTION_CW;
     static const uint8_t PIN_UNUSED           = UINT8_MAX;
     static const uint32_t DEFAULT_TIMEOUT     = 1;
     static const uint32_t DEFAULT_ADC_TIMEOUT = 1;
@@ -43,7 +43,7 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     IOExpander ioe;
-    bool direction_cw = DEFAULT_DIRECTION;
+    Direction direction = DEFAULT_DIRECTION;
     float brightness = DEFAULT_BRIGHTNESS;
 
     
@@ -80,8 +80,8 @@ namespace pimoroni {
     void set_adc_vref(float vref);
 
     // Potentiometer breakout specific
-    bool get_direction();
-    void set_direction(bool clockwise);
+    Direction get_direction();
+    void set_direction(Direction direction);
 
     void set_brightness(float brightness);
     void set_led(uint8_t r, uint8_t g, uint8_t b);

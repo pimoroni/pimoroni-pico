@@ -22,6 +22,8 @@ STATIC const mp_rom_map_elem_t BreakoutEncoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&BreakoutEncoder_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_available), MP_ROM_PTR(&BreakoutEncoder_available_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutEncoder_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_DIRECTION_CW), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_DIRECTION_CCW), MP_ROM_INT(0) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutEncoder_locals_dict, BreakoutEncoder_locals_dict_table);
 

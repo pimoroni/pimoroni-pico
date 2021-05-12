@@ -48,12 +48,12 @@ namespace pimoroni {
     ioe.set_address(address);
   }
 
-  bool BreakoutEncoder::get_direction(void) {
-    return direction_cw;
+  BreakoutEncoder::Direction BreakoutEncoder::get_direction() {
+    return direction;
   }
 
-  void BreakoutEncoder::set_direction(bool clockwise) {
-    direction_cw = clockwise;
+  void BreakoutEncoder::set_direction(Direction direction) {
+    this->direction = direction;
   }
 
   void BreakoutEncoder::set_brightness(float brightness) {
@@ -77,7 +77,7 @@ namespace pimoroni {
 
   int16_t BreakoutEncoder::read() {
     int16_t count = ioe.read_rotary_encoder(ENC_CHANNEL);
-    if(!direction_cw)
+    if(direction != DIRECTION_CW)
       count = 0 - count;
 
     ioe.clear_interrupt_flag();

@@ -144,7 +144,7 @@ mp_obj_t BreakoutEncoder_set_direction(size_t n_args, const mp_obj_t *pos_args, 
 
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_BreakoutEncoder_obj_t);
 
-    self->breakout->set_direction(args[ARG_clockwise].u_bool);
+    self->breakout->set_direction(args[ARG_clockwise].u_bool ? BreakoutEncoder::DIRECTION_CW : BreakoutEncoder::DIRECTION_CCW);
 
     return mp_const_none;
 }

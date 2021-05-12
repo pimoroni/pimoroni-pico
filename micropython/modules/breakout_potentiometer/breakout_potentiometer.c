@@ -26,6 +26,8 @@ STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&BreakoutPotentiometer_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutPotentiometer_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_read_raw), MP_ROM_PTR(&BreakoutPotentiometer_read_raw_obj) },
+    { MP_ROM_QSTR(MP_QSTR_DIRECTION_CW), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_DIRECTION_CCW), MP_ROM_INT(0) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutPotentiometer_locals_dict, BreakoutPotentiometer_locals_dict_table);
 

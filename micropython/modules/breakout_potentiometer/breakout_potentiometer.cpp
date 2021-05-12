@@ -167,7 +167,7 @@ mp_obj_t BreakoutPotentiometer_set_direction(size_t n_args, const mp_obj_t *pos_
 
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_potentiometer_BreakoutPotentiometer_obj_t);
 
-    self->breakout->set_direction(args[ARG_clockwise].u_bool);
+    self->breakout->set_direction(args[ARG_clockwise].u_bool ? BreakoutPotentiometer::DIRECTION_CW : BreakoutPotentiometer::DIRECTION_CCW);
 
     return mp_const_none;
 }

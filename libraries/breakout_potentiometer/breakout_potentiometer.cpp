@@ -11,7 +11,7 @@ namespace pimoroni {
       ioe.set_mode(POT_TERM_B, IOExpander::PIN_OUT);
       ioe.set_mode(POT_INPUT, IOExpander::PIN_ADC);
 
-      if(direction_cw) {
+      if(direction == DIRECTION_CW) {
         // Clockwise increasing
         ioe.output(POT_TERM_A, IOExpander::LOW);
         ioe.output(POT_TERM_B, IOExpander::HIGH);
@@ -58,7 +58,7 @@ namespace pimoroni {
     ioe.set_address(address);
   }
 
-  float BreakoutPotentiometer::get_adc_vref(void) {
+  float BreakoutPotentiometer::get_adc_vref() {
     return ioe.get_adc_vref();
   }
 
@@ -66,12 +66,12 @@ namespace pimoroni {
     ioe.set_adc_vref(vref);
   }
 
-  bool BreakoutPotentiometer::get_direction(void) {
-    return direction_cw;
+  BreakoutPotentiometer::Direction BreakoutPotentiometer::get_direction() {
+    return direction;
   }
 
-  void BreakoutPotentiometer::set_direction(bool clockwise) {
-    if(clockwise) {
+  void BreakoutPotentiometer::set_direction(Direction direction) {
+    if(direction == DIRECTION_CW) {
       // Clockwise increasing
       ioe.output(POT_TERM_A, IOExpander::LOW);
       ioe.output(POT_TERM_B, IOExpander::HIGH);
@@ -81,7 +81,7 @@ namespace pimoroni {
       ioe.output(POT_TERM_A, IOExpander::HIGH);
       ioe.output(POT_TERM_B, IOExpander::LOW);
     }
-    direction_cw = clockwise;
+    this->direction = direction;
   }
 
   void BreakoutPotentiometer::set_brightness(float brightness) {
