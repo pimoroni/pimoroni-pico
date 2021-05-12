@@ -12,7 +12,7 @@ namespace pimoroni {
       ioe.set_mode(MICS_NH3, IOExpander::PIN_ADC);
       ioe.set_mode(MICS_OX, IOExpander::PIN_ADC);
 
-      ioe.set_mode(MICS_HEATER_EN, IOExpander::PIN_OUT);
+      ioe.set_mode(MICS_HEATER_EN, IOExpander::PIN_OD);
       ioe.output(MICS_HEATER_EN, IOExpander::LOW);
 
       // Calculate a period large enough to get 0-255 steps at the desired brightness

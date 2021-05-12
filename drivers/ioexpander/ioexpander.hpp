@@ -38,6 +38,7 @@ namespace pimoroni {
     static const uint8_t PIN_IN_PULL_UP = PIN_MODE_PU;  // 0b10000
     static const uint8_t PIN_IN_PU = PIN_MODE_PU;       // 0b10000
     static const uint8_t PIN_OUT = PIN_MODE_PP;         // 0b00001
+    static const uint8_t PIN_OD = PIN_MODE_OD;          // 0b00001
     static const uint8_t PIN_PWM = PIN_MODE_PWM;        // 0b00101
     static const uint8_t PIN_ADC = PIN_MODE_ADC;        // 0b01010
 
