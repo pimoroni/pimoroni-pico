@@ -39,7 +39,7 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: true
-        path: pimoroni-pico
+        path: pimoroni-pico-${{ github.sha }}
 
     # Linux deps
     - name: Install deps
@@ -65,7 +65,7 @@ jobs:
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
-      run: make USER_C_MODULES=../../../pimoroni-pico/micropython/modules/micropython.cmake -j2
+      run: make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -j2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
