@@ -1,4 +1,4 @@
-#include "../../../pimoroni-pico/libraries/breakout_colourlcd240x240/breakout_colourlcd240x240.hpp"
+#include "../../../libraries/breakout_colourlcd240x240/breakout_colourlcd240x240.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
