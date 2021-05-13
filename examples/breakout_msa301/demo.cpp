@@ -18,9 +18,9 @@ int main() {
   msa301.enable_interrupts(MSA301::FREEFALL | MSA301::ORIENTATION);
 
   while(true){
-    printf("%d\n", msa301.read_interrupt(MSA301::FREEFALL));
-    printf("X: %f, Y: %f, Z: %f\n", msa301.get_x_axis(), msa301.get_y_axis(), msa301.get_z_axis());
-    printf("%d\n", msa301.get_orientation());
+    printf("X: %f, Y: %f, Z: %f", msa301.get_x_axis(), msa301.get_y_axis(), msa301.get_z_axis());
+    printf(", Freefall? %d", msa301.read_interrupt(MSA301::FREEFALL));
+    printf(", Orientation: %d\n", msa301.get_orientation());
     sleep_ms(100);
   };
   return 0;
