@@ -132,6 +132,11 @@ namespace pimoroni {
     void init();
     void reset();
 
+    i2c_inst_t* get_i2c() const;
+    int get_sda() const;
+    int get_scl() const;
+    int get_int() const;
+
     uint8_t part_id();
     float get_axis(Axis axis, uint8_t sample_count = 1);
     float get_x_axis(uint8_t sample_count = 1);
@@ -141,10 +146,10 @@ namespace pimoroni {
 
     void set_power_mode(MSA301::PowerMode power_mode);
     void set_range_and_resolution(Range range, MSA301::Resolution resolution);
-    void set_axis_polarity(int polarity);
+    void set_axis_polarity(uint8_t polarity);
 
     void disable_all_interrupts();
-    void enable_interrupts(int interrupts);
+    void enable_interrupts(uint16_t interrupts);
     void set_interrupt_latch(InterruptLatchPeriod latch_period, bool reset_latched);
     bool read_interrupt(Interrupt interrupt);
 

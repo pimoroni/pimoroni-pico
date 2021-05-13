@@ -30,6 +30,22 @@ namespace pimoroni {
     sleep_ms(1);
   }
 
+  i2c_inst_t* MSA301::get_i2c() const {
+    return i2c;
+  }
+
+  int MSA301::get_sda() const {
+    return sda;
+  }
+
+  int MSA301::get_scl() const {
+    return scl;
+  }
+
+  int MSA301::get_int() const {
+    return interrupt;
+  }
+
   uint8_t MSA301::part_id() {
     return i2c_reg_read_uint8(PART_ID);
   }
@@ -71,7 +87,7 @@ namespace pimoroni {
     i2c_reg_write_uint8(RESOLUTION_RANGE, range | resolution); 
   }
 
-  void MSA301::set_axis_polarity(int polarity) {
+  void MSA301::set_axis_polarity(uint8_t polarity) {
     i2c_reg_write_uint8(SET_AXIS_POLARITY, polarity);
   }
 
@@ -79,7 +95,7 @@ namespace pimoroni {
     enable_interrupts(MSA301::Interrupt::NONE);
   }
 
-  void MSA301::enable_interrupts(int interrupts) { 
+  void MSA301::enable_interrupts(uint16_t interrupts) { 
     i2c_reg_write_uint8(INTERRUPT_ENABLE_0, interrupts & 0xff); 
     i2c_reg_write_uint8(INTERRUPT_ENABLE_1, (interrupts & 0xff00) >> 8); 
   }
