@@ -13,11 +13,6 @@ add_subdirectory(breakout_sgp30)
 add_subdirectory(breakout_colourlcd240x240)
 add_subdirectory(breakout_msa301)
 
-add_subdirectory(ioe_adc_bg)
-add_subdirectory(ioe_adc_min_case)
-add_subdirectory(ioe_bg)
-add_subdirectory(ioe_enc_min_case)
-
 add_subdirectory(pico_display)
 add_subdirectory(pico_unicorn)
 add_subdirectory(pico_unicorn_plasma)
