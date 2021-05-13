@@ -1,12 +1,19 @@
 // Include MicroPython API.
 #include "py/runtime.h"
 
-// enum {
-//     REF = 0,
-//     REDUCING,
-//     NH3,
-//     OXIDISING
-// };
+enum {
+    IOE_PIN_IN      = 0b00010,
+    IOE_PIN_IN_PU   = 0b10000,
+    IOE_PIN_OUT     = 0b00001,
+    IOE_PIN_OD      = 0b00011,
+    IOE_PIN_PWM     = 0b00101,
+    IOE_PIN_ADC     = 0b01010,
+
+    IOE_NUM_PINS    = 14,
+
+    IOE_LOW         = 0,
+    IOE_HIGH        = 1,
+};
 
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type;

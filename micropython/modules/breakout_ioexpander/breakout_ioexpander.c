@@ -50,10 +50,15 @@ STATIC const mp_rom_map_elem_t BreakoutIOExpander_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_output), MP_ROM_PTR(&BreakoutIOExpander_output_obj) },
     { MP_ROM_QSTR(MP_QSTR_setup_rotary_encoder), MP_ROM_PTR(&BreakoutIOExpander_setup_rotary_encoder_obj) },
     { MP_ROM_QSTR(MP_QSTR_read_rotary_encoder), MP_ROM_PTR(&BreakoutIOExpander_read_rotary_encoder_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_REF), MP_ROM_INT(REF) },
-    // { MP_ROM_QSTR(MP_QSTR_REDUCING), MP_ROM_INT(REDUCING) },
-    // { MP_ROM_QSTR(MP_QSTR_NH3), MP_ROM_INT(NH3) },
-    // { MP_ROM_QSTR(MP_QSTR_OXIDISING), MP_ROM_INT(OXIDISING) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_IN), MP_ROM_INT(IOE_PIN_IN) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_IN_PU), MP_ROM_INT(IOE_PIN_IN_PU) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_OUT), MP_ROM_INT(IOE_PIN_OUT) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_OD), MP_ROM_INT(IOE_PIN_OD) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_PWM), MP_ROM_INT(IOE_PIN_PWM) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_ADC), MP_ROM_INT(IOE_PIN_ADC) },
+    { MP_ROM_QSTR(MP_QSTR_NUM_PINS), MP_ROM_INT(IOE_NUM_PINS) },
+    { MP_ROM_QSTR(MP_QSTR_LOW), MP_ROM_INT(IOE_LOW) },
+    { MP_ROM_QSTR(MP_QSTR_HIGH), MP_ROM_INT(IOE_HIGH) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutIOExpander_locals_dict, BreakoutIOExpander_locals_dict_table);
 

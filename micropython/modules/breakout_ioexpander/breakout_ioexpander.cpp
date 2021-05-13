@@ -401,7 +401,7 @@ mp_obj_t BreakoutIOExpander_output(size_t n_args, const mp_obj_t *pos_args, mp_m
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_exp_pin, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_load, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_load, MP_ARG_BOOL, {.u_bool = true} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
