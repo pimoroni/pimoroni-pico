@@ -1,5 +1,6 @@
 add_subdirectory(breakout_dotmatrix)
 add_subdirectory(breakout_encoder)
+add_subdirectory(breakout_ioexpander)
 add_subdirectory(breakout_ltr559)
 add_subdirectory(breakout_colourlcd160x80)
 add_subdirectory(breakout_roundlcd)
