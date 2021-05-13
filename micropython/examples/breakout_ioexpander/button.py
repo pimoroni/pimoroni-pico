@@ -11,8 +11,8 @@ last_state = True
 
 while True:
     state = ioe.input(ioe_button_pin)
-    if state != last_state:
-        if state == True:
+    if state is not last_state:
+        if state:
             print("Button has been released")
         else:
             print("Button has been pressed")
