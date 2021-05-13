@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../libraries/pico_explorer/pico_explorer.hpp"
+#include "libraries/pico_explorer/pico_explorer.hpp"
 
 using namespace pimoroni;
 

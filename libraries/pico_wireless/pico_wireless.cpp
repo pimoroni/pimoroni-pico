@@ -1,5 +1,5 @@
 #include "pico_wireless.hpp"
-#include "../../drivers/esp32spi/spi_drv.hpp"
+#include "drivers/esp32spi/spi_drv.hpp"
 
 namespace pimoroni {
 

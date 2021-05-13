@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pico/stdlib.h"
-#include "../../drivers/esp32spi/esp32spi.hpp"
+#include "drivers/esp32spi/esp32spi.hpp"
 
 namespace pimoroni {
 

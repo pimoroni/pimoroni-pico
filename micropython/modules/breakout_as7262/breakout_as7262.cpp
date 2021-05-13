@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_as7262/breakout_as7262.hpp"
+#include "libraries/breakout_as7262/breakout_as7262.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

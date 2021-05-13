@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../drivers/st7789/st7789.hpp"
-#include "../../libraries/pico_graphics/pico_graphics.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 namespace pimoroni {
 
