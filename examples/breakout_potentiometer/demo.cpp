@@ -56,7 +56,7 @@ int main() {
     }
   }
   else {
-    printf("Encoder Potentiometer found :'(\n");
+    printf("Potentiometer not found :'(\n");
     gpio_put(PICO_DEFAULT_LED_PIN, true);
   }
 
