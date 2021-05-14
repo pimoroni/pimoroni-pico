@@ -16,7 +16,7 @@ namespace pimoroni {
         static constexpr int8_t DEFAULT_I2C_ADDRESS    = 0x74;
         static constexpr int8_t ALTERNATE_I2C_ADDRESS  = 0x77;
 
-        void init();
+        bool init();
         void set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
   
         BreakoutRGBMatrix5x5() : IS31FL3731(DEFAULT_I2C_ADDRESS)  {};

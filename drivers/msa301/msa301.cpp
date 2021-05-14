@@ -7,7 +7,7 @@
 
 namespace pimoroni {
 
-  void MSA301::init() {
+  bool MSA301::init() {
     i2c_init(i2c, 400000);
 
     gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
@@ -23,6 +23,8 @@ namespace pimoroni {
 
     set_power_mode(PowerMode::NORMAL);
     set_range_and_resolution(Range::G_2, Resolution::BITS_14);
+
+    return true;
   }
 
   void MSA301::reset() {

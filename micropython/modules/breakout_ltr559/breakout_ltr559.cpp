@@ -50,65 +50,48 @@ void BreakoutLTR559_print(const mp_print_t *print, mp_obj_t self_in, mp_print_ki
 mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_ltr559_BreakoutLTR559_obj_t *self = nullptr;
 
-    if(n_args + n_kw == 0) {
-        mp_arg_check_num(n_args, n_kw, 0, 0, true);
-        self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
-        self->base.type = &breakout_ltr559_BreakoutLTR559_type;
-        self->breakout = new BreakoutLTR559();
+    enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutLTR559::DEFAULT_I2C_ADDRESS} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
+        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutLTR559::PIN_UNUSED} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Get I2C bus.
+    int i2c_id = args[ARG_i2c].u_int;
+    int sda = args[ARG_sda].u_int;
+    int scl = args[ARG_scl].u_int;
+
+    if(i2c_id == -1) {
+        i2c_id = sda & 1;
     }
-    else if(n_args + n_kw == 1) {
-        enum { ARG_address };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
-        self->base.type = &breakout_ltr559_BreakoutLTR559_type;
-
-        self->breakout = new BreakoutLTR559(args[ARG_address].u_int);
-    }
-    else {
-        enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_i2c, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_sda, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_scl, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutLTR559::PIN_UNUSED} },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        // Get I2C bus.
-        int i2c_id = args[ARG_i2c].u_int;
-        if(i2c_id < 0 || i2c_id > 1) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
-        }
-
-        int sda = args[ARG_sda].u_int;
-        if (!IS_VALID_SDA(i2c_id, sda)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
-        }
-
-        int scl = args[ARG_scl].u_int;
-        if (!IS_VALID_SCL(i2c_id, scl)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }
-
-        self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
-        self->base.type = &breakout_ltr559_BreakoutLTR559_type;
-        
-        i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-        self->breakout = new BreakoutLTR559(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    if(i2c_id < 0 || i2c_id > 1) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
     }
 
-    self->breakout->init();
+    if(!IS_VALID_SDA(i2c_id, sda)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
+    }
+
+    if(!IS_VALID_SCL(i2c_id, scl)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
+    }
+
+    self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
+    self->base.type = &breakout_ltr559_BreakoutLTR559_type;
+    
+    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
+    self->breakout = new BreakoutLTR559(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+
+    if(!self->breakout->init()) {
+        mp_raise_msg(&mp_type_RuntimeError, "LTR559 breakout not found when initialising");
+    }
 
     return MP_OBJ_FROM_PTR(self);
 }

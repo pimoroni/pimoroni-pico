@@ -2,19 +2,22 @@
 
 namespace pimoroni {
 
-    void BreakoutRGBMatrix5x5::init() {
-        IS31FL3731::init();
-        enable({
-            0b00000000, 0b10111111,
-            0b00111110, 0b00111110,
-            0b00111111, 0b10111110,
-            0b00000111, 0b10000110,
-            0b00110000, 0b00110000,
-            0b00111111, 0b10111110,
-            0b00111111, 0b10111110,
-            0b01111111, 0b11111110,
-            0b01111111, 0b00000000
-        }, 0);
+    bool BreakoutRGBMatrix5x5::init() {
+        bool success = IS31FL3731::init();
+        if(success) {
+            enable({
+                0b00000000, 0b10111111,
+                0b00111110, 0b00111110,
+                0b00111111, 0b10111110,
+                0b00000111, 0b10000110,
+                0b00110000, 0b00110000,
+                0b00111111, 0b10111110,
+                0b00111111, 0b10111110,
+                0b01111111, 0b11111110,
+                0b01111111, 0b00000000
+            }, 0);
+        }
+        return success;
     }
 
     RGBLookup BreakoutRGBMatrix5x5::lookup_pixel(uint8_t index) {
