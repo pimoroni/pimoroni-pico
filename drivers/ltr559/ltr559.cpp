@@ -75,6 +75,10 @@ namespace pimoroni {
     return i2c;
   }
 
+  int LTR559::get_address() const {
+    return address;
+  }
+
   int LTR559::get_sda() const {
     return sda;
   }

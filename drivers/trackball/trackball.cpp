@@ -68,6 +68,10 @@ namespace pimoroni {
     return i2c;
   }
 
+  int Trackball::get_address() const {
+    return address;
+  }
+
   int Trackball::get_sda() const {
     return sda;
   }

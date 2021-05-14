@@ -175,6 +175,7 @@ namespace pimoroni {
 
     // For print access in micropython
     i2c_inst_t* get_i2c() const;
+    int get_address() const;
     int get_sda() const;
     int get_scl() const;
     int get_int() const;

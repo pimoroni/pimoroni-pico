@@ -35,6 +35,10 @@ namespace pimoroni {
     return ioe.get_i2c();
   }
 
+  int BreakoutMICS6814::get_address() const {
+    return ioe.get_address();
+  }
+
   int BreakoutMICS6814::get_sda() const {
     return ioe.get_sda();
   }

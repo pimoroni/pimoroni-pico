@@ -1,4 +1,5 @@
 #include "libraries/breakout_ltr559/breakout_ltr559.hpp"
+#include <cstdio>
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
@@ -27,6 +28,11 @@ void BreakoutLTR559_print(const mp_print_t *print, mp_obj_t self_in, mp_print_ki
 
     mp_print_str(print, "i2c = ");
     mp_obj_print_helper(print, mp_obj_new_int((breakout->get_i2c() == i2c0) ? 0 : 1), PRINT_REPR);
+
+    mp_print_str(print, ", address = 0x");
+    char buf[3];
+    sprintf(buf, "%02X", breakout->get_address());
+    mp_print_str(print, buf);
 
     mp_print_str(print, ", sda = ");
     mp_obj_print_helper(print, mp_obj_new_int(breakout->get_sda()), PRINT_REPR);

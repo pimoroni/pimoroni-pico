@@ -78,6 +78,10 @@ namespace pimoroni {
     return i2c;
   }
 
+  int IS31FL3731::get_address() const {
+    return address;
+  }
+
   int IS31FL3731::get_sda() const {
     return sda;
   }

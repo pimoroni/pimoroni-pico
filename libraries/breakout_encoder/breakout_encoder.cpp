@@ -32,6 +32,10 @@ namespace pimoroni {
     return ioe.get_i2c();
   }
 
+  int BreakoutEncoder::get_address() const {
+    return ioe.get_address();
+  }
+
   int BreakoutEncoder::get_sda() const {
     return ioe.get_sda();
   }

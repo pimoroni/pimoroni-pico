@@ -20,6 +20,10 @@ namespace pimoroni {
     return i2c;
   }
 
+  int LTP305::get_address() const {
+    return address;
+  }
+
   int LTP305::get_sda() const {
     return sda;
   }

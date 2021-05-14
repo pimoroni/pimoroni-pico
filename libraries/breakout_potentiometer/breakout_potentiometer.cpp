@@ -42,6 +42,10 @@ namespace pimoroni {
     return ioe.get_i2c();
   }
 
+  int BreakoutPotentiometer::get_address() const {
+    return ioe.get_address();
+  }
+
   int BreakoutPotentiometer::get_sda() const {
     return ioe.get_sda();
   }
