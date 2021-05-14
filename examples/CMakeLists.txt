@@ -7,6 +7,7 @@ add_subdirectory(breakout_matrix11x7)
 add_subdirectory(breakout_trackball)
 add_subdirectory(breakout_sgp30)
 add_subdirectory(breakout_colourlcd240x240)
+add_subdirectory(breakout_msa301)
 
 add_subdirectory(pico_display)
 add_subdirectory(pico_unicorn)
