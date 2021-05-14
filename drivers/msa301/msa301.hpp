@@ -129,7 +129,7 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    void init();
+    bool init();
     void reset();
 
     i2c_inst_t* get_i2c() const;

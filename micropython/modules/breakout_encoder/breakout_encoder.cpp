@@ -1,4 +1,5 @@
 #include "libraries/breakout_encoder/breakout_encoder.hpp"
+#include <cstdio>
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
@@ -28,6 +29,11 @@ void BreakoutEncoder_print(const mp_print_t *print, mp_obj_t self_in, mp_print_k
     mp_print_str(print, "i2c = ");
     mp_obj_print_helper(print, mp_obj_new_int((breakout->get_i2c() == i2c0) ? 0 : 1), PRINT_REPR);
 
+    mp_print_str(print, ", address = 0x");
+    char buf[3];
+    sprintf(buf, "%02X", breakout->get_address());
+    mp_print_str(print, buf);
+
     mp_print_str(print, ", sda = ");
     mp_obj_print_helper(print, mp_obj_new_int(breakout->get_sda()), PRINT_REPR);
 
@@ -44,63 +50,44 @@ void BreakoutEncoder_print(const mp_print_t *print, mp_obj_t self_in, mp_print_k
 mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_encoder_BreakoutEncoder_obj_t *self = nullptr;
 
-    if(n_args == 0) {
-        mp_arg_check_num(n_args, n_kw, 0, 0, true);
-        self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
-        self->base.type = &breakout_encoder_BreakoutEncoder_type;
-        self->breakout = new BreakoutEncoder();
+    enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutEncoder::DEFAULT_I2C_ADDRESS} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
+        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutEncoder::PIN_UNUSED} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Get I2C bus.
+    int i2c_id = args[ARG_i2c].u_int;
+    int sda = args[ARG_sda].u_int;
+    int scl = args[ARG_scl].u_int;
+
+    if(i2c_id == -1) {
+        i2c_id = (sda >> 1) & 0b1;  // If no i2c specified, choose the one for the given SDA pin
     }
-    else if(n_args == 1) {
-        enum { ARG_address };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
-        self->base.type = &breakout_encoder_BreakoutEncoder_type;
-
-        self->breakout = new BreakoutEncoder(args[ARG_address].u_int);
+    if(i2c_id < 0 || i2c_id > 1) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
     }
-    else {
-        enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_i2c, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_sda, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_scl, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutEncoder::PIN_UNUSED} },
-        };
 
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        // Get I2C bus.
-        int i2c_id = args[ARG_i2c].u_int;
-        if(i2c_id < 0 || i2c_id > 1) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
-        }
-
-        int sda = args[ARG_sda].u_int;
-        if (!IS_VALID_SDA(i2c_id, sda)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
-        }
-
-        int scl = args[ARG_scl].u_int;
-        if (!IS_VALID_SCL(i2c_id, scl)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }
-
-        self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
-        self->base.type = &breakout_encoder_BreakoutEncoder_type;
-
-        i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-        self->breakout = new BreakoutEncoder(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    if(!IS_VALID_SDA(i2c_id, sda)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
     }
+
+    if(!IS_VALID_SCL(i2c_id, scl)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
+    }
+
+    self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
+    self->base.type = &breakout_encoder_BreakoutEncoder_type;
+
+    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
+    self->breakout = new BreakoutEncoder(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "Encoder breakout not found when initialising");

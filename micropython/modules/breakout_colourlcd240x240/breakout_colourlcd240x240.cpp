@@ -51,7 +51,7 @@ void BreakoutColourLCD240x240_print(const mp_print_t *print, mp_obj_t self_in, m
 mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = nullptr;
 
-    if(n_args <= 1) {
+    if(n_args + n_kw <= 1) {
         enum { ARG_buffer };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -69,7 +69,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
 
         self->breakout = new BreakoutColourLCD240x240((uint16_t *)bufinfo.buf);     
     }
-    else if(n_args == 2) {
+    else if(n_args + n_kw == 2) {
         enum { ARG_buffer, ARG_slot };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },

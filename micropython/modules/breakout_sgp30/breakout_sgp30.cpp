@@ -41,49 +41,45 @@ void BreakoutSGP30_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kin
 mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_sgp30_BreakoutSGP30_obj_t *self = nullptr;
 
-    if(n_args == 0) {
-        mp_arg_check_num(n_args, n_kw, 0, 0, true);
-        self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
-        self->base.type = &breakout_sgp30_BreakoutSGP30_type;
-        self->breakout = new BreakoutSGP30();
+    enum { ARG_i2c, ARG_sda, ARG_scl };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Get I2C bus.
+    int i2c_id = args[ARG_i2c].u_int;
+    int sda = args[ARG_sda].u_int;
+    int scl = args[ARG_scl].u_int;
+
+    if(i2c_id == -1) {
+        i2c_id = (sda >> 1) & 0b1;  // If no i2c specified, choose the one for the given SDA pin
     }
-    else {
-        enum { ARG_i2c, ARG_sda, ARG_scl };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_i2c, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_sda, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_scl, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        // Get I2C bus.
-        int i2c_id = args[ARG_i2c].u_int;
-        if(i2c_id < 0 || i2c_id > 1) {
-            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
-        }
-
-        int sda = args[ARG_sda].u_int;
-        if (!IS_VALID_SDA(i2c_id, sda)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
-        }
-
-        int scl = args[ARG_scl].u_int;
-        if (!IS_VALID_SCL(i2c_id, scl)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }
-
-        self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
-        self->base.type = &breakout_sgp30_BreakoutSGP30_type;
-        
-        i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-        self->breakout = new BreakoutSGP30(i2c, sda, scl);
+    if(i2c_id < 0 || i2c_id > 1) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
     }
+
+    if(!IS_VALID_SDA(i2c_id, sda)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
+    }
+
+    if(!IS_VALID_SCL(i2c_id, scl)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
+    }
+
+    self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
+    self->base.type = &breakout_sgp30_BreakoutSGP30_type;
+    
+    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
+    self->breakout = new BreakoutSGP30(i2c, sda, scl);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "SGP30 not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, "SGP30 breakout not found when initialising");
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -115,7 +111,7 @@ mp_obj_t BreakoutSGP30_start_measurement(size_t n_args, const mp_obj_t *pos_args
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->start_measurement(args[ARG_wait_for_setup].u_bool);
 
@@ -153,7 +149,7 @@ mp_obj_t BreakoutSGP30_get_air_quality_raw(mp_obj_t self_in) {
 mp_obj_t BreakoutSGP30_soft_reset(mp_obj_t self_in) {
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->soft_reset();
-    
+
     return mp_const_none;
 }
 
@@ -183,7 +179,7 @@ mp_obj_t BreakoutSGP30_set_baseline(size_t n_args, const mp_obj_t *pos_args, mp_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->set_baseline(args[ARG_eco2].u_int, args[ARG_tvoc].u_int);
 
@@ -199,7 +195,7 @@ mp_obj_t BreakoutSGP30_set_humidity(size_t n_args, const mp_obj_t *pos_args, mp_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->set_humidity(args[ARG_absolute_humidity].u_int);
 

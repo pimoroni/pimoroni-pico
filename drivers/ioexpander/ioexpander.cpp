@@ -359,6 +359,10 @@ namespace pimoroni {
     return i2c;
   }
 
+  int IOExpander::get_address() const {
+    return address;
+  }
+
   int IOExpander::get_sda() const {
     return sda;
   }
