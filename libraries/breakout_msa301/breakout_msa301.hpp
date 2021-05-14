@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../drivers/msa301/msa301.hpp"
+#include "drivers/msa301/msa301.hpp"
 
 namespace pimoroni {
 
