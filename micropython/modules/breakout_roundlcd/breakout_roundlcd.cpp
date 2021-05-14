@@ -51,25 +51,7 @@ void BreakoutRoundLCD_print(const mp_print_t *print, mp_obj_t self_in, mp_print_
 mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_roundlcd_BreakoutRoundLCD_obj_t *self = nullptr;
 
-    if(n_args + n_kw <= 1) {
-        enum { ARG_buffer };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        self = m_new_obj(breakout_roundlcd_BreakoutRoundLCD_obj_t);
-        self->base.type = &breakout_roundlcd_BreakoutRoundLCD_type;
-
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-
-        self->breakout = new BreakoutRoundLCD((uint16_t *)bufinfo.buf);     
-    }
-    else if(n_args + n_kw == 2) {
+    if(n_args + n_kw == 2) {
         enum { ARG_buffer, ARG_slot };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -98,12 +80,12 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
         enum { ARG_buffer, ARG_spi, ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_bl };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_spi, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_cs, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_dc, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_sck, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_mosi, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_bl, MP_ARG_INT, {.u_int = BreakoutRoundLCD::PIN_UNUSED} },
+            { MP_QSTR_spi, MP_ARG_INT, {.u_int = -1} },
+            { MP_QSTR_cs, MP_ARG_INT, {.u_int = ST7789::DEFAULT_CS_PIN} },
+            { MP_QSTR_dc, MP_ARG_INT, {.u_int = ST7789::DEFAULT_DC_PIN} },
+            { MP_QSTR_sck, MP_ARG_INT, {.u_int = ST7789::DEFAULT_SCK_PIN} },
+            { MP_QSTR_mosi, MP_ARG_INT, {.u_int = ST7789::DEFAULT_MOSI_PIN} },
+            { MP_QSTR_bl, MP_ARG_INT, {.u_int = ST7789::DEFAULT_BL_PIN} },
         };
 
         // Parse args.
@@ -115,17 +97,21 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
 
         // Get SPI bus.
         int spi_id = args[ARG_spi].u_int;
+        int sck = args[ARG_sck].u_int;
+        int mosi = args[ARG_mosi].u_int;
+
+        if(spi_id == -1) {
+            spi_id = (sck >> 3) & 0b1;  // If no spi specified, choose the one for the given SCK pin
+        }
         if(spi_id < 0 || spi_id > 1) {
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SPI(%d) doesn't exist"), spi_id);
         }
 
-        int sck = args[ARG_sck].u_int;
         if(!IS_VALID_SCK(spi_id, sck)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCK pin"));
         }
 
-        int mosi = args[ARG_mosi].u_int;
-        if(!IS_VALID_SCK(spi_id, mosi)) {
+        if(!IS_VALID_MOSI(spi_id, mosi)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad MOSI pin"));
         }
 
