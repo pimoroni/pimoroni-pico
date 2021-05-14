@@ -77,6 +77,11 @@ namespace pimoroni {
     uint8_t chip_id = 0;
     read_bytes(RV3028_ID, &chip_id, 1);
     if(chip_id != (RV3028_CHIP_ID | RV3028_VERSION)) {
+      i2c_deinit(i2c);
+      gpio_disable_pulls(sda);
+      gpio_set_function(sda, GPIO_FUNC_NULL);
+      gpio_disable_pulls(scl);
+      gpio_set_function(scl, GPIO_FUNC_NULL);
       return false;
     }
 

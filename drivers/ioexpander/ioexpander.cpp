@@ -348,6 +348,11 @@ namespace pimoroni {
         if(debug) {
           printf("Chip ID invalid: %04x expected: %04x\n", chip_id, CHIP_ID);
         }
+        i2c_deinit(i2c);
+        gpio_disable_pulls(sda);
+        gpio_set_function(sda, GPIO_FUNC_NULL);
+        gpio_disable_pulls(scl);
+        gpio_set_function(scl, GPIO_FUNC_NULL);
         succeeded = false;
       }
     }

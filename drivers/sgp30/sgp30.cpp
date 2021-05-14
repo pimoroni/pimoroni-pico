@@ -14,6 +14,7 @@ Distributed as-is; no warranty is given.
 namespace pimoroni {
 
   bool SGP30::init() {
+    bool status = true;
 
     i2c_init(i2c, 400000);
 
@@ -25,15 +26,17 @@ namespace pimoroni {
     soft_reset();
 
     if(!retrieve_unique_id()) {
-      return false;
+      status = false;
     }
 
     // Retrieve and check Feature Set
     uint16_t featureset;
-    if(!read_reg_1_word(GET_FEATURE_SET_VERSION, 10, &featureset))
-      return false;
-    if((featureset & 0xF0) != SGP30_REQ_FEATURES)
-      return false;
+    if(!read_reg_1_word(GET_FEATURE_SET_VERSION, 10, &featureset)) {
+      status = false;
+    }
+    if((featureset & 0xF0) != SGP30_REQ_FEATURES) {
+      status = false;
+    }
 
     // Start the measurement process
     // - parameter true = wait for readings to initialise
@@ -42,7 +45,14 @@ namespace pimoroni {
     // if (!start_measurement(true))
     //   return false;
 
-    return true;
+    if(!status) {
+      i2c_deinit(i2c);
+      gpio_disable_pulls(sda);
+      gpio_set_function(sda, GPIO_FUNC_NULL);
+      gpio_disable_pulls(scl);
+      gpio_set_function(scl, GPIO_FUNC_NULL);
+    }
+    return status;
   }
 
   i2c_inst_t* SGP30::get_i2c() const {

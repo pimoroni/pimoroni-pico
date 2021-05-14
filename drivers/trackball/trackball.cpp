@@ -40,8 +40,6 @@ namespace pimoroni {
   };
 
   bool Trackball::init() {
-    bool succeeded = false;
-
     i2c_init(i2c, 100000);
 
     gpio_set_function(sda, GPIO_FUNC_I2C);
@@ -58,10 +56,16 @@ namespace pimoroni {
     uint16_t chip_id = ((uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_H) << 8) | (uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_L);
     if(chip_id == CHIP_ID) {
       enable_interrupt();
-      succeeded = true;
+      return true;
     }
 
-    return succeeded;
+    // Setup failed, clean up after ourselves
+    i2c_deinit(i2c);
+    gpio_disable_pulls(sda);
+    gpio_set_function(sda, GPIO_FUNC_NULL);
+    gpio_disable_pulls(scl);
+    gpio_set_function(scl, GPIO_FUNC_NULL);
+    return false;
   }
 
   i2c_inst_t* Trackball::get_i2c() const {

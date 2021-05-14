@@ -67,6 +67,11 @@ namespace pimoroni {
       if (checkTimeoutExpired())
       {
         did_timeout = true;
+        i2c_deinit(i2c);
+        gpio_disable_pulls(sda);
+        gpio_set_function(sda, GPIO_FUNC_NULL);
+        gpio_disable_pulls(scl);
+        gpio_set_function(scl, GPIO_FUNC_NULL);
         return false;
       }
     }
