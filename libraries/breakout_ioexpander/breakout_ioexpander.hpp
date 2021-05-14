@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../drivers/ioexpander/ioexpander.hpp"
+#include "drivers/ioexpander/ioexpander.hpp"
 
 namespace pimoroni {
 
