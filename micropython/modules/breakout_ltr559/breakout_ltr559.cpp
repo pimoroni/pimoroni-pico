@@ -69,7 +69,7 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
     int scl = args[ARG_scl].u_int;
 
     if(i2c_id == -1) {
-        i2c_id = sda & 1;
+        i2c_id = (sda >> 1) & 0b1;  // If no i2c specified, choose the one for the given SDA pin
     }
     if(i2c_id < 0 || i2c_id > 1) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
