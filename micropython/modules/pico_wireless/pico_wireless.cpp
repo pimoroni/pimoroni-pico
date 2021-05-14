@@ -2,7 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
-#include "../../../libraries/pico_wireless/pico_wireless.hpp"
+#include "libraries/pico_wireless/pico_wireless.hpp"
 
 using namespace pimoroni;
 

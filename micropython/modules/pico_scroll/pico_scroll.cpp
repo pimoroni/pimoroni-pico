@@ -3,7 +3,7 @@
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 
-#include "../../../libraries/pico_scroll/pico_scroll.hpp"
+#include "libraries/pico_scroll/pico_scroll.hpp"
 
 using namespace pimoroni;
 

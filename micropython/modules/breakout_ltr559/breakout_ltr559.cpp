@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_ltr559/breakout_ltr559.hpp"
+#include "libraries/breakout_ltr559/breakout_ltr559.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

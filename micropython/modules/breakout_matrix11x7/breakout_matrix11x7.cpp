@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_matrix11x7/breakout_matrix11x7.hpp"
+#include "libraries/breakout_matrix11x7/breakout_matrix11x7.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

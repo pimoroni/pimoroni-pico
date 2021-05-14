@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../drivers/is31fl3731/is31fl3731.hpp"
+#include "drivers/is31fl3731/is31fl3731.hpp"
 
 namespace pimoroni {
     class BreakoutMatrix11x7 : public IS31FL3731 {

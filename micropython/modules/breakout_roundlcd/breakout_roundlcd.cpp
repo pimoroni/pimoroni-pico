@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_roundlcd/breakout_roundlcd.hpp"
+#include "libraries/breakout_roundlcd/breakout_roundlcd.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

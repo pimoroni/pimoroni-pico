@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_dotmatrix/breakout_dotmatrix.hpp"
+#include "libraries/breakout_dotmatrix/breakout_dotmatrix.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

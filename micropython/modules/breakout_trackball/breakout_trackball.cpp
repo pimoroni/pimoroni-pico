@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_trackball/breakout_trackball.hpp"
+#include "libraries/breakout_trackball/breakout_trackball.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 

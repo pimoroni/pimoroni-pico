@@ -1,4 +1,4 @@
-#include "../../../libraries/breakout_rgbmatrix5x5/breakout_rgbmatrix5x5.hpp"
+#include "libraries/breakout_rgbmatrix5x5/breakout_rgbmatrix5x5.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
