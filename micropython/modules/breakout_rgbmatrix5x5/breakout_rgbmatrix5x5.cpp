@@ -41,13 +41,13 @@ void BreakoutRGBMatrix5x5_print(const mp_print_t *print, mp_obj_t self_in, mp_pr
 mp_obj_t BreakoutRGBMatrix5x5_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t);
         self->base.type = &breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type;
-        self->breakout = new BreakoutRGBMatrix5x5();        
+        self->breakout = new BreakoutRGBMatrix5x5();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -59,8 +59,8 @@ mp_obj_t BreakoutRGBMatrix5x5_make_new(const mp_obj_type_t *type, size_t n_args,
 
         self = m_new_obj(breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t);
         self->base.type = &breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type;
-        
-        self->breakout = new BreakoutRGBMatrix5x5(args[ARG_address].u_int);     
+
+        self->breakout = new BreakoutRGBMatrix5x5(args[ARG_address].u_int);
     }
     else {
         enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl };
@@ -89,7 +89,7 @@ mp_obj_t BreakoutRGBMatrix5x5_make_new(const mp_obj_type_t *type, size_t n_args,
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t);
         self->base.type = &breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type;
@@ -117,7 +117,7 @@ mp_obj_t BreakoutRGBMatrix5x5_set_pixel(size_t n_args, const mp_obj_t *pos_args,
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_obj_t);
 
     int x = args[ARG_x].u_int;

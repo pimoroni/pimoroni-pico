@@ -44,13 +44,13 @@ void BreakoutMICS6814_print(const mp_print_t *print, mp_obj_t self_in, mp_print_
 mp_obj_t BreakoutMICS6814_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_mics6814_BreakoutMICS6814_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_mics6814_BreakoutMICS6814_obj_t);
         self->base.type = &breakout_mics6814_BreakoutMICS6814_type;
         self->breakout = new BreakoutMICS6814();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -254,7 +254,7 @@ mp_obj_t BreakoutMICS6814_read_all(mp_obj_t self_in) {
     tuple[REDUCING] = mp_obj_new_float(reading.reducing);
     tuple[NH3] = mp_obj_new_float(reading.nh3);
     tuple[OXIDISING] = mp_obj_new_float(reading.oxidising);
-    
+
     return mp_obj_new_tuple(4, tuple);
 }
 

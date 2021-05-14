@@ -44,13 +44,13 @@ void BreakoutPotentiometer_print(const mp_print_t *print, mp_obj_t self_in, mp_p
 mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_potentiometer_BreakoutPotentiometer_obj_t);
         self->base.type = &breakout_potentiometer_BreakoutPotentiometer_type;
         self->breakout = new BreakoutPotentiometer();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },

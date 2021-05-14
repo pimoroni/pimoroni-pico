@@ -41,13 +41,13 @@ void BreakoutDotMatrix_print(const mp_print_t *print, mp_obj_t self_in, mp_print
 mp_obj_t BreakoutDotMatrix_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_dotmatrix_BreakoutDotMatrix_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_dotmatrix_BreakoutDotMatrix_obj_t);
         self->base.type = &breakout_dotmatrix_BreakoutDotMatrix_type;
         self->breakout = new BreakoutDotMatrix();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -113,7 +113,7 @@ mp_obj_t BreakoutDotMatrix_set_brightness(size_t n_args, const mp_obj_t *pos_arg
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_dotmatrix_BreakoutDotMatrix_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_dotmatrix_BreakoutDotMatrix_obj_t);
 
     float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
@@ -135,7 +135,7 @@ mp_obj_t BreakoutDotMatrix_set_decimal(size_t n_args, const mp_obj_t *pos_args, 
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_dotmatrix_BreakoutDotMatrix_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_dotmatrix_BreakoutDotMatrix_obj_t);
     self->breakout->set_decimal(args[ARG_left].u_bool, args[ARG_right].u_bool);
 
@@ -158,7 +158,7 @@ mp_obj_t BreakoutDotMatrix_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    
+
     if(x < 0 || x >= BreakoutDotMatrix::WIDTH || y < 0 || y >= BreakoutDotMatrix::HEIGHT)
         mp_raise_ValueError("x or y out of range.");
     else
@@ -177,7 +177,7 @@ mp_obj_t BreakoutDotMatrix_set_character(size_t n_args, const mp_obj_t *pos_args
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_dotmatrix_BreakoutDotMatrix_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_dotmatrix_BreakoutDotMatrix_obj_t);
 
     int x = args[ARG_x].u_int;

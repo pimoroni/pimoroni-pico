@@ -41,7 +41,7 @@ void BreakoutSGP30_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kin
 mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_sgp30_BreakoutSGP30_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
         self->base.type = &breakout_sgp30_BreakoutSGP30_type;
@@ -115,7 +115,7 @@ mp_obj_t BreakoutSGP30_start_measurement(size_t n_args, const mp_obj_t *pos_args
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->start_measurement(args[ARG_wait_for_setup].u_bool);
 
@@ -153,7 +153,7 @@ mp_obj_t BreakoutSGP30_get_air_quality_raw(mp_obj_t self_in) {
 mp_obj_t BreakoutSGP30_soft_reset(mp_obj_t self_in) {
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->soft_reset();
-    
+
     return mp_const_none;
 }
 
@@ -183,7 +183,7 @@ mp_obj_t BreakoutSGP30_set_baseline(size_t n_args, const mp_obj_t *pos_args, mp_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->set_baseline(args[ARG_eco2].u_int, args[ARG_tvoc].u_int);
 
@@ -199,7 +199,7 @@ mp_obj_t BreakoutSGP30_set_humidity(size_t n_args, const mp_obj_t *pos_args, mp_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_sgp30_BreakoutSGP30_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_sgp30_BreakoutSGP30_obj_t);
     self->breakout->set_humidity(args[ARG_absolute_humidity].u_int);
 

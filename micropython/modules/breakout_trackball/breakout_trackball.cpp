@@ -44,13 +44,13 @@ void BreakoutTrackball_print(const mp_print_t *print, mp_obj_t self_in, mp_print
 mp_obj_t BreakoutTrackball_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_trackball_BreakoutTrackball_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_trackball_BreakoutTrackball_obj_t);
         self->base.type = &breakout_trackball_BreakoutTrackball_type;
-        self->breakout = new BreakoutTrackball();        
+        self->breakout = new BreakoutTrackball();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -62,8 +62,8 @@ mp_obj_t BreakoutTrackball_make_new(const mp_obj_type_t *type, size_t n_args, si
 
         self = m_new_obj(breakout_trackball_BreakoutTrackball_obj_t);
         self->base.type = &breakout_trackball_BreakoutTrackball_type;
-        
-        self->breakout = new BreakoutTrackball(args[ARG_address].u_int);     
+
+        self->breakout = new BreakoutTrackball(args[ARG_address].u_int);
     }
     else {
         enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
@@ -93,7 +93,7 @@ mp_obj_t BreakoutTrackball_make_new(const mp_obj_type_t *type, size_t n_args, si
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_trackball_BreakoutTrackball_obj_t);
         self->base.type = &breakout_trackball_BreakoutTrackball_type;
@@ -117,7 +117,7 @@ mp_obj_t BreakoutTrackball_change_address(size_t n_args, const mp_obj_t *pos_arg
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     self->breakout->change_address(args[ARG_address].u_int);
@@ -134,7 +134,7 @@ mp_obj_t BreakoutTrackball_enable_interrupt(size_t n_args, const mp_obj_t *pos_a
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     self->breakout->enable_interrupt(args[ARG_interrupt].u_bool);
@@ -191,7 +191,7 @@ mp_obj_t BreakoutTrackball_set_red(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     int value = args[ARG_value].u_int;
@@ -213,7 +213,7 @@ mp_obj_t BreakoutTrackball_set_green(size_t n_args, const mp_obj_t *pos_args, mp
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     int value = args[ARG_value].u_int;
@@ -235,7 +235,7 @@ mp_obj_t BreakoutTrackball_set_blue(size_t n_args, const mp_obj_t *pos_args, mp_
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     int value = args[ARG_value].u_int;
@@ -257,7 +257,7 @@ mp_obj_t BreakoutTrackball_set_white(size_t n_args, const mp_obj_t *pos_args, mp
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_trackball_BreakoutTrackball_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_trackball_BreakoutTrackball_obj_t);
 
     int value = args[ARG_value].u_int;
@@ -281,7 +281,7 @@ mp_obj_t BreakoutTrackball_read(mp_obj_t self_in) {
     tuple[DOWN] = mp_obj_new_int(state.down);
     tuple[SW_CHANGED] = mp_obj_new_int(state.sw_changed);
     tuple[SW_PRESSED] = mp_obj_new_int(state.sw_pressed);
-    
+
     return mp_obj_new_tuple(6, tuple);
 }
 }

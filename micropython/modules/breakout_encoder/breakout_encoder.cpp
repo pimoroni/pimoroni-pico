@@ -44,13 +44,13 @@ void BreakoutEncoder_print(const mp_print_t *print, mp_obj_t self_in, mp_print_k
 mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_encoder_BreakoutEncoder_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
         self->base.type = &breakout_encoder_BreakoutEncoder_type;
         self->breakout = new BreakoutEncoder();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },

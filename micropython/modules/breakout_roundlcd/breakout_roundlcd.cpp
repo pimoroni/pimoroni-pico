@@ -51,7 +51,7 @@ void BreakoutRoundLCD_print(const mp_print_t *print, mp_obj_t self_in, mp_print_
 mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_roundlcd_BreakoutRoundLCD_obj_t *self = nullptr;
 
-    if(n_args <= 1) {
+    if(n_args + n_kw <= 1) {
         enum { ARG_buffer };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -69,7 +69,7 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
 
         self->breakout = new BreakoutRoundLCD((uint16_t *)bufinfo.buf);     
     }
-    else if(n_args == 2) {
+    else if(n_args + n_kw == 2) {
         enum { ARG_buffer, ARG_slot };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -329,7 +329,7 @@ mp_obj_t BreakoutRoundLCD_pixel_span(size_t n_args, const mp_obj_t *pos_args, mp
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_roundlcd_BreakoutRoundLCD_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_roundlcd_BreakoutRoundLCD_obj_t);
 
     int x = args[ARG_x].u_int;

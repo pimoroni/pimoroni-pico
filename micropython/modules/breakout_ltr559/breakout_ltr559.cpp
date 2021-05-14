@@ -44,13 +44,13 @@ void BreakoutLTR559_print(const mp_print_t *print, mp_obj_t self_in, mp_print_ki
 mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_ltr559_BreakoutLTR559_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
         self->base.type = &breakout_ltr559_BreakoutLTR559_type;
         self->breakout = new BreakoutLTR559();
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -62,7 +62,7 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
 
         self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
         self->base.type = &breakout_ltr559_BreakoutLTR559_type;
-        
+
         self->breakout = new BreakoutLTR559(args[ARG_address].u_int);
     }
     else {
@@ -93,7 +93,7 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
         self->base.type = &breakout_ltr559_BreakoutLTR559_type;
@@ -152,7 +152,7 @@ mp_obj_t BreakoutLTR559_interrupts(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
     self->breakout->interrupts(args[ARG_light].u_bool, args[ARG_proximity].u_bool);
 
@@ -171,7 +171,7 @@ mp_obj_t BreakoutLTR559_proximity_led(size_t n_args, const mp_obj_t *pos_args, m
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int current = args[ARG_current].u_int;
@@ -203,7 +203,7 @@ mp_obj_t BreakoutLTR559_light_control(size_t n_args, const mp_obj_t *pos_args, m
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int gain = args[ARG_gain].u_int;
@@ -226,7 +226,7 @@ mp_obj_t BreakoutLTR559_proximity_control(size_t n_args, const mp_obj_t *pos_arg
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
     self->breakout->proximity_control(args[ARG_active].u_bool, args[ARG_saturation_indicator].u_bool);
 
@@ -243,7 +243,7 @@ mp_obj_t BreakoutLTR559_light_threshold(size_t n_args, const mp_obj_t *pos_args,
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int lower = args[ARG_lower].u_int;
@@ -269,7 +269,7 @@ mp_obj_t BreakoutLTR559_proximity_threshold(size_t n_args, const mp_obj_t *pos_a
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int lower = args[ARG_lower].u_int;
@@ -295,7 +295,7 @@ mp_obj_t BreakoutLTR559_light_measurement_rate(size_t n_args, const mp_obj_t *po
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int integration_time = args[ARG_integration_time].u_int;
@@ -320,7 +320,7 @@ mp_obj_t BreakoutLTR559_proximity_measurement_rate(size_t n_args, const mp_obj_t
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int rate = args[ARG_rate].u_int;
@@ -342,7 +342,7 @@ mp_obj_t BreakoutLTR559_proximity_offset(size_t n_args, const mp_obj_t *pos_args
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_ltr559_BreakoutLTR559_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_ltr559_BreakoutLTR559_obj_t);
 
     int offset = args[ARG_offset].u_int;

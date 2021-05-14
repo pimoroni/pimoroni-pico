@@ -44,7 +44,7 @@ void BreakoutAS7262_print(const mp_print_t *print, mp_obj_t self_in, mp_print_ki
 mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_as7262_BreakoutAS7262_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_as7262_BreakoutAS7262_obj_t);
         self->base.type = &breakout_as7262_BreakoutAS7262_type;
@@ -257,7 +257,7 @@ mp_obj_t BreakoutAS7262_set_leds(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
     self->breakout->set_leds(args[ARG_illumination].u_bool, args[ARG_indicator].u_bool);
 

@@ -41,13 +41,13 @@ void BreakoutMatrix11x7_print(const mp_print_t *print, mp_obj_t self_in, mp_prin
 mp_obj_t BreakoutMatrix11x7_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_matrix11x7_BreakoutMatrix11x7_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_matrix11x7_BreakoutMatrix11x7_obj_t);
         self->base.type = &breakout_matrix11x7_BreakoutMatrix11x7_type;
         self->breakout = new BreakoutMatrix11x7();        
     }
-    else if(n_args == 1) {
+    else if(n_args + n_kw == 1) {
         enum { ARG_address };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_address, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -59,7 +59,7 @@ mp_obj_t BreakoutMatrix11x7_make_new(const mp_obj_type_t *type, size_t n_args, s
 
         self = m_new_obj(breakout_matrix11x7_BreakoutMatrix11x7_obj_t);
         self->base.type = &breakout_matrix11x7_BreakoutMatrix11x7_type;
-        
+
         self->breakout = new BreakoutMatrix11x7(args[ARG_address].u_int);     
     }
     else {
@@ -89,7 +89,7 @@ mp_obj_t BreakoutMatrix11x7_make_new(const mp_obj_type_t *type, size_t n_args, s
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_matrix11x7_BreakoutMatrix11x7_obj_t);
         self->base.type = &breakout_matrix11x7_BreakoutMatrix11x7_type;

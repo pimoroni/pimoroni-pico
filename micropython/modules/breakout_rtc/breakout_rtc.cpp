@@ -47,7 +47,7 @@ void BreakoutRTC_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
 mp_obj_t BreakoutRTC_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_rtc_BreakoutRTC_obj_t *self = nullptr;
 
-    if(n_args == 0) {
+    if(n_args + n_kw == 0) {
         mp_arg_check_num(n_args, n_kw, 0, 0, true);
         self = m_new_obj(breakout_rtc_BreakoutRTC_obj_t);
         self->base.type = &breakout_rtc_BreakoutRTC_type;
@@ -80,11 +80,11 @@ mp_obj_t BreakoutRTC_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         int scl = args[ARG_scl].u_int;
         if (!IS_VALID_SCL(i2c_id, scl)) {
             mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-        }        
+        }
 
         self = m_new_obj(breakout_rtc_BreakoutRTC_obj_t);
         self->base.type = &breakout_rtc_BreakoutRTC_type;
-        
+
         i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
         self->breakout = new BreakoutRTC(i2c, sda, scl, args[ARG_interrupt].u_int);
     }
@@ -537,10 +537,10 @@ mp_obj_t BreakoutRTC_set_timer(size_t n_args, const mp_obj_t *pos_args, mp_map_t
     }
     else {
         switch(timer_frequency) {
-            case 4096:    // 4096Hz (default)    // up to 122us error on first time
+            case 4096:  // 4096Hz (default)    // up to 122us error on first time
             case 64:    // 64Hz          // up to 7.813ms error on first time
-            case 1:      // 1Hz          // up to 7.813ms error on first time
-            case 60000:    // 1/60Hz        // up to 7.813ms error on first time
+            case 1:     // 1Hz          // up to 7.813ms error on first time
+            case 60000: // 1/60Hz        // up to 7.813ms error on first time
                 self->breakout->set_timer(timer_repeat, timer_frequency, timer_value, set_interrupt, start_timer, enable_clock_output);
                 break;
 
