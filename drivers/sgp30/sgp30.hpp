@@ -2,6 +2,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 // commands and constants
 #define SGP30_REQ_FEATURES 0x0020  // The required feature set
@@ -37,22 +39,29 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c   = i2c0;
+    I2C *i2c;
 
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    SGP30() {}
-
-    SGP30(i2c_inst_t *i2c, uint8_t sda, uint8_t scl) :
-      i2c(i2c), sda(sda), scl(scl) {}
-
+    SGP30() {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    SGP30(uint8_t address) : address(address) {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) {
+      i2c = new I2C(sda, scl);
+    }
+    SGP30(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl) : address(address) {
+      i2c = new I2C(sda, scl);
+    }
+    SGP30(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
+      i2c(i2c), address(address) {}
 
     //--------------------------------------------------
     // Methods

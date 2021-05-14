@@ -5,7 +5,8 @@
 
 using namespace pimoroni;
 
-BreakoutLTR559 ltr559;
+I2C i2c(4, 5);
+BreakoutLTR559 ltr559(&i2c);
 
 int main() {
   stdio_init_all();

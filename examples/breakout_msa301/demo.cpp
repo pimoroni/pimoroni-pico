@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_msa301.hpp"
 
 using namespace pimoroni;
 
-BreakoutMSA301 msa301;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutMSA301 msa301(&i2c);
 
 int main() {
   stdio_init_all();

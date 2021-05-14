@@ -298,15 +298,20 @@ namespace pimoroni {
   }
 
   IOExpander::IOExpander() :
-    IOExpander(i2c0, DEFAULT_I2C_ADDRESS, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN) {
-  }
+    IOExpander(new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN), DEFAULT_I2C_ADDRESS, DEFAULT_INT_PIN, timeout, debug) {};
 
   IOExpander::IOExpander(uint8_t address, uint32_t timeout, bool debug) :
-    IOExpander(i2c0, address, DEFAULT_SDA_PIN, DEFAULT_SCL_PIN, DEFAULT_INT_PIN, timeout, debug) {
-  }
+    IOExpander(new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN), address, DEFAULT_INT_PIN, timeout, debug) {};
+
+  IOExpander::IOExpander(uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt, uint32_t timeout, bool debug) :
+    IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
 
   IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt, uint32_t timeout, bool debug) :
-    i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt),
+    IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
+
+  IOExpander::IOExpander(I2C *i2c, uint8_t address, uint8_t interrupt, uint32_t timeout, bool debug) :
+    i2c(i2c),
+    address(address), interrupt(interrupt),
     timeout(timeout), debug(debug), vref(3.3f),
     encoder_offset{0,0,0,0},
     encoder_last{0,0,0,0},
@@ -323,16 +328,11 @@ namespace pimoroni {
           Pin::adc(0, 6, 3),
           Pin::adc_or_pwm(0, 5, 4, 2, reg::PIOCON1),
           Pin::adc(0, 7, 2),
-          Pin::adc(1, 7, 0)} {
-  }
+          Pin::adc(1, 7, 0)}
+  {}
 
   bool IOExpander::init(bool skipChipIdCheck) {
     bool succeeded = true;
-
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
 
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
@@ -356,7 +356,7 @@ namespace pimoroni {
   }
 
   i2c_inst_t* IOExpander::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int IOExpander::get_address() const {
@@ -364,11 +364,11 @@ namespace pimoroni {
   }
 
   int IOExpander::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int IOExpander::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   int IOExpander::get_int() const {
@@ -376,12 +376,12 @@ namespace pimoroni {
   }
 
   uint16_t IOExpander::get_chip_id() {
-      return ((uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_H) << 8) | (uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_L);
+      return ((uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_H) << 8) | (uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_L);
   }
   
   void IOExpander::set_address(uint8_t address) {
     set_bit(reg::CTRL, 4);
-    i2c_reg_write_uint8(reg::ADDR, address);
+    i2c->reg_write_uint8(address, reg::ADDR, address);
     this->address = address;
     sleep_ms(250); //TODO Handle addr change IOError better
     //wait_for_flash()
@@ -496,7 +496,7 @@ namespace pimoroni {
       // PWMTYP - PWM type select: 0 edge-aligned, 1 center-aligned
       // FBINEN - Fault-break input enable
 
-      i2c_reg_write_uint8(reg::PWMCON1, pwmdiv2);
+      i2c->reg_write_uint8(address, reg::PWMCON1, pwmdiv2);
     }
 
     return divider_good;
@@ -504,8 +504,8 @@ namespace pimoroni {
 
   void IOExpander::set_pwm_period(uint16_t value, bool load) {
     value &= 0xffff;
-    i2c_reg_write_uint8(reg::PWMPL, (uint8_t)(value & 0xff));
-    i2c_reg_write_uint8(reg::PWMPH, (uint8_t)(value >> 8));
+    i2c->reg_write_uint8(address, reg::PWMPL, (uint8_t)(value & 0xff));
+    i2c->reg_write_uint8(address, reg::PWMPH, (uint8_t)(value >> 8));
 
     if(load)
       pwm_load();
@@ -561,8 +561,8 @@ namespace pimoroni {
         clr_bit(io_pin.reg_io_pwm, io_pin.pwm_channel);
     }
 
-    uint8_t pm1 = i2c_reg_read_uint8(io_pin.reg_m1);
-    uint8_t pm2 = i2c_reg_read_uint8(io_pin.reg_m2);
+    uint8_t pm1 = i2c->reg_read_uint8(address, io_pin.reg_m1);
+    uint8_t pm2 = i2c->reg_read_uint8(address, io_pin.reg_m2);
 
     // Clear the pm1 and pm2 bits
     pm1 &= 255 - (1 << io_pin.pin);
@@ -572,15 +572,15 @@ namespace pimoroni {
     pm1 |= (gpio_mode >> 1) << io_pin.pin;
     pm2 |= (gpio_mode & 0b1) << io_pin.pin;
 
-    i2c_reg_write_uint8(io_pin.reg_m1, pm1);
-    i2c_reg_write_uint8(io_pin.reg_m2, pm2);
+    i2c->reg_write_uint8(address, io_pin.reg_m1, pm1);
+    i2c->reg_write_uint8(address, io_pin.reg_m2, pm2);
 
     // Set up Schmitt trigger mode on inputs
     if(mode == PIN_MODE_PU || mode == PIN_MODE_IN)
       change_bit(io_pin.reg_ps, io_pin.pin, schmitt_trigger);
 
     // 5th bit of mode encodes default output pin state
-    i2c_reg_write_uint8(io_pin.reg_p, (initial_state << 3) | io_pin.pin);
+    i2c->reg_write_uint8(address, io_pin.reg_p, (initial_state << 3) | io_pin.pin);
   }
 
   int16_t IOExpander::input(uint8_t pin, uint32_t adc_timeout) {
@@ -599,7 +599,7 @@ namespace pimoroni {
         
       clr_bits(reg::ADCCON0, 0x0f);
       set_bits(reg::ADCCON0, io_pin.adc_channel);
-      i2c_reg_write_uint8(reg::AINDIDS, 0);
+      i2c->reg_write_uint8(address, reg::AINDIDS, 0);
       set_bit(reg::AINDIDS, io_pin.adc_channel);
       set_bit(reg::ADCCON1, 0);
 
@@ -617,8 +617,8 @@ namespace pimoroni {
         }
       }
 
-      uint8_t hi = i2c_reg_read_uint8(reg::ADCRH);
-      uint8_t lo = i2c_reg_read_uint8(reg::ADCRL);
+      uint8_t hi = i2c->reg_read_uint8(address, reg::ADCRH);
+      uint8_t lo = i2c->reg_read_uint8(address, reg::ADCRL);
       return (uint16_t)(hi << 4) | (uint16_t)lo;
     }
     else {
@@ -647,7 +647,7 @@ namespace pimoroni {
         
       clr_bits(reg::ADCCON0, 0x0f);
       set_bits(reg::ADCCON0, io_pin.adc_channel);
-      i2c_reg_write_uint8(reg::AINDIDS, 0);
+      i2c->reg_write_uint8(address, reg::AINDIDS, 0);
       set_bit(reg::AINDIDS, io_pin.adc_channel);
       set_bit(reg::ADCCON1, 0);
 
@@ -666,8 +666,8 @@ namespace pimoroni {
         }
       }
 
-      uint8_t hi = i2c_reg_read_uint8(reg::ADCRH);
-      uint8_t lo = i2c_reg_read_uint8(reg::ADCRL);
+      uint8_t hi = i2c->reg_read_uint8(address, reg::ADCRH);
+      uint8_t lo = i2c->reg_read_uint8(address, reg::ADCRL);
       return ((float)((uint16_t)(hi << 4) | (uint16_t)lo) / 4095.0f) * vref;
     }
     else {
@@ -693,8 +693,8 @@ namespace pimoroni {
         printf("Outputting PWM to pin: %d\n", pin);
       }
 
-      i2c_reg_write_uint8(io_pin.reg_pwml, (uint8_t)(value & 0xff));
-      i2c_reg_write_uint8(io_pin.reg_pwmh, (uint8_t)(value >> 8));
+      i2c->reg_write_uint8(address, io_pin.reg_pwml, (uint8_t)(value & 0xff));
+      i2c->reg_write_uint8(address, io_pin.reg_pwmh, (uint8_t)(value >> 8));
       if(load)
         pwm_load();
     }
@@ -726,20 +726,20 @@ namespace pimoroni {
       output(pin_c, 0);
     }
 
-    i2c_reg_write_uint8(ENC_CFG[channel], pin_a | (pin_b << 4));
+    i2c->reg_write_uint8(address, ENC_CFG[channel], pin_a | (pin_b << 4));
     change_bit(reg::ENC_EN, (channel * 2) + 1, count_microsteps);
     set_bit(reg::ENC_EN, channel * 2);
     
     // Reset internal encoder count to zero
     uint8_t reg = ENC_COUNT[channel];
-    i2c_reg_write_uint8(reg, 0x00);
+    i2c->reg_write_uint8(address, reg, 0x00);
   }
 
   int16_t IOExpander::read_rotary_encoder(uint8_t channel) {
     channel -= 1;
     int16_t last = encoder_last[channel];
     uint8_t reg = ENC_COUNT[channel];
-    int16_t value = (int16_t)i2c_reg_read_uint8(reg);
+    int16_t value = (int16_t)i2c->reg_read_uint8(address, reg);
 
     if(value & 0b10000000)
       value -= 256;
@@ -754,21 +754,9 @@ namespace pimoroni {
     return encoder_offset[channel] + value;
   }
 
-  uint8_t IOExpander::i2c_reg_read_uint8(uint8_t reg) {
-    uint8_t value;
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
-    return value;
-  }
-  
-  void IOExpander::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
-    uint8_t buffer[2] = {reg, value};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
-  }
-
   uint8_t IOExpander::get_bit(uint8_t reg, uint8_t bit) {
     // Returns the specified bit (nth position from right) from a register
-    return i2c_reg_read_uint8(reg) & (1 << bit);
+    return i2c->reg_read_uint8(address, reg) & (1 << bit);
   }
 
   void IOExpander::set_bits(uint8_t reg, uint8_t bits) {
@@ -780,7 +768,7 @@ namespace pimoroni {
       if(BIT_ADDRESSED_REGS[i] == reg) {
         for(uint8_t bit = 0; bit < 8; bit++) {
           if(bits & (1 << bit))
-            i2c_reg_write_uint8(reg, 0b1000 | (bit & 0b111));
+            i2c->reg_write_uint8(address, reg, 0b1000 | (bit & 0b111));
         }
         reg_in_bit_addressed_regs = true;
         break;
@@ -789,9 +777,9 @@ namespace pimoroni {
 
     // Now deal with any other registers
     if(!reg_in_bit_addressed_regs) {
-      uint8_t value = i2c_reg_read_uint8(reg);
+      uint8_t value = i2c->reg_read_uint8(address, reg);
       sleep_us(10);
-      i2c_reg_write_uint8(reg, value | bits);
+      i2c->reg_write_uint8(address, reg, value | bits);
     }
   }
 
@@ -806,7 +794,7 @@ namespace pimoroni {
       if(BIT_ADDRESSED_REGS[i] == reg) {
         for(uint8_t bit = 0; bit < 8; bit++) {
           if(bits & (1 << bit))
-            i2c_reg_write_uint8(reg, 0b0000 | (bit & 0b111));
+            i2c->reg_write_uint8(address, reg, 0b0000 | (bit & 0b111));
         }
         reg_in_bit_addressed_regs = true;
         break;
@@ -815,9 +803,9 @@ namespace pimoroni {
 
     // Now deal with any other registers
     if(!reg_in_bit_addressed_regs) {
-      uint8_t value = i2c_reg_read_uint8(reg);
+      uint8_t value = i2c->reg_read_uint8(address, reg);
       sleep_us(10);
-      i2c_reg_write_uint8(reg, value & ~bits);
+      i2c->reg_write_uint8(address, reg, value & ~bits);
     }
   }
 

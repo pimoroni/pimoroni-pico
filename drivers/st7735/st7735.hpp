@@ -2,7 +2,7 @@
 
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
-#include "../../common/pimoroni.hpp"
+#include "../../common/pimoroni_common.hpp"
 
 namespace pimoroni {
 

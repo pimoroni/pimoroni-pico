@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drivers/ioexpander/ioexpander.hpp"
+#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
@@ -58,6 +59,9 @@ namespace pimoroni {
 
     BreakoutEncoder(uint8_t address) :
       ioe(address) {}
+
+    BreakoutEncoder(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
+      ioe(i2c, address, interrupt, timeout, debug) {}
 
     BreakoutEncoder(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
       ioe(i2c, address, sda, scl, interrupt, timeout),

@@ -1,10 +1,12 @@
 #include "pico/stdlib.h"
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_as7262.hpp"
 
 using namespace pimoroni;
 
-BreakoutAS7262 as7262;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutAS7262 as7262(&i2c);
 
 int main() {
   stdio_init_all();

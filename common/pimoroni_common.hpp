@@ -32,4 +32,9 @@ namespace pimoroni {
       BG_SPI_FRONT,
       BG_SPI_BACK
     };
+
+    enum BOARD {
+      BREAKOUT_GARDEN,
+      PICO_EXPLORER
+    };
 }

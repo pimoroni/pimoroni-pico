@@ -4,7 +4,8 @@
 
 using namespace pimoroni;
 
-BreakoutDotMatrix display;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutDotMatrix display(&i2c);
 bool led_toggle = false;
 
   //        Left Image       Padding    Right Image      Padding

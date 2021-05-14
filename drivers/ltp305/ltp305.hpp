@@ -2,6 +2,7 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -16,8 +17,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_I2C_ADDRESS      = 0x61;
     static const uint8_t I2C_ADDRESS_ALTERNATE1   = 0x62;
     static const uint8_t I2C_ADDRESS_ALTERNATE2   = 0x63;
-    static const uint8_t DEFAULT_SDA_PIN          = 20;
-    static const uint8_t DEFAULT_SCL_PIN          = 21;
 
     static const uint8_t DEFAULT_BRIGHTNESS       = 64;
     static const uint8_t MAX_BRIGHTNESS           = 127;
@@ -43,12 +42,10 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c   = i2c0;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
 
     uint8_t brightness = DEFAULT_BRIGHTNESS;
 
@@ -91,8 +88,10 @@ namespace pimoroni {
     LTP305(uint8_t address) :
       address(address) {}
 
-    LTP305(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) :
-      i2c(i2c), address(address), sda(sda), scl(scl) {}
+    LTP305(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS) :
+      i2c(i2c), address(address) {}
+
+    LTP305(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) : LTP305(new I2C(sda, scl), address) {}
 
 
     //--------------------------------------------------
@@ -114,9 +113,6 @@ namespace pimoroni {
                    uint16_t offset_x, uint16_t offset_y, bool wrap = false, bool bg = false, uint8_t on_level = DEFAULT_ON_LEVEL, uint8_t padding = 0);
     void clear();
     void show();
-
-  private:
-    void i2c_reg_write_uint8(uint8_t reg, uint8_t value);
   };
 
 }

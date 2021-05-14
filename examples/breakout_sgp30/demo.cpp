@@ -13,7 +13,8 @@
 
 using namespace pimoroni;
 
-BreakoutSGP30 sgp30;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutSGP30 sgp30(&i2c);
 
 int main() {
   uint8_t prd;

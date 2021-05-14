@@ -4,7 +4,8 @@
 
 using namespace pimoroni;
 
-BreakoutMatrix11x7 matrix11x7(0x75);
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutMatrix11x7 matrix11x7(&i2c, 0x75);
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

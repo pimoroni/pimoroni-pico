@@ -1,4 +1,5 @@
 #include "pico/stdlib.h"
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_as7262.hpp"
 #include "pico_explorer.hpp"
@@ -7,7 +8,8 @@ using namespace pimoroni;
 
 constexpr float INTEGRATION_TIME = 10.0f;
 
-BreakoutAS7262 as7262;
+I2C i2c(BOARD::PICO_EXPLORER);
+BreakoutAS7262 as7262(&i2c);
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 

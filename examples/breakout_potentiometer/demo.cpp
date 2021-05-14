@@ -1,12 +1,14 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 #include <math.h>
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_potentiometer.hpp"
 
 using namespace pimoroni;
 
-BreakoutPotentiometer pot;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutPotentiometer pot(&i2c);
 bool toggle = false;
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel

@@ -2,7 +2,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
-#include "common/pimoroni.hpp"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -107,24 +108,27 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c = i2c0;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address    = DEFAULT_I2C_ADDRESS;
-    uint sda       = I2C_DEFAULT_SDA;
-    uint scl       = I2C_DEFAULT_SCL;
-    uint interrupt = I2C_DEFAULT_INT;
-    i2c_inst_t *i2c = PIMORONI_I2C_DEFAULT_INSTANCE;
-
+    uint8_t address    = DEFAULT_I2C_ADDRESS;
+    uint interrupt    = I2C_DEFAULT_INT;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    MSA301() {}
-
-    MSA301(i2c_inst_t *i2c, uint sda, uint scl, uint interrupt) :
-      i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    MSA301() {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    MSA301(uint8_t address) : address(address) {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    MSA301(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint8_t interrupt = PIN_UNUSED) : address(address), interrupt(interrupt) {
+      i2c = new I2C(sda, scl);
+    }
+    MSA301(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
+      i2c(i2c), address(address), interrupt(interrupt) {}
 
 
     //--------------------------------------------------
@@ -154,11 +158,6 @@ namespace pimoroni {
     void enable_interrupts(uint16_t interrupts);
     void set_interrupt_latch(InterruptLatchPeriod latch_period, bool reset_latched);
     bool read_interrupt(Interrupt interrupt);
-
-  private:
-    void i2c_reg_write_uint8(uint8_t reg, uint8_t value);
-    uint8_t i2c_reg_read_uint8(uint8_t reg);
-    int16_t i2c_reg_read_int16(uint8_t reg);
   };
 }
 

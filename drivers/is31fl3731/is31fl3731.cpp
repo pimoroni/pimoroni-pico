@@ -54,28 +54,24 @@ namespace pimoroni {
   };
 
   bool IS31FL3731::init() {
-    i2c_init(i2c, 100000);
 
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
-
-    i2c_reg_write_uint8(reg::BANK, CONFIG_BANK);
-    i2c_reg_write_uint8(reg::SHUTDOWN, 0b00000000);
+    i2c->reg_write_uint8(address, reg::BANK, CONFIG_BANK);
+    i2c->reg_write_uint8(address, reg::SHUTDOWN, 0b00000000);
 
     clear();
     update(0);
 
-    i2c_reg_write_uint8(reg::SHUTDOWN, 0b00000001);    
+    i2c->reg_write_uint8(address, reg::SHUTDOWN, 0b00000001);    
 
-    i2c_reg_write_uint8(reg::MODE, mode::PICTURE);
+    i2c->reg_write_uint8(address, reg::MODE, mode::PICTURE);
 
-    i2c_reg_write_uint8(reg::AUDIOSYNC, 0);
+    i2c->reg_write_uint8(address, reg::AUDIOSYNC, 0);
 
     return true;
   }
 
   i2c_inst_t* IS31FL3731::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int IS31FL3731::get_address() const {
@@ -83,11 +79,11 @@ namespace pimoroni {
   }
 
   int IS31FL3731::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int IS31FL3731::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   void IS31FL3731::clear() {
@@ -96,20 +92,8 @@ namespace pimoroni {
     }
   }
 
-  void IS31FL3731::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
-    uint8_t buffer[2] = {reg, value};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
-  }
-
-  int16_t IS31FL3731::i2c_reg_read_int16(uint8_t reg) {
-    int16_t value;
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, (uint8_t *)&value, 2, false);
-    return value;
-  }
-
   void IS31FL3731::enable(std::initializer_list<uint8_t> pattern, uint8_t frame) {
-    i2c_reg_write_uint8(reg::BANK, frame);
+    i2c->reg_write_uint8(address, reg::BANK, frame);
     uint8_t enable_buf[19];
     enable_buf[0] = ENABLE_OFFSET;
     uint8_t offset = 1;
@@ -117,7 +101,7 @@ namespace pimoroni {
       enable_buf[offset] = byte;
       offset++;
     }
-    i2c_write_blocking(i2c, address, enable_buf, sizeof(enable_buf), false);
+    i2c->write_blocking(address, enable_buf, sizeof(enable_buf), false);
   }
 
   void IS31FL3731::set(uint8_t index, uint8_t brightness) {
@@ -125,10 +109,10 @@ namespace pimoroni {
   }
 
   void IS31FL3731::update(uint8_t frame) {
-    i2c_reg_write_uint8(reg::BANK, frame);
+    i2c->reg_write_uint8(address, reg::BANK, frame);
     buf[0] = COLOR_OFFSET;
-    i2c_write_blocking(i2c, address, buf, sizeof(buf), false);
-    i2c_reg_write_uint8(reg::BANK, CONFIG_BANK); // Switch back to config bank
-    i2c_reg_write_uint8(reg::FRAME, frame); // Set the desired frame as active
+    i2c->write_blocking(address, buf, sizeof(buf), false);
+    i2c->reg_write_uint8(address, reg::BANK, CONFIG_BANK); // Switch back to config bank
+    i2c->reg_write_uint8(address, reg::FRAME, frame); // Set the desired frame as active
   }
 }

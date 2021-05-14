@@ -32,6 +32,7 @@ include_directories(
   ${CMAKE_CURRENT_LIST_DIR}
 )
 
+add_subdirectory(common)
 add_subdirectory(drivers)
 add_subdirectory(libraries)
 

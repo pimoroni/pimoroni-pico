@@ -2,7 +2,7 @@
 
 #include "drivers/st7735/st7735.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
-#include "common/pimoroni.hpp"
+#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
 

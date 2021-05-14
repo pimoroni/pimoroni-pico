@@ -4,6 +4,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -70,12 +72,10 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c = i2c0;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
     int8_t interrupt  = DEFAULT_INT_PIN;
 
 
@@ -83,10 +83,17 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    AS7262() {}
-
-    AS7262(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    AS7262() {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    AS7262(uint8_t address) : address(address) {
+      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
+    };
+    AS7262(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint8_t interrupt = PIN_UNUSED) : address(address), interrupt(interrupt) {
+      i2c = new I2C(sda, scl);
+    }
+    AS7262(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED) :
+      i2c(i2c), address(address), interrupt(interrupt) {}
 
 
     //--------------------------------------------------

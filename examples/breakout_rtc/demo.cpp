@@ -4,7 +4,8 @@
 
 using namespace pimoroni;
 
-BreakoutRTC rtc;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutRTC rtc(&i2c);
 
 int main() {
   stdio_init_all();
@@ -15,10 +16,10 @@ int main() {
   if(!rtc.init()) {
     printf("Init failed! Check your connections and i2c pin choices.\n");
   }
-  // rtc.setup(false);
+  //rtc.setup(false);
 
   // Uncomment the below line on first run to set the RTC date and time to the program's compiler time
-  // rtc.set_to_compiler_time();
+  //rtc.set_to_compiler_time();
 
   // Make sure we have 24-hour time
   if(rtc.is_12_hour())

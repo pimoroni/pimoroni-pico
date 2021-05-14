@@ -7,7 +7,8 @@
 
 using namespace pimoroni;
 
-BreakoutRGBMatrix5x5 rgbmatrix5x5;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutRGBMatrix5x5 rgbmatrix5x5(&i2c);
 
 int main() {
   rgbmatrix5x5.init();

@@ -12,7 +12,8 @@ Distributed as-is; no warranty is given.
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
-#include "common/pimoroni.hpp"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -197,8 +198,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = RV3028_ADDR;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
     static const uint8_t DEFAULT_INT_PIN      = 22;
     static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
@@ -207,12 +206,10 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c = PIMORONI_I2C_DEFAULT_INSTANCE;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
     int8_t address  = DEFAULT_I2C_ADDRESS;
-    uint sda        = DEFAULT_SDA_PIN;
-    uint scl        = DEFAULT_SCL_PIN;
     uint interrupt  = DEFAULT_INT_PIN;
 
     uint8_t times[TIME_ARRAY_LENGTH];
@@ -224,8 +221,13 @@ namespace pimoroni {
   public:
     RV3028() {}
 
-    RV3028(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-            i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    RV3028(uint8_t address) :
+      address(address) {}
+
+    RV3028(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = DEFAULT_INT_PIN) :
+      i2c(i2c), address(address), interrupt(interrupt) {}
+
+    RV3028(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) : RV3028(new I2C(sda, scl), address) {}
 
 
     //--------------------------------------------------
@@ -325,13 +327,6 @@ private:
     void set_bit(uint8_t reg_addr, uint8_t bit_num);
     void clear_bit(uint8_t reg_addr, uint8_t bit_num);
     bool read_bit(uint8_t reg_addr, uint8_t bit_num);
-
-    // From i2cdevice
-    int write_bytes(uint8_t reg, uint8_t *buf, int len);
-    int read_bytes(uint8_t reg, uint8_t *buf, int len);
-    uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
-    void set_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
-    void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask = 0b1);
   };
 
   // POSSIBLE ENHANCEMENTS :
