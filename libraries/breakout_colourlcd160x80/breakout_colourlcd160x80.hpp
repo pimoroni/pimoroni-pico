@@ -13,8 +13,6 @@ namespace pimoroni {
   public:
     static const int WIDTH            = 160;
     static const int HEIGHT           = 80;
-    static const uint8_t PIN_UNUSED   = UINT8_MAX;
-
 
     //--------------------------------------------------
     // Variables
@@ -31,7 +29,7 @@ namespace pimoroni {
   public:
     BreakoutColourLCD160x80(uint16_t *buf);
     BreakoutColourLCD160x80(uint16_t *buf, spi_inst_t *spi,
-      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = PIN_UNUSED, uint8_t bl = PIN_UNUSED);
+      uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED);
     BreakoutColourLCD160x80(uint16_t *buf, BG_SPI_SLOT slot);
 
 

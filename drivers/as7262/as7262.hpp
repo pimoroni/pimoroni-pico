@@ -15,10 +15,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x49;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
-    static const uint8_t DEFAULT_INT_PIN      = 22;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
 
 
     //--------------------------------------------------
@@ -76,24 +72,17 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    uint interrupt  = PIN_UNUSED;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    AS7262() {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    AS7262(uint8_t address) : address(address) {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    AS7262(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint8_t interrupt = PIN_UNUSED) : address(address), interrupt(interrupt) {
-      i2c = new I2C(sda, scl);
-    }
-    AS7262(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), interrupt(interrupt) {}
+    AS7262() : AS7262(DEFAULT_I2C_ADDRESS) {};
+    AS7262(uint8_t address) : i2c(new I2C()), address(address) {};
+    AS7262(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C()), address(address), interrupt(interrupt) {}
+    AS7262(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
 
 
     //--------------------------------------------------

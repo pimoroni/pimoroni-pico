@@ -42,12 +42,9 @@ namespace pimoroni {
   bool Trackball::init() {
     bool succeeded = false;
 
-    i2c_init(i2c, 100000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(scl);
+    if(i2c->get_baudrate() > 100000) {
+      return false;
+    }
 
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
@@ -55,7 +52,7 @@ namespace pimoroni {
       gpio_pull_up(interrupt);
     }
 
-    uint16_t chip_id = ((uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_H) << 8) | (uint16_t)i2c_reg_read_uint8(reg::CHIP_ID_L);
+    uint16_t chip_id = ((uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_H) << 8) | (uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_L);
     if(chip_id == CHIP_ID) {
       enable_interrupt();
       succeeded = true;
@@ -65,7 +62,7 @@ namespace pimoroni {
   }
 
   i2c_inst_t* Trackball::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int Trackball::get_address() const {
@@ -73,11 +70,11 @@ namespace pimoroni {
   }
 
   int Trackball::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int Trackball::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   int Trackball::get_int() const {
@@ -85,17 +82,17 @@ namespace pimoroni {
   }
 
   void Trackball::change_address(uint8_t new_address) {
-    i2c_reg_write_uint8(reg::I2C_ADDR, new_address);
+    i2c->reg_write_uint8(address, reg::I2C_ADDR, new_address);
     wait_for_flash();
   }
   
   void Trackball::enable_interrupt(bool use_interrupt) {
-    uint8_t value = i2c_reg_read_uint8(reg::INT);
+    uint8_t value = i2c->reg_read_uint8(address, reg::INT);
     value &= ~MSK_INT_OUT_EN;
     if(use_interrupt)
       value |= MSK_INT_OUT_EN;
 
-    i2c_reg_write_uint8(reg::INT, value);
+    i2c->reg_write_uint8(address, reg::INT, value);
   }
   
   bool Trackball::get_interrupt() {
@@ -105,59 +102,47 @@ namespace pimoroni {
       value = !gpio_get(interrupt);
     }
     else {
-      value = i2c_reg_read_uint8(reg::INT);
+      value = i2c->reg_read_uint8(address, reg::INT);
       value &= MSK_INT_TRIGGERED;
     }
     return false;
   }
 
   void Trackball::set_rgbw(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
-    i2c_reg_write_uint8(reg::LED_RED, r);
-    i2c_reg_write_uint8(reg::LED_GRN, g);
-    i2c_reg_write_uint8(reg::LED_BLU, b);
-    i2c_reg_write_uint8(reg::LED_WHT, w);
+    i2c->reg_write_uint8(address, reg::LED_RED, r);
+    i2c->reg_write_uint8(address, reg::LED_GRN, g);
+    i2c->reg_write_uint8(address, reg::LED_BLU, b);
+    i2c->reg_write_uint8(address, reg::LED_WHT, w);
   }
 
   void Trackball::set_red(uint8_t value) {
-    i2c_reg_write_uint8(reg::LED_RED, value);
+    i2c->reg_write_uint8(address, reg::LED_RED, value);
   }
 
   void Trackball::set_green(uint8_t value) {
-    i2c_reg_write_uint8(reg::LED_GRN, value);
+    i2c->reg_write_uint8(address, reg::LED_GRN, value);
   }
 
   void Trackball::set_blue(uint8_t value) {
-    i2c_reg_write_uint8(reg::LED_BLU, value);
+    i2c->reg_write_uint8(address, reg::LED_BLU, value);
   }
 
   void Trackball::set_white(uint8_t value) {
-    i2c_reg_write_uint8(reg::LED_WHT, value);
+    i2c->reg_write_uint8(address, reg::LED_WHT, value);
   }
 
   Trackball::State Trackball::read() {
     State state;
     uint8_t sw_state;
-    state.left = i2c_reg_read_uint8(reg::LEFT);
-    state.right = i2c_reg_read_uint8(reg::RIGHT);
-    state.up = i2c_reg_read_uint8(reg::UP);
-    state.down = i2c_reg_read_uint8(reg::DOWN);
-    sw_state = i2c_reg_read_uint8(reg::SWITCH);
+    state.left = i2c->reg_read_uint8(address, reg::LEFT);
+    state.right = i2c->reg_read_uint8(address, reg::RIGHT);
+    state.up = i2c->reg_read_uint8(address, reg::UP);
+    state.down = i2c->reg_read_uint8(address, reg::DOWN);
+    sw_state = i2c->reg_read_uint8(address, reg::SWITCH);
 
     state.sw_changed = sw_state & ~MSK_SWITCH_STATE;
     state.sw_pressed = (sw_state  & MSK_SWITCH_STATE) > 0;
     return state;
-  }
-
-  uint8_t Trackball::i2c_reg_read_uint8(uint8_t reg) {
-    uint8_t value;
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
-    return value;
-  }
-
-  void Trackball::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
-    uint8_t buffer[2] = {reg, value};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
   }
 
   void Trackball::wait_for_flash(void) {

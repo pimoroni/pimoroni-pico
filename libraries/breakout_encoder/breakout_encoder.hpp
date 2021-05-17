@@ -47,7 +47,7 @@ namespace pimoroni {
     IOExpander ioe;
     Direction direction = DEFAULT_DIRECTION;
     float brightness = DEFAULT_BRIGHTNESS;
-    uint8_t interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
+    uint interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
 
 
     //--------------------------------------------------
@@ -60,10 +60,10 @@ namespace pimoroni {
     BreakoutEncoder(uint8_t address) :
       ioe(address) {}
 
-    BreakoutEncoder(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
+    BreakoutEncoder(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
       ioe(i2c, address, interrupt, timeout, debug) {}
 
-    BreakoutEncoder(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
+    BreakoutEncoder(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
       ioe(i2c, address, sda, scl, interrupt, timeout),
       interrupt_pin(interrupt) {}
 

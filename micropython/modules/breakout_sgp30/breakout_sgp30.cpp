@@ -44,8 +44,8 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     enum { ARG_i2c, ARG_sda, ARG_scl };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
-        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
     };
 
     // Parse args.

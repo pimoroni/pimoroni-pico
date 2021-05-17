@@ -51,8 +51,8 @@ mp_obj_t BreakoutMatrix11x7_make_new(const mp_obj_type_t *type, size_t n_args, s
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
         { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutMatrix11x7::DEFAULT_I2C_ADDRESS} },
-        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
-        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
     };
 
     // Parse args.

@@ -47,9 +47,9 @@ mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_
     enum { ARG_i2c, ARG_sda, ARG_scl, ARG_int };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
-        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
-        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutAS7262::PIN_UNUSED} },
+        { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
+        { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
+        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = PIN_UNUSED} },
     };
 
     // Parse args.

@@ -6,9 +6,10 @@
 #define PIMORONI_SPI_DEFAULT_INSTANCE spi0
 
 namespace pimoroni {
-    static const unsigned int PIN_UNUSED = UINT_MAX;
+    static const unsigned int PIN_UNUSED = INT_MAX; // Intentionally INT_MAX to avoid overflowing MicroPython's int type
 
     // I2C
+    static const unsigned int I2C_DEFAULT_BAUDRATE = 400000;
     static const unsigned int I2C_DEFAULT_SDA = 20;
     static const unsigned int I2C_DEFAULT_SCL = 21;
     static const unsigned int I2C_DEFAULT_INT = 22;

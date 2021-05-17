@@ -37,12 +37,6 @@ namespace pimoroni {
     saved_vhv_timeout = 0;
     // distance_mode = 1;
 
-    // Initialise I2C connection
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
-
     last_status = 0;
 
     // check model ID and module type registers (values specified in datasheet)
@@ -169,14 +163,14 @@ namespace pimoroni {
   void VL53L1X::writeReg(uint16_t reg, uint8_t value)
   {
     uint8_t buffer[3] = {(reg >> 8) & 0xFF, reg & 0xFF, value};
-    i2c_write_blocking(i2c, address, buffer, 3, false);
+    i2c->write_blocking(address, buffer, 3, false);
   }
 
   // Write a 16-bit register
   void VL53L1X::writeReg16Bit(uint16_t reg, uint16_t value)
   {
     uint8_t buffer[4] = {(reg >> 8) & 0xFF, reg & 0xFF, (value >> 8) & 0xFF, value & 0xFF};
-    i2c_write_blocking(i2c, address, buffer, 4, false);
+    i2c->write_blocking(address, buffer, 4, false);
   }
 
   // Write a 32-bit register
@@ -184,7 +178,7 @@ namespace pimoroni {
   {
     uint8_t buffer[6] = {(reg >> 8) & 0xFF, reg & 0xFF,
       (value >> 24) & 0xFF, (value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF};
-    i2c_write_blocking(i2c, address, buffer, 6, false);
+    i2c->write_blocking(address, buffer, 6, false);
   }
 
   // Read an 8-bit register
@@ -193,8 +187,8 @@ namespace pimoroni {
     uint8_t regbuf[2] = {((uint8_t)reg >> 8) & 0xFF, (uint8_t)reg & 0xFF};
     uint8_t buffer[1];
     uint8_t value;
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
-    i2c_read_blocking(i2c, address, buffer, 1, false);
+    i2c->write_blocking(address, regbuf, 2, true);
+    i2c->read_blocking(address, buffer, 1, false);
     value = buffer[0];
     return value;
   }
@@ -206,8 +200,8 @@ namespace pimoroni {
     uint8_t buffer[2];
     uint16_t value;
     reg= (reg << 8) + (reg >> 8);
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
-    i2c_read_blocking(i2c, address, buffer, 2, false);
+    i2c->write_blocking(address, regbuf, 2, true);
+    i2c->read_blocking(address, buffer, 2, false);
     value= (buffer[0] << 8) + buffer[1];
     return value;
   }
@@ -219,8 +213,8 @@ namespace pimoroni {
     uint8_t buffer[4];
     uint32_t value;
     reg= (reg << 8) + (reg >> 8);
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
-    i2c_read_blocking(i2c, address, buffer, 4, false);
+    i2c->write_blocking(address, regbuf, 2, true);
+    i2c->read_blocking(address, buffer, 4, false);
     value= (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
     return value;
   }
@@ -580,8 +574,8 @@ namespace pimoroni {
     uint16_t reg = RESULT__RANGE_STATUS;
     uint8_t regbuf[2] = {(reg >> 8) & 0xFF, reg & 0xFF};
     uint8_t buffer[17];
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
-    i2c_read_blocking(i2c, address, buffer, 17, false);
+    i2c->write_blocking(address, regbuf, 2, true);
+    i2c->read_blocking(address, buffer, 17, false);
 
     results.range_status = buffer[0];
 

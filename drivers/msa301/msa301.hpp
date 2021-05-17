@@ -13,10 +13,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS    = 0x26;
-    static const uint8_t DEFAULT_SDA_PIN        = 20;
-    static const uint8_t DEFAULT_SCL_PIN        = 21;
-    static const uint8_t DEFAULT_INT_PIN        = 22;
-    static const uint8_t PIN_UNUSED             = UINT8_MAX;
     
     static const uint8_t SOFT_RESET             = 0x00;
     static const uint8_t PART_ID                = 0x01;
@@ -109,26 +105,17 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     I2C *i2c;
-
-    // interface pins with our standard defaults where appropriate
-    uint8_t address    = DEFAULT_I2C_ADDRESS;
-    uint interrupt    = I2C_DEFAULT_INT;
+    uint8_t address  = DEFAULT_I2C_ADDRESS;
+    uint interrupt   = PIN_UNUSED;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    MSA301() {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    MSA301(uint8_t address) : address(address) {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    MSA301(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint8_t interrupt = PIN_UNUSED) : address(address), interrupt(interrupt) {
-      i2c = new I2C(sda, scl);
-    }
-    MSA301(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), interrupt(interrupt) {}
+    MSA301() : MSA301(DEFAULT_I2C_ADDRESS) {};
+    MSA301(uint8_t address) : i2c(new I2C()), address(address) {};
+    MSA301(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C(sda, scl)), address(address), interrupt(interrupt) {}
+    MSA301(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
 
 
     //--------------------------------------------------

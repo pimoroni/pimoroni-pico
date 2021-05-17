@@ -5,7 +5,7 @@ namespace pimoroni {
     void I2C::init() {
         i2c = ((sda / 2) & 0b1) ? i2c1 : i2c0;
 
-        i2c_init(i2c, 400000);
+        i2c_init(i2c, baudrate);
 
         gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
         gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
@@ -29,7 +29,28 @@ namespace pimoroni {
     uint8_t I2C::reg_read_uint8(uint8_t address, uint8_t reg) {
         uint8_t value;
         i2c_write_blocking(i2c, address, &reg, 1, false);
-        i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
+        i2c_read_blocking(i2c, address, (uint8_t *)&value, sizeof(uint8_t), false);
+        return value;
+    }
+
+    uint16_t I2C::reg_read_uint16(uint8_t address, uint8_t reg) {
+        uint16_t value;
+        i2c_write_blocking(i2c, address, &reg, 1, true);
+        i2c_read_blocking(i2c, address, (uint8_t *)&value, sizeof(uint16_t), false);
+        return value;
+    }
+
+    uint32_t I2C::reg_read_uint32(uint8_t address, uint8_t reg) {
+        uint32_t value;
+        i2c_write_blocking(i2c, address, &reg, 1, true);
+        i2c_read_blocking(i2c, address, (uint8_t *)&value, sizeof(uint32_t), false);
+        return value;
+    }
+
+    int16_t I2C::reg_read_int16(uint8_t address, uint8_t reg) {
+        int16_t value;
+        i2c_write_blocking(i2c, address, &reg, 1, true);
+        i2c_read_blocking(i2c, address, (uint8_t *)&value, sizeof(int16_t), false);
         return value;
     }
 
@@ -66,12 +87,5 @@ namespace pimoroni {
         read_bytes(address, reg, &value, 1);
         value &= ~(mask << shift);
         write_bytes(address, reg, &value, 1);
-    }
-
-    int16_t I2C::reg_read_int16(uint8_t address, uint8_t reg) {
-        int16_t value;
-        i2c_write_blocking(i2c, address, &reg, 1, true);
-        i2c_read_blocking(i2c, address, (uint8_t *)&value, 2, false);
-        return value;
     }
 }

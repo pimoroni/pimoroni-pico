@@ -148,7 +148,7 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    uint interrupt  = DEFAULT_INT_PIN;
 
     uint32_t timeout;
     bool debug;
@@ -164,9 +164,9 @@ namespace pimoroni {
   public:
     IOExpander();
     IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false);
-    IOExpander(uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
-    IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
-    IOExpander(I2C *i2c, uint8_t address=DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+    IOExpander(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+    IOExpander(i2c_inst_t *i2c, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+    IOExpander(I2C *i2c, uint8_t address=DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
 
 
     //--------------------------------------------------

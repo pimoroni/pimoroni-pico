@@ -7,11 +7,19 @@ using namespace pimoroni;
 
 static const uint8_t SENSITIVITY = 2;
 
-
-BreakoutTrackball trackball;
+// Trackball requires I2C at 100kHz or less.
+I2C i2c(BOARD::BREAKOUT_GARDEN, 100000);
+BreakoutTrackball trackball(&i2c);
 
 int main() {
-  trackball.init();
+  stdio_init_all();
+
+  if(!trackball.init()) {
+    printf("Trackball failed to init!\n");
+    return 1;
+  }
+
+  printf("Roll the Trackball to change colour!\n");
 
   trackball.set_rgbw(0, 0, 0, 64);
 

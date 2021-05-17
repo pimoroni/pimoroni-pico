@@ -298,18 +298,18 @@ namespace pimoroni {
   }
 
   IOExpander::IOExpander() :
-    IOExpander(new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN), DEFAULT_I2C_ADDRESS, DEFAULT_INT_PIN, timeout, debug) {};
+    IOExpander(new I2C(), DEFAULT_I2C_ADDRESS, DEFAULT_INT_PIN, timeout, debug) {};
 
   IOExpander::IOExpander(uint8_t address, uint32_t timeout, bool debug) :
-    IOExpander(new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN), address, DEFAULT_INT_PIN, timeout, debug) {};
+    IOExpander(new I2C(), address, DEFAULT_INT_PIN, timeout, debug) {};
 
-  IOExpander::IOExpander(uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt, uint32_t timeout, bool debug) :
+  IOExpander::IOExpander(uint8_t address, uint sda, uint scl, uint interrupt, uint32_t timeout, bool debug) :
     IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
 
-  IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt, uint32_t timeout, bool debug) :
+  IOExpander::IOExpander(i2c_inst_t *i2c, uint8_t address, uint sda, uint scl, uint interrupt, uint32_t timeout, bool debug) :
     IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
 
-  IOExpander::IOExpander(I2C *i2c, uint8_t address, uint8_t interrupt, uint32_t timeout, bool debug) :
+  IOExpander::IOExpander(I2C *i2c, uint8_t address, uint interrupt, uint32_t timeout, bool debug) :
     i2c(i2c),
     address(address), interrupt(interrupt),
     timeout(timeout), debug(debug), vref(3.3f),

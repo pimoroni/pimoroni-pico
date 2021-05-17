@@ -112,10 +112,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS    = 0x23;
-    static const uint8_t DEFAULT_SDA_PIN        = 20;
-    static const uint8_t DEFAULT_SCL_PIN        = 21;
-    static const uint8_t DEFAULT_INT_PIN        = 22;
-    static const uint8_t PIN_UNUSED             = UINT8_MAX;
 
   private:
     const int ch0_c[4] = {17743, 42785, 5926, 0};
@@ -133,7 +129,7 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     uint8_t address    = DEFAULT_I2C_ADDRESS;
-    uint8_t interrupt  = DEFAULT_INT_PIN;
+    uint interrupt     = PIN_UNUSED;
 
     static pimoroni::lookup lookup_led_current; 
     static pimoroni::lookup lookup_led_duty_cycle;
@@ -148,16 +144,10 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    LTR559() {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    LTR559(uint8_t address) : address(address) {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    LTR559(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint8_t interrupt = PIN_UNUSED) : address(address), interrupt(interrupt) {
-      i2c = new I2C(sda, scl);
-    }
-    LTR559(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint8_t interrupt = PIN_UNUSED) :
+    LTR559() : LTR559(DEFAULT_I2C_ADDRESS) {};
+    LTR559(uint8_t address) : i2c(new I2C()), address(address) {};
+    LTR559(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C()), address(address), interrupt(interrupt) {}
+    LTR559(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
       i2c(i2c), address(address), interrupt(interrupt) {}
 
     //--------------------------------------------------

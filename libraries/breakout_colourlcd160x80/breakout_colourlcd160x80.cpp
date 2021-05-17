@@ -8,7 +8,7 @@ namespace pimoroni {
   }
 
   BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf, spi_inst_t *spi,
-      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso, uint8_t bl)
+      uint cs, uint dc, uint sck, uint mosi, uint miso, uint bl)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, spi, cs, dc, sck, mosi, miso, bl) {
     __fb = buf;
   }

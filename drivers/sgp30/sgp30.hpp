@@ -18,8 +18,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x58;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
 
   private:
     /***** Private constants here *****/
@@ -48,20 +46,11 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    SGP30() {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    SGP30(uint8_t address) : address(address) {
-      i2c = new I2C(DEFAULT_SDA_PIN, DEFAULT_SCL_PIN);
-    };
-    SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) {
-      i2c = new I2C(sda, scl);
-    }
-    SGP30(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl) : address(address) {
-      i2c = new I2C(sda, scl);
-    }
-    SGP30(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address) {}
+    SGP30() : SGP30(DEFAULT_I2C_ADDRESS) {};
+    SGP30(uint8_t address) : i2c(new I2C()), address(address) {};
+    SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) : i2c(new I2C(sda, scl)) { }
+    SGP30(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl) : i2c(new I2C(sda, scl)) , address(address) {}
+    SGP30(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address) {}
 
     //--------------------------------------------------
     // Methods
