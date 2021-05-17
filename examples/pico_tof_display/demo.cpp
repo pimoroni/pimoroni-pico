@@ -253,5 +253,5 @@ int main() {
     i++;
   }
 
-    return 0;
+  return 0;
 }
