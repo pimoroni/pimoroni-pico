@@ -50,10 +50,9 @@ void BreakoutLTR559_print(const mp_print_t *print, mp_obj_t self_in, mp_print_ki
 mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_ltr559_BreakoutLTR559_obj_t *self = nullptr;
 
-    enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
+    enum { ARG_i2c, ARG_sda, ARG_scl, ARG_interrupt };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutLTR559::DEFAULT_I2C_ADDRESS} },
         { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
         { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
         { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = -1} },
@@ -85,9 +84,8 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
 
     self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
     self->base.type = &breakout_ltr559_BreakoutLTR559_type;
-    
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutLTR559(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+
+    self->breakout = new BreakoutLTR559(sda, scl, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "LTR559 breakout not found when initialising");

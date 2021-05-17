@@ -86,8 +86,7 @@ mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size
     self = m_new_obj(breakout_encoder_BreakoutEncoder_obj_t);
     self->base.type = &breakout_encoder_BreakoutEncoder_type;
 
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutEncoder(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    self->breakout = new BreakoutEncoder(args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "Encoder breakout not found when initialising");

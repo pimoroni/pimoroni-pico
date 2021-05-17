@@ -72,17 +72,19 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    uint interrupt  = PIN_UNUSED;
+    uint interrupt    = PIN_UNUSED;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    AS7262() : AS7262(DEFAULT_I2C_ADDRESS) {};
-    AS7262(uint8_t address) : i2c(new I2C()), address(address) {};
-    AS7262(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C()), address(address), interrupt(interrupt) {}
+    AS7262(uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), address, interrupt) {};
+
     AS7262(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
+
+    // TODO remove MicroPython-binding compatibility constructors
+    AS7262(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), address, interrupt) {}
 
 
     //--------------------------------------------------

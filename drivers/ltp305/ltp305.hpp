@@ -91,7 +91,7 @@ namespace pimoroni {
     LTP305(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS) :
       i2c(i2c), address(address) {}
 
-    LTP305(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) : LTP305(new I2C(sda, scl), address) {}
+    LTP305(uint8_t address, uint sda, uint scl) : LTP305(new I2C(sda, scl), address) {}
 
 
     //--------------------------------------------------

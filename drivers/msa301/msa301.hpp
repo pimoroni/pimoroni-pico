@@ -105,17 +105,19 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     I2C *i2c;
-    uint8_t address  = DEFAULT_I2C_ADDRESS;
-    uint interrupt   = PIN_UNUSED;
+    const uint8_t address  = DEFAULT_I2C_ADDRESS;
+    uint interrupt         = PIN_UNUSED;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    MSA301() : MSA301(DEFAULT_I2C_ADDRESS) {};
-    MSA301(uint8_t address) : i2c(new I2C()), address(address) {};
-    MSA301(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C(sda, scl)), address(address), interrupt(interrupt) {}
-    MSA301(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
+    MSA301() : MSA301(new I2C()) {};
+
+    MSA301(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
+
+    // TODO remove MicroPython-binding compatibility constructors
+    MSA301(i2c_inst_t *i2c_inst, uint sda, uint scl, uint interrupt = PIN_UNUSED) : MSA301(new I2C(sda, scl), interrupt) {}
 
 
     //--------------------------------------------------

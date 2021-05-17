@@ -209,7 +209,7 @@ namespace pimoroni {
     I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address  = DEFAULT_I2C_ADDRESS;
+    const int8_t address  = DEFAULT_I2C_ADDRESS;
     uint interrupt  = DEFAULT_INT_PIN;
 
     uint8_t times[TIME_ARRAY_LENGTH];
@@ -219,15 +219,13 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    RV3028() {}
+    RV3028() : RV3028(new I2C()) {}
 
-    RV3028(uint8_t address) :
-      address(address) {}
+    RV3028(I2C *i2c, uint interrupt = DEFAULT_INT_PIN) :
+      i2c(i2c), interrupt(interrupt) {}
 
-    RV3028(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = DEFAULT_INT_PIN) :
-      i2c(i2c), address(address), interrupt(interrupt) {}
-
-    RV3028(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) : RV3028(new I2C(sda, scl), address) {}
+    // TODO remove MicroPython-binding compatibility constructors
+    RV3028(i2c_inst_t *i2c, uint sda, uint scl, uint interrupt = DEFAULT_INT_PIN) : RV3028(new I2C(sda, scl), interrupt) {}
 
 
     //--------------------------------------------------

@@ -39,18 +39,19 @@ namespace pimoroni {
   private:
     I2C *i2c;
 
-    int8_t address    = DEFAULT_I2C_ADDRESS;
+    const int8_t address    = DEFAULT_I2C_ADDRESS;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    SGP30() : SGP30(DEFAULT_I2C_ADDRESS) {};
-    SGP30(uint8_t address) : i2c(new I2C()), address(address) {};
+    SGP30() : SGP30(new I2C()) {};
+
+    SGP30(I2C *i2c) : i2c(i2c) {}
+
+    // TODO remove MicroPython-binding compatibility constructors
     SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) : i2c(new I2C(sda, scl)) { }
-    SGP30(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl) : i2c(new I2C(sda, scl)) , address(address) {}
-    SGP30(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address) {}
 
     //--------------------------------------------------
     // Methods

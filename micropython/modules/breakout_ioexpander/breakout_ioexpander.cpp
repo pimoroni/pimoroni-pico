@@ -86,8 +86,7 @@ mp_obj_t BreakoutIOExpander_make_new(const mp_obj_type_t *type, size_t n_args, s
     self = m_new_obj(breakout_ioexpander_BreakoutIOExpander_obj_t);
     self->base.type = &breakout_ioexpander_BreakoutIOExpander_type;
 
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutIOExpander(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    self->breakout = new BreakoutIOExpander(args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "IOExpander breakout not found when initialising");

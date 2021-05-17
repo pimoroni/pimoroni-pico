@@ -128,8 +128,8 @@ namespace pimoroni {
     I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
-    uint8_t address    = DEFAULT_I2C_ADDRESS;
-    uint interrupt     = PIN_UNUSED;
+    const uint8_t address    = DEFAULT_I2C_ADDRESS;
+    uint interrupt           = PIN_UNUSED;
 
     static pimoroni::lookup lookup_led_current; 
     static pimoroni::lookup lookup_led_duty_cycle;
@@ -144,11 +144,12 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    LTR559() : LTR559(DEFAULT_I2C_ADDRESS) {};
-    LTR559(uint8_t address) : i2c(new I2C()), address(address) {};
-    LTR559(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C()), address(address), interrupt(interrupt) {}
-    LTR559(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), interrupt(interrupt) {}
+    LTR559() : LTR559(new I2C()) {};
+
+    LTR559(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
+
+    // TODO remove MicroPython-binding compatibility constructors
+    LTR559(uint sda, uint scl, uint interrupt = PIN_UNUSED) : LTR559(new I2C(), interrupt) {}
 
     //--------------------------------------------------
     // Methods

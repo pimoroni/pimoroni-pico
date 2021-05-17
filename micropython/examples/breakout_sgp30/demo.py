@@ -1,7 +1,9 @@
 import time
 from breakout_sgp30 import BreakoutSGP30
 
-sgp30 = BreakoutSGP30()
+# sgp30 = BreakoutSGP30(sda=4, scl=5)  # i2c pins 4, 5 for Breakout Garden
+sgp30 = BreakoutSGP30()                # Default i2c pins for Pico Explorer
+
 print("SGP30 initialised - about to start measuring without waiting")
 
 sgp30.start_measurement(False)

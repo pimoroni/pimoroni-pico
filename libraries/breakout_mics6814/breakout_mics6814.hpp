@@ -11,7 +11,6 @@ namespace pimoroni {
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x19;
     static constexpr float DEFAULT_BRIGHTNESS = 1.0f; //Effectively the maximum fraction of the period that the LED will be on
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
     static const uint32_t DEFAULT_TIMEOUT     = 1;
     static const uint32_t DEFAULT_ADC_TIMEOUT = 1;
 
@@ -53,15 +52,13 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    BreakoutMICS6814() :
-      ioe(DEFAULT_I2C_ADDRESS) {}
+    BreakoutMICS6814(uint8_t address = DEFAULT_I2C_ADDRESS) : BreakoutMICS6814(new I2C(), address) {};
 
-    BreakoutMICS6814(uint8_t address) :
-      ioe(address) {}
+    BreakoutMICS6814(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
+      ioe(i2c, address, interrupt, timeout, debug) {}
 
-    BreakoutMICS6814(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
-      ioe(i2c, address, sda, scl, interrupt, timeout) {}
-
+    // TODO remove MicroPython-binding compatibility constructors
+    BreakoutMICS6814(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : BreakoutMICS6814(new I2C(sda, scl), address, interrupt, timeout) {};
 
     //--------------------------------------------------
     // Methods

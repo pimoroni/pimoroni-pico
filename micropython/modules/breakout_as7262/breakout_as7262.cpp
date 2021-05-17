@@ -79,8 +79,7 @@ mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self = m_new_obj(breakout_as7262_BreakoutAS7262_obj_t);
     self->base.type = &breakout_as7262_BreakoutAS7262_type;
 
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutAS7262(i2c, sda, scl, args[ARG_int].u_int);
+    self->breakout = new BreakoutAS7262(sda, scl, args[ARG_int].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "AS7262 breakout not found when initialising");

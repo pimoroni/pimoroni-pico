@@ -28,10 +28,6 @@ namespace pimoroni {
 
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS = 0x18;
-    static const uint8_t DEFAULT_SDA_PIN = 20;
-    static const uint8_t DEFAULT_SCL_PIN = 21;
-    static const uint8_t DEFAULT_INT_PIN = 22;
-    static const uint8_t PIN_UNUSED      = UINT8_MAX;
 
     static const uint16_t CHIP_ID = 0xE26A;
     static const uint8_t CHIP_VERSION = 2;
@@ -148,7 +144,7 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    uint interrupt  = DEFAULT_INT_PIN;
+    uint interrupt    = PIN_UNUSED;
 
     uint32_t timeout;
     bool debug;
@@ -162,10 +158,16 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    IOExpander();
-    IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false);
-    IOExpander(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
-    IOExpander(i2c_inst_t *i2c, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+    IOExpander() :
+        IOExpander(new I2C(), DEFAULT_I2C_ADDRESS, PIN_UNUSED, timeout, debug) {};
+
+    IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false) :
+        IOExpander(new I2C(), address, PIN_UNUSED, timeout, debug) {};
+
+    IOExpander(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false) :
+        IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
+
+    // TODO remove MicroPython-binding compatibility constructors
     IOExpander(I2C *i2c, uint8_t address=DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
 
 

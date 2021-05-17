@@ -86,8 +86,7 @@ mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args
     self = m_new_obj(breakout_potentiometer_BreakoutPotentiometer_obj_t);
     self->base.type = &breakout_potentiometer_BreakoutPotentiometer_type;
 
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutPotentiometer(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    self->breakout = new BreakoutPotentiometer(args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "Potentiometer breakout not found when initialising");

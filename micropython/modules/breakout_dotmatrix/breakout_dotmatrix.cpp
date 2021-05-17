@@ -82,8 +82,7 @@ mp_obj_t BreakoutDotMatrix_make_new(const mp_obj_type_t *type, size_t n_args, si
     self = m_new_obj(breakout_dotmatrix_BreakoutDotMatrix_obj_t);
     self->base.type = &breakout_dotmatrix_BreakoutDotMatrix_type;
     
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutDotMatrix(i2c, args[ARG_address].u_int, sda, scl);
+    self->breakout = new BreakoutDotMatrix(args[ARG_address].u_int, sda, scl);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "DotMatrix breakout not found when initialising");
