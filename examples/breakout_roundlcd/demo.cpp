@@ -17,7 +17,7 @@ BreakoutRoundLCD display(buffer, BG_SPI_FRONT);
 constexpr float RADIUS = BreakoutRoundLCD::WIDTH / 2;
 
 Pen from_hsv(float h, float s, float v) {
-  uint8_t r, g, b;
+  uint8_t r = 0, g = 0, b = 0;
 
   float i = floor(h * 6.0f);
   float f = h * 6.0f - i;

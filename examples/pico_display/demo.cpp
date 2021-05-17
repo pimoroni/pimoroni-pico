@@ -82,11 +82,6 @@ int main() {
   // uint16_t dark_green = pico_display.create_pen(10, 100, 10);
   // uint16_t blue = pico_display.create_pen(0, 0, 255);
 
-  bool a_pressed = false;
-  bool b_pressed = false;
-  bool x_pressed = false;
-  bool y_pressed = false;
-
   struct pt {
     float      x;
     float      y;

@@ -37,7 +37,6 @@ int main() {
 
   stdio_init_all();
 
-  int16_t count = 0;
   if(pot.init()) {
     printf("Potentiometer found...\n");
 
@@ -50,7 +49,7 @@ int main() {
       float percent = pot.read();
 
       printf("Percent: %d\n", (int)(percent * 100));
-      uint8_t r, g, b;
+      uint8_t r = 0, g = 0, b = 0;
       from_hsv(percent, 1.0f, 1.0f, r, g, b);
       pot.set_led(r, g, b);
 

@@ -40,11 +40,6 @@ int main() {
   uint32_t i = 0;
   while(true) {
     i = i + 1;
-    uint8_t j = 0;
-
-
-
-
 
     if(pico_unicorn.is_pressed(pico_unicorn.A)) { a_pressed = true; }
     if(pico_unicorn.is_pressed(pico_unicorn.B)) { b_pressed = true; }

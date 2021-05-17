@@ -58,11 +58,6 @@ int main() {
   pico_explorer.init();
   msa301.init();
 
-  bool a_pressed = false;
-  bool b_pressed = false;
-  bool x_pressed = false;
-  bool y_pressed = false;
-
   struct pt {
     float      x;
     float      y;
@@ -160,7 +155,7 @@ int main() {
     float yoff = cos(i / 20.0f) * 50.0f;
     yoff += 120 - (68 / 2);
     for(int y = 0; y < 68; y++) {
-      uint16_t *dest = pico_explorer.frame_buffer + (y * 240);
+      // uint16_t *dest = pico_explorer.frame_buffer + (y * 240);
       uint8_t *src = _binary_fox_tga_start + 18 + (y * 81 * 3);
       for(int x = 0; x < 81; x++) {
         uint8_t b = *src++;

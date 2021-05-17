@@ -79,7 +79,7 @@ int socket_accept(int8_t server_sock) {
 }
 
 uint8_t start_server(uint16_t http_port) {
-  printf("Starting server...\n", NETWORK);
+  printf("Starting server...\n");
   // Get a socket for our server
   uint8_t server_sock = wireless.get_socket();
   wireless.start_server(http_port, server_sock);

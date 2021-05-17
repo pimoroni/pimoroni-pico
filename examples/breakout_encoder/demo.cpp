@@ -36,7 +36,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 void count_changed(int16_t count) {
   printf("Count: %d\n", count);
   float h = (count % STEPS_PER_REV) / (float)STEPS_PER_REV;
-  uint8_t r, g, b;
+  uint8_t r = 0, g = 0, b = 0;
   from_hsv(h, 1.0f, 1.0f, r, g, b);
   enc.set_led(r, g, b);
 }
