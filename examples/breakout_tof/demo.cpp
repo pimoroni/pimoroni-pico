@@ -20,17 +20,16 @@ int main() {
 
   printf("VL53L1X found...\n");
 
-  tof.start_continuous(1000);
+  tof.start_continuous(100);
   tof.set_measurement_timing_budget(50000);
   tof.set_distance_mode_int(1);
 
   while(true) {
     uint16_t distance = tof.read(true);
     printf("Distance: %imm\n", distance);
-    gpio_put(PICO_DEFAULT_LED_PIN, 1);
-    sleep_ms(500);
-    gpio_put(PICO_DEFAULT_LED_PIN, 0);
-    sleep_ms(500);
+    gpio_put(PICO_DEFAULT_LED_PIN, true);
+    sleep_ms(100);
+    gpio_put(PICO_DEFAULT_LED_PIN, false);
   }
 
   return 0;

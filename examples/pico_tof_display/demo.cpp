@@ -134,10 +134,11 @@ void flash_led(uint32_t curr_count) {
   // Flash the LED based on the current loop counter
   // curr_count=0 will turn LED off
 #ifndef USE_PICO_EXPLORER
-  if ((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
+  if((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
     // value less than half modded number - LED off
     pico_display.set_led(0, 0, 0);
-  } else {
+  }
+  else {
     // value more than half modded number - LED on
     pico_display.set_led(128, 128, 128);
   }
@@ -149,12 +150,14 @@ int main() {
   uint16_t vl53_mode = 1;
 
   pico_display.init();
+  pico_display.clear();
+  pico_display.update();
 
   vl53_present = vl53l1x.init();
 
   uint32_t i = 0;
   char buf[256];
-  if (vl53_present) {
+  if(vl53_present) {
     vl53l1x.start_continuous(1000);
     vl53l1x.set_measurement_timing_budget(50000);
     vl53l1x.set_distance_mode_int(vl53_mode);
@@ -175,18 +178,18 @@ int main() {
     bool x_pressed = ar_button_x.next(i, pico_display.is_pressed(pico_display.X));
     bool y_pressed = ar_button_y.next(i, pico_display.is_pressed(pico_display.Y));
 
-    if (b_pressed) {
+    if(b_pressed) {
       dist_held = !dist_held;
     }
 
-    if (x_pressed) {
+    if(x_pressed) {
       units_metric = !units_metric;
     }
 
-    if (y_pressed) {
-      if (vl53_present) {
+    if(y_pressed) {
+      if(vl53_present) {
         vl53_mode++;
-        if (vl53_mode > 3) vl53_mode = 1;
+        if(vl53_mode > 3) vl53_mode = 1;
         vl53l1x.set_distance_mode_int(vl53_mode);
       }
     }
@@ -199,13 +202,14 @@ int main() {
     pico_display.set_pen(255, 255, 255);
     // Show the current distance
     flash_led(0);
-    if (vl53_present) {
+    if(vl53_present) {
       pico_display.text("Units",
           Point(text_box.x+disptext_x_reminder_xoff,
             text_box.y+disptext_x_reminder_yoff), 230, disptext_reminder_size);
       pico_display.text("+Mode",
           Point(text_box.x+disptext_y_reminder_xoff,
             text_box.y+disptext_y_reminder_yoff), 230, disptext_reminder_size);
+
       if(dist_held) {
         pico_display.set_pen(255, 64, 64);
       }
@@ -220,10 +224,13 @@ int main() {
             text_box.y+disptext_mode_yoff), 230, disptext_mode_size);
 
       // Get the distance (use previous distance if number is held)
-      if (!dist_held) dist = vl53l1x.read(false);
-      if (units_metric) {
+      if(!dist_held)
+        dist = vl53l1x.read(false);
+
+      if(units_metric) {
         sprintf(buf, "%dmm", dist);
-      } else {
+      }
+      else {
         uint16_t ft = ((uint16_t)(dist/MM_TO_INCH))/12;
         sprintf(buf, "%dft %.1fin", ft,
             ((float)dist/MM_TO_INCH)-ft*12.0);
@@ -231,7 +238,8 @@ int main() {
       pico_display.text(buf,
           Point(text_box.x+disptext_dist_xoff,
             text_box.y+disptext_dist_yoff), 120, disptext_dist_size);
-    } else {
+    }
+    else {
       pico_display.text("VL53L1X Missing",
           Point(text_box.x+disptext_dist_xoff,
             text_box.y+disptext_dist_yoff), 230, disptext_dist_size);
