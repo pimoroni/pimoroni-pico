@@ -69,7 +69,7 @@ mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad i2C object"));
+        mp_raise_ValueError(MP_ERROR_TEXT("BreakoutEncoder: Bad i2C object"));
         return mp_const_none;
     }
 
@@ -81,7 +81,7 @@ mp_obj_t BreakoutEncoder_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->breakout = new BreakoutEncoder(i2c->i2c, args[ARG_address].u_int, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "Encoder breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, "BreakoutEncoder: breakout not found when initialising");
     }
 
     return MP_OBJ_FROM_PTR(self);

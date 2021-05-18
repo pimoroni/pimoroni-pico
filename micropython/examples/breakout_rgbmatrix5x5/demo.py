@@ -1,13 +1,18 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_rgbmatrix5x5 import BreakoutRGBMatrix5x5
+
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+matrix = BreakoutRGBMatrix5x5(i2c)
 
 colors = []
 colors.append((255, 0, 0))
 colors.append((0, 255, 0))
 colors.append((0, 0, 255))
 colors.append((128, 128, 128))
-
-matrix = BreakoutRGBMatrix5x5()
 
 x = 0
 y = 0

@@ -50,10 +50,11 @@ mp_obj_t PimoroniI2C___del__(mp_obj_t self_in) {
 mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PimoroniI2C_obj_t *self = nullptr;
 
-    enum { ARG_sda, ARG_scl };
+    enum { ARG_sda, ARG_scl, ARG_baudrate };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
         { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
+        { MP_QSTR_baudrate, MP_ARG_INT, {.u_int = I2C_DEFAULT_BAUDRATE} },
     };
 
     // Parse args.
@@ -63,6 +64,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     // Get I2C bus.
     int sda = args[ARG_sda].u_int;
     int scl = args[ARG_scl].u_int;
+    int baud = args[ARG_baudrate].u_int;
     int i2c_id = (sda >> 1) & 0b1;  // i2c bus for given SDA pin
 
     if(!IS_VALID_SDA(i2c_id, sda)) {
@@ -76,7 +78,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     self = m_new_obj_with_finaliser(_PimoroniI2C_obj_t);
     self->base.type = &PimoroniI2C_type;
 
-    self->i2c = new I2C(sda, scl);
+    self->i2c = new I2C(sda, scl, baud);
 
     return MP_OBJ_FROM_PTR(self);
 }

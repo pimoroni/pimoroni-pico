@@ -1,10 +1,15 @@
-import math
 import time
+import math
 import random
 
+from pimoroni_i2c import PimoroniI2C
 from breakout_dotmatrix import BreakoutDotMatrix
 
-display = BreakoutDotMatrix()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+display = BreakoutDotMatrix(i2c)
 start_time = time.time()
 
 

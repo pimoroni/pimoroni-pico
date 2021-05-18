@@ -1,9 +1,14 @@
 import time
 import math
 
+from pimoroni_i2c import PimoroniI2C
 from breakout_dotmatrix import BreakoutDotMatrix
 
-display = BreakoutDotMatrix()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+display = BreakoutDotMatrix(i2c)
 
 #        Left Image     Padding  Right Image    Padding
 image = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,

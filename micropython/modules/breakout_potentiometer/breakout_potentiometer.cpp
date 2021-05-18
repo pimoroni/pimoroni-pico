@@ -69,7 +69,7 @@ mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad i2C object"));
+        mp_raise_ValueError(MP_ERROR_TEXT("BreakoutPotentiometer: Bad i2C object"));
         return mp_const_none;
     }
 
@@ -81,7 +81,7 @@ mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args
     self->breakout = new BreakoutPotentiometer(i2c->i2c, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "Potentiometer breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, "BreakoutPotentiometer: breakout not found when initialising");
     }
 
     return MP_OBJ_FROM_PTR(self);

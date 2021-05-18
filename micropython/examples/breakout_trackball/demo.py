@@ -1,11 +1,18 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_trackball import BreakoutTrackball
+
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5, "baudrate": 100000}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21, "baudrate": 100000}
 
 sensitivity = 2
 
-trackball = BreakoutTrackball()
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+trackball = BreakoutTrackball(i2c)
 
 trackball.set_rgbw(0, 0, 0, 64)
+
+print("Roll the trackball to change colour!")
 
 while True:
     state = trackball.read()

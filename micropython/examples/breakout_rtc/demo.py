@@ -1,8 +1,12 @@
+from pimoroni_i2c import PimoroniI2C
 from breakout_rtc import BreakoutRTC
 import time
 
-# rtc = BreakoutRTC(sda=4, scl=5)  # i2c pins 4, 5 for Breakout Garden
-rtc = BreakoutRTC()                # Default i2c pins for Pico Explorer
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}  # i2c pins 4, 5 for Breakout Garden
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}  # Default i2c pins for Pico Explorer
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+rtc = BreakoutRTC(i2c)
 
 if rtc.is_12_hour():
     rtc.set_24_hour()
