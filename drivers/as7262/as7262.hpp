@@ -79,12 +79,12 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    AS7262(uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), address, interrupt) {};
+    AS7262(uint interrupt = PIN_UNUSED) : AS7262(new I2C(), interrupt) {};
 
-    AS7262(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
+    AS7262(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
 
     // TODO remove MicroPython-binding compatibility constructors
-    AS7262(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), address, interrupt) {}
+    AS7262(uint sda, uint scl, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), interrupt) {}
 
 
     //--------------------------------------------------
