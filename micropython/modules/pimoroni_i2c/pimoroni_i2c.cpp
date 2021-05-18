@@ -39,6 +39,13 @@ void PimoroniI2C_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     mp_print_str(print, ")");
 }
 
+/***** Destructor ******/
+mp_obj_t PimoroniI2C___del__(mp_obj_t self_in) {
+    _PimoroniI2C_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniI2C_obj_t);
+    delete self->i2c;
+    return mp_const_none;
+}
+
 /***** Constructor *****/
 mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PimoroniI2C_obj_t *self = nullptr;
@@ -66,7 +73,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
     }
 
-    self = m_new_obj(_PimoroniI2C_obj_t);
+    self = m_new_obj_with_finaliser(_PimoroniI2C_obj_t);
     self->base.type = &PimoroniI2C_type;
 
     self->i2c = new I2C(sda, scl);

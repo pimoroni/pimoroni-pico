@@ -6,10 +6,11 @@
 
 
 /***** Methods *****/
-//MP_DEFINE_CONST_FUN_OBJ_KW(PimoroniI2C_read_obj, 2, PimoroniI2C_set_address);
+MP_DEFINE_CONST_FUN_OBJ_1(PimoroniI2C___del___obj, PimoroniI2C___del__);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t PimoroniI2C_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&PimoroniI2C___del___obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(PimoroniI2C_locals_dict, PimoroniI2C_locals_dict_table);
