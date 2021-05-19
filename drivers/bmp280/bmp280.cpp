@@ -57,4 +57,12 @@ namespace pimoroni {
         
         return result;
     }
+
+    I2C* BMP280::get_i2c() const {
+        return i2c;
+    }
+
+    int BMP280::get_int() const {
+        return interrupt;
+    }
 }

@@ -72,4 +72,12 @@ namespace pimoroni {
         reading.humidity = data.humidity;
         return reading;
     }
+
+    I2C* BME280::get_i2c() const {
+        return i2c;
+    }
+
+    int BME280::get_int() const {
+        return interrupt;
+    }
 }

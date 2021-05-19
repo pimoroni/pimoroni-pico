@@ -34,6 +34,10 @@ namespace pimoroni {
             BMP280(uint8_t address) : BMP280(new I2C(), address) {}
             BMP280(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
 
+            // For print access in micropython
+            I2C* get_i2c() const;
+            int get_int() const;
+
             bmp280_reading read();
 
             // Bindings for bmp280_dev 
