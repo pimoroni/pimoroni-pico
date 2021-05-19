@@ -12,6 +12,13 @@ using namespace pimoroni;
 
 extern "C" {
 #include "breakout_potentiometer.h"
+#include "pimoroni_i2c.h"
+
+/***** I2C Struct *****/
+typedef struct _PimoroniI2C_obj_t {
+    mp_obj_base_t base;
+    I2C *i2c;
+} _PimoroniI2C_obj_t;
 
 /***** Variables Struct *****/
 typedef struct _breakout_potentiometer_BreakoutPotentiometer_obj_t {
@@ -50,47 +57,31 @@ void BreakoutPotentiometer_print(const mp_print_t *print, mp_obj_t self_in, mp_p
 mp_obj_t BreakoutPotentiometer_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_potentiometer_BreakoutPotentiometer_obj_t *self = nullptr;
 
-    enum { ARG_i2c, ARG_address, ARG_sda, ARG_scl, ARG_interrupt };
+    enum { ARG_i2c, ARG_interrupt };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_i2c, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_i2c, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutPotentiometer::DEFAULT_I2C_ADDRESS} },
-        { MP_QSTR_sda, MP_ARG_INT, {.u_int = 20} },
-        { MP_QSTR_scl, MP_ARG_INT, {.u_int = 21} },
-        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = BreakoutPotentiometer::PIN_UNUSED} },
+        { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = PIN_UNUSED} },
     };
 
     // Parse args.
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    // Get I2C bus.
-    int i2c_id = args[ARG_i2c].u_int;
-    int sda = args[ARG_sda].u_int;
-    int scl = args[ARG_scl].u_int;
-
-    if(i2c_id == -1) {
-        i2c_id = (sda >> 1) & 0b1;  // If no i2c specified, choose the one for the given SDA pin
-    }
-    if(i2c_id < 0 || i2c_id > 1) {
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("I2C(%d) doesn't exist"), i2c_id);
+    if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("BreakoutPotentiometer: Bad i2C object"));
+        return mp_const_none;
     }
 
-    if(!IS_VALID_SDA(i2c_id, sda)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad SDA pin"));
-    }
-
-    if(!IS_VALID_SCL(i2c_id, scl)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
-    }
+    _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
 
     self = m_new_obj(breakout_potentiometer_BreakoutPotentiometer_obj_t);
     self->base.type = &breakout_potentiometer_BreakoutPotentiometer_type;
 
-    i2c_inst_t *i2c = (i2c_id == 0) ? i2c0 : i2c1;
-    self->breakout = new BreakoutPotentiometer(i2c, args[ARG_address].u_int, sda, scl, args[ARG_interrupt].u_int);
+    self->breakout = new BreakoutPotentiometer(i2c->i2c, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "Potentiometer breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, "BreakoutPotentiometer: breakout not found when initialising");
     }
 
     return MP_OBJ_FROM_PTR(self);

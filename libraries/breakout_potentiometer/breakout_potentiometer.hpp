@@ -22,7 +22,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0E;
     static constexpr float DEFAULT_BRIGHTNESS = 1.0f; //Effectively the maximum fraction of the period that the LED will be on
     static const Direction DEFAULT_DIRECTION  = DIRECTION_CW;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
     static const uint32_t DEFAULT_TIMEOUT     = 1;
     static const uint32_t DEFAULT_ADC_TIMEOUT = 1;
 
@@ -51,14 +50,13 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    BreakoutPotentiometer() :
-      ioe(DEFAULT_I2C_ADDRESS) {}
+    BreakoutPotentiometer(uint8_t address = DEFAULT_I2C_ADDRESS) : BreakoutPotentiometer(new I2C(), address) {};
 
-    BreakoutPotentiometer(uint8_t address) :
-      ioe(address) {}
+    BreakoutPotentiometer(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
+      ioe(i2c, address, interrupt, timeout, debug) {}
 
-    BreakoutPotentiometer(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
-      ioe(i2c, address, sda, scl, interrupt, timeout) {}
+    // TODO remove MicroPython-binding compatibility constructors
+    BreakoutPotentiometer(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : BreakoutPotentiometer(new I2C(sda, scl), address, interrupt, timeout) {};
 
 
     //--------------------------------------------------

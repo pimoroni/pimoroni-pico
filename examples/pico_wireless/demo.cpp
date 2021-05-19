@@ -66,7 +66,7 @@ int main() {
 
     sleep_ms(1000);
 
-    uint8_t r, g, b;
+    uint8_t r = 0, g = 0, b = 0;
     uint8_t a = 0;
     while(!wireless.is_pressed(PicoWireless::A)) {
         from_hsv((float)a/256.0f, 1, 1, r, g, b);
@@ -79,15 +79,15 @@ int main() {
 
     printf("firmware version Nina %s\n", wireless.get_fw_version());
     uint8_t* mac = wireless.get_mac_address();
-    printf("mac address ", wireless.get_mac_address()[0]);
-    for(uint i =0; i < WL_MAC_ADDR_LENGTH; i++) {
+    printf("mac address ");
+    for(uint i = 0; i < WL_MAC_ADDR_LENGTH; i++) {
       printf("%d:", mac[i]);
     }
     printf("\n");
 
     printf("starting connection\n");
 
-    bool connected = wireless.wifi_set_passphrase(NETWORK, PASSWORD);
+    wireless.wifi_set_passphrase(NETWORK, PASSWORD);
 
     printf("waiting to establish connection status\n");
     while(wireless.get_connection_status() != WL_CONNECTED) {
@@ -103,8 +103,8 @@ int main() {
     wireless.get_gateway_ip(gateway);
     printf("gateway address: %d.%d.%d.%d\n", gateway[0], gateway[1], gateway[2], gateway[3]);
 
-    printf("SSID = %s\n", wireless.get_current_ssid());
-    printf("RSSI = %d\n", wireless.get_current_rssi());
+    printf("SSID = %s\n", wireless.get_current_ssid().c_str());
+    printf("RSSI = %ld\n", wireless.get_current_rssi());
     
     uint8_t t = 0;
     while (true) {      

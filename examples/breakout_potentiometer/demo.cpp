@@ -1,12 +1,14 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 #include <math.h>
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_potentiometer.hpp"
 
 using namespace pimoroni;
 
-BreakoutPotentiometer pot;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutPotentiometer pot(&i2c);
 bool toggle = false;
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
@@ -35,7 +37,6 @@ int main() {
 
   stdio_init_all();
 
-  int16_t count = 0;
   if(pot.init()) {
     printf("Potentiometer found...\n");
 
@@ -48,7 +49,7 @@ int main() {
       float percent = pot.read();
 
       printf("Percent: %d\n", (int)(percent * 100));
-      uint8_t r, g, b;
+      uint8_t r = 0, g = 0, b = 0;
       from_hsv(percent, 1.0f, 1.0f, r, g, b);
       pot.set_led(r, g, b);
 

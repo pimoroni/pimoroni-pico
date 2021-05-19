@@ -95,7 +95,7 @@ namespace pimoroni {
     }
   }
 
-  void PicoExplorer::set_audio_pin(uint8_t pin) {
+  void PicoExplorer::set_audio_pin(uint pin) {
     pwm_config tone_pwm_cfg = pwm_get_default_config();
 
     // calculate the pwm wrap value for this frequency

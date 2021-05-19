@@ -61,13 +61,6 @@ BUILD_MONTH_OCT | BUILD_MONTH_NOV | BUILD_MONTH_DEC
 namespace pimoroni {
 
   bool RV3028::init() {
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(scl);
-
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
       gpio_set_dir(interrupt, GPIO_IN);
@@ -75,7 +68,7 @@ namespace pimoroni {
     }
 
     uint8_t chip_id = 0;
-    read_bytes(RV3028_ID, &chip_id, 1);
+    i2c->read_bytes(address, RV3028_ID, &chip_id, 1);
     if(chip_id != (RV3028_CHIP_ID | RV3028_VERSION)) {
       return false;
     }
@@ -88,15 +81,15 @@ namespace pimoroni {
   }
 
   i2c_inst_t* RV3028::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int RV3028::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int RV3028::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   int RV3028::get_int() const {
@@ -712,7 +705,7 @@ namespace pimoroni {
 
   // Returns the status byte
   uint8_t RV3028::status(void) {
-    return(read_register(RV3028_STATUS));
+    return read_register(RV3028_STATUS);
   }
 
   void RV3028::clear_interrupts() { // Read the status register to clear the current interrupt flags
@@ -733,7 +726,7 @@ namespace pimoroni {
 
   uint8_t RV3028::read_register(uint8_t addr) {
     uint8_t b1[2];
-    if(1 == RV3028::read_bytes(addr, b1, 1))
+    if(1 == i2c->read_bytes(address, addr, b1, 1))
       return b1[0];
     else
       return 0xFF; //Error
@@ -743,15 +736,15 @@ namespace pimoroni {
     uint8_t b1[2];
     b1[0] = val;
     b1[1] = 0;
-    return(RV3028::write_bytes(addr, b1, 1));
+    return i2c->write_bytes(address, addr, b1, 1);
   }
 
   bool RV3028::read_multiple_registers(uint8_t addr, uint8_t *dest, uint8_t len) {
-    return(RV3028::read_bytes(addr, dest, len));
+    return i2c->read_bytes(address, addr, dest, len);
   }
 
   bool RV3028::write_multiple_registers(uint8_t addr, uint8_t *values, uint8_t len) {
-    return(RV3028::write_bytes(addr, values, len));
+    return i2c->write_bytes(address, addr, values, len);
   }
 
   bool RV3028::write_config_eeprom_ram_mirror(uint8_t eeprom_addr, uint8_t val) {
@@ -833,52 +826,15 @@ namespace pimoroni {
   }
 
   void RV3028::set_bit(uint8_t reg_addr, uint8_t bit_num) {
-    RV3028::set_bits(reg_addr, bit_num, 0x01);
+    i2c->set_bits(address, reg_addr, bit_num, 0x01);
   }
 
   void RV3028::clear_bit(uint8_t reg_addr, uint8_t bit_num) {
-    RV3028::clear_bits(reg_addr, bit_num, 0x01);
+    i2c->clear_bits(address, reg_addr, bit_num, 0x01);
   }
 
   bool RV3028::read_bit(uint8_t reg_addr, uint8_t bit_num) {
-    uint8_t value = RV3028::get_bits(reg_addr, bit_num, 0x01);
+    uint8_t value = i2c->get_bits(address, reg_addr, bit_num, 0x01);
     return value;
   }
-
-  // i2c functions
-  int RV3028::write_bytes(uint8_t reg, uint8_t *buf, int len) {
-    uint8_t buffer[len + 1];
-    buffer[0] = reg;
-    for(int x = 0; x < len; x++) {
-      buffer[x + 1] = buf[x];
-    }
-    return i2c_write_blocking(i2c, address, buffer, len + 1, false);
-  };
-
-  int RV3028::read_bytes(uint8_t reg, uint8_t *buf, int len) {
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, buf, len, false);
-    return len;
-  };
-
-  uint8_t RV3028::get_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    return value & (mask << shift);
-  }
-
-  void RV3028::set_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value |= mask << shift;
-    write_bytes(reg, &value, 1);
-  }
-
-  void RV3028::clear_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value &= ~(mask << shift);
-    write_bytes(reg, &value, 1);
-  }
-
 }

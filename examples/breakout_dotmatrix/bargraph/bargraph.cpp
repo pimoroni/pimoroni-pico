@@ -5,7 +5,8 @@
 
 using namespace pimoroni;
 
-BreakoutDotMatrix display;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutDotMatrix display(&i2c);
 static const uint8_t WIDTH = display.WIDTH;
 static const uint8_t HEIGHT = display.HEIGHT;
 static const uint8_t HALF_WIDTH = (WIDTH / 2);

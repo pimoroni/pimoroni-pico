@@ -1,9 +1,14 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_matrix11x7 import BreakoutMatrix11x7
 
 on_brightness = 64
 
-matrix = BreakoutMatrix11x7()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+matrix = BreakoutMatrix11x7(i2c)
 
 x = 0
 y = 0

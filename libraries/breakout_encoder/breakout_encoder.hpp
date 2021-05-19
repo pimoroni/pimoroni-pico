@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drivers/ioexpander/ioexpander.hpp"
+#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
@@ -46,22 +47,20 @@ namespace pimoroni {
     IOExpander ioe;
     Direction direction = DEFAULT_DIRECTION;
     float brightness = DEFAULT_BRIGHTNESS;
-    uint8_t interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
+    uint interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    BreakoutEncoder() :
-      ioe(DEFAULT_I2C_ADDRESS) {}
+    BreakoutEncoder(uint8_t address = DEFAULT_I2C_ADDRESS) : BreakoutEncoder(new I2C(), address) {};
 
-    BreakoutEncoder(uint8_t address) :
-      ioe(address) {}
+    BreakoutEncoder(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
+      ioe(i2c, address, interrupt, timeout, debug) {}
 
-    BreakoutEncoder(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) :
-      ioe(i2c, address, sda, scl, interrupt, timeout),
-      interrupt_pin(interrupt) {}
+    // TODO remove MicroPython-binding compatibility constructors
+    BreakoutEncoder(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : BreakoutEncoder(new I2C(sda, scl), address, interrupt, timeout) {};
 
 
     //--------------------------------------------------

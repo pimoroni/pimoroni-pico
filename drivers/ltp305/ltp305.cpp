@@ -5,11 +5,6 @@
 namespace pimoroni {
 
   bool LTP305::init() {
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
-
     set_brightness(DEFAULT_BRIGHTNESS);
     clear();
 
@@ -17,7 +12,7 @@ namespace pimoroni {
   }
 
   i2c_inst_t* LTP305::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int LTP305::get_address() const {
@@ -25,17 +20,17 @@ namespace pimoroni {
   }
 
   int LTP305::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int LTP305::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   void LTP305::set_brightness(uint8_t brightness, bool update) {
     brightness = std::min((uint8_t)MAX_BRIGHTNESS, brightness);
     if(update)
-      i2c_reg_write_uint8(CMD_BRIGHTNESS, brightness);
+      i2c->reg_write_uint8(address, CMD_BRIGHTNESS, brightness);
   }
 
   void LTP305::set_decimal(bool left, bool right) {
@@ -120,17 +115,12 @@ namespace pimoroni {
   }
 
   void LTP305::show() {
-    i2c_write_blocking(i2c, address, buf_matrix_left, BUFFER_CMD + BUFFER_LENGTH, false);
-    i2c_write_blocking(i2c, address, buf_matrix_right, BUFFER_CMD + BUFFER_LENGTH, false);
+    i2c->write_blocking(address, buf_matrix_left, BUFFER_CMD + BUFFER_LENGTH, false);
+    i2c->write_blocking(address, buf_matrix_right, BUFFER_CMD + BUFFER_LENGTH, false);
     
-    i2c_reg_write_uint8(CMD_MODE, MODE);
-    i2c_reg_write_uint8(CMD_OPTIONS, OPTS);
-    i2c_reg_write_uint8(CMD_BRIGHTNESS, brightness);
-    i2c_reg_write_uint8(CMD_UPDATE, 0x01);
-  }
-
-  void LTP305::i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
-    uint8_t buffer[2] = {reg, value};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
+    i2c->reg_write_uint8(address, CMD_MODE, MODE);
+    i2c->reg_write_uint8(address, CMD_OPTIONS, OPTS);
+    i2c->reg_write_uint8(address, CMD_BRIGHTNESS, brightness);
+    i2c->reg_write_uint8(address, CMD_UPDATE, 0x01);
   }
 }

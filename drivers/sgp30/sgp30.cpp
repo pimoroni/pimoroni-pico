@@ -14,14 +14,6 @@ Distributed as-is; no warranty is given.
 namespace pimoroni {
 
   bool SGP30::init() {
-
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(scl);
-
     soft_reset();
 
     if(!retrieve_unique_id()) {
@@ -46,15 +38,15 @@ namespace pimoroni {
   }
 
   i2c_inst_t* SGP30::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int SGP30::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int SGP30::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   // Get the unique ID from the Chip. Will fail if no chip attached
@@ -137,7 +129,7 @@ namespace pimoroni {
   // Write a single byte globally (not to a specifc I2c address)
   bool SGP30::write_global(uint16_t reg, uint16_t delay_ms) {
     uint8_t buffer[1] = { (uint8_t)(reg & 0xFF)};
-    i2c_write_blocking(i2c, 0, buffer, 1, false);
+    i2c->write_blocking(0, buffer, 1, false);
     sleep_ms(delay_ms);
     return true;
   }
@@ -145,7 +137,7 @@ namespace pimoroni {
   // Write just the register to the i2c address, no parameter
   bool SGP30::write_reg(uint16_t reg, uint16_t delay_ms) {
     uint8_t buffer[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF)};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
+    i2c->write_blocking(address, buffer, 2, false);
     sleep_ms(delay_ms);
     return true;
   }
@@ -154,7 +146,7 @@ namespace pimoroni {
   bool SGP30::write_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t value) {
     uint8_t buffer[5] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF),
                           (uint8_t)((value >> 8) & 0xFF), (uint8_t)(value & 0xFF), calculate_crc(value)};
-    i2c_write_blocking(i2c, address, buffer, 5, false);
+    i2c->write_blocking(address, buffer, 5, false);
     sleep_ms(delay_ms);
     return true;
   }
@@ -164,7 +156,7 @@ namespace pimoroni {
     uint8_t buffer[8] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF),
                           (uint8_t)((value1 >> 8) & 0xFF), (uint8_t)(value1 & 0xFF), calculate_crc(value1),
                           (uint8_t)((value2 >> 8) & 0xFF), (uint8_t)(value2 & 0xFF), calculate_crc(value2)};
-    i2c_write_blocking(i2c, address, buffer, 8, false);
+    i2c->write_blocking(address, buffer, 8, false);
     sleep_ms(delay_ms);
     return true;
   }
@@ -173,9 +165,9 @@ namespace pimoroni {
   bool SGP30::read_reg_1_word(uint16_t reg, uint16_t delay_ms, uint16_t *value) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[3];
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
+    i2c->write_blocking(address, regbuf, 2, true);
     sleep_ms(delay_ms);
-    i2c_read_blocking(i2c, address, buffer, 3, false);
+    i2c->read_blocking(address, buffer, 3, false);
     if(buffer[2] != calculate_crc(buffer[0], buffer[1]))
       return false;
     *value = (buffer[0] << 8) + buffer[1];
@@ -186,9 +178,9 @@ namespace pimoroni {
   bool SGP30::read_reg_2_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[6];
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
+    i2c->write_blocking(address, regbuf, 2, true);
     sleep_ms(delay_ms);
-    i2c_read_blocking(i2c, address, buffer, 6, false);
+    i2c->read_blocking(address, buffer, 6, false);
     if((buffer[2] != calculate_crc(buffer[0], buffer[1])) || (buffer[5] != calculate_crc(buffer[3], buffer[4]))) {
       return false;
     }
@@ -201,9 +193,9 @@ namespace pimoroni {
   bool SGP30::read_reg_3_words(uint16_t reg, uint16_t delay_ms, uint16_t *value1, uint16_t *value2, uint16_t *value3) {
     uint8_t regbuf[2] = { (uint8_t)((reg >> 8) & 0xFF), (uint8_t)(reg & 0xFF) };
     uint8_t buffer[9];
-    i2c_write_blocking(i2c, address, regbuf, 2, true);
+    i2c->write_blocking(address, regbuf, 2, true);
     sleep_ms(delay_ms);
-    i2c_read_blocking(i2c, address, buffer, 9, false);
+    i2c->read_blocking(address, buffer, 9, false);
     if(buffer[2] != calculate_crc(buffer[0], buffer[1])) {
       return false;
     }

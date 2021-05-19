@@ -2,6 +2,7 @@
 
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
+#include "../../common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
@@ -19,17 +20,6 @@ namespace pimoroni {
   private:
     static const uint8_t ROWS = 162;
     static const uint8_t COLS = 132;
-
-
-    //--------------------------------------------------
-    // Enums
-    //--------------------------------------------------
-  public:
-    enum BG_SPI_SLOT {
-      BG_SPI_FRONT,
-      BG_SPI_BACK
-    };
-
 
     //--------------------------------------------------
     // Variables

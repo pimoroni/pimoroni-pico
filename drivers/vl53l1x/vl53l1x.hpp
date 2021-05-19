@@ -15,17 +15,17 @@ Distributed as-is; no warranty is given.
 
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
   class VL53L1X {
+    static const uint8_t DEFAULT_I2C_ADDRESS  = 0x29;
 
-    i2c_inst_t *i2c = i2c0;
+    I2C *i2c;
 
-    int8_t address   = 0x29;
-    int8_t sda       = 20;
-    int8_t scl       = 21;
-    int8_t interrupt = 22;
+    int8_t address   = DEFAULT_I2C_ADDRESS;
+    uint interrupt = 22;
 
     // register addresses from API vl53l1x_register_map.h
     enum regAddr : uint16_t
@@ -1291,7 +1291,10 @@ namespace pimoroni {
     uint8_t last_status; // status of last I2C transmission
 
   public:
-    VL53L1X() {}
+    VL53L1X() : VL53L1X(DEFAULT_I2C_ADDRESS) {};
+    VL53L1X(uint8_t address) : i2c(new I2C()), address(address) {};
+    VL53L1X(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED) : i2c(new I2C()), address(address), interrupt(interrupt) {}
+    VL53L1X(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
 
     uint16_t getid();
     uint16_t getosc();

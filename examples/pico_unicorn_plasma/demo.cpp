@@ -102,8 +102,9 @@ int main() {
   while(true) {
     int           x1, x2, x3, x4, y1, y2, y3, y4, sx1, sx2, sx3, sx4;
     unsigned char x, y;
-    int8_t          value;
-    uint8_t       r, g, b,j,k,l,m;
+    int8_t        value;
+    uint8_t       r = 0, g = 0, b = 0;
+    uint8_t       j, k, l, m;
 
     // Setup a delay to slow the framerate. 
     // Would be better to read from a timer as some math operations take variable time

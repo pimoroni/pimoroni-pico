@@ -9,10 +9,10 @@ namespace pimoroni {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 240;
-    static const uint8_t A = 12;
-    static const uint8_t B = 13;
-    static const uint8_t X = 14;
-    static const uint8_t Y = 15;
+    static const uint A = 12;
+    static const uint B = 13;
+    static const uint X = 14;
+    static const uint Y = 15;
 
     static const uint8_t ADC0 = 0;
     static const uint8_t ADC1 = 1;
@@ -25,14 +25,14 @@ namespace pimoroni {
     static const uint8_t REVERSE = 1;
     static const uint8_t STOP    = 2;
 
-    static const uint8_t GP0 = 0;
-    static const uint8_t GP1 = 1;
-    static const uint8_t GP2 = 2;
-    static const uint8_t GP3 = 3;
-    static const uint8_t GP4 = 4;
-    static const uint8_t GP5 = 5;
-    static const uint8_t GP6 = 6;
-    static const uint8_t GP7 = 7;
+    static const uint GP0 = 0;
+    static const uint GP1 = 1;
+    static const uint GP2 = 2;
+    static const uint GP3 = 3;
+    static const uint GP4 = 4;
+    static const uint GP5 = 5;
+    static const uint GP6 = 6;
+    static const uint GP7 = 7;
 
     uint16_t *__fb;
   private:
@@ -50,7 +50,7 @@ namespace pimoroni {
 
     void set_motor(uint8_t channel, uint8_t action, float speed = 0.0f);
 
-    void set_audio_pin(uint8_t pin);
+    void set_audio_pin(uint pin);
     void set_tone(uint16_t frequency, float duty = 0.2f);
   };
 

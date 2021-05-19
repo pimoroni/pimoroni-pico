@@ -5,7 +5,8 @@
 
 using namespace pimoroni;
 
-BreakoutDotMatrix display;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutDotMatrix display(&i2c);
 bool led_toggle = false;
 
 void eye(uint8_t x, uint8_t y) {

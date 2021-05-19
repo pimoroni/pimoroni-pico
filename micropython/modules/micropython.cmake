@@ -1,5 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
 
+include(${CMAKE_CURRENT_LIST_DIR}/pimoroni_i2c/micropython.cmake)
+
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_dotmatrix/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_encoder/micropython.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/breakout_ioexpander/micropython.cmake)

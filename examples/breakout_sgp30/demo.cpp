@@ -13,13 +13,13 @@
 
 using namespace pimoroni;
 
-BreakoutSGP30 sgp30;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutSGP30 sgp30(&i2c);
 
 int main() {
   uint8_t prd;
   uint16_t eCO2, TVOC;
-  uint16_t raweCO2, rawTVOC;
-  uint16_t baseCO2, baseTVOC;
+  uint16_t rawCO2, rawTVOC;
 
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
@@ -56,8 +56,8 @@ int main() {
     sleep_ms(1000 - (100 * prd));
     if(prd == 1) {
       sgp30.get_air_quality(&eCO2, &TVOC);
-      sgp30.get_air_quality_raw(&raweCO2, &rawTVOC);
-      printf("%3d: CO2 %d TVOC %d, raw %d %d\n", j, eCO2, TVOC, raweCO2, rawTVOC);
+      sgp30.get_air_quality_raw(&rawCO2, &rawTVOC);
+      printf("%3d: CO2 %d TVOC %d, raw %d %d\n", j, eCO2, TVOC, rawCO2, rawTVOC);
       if(j == 30) {
         printf("Resetting device\n");
         sgp30.soft_reset();

@@ -27,11 +27,6 @@ namespace pimoroni {
   pimoroni::lookup LTR559::lookup_light_gain({1, 2, 4, 8, 0, 0, 48, 96});
   
   bool LTR559::init() {
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
-
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
       gpio_set_dir(interrupt, GPIO_IN);
@@ -64,15 +59,15 @@ namespace pimoroni {
   }
 
   void LTR559::reset() {
-    set_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT);
+    i2c->set_bits(address, LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT);
 
-    while(get_bits(LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT)) {
+    while(i2c->get_bits(address, LTR559_ALS_CONTROL, LTR559_ALS_CONTROL_SW_RESET_BIT)) {
       sleep_ms(100);
     }
   }
 
   i2c_inst_t* LTR559::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int LTR559::get_address() const {
@@ -80,11 +75,11 @@ namespace pimoroni {
   }
 
   int LTR559::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int LTR559::get_scl() const {
-    return scl;
+    return i2c->get_sda();
   }
 
   int LTR559::get_int() const {
@@ -94,26 +89,26 @@ namespace pimoroni {
 
   uint8_t LTR559::part_id() {
     uint8_t part_id;
-    read_bytes(LTR559_PART_ID, &part_id, 1);
+    i2c->read_bytes(address, LTR559_PART_ID, &part_id, 1);
     return (part_id >> LTR559_PART_ID_PART_NUMBER_SHIFT) & LTR559_PART_ID_PART_NUMBER_MASK;
   }
 
   uint8_t LTR559::revision_id() {
     uint8_t revision_id;
-    read_bytes(LTR559_PART_ID, &revision_id, 1);
+    i2c->read_bytes(address, LTR559_PART_ID, &revision_id, 1);
     return revision_id & LTR559_PART_ID_REVISION_MASK;
   }
 
   uint8_t LTR559::manufacturer_id() {
     uint8_t manufacturer;
-    read_bytes(LTR559_MANUFACTURER_ID, &manufacturer, 1);
+    i2c->read_bytes(address, LTR559_MANUFACTURER_ID, &manufacturer, 1);
     return manufacturer;
   }
 
   bool LTR559::get_reading() {
     bool has_updated = false;
     uint8_t status;
-    this->read_bytes(LTR559_ALS_PS_STATUS, &status, 1);
+    i2c->read_bytes(address, LTR559_ALS_PS_STATUS, &status, 1);
     bool als_int = (status >> LTR559_ALS_PS_STATUS_ALS_INTERRUPT_BIT) & 0b1;
     bool ps_int = (status >> LTR559_ALS_PS_STATUS_PS_INTERRUPT_BIT) & 0b1;
     bool als_data = (status >> LTR559_ALS_PS_STATUS_ALS_DATA_BIT) & 0b1;
@@ -122,7 +117,7 @@ namespace pimoroni {
     if(ps_int || ps_data) {
       has_updated = true;
       uint16_t ps0;
-      read_bytes(LTR559_PS_DATA, (uint8_t *)&ps0, 2);
+      i2c->read_bytes(address, LTR559_PS_DATA, (uint8_t *)&ps0, 2);
       ps0 &= LTR559_PS_DATA_MASK;
 
       data.proximity = ps0;
@@ -131,7 +126,7 @@ namespace pimoroni {
     if(als_int || als_data) {
       has_updated = true;
       uint16_t als[2];
-      read_bytes(LTR559_ALS_DATA_CH1, (uint8_t *)&als, 4);
+      i2c->read_bytes(address, LTR559_ALS_DATA_CH1, (uint8_t *)&als, 4);
       data.als0 = als[1];
       data.als1 = als[0];
       data.gain = this->lookup_light_gain.value((status >> LTR559_ALS_PS_STATUS_ALS_GAIN_SHIFT) & LTR559_ALS_PS_STATUS_ALS_GAIN_MASK);
@@ -164,7 +159,7 @@ namespace pimoroni {
     buf |= 0b1 << LTR559_INTERRUPT_POLARITY_BIT;
     buf |= (uint8_t)light << LTR559_INTERRUPT_ALS_BIT;
     buf |= (uint8_t)proximity << LTR559_INTERRUPT_PS_BIT;
-    write_bytes(LTR559_INTERRUPT, &buf, 1);
+    i2c->write_bytes(address, LTR559_INTERRUPT, &buf, 1);
   }
 
   void LTR559::proximity_led(uint8_t current, uint8_t duty_cycle, uint8_t pulse_freq, uint8_t num_pulses) {
@@ -177,10 +172,10 @@ namespace pimoroni {
     pulse_freq <<= LTR559_PS_LED_PULSE_FREQ_SHIFT;
 
     uint8_t buf = current | duty_cycle | pulse_freq;
-    write_bytes(LTR559_PS_LED, &buf, 1);
+    i2c->write_bytes(address, LTR559_PS_LED, &buf, 1);
 
     buf = num_pulses & LTR559_PS_N_PULSES_MASK;
-    write_bytes(LTR559_PS_N_PULSES, &buf, 1);
+    i2c->write_bytes(address, LTR559_PS_N_PULSES, &buf, 1);
   }
 
   void LTR559::light_control(bool active, uint8_t gain) {
@@ -193,12 +188,12 @@ namespace pimoroni {
     else
       buf &= ~(0b1 << LTR559_ALS_CONTROL_MODE_BIT);
 
-    write_bytes(LTR559_ALS_CONTROL, &buf, 1);
+    i2c->write_bytes(address, LTR559_ALS_CONTROL, &buf, 1);
   }
 
   void LTR559::proximity_control(bool active, bool saturation_indicator) {
     uint8_t buf = 0;
-    read_bytes(LTR559_PS_CONTROL, &buf, 1);
+    i2c->read_bytes(address, LTR559_PS_CONTROL, &buf, 1);
     if(active)
       buf |= LTR559_PS_CONTROL_ACTIVE_MASK;
     else
@@ -209,21 +204,21 @@ namespace pimoroni {
     else
       buf &= ~(0b1 << LTR559_PS_CONTROL_SATURATION_INDICATOR_ENABLE_BIT);
     
-    write_bytes(LTR559_PS_CONTROL, &buf, 1);
+    i2c->write_bytes(address, LTR559_PS_CONTROL, &buf, 1);
   }
 
   void LTR559::light_threshold(uint16_t lower, uint16_t upper) {
     lower = __builtin_bswap16(lower);
     upper = __builtin_bswap16(upper);
-    write_bytes(LTR559_ALS_THRESHOLD_LOWER, (uint8_t *)&lower, 2);
-    write_bytes(LTR559_ALS_THRESHOLD_UPPER, (uint8_t *)&upper, 2);
+    i2c->write_bytes(address, LTR559_ALS_THRESHOLD_LOWER, (uint8_t *)&lower, 2);
+    i2c->write_bytes(address, LTR559_ALS_THRESHOLD_UPPER, (uint8_t *)&upper, 2);
   }
 
   void LTR559::proximity_threshold(uint16_t lower, uint16_t upper) {
     lower = uint16_to_bit12(lower);
     upper = uint16_to_bit12(upper);
-    write_bytes(LTR559_PS_THRESHOLD_LOWER, (uint8_t *)&lower, 2);
-    write_bytes(LTR559_PS_THRESHOLD_UPPER, (uint8_t *)&upper, 2); 
+    i2c->write_bytes(address, LTR559_PS_THRESHOLD_LOWER, (uint8_t *)&lower, 2);
+    i2c->write_bytes(address, LTR559_PS_THRESHOLD_UPPER, (uint8_t *)&upper, 2); 
   }
 
   void LTR559::light_measurement_rate(uint16_t integration_time, uint16_t rate) {
@@ -233,17 +228,17 @@ namespace pimoroni {
     uint8_t buf = 0;
     buf |= rate;
     buf |= integration_time << LTR559_ALS_MEAS_RATE_INTEGRATION_TIME_SHIFT;
-    write_bytes(LTR559_ALS_MEAS_RATE, &buf, 1);
+    i2c->write_bytes(address, LTR559_ALS_MEAS_RATE, &buf, 1);
   }
 
   void LTR559::proximity_measurement_rate(uint16_t rate) {
     uint8_t buf = lookup_proximity_meas_rate.index(rate);
-    write_bytes(LTR559_PS_MEAS_RATE, &buf, 1);
+    i2c->write_bytes(address, LTR559_PS_MEAS_RATE, &buf, 1);
   }
 
   void LTR559::proximity_offset(uint16_t offset) {
     offset &= LTR559_PS_OFFSET_MASK;
-    write_bytes(LTR559_PS_OFFSET, (uint8_t *)&offset, 1);
+    i2c->write_bytes(address, LTR559_PS_OFFSET, (uint8_t *)&offset, 1);
   }
 
   uint16_t LTR559::bit12_to_uint16(uint16_t value) {
@@ -252,42 +247,5 @@ namespace pimoroni {
 
   uint16_t LTR559::uint16_to_bit12(uint16_t value) {
     return ((value & 0xFF) << 8) | ((value & 0xF00) >> 8);
-  }
-
-  // i2c functions
-
-  int LTR559::write_bytes(uint8_t reg, uint8_t *buf, int len) {
-    uint8_t buffer[len + 1];
-    buffer[0] = reg;
-    for(int x = 0; x < len; x++) {
-      buffer[x + 1] = buf[x];
-    }
-    return i2c_write_blocking(i2c, address, buffer, len + 1, false);
-  };
-
-  int LTR559::read_bytes(uint8_t reg, uint8_t *buf, int len) {
-    i2c_write_blocking(i2c, address, &reg, 1, true);
-    i2c_read_blocking(i2c, address, buf, len, false);
-    return len;
-  };
-
-  uint8_t LTR559::get_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    return value & (mask << shift);
-  }
-
-  void LTR559::set_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value |= mask << shift;
-    write_bytes(reg, &value, 1);
-  }
-
-  void LTR559::clear_bits(uint8_t reg, uint8_t shift, uint8_t mask) {
-    uint8_t value;
-    read_bytes(reg, &value, 1);
-    value &= ~(mask << shift);
-    write_bytes(reg, &value, 1);
   }
 }

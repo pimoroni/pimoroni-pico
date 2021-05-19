@@ -42,13 +42,6 @@ namespace pimoroni {
   bool AS7262::init() {
     bool succeeded = false;
 
-    i2c_init(i2c, 400000);
-
-    gpio_set_function(sda, GPIO_FUNC_I2C);
-    gpio_pull_up(sda);
-    gpio_set_function(scl, GPIO_FUNC_I2C);
-    gpio_pull_up(scl);
-
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
       gpio_set_dir(interrupt, GPIO_IN);
@@ -71,15 +64,15 @@ namespace pimoroni {
   }
 
   i2c_inst_t* AS7262::get_i2c() const {
-    return i2c;
+    return i2c->get_i2c();
   }
 
   int AS7262::get_sda() const {
-    return sda;
+    return i2c->get_sda();
   }
 
   int AS7262::get_scl() const {
-    return scl;
+    return i2c->get_scl();
   }
 
   int AS7262::get_int() const {
@@ -216,13 +209,13 @@ namespace pimoroni {
     // Plumbing for virtual i2c
   void AS7262::_i2c_reg_write_uint8(uint8_t reg, uint8_t value) {
     uint8_t buffer[2] = {reg, value};
-    i2c_write_blocking(i2c, address, buffer, 2, false);
+    i2c->write_blocking(address, buffer, 2, false);
   }
 
   uint8_t AS7262::_i2c_reg_read_uint8(uint8_t reg) {
     uint8_t value;
-    i2c_write_blocking(i2c, address, &reg, 1, false);
-    i2c_read_blocking(i2c, address, (uint8_t *)&value, 1, false);
+    i2c->write_blocking(address, &reg, 1, false);
+    i2c->read_blocking(address, (uint8_t *)&value, 1, false);
     return value;
   }
 }

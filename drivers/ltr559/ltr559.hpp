@@ -1,7 +1,8 @@
 #pragma once
 
-#include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 #include <vector>
 #include <initializer_list>
 
@@ -85,6 +86,7 @@
 
 
 namespace pimoroni {
+
   typedef struct {
     uint16_t proximity;
     uint16_t als0;
@@ -110,10 +112,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS    = 0x23;
-    static const uint8_t DEFAULT_SDA_PIN        = 20;
-    static const uint8_t DEFAULT_SCL_PIN        = 21;
-    static const uint8_t DEFAULT_INT_PIN        = 22;
-    static const uint8_t PIN_UNUSED             = UINT8_MAX;
 
   private:
     const int ch0_c[4] = {17743, 42785, 5926, 0};
@@ -127,13 +125,11 @@ namespace pimoroni {
     ltr559_reading data;
 
   private:
-    i2c_inst_t *i2c = i2c0;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
-    int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    const uint8_t address    = DEFAULT_I2C_ADDRESS;
+    uint interrupt           = PIN_UNUSED;
 
     static pimoroni::lookup lookup_led_current; 
     static pimoroni::lookup lookup_led_duty_cycle;
@@ -148,14 +144,12 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    LTR559() {}
+    LTR559() : LTR559(new I2C()) {};
 
-    LTR559(uint8_t address) :
-      address(address) {}
+    LTR559(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
 
-    LTR559(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED) :
-      i2c(i2c), address(address), sda(sda), scl(scl), interrupt(interrupt) {}
-
+    // TODO remove MicroPython-binding compatibility constructors
+    LTR559(uint sda, uint scl, uint interrupt = PIN_UNUSED) : LTR559(new I2C(), interrupt) {}
 
     //--------------------------------------------------
     // Methods
@@ -188,13 +182,6 @@ namespace pimoroni {
   private:
     uint16_t bit12_to_uint16(uint16_t value);
     uint16_t uint16_to_bit12(uint16_t value);
-
-    // From i2cdevice
-    int write_bytes(uint8_t reg, uint8_t *buf, int len);
-    int read_bytes(uint8_t reg, uint8_t *buf, int len);
-    uint8_t get_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-    void set_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
-    void clear_bits(uint8_t reg, uint8_t shift, uint8_t mask=0b1);
   };
 
 }

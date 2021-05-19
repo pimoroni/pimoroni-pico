@@ -1,3 +1,4 @@
+from pimoroni_i2c import PimoroniI2C
 from breakout_as7262 import BreakoutAS7262
 import picoexplorer as display
 import time
@@ -11,7 +12,8 @@ bar_height = height
 display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
 display.init(display_buffer)
 
-as7 = BreakoutAS7262()
+i2c = PimoroniI2C(20, 21)
+as7 = BreakoutAS7262(i2c)
 
 integration_time = 10  # integration time in milliseconds, max ~90ms
 

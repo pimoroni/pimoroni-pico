@@ -1,7 +1,12 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_msa301 import BreakoutMSA301
 
-msa = BreakoutMSA301()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+msa = BreakoutMSA301(i2c)
 
 part_id = msa.part_id()
 print("Found MSA301. Part ID: 0x", '{:02x}'.format(part_id), sep="")

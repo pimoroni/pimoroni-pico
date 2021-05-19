@@ -2,6 +2,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -26,10 +28,6 @@ namespace pimoroni {
 
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS = 0x18;
-    static const uint8_t DEFAULT_SDA_PIN = 20;
-    static const uint8_t DEFAULT_SCL_PIN = 21;
-    static const uint8_t DEFAULT_INT_PIN = 22;
-    static const uint8_t PIN_UNUSED      = UINT8_MAX;
 
     static const uint16_t CHIP_ID = 0xE26A;
     static const uint8_t CHIP_VERSION = 2;
@@ -142,13 +140,11 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
     int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
+    uint interrupt    = PIN_UNUSED;
 
     uint32_t timeout;
     bool debug;
@@ -162,9 +158,17 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    IOExpander();
-    IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false);
-    IOExpander(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl, uint8_t interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+    IOExpander() :
+        IOExpander(new I2C(), DEFAULT_I2C_ADDRESS, PIN_UNUSED, timeout, debug) {};
+
+    IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false) :
+        IOExpander(new I2C(), address, PIN_UNUSED, timeout, debug) {};
+
+    IOExpander(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false) :
+        IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
+
+    // TODO remove MicroPython-binding compatibility constructors
+    IOExpander(I2C *i2c, uint8_t address=DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
 
 
     //--------------------------------------------------

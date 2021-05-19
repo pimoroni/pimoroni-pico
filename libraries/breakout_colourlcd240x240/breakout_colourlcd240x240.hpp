@@ -2,6 +2,7 @@
 
 #include "drivers/st7789/st7789.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
+#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
@@ -12,8 +13,6 @@ namespace pimoroni {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 240;
-    static const uint8_t PIN_UNUSED   = UINT8_MAX;
-
 
     //--------------------------------------------------
     // Variables
@@ -30,8 +29,8 @@ namespace pimoroni {
   public:
     BreakoutColourLCD240x240(uint16_t *buf);
     BreakoutColourLCD240x240(uint16_t *buf,  spi_inst_t *spi,
-      uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = PIN_UNUSED, uint8_t bl = PIN_UNUSED);
-    BreakoutColourLCD240x240(uint16_t *buf,  ST7789::BG_SPI_SLOT slot);
+      uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED);
+    BreakoutColourLCD240x240(uint16_t *buf,  BG_SPI_SLOT slot);
     
 
     //--------------------------------------------------

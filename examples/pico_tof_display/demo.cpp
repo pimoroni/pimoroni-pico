@@ -170,7 +170,7 @@ int main() {
   bool dist_held = false;
 
   while(true) {
-    bool a_pressed = ar_button_a.next(i, pico_display.is_pressed(pico_display.A));
+    // bool a_pressed = ar_button_a.next(i, pico_display.is_pressed(pico_display.A));
     bool b_pressed = ar_button_b.next(i, pico_display.is_pressed(pico_display.B));
     bool x_pressed = ar_button_x.next(i, pico_display.is_pressed(pico_display.X));
     bool y_pressed = ar_button_y.next(i, pico_display.is_pressed(pico_display.Y));

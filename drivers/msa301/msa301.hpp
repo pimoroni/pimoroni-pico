@@ -2,6 +2,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -11,10 +13,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS    = 0x26;
-    static const uint8_t DEFAULT_SDA_PIN        = 20;
-    static const uint8_t DEFAULT_SCL_PIN        = 21;
-    static const uint8_t DEFAULT_INT_PIN        = 22;
-    static const uint8_t PIN_UNUSED             = UINT8_MAX;
     
     static const uint8_t SOFT_RESET             = 0x00;
     static const uint8_t PART_ID                = 0x01;
@@ -106,23 +104,20 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c = i2c0;
-
-    // interface pins with our standard defaults where appropriate
-    int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
-    int8_t interrupt  = DEFAULT_INT_PIN;
-
+    I2C *i2c;
+    const uint8_t address  = DEFAULT_I2C_ADDRESS;
+    uint interrupt         = PIN_UNUSED;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    MSA301() {}
+    MSA301() : MSA301(new I2C()) {};
 
-    MSA301(i2c_inst_t *i2c, uint8_t sda, uint8_t scl, uint8_t interrupt) :
-      i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    MSA301(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
+
+    // TODO remove MicroPython-binding compatibility constructors
+    MSA301(i2c_inst_t *i2c_inst, uint sda, uint scl, uint interrupt = PIN_UNUSED) : MSA301(new I2C(sda, scl), interrupt) {}
 
 
     //--------------------------------------------------
@@ -152,11 +147,6 @@ namespace pimoroni {
     void enable_interrupts(uint16_t interrupts);
     void set_interrupt_latch(InterruptLatchPeriod latch_period, bool reset_latched);
     bool read_interrupt(Interrupt interrupt);
-
-  private:
-    void i2c_reg_write_uint8(uint8_t reg, uint8_t value);
-    uint8_t i2c_reg_read_uint8(uint8_t reg);
-    int16_t i2c_reg_read_int16(uint8_t reg);
   };
 }
 

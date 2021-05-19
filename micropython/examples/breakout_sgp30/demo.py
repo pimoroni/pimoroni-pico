@@ -1,7 +1,13 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_sgp30 import BreakoutSGP30
 
-sgp30 = BreakoutSGP30()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}  # i2c pins 4, 5 for Breakout Garden
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}  # Default i2c pins for Pico Explorer
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+sgp30 = BreakoutSGP30(i2c)
+
 print("SGP30 initialised - about to start measuring without waiting")
 
 sgp30.start_measurement(False)

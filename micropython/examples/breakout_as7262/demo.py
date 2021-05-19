@@ -1,7 +1,12 @@
 import time
+from pimoroni_i2c import PimoroniI2C
 from breakout_as7262 import BreakoutAS7262
 
-as7262 = BreakoutAS7262()
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+as7262 = BreakoutAS7262(i2c)
 
 dev_type = as7262.device_type()
 hw_version = as7262.hardware_version()

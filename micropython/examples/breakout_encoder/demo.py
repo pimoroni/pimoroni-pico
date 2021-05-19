@@ -1,8 +1,13 @@
+from pimoroni_i2c import PimoroniI2C
 from breakout_encoder import BreakoutEncoder
+
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 steps_per_rev = 24
 
-enc = BreakoutEncoder()
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+enc = BreakoutEncoder(i2c)
 
 enc.set_brightness(1.0)
 # enc.set_direction(BreakoutEncoder.DIRECTION_CCW)     # Uncomment this to flip the direction

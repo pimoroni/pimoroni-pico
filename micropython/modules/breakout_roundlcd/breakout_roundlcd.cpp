@@ -63,14 +63,14 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
         mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
         int slot = args[ARG_slot].u_int;
-        if(slot == ST7789::BG_SPI_FRONT || slot == ST7789::BG_SPI_BACK) {
+        if(slot == BG_SPI_FRONT || slot == BG_SPI_BACK) {
             self = m_new_obj(breakout_roundlcd_BreakoutRoundLCD_obj_t);
             self->base.type = &breakout_roundlcd_BreakoutRoundLCD_type;
 
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
-            self->breakout = new BreakoutRoundLCD((uint16_t *)bufinfo.buf, (ST7789::BG_SPI_SLOT)slot);
+            self->breakout = new BreakoutRoundLCD((uint16_t *)bufinfo.buf, (BG_SPI_SLOT)slot);
         }
         else {
             mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
@@ -81,11 +81,11 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_spi, MP_ARG_INT, {.u_int = -1} },
-            { MP_QSTR_cs, MP_ARG_INT, {.u_int = ST7789::DEFAULT_CS_PIN} },
-            { MP_QSTR_dc, MP_ARG_INT, {.u_int = ST7789::DEFAULT_DC_PIN} },
-            { MP_QSTR_sck, MP_ARG_INT, {.u_int = ST7789::DEFAULT_SCK_PIN} },
-            { MP_QSTR_mosi, MP_ARG_INT, {.u_int = ST7789::DEFAULT_MOSI_PIN} },
-            { MP_QSTR_bl, MP_ARG_INT, {.u_int = ST7789::DEFAULT_BL_PIN} },
+            { MP_QSTR_cs, MP_ARG_INT, {.u_int = pimoroni::SPI_BG_FRONT_CS} },
+            { MP_QSTR_dc, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_MISO} },
+            { MP_QSTR_sck, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_SCK} },
+            { MP_QSTR_mosi, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_MOSI} },
+            { MP_QSTR_bl, MP_ARG_INT, {.u_int = pimoroni::SPI_BG_FRONT_PWM} },
         };
 
         // Parse args.
@@ -120,7 +120,7 @@ mp_obj_t BreakoutRoundLCD_make_new(const mp_obj_type_t *type, size_t n_args, siz
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
         self->breakout = new BreakoutRoundLCD((uint16_t *)bufinfo.buf, spi,
-            args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, BreakoutRoundLCD::PIN_UNUSED, args[ARG_bl].u_int);
+            args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, PIN_UNUSED, args[ARG_bl].u_int);
     }
 
     self->breakout->init();

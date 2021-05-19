@@ -1,6 +1,7 @@
 #include "pico/stdlib.h"
 #include <stdio.h>
 #include <math.h>
+#include "common/pimoroni_common.hpp"
 
 #include "breakout_encoder.hpp"
 
@@ -8,7 +9,8 @@ using namespace pimoroni;
 
 static const uint8_t STEPS_PER_REV = 24;
 
-BreakoutEncoder enc;
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutEncoder enc(&i2c);
 bool toggle = false;
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
@@ -34,7 +36,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 void count_changed(int16_t count) {
   printf("Count: %d\n", count);
   float h = (count % STEPS_PER_REV) / (float)STEPS_PER_REV;
-  uint8_t r, g, b;
+  uint8_t r = 0, g = 0, b = 0;
   from_hsv(h, 1.0f, 1.0f, r, g, b);
   enc.set_led(r, g, b);
 }

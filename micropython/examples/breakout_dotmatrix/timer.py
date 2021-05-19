@@ -1,11 +1,16 @@
 import time
 
+from pimoroni_i2c import PimoroniI2C
 from breakout_dotmatrix import BreakoutDotMatrix
+
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 address = 0x61
 start_time = time.time()
 
-display = BreakoutDotMatrix(address=address)
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+display = BreakoutDotMatrix(i2c, address=address)
 display.clear()
 display.show()
 

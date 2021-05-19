@@ -2,6 +2,8 @@
 
 #include "hardware/i2c.h"
 #include "hardware/gpio.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 // commands and constants
 #define SGP30_REQ_FEATURES 0x0020  // The required feature set
@@ -16,8 +18,6 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x58;
-    static const uint8_t DEFAULT_SDA_PIN      = 20;
-    static const uint8_t DEFAULT_SCL_PIN      = 21;
 
   private:
     /***** Private constants here *****/
@@ -37,22 +37,21 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    i2c_inst_t *i2c   = i2c0;
+    I2C *i2c;
 
-    int8_t address    = DEFAULT_I2C_ADDRESS;
-    int8_t sda        = DEFAULT_SDA_PIN;
-    int8_t scl        = DEFAULT_SCL_PIN;
+    const int8_t address    = DEFAULT_I2C_ADDRESS;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    SGP30() {}
+    SGP30() : SGP30(new I2C()) {};
 
-    SGP30(i2c_inst_t *i2c, uint8_t sda, uint8_t scl) :
-      i2c(i2c), sda(sda), scl(scl) {}
+    SGP30(I2C *i2c) : i2c(i2c) {}
 
+    // TODO remove MicroPython-binding compatibility constructors
+    SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) : i2c(new I2C(sda, scl)) { }
 
     //--------------------------------------------------
     // Methods

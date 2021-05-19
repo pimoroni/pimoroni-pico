@@ -12,9 +12,13 @@ namespace pimoroni {
 
         bool init();
 
-        BreakoutMatrix11x7() : IS31FL3731(DEFAULT_I2C_ADDRESS)  {};
-        BreakoutMatrix11x7(uint8_t address) : IS31FL3731(address) {};
-        BreakoutMatrix11x7(i2c_inst_t *i2c, uint8_t address, uint8_t sda, uint8_t scl) : IS31FL3731(i2c, address, sda, scl) {};
+        BreakoutMatrix11x7() : IS31FL3731(new I2C(I2C_BG_SDA, I2C_BG_SCL), DEFAULT_I2C_ADDRESS) {}
+
+        BreakoutMatrix11x7(uint8_t address) : IS31FL3731(new I2C(I2C_DEFAULT_SDA, I2C_DEFAULT_SCL), address) {}
+      
+        BreakoutMatrix11x7(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS) : IS31FL3731(i2c, address) {}
+
+        BreakoutMatrix11x7(i2c_inst_t *i2c_inst, uint8_t address, uint8_t sda, uint8_t scl) : IS31FL3731(i2c_inst, address, sda, scl) {}
 
         void set_pixel(uint8_t x, uint8_t y, uint8_t c);
 
