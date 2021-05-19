@@ -116,9 +116,6 @@ namespace pimoroni {
 
     MSA301(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    MSA301(i2c_inst_t *i2c_inst, uint sda, uint scl, uint interrupt = PIN_UNUSED) : MSA301(new I2C(sda, scl), interrupt) {}
-
 
     //--------------------------------------------------
     // Methods

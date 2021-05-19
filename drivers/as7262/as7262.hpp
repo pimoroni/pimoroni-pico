@@ -83,10 +83,6 @@ namespace pimoroni {
 
     AS7262(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    AS7262(uint sda, uint scl, uint interrupt = PIN_UNUSED) : AS7262(new I2C(), interrupt) {}
-
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------

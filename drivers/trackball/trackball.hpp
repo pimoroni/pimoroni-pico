@@ -52,9 +52,6 @@ namespace pimoroni {
 
     Trackball(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : i2c(i2c), address(address), interrupt(interrupt) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    Trackball(i2c_inst_t *i2c_inst, uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : Trackball(new I2C(sda, scl), address, interrupt) {}
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
