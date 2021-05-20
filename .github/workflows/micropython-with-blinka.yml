@@ -1,0 +1,119 @@
+name: MicroPython+Blinka
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  MICROPYTHON_VERSION: v1.15
+  BLINKA_VERSION: 6.9.1
+  PLATFORMDETECT_VERSION: 3.13.1
+  BUILD_TYPE: Release
+  BOARD_TYPE: PICO
+
+jobs:
+  build:
+    name: ${{matrix.name}}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-20.04
+            name: Linux
+            cache-key: linux
+            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk'
+            apt-packages: clang-tidy gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    # Check out MicroPython
+    - name: Checkout MicroPython
+      uses: actions/checkout@v2
+      with:
+        repository: micropython/micropython
+        ref: ${{env.MICROPYTHON_VERSION}}
+        submodules: false  # MicroPython submodules are hideously broken
+        path: micropython
+
+    # Checkout Blinka requirements
+    - name: Checkout Blinka
+      uses: actions/checkout@v2
+      with:
+        repository: adafruit/Adafruit_Blinka
+        ref: ${{env.BLINKA_VERSION}}
+        path: Adafruit_Blinka
+
+    - name: Checkout PlatformDetect
+      uses: actions/checkout@v2
+      with:
+        repository: adafruit/Adafruit_Python_PlatformDetect
+        ref: ${{env.PLATFORMDETECT_VERSION}}
+        path: Adafruit_Python_PlatformDetect
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        path: pimoroni-pico-${{ github.sha }}
+
+    # Copy module files from Blinka/PlatformDetect into MicroPython
+    - name: Copy modules
+      run: |
+        mkdir -p micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
+        cp -r Adafruit_Blinka/src/adafruit_blinka/microcontroller/rp2040 micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
+        mkdir -p micropython/ports/rp2/modules/adafruit_blinka/board/raspberrypi/
+        cp Adafruit_Blinka/src/adafruit_blinka/microcontroller/__init__.py micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
+        cp Adafruit_Blinka/src/adafruit_blinka/board/__init__.py micropython/ports/rp2/modules/adafruit_blinka/board/
+        cp Adafruit_Blinka/src/adafruit_blinka/board/pico_u2if.py micropython/ports/rp2/modules/adafruit_blinka/board/
+        cp Adafruit_Blinka/src/adafruit_blinka/board/raspberrypi/__init__.py micropython/ports/rp2/modules/adafruit_blinka/board/raspberrypi/
+        cp Adafruit_Blinka/src/adafruit_blinka/board/raspberrypi/pico.py micropython/ports/rp2/modules/adafruit_blinka/board/raspberrypi/
+        cp Adafruit_Blinka/src/*.py micropython/ports/rp2/modules/
+        cp -r Adafruit_Blinka/src/microcontroller micropython/ports/rp2/modules/
+        cp Adafruit_Blinka/src/adafruit_blinka/__init__.py micropython/ports/rp2/modules/adafruit_blinka/
+        cp -r Adafruit_Blinka/src/adafruit_blinka/agnostic micropython/ports/rp2/modules/adafruit_blinka/
+        cp -r Adafruit_Python_PlatformDetect/adafruit_platformdetect micropython/ports/rp2/modules/
+
+    # Linux deps
+    - name: Install deps
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ${{matrix.apt-packages}}
+
+    - name: Fetch base MicroPython submodules
+      shell: bash
+      working-directory: micropython
+      run: git submodule update --init
+
+    - name: Fetch Pico SDK submodules
+      shell: bash
+      working-directory: micropython/lib/pico-sdk
+      run: git submodule update --init
+
+    - name: Build mpy-cross
+      shell: bash
+      working-directory: micropython/mpy-cross
+      run: make
+
+    - name: Build MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -j2
+
+    - name: Store .uf2 as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}-blinka-${{env.BLINKA_VERSION}}-platformdetect-${{env.PLATFORMDETECT_VERSION}}.uf2
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
+
+    - name: Upload .uf2
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}-blinka-${{env.BLINKA_VERSION}}-platformdetect-${{env.PLATFORMDETECT_VERSION}}.uf2
+        asset_content_type: application/octet-stream
