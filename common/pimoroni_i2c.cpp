@@ -3,12 +3,26 @@
 
 namespace pimoroni {
     void I2C::init() {
-        i2c = ((sda / 2) & 0b1) ? i2c1 : i2c0;
+        i2c = pin_to_inst(sda);
+        // TODO call pin_to_inst on sda and scl, and verify they are a valid i2c pin pair
+        // TODO maybe also fall back to PIO i2c for non-standard pin combinations
+
+        // Since it's easy to leave the I2C in a bad state when experimenting in the MicroPython REPL
+        // this loop will find any I2C pins relevant to the current instance and reset them.
+        for(auto pin = 0u; pin < 30; pin++) {
+            if(pin_to_inst(pin) == i2c && gpio_get_function(pin) == GPIO_FUNC_I2C) {
+                gpio_disable_pulls(pin);
+                gpio_set_function(pin, GPIO_FUNC_NULL);
+            }
+        }
 
         i2c_init(i2c, baudrate);
-
         gpio_set_function(sda, GPIO_FUNC_I2C); gpio_pull_up(sda);
         gpio_set_function(scl, GPIO_FUNC_I2C); gpio_pull_up(scl);
+    }
+
+    i2c_inst_t* I2C::pin_to_inst(uint pin) {
+        return ((pin >> 1) & 0b1) ? i2c1 : i2c0;
     }
 
     /* Basic wrappers for devices using i2c functions directly */
