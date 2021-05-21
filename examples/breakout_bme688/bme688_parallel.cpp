@@ -13,7 +13,7 @@ Reading the full batch of readings will take some time. This seems to take ~10se
 using namespace pimoroni;
 
 I2C i2c(BOARD::BREAKOUT_GARDEN);
-BME68x bme68x(&i2c);
+BME68X bme68x(&i2c);
 
 constexpr uint16_t profile_length = 10;
 

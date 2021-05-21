@@ -12,7 +12,7 @@ Read a single reading from the BME688
 using namespace pimoroni;
 
 I2C i2c(BOARD::BREAKOUT_GARDEN);
-BME68x bme68x(&i2c);
+BME68X bme68x(&i2c);
 
 int main() {
   gpio_init(PICO_DEFAULT_LED_PIN);

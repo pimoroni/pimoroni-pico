@@ -2,7 +2,7 @@
 #include "pico/stdlib.h"
 
 namespace pimoroni {
-    bool BME68x::init() {
+    bool BME68X::init() {
         int8_t result = 0;
 
         if(interrupt != PIN_UNUSED) {
@@ -32,7 +32,7 @@ namespace pimoroni {
         return true;
     }
 
-    bool BME68x::configure(uint8_t filter, uint8_t odr, uint8_t os_humidity, uint8_t os_pressure, uint8_t os_temp) {
+    bool BME68X::configure(uint8_t filter, uint8_t odr, uint8_t os_humidity, uint8_t os_pressure, uint8_t os_temp) {
         int8_t result;
 
         conf.filter = filter;
@@ -48,7 +48,7 @@ namespace pimoroni {
         return true;
     }
 
-    bool BME68x::read_forced(bme68x_data *data) {
+    bool BME68X::read_forced(bme68x_data *data) {
         int8_t result = 0;
         uint8_t n_fields;
         uint32_t delay_period;
@@ -79,7 +79,7 @@ namespace pimoroni {
     Will read profile_length results with the given temperatures and duration multipliers into the results array.
     Blocks until it has a valid result for each temp/duration, and returns the entire set in the given order.
     */
-    bool BME68x::read_parallel(bme68x_data *results, uint16_t *profile_temps, uint16_t *profile_durations, size_t profile_length) {
+    bool BME68X::read_parallel(bme68x_data *results, uint16_t *profile_temps, uint16_t *profile_durations, size_t profile_length) {
         int8_t result;
         bme68x_data data[3]; // Parallel & Sequential mode read 3 simultaneous fields
         uint8_t n_fields;

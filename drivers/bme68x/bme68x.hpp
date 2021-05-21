@@ -8,7 +8,7 @@
 #include "stdio.h"
 
 namespace pimoroni {
-    class BME68x {
+    class BME68X {
         public:
             static const uint8_t DEFAULT_I2C_ADDRESS    = 0x76;
             static const uint8_t ALTERNATE_I2C_ADDRESS  = 0x77;
@@ -25,13 +25,16 @@ namespace pimoroni {
             bool read_forced(bme68x_data *data);
             bool read_parallel(bme68x_data *results, uint16_t *profile_temps, uint16_t *profile_durations, size_t profile_length);
 
-            BME68x() : BME68x(new I2C()) {}
-            BME68x(uint8_t address, uint interrupt = PIN_UNUSED) : BME68x(new I2C(), address, interrupt) {}
-            BME68x(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
+            BME68X() : BME68X(new I2C()) {}
+            BME68X(uint8_t address, uint interrupt = PIN_UNUSED) : BME68X(new I2C(), address, interrupt) {}
+            BME68X(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED) : i2c(i2c), address(address), interrupt(interrupt) {}
+
+            I2C *get_i2c() {return i2c;}
+            uint get_int() {return PIN_UNUSED;}
 
             // Bindings for bme68x_dev 
             static int write_bytes(uint8_t reg_addr, uint8_t *reg_data, uint32_t length, void *intf_ptr) {
-                BME68x::i2c_intf_ptr* i2c = (BME68x::i2c_intf_ptr *)intf_ptr;
+                BME68X::i2c_intf_ptr* i2c = (BME68X::i2c_intf_ptr *)intf_ptr;
 
                 uint8_t buffer[length + 1];
                 buffer[0] = reg_addr;
@@ -45,7 +48,7 @@ namespace pimoroni {
             };
 
             static int read_bytes(uint8_t reg_addr, uint8_t *reg_data, uint32_t length, void *intf_ptr) {
-                BME68x::i2c_intf_ptr* i2c = (BME68x::i2c_intf_ptr *)intf_ptr;
+                BME68X::i2c_intf_ptr* i2c = (BME68X::i2c_intf_ptr *)intf_ptr;
 
                 int result = i2c->i2c->write_blocking(i2c->address, &reg_addr, 1, true);
                 result = i2c->i2c->read_blocking(i2c->address, reg_data, length, false);
