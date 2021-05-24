@@ -5,71 +5,70 @@
 
 #include "pico_rgb_keypad.hpp"
 
+/*
+  Test buttons/lights by lighting them up in a sequence of colors.
+
+  Press each button in turn, it will light up green.
+  Once all buttons are lit, they will turn off.
+  Press them again to light them in the next color.
+*/
+
 using namespace pimoroni;
 
 PicoRGBKeypad pico_keypad;
 
-int main() {
+constexpr uint8_t num_colors = 6;
 
+// Simple struct to pair r/g/b together as a color
+struct color {uint8_t r, g, b;};
+
+color colors[num_colors] = {
+  {0x00, 0x20, 0x00}, // Green
+  {0x20, 0x20, 0x00}, // Yellow
+  {0x20, 0x00, 0x00}, // Red
+  {0x20, 0x00, 0x20}, // Pink
+  {0x00, 0x00, 0x20}, // Blue
+  {0x00, 0x20, 0x20}  // Teal
+};
+
+int main() {
   pico_keypad.init();
   pico_keypad.set_brightness(1.0f);
 
-  uint16_t lit = 0;
-  uint16_t last_button_states = 0;
-  uint8_t colour_index = 0;
+  uint16_t lit_buttons = 0;
+  uint8_t color_index = 0;
+  color current_color = colors[color_index];
 
   while(true) {
-    // read button states from i2c expander
-    uint16_t button_states = pico_keypad.get_button_states();
+    // Read button states from i2c expander
+    // for any pressed buttons set the corresponding bit in "lit_buttons"
+    lit_buttons |= pico_keypad.get_button_states();
 
-    if(last_button_states != button_states && button_states) {
-      last_button_states = button_states;
-      if(button_states) {
-        if(lit == 0xffff) {
-          // all buttons are already lit, reset the test
-          lit = 0;
-          colour_index++;
-          if(colour_index >= 6) {
-            colour_index = 0;
-          }
-        }else{
-          uint8_t button = 0;
-          for(uint8_t find = 0; find < pico_keypad.NUM_PADS; find++) {
-            // check if this button is pressed and no other buttons are pressed
-            if(button_states & 0x01) {
-              if(!(button_states & (~0x01))) {
-                lit |= 1 << button;
-              }
-              break;
-            }
-            button_states >>= 1;
-            button++;
-          }
-        }
-      }
-    }
+    // You could use a bitwise OR (^) to make the buttons toggle their respective "lit" bits on and off:
+    // lit_buttons ^= pico_keypad.get_button_states();
 
-    last_button_states = button_states;
-
-    for(uint8_t i = 0; i < PicoRGBKeypad::NUM_PADS; i++) {
-      if((lit >> i) & 0x01) {
-        switch(colour_index)
-        {
-          case 0: pico_keypad.illuminate(i, 0x00, 0x20, 0x00);  break;
-          case 1: pico_keypad.illuminate(i, 0x20, 0x20, 0x00);  break;
-          case 2: pico_keypad.illuminate(i, 0x20, 0x00, 0x00);  break;
-          case 3: pico_keypad.illuminate(i, 0x20, 0x00, 0x20);  break;
-          case 4: pico_keypad.illuminate(i, 0x00, 0x00, 0x20);  break;
-          case 5: pico_keypad.illuminate(i, 0x00, 0x20, 0x20);  break;
-        }
+    // Iterate through the lights
+    for(auto i = 0u; i < PicoRGBKeypad::NUM_PADS; i++) {
+      if(lit_buttons & (0b1 << i)) {
+        pico_keypad.illuminate(i, current_color.r, current_color.g, current_color.b);
       }else{
+        // Kinda dim white-ish
         pico_keypad.illuminate(i, 0x05, 0x05, 0x05);
       }
     }
 
+    // Display the LED changes
     pico_keypad.update();
 
     sleep_ms(100);
+
+    if (lit_buttons == 0xffff) {
+      sleep_ms(500); // Wait a little so the last button can be seen
+      lit_buttons = 0; // Reset lit buttons
+      color_index += 1; // Proceed to the next color
+      if(color_index == num_colors) color_index = 0; // Wrap at last color
+      current_color = colors[color_index]; // Update the current color
+    }
   }
 
   return 0;
