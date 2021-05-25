@@ -398,7 +398,7 @@ mp_obj_t BreakoutRoundLCD_character(size_t n_args, const mp_obj_t *pos_args, mp_
     int y = args[ARG_y].u_int;
 
     Point p(x, y);
-    if(n_args == 4) {
+    if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
         int scale = args[ARG_scale].u_int;
         self->breakout->character((char)c, p, scale);
     }
@@ -435,7 +435,7 @@ mp_obj_t BreakoutRoundLCD_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         int wrap = args[ARG_wrap].u_int;
 
         Point p(x, y);
-        if(n_args == 5) {
+        if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
             int scale = args[ARG_scale].u_int;
             self->breakout->text(t, p, wrap, scale);
         }

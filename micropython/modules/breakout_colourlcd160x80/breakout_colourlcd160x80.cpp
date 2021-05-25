@@ -398,7 +398,7 @@ mp_obj_t BreakoutColourLCD160x80_character(size_t n_args, const mp_obj_t *pos_ar
     int y = args[ARG_y].u_int;
 
     Point p(x, y);
-    if(n_args == 4) {
+    if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
         int scale = args[ARG_scale].u_int;
         self->breakout->character((char)c, p, scale);
     }
@@ -424,22 +424,36 @@ mp_obj_t BreakoutColourLCD160x80_text(size_t n_args, const mp_obj_t *pos_args, m
 
     breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
 
-    mp_check_self(mp_obj_is_str_or_bytes(args[ARG_text].u_obj));
-    GET_STR_DATA_LEN(args[ARG_text].u_obj, str, str_len);
+    mp_obj_t text_obj = args[ARG_text].u_obj;
+    if(mp_obj_is_str_or_bytes(text_obj)) {
+        GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+        std::string t((const char*)str);
 
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int wrap = args[ARG_wrap].u_int;
+        int x = args[ARG_x].u_int;
+        int y = args[ARG_y].u_int;
+        int wrap = args[ARG_wrap].u_int;
 
-    Point p(x, y);
-    if(n_args == 5) {
-        int scale = args[ARG_scale].u_int;
-        self->breakout->text(t, p, wrap, scale);
+        Point p(x, y);
+        if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
+            int scale = args[ARG_scale].u_int;
+            self->breakout->text(t, p, wrap, scale);
+        }
+        else
+            self->breakout->text(t, p, wrap);
     }
-    else
-        self->breakout->text(t, p, wrap);
+    else if(mp_obj_is_float(text_obj)) {
+        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+    }
+    else if(mp_obj_is_int(text_obj)) {
+        mp_raise_TypeError("can't convert 'int' object to str implicitly");
+    }
+    else if(mp_obj_is_bool(text_obj)) {
+        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+    }
+    else {
+        mp_raise_TypeError("can't convert object to str implicitly");
+    }
 
     return mp_const_none;
 }
