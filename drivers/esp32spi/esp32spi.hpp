@@ -134,14 +134,14 @@ namespace pimoroni {
     void get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out);
     void get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out);
 
-    int8_t wifi_set_network(const std::string ssid);
-    int8_t wifi_set_passphrase(const std::string ssid, const std::string passphrase);
-    int8_t wifi_set_key(const std::string ssid, uint8_t key_idx, const std::string key);
+    int8_t wifi_set_network(const std::string_view ssid);
+    int8_t wifi_set_passphrase(const std::string_view ssid, const std::string_view passphrase);
+    int8_t wifi_set_key(const std::string_view ssid, uint8_t key_idx, const std::string_view key);
 
     void config(uint8_t valid_params, uint32_t local_ip, uint32_t gateway, uint32_t subnet);
 
     void set_dns(uint8_t valid_params, uint32_t dns_server1, uint32_t dns_server2);
-    void set_hostname(std::string hostname);
+    void set_hostname(std::string_view hostname);
     int8_t disconnect();
 
     uint8_t get_connection_status();
@@ -165,16 +165,16 @@ namespace pimoroni {
     uint8_t get_channel_networks(uint8_t network_item);
     int32_t get_rssi_networks(uint8_t network_item);
 
-    bool req_host_by_name(const std::string hostname);
+    bool req_host_by_name(const std::string_view hostname);
     bool get_host_by_name(IPAddress& ip_out);
-    bool get_host_by_name(const std::string hostname, IPAddress& ip_out);
+    bool get_host_by_name(const std::string_view hostname, IPAddress& ip_out);
 
     const char* get_fw_version();
     uint32_t get_time();
     void set_power_mode(uint8_t mode);
 
-    int8_t wifi_set_ap_network(const std::string ssid, uint8_t channel);
-    int8_t wifi_set_ap_passphrase(const std::string ssid, const std::string passphrase, uint8_t channel);
+    int8_t wifi_set_ap_network(const std::string_view ssid, uint8_t channel);
+    int8_t wifi_set_ap_passphrase(const std::string_view ssid, const std::string_view passphrase, uint8_t channel);
 
     int16_t ping(uint32_t ip_address, uint8_t ttl);
 
@@ -194,7 +194,7 @@ namespace pimoroni {
     void start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
     void start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
     void start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
-    void start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
+    void start_client(const std::string_view host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode = TCP_MODE);
     void stop_client(uint8_t sock);
     
     uint8_t get_server_state(uint8_t sock);
@@ -213,9 +213,9 @@ namespace pimoroni {
 
     //--------------------------------------------------
 
-    void wifi_set_ent_identity(const std::string identity);
-    void wifi_set_ent_username(const std::string username);
-    void wifi_set_ent_password(const std::string password);
+    void wifi_set_ent_identity(const std::string_view identity);
+    void wifi_set_ent_username(const std::string_view username);
+    void wifi_set_ent_password(const std::string_view password);
     void wifi_set_ent_enable();
   };
 

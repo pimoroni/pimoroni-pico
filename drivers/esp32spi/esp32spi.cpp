@@ -127,7 +127,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t Esp32Spi::wifi_set_network(const std::string ssid) {
+  int8_t Esp32Spi::wifi_set_network(const std::string_view ssid) {
   	driver.wait_for_esp_select();
 
     // Send Command
@@ -149,7 +149,7 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t Esp32Spi::wifi_set_passphrase(const std::string ssid, const std::string passphrase) {
+  int8_t Esp32Spi::wifi_set_passphrase(const std::string_view ssid, const std::string_view passphrase) {
 	  driver.wait_for_esp_select();
 
     // Send Command
@@ -172,7 +172,7 @@ namespace pimoroni {
     return data;
   }
 
-  int8_t Esp32Spi::wifi_set_key(const std::string ssid, uint8_t key_idx, const std::string key) {
+  int8_t Esp32Spi::wifi_set_key(const std::string_view ssid, uint8_t key_idx, const std::string_view key) {
 	  driver.wait_for_esp_select();
 
     //Send Command
@@ -245,7 +245,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::set_hostname(const std::string hostname) {
+  void Esp32Spi::set_hostname(const std::string_view hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -579,7 +579,7 @@ namespace pimoroni {
 	  return network_rssi;
   }
 
-  bool Esp32Spi::req_host_by_name(const std::string hostname) {
+  bool Esp32Spi::req_host_by_name(const std::string_view hostname) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -629,7 +629,7 @@ namespace pimoroni {
     return result;
   }
 
-  bool Esp32Spi::get_host_by_name(const std::string hostname, IPAddress& ip_out) {
+  bool Esp32Spi::get_host_by_name(const std::string_view hostname, IPAddress& ip_out) {
     if(req_host_by_name(hostname)) {
       return get_host_by_name(ip_out);
     }
@@ -697,7 +697,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  int8_t Esp32Spi::wifi_set_ap_network(const std::string ssid, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_network(const std::string_view ssid, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -720,7 +720,7 @@ namespace pimoroni {
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
-  int8_t Esp32Spi::wifi_set_ap_passphrase(const std::string ssid, const std::string passphrase, uint8_t channel) {
+  int8_t Esp32Spi::wifi_set_ap_passphrase(const std::string_view ssid, const std::string_view passphrase, uint8_t channel) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -993,7 +993,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
+  void Esp32Spi::start_client(const std::string_view host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -1326,7 +1326,7 @@ namespace pimoroni {
     return data;
   }
 
-  void Esp32Spi::wifi_set_ent_identity(const std::string identity) {
+  void Esp32Spi::wifi_set_ent_identity(const std::string_view identity) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -1346,7 +1346,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::wifi_set_ent_username(const std::string username) {
+  void Esp32Spi::wifi_set_ent_username(const std::string_view username) {
     driver.wait_for_esp_select();
 
     // Send Command
@@ -1366,7 +1366,7 @@ namespace pimoroni {
     driver.esp_deselect();
   }
 
-  void Esp32Spi::wifi_set_ent_password(const std::string password) {
+  void Esp32Spi::wifi_set_ent_password(const std::string_view password) {
     driver.wait_for_esp_select();
 
     // Send Command
