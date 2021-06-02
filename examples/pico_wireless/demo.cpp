@@ -81,12 +81,14 @@ int main() {
     uint8_t* mac = wireless.get_mac_address();
     printf("mac address ");
     for(uint i = 0; i < WL_MAC_ADDR_LENGTH; i++) {
-      printf("%d:", mac[i]);
+      printf("%2X", mac[WL_MAC_ADDR_LENGTH - 1 - i]);
+      if (i < WL_MAC_ADDR_LENGTH - 1) printf(":");
     }
     printf("\n");
 
     printf("starting connection\n");
 
+    wireless.set_hostname("picowireless");
     wireless.wifi_set_passphrase(NETWORK, PASSWORD);
 
     printf("waiting to establish connection status\n");
@@ -107,7 +109,7 @@ int main() {
     printf("RSSI = %ld\n", wireless.get_current_rssi());
     
     uint8_t t = 0;
-    while (true) {      
+    while (true) {
       from_hsv((float)t/256.0f, 1, 1, r, g, b);
       wireless.set_led(r, g, b);
       sleep_ms(10);
