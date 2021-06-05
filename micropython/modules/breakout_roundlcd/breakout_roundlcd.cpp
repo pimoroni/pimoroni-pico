@@ -394,7 +394,7 @@ mp_obj_t BreakoutRoundLCD_character(size_t n_args, const mp_obj_t *pos_args, mp_
     breakout_roundlcd_BreakoutRoundLCD_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_roundlcd_BreakoutRoundLCD_obj_t);
 
     int c = mp_obj_get_int(args[ARG_char].u_obj);
-    int x = args[ARG_y].u_int;
+    int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
 
     Point p(x, y);
