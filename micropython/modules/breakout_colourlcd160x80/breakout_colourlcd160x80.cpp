@@ -394,7 +394,7 @@ mp_obj_t BreakoutColourLCD160x80_character(size_t n_args, const mp_obj_t *pos_ar
     breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
 
     int c = mp_obj_get_int(args[ARG_char].u_obj);
-    int x = args[ARG_y].u_int;
+    int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
 
     Point p(x, y);
