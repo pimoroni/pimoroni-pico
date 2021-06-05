@@ -47,6 +47,15 @@ jobs:
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
 
+    - name: Hotfix lwip submodule
+      shell: bash
+      working-directory: micropython
+      run: |
+        git config --global user.email "hotfix@example.com"
+        git config --global user.name "Sassy McGuffin"
+        wget https://github.com/micropython/micropython/commit/43e7e5f00a601b36b5b39f1fef036d6c25d5562c.patch
+        git am 43e7e5f00a601b36b5b39f1fef036d6c25d5562c.patch
+
     - name: Fetch base MicroPython submodules
       shell: bash
       working-directory: micropython
