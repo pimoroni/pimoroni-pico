@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <cstdlib>
 #include <math.h>
 #include <map>
@@ -11,7 +12,7 @@ namespace pimoroni {
     CHIP_ID_L = 0xfa,
     CHIP_ID_H = 0xfb,
     VERSION = 0xfc,
-    
+
     // Rotary encoder
     ENC_EN = 0x04,
     // BIT_ENC_EN_1 = 0
@@ -215,7 +216,7 @@ namespace pimoroni {
     ADDRWR = 0x10,
   };
 
-  static const uint8_t NUM_BIT_ADDRESSED_REGISTERS = 4;  
+  static const uint8_t NUM_BIT_ADDRESSED_REGISTERS = 4;
   static const uint8_t BIT_ADDRESSED_REGS[NUM_BIT_ADDRESSED_REGISTERS] = {reg::P0, reg::P1, reg::P2, reg::P3};
   static const uint8_t ENC_CFG[4] = {reg::ENC_1_CFG, reg::ENC_2_CFG, reg::ENC_3_CFG, reg::ENC_4_CFG};
   static const uint8_t ENC_COUNT[4] = {reg::ENC_1_COUNT, reg::ENC_2_COUNT, reg::ENC_3_COUNT, reg::ENC_4_COUNT};
@@ -366,7 +367,7 @@ namespace pimoroni {
   uint16_t IOExpander::get_chip_id() {
       return ((uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_H) << 8) | (uint16_t)i2c->reg_read_uint8(address, reg::CHIP_ID_L);
   }
-  
+
   void IOExpander::set_address(uint8_t address) {
     set_bit(reg::CTRL, 4);
     i2c->reg_write_uint8(address, reg::ADDR, address);
@@ -383,7 +384,7 @@ namespace pimoroni {
   void IOExpander::set_adc_vref(float vref) {
     this->vref = vref;
   }
-    
+
   void IOExpander::enable_interrupt_out(bool pin_swap) {
     set_bit(reg::INT, int_bit::OUT_EN);
     change_bit(reg::INT, int_bit::PIN_SWAP, pin_swap);
@@ -409,10 +410,10 @@ namespace pimoroni {
     if(pin >= 1 && pin <= NUM_PINS) {
       Pin& io_pin = pins[pin - 1];
       change_bit(io_pin.reg_int_mask_p, io_pin.pin, enabled);
-      
+
       succeeded = true;
     }
-    
+
     return succeeded;
   }
 
@@ -515,7 +516,7 @@ namespace pimoroni {
     }
 
     Pin& io_pin = pins[pin - 1];
-    
+
     uint8_t gpio_mode = mode & 0b11;
     uint8_t io_type = (mode >> 2) & 0b11;
     uint8_t initial_state = mode >> 4;
@@ -584,7 +585,7 @@ namespace pimoroni {
       if(debug) {
         printf("Reading ADC from pin %d\n", pin);
       }
-        
+
       clr_bits(reg::ADCCON0, 0x0f);
       set_bits(reg::ADCCON0, io_pin.adc_channel);
       i2c->reg_write_uint8(address, reg::AINDIDS, 0);
@@ -613,7 +614,7 @@ namespace pimoroni {
       if(debug) {
         printf("Reading IO from pin %d\n", pin);
       }
-      
+
       uint8_t pv = get_bit(io_pin.reg_p, io_pin.pin);
       return (pv) ? 1 : 0;
     }
@@ -632,7 +633,7 @@ namespace pimoroni {
       if(debug) {
         printf("Reading ADC from pin %d\n", pin);
       }
-        
+
       clr_bits(reg::ADCCON0, 0x0f);
       set_bits(reg::ADCCON0, io_pin.adc_channel);
       i2c->reg_write_uint8(address, reg::AINDIDS, 0);
@@ -662,12 +663,12 @@ namespace pimoroni {
       if(debug) {
         printf("Reading IO from pin %d\n", pin);
       }
-      
+
       uint8_t pv = get_bit(io_pin.reg_p, io_pin.pin);
       return (pv) ? vref : 0.0f;
     }
   }
-  
+
   void IOExpander::output(uint8_t pin, uint16_t value, bool load) {
     if(pin < 1 || pin > NUM_PINS) {
       printf("Pin should be in range 1-14.");
@@ -691,14 +692,14 @@ namespace pimoroni {
         if(debug) {
           printf("Outputting LOW to pin: %d\n", pin);
         }
-        
+
         clr_bit(io_pin.reg_p, io_pin.pin);
       }
       else if(value == HIGH) {
         if(debug) {
           printf("Outputting HIGH to pin: %d\n", pin);
         }
-        
+
         set_bit(io_pin.reg_p, io_pin.pin);
       }
     }
@@ -717,7 +718,7 @@ namespace pimoroni {
     i2c->reg_write_uint8(address, ENC_CFG[channel], pin_a | (pin_b << 4));
     change_bit(reg::ENC_EN, (channel * 2) + 1, count_microsteps);
     set_bit(reg::ENC_EN, channel * 2);
-    
+
     // Reset internal encoder count to zero
     uint8_t reg = ENC_COUNT[channel];
     i2c->reg_write_uint8(address, reg, 0x00);
