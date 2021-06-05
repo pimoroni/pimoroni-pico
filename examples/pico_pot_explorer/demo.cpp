@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 
+#include "common/pimoroni_i2c.hpp"
 #include "pico_explorer.hpp"
 #include "breakout_potentiometer.hpp"
 
@@ -12,7 +13,8 @@ using namespace pimoroni;
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 
-BreakoutPotentiometer pot;
+I2C i2c(PICO_EXPLORER);
+BreakoutPotentiometer pot(&i2c);
 bool toggle = false;
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
@@ -43,6 +45,8 @@ int main() {
 
   pico_explorer.init();
   pico_explorer.update();
+
+  printf("Starting...\n");
 
   if(pot.init()) {
     printf("Potentiometer found...\n");
@@ -102,7 +106,7 @@ int main() {
     }
   }
   else {
-    printf("Encoder Potentiometer found :'(\n");
+    printf("No Potentiometer found :'(\n");
     gpio_put(PICO_DEFAULT_LED_PIN, true);
   }
 

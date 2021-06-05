@@ -38,6 +38,10 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
       width(width), height(height), frame_buffer(frame_buffer) {
       switch(slot) {
+        case PICO_EXPLORER_ONBOARD:
+          cs = SPI_BG_FRONT_CS;
+          bl = PIN_UNUSED;
+          break;
         case BG_SPI_FRONT:
           cs = SPI_BG_FRONT_CS;
           bl = SPI_BG_FRONT_PWM;
