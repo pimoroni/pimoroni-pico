@@ -15,7 +15,7 @@ const uint8_t MOTOR2P = 11;
 namespace pimoroni {
 
   PicoExplorer::PicoExplorer(uint16_t *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf)  {
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, PICO_EXPLORER_ONBOARD)  {
     __fb = buf;
   }
 

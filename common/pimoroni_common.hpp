@@ -31,7 +31,8 @@ namespace pimoroni {
 
     enum BG_SPI_SLOT {
       BG_SPI_FRONT,
-      BG_SPI_BACK
+      BG_SPI_BACK,
+      PICO_EXPLORER_ONBOARD
     };
 
     enum BOARD {

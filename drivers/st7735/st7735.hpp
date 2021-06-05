@@ -40,13 +40,13 @@ namespace pimoroni {
     uint32_t dma_channel;
 
     // interface pins with our standard defaults where appropriate
-    int8_t cs     = DEFAULT_CS_PIN;
-    int8_t dc     = DEFAULT_DC_PIN;
-    int8_t sck    = DEFAULT_SCK_PIN;
-    int8_t mosi   = DEFAULT_MOSI_PIN;
-    int8_t miso   = -1; // we generally don't use this pin
-    int8_t bl     = DEFAULT_BL_PIN;
-    int8_t vsync  = -1; // only available on some products
+    uint cs     = DEFAULT_CS_PIN;
+    uint dc     = DEFAULT_DC_PIN;
+    uint sck    = DEFAULT_SCK_PIN;
+    uint mosi   = DEFAULT_MOSI_PIN;
+    uint miso   = PIN_UNUSED; // we generally don't use this pin
+    uint bl     = DEFAULT_BL_PIN;
+    uint vsync  = PIN_UNUSED; // only available on some products
 
     uint32_t spi_baud = 30 * 1024 * 1024;
 
@@ -61,13 +61,17 @@ namespace pimoroni {
     ST7735(uint16_t width, uint16_t height, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
       width(width), height(height), frame_buffer(frame_buffer) {
       switch(slot) {
+        case PICO_EXPLORER_ONBOARD: // Don't read too much into this, the case is just here to avoid a compile error
+          cs = SPI_BG_FRONT_CS;
+          bl = PIN_UNUSED;
+          break;
         case BG_SPI_FRONT:
-          cs = 17;
-          bl = 20;
+          cs = SPI_BG_FRONT_CS;
+          bl = SPI_BG_FRONT_PWM;
           break;
         case BG_SPI_BACK:
-          cs = 22;
-          bl = 21;
+          cs = SPI_BG_BACK_CS;
+          bl = SPI_BG_BACK_PWM;
           break;
       }
     }

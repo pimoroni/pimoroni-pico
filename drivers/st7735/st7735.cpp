@@ -79,13 +79,13 @@ namespace pimoroni {
     gpio_set_function(sck,  GPIO_FUNC_SPI);
     gpio_set_function(mosi, GPIO_FUNC_SPI);
 
-    if(miso != -1) {
+    if(miso != PIN_UNUSED) {
       gpio_set_function(miso, GPIO_FUNC_SPI);
     }
 
     // if supported by the display then the vsync pin is
     // toggled high during vertical blanking period
-    if(vsync != -1) {
+    if(vsync != PIN_UNUSED) {
       gpio_set_function(vsync, GPIO_FUNC_SIO);
       gpio_set_dir(vsync, GPIO_IN);
       gpio_set_pulls(vsync, false, true);
@@ -93,7 +93,7 @@ namespace pimoroni {
 
     // if a backlight pin is provided then set it up for
     // pwm control
-    if(bl != -1) {
+    if(bl != PIN_UNUSED) {
       pwm_config cfg = pwm_get_default_config();
       pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
       pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
