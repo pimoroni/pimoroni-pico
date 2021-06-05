@@ -2,7 +2,7 @@ import time
 import picowireless
 from micropython import const
 
-WIFI_SSID = "your SSID here!"
+WIFI_SSID = "Your SSID here!"
 WIFI_PASS = "Your PSK here!"
 
 CLOUDFLARE_DNS = (1, 1, 1, 1)
@@ -31,7 +31,7 @@ def connect(host_address, port, client_sock, timeout=1000):
     return False
 
 
-def http_request(client_sock, host_address, port, request_host, request_path, handler):
+def http_request(client_sock, host_address, port, request_host, request_path, handler, timeout=5000):
     print("Connecting to {1}.{2}.{3}.{4}:{0}...".format(port, *host_address))
     if not connect(host_address, port, client_sock):
         print("Connection failed!")
@@ -46,7 +46,14 @@ Connection: close
 
     picowireless.send_data(client_sock, http_request)
 
+    t_start = time.time()
+
     while True:
+        if time.time() - t_start > timeout:
+            picowireless.client_stop(client_sock)
+            print("HTTP request to {}:{} timed out...".format(host_address, port))
+            return False
+
         avail_length = picowireless.avail_data(client_sock)
         if avail_length > 0:
             break
