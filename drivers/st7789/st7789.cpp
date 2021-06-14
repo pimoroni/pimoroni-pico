@@ -54,7 +54,7 @@ namespace pimoroni {
     RASET     = 0x2B
   };
 
-  void ST7789::init(bool auto_init_sequence, bool round) {
+  void ST7789::init(bool auto_init_sequence, bool round, uint32_t spi_baud) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
 
@@ -113,6 +113,21 @@ namespace pimoroni {
         command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
       }
 
+      if(width == 320 && height == 240) {
+        command(reg::FRMCTR2, 5, "\x0c\x0c\x00\x33\x33");
+        command(reg::GCTRL, 1, "\x74");
+        command(reg::VCOMS, 1, "\x2f");
+        command(reg::LCMCTRL, 1, "\2c");
+        command(reg::VDVVRHEN, 1, "\x01");
+        command(reg::VRHS, 1, "\x19");
+        command(reg::VDVS, 1, "\x20");
+        command(reg::FRMCTR2, 1, "\x0f");
+        command(reg::PWRCTRL1, 2, "\xa4\xa1");
+        command(0xd6, 1, "\xa1"); // ???
+        command(reg::GMCTRP1, 14, "\xF0\x08\x0F\x0B\x0B\x07\x34\x43\x4B\x38\x14\x13\x2C\x31");
+        command(reg::GMCTRN1, 14, "\xF0\x0C\x11\x09\x08\x24\x34\x33\x4A\x3A\x16\x16\x2E\x32");
+      }
+
       command(reg::INVON);   // set inversion mode
       command(reg::SLPOUT);  // leave sleep mode
       command(reg::DISPON);  // turn display on
@@ -141,6 +156,14 @@ namespace pimoroni {
         caset[1] = 186;
         raset[0] = 40;   // 240 rows
         raset[1] = 279;
+        madctl = 0;
+      }
+
+      if(width == 320 && height == 240) {
+        caset[0] = 0;
+        caset[1] = 319;
+        raset[0] = 0;
+        raset[1] = 239;
         madctl = 0;
       }
 
