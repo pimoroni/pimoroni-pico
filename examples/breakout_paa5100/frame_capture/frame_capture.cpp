@@ -2,14 +2,14 @@
 #include "pico/stdlib.h"
 #include <string>
 
-#include "breakout_pmw3901.hpp"
+#include "breakout_paa5100.hpp"
 
 using namespace pimoroni;
 
-BreakoutPMW3901 flo(BG_SPI_FRONT);
-BreakoutPMW3901::Degrees rotation = BreakoutPMW3901::DEGREES_0;
-const uint8_t SIZE = BreakoutPMW3901::FRAME_SIZE;
-uint8_t data[BreakoutPMW3901::RAW_DATA_LEN];
+BreakoutPAA5100 flo(BG_SPI_FRONT);
+BreakoutPAA5100::Degrees rotation = BreakoutPAA5100::DEGREES_0;
+const uint8_t SIZE = BreakoutPAA5100::FRAME_SIZE;
+uint8_t data[BreakoutPAA5100::RAW_DATA_LEN];
 
 std::string value_to_char(uint8_t value) {
   const std::string charmap = " .:-=+*#%@";
@@ -34,14 +34,14 @@ int main() {
     uint16_t data_size = 0;
     if(flo.frame_capture(data, data_size)) {
       for(uint8_t y = 0; y < SIZE; y++) {
-        if(rotation == BreakoutPMW3901::DEGREES_180 || rotation == BreakoutPMW3901::DEGREES_270)
+        if(rotation == BreakoutPAA5100::DEGREES_180 || rotation == BreakoutPAA5100::DEGREES_270)
           y = SIZE - y - 1;
 
         for(uint8_t x = 0; x < SIZE; x++) {
-          if(rotation == BreakoutPMW3901::DEGREES_180 || rotation == BreakoutPMW3901::DEGREES_90)
+          if(rotation == BreakoutPAA5100::DEGREES_180 || rotation == BreakoutPAA5100::DEGREES_90)
             x = SIZE - x - 1;
 
-          if(rotation == BreakoutPMW3901::DEGREES_90 || rotation == BreakoutPMW3901::DEGREES_270)
+          if(rotation == BreakoutPAA5100::DEGREES_90 || rotation == BreakoutPAA5100::DEGREES_270)
             offset = (x * 35) + y;
           else
             offset = (y * 35) + x;
@@ -53,7 +53,7 @@ int main() {
       }
     }
     else {
-      printf("Capture failed. %d bytes received, of %d. Recapturing in ", data_size, BreakoutPMW3901::RAW_DATA_LEN);
+      printf("Capture failed. %d bytes received, of %d. Recapturing in ", data_size, BreakoutPAA5100::RAW_DATA_LEN);
     }
     printf("5...\n");
     sleep_ms(1000);
