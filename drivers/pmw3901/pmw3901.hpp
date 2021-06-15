@@ -15,7 +15,7 @@ namespace pimoroni {
   public:
     static const uint8_t FRAME_SIZE     = 35;
     static const uint16_t RAW_DATA_LEN  = 1225;
-  private:
+  protected:
     static const uint8_t WAIT = -1;
 
     //--------------------------------------------------
@@ -93,7 +93,6 @@ namespace pimoroni {
   protected:
     virtual void secret_sauce();
 
-  private:
     void cs_select();
     void cs_deselect();
     void write_register(uint8_t reg, uint8_t data);
@@ -103,4 +102,8 @@ namespace pimoroni {
     uint32_t millis();
   };
 
+  class PAA5100 : public PMW3901 {
+  protected:
+    virtual void secret_sauce();
+  };
 }
