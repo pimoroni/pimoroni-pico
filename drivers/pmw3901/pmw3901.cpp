@@ -4,17 +4,20 @@
 #include <math.h>
 #include <cstdio>
 #include <algorithm>
+#include <cstring>
 
 namespace pimoroni {
 
   enum reg : uint8_t {
-    ID = 0x00,
-    REVISION = 0x01,
-    DATA_READY = 0x02,
-    MOTION_BURST = 0x16,
-    POWER_UP_RESET = 0x3a,
-    ORIENTATION = 0x5b,
-    RESOLUTION = 0x4e,  // PAA5100 only
+    ID                  = 0x00,
+    REVISION            = 0x01,
+    DATA_READY          = 0x02,
+    MOTION_BURST        = 0x16,
+    POWER_UP_RESET      = 0x3a,
+    ORIENTATION         = 0x5b,
+    RESOLUTION          = 0x4e,  // PAA5100 only
+    RAWDATA_GRAB        = 0x58,
+    RAWDATA_GRAB_STATUS = 0x59,
   };
 
   bool PMW3901::init() {
@@ -134,16 +137,15 @@ namespace pimoroni {
       read_registers(reg::MOTION_BURST, buf, 12);
       uint8_t dr = buf[0];
       //uint8_t obs = buf[1];
-      x_out = (int16_t)((int32_t)buf[2] << 8 | buf[3]);
-      y_out = (int16_t)((int32_t)buf[4] << 8 | buf[5]);
+      x_out = (int16_t)((int32_t)buf[3] << 8 | buf[2]);
+      y_out = (int16_t)((int32_t)buf[5] << 8 | buf[4]);
       uint8_t quality = buf[6];
       //uint8_t raw_sum = buf[7];
       //uint8_t raw_max = buf[8];
       //uint8_t raw_min = buf[9];
       uint8_t shutter_upper = buf[10];
       //uint8_t shutter_lower = buf[11];
-      printf("dr = %d, x = %d, y = %d\n",dr, x_out, y_out);
-      if((dr & 0b10000000) && !((quality < 0x19) && (shutter_upper = 0x1f)))
+      if((dr & 0b10000000) && !((quality < 0x19) && (shutter_upper == 0x1f)))
         return true;
 
       sleep_ms(1);
@@ -158,9 +160,8 @@ namespace pimoroni {
       uint8_t buf[5];
       read_registers(reg::DATA_READY, buf, 5);
       uint8_t dr = buf[0];
-      x_out = (int16_t)((int32_t)buf[1] << 8 | buf[2]);
-      y_out = (int16_t)((int32_t)buf[3] << 8 | buf[4]);
-      printf("dr = %d, x = %d, y = %d\n",dr, x_out, y_out);
+      x_out = (int16_t)((int32_t)buf[2] << 8 | buf[1]);
+      y_out = (int16_t)((int32_t)buf[4] << 8 | buf[3]);
       if(dr & 0b10000000)
         return true;
 
@@ -170,8 +171,68 @@ namespace pimoroni {
     return false;
   }
 
-  void PMW3901::frame_capture(uint16_t timeout_ms) {
+  bool PMW3901::frame_capture(uint8_t (&raw_data_out)[RAW_DATA_LEN], uint16_t& data_size_out, uint16_t timeout_ms) {
+    bool success = false;
 
+    data_size_out = 0;
+
+    uint8_t buf[] = {
+      0x7f, 0x07,
+      0x4c, 0x00,
+      0x7f, 0x08,
+      0x6a, 0x38,
+      0x7f, 0x00,
+      0x55, 0x04,
+      0x40, 0x80,
+      0x4d, 0x11,
+
+      WAIT, 0x0a,
+
+      0x7f, 0x00,
+      0x58, 0xff
+    };
+    write_buffer(buf, sizeof(buf));
+
+    uint8_t status = 0;
+    uint32_t start_time = millis();
+    while(millis() - start_time < timeout_ms) {
+      status = read_register(reg::RAWDATA_GRAB_STATUS);
+      if(status & 0b11000000) {
+        success = true;
+        break;
+      }
+    }
+
+    if(success) {
+      write_register(reg::RAWDATA_GRAB, 0x00);
+      memset(raw_data_out, 0, RAW_DATA_LEN * sizeof(uint8_t));
+      
+      uint8_t data = 0;
+      uint16_t x = 0;
+
+      success = false;
+      start_time = millis();
+      while(millis() - start_time < timeout_ms) {
+        data = read_register(reg::RAWDATA_GRAB);
+        if((data & 0b11000000) == 0b01000000) {  // Upper 6-bits
+          raw_data_out[x] &= ~0b11111100;
+          raw_data_out[x] |= (data & 0b00111111) << 2;         // Held in 5:0
+        }
+        if((data & 0b11000000) == 0b10000000) {  // Lower 2-bits
+          raw_data_out[x] &= ~0b00000011;
+          raw_data_out[x] |= (data & 0b00001100) >> 2;  // Held in 3:2
+          x++;
+        }
+        if(x == RAW_DATA_LEN) {
+          success = true;
+          break;
+        }
+      }
+
+      data_size_out = x;
+    }
+
+    return success;
   }
 
   void PMW3901::cs_select() {
@@ -179,7 +240,9 @@ namespace pimoroni {
   }
 
   void PMW3901::cs_deselect() {
+    sleep_us(1);
     gpio_put(cs, true);
+    sleep_us(1);
   }
 
   void PMW3901::write_register(uint8_t reg, uint8_t data) {
@@ -192,14 +255,12 @@ namespace pimoroni {
   }
 
   void PMW3901::write_buffer(uint8_t *buf, uint16_t len) {
-    cs_select();
     for(uint8_t i = 0; i < len; i += 2) {
       if(buf[i] == WAIT)
         sleep_ms(buf[i + 1]);
       else
-        spi_write_blocking(spi, &buf[i], 2);
+        write_register(buf[i], buf[i + 1]);
     }
-    cs_deselect();
   }
 
   void PMW3901::read_registers(uint8_t reg, uint8_t *buf, uint16_t len) {
