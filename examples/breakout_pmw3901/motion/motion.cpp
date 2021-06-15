@@ -5,24 +5,22 @@
 
 using namespace pimoroni;
 
-BreakoutPMW3901 flo;
+BreakoutPMW3901 flo(BG_SPI_FRONT);
 
 int main() {
   stdio_init_all();
 
-  sleep_ms(10000);
-
   flo.init();
   flo.set_rotation(BreakoutPMW3901::DEGREES_0);
-
-  //uint8_t tx = 0, ty = 0;
-
+  int16_t tx = 0, ty = 0;
   int16_t x = 0, y = 0;
   while(true) {
-    flo.get_motion(x, y);
-    printf("tick\n");
-    //tx;
-    sleep_ms(1000);
+    if(flo.get_motion(x, y)) {
+      tx += x;
+      ty += y;
+      printf("Relative: x %6d, y %6d | Absolute: tx %6d, ty %6d\n", x, y, tx, ty);
+    }
+    sleep_ms(10);
   };
   return 0;
 }

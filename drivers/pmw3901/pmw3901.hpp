@@ -12,8 +12,11 @@ namespace pimoroni {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
+  public:
+    static const uint8_t FRAME_SIZE     = 35;
+    static const uint16_t RAW_DATA_LEN  = 1225;
   private:
-  static const uint8_t WAIT = -1;
+    static const uint8_t WAIT = -1;
 
     //--------------------------------------------------
     // Enums
@@ -85,7 +88,7 @@ namespace pimoroni {
     void set_orientation(bool invert_x = true, bool invert_y = true, bool swap_xy = true);
     bool get_motion(int16_t& x_out, int16_t& y_out, uint16_t timeout_ms = 5000);
     bool get_motion_slow(int16_t& x_out, int16_t& y_out, uint16_t timeout_ms = 5000);
-    void frame_capture(uint16_t timeout_ms = 10000);
+    bool frame_capture(uint8_t (&raw_data_out)[RAW_DATA_LEN], uint16_t& data_size_out, uint16_t timeout_ms = 10000);
 
   protected:
     virtual void secret_sauce();
