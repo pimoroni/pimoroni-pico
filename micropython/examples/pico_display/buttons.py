@@ -1,6 +1,7 @@
 # This example shows you a simple, non-interrupt way of reading Pico Display's buttons with a loop that checks to see if buttons are pressed.
 
-import picodisplay as display
+import picodisplay as display  #Comment this line out to use PicoDisplay2
+#import picodisplay2 as display  #Uncomment this line to use PicoDisplay2
 import utime
 
 # Initialise display with a bytearray display buffer
