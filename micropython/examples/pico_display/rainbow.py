@@ -1,8 +1,8 @@
 # This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Display's screen and RGB LED . If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
 
 import utime
-import picodisplay as display  #Comment this line out to use PicoDisplay2
-#import picodisplay2 as display  #Uncomment this line to use PicoDisplay2
+import picodisplay as display  # Comment this line out to use PicoDisplay2
+# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
 
 # Set up and initialise Pico Display
 buf = bytearray(display.get_width() * display.get_height() * 2)
