@@ -164,7 +164,7 @@ namespace pimoroni {
         caset[1] = 319;
         raset[0] = 0;
         raset[1] = 239;
-        madctl = 0;
+        madctl = MADCTL::RGB;
       }
 
       // Byte swap the 16bit rows/cols values
