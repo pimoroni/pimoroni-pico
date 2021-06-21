@@ -49,7 +49,7 @@ namespace pimoroni {
     gpio_set_function(Y, GPIO_FUNC_SIO); gpio_set_dir(Y, GPIO_IN); gpio_pull_up(Y);
 
     // initialise the screen
-    screen.init();
+    screen.init(true, false, 74 * 1000 * 1000);
   }
 
   void PicoDisplay2::update() {
