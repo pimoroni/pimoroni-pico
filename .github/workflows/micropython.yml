@@ -8,7 +8,7 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  MICROPYTHON_VERSION: v1.15
+  MICROPYTHON_VERSION: v1.16
   BUILD_TYPE: Release
   BOARD_TYPE: PICO
 
@@ -46,15 +46,6 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
-
-    - name: Hotfix lwip submodule
-      shell: bash
-      working-directory: micropython
-      run: |
-        git config --global user.email "hotfix@example.com"
-        git config --global user.name "Sassy McGuffin"
-        wget https://github.com/micropython/micropython/commit/43e7e5f00a601b36b5b39f1fef036d6c25d5562c.patch
-        git am 43e7e5f00a601b36b5b39f1fef036d6c25d5562c.patch
 
     - name: Fetch base MicroPython submodules
       shell: bash
