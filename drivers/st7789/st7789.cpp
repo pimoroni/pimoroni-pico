@@ -50,7 +50,8 @@ namespace pimoroni {
     RAMWR     = 0x2C,
     INVON     = 0x21,
     CASET     = 0x2A,
-    RASET     = 0x2B
+    RASET     = 0x2B,
+    PWMFRSEL  = 0xCC
   };
 
   void ST7789::init(bool auto_init_sequence, bool round, uint32_t spi_baud) {
@@ -116,7 +117,7 @@ namespace pimoroni {
         command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
         command(reg::GCTRL, 1, "\x74");
         command(reg::VCOMS, 1, "\x2f");
-        command(reg::LCMCTRL, 1, "\2c");
+        command(reg::LCMCTRL, 1, "\x22");
         command(reg::VDVVRHEN, 1, "\x01");
         command(reg::VRHS, 1, "\x19");
         command(reg::VDVS, 1, "\x20");
@@ -163,7 +164,7 @@ namespace pimoroni {
         caset[1] = 319;
         raset[0] = 0;
         raset[1] = 239;
-        madctl = MADCTL::RGB;
+        madctl = 0;
       }
 
       // Byte swap the 16bit rows/cols values
