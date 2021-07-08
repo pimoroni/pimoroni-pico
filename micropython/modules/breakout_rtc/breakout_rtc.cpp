@@ -136,8 +136,8 @@ mp_obj_t BreakoutRTC_set_time(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         mp_raise_ValueError("date out of range. Expected 1 to 31");
     else if(month < 1 || month > 12)
         mp_raise_ValueError("month out of range. Expected 1 to 12");
-    else if(year < 0 || year > 99)
-        mp_raise_ValueError("year out of range. Expected 0 to 99");
+    else if(year < 2000 || year > 2099)
+        mp_raise_ValueError("year out of range. Expected 2000 to 2099");
     else
         return mp_obj_new_bool(self->breakout->set_time(sec, min, hour, weekday, date, month, year));
 
