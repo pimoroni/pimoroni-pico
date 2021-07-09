@@ -1,3 +1,10 @@
 [submodule "micropython/modules/ulab"]
 	path = micropython/modules/ulab
 	url = https://github.com/v923z/micropython-ulab.git
+[submodule "drivers/bme280/src"]
+	path = drivers/bme280/src
+	url = https://github.com/BoschSensortec/BME280_driver
+[submodule "drivers/bmp280/src"]
+	path = drivers/bmp280/src
+	url = https://github.com/pimoroni/BMP280_driver
+	branch = patch-intf-ptr
