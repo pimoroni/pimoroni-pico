@@ -415,7 +415,7 @@ mp_obj_t BreakoutColourLCD240x240_text(size_t n_args, const mp_obj_t *pos_args, 
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_wr, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_wordwrap, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
     };
 
