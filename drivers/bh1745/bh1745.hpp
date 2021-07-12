@@ -38,9 +38,10 @@ namespace pimoroni {
             BH1745(i2c_inst_t *i2c, uint8_t addr, uint8_t sda, uint8_t scl, uint interrupt) :
                 BH1745(new I2C(sda, scl), address) {};
 
-            int init();
+            bool init();
 
-            i2c_inst_t* get_i2c() const;
+            I2C* get_i2c() const;
+            int get_address() const;
 
             uint8_t get_chip_id();
             uint8_t get_manufacturer();

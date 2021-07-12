@@ -13,7 +13,7 @@ BH1745 bh1745(&i2c, BH1745::DEFAULT_I2C_ADDRESS);
 int main() {
   stdio_init_all();
 
-  if (bh1745.init() == 1) {
+  if (!bh1745.init()) {
       printf("Failed to set up sensor\n");
       return 1;
   }

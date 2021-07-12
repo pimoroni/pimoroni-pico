@@ -2,11 +2,11 @@
 #include <algorithm>
 
 namespace pimoroni {
-    int BH1745::init() {
+    bool BH1745::init() {
         reset();
 
         if (this->get_chip_id() != BH1745_CHIP_ID || this->get_manufacturer() != BH1745_MANUFACTURER) {
-            return 1;
+            return false;
         }
 
         reset();
@@ -20,11 +20,15 @@ namespace pimoroni {
 
         sleep_ms(320);
 
-        return 0;
+        return true;
     }
 
-    i2c_inst_t* BH1745::get_i2c() const {
-        return i2c->get_i2c();
+    I2C* BH1745::get_i2c() const {
+        return i2c;
+    }
+
+    int BH1745::get_address() const {
+        return address;
     }
 
     uint8_t BH1745::get_chip_id() {
