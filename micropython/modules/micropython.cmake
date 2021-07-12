@@ -21,6 +21,7 @@ include(breakout_rtc/micropython)
 include(breakout_trackball/micropython)
 include(breakout_sgp30/micropython)
 include(breakout_colourlcd240x240/micropython)
+include(breakout_bme68x/micropython)
 
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)

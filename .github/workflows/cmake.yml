@@ -27,6 +27,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        submodules: true
 
     # Check out the Pico SDK
     - name: Checkout Pico SDK
