@@ -394,16 +394,11 @@ mp_obj_t BreakoutRoundLCD_character(size_t n_args, const mp_obj_t *pos_args, mp_
     breakout_roundlcd_BreakoutRoundLCD_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_roundlcd_BreakoutRoundLCD_obj_t);
 
     int c = mp_obj_get_int(args[ARG_char].u_obj);
-    int x = args[ARG_y].u_int;
+    int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
+    int scale = args[ARG_scale].u_int;
 
-    Point p(x, y);
-    if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
-        int scale = args[ARG_scale].u_int;
-        self->breakout->character((char)c, p, scale);
-    }
-    else
-        self->breakout->character((char)c, p);
+    self->breakout->character((char)c, Point(x, y), scale);
 
     return mp_const_none;
 }
@@ -433,14 +428,9 @@ mp_obj_t BreakoutRoundLCD_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         int x = args[ARG_x].u_int;
         int y = args[ARG_y].u_int;
         int wrap = args[ARG_wrap].u_int;
+        int scale = args[ARG_scale].u_int;
 
-        Point p(x, y);
-        if(n_args == (ARG_scale + 1)) { // Assumes scale is the last argument
-            int scale = args[ARG_scale].u_int;
-            self->breakout->text(t, p, wrap, scale);
-        }
-        else
-            self->breakout->text(t, p, wrap);
+        self->breakout->text(t, Point(x, y), wrap, scale);
     }
     else if(mp_obj_is_float(text_obj)) {
         mp_raise_TypeError("can't convert 'float' object to str implicitly");
