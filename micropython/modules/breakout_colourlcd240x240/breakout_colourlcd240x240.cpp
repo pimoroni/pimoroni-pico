@@ -396,14 +396,9 @@ mp_obj_t BreakoutColourLCD240x240_character(size_t n_args, const mp_obj_t *pos_a
     int c = mp_obj_get_int(args[ARG_char].u_obj);
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
+    int scale = args[ARG_scale].u_int;
 
-    Point p(x, y);
-    if(n_args == 4) {
-        int scale = args[ARG_scale].u_int;
-        self->breakout->character((char)c, p, scale);
-    }
-    else
-        self->breakout->character((char)c, p);
+    self->breakout->character((char)c, Point(x, y), scale);
 
     return mp_const_none;
 }
@@ -415,7 +410,7 @@ mp_obj_t BreakoutColourLCD240x240_text(size_t n_args, const mp_obj_t *pos_args, 
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_wr, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_wordwrap, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
     };
 
@@ -424,22 +419,31 @@ mp_obj_t BreakoutColourLCD240x240_text(size_t n_args, const mp_obj_t *pos_args, 
 
     breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd240x240_BreakoutColourLCD240x240_obj_t);
 
-    mp_check_self(mp_obj_is_str_or_bytes(args[ARG_text].u_obj));
-    GET_STR_DATA_LEN(args[ARG_text].u_obj, str, str_len);
+    mp_obj_t text_obj = args[ARG_text].u_obj;
+    if(mp_obj_is_str_or_bytes(text_obj)) {
+        GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+        std::string t((const char*)str);
 
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int wrap = args[ARG_wrap].u_int;
-
-    Point p(x, y);
-    if(n_args == 5) {
+        int x = args[ARG_x].u_int;
+        int y = args[ARG_y].u_int;
+        int wrap = args[ARG_wrap].u_int;
         int scale = args[ARG_scale].u_int;
-        self->breakout->text(t, p, wrap, scale);
+
+        self->breakout->text(t, Point(x, y), wrap, scale);
     }
-    else
-        self->breakout->text(t, p, wrap);
+    else if(mp_obj_is_float(text_obj)) {
+        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+    }
+    else if(mp_obj_is_int(text_obj)) {
+        mp_raise_TypeError("can't convert 'int' object to str implicitly");
+    }
+    else if(mp_obj_is_bool(text_obj)) {
+        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+    }
+    else {
+        mp_raise_TypeError("can't convert object to str implicitly");
+    }
 
     return mp_const_none;
 }
