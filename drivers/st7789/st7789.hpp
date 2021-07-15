@@ -29,7 +29,7 @@ namespace pimoroni {
     uint bl     = SPI_BG_FRONT_PWM;
     uint vsync  = PIN_UNUSED; // only available on some products
 
-    uint32_t spi_baud = 16 * 1000 * 1000;
+    static const uint32_t SPI_BAUD = 16 * 1000 * 1000;
 
   public:
     // frame buffer where pixel data is stored
@@ -68,7 +68,7 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    void init(bool auto_init_sequence = true, bool round = false);
+    void init(bool auto_init_sequence = true, bool round = false, uint32_t spi_baud = SPI_BAUD);
 
     spi_inst_t* get_spi() const;
     uint get_cs() const;

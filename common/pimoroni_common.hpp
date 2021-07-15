@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <climits>
+#include "pico/stdlib.h"
 
 #define PIMORONI_I2C_DEFAULT_INSTANCE i2c0
 #define PIMORONI_SPI_DEFAULT_INSTANCE spi0
@@ -39,4 +40,13 @@ namespace pimoroni {
       BREAKOUT_GARDEN,
       PICO_EXPLORER
     };
+
+    enum Polarity {
+      ACTIVE_LOW = 0,
+      ACTIVE_HIGH = 1
+    };
+
+    inline uint32_t millis() {
+      return to_ms_since_boot(get_absolute_time());
+    }
 }

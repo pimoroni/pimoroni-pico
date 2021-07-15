@@ -15,6 +15,7 @@ add_subdirectory(breakout_colourlcd240x240)
 add_subdirectory(breakout_msa301)
 
 add_subdirectory(pico_display)
+add_subdirectory(pico_display_2)
 add_subdirectory(pico_unicorn)
 add_subdirectory(pico_unicorn_plasma)
 add_subdirectory(pico_scroll)
