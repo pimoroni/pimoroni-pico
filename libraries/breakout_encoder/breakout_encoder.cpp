@@ -87,6 +87,10 @@ namespace pimoroni {
     return (ioe.get_interrupt_flag() > 0);
   }
 
+  void BreakoutEncoder::clear() {
+    ioe.clear_rotary_encoder(ENC_CHANNEL);
+  }
+
   int16_t BreakoutEncoder::read() {
     int16_t count = ioe.read_rotary_encoder(ENC_CHANNEL);
     if(direction != DIRECTION_CW)

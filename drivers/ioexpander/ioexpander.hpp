@@ -214,6 +214,7 @@ namespace pimoroni {
 
     void setup_rotary_encoder(uint8_t channel, uint8_t pin_a, uint8_t pin_b, uint8_t pin_c = 0, bool count_microsteps = false);
     int16_t read_rotary_encoder(uint8_t channel);
+    void clear_rotary_encoder(uint8_t channel);
 
   private:
     uint8_t i2c_reg_read_uint8(uint8_t reg);
