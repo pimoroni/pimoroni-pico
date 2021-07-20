@@ -38,9 +38,8 @@ namespace pimoroni {
     VRHS      = 0xC3,
     VDVS      = 0xC4,
     FRCTRL2   = 0xC6,
-    PWRCTRL1  = 0xD0,
-    FRMCTR1   = 0xB1,
-    FRMCTR2   = 0xB2,
+    PWCTRL1   = 0xD0,
+    PORCTRL   = 0xB2,
     GMCTRP1   = 0xE0,
     GMCTRN1   = 0xE1,
     INVOFF    = 0x20,
@@ -100,15 +99,15 @@ namespace pimoroni {
       command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
 
       if(width == 240 && height == 240) {
-        command(reg::FRMCTR2, 5, "\x0c\x0c\x00\x33\x33");
+        command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
         command(reg::GCTRL, 1, "\x14");
         command(reg::VCOMS, 1, "\x37");
         command(reg::LCMCTRL, 1, "\x2c");
         command(reg::VDVVRHEN, 1, "\x01");
         command(reg::VRHS, 1, "\x12");
         command(reg::VDVS, 1, "\x20");
-        command(0xd0, 2, "\xa4\xa1");
-        command(reg::FRMCTR2, 1, "\x0f");
+        command(reg::PWCTRL1, 2, "\xa4\xa1");
+        command(reg::FRCTRL2, 1, "\x0f");
         command(reg::GMCTRP1, 14, "\xD0\x04\x0D\x11\x13\x2B\x3F\x54\x4C\x18\x0D\x0B\x1F\x23");
         command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
       }
