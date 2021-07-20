@@ -23,7 +23,6 @@ namespace pimoroni {
     static const uint8_t DEFAULT_I2C_ADDRESS  = 0x0F;
     static constexpr float DEFAULT_BRIGHTNESS = 1.0f; //Effectively the maximum fraction of the period that the LED will be on
     static const Direction DEFAULT_DIRECTION  = DIRECTION_CW;
-    static const uint8_t PIN_UNUSED           = UINT8_MAX;
     static const uint32_t DEFAULT_TIMEOUT     = 1;
 
   private:
@@ -90,6 +89,7 @@ namespace pimoroni {
 
     bool available();
     int16_t read();
+    void clear();
   };
 
 }
