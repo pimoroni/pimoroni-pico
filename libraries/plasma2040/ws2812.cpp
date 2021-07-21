@@ -53,8 +53,13 @@ bool WS2812::start(uint fps) {
 }
 
 bool WS2812::stop() {
-    dma_channel_unclaim(dma_channel);
     return cancel_repeating_timer(&timer);
+}
+
+void WS2812::clear() {
+    for (auto i = 0u; i < num_leds; ++i) {
+        buffer[i].rgb(0, 0, 0);
+    }
 }
 
 void WS2812::set_hsv(uint32_t index, float h, float s, float v) {

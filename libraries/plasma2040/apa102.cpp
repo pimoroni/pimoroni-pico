@@ -55,8 +55,13 @@ bool APA102::start(uint fps) {
 }
 
 bool APA102::stop() {
-    dma_channel_unclaim(dma_channel);
     return cancel_repeating_timer(&timer);
+}
+
+void APA102::clear() {
+    for (auto i = 0u; i < num_leds; ++i) {
+        buffer[i].rgb(0, 0, 0);
+    }
 }
 
 void APA102::set_hsv(uint32_t index, float h, float s, float v) {

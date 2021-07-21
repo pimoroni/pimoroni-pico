@@ -48,16 +48,25 @@ namespace plasma {
                     this->g = g;
                     this->b = b;
                 }
-                RGB() {}
+                RGB() : sof(0b11101111), b(0), g(0), r(0) {}
             };
 #pragma pack(pop)
             RGB *buffer;
             uint32_t num_leds;
 
             APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq=DEFAULT_SERIAL_FREQ);
+            ~APA102() {
+                stop();
+                clear();
+                update(true);
+                dma_channel_unclaim(dma_channel);
+                pio_sm_unclaim(pio, sm);
+                delete[] buffer;
+            }
             bool start(uint fps=60);
             bool stop();
             void update(bool blocking=false);
+            void clear();
             void set_hsv(uint32_t index, float h, float s, float v);
             void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b);
             void set_brightness(uint8_t b);
