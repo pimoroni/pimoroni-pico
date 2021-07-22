@@ -18,6 +18,7 @@ add_subdirectory(breakout_bmp280)
 add_subdirectory(breakout_bme280)
 add_subdirectory(breakout_as7262)
 add_subdirectory(breakout_bh1745)
+add_subdirectory(breakout_icp10125)
 
 add_subdirectory(pico_display)
 add_subdirectory(pico_unicorn)
