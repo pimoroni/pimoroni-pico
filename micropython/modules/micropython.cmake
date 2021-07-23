@@ -28,6 +28,7 @@ include(breakout_bme68x/micropython)
 include(breakout_bme280/micropython)
 include(breakout_bmp280/micropython)
 include(breakout_icp10125/micropython)
+include(breakout_scd41/micropython)
 
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
