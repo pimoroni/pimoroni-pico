@@ -46,7 +46,7 @@ namespace pimoroni {
 
         bool init();
         int chip_id();
-        bool read_otp();
+        void reset();
         reading measure(meas_command cmd=NORMAL);
 
       private:
@@ -59,8 +59,7 @@ namespace pimoroni {
         const float LUT_upper = 11.5 * (1 << 20);
         const float quadr_factor = 1.0 / 16777216.0;
         const float offst_factor = 2048.0;
-
-        void reset();
+        bool read_otp();
         void process_data(const int p_LSB, const int T_LSB, float *pressure, float *temperature);
         void calculate_conversion_constants(const float *p_Pa, const float *p_LUT, float *out);
         uint8_t crc8(uint8_t *bytes, size_t length, uint8_t polynomial = 0x31);

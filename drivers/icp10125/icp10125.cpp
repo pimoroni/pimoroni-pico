@@ -75,6 +75,7 @@ namespace pimoroni {
         if(results[2].crc8 != crc8((uint8_t *)&results[2].data, 2)) {result.status = CRC_FAIL; return result;};
 
         int temperature = __bswap16(results[0].data);
+        // Due to all the byte swapping nonsense I'm not sure if I've discarded the LLSB or LMSB here...
         int pressure = ((int32_t)__bswap16(results[1].data) << 8) | (__bswap16(results[2].data >> 8)); // LLSB is discarded
 
         process_data(pressure, temperature, &result.pressure, &result.temperature);
