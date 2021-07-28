@@ -93,4 +93,33 @@ mp_obj_t BreakoutBME280_read(mp_obj_t self_in) {
     return mp_obj_new_tuple(3, tuple);
 }
 
+mp_obj_t BreakoutBME280_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_filter, ARG_standby_time, ARG_os_pressure, ARG_os_temp, ARG_os_humidity, ARG_mode };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_filter, MP_ARG_INT, { .u_int=BME280_FILTER_COEFF_2 } },
+        { MP_QSTR_standby_time, MP_ARG_INT, { .u_int=BME280_STANDBY_TIME_0_5_MS } },
+        { MP_QSTR_os_pressure, MP_ARG_INT, { .u_int=BME280_OVERSAMPLING_16X } },
+        { MP_QSTR_os_temp, MP_ARG_INT, { .u_int=BME280_OVERSAMPLING_2X } },
+        { MP_QSTR_os_humidity, MP_ARG_INT, { .u_int=BME280_OVERSAMPLING_1X } },
+        { MP_QSTR_mode, MP_ARG_INT, { .u_int=BME280_NORMAL_MODE } },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_bme280_BreakoutBME280_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_bme280_BreakoutBME280_obj_t);
+    self->breakout->configure(
+        args[ARG_filter].u_int,
+        args[ARG_standby_time].u_int,
+        args[ARG_os_pressure].u_int,
+        args[ARG_os_temp].u_int,
+        args[ARG_os_humidity].u_int,
+        args[ARG_mode].u_int
+    );
+
+    return mp_const_none;
+}
+
+
 }
