@@ -14,6 +14,9 @@ The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel
   - [Set An LED](#set-an-led-1)
     - [RGB](#rgb-1)
     - [HSV](#hsv-1)
+- [Using the Buttons & RGB LED](#using-the-buttons--rgb-led)
+  - [Buttons](#buttons)
+  - [RGBLED](#rgbled)
 
 ## Notes On PIO Limitations
 
@@ -111,4 +114,69 @@ Set the first LED - `0` - to Red `0.0`:
 
 ```python
 led_strip.set_hsv(0, 0.0, 1.0, 1.0)
+```
+
+## Using the Buttons & RGB LED
+
+The `pimoroni` module contains `Button` and `RGBLED` classes to simplify button debounce, auto-repeat and PWM'ing an RGB LED.
+
+```python
+Button(button, invert=True, repeat_time=200, hold_time=1000)
+```
+
+```python
+RGBLED(r, g, b, invert=True)
+```
+
+The `plasma` module contains constants for the LED and button pins:
+
+* `plasma.PIN_LED_R` = 16
+* `plasma.PIN_LED_G` = 17
+* `plasma.PIN_LED_B` = 18
+* `plasma.PIN_BUTTON_A` = 12
+* `plasma.PIN_BUTTON_B` = 13
+
+### Buttons
+
+Import the `Button` class from the `pimoroni` module and the pin constants for the buttons:
+
+```python
+from pimoroni import Button
+from plasma import PIN_BUTTON_A, PIN_BUTTON_B
+```
+
+Set up an instance of `Button` for each button:
+
+```python
+button_a = Button(PIN_BUTTON_A)
+button_b = Button(PIN_BUTTON_B)
+```
+
+To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `hold_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values such as hue:
+
+```python
+state = button_a.read()
+```
+
+### RGBLED
+
+Import the `RGBLED` class from `pimoroni` and the pin constants for the buttons:
+
+```python
+from pimoroni import RGBLED
+from plasma import PIN_LED_R, PIN_LED_G, PIN_LED_B
+```
+
+And set up an instance of `RGBLED` for the LED:
+
+```python
+led = RGBLED(PIN_LED_R, PIN_LED_G, PIN_LED_B)
+```
+
+To set the LED colour, call `.set_rgb(r, g, b)`. Each value should be between 0 and 255:
+
+```python
+led.set_rgb(255, 0, 0)  # Full red
+led.set_rgb(0, 255, 0)  # Full green
+led.set_rgb(0, 0, 255)  # Full blue
 ```

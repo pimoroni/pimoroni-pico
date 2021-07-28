@@ -57,6 +57,11 @@ STATIC const mp_map_elem_t plasma_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_plasma) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_APA102), (mp_obj_t)&PlasmaAPA102_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_WS2812), (mp_obj_t)&PlasmaWS2812_type },
+    { MP_ROM_QSTR(MP_QSTR_PIN_LED_R), MP_ROM_INT(16) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_LED_G), MP_ROM_INT(17) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_LED_B), MP_ROM_INT(18) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_BUTTON_A), MP_ROM_INT(12) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_BUTTON_B), MP_ROM_INT(13) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_plasma_globals, plasma_globals_table);
 
