@@ -41,6 +41,11 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
 
+    # Copy Python module files
+    - name: Copy modules
+      run: |
+        cp -r pimoroni-pico-${GITHUB_SHA}/micropython/modules_py/* micropython/ports/rp2/modules/
+
     # Linux deps
     - name: Install deps
       if: runner.os == 'Linux'

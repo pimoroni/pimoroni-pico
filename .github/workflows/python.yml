@@ -32,4 +32,4 @@ jobs:
     - name: Lint
       shell: bash
       run: |
-        python3 -m flake8 --ignore E501 micropython/examples
+        python3 -m flake8 --ignore E501 micropython/modules_py micropython/examples
