@@ -2,6 +2,10 @@ import time
 from machine import Pin, PWM
 
 
+PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
+PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+
 class Button:
     def __init__(self, button, invert=True, repeat_time=200, hold_time=1000):
         self.invert = invert
