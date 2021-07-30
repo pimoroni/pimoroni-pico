@@ -45,6 +45,9 @@ const mp_obj_type_t breakout_bh1745_BreakoutBH1745_type = {
 STATIC const mp_map_elem_t breakout_bh1745_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_bh1745) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutBH1745), (mp_obj_t)&breakout_bh1745_BreakoutBH1745_type },
+
+    { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_DEFAULT), MP_ROM_INT(BH1745_I2C_ADDRESS_DEFAULT) },
+    { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_ALT), MP_ROM_INT(BH1745_I2C_ADDRESS_ALTERNATE) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_bh1745_globals, breakout_bh1745_globals_table);
 

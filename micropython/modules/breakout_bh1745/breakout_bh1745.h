@@ -10,6 +10,9 @@ enum {
     RGBC_C
 };
 
+static const uint8_t BH1745_I2C_ADDRESS_DEFAULT = 0x38;
+static const uint8_t BH1745_I2C_ADDRESS_ALTERNATE = 0x39;
+
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t breakout_bh1745_BreakoutBH1745_type;
 
