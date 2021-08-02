@@ -46,9 +46,9 @@ namespace plasma {
                 void rgb(uint8_t r, uint8_t g, uint8_t b) {
                     this->r = r;
                     this->g = g;
-                    this->b = b;
+                    this->b = b;;
                 }
-                RGB() : sof(0b11101111), b(0), g(0), r(0) {}
+                RGB() : sof(0b11101111), b(0), g(0), r(0) {};
             };
 #pragma pack(pop)
             RGB *buffer;

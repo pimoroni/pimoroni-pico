@@ -43,6 +43,7 @@ bool APA102::dma_timer_callback(struct repeating_timer *t) {
 }
 
 void APA102::update(bool blocking) {
+    if(dma_channel_is_busy(dma_channel) && !blocking) return;
     while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
     pio->txf[sm] = 0x00000000; // Output the APA102 start-of-frame bytes
     dma_channel_set_trans_count(dma_channel, num_leds, false);
@@ -62,7 +63,7 @@ bool APA102::stop() {
 
 void APA102::clear() {
     for (auto i = 0u; i < num_leds; ++i) {
-        buffer[i].rgb(0, 0, 0);
+        set_rgb(i, 0, 0, 0);
     }
 }
 
@@ -75,12 +76,12 @@ void APA102::set_hsv(uint32_t index, float h, float s, float v) {
     uint8_t t = v * (1.0f - (1.0f - f) * s);
 
     switch (int(i) % 6) {
-      case 0: buffer[index].rgb(v, t, p); break;
-      case 1: buffer[index].rgb(q, v, p); break;
-      case 2: buffer[index].rgb(p, v, t); break;
-      case 3: buffer[index].rgb(p, q, v); break;
-      case 4: buffer[index].rgb(t, p, v); break;
-      case 5: buffer[index].rgb(v, p, q); break;
+      case 0: set_rgb(index, v, t, p); break;
+      case 1: set_rgb(index, q, v, p); break;
+      case 2: set_rgb(index, p, v, t); break;
+      case 3: set_rgb(index, p, q, v); break;
+      case 4: set_rgb(index, t, p, v); break;
+      case 5: set_rgb(index, v, p, q); break;
     }
 }
 

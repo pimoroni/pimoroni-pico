@@ -3,13 +3,14 @@
 The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel™ LEDs on the Plasma 2040 board, though it can be used with your own custom pins/wiring.
 
 - [Notes On PIO Limitations](#notes-on-pio-limitations)
-- [APA102](#apa102)
+- [WS2812](#ws2812)
   - [Getting Started](#getting-started)
+  - [RGBW and Setting Colour Order](#rgbw-and-setting-colour-order)
   - [Set An LED](#set-an-led)
     - [RGB](#rgb)
     - [HSV](#hsv)
   - [Set Brightness](#set-brightness)
-- [WS2812](#ws2812)
+- [APA102](#apa102)
   - [Getting Started](#getting-started-1)
   - [Set An LED](#set-an-led-1)
     - [RGB](#rgb-1)
@@ -24,7 +25,7 @@ The WS2812 and APA102 drivers use the PIO hardware on the RP2040. There are only
 
 In most cases you'll use `0` for PIO and `0` for PIO state-machine, but you should change these if you plan on running different strand types together, or if you're using something else that uses PIO.
 
-## APA102
+## WS2812
 
 ### Getting Started
 
@@ -44,6 +45,28 @@ Start the LED strip by calling `start`. This sets up a timer which tells the RP2
 ```python
 led_strip.start(FPS)
 ```
+
+### RGBW and Setting Colour Order
+
+Some WS2812-style LED strips have varying colour orders and support an additional white element. Two keyword arguments are supplied to configure this:
+
+```
+import plasma
+
+LEDS = 30
+FPS = 60
+
+led_strip = plasma.WS2812(LEDS, 0, 0, 15, rgbw=True, color_order=plasma.COLOR_ORDER_GRB)
+```
+
+The available orders are defined as constants in `plasma`:
+
+* `COLOR_ORDER_RGB`
+* `COLOR_ORDER_RBG`
+* `COLOR_ORDER_GRB`
+* `COLOR_ORDER_GBR`
+* `COLOR_ORDER_BRG`
+* `COLOR_ORDER_BGR`
 
 ### Set An LED
 
@@ -75,7 +98,7 @@ led_strip.set_brightness(15)
 
 You can set brightness from `0` to `31`. This directly maps to the 5-bit brightness value sent to the APA102 LEDs.
 
-## WS2812
+## APA102
 
 ### Getting Started
 

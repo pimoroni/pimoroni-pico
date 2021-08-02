@@ -30,6 +30,14 @@ namespace plasma {
             static const uint SERIAL_FREQ_400KHZ = 400000;
             static const uint SERIAL_FREQ_800KHZ = 800000;
             static const uint DEFAULT_SERIAL_FREQ = SERIAL_FREQ_400KHZ;
+            enum class COLOR_ORDER {
+                RGB,
+                RBG,
+                GRB,
+                GBR,
+                BRG,
+                BGR
+            };
 #pragma pack(push, 1)
             union alignas(4) RGB {
                 struct {
@@ -42,19 +50,20 @@ namespace plasma {
                 void operator=(uint32_t v) {
                     srgb = v;
                 };
-                void brightness(uint8_t b) {};;
-                void rgb(uint8_t r, uint8_t g, uint8_t b) {
+                void rgb(uint8_t r, uint8_t g, uint8_t b, uint8_t w=0) {
                     this->r = r;
                     this->g = g;
                     this->b = b;
-                }
-                RGB() : r(0), g(0), b(0), w(0) {}
+                    this->w = w;
+                };
+                RGB() : r(0), g(0), b(0), w(0) {};
             };
 #pragma pack(pop)
             RGB *buffer;
             uint32_t num_leds;
+            COLOR_ORDER color_order;
 
-            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, RGB* buffer=nullptr);
+            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::RGB, RGB* buffer=nullptr);
             ~WS2812() {
                 stop();
                 clear();
@@ -68,7 +77,7 @@ namespace plasma {
             void update(bool blocking=false);
             void clear();
             void set_hsv(uint32_t index, float h, float s, float v);
-            void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b);
+            void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w=0);
             void set_brightness(uint8_t b);
             RGB get(uint32_t index) {return buffer[index];};
 

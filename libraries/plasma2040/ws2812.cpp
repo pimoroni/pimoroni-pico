@@ -2,7 +2,7 @@
 
 namespace plasma {
 
-WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, RGB* buffer) : buffer(buffer), num_leds(num_leds), pio(pio), sm(sm) {
+WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, COLOR_ORDER color_order, RGB* buffer) : buffer(buffer), num_leds(num_leds), color_order(color_order), pio(pio), sm(sm) {
     uint offset = pio_add_program(pio, &ws2812_program);
 
     pio_gpio_init(pio, pin);
@@ -11,7 +11,7 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, RGB* buffer
     pio_sm_config c = ws2812_program_get_default_config(offset);
     sm_config_set_sideset_pins(&c, pin);
     
-    sm_config_set_out_shift(&c, false, true, 24); // Discard first (APA102 global brightness) byte. TODO support RGBW WS281X LEDs
+    sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24); // Discard first (APA102 global brightness) byte. TODO support RGBW WS281X LEDs
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
     int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
@@ -42,6 +42,7 @@ bool WS2812::dma_timer_callback(struct repeating_timer *t) {
 }
 
 void WS2812::update(bool blocking) {
+    if(dma_channel_is_busy(dma_channel) && !blocking) return;
     while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, buffer, true);
@@ -60,7 +61,7 @@ bool WS2812::stop() {
 
 void WS2812::clear() {
     for (auto i = 0u; i < num_leds; ++i) {
-        buffer[i].rgb(0, 0, 0);
+        set_rgb(i, 0, 0, 0);
     }
 }
 
@@ -73,17 +74,36 @@ void WS2812::set_hsv(uint32_t index, float h, float s, float v) {
     uint8_t t = v * (1.0f - (1.0f - f) * s);
 
     switch (int(i) % 6) {
-      case 0: buffer[index].rgb(v, t, p); break;
-      case 1: buffer[index].rgb(q, v, p); break;
-      case 2: buffer[index].rgb(p, v, t); break;
-      case 3: buffer[index].rgb(p, q, v); break;
-      case 4: buffer[index].rgb(t, p, v); break;
-      case 5: buffer[index].rgb(v, p, q); break;
+      case 0: set_rgb(index, v, t, p); break;
+      case 1: set_rgb(index, q, v, p); break;
+      case 2: set_rgb(index, p, v, t); break;
+      case 3: set_rgb(index, p, q, v); break;
+      case 4: set_rgb(index, t, p, v); break;
+      case 5: set_rgb(index, v, p, q); break;
     }
 }
 
-void WS2812::set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b) {
-    buffer[index].rgb(r, g, b);
+void WS2812::set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
+    switch(color_order) {
+        case COLOR_ORDER::RGB:
+            buffer[index].rgb(r, g, b, w);
+            break;
+        case COLOR_ORDER::RBG:
+            buffer[index].rgb(r, b, g, w);
+            break;
+        case COLOR_ORDER::GRB:
+            buffer[index].rgb(g, r, b, w);
+            break;
+        case COLOR_ORDER::GBR:
+            buffer[index].rgb(g, b, r, w);
+            break;
+        case COLOR_ORDER::BRG:
+            buffer[index].rgb(b, r, g, w);
+            break;
+        case COLOR_ORDER::BGR:
+            buffer[index].rgb(b, g, r, w);
+            break;
+    }
 }
 
 void WS2812::set_brightness(uint8_t b) {

@@ -60,7 +60,9 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         ARG_sm,
         ARG_dat,
         ARG_freq,
-        ARG_buffer
+        ARG_buffer,
+        ARG_rgbw,
+        ARG_color_order
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -69,6 +71,8 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = WS2812::DEFAULT_SERIAL_FREQ} },
         { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
+        { MP_QSTR_rgbw, MP_ARG_BOOL, {.u_bool = false} },
+        { MP_QSTR_color_order, MP_ARG_INT, {.u_int = (uint8_t)WS2812::COLOR_ORDER::RGB} },
     };
 
     // Parse args.
@@ -80,6 +84,8 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int sm = args[ARG_sm].u_int;
     int dat = args[ARG_dat].u_int;
     int freq = args[ARG_freq].u_int;
+    bool rgbw = args[ARG_rgbw].u_bool;
+    WS2812::COLOR_ORDER color_order = (WS2812::COLOR_ORDER)args[ARG_color_order].u_int;
 
     void *buffer = nullptr;
 
@@ -96,7 +102,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->base.type = &PlasmaWS2812_type;
     self->buf = buffer;
 
-    self->ws2812 = new WS2812(num_leds, pio, sm, dat, freq, (WS2812::RGB *)buffer);
+    self->ws2812 = new WS2812(num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }
