@@ -54,7 +54,7 @@ namespace plasma {
             RGB *buffer;
             uint32_t num_leds;
 
-            APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq=DEFAULT_SERIAL_FREQ);
+            APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq=DEFAULT_SERIAL_FREQ, RGB* buffer=nullptr);
             ~APA102() {
                 stop();
                 clear();

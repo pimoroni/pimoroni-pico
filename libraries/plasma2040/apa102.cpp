@@ -2,7 +2,7 @@
 
 namespace plasma {
 
-APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq) : num_leds(num_leds), pio(pio), sm(sm) {
+APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq, RGB* buffer) : buffer(buffer), num_leds(num_leds), pio(pio), sm(sm) {
     uint offset = pio_add_program(pio, &apa102_program);
 
     pio_sm_set_pins_with_mask(pio, sm, 0, (1u << pin_clk) | (1u << pin_dat));
@@ -32,7 +32,9 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
     channel_config_set_read_increment(&config, true);
     dma_channel_configure(dma_channel, &config, &pio->txf[sm], NULL, 0, false);
 
-    buffer = new RGB[num_leds];
+    if(this->buffer == nullptr) {
+        this->buffer = new RGB[num_leds];
+    }
 }
 
 bool APA102::dma_timer_callback(struct repeating_timer *t) {

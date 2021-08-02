@@ -2,7 +2,7 @@
 
 namespace plasma {
 
-WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq) : num_leds(num_leds), pio(pio), sm(sm) {
+WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, RGB* buffer) : buffer(buffer), num_leds(num_leds), pio(pio), sm(sm) {
     uint offset = pio_add_program(pio, &ws2812_program);
 
     pio_gpio_init(pio, pin);
@@ -31,7 +31,9 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq) : num_leds(
     dma_channel_set_read_addr(dma_channel, (uint32_t *)buffer, false);
     dma_channel_configure(dma_channel, &config, &pio->txf[sm], NULL, 0, false);
 
-    buffer = new RGB[num_leds];
+    if(!this->buffer) {
+        this->buffer = new RGB[num_leds];
+    }
 }
 
 bool WS2812::dma_timer_callback(struct repeating_timer *t) {

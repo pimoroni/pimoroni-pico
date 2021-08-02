@@ -27,6 +27,7 @@ const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
 typedef struct _PlasmaWS2812_obj_t {
     mp_obj_base_t base;
     WS2812* ws2812;
+    void *buf;
 } _PlasmaWS2812_obj_t;
 
 
@@ -58,7 +59,8 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         ARG_pio,
         ARG_sm,
         ARG_dat,
-        ARG_freq
+        ARG_freq,
+        ARG_buffer
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -66,6 +68,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = WS2812::DEFAULT_SERIAL_FREQ} },
+        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
     };
 
     // Parse args.
@@ -78,10 +81,22 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int dat = args[ARG_dat].u_int;
     int freq = args[ARG_freq].u_int;
 
+    void *buffer = nullptr;
+
+    if (args[ARG_buffer].u_obj) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
+        buffer = bufinfo.buf;
+        if(bufinfo.len < (size_t)(num_leds * 4)) {
+            mp_raise_ValueError("Supplied buffer is too small for LED count!");
+        }
+    }
+
     self = m_new_obj_with_finaliser(_PlasmaWS2812_obj_t);
     self->base.type = &PlasmaWS2812_type;
+    self->buf = buffer;
 
-    self->ws2812 = new WS2812(num_leds, pio, sm, dat, freq);
+    self->ws2812 = new WS2812(num_leds, pio, sm, dat, freq, (WS2812::RGB *)buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -166,6 +181,7 @@ mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 typedef struct _PlasmaAPA102_obj_t {
     mp_obj_base_t base;
     APA102* apa102;
+    void *buf;
 } _PlasmaAPA102_obj_t;
 
 
@@ -198,7 +214,8 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         ARG_sm,
         ARG_dat,
         ARG_clk,
-        ARG_freq
+        ARG_freq,
+        ARG_buffer
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -207,6 +224,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_clk, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = APA102::DEFAULT_SERIAL_FREQ} },
+        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
     };
 
     // Parse args.
@@ -220,10 +238,22 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int clk = args[ARG_clk].u_int;
     int freq = args[ARG_freq].u_int;
 
+    void *buffer = nullptr;
+
+    if (args[ARG_buffer].u_obj) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
+        buffer = bufinfo.buf;
+        if(bufinfo.len < (size_t)(num_leds * 4)) {
+            mp_raise_ValueError("Supplied buffer is too small for LED count!");
+        }
+    }
+
     self = m_new_obj_with_finaliser(_PlasmaAPA102_obj_t);
     self->base.type = &PlasmaAPA102_type;
+    self->buf = buffer;
 
-    self->apa102 = new APA102(num_leds, pio, sm, dat, clk, freq);
+    self->apa102 = new APA102(num_leds, pio, sm, dat, clk, freq, (APA102::RGB *)buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }

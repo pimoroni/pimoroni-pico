@@ -54,7 +54,7 @@ namespace plasma {
             RGB *buffer;
             uint32_t num_leds;
 
-            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ);
+            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, RGB* buffer=nullptr);
             ~WS2812() {
                 stop();
                 clear();
