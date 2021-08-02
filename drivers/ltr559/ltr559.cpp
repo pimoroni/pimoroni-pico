@@ -36,8 +36,8 @@ namespace pimoroni {
     reset();
     interrupts(true, true);
 
-    // 50mA, 1.0 duty cycle, 30Hz, 1 pulse
-    proximity_led(50, 1.0, 30, 1);
+    // 50mA, 100% duty cycle, 30Hz, 1 pulse
+    proximity_led(50, 100, 30, 1);
 
     // enabled, gain 4x
     light_control(true, 4);
