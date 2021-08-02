@@ -22,7 +22,7 @@ namespace pimoroni {
 
             bool init();
             bool configure(uint8_t filter, uint8_t odr, uint8_t os_humidity, uint8_t os_pressure, uint8_t os_temp);
-            bool read_forced(bme68x_data *data);
+            bool read_forced(bme68x_data *data, uint16_t heater_temp=300, uint16_t heater_duration=100);
             bool read_parallel(bme68x_data *results, uint16_t *profile_temps, uint16_t *profile_durations, size_t profile_length);
 
             BME68X() : BME68X(new I2C()) {}

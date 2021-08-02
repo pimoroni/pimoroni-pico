@@ -37,6 +37,14 @@ The `read` method will return a tuple containing Temperature (degrees C), Pressu
 temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = bme.read()
 ```
 
+In all cases `gas_index` and `meas_index` will be zero, since these refer to the measurement profile used to gather the current readings. The MicroPython bindings currently only support a single measurement profile with a default of 300c for 100ms.
+
+You can pass a custom temperature and duration into `read`:
+
+```python
+temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = bme.read(heater_temp=250, heater_duration=50)
+```
+
 ## Configuring The Sensor
 
 The `configure` method allows you to set up the oversampling, filtering and operation mode.

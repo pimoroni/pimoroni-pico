@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Methods *****/
-MP_DEFINE_CONST_FUN_OBJ_1(BreakoutBME68X_read_obj, BreakoutBME68X_read);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBME68X_read_obj, 1, BreakoutBME68X_read);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBME68X_configure_obj, 1, BreakoutBME68X_configure);
 
 /***** Binding of Methods *****/
@@ -65,6 +65,9 @@ STATIC const mp_map_elem_t breakout_bme68x_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_STANDBY_TIME_1000_MS), MP_ROM_INT(BME68X_ODR_1000_MS) },
     { MP_ROM_QSTR(MP_QSTR_STANDBY_TIME_10_MS), MP_ROM_INT(BME68X_ODR_10_MS) },
     { MP_ROM_QSTR(MP_QSTR_STANDBY_TIME_20_MS), MP_ROM_INT(BME68X_ODR_20_MS) },
+
+    { MP_ROM_QSTR(MP_QSTR_STATUS_GAS_VALID), MP_ROM_INT(BME68X_GASM_VALID_MSK) },
+    { MP_ROM_QSTR(MP_QSTR_STATUS_HEATER_STABLE), MP_ROM_INT(BME68X_HEAT_STAB_MSK) },
 
     { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_DEFAULT), MP_ROM_INT(BME68X_I2C_ADDR_LOW) },
     { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_ALT), MP_ROM_INT(BME68X_I2C_ADDR_HIGH) },

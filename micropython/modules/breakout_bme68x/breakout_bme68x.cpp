@@ -82,18 +82,29 @@ mp_obj_t BreakoutBME68X_make_new(const mp_obj_type_t *type, size_t n_args, size_
     return MP_OBJ_FROM_PTR(self);
 }
 
-mp_obj_t BreakoutBME68X_read(mp_obj_t self_in) {
-    breakout_bme68x_BreakoutBME68X_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_bme68x_BreakoutBME68X_obj_t);
+mp_obj_t BreakoutBME68X_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_temp, ARG_duration };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_heater_temp, MP_ARG_INT, { .u_int=300 } },
+        { MP_QSTR_heater_duration, MP_ARG_INT, { .u_int=100 } },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_bme68x_BreakoutBME68X_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_bme68x_BreakoutBME68X_obj_t);
+
     bme68x_data result;
-    if(self->breakout->read_forced(&result)){
+    if(self->breakout->read_forced(&result, args[ARG_temp].u_int, args[ARG_duration].u_int)){
         mp_obj_t tuple[7];
         tuple[0] = mp_obj_new_float(result.temperature);
         tuple[1] = mp_obj_new_float(result.pressure);
         tuple[2] = mp_obj_new_float(result.humidity);
         tuple[3] = mp_obj_new_float(result.gas_resistance);
-        tuple[4] = mp_obj_new_float(result.status);
-        tuple[5] = mp_obj_new_float(result.gas_index);
-        tuple[6] = mp_obj_new_float(result.meas_index);
+        tuple[4] = mp_obj_new_int(result.status);
+        tuple[5] = mp_obj_new_int(result.gas_index);
+        tuple[6] = mp_obj_new_int(result.meas_index);
         return mp_obj_new_tuple(7, tuple);
     }
     else {

@@ -48,14 +48,14 @@ namespace pimoroni {
         return true;
     }
 
-    bool BME68X::read_forced(bme68x_data *data) {
+    bool BME68X::read_forced(bme68x_data *data, uint16_t heater_temp, uint16_t heater_duration) {
         int8_t result = 0;
         uint8_t n_fields;
         uint32_t delay_period;
 
         heatr_conf.enable = BME68X_ENABLE;
-        heatr_conf.heatr_temp = 300;
-        heatr_conf.heatr_dur = 100;
+        heatr_conf.heatr_temp = heater_temp;
+        heatr_conf.heatr_dur = heater_duration;
         result = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &device);
         bme68x_check_rslt("bme68x_set_heatr_conf", result);
         if(result != BME68X_OK) return false;
