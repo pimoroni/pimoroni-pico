@@ -15,8 +15,10 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     enum DecayMode {
-      FAST_DECAY = 0, //aka 'Coasting'
-      SLOW_DECAY = 1  //aka 'Braking'
+      FAST_DECAY  = 0, //aka 'Coasting'
+      COASTING    = 0,
+      SLOW_DECAY  = 1, //aka 'Braking'
+      BRAKING     = 1
     };
 
     //--------------------------------------------------
@@ -39,6 +41,7 @@ namespace pimoroni {
     uint pin_minus;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
+    float pwm_frequency = DEFAULT_PWM_FREQUENCY;
 
     DecayMode motor_mode = DEFAULT_DECAY_MODE;
     float motor_speed = 0.0f;
@@ -56,13 +59,19 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
+    bool init();
+
+    float get_speed();
     void set_speed(float speed);
+
+    float get_frequency();
     void set_frequency(float freq);
 
     DecayMode get_decay_mode();
     void set_mode(DecayMode mode);
 
     void stop();
+    void disable();
 
   private:
     static bool calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out);

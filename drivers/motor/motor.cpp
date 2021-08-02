@@ -4,23 +4,7 @@
 
 namespace pimoroni {
   Motor::Motor(uint pin_plus, uint pin_minus, float freq, DecayMode mode)
-    : pin_plus(pin_plus), pin_minus(pin_minus), motor_mode(mode) {
-
-    uint16_t period = 0;
-    uint8_t divider = 1;
-    Motor::calculate_pwm_period(freq, period, divider);
-    pwm_period = period;
-
-    pwm_cfg = pwm_get_default_config();
-    pwm_config_set_wrap(&pwm_cfg, period);
-    pwm_config_set_clkdiv_int(&pwm_cfg, divider);
-
-    pwm_init(pwm_gpio_to_slice_num(pin_plus), &pwm_cfg, true);
-    gpio_set_function(pin_plus, GPIO_FUNC_PWM);
-
-    pwm_init(pwm_gpio_to_slice_num(pin_minus), &pwm_cfg, true);
-    gpio_set_function(pin_minus, GPIO_FUNC_PWM);
-    update_pwm();
+    : pin_plus(pin_plus), pin_minus(pin_minus), pwm_frequency(freq), motor_mode(mode) {
   }
 
   Motor::~Motor() {
@@ -28,9 +12,40 @@ namespace pimoroni {
     gpio_set_function(pin_minus, GPIO_FUNC_NULL);
   }
 
+  bool Motor::init() {
+    bool success = false;
+
+    uint16_t period; uint8_t divider;
+    if(Motor::calculate_pwm_period(pwm_frequency, period, divider)) {
+      pwm_period = period;
+
+      pwm_cfg = pwm_get_default_config();
+      pwm_config_set_wrap(&pwm_cfg, period);
+      pwm_config_set_clkdiv_int(&pwm_cfg, divider);
+
+      pwm_init(pwm_gpio_to_slice_num(pin_plus), &pwm_cfg, true);
+      gpio_set_function(pin_plus, GPIO_FUNC_PWM);
+
+      pwm_init(pwm_gpio_to_slice_num(pin_minus), &pwm_cfg, true);
+      gpio_set_function(pin_minus, GPIO_FUNC_PWM);
+      update_pwm();
+
+      success = true;
+    }
+    return success;
+  }
+
+  float Motor::get_speed() {
+    return motor_speed;
+  }
+
   void Motor::set_speed(float speed) {
-    motor_speed = speed;
+    motor_speed = std::min(std::max(speed, -1.0f), 1.0f);
     update_pwm();
+  }
+
+  float Motor::get_frequency() {
+    return pwm_frequency;
   }
 
   void Motor::set_frequency(float freq) {
@@ -38,6 +53,7 @@ namespace pimoroni {
     uint16_t period; uint8_t divider;
     if(Motor::calculate_pwm_period(freq, period, divider)) {
       pwm_period = period;
+      pwm_frequency = freq;
 
       //Stop PWM to the motor
       pwm_set_gpio_level(pin_plus, 0);
@@ -70,6 +86,12 @@ namespace pimoroni {
     update_pwm();
   }
 
+  void Motor::disable() {
+    motor_speed = 0.0f;
+    pwm_set_gpio_level(pin_plus, 0);
+    pwm_set_gpio_level(pin_minus, 0);
+  }
+
   bool Motor::calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out) {
     bool success = false;
     if(freq > 0.0f) {
@@ -90,7 +112,7 @@ namespace pimoroni {
   }
 
   void Motor::update_pwm() {
-    int32_t signed_duty_cycle = (int32_t)(std::min(std::max(motor_speed, -1.0f), 1.0f) * (float)pwm_period);
+    int32_t signed_duty_cycle = (int32_t)(motor_speed * (float)pwm_period);
 
     switch(motor_mode) {
     case FAST_DECAY: //aka 'Coasting'
