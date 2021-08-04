@@ -63,6 +63,7 @@ cd ../../../
 ```bash
 git clone https://github.com/pimoroni/pimoroni-pico.git
 cd pimoroni-pico
+git submodule update --init
 mkdir build
 ```
 
