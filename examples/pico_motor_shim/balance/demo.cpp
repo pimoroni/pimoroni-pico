@@ -15,7 +15,7 @@ using namespace pimoroni;
 
 static constexpr float TOP_SPEED = 1.0f; //A value between 0 and 1
 static constexpr float Z_BIAS_CORRECTION = 0.5f; //A magic number that seems to correct the MSA301's Z bias
-static constexpr float PROPORTIONAL = 0.01f;
+static constexpr float PROPORTIONAL = 0.03f;
 
 
 
@@ -66,6 +66,12 @@ int main() {
   //Initialise the LED. We use this to indicate that the sequence is running.
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+  for(int i = 0; i < 20; i++) {
+    gpio_put(PICO_DEFAULT_LED_PIN, true);
+    sleep_ms(250);
+    gpio_put(PICO_DEFAULT_LED_PIN, false);
+    sleep_ms(250);
+  }
 
   //Initialise the two motors
   if(!motor_1.init() || !motor_2.init()) {
@@ -78,33 +84,34 @@ int main() {
     return 0;
   }
 
+  printf("Ready\n");
+
   while(true) {
+    //Turn the Pico's LED on to show that the sequence has started
+    gpio_put(PICO_DEFAULT_LED_PIN, true);
+    sleep_ms(50);
+
     //Has the user has pressed the button to start the sequence
-    if(check_button_toggle()) {
+    while(check_button_toggle()) {
+      float y = msa301.get_y_axis();
+      float z = msa301.get_z_axis() + Z_BIAS_CORRECTION;
 
-      //Turn the Pico's LED on to show that the sequence has started
-      gpio_put(PICO_DEFAULT_LED_PIN, true);
+      float current_angle = (atan2(z, -y) * 180.0f) / M_PI;
+      float angle_error = wrap_angle(target_angle - current_angle);
+      printf("Y: %f, Z: %f, AngErr: %f\n", y, z, angle_error);
 
-      while(check_button_toggle()) {
-        float y = msa301.get_y_axis();
-        float z = msa301.get_z_axis() + Z_BIAS_CORRECTION;
+      float output = angle_error * PROPORTIONAL; //No need to clamp this value as set_speed does this internally
+      motor_1.set_speed(output);
+      motor_2.set_speed(-output);
 
-        float current_angle = (atan2(z, -y) * 180.0f) / M_PI;
-        float angle_error = wrap_angle(target_angle - current_angle);
-        printf("Y: %f, Z: %f, AngErr: %f\n", y, z, angle_error);
-
-        float output = angle_error * PROPORTIONAL; //No need to clamp this value as set_speed does this internally
-        motor_1.set_speed(-output);
-        motor_2.set_speed(output);
-
-        sleep_ms(1);
-      }
+      sleep_ms(1);
     }
 
     //The sequence loop has ended, so turn off the Pico's LED and disable the motors
     gpio_put(PICO_DEFAULT_LED_PIN, false);
     motor_1.disable();
     motor_2.disable();
+    sleep_ms(50);
   }
   return 0;
 }
