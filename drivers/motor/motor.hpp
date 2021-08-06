@@ -25,7 +25,8 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint16_t DEFAULT_PWM_FREQUENCY = 25000;
+    static const uint16_t DEFAULT_PWM_FREQUENCY = 25000;      // Chose 25KHz because it is outside of hearing
+                                                              // and divides nicely into the RP2040's 125MHz PWM frequency
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;
 
   private:

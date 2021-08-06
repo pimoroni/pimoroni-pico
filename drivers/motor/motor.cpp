@@ -20,7 +20,11 @@ namespace pimoroni {
       pwm_period = period;
 
       pwm_cfg = pwm_get_default_config();
-      pwm_config_set_wrap(&pwm_cfg, period);
+
+      //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+      pwm_config_set_wrap(&pwm_cfg, period - 1);
+
+      //Apply the divider
       pwm_config_set_clkdiv_int(&pwm_cfg, divider);
 
       pwm_init(pwm_gpio_to_slice_num(pin_plus), &pwm_cfg, true);
@@ -52,23 +56,30 @@ namespace pimoroni {
     //Calculate a suitable pwm wrap period for this frequency
     uint16_t period; uint8_t divider;
     if(Motor::calculate_pwm_period(freq, period, divider)) {
+
+      //Record if the new period will be larger or smaller.
+      //This is used to apply new pwm values either before or after the wrap is applied,
+      //to avoid momentary blips in PWM output on SLOW_DECAY
+      bool pre_update_pwm = (period > pwm_period);
+
       pwm_period = period;
       pwm_frequency = freq;
-
-      //Stop PWM to the motor
-      pwm_set_gpio_level(pin_plus, 0);
-      pwm_set_gpio_level(pin_minus, 0);
 
       //Apply the new divider
       pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_plus), divider, 0);
       pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_minus), divider, 0);
 
-      //Set the new wrap periods
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_plus), pwm_period);
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_minus), pwm_period);
+      //If the the period is larger, update the pwm before setting the new wraps
+      if(pre_update_pwm)
+        update_pwm();
 
-      //Set the motor back into the state it was before
-      update_pwm();
+      //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+      pwm_set_wrap(pwm_gpio_to_slice_num(pin_plus), pwm_period - 1);
+      pwm_set_wrap(pwm_gpio_to_slice_num(pin_minus), pwm_period - 1);
+
+      //If the the period is smaller, update the pwm after setting the new wraps
+      if(!pre_update_pwm)
+        update_pwm();
     }
   }
 
@@ -94,11 +105,11 @@ namespace pimoroni {
 
   bool Motor::calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out) {
     bool success = false;
-    if(freq > 0.0f) {
+    if((freq > 0.0f) && (freq <= (clock_get_hz(clk_sys) >> 1))) { //Half clock is to give a period of at least 2
       uint32_t period = (uint32_t)(clock_get_hz(clk_sys) / freq);
       uint8_t divider = 1;
 
-      while((period >= MAX_PWM_PERIOD) && (divider < MAX_PWM_DIVIDER)) {
+      while((period > MAX_PWM_PERIOD) && (divider < MAX_PWM_DIVIDER)) {
         period >>= 1;
         divider <<= 1;
       }
