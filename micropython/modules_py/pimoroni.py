@@ -122,13 +122,13 @@ class Motor:
         return self.freq
 
 
-    def set_frequency(self, freq)
+    def set_frequency(self, freq):
         self.pos_pwm.freq(freq)
         self.neg_pwm.freq(freq)
         self._update_pwm()
 
 
-    def get_decay_mode(self)
+    def get_decay_mode(self):
         return self.decay_mode
 
 
