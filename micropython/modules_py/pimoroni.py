@@ -93,10 +93,10 @@ class Motor:
     FAST_DECAY = 0  # Recirculation current fast decay mode (coasting)
     SLOW_DECAY = 1  # Recirculation current slow decay mode (braking)
 
-    def __init__(self, pos, neg, freq=25000, decay_mode=Motor.SLOW_DECAY):
+    def __init__(self, pos, neg, freq=25000, decay_mode=SLOW_DECAY):
         self.speed = 0.0
         self.freq = freq
-        if decay_mode in (Motor.FAST_DECAY, Motor.SLOW_DECAY):
+        if decay_mode in (self.FAST_DECAY, self.SLOW_DECAY):
             self.decay_mode = decay_mode
         else:
             raise ValueError("Decay mode value must be either Motor.FAST_DECAY or Motor.SLOW_DECAY")
@@ -127,7 +127,7 @@ class Motor:
         return self.decay_mode
 
     def set_decay_mode(self, mode):
-        if mode in (Motor.FAST_DECAY, Motor.SLOW_DECAY):
+        if mode in (self.FAST_DECAY, self.SLOW_DECAY):
             self.decay_mode = mode
             self._update_pwm()
         else:
@@ -145,7 +145,7 @@ class Motor:
     def _update_pwm(self):
         signed_duty_cycle = int(self.speed * 0xFFFF)
 
-        if self.decay_mode is Motor.SLOW_DECAY:  # aka 'Braking'
+        if self.decay_mode is self.SLOW_DECAY:  # aka 'Braking'
             if signed_duty_cycle >= 0:
                 self.pos_pwm.duty_u16(0xFFFF)
                 self.neg_pwm.duty_u16(0xFFFF - signed_duty_cycle)
