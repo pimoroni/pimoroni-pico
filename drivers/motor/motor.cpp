@@ -126,17 +126,6 @@ namespace pimoroni {
     int32_t signed_duty_cycle = (int32_t)(motor_speed * (float)pwm_period);
 
     switch(motor_decay_mode) {
-    case FAST_DECAY: //aka 'Coasting'
-      if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pin_pos, signed_duty_cycle);
-        pwm_set_gpio_level(pin_neg, 0);
-      }
-      else {
-        pwm_set_gpio_level(pin_pos, 0);
-        pwm_set_gpio_level(pin_neg, 0 - signed_duty_cycle);
-      }
-      break;
-
     case SLOW_DECAY: //aka 'Braking'
       if(signed_duty_cycle >= 0) {
         pwm_set_gpio_level(pin_pos, pwm_period);
@@ -145,6 +134,18 @@ namespace pimoroni {
       else {
         pwm_set_gpio_level(pin_pos, pwm_period + signed_duty_cycle);
         pwm_set_gpio_level(pin_neg, pwm_period);
+      }
+      break;
+
+    case FAST_DECAY: //aka 'Coasting'
+    default:
+      if(signed_duty_cycle >= 0) {
+        pwm_set_gpio_level(pin_pos, signed_duty_cycle);
+        pwm_set_gpio_level(pin_neg, 0);
+      }
+      else {
+        pwm_set_gpio_level(pin_pos, 0);
+        pwm_set_gpio_level(pin_neg, 0 - signed_duty_cycle);
       }
       break;
     }
