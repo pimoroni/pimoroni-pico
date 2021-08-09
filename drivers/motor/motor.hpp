@@ -16,9 +16,7 @@ namespace pimoroni {
   public:
     enum DecayMode {
       FAST_DECAY  = 0, //aka 'Coasting'
-      COASTING    = 0,
       SLOW_DECAY  = 1, //aka 'Braking'
-      BRAKING     = 1
     };
 
     //--------------------------------------------------
@@ -38,13 +36,13 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    uint pin_plus;
-    uint pin_minus;
+    uint pin_pos;
+    uint pin_neg;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
     float pwm_frequency = DEFAULT_PWM_FREQUENCY;
 
-    DecayMode motor_mode = DEFAULT_DECAY_MODE;
+    DecayMode motor_decay_mode = DEFAULT_DECAY_MODE;
     float motor_speed = 0.0f;
 
 
@@ -52,7 +50,7 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor(uint pin_plus, uint pin_minus, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
+    Motor(uint pin_pos, uint pin_neg, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
     ~Motor();
 
 
@@ -69,7 +67,7 @@ namespace pimoroni {
     void set_frequency(float freq);
 
     DecayMode get_decay_mode();
-    void set_mode(DecayMode mode);
+    void set_decay_mode(DecayMode mode);
 
     void stop();
     void disable();

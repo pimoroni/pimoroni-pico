@@ -3,13 +3,13 @@
 #include <math.h>
 
 namespace pimoroni {
-  Motor::Motor(uint pin_plus, uint pin_minus, float freq, DecayMode mode)
-    : pin_plus(pin_plus), pin_minus(pin_minus), pwm_frequency(freq), motor_mode(mode) {
+  Motor::Motor(uint pin_pos, uint pin_neg, float freq, DecayMode mode)
+    : pin_pos(pin_pos), pin_neg(pin_neg), pwm_frequency(freq), motor_decay_mode(mode) {
   }
 
   Motor::~Motor() {
-    gpio_set_function(pin_plus, GPIO_FUNC_NULL);
-    gpio_set_function(pin_minus, GPIO_FUNC_NULL);
+    gpio_set_function(pin_pos, GPIO_FUNC_NULL);
+    gpio_set_function(pin_neg, GPIO_FUNC_NULL);
   }
 
   bool Motor::init() {
@@ -27,11 +27,11 @@ namespace pimoroni {
       //Apply the divider
       pwm_config_set_clkdiv_int(&pwm_cfg, divider);
 
-      pwm_init(pwm_gpio_to_slice_num(pin_plus), &pwm_cfg, true);
-      gpio_set_function(pin_plus, GPIO_FUNC_PWM);
+      pwm_init(pwm_gpio_to_slice_num(pin_pos), &pwm_cfg, true);
+      gpio_set_function(pin_pos, GPIO_FUNC_PWM);
 
-      pwm_init(pwm_gpio_to_slice_num(pin_minus), &pwm_cfg, true);
-      gpio_set_function(pin_minus, GPIO_FUNC_PWM);
+      pwm_init(pwm_gpio_to_slice_num(pin_neg), &pwm_cfg, true);
+      gpio_set_function(pin_neg, GPIO_FUNC_PWM);
       update_pwm();
 
       success = true;
@@ -66,16 +66,16 @@ namespace pimoroni {
       pwm_frequency = freq;
 
       //Apply the new divider
-      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_plus), divider, 0);
-      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_minus), divider, 0);
+      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_pos), divider, 0);
+      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_neg), divider, 0);
 
       //If the the period is larger, update the pwm before setting the new wraps
       if(pre_update_pwm)
         update_pwm();
 
       //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_plus), pwm_period - 1);
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_minus), pwm_period - 1);
+      pwm_set_wrap(pwm_gpio_to_slice_num(pin_pos), pwm_period - 1);
+      pwm_set_wrap(pwm_gpio_to_slice_num(pin_neg), pwm_period - 1);
 
       //If the the period is smaller, update the pwm after setting the new wraps
       if(!pre_update_pwm)
@@ -84,11 +84,11 @@ namespace pimoroni {
   }
 
   Motor::DecayMode Motor::get_decay_mode() {
-    return motor_mode;
+    return motor_decay_mode;
   }
 
-  void Motor::set_mode(Motor::DecayMode mode) {
-    motor_mode = mode;
+  void Motor::set_decay_mode(Motor::DecayMode mode) {
+    motor_decay_mode = mode;
     update_pwm();
   }
 
@@ -99,8 +99,8 @@ namespace pimoroni {
 
   void Motor::disable() {
     motor_speed = 0.0f;
-    pwm_set_gpio_level(pin_plus, 0);
-    pwm_set_gpio_level(pin_minus, 0);
+    pwm_set_gpio_level(pin_pos, 0);
+    pwm_set_gpio_level(pin_neg, 0);
   }
 
   bool Motor::calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out) {
@@ -125,26 +125,26 @@ namespace pimoroni {
   void Motor::update_pwm() {
     int32_t signed_duty_cycle = (int32_t)(motor_speed * (float)pwm_period);
 
-    switch(motor_mode) {
+    switch(motor_decay_mode) {
     case FAST_DECAY: //aka 'Coasting'
       if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pin_plus, signed_duty_cycle);
-        pwm_set_gpio_level(pin_minus, 0);
+        pwm_set_gpio_level(pin_pos, signed_duty_cycle);
+        pwm_set_gpio_level(pin_neg, 0);
       }
       else {
-        pwm_set_gpio_level(pin_plus, 0);
-        pwm_set_gpio_level(pin_minus, 0 - signed_duty_cycle);
+        pwm_set_gpio_level(pin_pos, 0);
+        pwm_set_gpio_level(pin_neg, 0 - signed_duty_cycle);
       }
       break;
 
     case SLOW_DECAY: //aka 'Braking'
       if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pin_plus, pwm_period);
-        pwm_set_gpio_level(pin_minus, pwm_period - signed_duty_cycle);
+        pwm_set_gpio_level(pin_pos, pwm_period);
+        pwm_set_gpio_level(pin_neg, pwm_period - signed_duty_cycle);
       }
       else {
-        pwm_set_gpio_level(pin_plus, pwm_period + signed_duty_cycle);
-        pwm_set_gpio_level(pin_minus, pwm_period);
+        pwm_set_gpio_level(pin_pos, pwm_period + signed_duty_cycle);
+        pwm_set_gpio_level(pin_neg, pwm_period);
       }
       break;
     }
