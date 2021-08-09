@@ -93,11 +93,11 @@ class Motor:
     FAST_DECAY = 0  # Recirculation current fast decay mode (coasting)
     SLOW_DECAY = 1  # Recirculation current slow decay mode (braking)
 
-    def __init__(self, pos, neg, freq=25000, decay_mode=SLOW_DECAY):
+    def __init__(self, pos, neg, freq=25000, decay_mode=Motor.SLOW_DECAY):
         self.speed = 0.0
         self.freq = freq
-        if mode in (FAST_DECAY, SLOW_DECAY):
-            self.decay_mode = mode
+        if decay_mode in (Motor.FAST_DECAY, Motor.SLOW_DECAY):
+            self.decay_mode = decay_mode
         else:
             raise ValueError("Decay mode value must be either Motor.FAST_DECAY or Motor.SLOW_DECAY")
 
@@ -106,10 +106,8 @@ class Motor:
         self.neg_pwm = PWM(Pin(neg))
         self.neg_pwm.freq(freq)
 
-
     def get_speed(self):
         return self.speed
-
 
     def set_speed(self, speed):
         if speed > 1.0 or speed < -1.0:
@@ -117,52 +115,45 @@ class Motor:
         self.speed = speed
         self._update_pwm()
 
-
     def get_frequency(self):
         return self.freq
-
 
     def set_frequency(self, freq):
         self.pos_pwm.freq(freq)
         self.neg_pwm.freq(freq)
         self._update_pwm()
 
-
     def get_decay_mode(self):
         return self.decay_mode
 
-
     def set_decay_mode(self, mode):
-        if mode in (FAST_DECAY, SLOW_DECAY):
+        if mode in (Motor.FAST_DECAY, Motor.SLOW_DECAY):
             self.decay_mode = mode
             self._update_pwm()
         else:
             raise ValueError("Decay mode value must be either Motor.FAST_DECAY or Motor.SLOW_DECAY")
 
-
     def stop(self):
         self.speed = 0.0
         self._update_pwm()
-
 
     def disable(self):
         self.speed = 0.0
         self.pos_pwm.duty_u16(0)
         self.neg_pwm.duty_u16(0)
 
-
     def _update_pwm(self):
         signed_duty_cycle = int(self.speed * 0xFFFF)
 
-        if self.decay_mode is SLOW_DECAY:  # aka 'Braking'
+        if self.decay_mode is Motor.SLOW_DECAY:  # aka 'Braking'
             if signed_duty_cycle >= 0:
                 self.pos_pwm.duty_u16(0xFFFF)
                 self.neg_pwm.duty_u16(0xFFFF - signed_duty_cycle)
             else:
                 self.pos_pwm.duty_u16(0xFFFF + signed_duty_cycle)
                 self.neg_pwm.duty_u16(0xFFFF)
-        
-        else: # aka 'Coasting'
+
+        else:  # aka 'Coasting'
             if signed_duty_cycle >= 0:
                 self.pos_pwm.duty_u16(signed_duty_cycle)
                 self.neg_pwm.duty_u16(0)
