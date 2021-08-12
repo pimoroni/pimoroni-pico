@@ -52,6 +52,12 @@ const mp_obj_type_t PlasmaWS2812_type = {
     .locals_dict = (mp_obj_dict_t*)&PlasmaWS2812_locals_dict,
 };
 
+typedef struct _mp_obj_float_t {
+    mp_obj_base_t base;
+    mp_float_t value;
+} mp_obj_float_t;
+mp_obj_float_t shunt_resistor = {{&mp_type_float}, 0.015f};
+
 /***** Globals Table *****/
 STATIC const mp_map_elem_t plasma_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_plasma) },
@@ -69,6 +75,9 @@ STATIC const mp_map_elem_t plasma_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_COLOR_ORDER_GBR), MP_ROM_INT(0x03) },
     { MP_ROM_QSTR(MP_QSTR_COLOR_ORDER_BRG), MP_ROM_INT(0x04) },
     { MP_ROM_QSTR(MP_QSTR_COLOR_ORDER_BGR), MP_ROM_INT(0x05) },
+
+    { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&shunt_resistor) },
+    { MP_ROM_QSTR(MP_QSTR_ADC_GAIN), MP_ROM_INT(50) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_plasma_globals, plasma_globals_table);
 
