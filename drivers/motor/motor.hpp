@@ -64,7 +64,7 @@ namespace pimoroni {
     void set_speed(float speed);
 
     float get_frequency();
-    void set_frequency(float freq);
+    bool set_frequency(float freq);
 
     DecayMode get_decay_mode();
     void set_decay_mode(DecayMode mode);
@@ -73,7 +73,7 @@ namespace pimoroni {
     void disable();
 
   private:
-    static bool calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out);
+    static bool calculate_pwm_factors(float freq, uint16_t& period_out, uint16_t& div16_out);
     void update_pwm();
   };
 

@@ -15,8 +15,8 @@ namespace pimoroni {
   bool Motor::init() {
     bool success = false;
 
-    uint16_t period; uint8_t divider;
-    if(Motor::calculate_pwm_period(pwm_frequency, period, divider)) {
+    uint16_t period; uint16_t div16;
+    if(Motor::calculate_pwm_factors(pwm_frequency, period, div16)) {
       pwm_period = period;
 
       pwm_cfg = pwm_get_default_config();
@@ -25,7 +25,7 @@ namespace pimoroni {
       pwm_config_set_wrap(&pwm_cfg, period - 1);
 
       //Apply the divider
-      pwm_config_set_clkdiv_int(&pwm_cfg, divider);
+      pwm_config_set_clkdiv(&pwm_cfg, (float)div16 / 16.0f);
 
       pwm_init(pwm_gpio_to_slice_num(pin_pos), &pwm_cfg, true);
       gpio_set_function(pin_pos, GPIO_FUNC_PWM);
@@ -52,10 +52,12 @@ namespace pimoroni {
     return pwm_frequency;
   }
 
-  void Motor::set_frequency(float freq) {
+  bool Motor::set_frequency(float freq) {
+    bool success = false;
+
     //Calculate a suitable pwm wrap period for this frequency
-    uint16_t period; uint8_t divider;
-    if(Motor::calculate_pwm_period(freq, period, divider)) {
+    uint16_t period; uint16_t div16;
+    if(Motor::calculate_pwm_factors(freq, period, div16)) {
 
       //Record if the new period will be larger or smaller.
       //This is used to apply new pwm values either before or after the wrap is applied,
@@ -65,22 +67,34 @@ namespace pimoroni {
       pwm_period = period;
       pwm_frequency = freq;
 
+      uint pos_num = pwm_gpio_to_slice_num(pin_pos);
+      uint neg_num = pwm_gpio_to_slice_num(pin_neg);
+
       //Apply the new divider
-      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_pos), divider, 0);
-      pwm_set_clkdiv_int_frac(pwm_gpio_to_slice_num(pin_neg), divider, 0);
+      uint8_t div = div16 >> 4;
+      uint8_t mod = div16 % 16;
+      pwm_set_clkdiv_int_frac(pos_num, div, mod);
+      if(neg_num != pos_num) {
+        pwm_set_clkdiv_int_frac(neg_num, div, mod);
+      }
 
       //If the the period is larger, update the pwm before setting the new wraps
       if(pre_update_pwm)
         update_pwm();
 
       //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_pos), pwm_period - 1);
-      pwm_set_wrap(pwm_gpio_to_slice_num(pin_neg), pwm_period - 1);
+      pwm_set_wrap(pos_num, pwm_period - 1);
+      if(neg_num != pos_num) {
+        pwm_set_wrap(neg_num, pwm_period - 1);
+      }
 
       //If the the period is smaller, update the pwm after setting the new wraps
       if(!pre_update_pwm)
         update_pwm();
+
+      success = true;
     }
+    return success;
   }
 
   Motor::DecayMode Motor::get_decay_mode() {
@@ -103,21 +117,39 @@ namespace pimoroni {
     pwm_set_gpio_level(pin_neg, 0);
   }
 
-  bool Motor::calculate_pwm_period(float freq, uint16_t& period_out, uint8_t& divider_out) {
+  //Based on Micropython implementation: https://github.com/micropython/micropython/blob/master/ports/rp2/machine_pwm.c
+  bool Motor::calculate_pwm_factors(float freq, uint16_t& period_out, uint16_t& div16_out) {
     bool success = false;
-    if((freq > 0.0f) && (freq <= (clock_get_hz(clk_sys) >> 1))) { //Half clock is to give a period of at least 2
-      uint32_t period = (uint32_t)(clock_get_hz(clk_sys) / freq);
-      uint8_t divider = 1;
+    uint32_t source_hz = clock_get_hz(clk_sys);
 
-      while((period > MAX_PWM_PERIOD) && (divider < MAX_PWM_DIVIDER)) {
-        period >>= 1;
-        divider <<= 1;
+    //Check the provided frequency is valid
+    if((freq >= 1.0f) && (freq <= (float)(source_hz >> 1))) {
+      uint32_t div16 = (uint32_t)((float)(source_hz << 4) / freq);
+      uint16_t period = 1;
+
+      while(true) {
+        //Try a few small prime factors to get close to the desired frequency
+        if(div16 >= (5 << 4) && div16 % 5 == 0 && period * 5 < MAX_PWM_PERIOD) {
+          div16 /= 5;
+          period *= 5;
+        }
+        else if(div16 >= (3 << 4) && div16 % 3 == 0 && period * 3 < MAX_PWM_PERIOD) {
+          div16 /= 3;
+          period *= 3;
+        }
+        else if(div16 >= (2 << 4) && period * 2 <= MAX_PWM_PERIOD) {
+          div16 /= 2;
+          period *= 2;
+        }
+        else
+          break;
       }
+      if(div16 >= 16 && div16 < (256 << 4)) {
+        period_out = period;
+        div16_out = div16;
 
-      period_out = (uint16_t)std::min(period, MAX_PWM_PERIOD);
-      divider_out = divider;
-
-      success = true;
+        success = true;
+      }
     }
     return success;
   }
