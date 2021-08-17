@@ -10,7 +10,7 @@ UPDATES = 60
 # WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, 15)
 # APA102 / DotStar™ LEDs
-#led_strip = plasma.APA102(NUM_LEDS, 0, 0, 15, 14)
+# led_strip = plasma.APA102(NUM_LEDS, 0, 0, 15, 14)
 
 # Set up the ADC for reading current
 sense = Analog(plasma.PIN_CURRENT_SENSE, plasma.ADC_GAIN, plasma.SHUNT_RESISTOR)
@@ -30,5 +30,5 @@ while True:
         # Display the current value once every second
         print("Current =", sense.read_current(), "A")
         count = 0
-    
+
     time.sleep(1.0 / UPDATES)
