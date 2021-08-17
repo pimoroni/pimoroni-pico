@@ -80,6 +80,6 @@ class RGBLED:
             r = 255 - r
             g = 255 - g
             b = 255 - b
-        self.led_r.duty_u16(r * 255)
-        self.led_g.duty_u16(g * 255)
-        self.led_b.duty_u16(b * 255)
+        self.led_r.duty_u16((r * 65535) / 255)
+        self.led_g.duty_u16((g * 65535) / 255)
+        self.led_b.duty_u16((b * 65535) / 255)
