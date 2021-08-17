@@ -1,5 +1,21 @@
 import time
-from machine import Pin, PWM
+from machine import Pin, PWM, ADC
+
+
+class Analog:
+    def __init__(self, pin, amplifier_gain=1, resistor=0):
+        self.gain = amplifier_gain
+        self.resistor = resistor
+        self.pin = ADC(pin)
+
+    def read_voltage(self):
+        return self.pin.read_u16() * 3.3 / 65535 / self.gain
+
+    def read_current(self):
+        if self.resistor > 0:
+            return self.read_voltage() / self.resistor
+        else:
+            return self.read_voltage()
 
 
 class Button:

@@ -743,6 +743,13 @@ namespace pimoroni {
     return encoder_offset[channel] + value;
   }
 
+  void IOExpander::clear_rotary_encoder(uint8_t channel) {
+    channel -= 1;
+    encoder_last[channel] = 0;
+    uint8_t reg = ENC_COUNT[channel];
+    i2c->reg_write_uint8(address, reg, 0);
+  }
+
   uint8_t IOExpander::get_bit(uint8_t reg, uint8_t bit) {
     // Returns the specified bit (nth position from right) from a register
     return i2c->reg_read_uint8(address, reg) & (1 << bit);

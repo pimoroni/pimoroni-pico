@@ -1,0 +1,10 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program apa102
+.side_set 1
+    out pins, 1   side 0   ; Stall here when no data (still asserts clock low)
+    nop           side 1
