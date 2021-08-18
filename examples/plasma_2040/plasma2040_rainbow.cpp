@@ -13,12 +13,19 @@
 /*
 Press "B" to speed up the LED cycling effect.
 Press "A" to slow it down again.
+Press "Boot" to reset the speed back to default.
 */
 
 using namespace pimoroni;
 
 // Set how many LEDs you have
 const uint N_LEDS = 30;
+
+// The speed that the LEDs will start cycling at
+const uint DEFAULT_SPEED = 10;
+
+// How many times the LEDs will be updated per second
+const uint UPDATES = 60;
 
 // Pick *one* LED type by uncommenting the relevant line below:
 
@@ -29,6 +36,7 @@ const uint N_LEDS = 30;
 // by default the WS2812 LED strip will be 400KHz, RGB with no white element
 plasma::WS2812 led_strip(N_LEDS, pio0, 0, plasma::PIN_DAT);
 
+Button user_sw(plasma::USER_SW, Polarity::ACTIVE_LOW, 0);
 Button button_a(plasma::BUTTON_A, Polarity::ACTIVE_LOW, 50);
 Button button_b(plasma::BUTTON_B, Polarity::ACTIVE_LOW, 50);
 RGBLED led(plasma::LED_R, plasma::LED_G, plasma::LED_B);
@@ -37,17 +45,23 @@ RGBLED led(plasma::LED_R, plasma::LED_G, plasma::LED_B);
 int main() {
     stdio_init_all();
 
-    led_strip.start(60);
+    led_strip.start(UPDATES);
 
-    int speed = 10;
+    int speed = DEFAULT_SPEED;
     float offset = 0.0f;
 
     while (true) {
+        bool sw = user_sw.read();
         bool a = button_a.read();
         bool b = button_b.read();
-    
-        if(a) speed--;
-        if(b) speed++;
+
+        if(sw) {
+            speed = DEFAULT_SPEED;
+        }
+        else {
+            if(a) speed--;
+            if(b) speed++;
+        }
         speed = std::min((int)255, std::max((int)1, speed));
 
         offset += float(speed) / 2000.0f;
@@ -61,6 +75,6 @@ int main() {
 
         // Sleep time controls the rate at which the LED buffer is updated
         // but *not* the actual framerate at which the buffer is sent to the LEDs
-        sleep_ms(1000 / 60);
+        sleep_ms(1000 / UPDATES);
     }
 }
