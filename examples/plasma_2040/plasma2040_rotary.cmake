@@ -1,6 +1,7 @@
-add_executable(plasma2040_rotary plasma2040_rotary.cpp)
+set(OUTPUT_NAME plasma2040_rotary)
+add_executable(${OUTPUT_NAME} plasma2040_rotary.cpp)
 
-target_link_libraries(plasma2040_rotary
+target_link_libraries(${OUTPUT_NAME}
         pico_stdlib
         plasma2040
         breakout_encoder
@@ -9,4 +10,4 @@ target_link_libraries(plasma2040_rotary
         button
         )
 
-pico_add_extra_outputs(plasma2040_rotary)
+pico_add_extra_outputs(${OUTPUT_NAME})
