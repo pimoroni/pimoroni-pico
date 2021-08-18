@@ -9,6 +9,7 @@
 #include "common/pimoroni_common.hpp"
 #include "rgbled.hpp"
 #include "button.hpp"
+#include "analog.hpp"
 
 /*
 Press "B" to speed up the LED cycling effect.
@@ -27,6 +28,7 @@ const uint DEFAULT_SPEED = 10;
 // How many times the LEDs will be updated per second
 const uint UPDATES = 60;
 
+
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
@@ -40,6 +42,7 @@ Button user_sw(plasma::USER_SW, Polarity::ACTIVE_LOW, 0);
 Button button_a(plasma::BUTTON_A, Polarity::ACTIVE_LOW, 50);
 Button button_b(plasma::BUTTON_B, Polarity::ACTIVE_LOW, 50);
 RGBLED led(plasma::LED_R, plasma::LED_G, plasma::LED_B);
+Analog sense(plasma::PIN_SENSE, plasma::ADC_GAIN, plasma::SHUNT_RESISTOR);
 
 
 int main() {
@@ -50,6 +53,7 @@ int main() {
     int speed = DEFAULT_SPEED;
     float offset = 0.0f;
 
+    uint count = 0;
     while (true) {
         bool sw = user_sw.read();
         bool a = button_a.read();
@@ -72,6 +76,13 @@ int main() {
         }
 
         led.set_rgb(speed, 0, 255 - speed);
+
+        count += 1;
+        if(count >= UPDATES) {
+            // Display the current value once every second
+            printf("Current = %f A\n", sense.read_current());
+            count = 0;
+        }
 
         // Sleep time controls the rate at which the LED buffer is updated
         // but *not* the actual framerate at which the buffer is sent to the LEDs
