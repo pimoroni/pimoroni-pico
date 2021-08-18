@@ -16,6 +16,9 @@ using namespace pimoroni;
 // Set how many LEDs you have
 const uint N_LEDS = 30;
 
+// How many times the LEDs will be updated per second
+const uint UPDATES = 60;
+
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
@@ -67,7 +70,7 @@ void gauge(uint v, uint vmax = 100) {
 int main() {
     stdio_init_all();
 
-    led_strip.start(60);
+    led_strip.start(UPDATES);
 
     bool encoder_detected = enc.init();
     enc.clear_interrupt_flag();
@@ -147,6 +150,6 @@ int main() {
 
         // Sleep time controls the rate at which the LED buffer is updated
         // but *not* the actual framerate at which the buffer is sent to the LEDs
-        sleep_ms(1000 / 60);
+        sleep_ms(1000 / UPDATES);
     }
 }
