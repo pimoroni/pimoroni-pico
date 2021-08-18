@@ -1,3 +1,4 @@
+add_subdirectory(analog)
 add_subdirectory(esp32spi)
 add_subdirectory(ioexpander)
 add_subdirectory(ltp305)
