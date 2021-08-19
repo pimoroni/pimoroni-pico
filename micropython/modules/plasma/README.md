@@ -18,6 +18,8 @@ The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel
 - [Using the Buttons & RGB LED](#using-the-buttons--rgb-led)
   - [Buttons](#buttons)
   - [RGBLED](#rgbled)
+- [Measuring LED Strip Current Draw](#measuring-led-strip-current-draw)
+  - [Analog](#analog)
 
 ## Notes On PIO Limitations
 
@@ -33,11 +35,12 @@ Construct a new `WS2812` instance, specifying the number of LEDs, PIO, PIO state
 
 ```python
 import plasma
+from plasma import plasma2040
 
 LEDS = 30
 FPS = 60
 
-led_strip = plasma.WS2812(LEDS, 0, 0, 15)
+led_strip = plasma.WS2812(LEDS, 0, 0, plasma2040.DAT)
 ```
 
 Start the LED strip by calling `start`. This sets up a timer which tells the RP2040 to DMA the pixel data into the PIO (a fast, asyncronous memory->peripheral copy) at the specified framerate.
@@ -50,13 +53,14 @@ led_strip.start(FPS)
 
 Some WS2812-style LED strips have varying colour orders and support an additional white element. Two keyword arguments are supplied to configure this:
 
-```
+```python
 import plasma
+from plasma import plasma2040
 
 LEDS = 30
 FPS = 60
 
-led_strip = plasma.WS2812(LEDS, 0, 0, 15, rgbw=True, color_order=plasma.COLOR_ORDER_GRB)
+led_strip = plasma.WS2812(LEDS, 0, 0, plasma2040.DAT, rgbw=True, color_order=plasma.COLOR_ORDER_GRB)
 ```
 
 The available orders are defined as constants in `plasma`:
@@ -106,11 +110,12 @@ Construct a new `APA102` instance, specifying the number of LEDs, PIO, PIO state
 
 ```python
 import plasma
+from plasma import plasma2040
 
 LEDS = 30
 FPS = 60
 
-led_strip = plasma.APA102(LEDS, 0, 0, 15, 14)
+led_strip = plasma.APA102(LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 ```
 
 Start the LED strip by calling `start`. This sets up a timer which tells the RP2040 to DMA the pixel data into the PIO (a fast, asyncronous memory->peripheral copy) at the specified framerate.
@@ -151,13 +156,14 @@ Button(button, invert=True, repeat_time=200, hold_time=1000)
 RGBLED(r, g, b, invert=True)
 ```
 
-The `plasma` module contains constants for the LED and button pins:
+The `plasma` module contains a `plasma2040` sub module with constants for the LED and button pins:
 
-* `plasma.PIN_LED_R` = 16
-* `plasma.PIN_LED_G` = 17
-* `plasma.PIN_LED_B` = 18
-* `plasma.PIN_BUTTON_A` = 12
-* `plasma.PIN_BUTTON_B` = 13
+* `plasma2040.LED_R` = 16
+* `plasma2040.LED_G` = 17
+* `plasma2040.LED_B` = 18
+* `plasma2040.BUTTON_A` = 12
+* `plasma2040.BUTTON_B` = 13
+* `plasma2040.USER_SW` = 23
 
 ### Buttons
 
@@ -165,14 +171,14 @@ Import the `Button` class from the `pimoroni` module and the pin constants for t
 
 ```python
 from pimoroni import Button
-from plasma import PIN_BUTTON_A, PIN_BUTTON_B
+from plasma import plasma2040
 ```
 
 Set up an instance of `Button` for each button:
 
 ```python
-button_a = Button(PIN_BUTTON_A)
-button_b = Button(PIN_BUTTON_B)
+button_a = Button(plasma2040.BUTTON_A)
+button_b = Button(plasma2040.BUTTON_B)
 ```
 
 To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `hold_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values such as hue:
@@ -183,17 +189,17 @@ state = button_a.read()
 
 ### RGBLED
 
-Import the `RGBLED` class from `pimoroni` and the pin constants for the buttons:
+Import the `RGBLED` class from `pimoroni` and the pin constants for the LED:
 
 ```python
 from pimoroni import RGBLED
-from plasma import PIN_LED_R, PIN_LED_G, PIN_LED_B
+from plasma import plasma2040
 ```
 
 And set up an instance of `RGBLED` for the LED:
 
 ```python
-led = RGBLED(PIN_LED_R, PIN_LED_G, PIN_LED_B)
+led = RGBLED(plasma2040.LED_R, plasma2040.LED_G, plasma2040.LED_B)
 ```
 
 To set the LED colour, call `.set_rgb(r, g, b)`. Each value should be between 0 and 255:
@@ -202,4 +208,41 @@ To set the LED colour, call `.set_rgb(r, g, b)`. Each value should be between 0 
 led.set_rgb(255, 0, 0)  # Full red
 led.set_rgb(0, 255, 0)  # Full green
 led.set_rgb(0, 0, 255)  # Full blue
+```
+
+## Measuring LED Strip Current Draw
+
+Plasma 2040 feasures low-side current sensing, letting you measure how much current a strip of LEDs is drawing. This could be used just for monitoring, or as a way to reduce the maximum brightness of a strip to keep its current draw within the range of the USB port or power supply being used.
+
+The `pimoroni` module contains an `Analog` class to simplify the reading of this current draw.
+
+```python
+Analog(pin, amplifier_gain=1, resistor=0)
+```
+
+The `plasma` module contains a `plasma2040` sub module with constants for the current sensing:
+
+* `plasma2040.CURRENT_SENSE` = 29
+* `plasma2040.ADC_GAIN` = 50
+* `plasma2040.SHUNT_RESISTOR` = 0.015
+
+### Analog
+
+Import the `Analog` class from `pimoroni` and the pin and gain constants for the current sensing:
+
+```python
+from pimoroni import Analog
+from plasma import plasma2040
+```
+
+And set up an instance of `Analog` for the current sensing:
+
+```python
+sense = Analog(plasma2040.CURRENT_SENSE, plasma2040.ADC_GAIN, plasma2040.SHUNT_RESISTOR)
+```
+
+To read the current draw, call `.read_current()`. The returned value will be in amps (A):
+
+```python
+print("Current =", sense.read_current(), "A")
 ```
