@@ -29,7 +29,7 @@ namespace plasma {
         public:
             static const uint SERIAL_FREQ_400KHZ = 400000;
             static const uint SERIAL_FREQ_800KHZ = 800000;
-            static const uint DEFAULT_SERIAL_FREQ = SERIAL_FREQ_400KHZ;
+            static const uint DEFAULT_SERIAL_FREQ = SERIAL_FREQ_800KHZ;
             enum class COLOR_ORDER {
                 RGB,
                 RBG,
