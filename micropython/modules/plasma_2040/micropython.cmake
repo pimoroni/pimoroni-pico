@@ -5,14 +5,15 @@ add_library(usermod_${MOD_NAME} INTERFACE)
 target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/plasma2040/apa102.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/plasma2040/ws2812.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/apa102.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/ws2812.cpp
 )
-pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/plasma2040/apa102.pio)
-pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/plasma2040/ws2812.pio)
+pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/apa102.pio)
+pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/ws2812.pio)
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/plasma2040/
 )
 
