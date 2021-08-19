@@ -22,7 +22,7 @@ UPDATES = 60
 # Pick *one* LED type by uncommenting the relevant line below:
 
 # APA102 / DotStar™ LEDs
-#led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
+# led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 
 # WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
