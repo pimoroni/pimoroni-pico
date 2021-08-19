@@ -18,6 +18,7 @@ Press "Boot" to reset the speed back to default.
 */
 
 using namespace pimoroni;
+using namespace plasma;
 
 // Set how many LEDs you have
 const uint N_LEDS = 30;
@@ -32,17 +33,17 @@ const uint UPDATES = 60;
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
-//plasma::APA102 led_strip(N_LEDS, pio0, 0, plasma::PIN_DAT, plasma::PIN_CLK);
+//APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
 
 // WS28X-style LEDs with a single signal line. AKA NeoPixel
 // by default the WS2812 LED strip will be 400KHz, RGB with no white element
-plasma::WS2812 led_strip(N_LEDS, pio0, 0, plasma::PIN_DAT);
+WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
 
-Button user_sw(plasma::USER_SW, Polarity::ACTIVE_LOW, 0);
-Button button_a(plasma::BUTTON_A, Polarity::ACTIVE_LOW, 50);
-Button button_b(plasma::BUTTON_B, Polarity::ACTIVE_LOW, 50);
-RGBLED led(plasma::LED_R, plasma::LED_G, plasma::LED_B);
-Analog sense(plasma::PIN_SENSE, plasma::ADC_GAIN, plasma::SHUNT_RESISTOR);
+Button user_sw(plasma2040::USER_SW, Polarity::ACTIVE_LOW, 0);
+Button button_a(plasma2040::BUTTON_A, Polarity::ACTIVE_LOW, 50);
+Button button_b(plasma2040::BUTTON_B, Polarity::ACTIVE_LOW, 50);
+RGBLED led(plasma2040::LED_R, plasma2040::LED_G, plasma2040::LED_B);
+Analog sense(plasma2040::SENSE, plasma2040::ADC_GAIN, plasma2040::SHUNT_RESISTOR);
 
 
 int main() {
