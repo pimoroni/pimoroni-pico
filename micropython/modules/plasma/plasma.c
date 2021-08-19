@@ -1,4 +1,4 @@
-#include "plasma_2040.h"
+#include "plasma.h"
 
 
 /***** Methods *****/
