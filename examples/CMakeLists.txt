@@ -33,4 +33,4 @@ add_subdirectory(pico_trackball_display)
 add_subdirectory(pico_audio)
 add_subdirectory(pico_wireless)
 
-add_subdirectory(plasma_2040)
+add_subdirectory(plasma2040)

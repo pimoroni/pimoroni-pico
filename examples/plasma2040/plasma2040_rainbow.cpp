@@ -9,45 +9,64 @@
 #include "common/pimoroni_common.hpp"
 #include "rgbled.hpp"
 #include "button.hpp"
+#include "analog.hpp"
 
 /*
 Press "B" to speed up the LED cycling effect.
 Press "A" to slow it down again.
+Press "Boot" to reset the speed back to default.
 */
 
 using namespace pimoroni;
+using namespace plasma;
 
 // Set how many LEDs you have
 const uint N_LEDS = 30;
 
+// The speed that the LEDs will start cycling at
+const uint DEFAULT_SPEED = 10;
+
+// How many times the LEDs will be updated per second
+const uint UPDATES = 60;
+
+
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
-//plasma::APA102 led_strip(N_LEDS, pio0, 0, plasma::PIN_DAT, plasma::PIN_CLK);
+//APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
 
 // WS28X-style LEDs with a single signal line. AKA NeoPixel
 // by default the WS2812 LED strip will be 400KHz, RGB with no white element
-plasma::WS2812 led_strip(N_LEDS, pio0, 0, plasma::PIN_DAT);
+WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
 
-Button button_a(plasma::BUTTON_A, Polarity::ACTIVE_LOW, 50);
-Button button_b(plasma::BUTTON_B, Polarity::ACTIVE_LOW, 50);
-RGBLED led(plasma::LED_R, plasma::LED_G, plasma::LED_B);
+Button user_sw(plasma2040::USER_SW, Polarity::ACTIVE_LOW, 0);
+Button button_a(plasma2040::BUTTON_A, Polarity::ACTIVE_LOW, 50);
+Button button_b(plasma2040::BUTTON_B, Polarity::ACTIVE_LOW, 50);
+RGBLED led(plasma2040::LED_R, plasma2040::LED_G, plasma2040::LED_B);
+Analog sense(plasma2040::CURRENT_SENSE, plasma2040::ADC_GAIN, plasma2040::SHUNT_RESISTOR);
 
 
 int main() {
     stdio_init_all();
 
-    led_strip.start(60);
+    led_strip.start(UPDATES);
 
-    int speed = 10;
+    int speed = DEFAULT_SPEED;
     float offset = 0.0f;
 
+    uint count = 0;
     while (true) {
+        bool sw = user_sw.read();
         bool a = button_a.read();
         bool b = button_b.read();
-    
-        if(a) speed--;
-        if(b) speed++;
+
+        if(sw) {
+            speed = DEFAULT_SPEED;
+        }
+        else {
+            if(a) speed--;
+            if(b) speed++;
+        }
         speed = std::min((int)255, std::max((int)1, speed));
 
         offset += float(speed) / 2000.0f;
@@ -59,8 +78,15 @@ int main() {
 
         led.set_rgb(speed, 0, 255 - speed);
 
+        count += 1;
+        if(count >= UPDATES) {
+            // Display the current value once every second
+            printf("Current = %f A\n", sense.read_current());
+            count = 0;
+        }
+
         // Sleep time controls the rate at which the LED buffer is updated
         // but *not* the actual framerate at which the buffer is sent to the LEDs
-        sleep_ms(1000 / 60);
+        sleep_ms(1000 / UPDATES);
     }
 }

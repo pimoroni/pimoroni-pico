@@ -1,4 +1,5 @@
-#include "libraries/plasma2040/plasma2040.hpp"
+#include "drivers/plasma/ws2812.hpp"
+#include "drivers/plasma/apa102.hpp"
 #include <cstdio>
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
@@ -11,7 +12,7 @@
 using namespace plasma;
 
 extern "C" {
-#include "plasma_2040.h"
+#include "plasma.h"
 #include "py/builtin.h"
 
 typedef struct _mp_obj_float_t {
