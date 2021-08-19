@@ -69,7 +69,7 @@ STATIC const mp_map_elem_t plasma2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_USER_SW), MP_ROM_INT(23) },
     { MP_ROM_QSTR(MP_QSTR_CLK), MP_ROM_INT(14) },
     { MP_ROM_QSTR(MP_QSTR_DAT), MP_ROM_INT(15) },
-    { MP_ROM_QSTR(MP_QSTR_SENSE), MP_ROM_INT(29) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE), MP_ROM_INT(29) },
 
     { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&shunt_resistor) },
     { MP_ROM_QSTR(MP_QSTR_ADC_GAIN), MP_ROM_INT(50) },

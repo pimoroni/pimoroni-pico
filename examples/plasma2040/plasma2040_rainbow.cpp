@@ -43,7 +43,7 @@ Button user_sw(plasma2040::USER_SW, Polarity::ACTIVE_LOW, 0);
 Button button_a(plasma2040::BUTTON_A, Polarity::ACTIVE_LOW, 50);
 Button button_b(plasma2040::BUTTON_B, Polarity::ACTIVE_LOW, 50);
 RGBLED led(plasma2040::LED_R, plasma2040::LED_G, plasma2040::LED_B);
-Analog sense(plasma2040::SENSE, plasma2040::ADC_GAIN, plasma2040::SHUNT_RESISTOR);
+Analog sense(plasma2040::CURRENT_SENSE, plasma2040::ADC_GAIN, plasma2040::SHUNT_RESISTOR);
 
 
 int main() {

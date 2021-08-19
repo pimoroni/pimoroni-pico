@@ -18,7 +18,7 @@ namespace plasma {
     const uint CLK = 14; // Used only for APA102
     const uint DAT = 15; // Used for both APA102 and WS2812
 
-    const uint SENSE = 29; // The pin used for current sensing
+    const uint CURRENT_SENSE = 29; // The pin used for current sensing
 
     constexpr float ADC_GAIN = 50;
     constexpr float SHUNT_RESISTOR = 0.015f;

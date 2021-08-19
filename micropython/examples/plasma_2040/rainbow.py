@@ -1,4 +1,5 @@
 import plasma
+from plasma import plasma2040
 import time
 
 # Import helpers for RGB LEDs, Buttons, and Analog
@@ -21,16 +22,16 @@ UPDATES = 60
 # Pick *one* LED type by uncommenting the relevant line below:
 
 # APA102 / DotStar™ LEDs
-# led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma.PIN_DAT, plasma.PIN_CLK)
+#led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma.PIN_DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
 
-user_sw = Button(plasma.PIN_USER_SW)
-button_a = Button(plasma.PIN_BUTTON_A)
-button_b = Button(plasma.PIN_BUTTON_B)
-led = RGBLED(plasma.PIN_LED_R, plasma.PIN_LED_G, plasma.PIN_LED_B)
-sense = Analog(plasma.PIN_CURRENT_SENSE, plasma.ADC_GAIN, plasma.SHUNT_RESISTOR)
+user_sw = Button(plasma2040.USER_SW)
+button_a = Button(plasma2040.BUTTON_A)
+button_b = Button(plasma2040.BUTTON_B)
+led = RGBLED(plasma2040.LED_R, plasma2040.LED_G, plasma2040.LED_B)
+sense = Analog(plasma2040.CURRENT_SENSE, plasma2040.ADC_GAIN, plasma2040.SHUNT_RESISTOR)
 
 # Start updating the LED strip
 led_strip.start()
