@@ -33,7 +33,7 @@ namespace pimoroni {
     }
 
     bool BME68X::configure(uint8_t filter, uint8_t odr, uint8_t os_humidity, uint8_t os_pressure, uint8_t os_temp) {
-        int8_t result;
+        int8_t result = 0;
 
         conf.filter = filter;
         conf.odr = odr;
