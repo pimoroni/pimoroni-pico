@@ -37,3 +37,4 @@ add_subdirectory(pico_audio)
 add_subdirectory(pico_wireless)
 
 add_subdirectory(plasma2040)
+add_subdirectory(interstate75)
