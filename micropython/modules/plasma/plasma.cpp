@@ -73,7 +73,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = WS2812::DEFAULT_SERIAL_FREQ} },
         { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_rgbw, MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_color_order, MP_ARG_INT, {.u_int = (uint8_t)WS2812::COLOR_ORDER::RGB} },
+        { MP_QSTR_color_order, MP_ARG_INT, {.u_int = (uint8_t)WS2812::COLOR_ORDER::GRB} },
     };
 
     // Parse args.

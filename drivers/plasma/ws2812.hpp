@@ -63,7 +63,7 @@ namespace plasma {
             uint32_t num_leds;
             COLOR_ORDER color_order;
 
-            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::RGB, RGB* buffer=nullptr);
+            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::GRB, RGB* buffer=nullptr);
             ~WS2812() {
                 stop();
                 clear();
