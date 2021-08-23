@@ -1,6 +1,5 @@
 import plasma
 from plasma import plasma2040
-import time
 
 # Import helpers for RGB LEDs and Buttons
 from pimoroni import RGBLED, Button
