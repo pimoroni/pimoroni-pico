@@ -11,6 +11,11 @@
 #include "rgbled.hpp"
 #include "button.hpp"
 
+/*
+Press "A" to cycle to the next mode.
+Press "B" to cycle to the previous mode.
+*/
+
 using namespace pimoroni;
 using namespace plasma;
 
@@ -49,15 +54,15 @@ constexpr float HUMIDITY_HUE_END = 0.667f;
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
-APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
+//APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
 
 // WS28X-style LEDs with a single signal line. AKA NeoPixel
-//WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
+WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
 
 
 
-Button button_a(plasma2040::BUTTON_A);
-Button button_b(plasma2040::BUTTON_B);
+Button button_a(plasma2040::BUTTON_A, ACTIVE_LOW, 0);
+Button button_b(plasma2040::BUTTON_B, ACTIVE_LOW, 0);
 
 RGBLED led(plasma2040::LED_R, plasma2040::LED_G, plasma2040::LED_B);
 
@@ -120,7 +125,7 @@ int main() {
       auto result = bme68x.read_forced(&data);
       (void)result;
 
-      printf("%.2f, %.2f, %.2f\n", data.temperature, data.pressure, data.humidity);
+      printf("%.2fc, %.2fPa, %.2f%%\n", data.temperature, data.pressure, data.humidity);
 
       switch(mode) {
         case DisplayMode::ALL:
