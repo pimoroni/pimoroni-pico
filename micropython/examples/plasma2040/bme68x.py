@@ -2,11 +2,11 @@ import plasma
 from plasma import plasma2040
 import time
 
-# Import helpers for RGB LEDs, Buttons, and Analog
-from pimoroni import RGBLED, Button, Analog
+# Import helpers for RGB LEDs and Buttons
+from pimoroni import RGBLED, Button
 
 # Import bme68x and I2C helper
-from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE
+from breakout_bme68x import BreakoutBME68X
 from pimoroni_i2c import PimoroniI2C
 
 # Press "A" to cycle to the next mode.
@@ -50,7 +50,7 @@ HUMIDITY_HUE_END = 0.667
 # led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 
 # WS2812 / NeoPixel™ LEDs
-# led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
 
 
 button_a = Button(plasma2040.BUTTON_A, repeat_time=0)
@@ -65,9 +65,11 @@ bme = BreakoutBME68X(i2c)
 
 ALL, TEMPERATURE, PRESSURE, HUMIDITY = range(4)
 
+
 # Maps a value from one range to another
 def map(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 
 # Sets a section of the led strip to show a hue gradient based on the provided percent
 def colour_gauge(percent, start_led, end_led, start_hue, end_hue):
@@ -95,12 +97,12 @@ mode = ALL
 
 # Start updating the LED strip
 led_strip.start()
-  
+
 while True:
     temperature, pressure, humidity, _, _, _, _ = bme.read()
     print("{:0.2f}c, {:0.2f}Pa, {:0.2f}%".format(
         temperature, pressure, humidity))
-    
+
     if mode == ALL:
         t = map(temperature, TEMPERATURE_C_MIN, TEMPERATURE_C_MAX, 0.0, 1.0)
         colour_gauge(t, 0, first_third, TEMPERATURE_HUE_START, TEMPERATURE_HUE_END)
@@ -122,26 +124,34 @@ while True:
     elif mode == HUMIDITY:
         t = map(humidity, HUMIDITY_MIN, HUMIDITY_MAX, 0.0, 1.0)
         colour_gauge(t, 0, NUM_LEDS, HUMIDITY_HUE_START, HUMIDITY_HUE_END)
-        
+
     a_pressed = button_a.read()
     b_pressed = button_b.read()
 
     if mode == ALL:
         led.set_rgb(127, 127, 127)
-        if a_pressed: mode = TEMPERATURE
-        elif b_pressed: mode = HUMIDITY
+        if a_pressed:
+            mode = TEMPERATURE
+        elif b_pressed:
+            mode = HUMIDITY
 
     elif mode == TEMPERATURE:
         led.set_rgb(255, 0, 255)
-        if a_pressed: mode = PRESSURE
-        elif b_pressed: mode = ALL
+        if a_pressed:
+            mode = PRESSURE
+        elif b_pressed:
+            mode = ALL
 
     elif mode == PRESSURE:
         led.set_rgb(255, 255, 0)
-        if a_pressed: mode = HUMIDITY
-        elif b_pressed: mode = TEMPERATURE
+        if a_pressed:
+            mode = HUMIDITY
+        elif b_pressed:
+            mode = TEMPERATURE
 
     elif mode == HUMIDITY:
         led.set_rgb(0, 255, 255)
-        if a_pressed: mode = ALL
-        elif b_pressed: mode = PRESSURE
+        if a_pressed:
+            mode = ALL
+        elif b_pressed:
+            mode = PRESSURE
