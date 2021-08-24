@@ -43,10 +43,10 @@ const uint UPDATES = 60;
 // Pick *one* LED type by uncommenting the relevant line below:
 
 // APA102-style LEDs with Data/Clock lines. AKA DotStar
-APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
+//APA102 led_strip(N_LEDS, pio0, 0, plasma2040::DAT, plasma2040::CLK);
 
 // WS28X-style LEDs with a single signal line. AKA NeoPixel
-//WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
+WS2812 led_strip(N_LEDS, pio0, 0, plasma2040::DAT);
 
 
 Button user_sw(plasma2040::USER_SW, Polarity::ACTIVE_LOW, 0);
