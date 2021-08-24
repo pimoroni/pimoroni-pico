@@ -1,5 +1,5 @@
-set(OUTPUT_NAME plasma2040_bme68x)
-add_executable(${OUTPUT_NAME} plasma2040_bme68x.cpp)
+set(OUTPUT_NAME plasma2040_monitor)
+add_executable(${OUTPUT_NAME} plasma2040_monitor.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
         pico_stdlib

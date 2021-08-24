@@ -12,6 +12,7 @@
 #include "button.hpp"
 
 /*
+Uses a BME68x to monitor the ambient temperature, pressure and humidity, and show them as bars on an LED strip.
 Press "A" to cycle to the next mode.
 Press "B" to cycle to the previous mode.
 */
