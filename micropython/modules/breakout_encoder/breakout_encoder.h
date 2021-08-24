@@ -16,3 +16,4 @@ extern mp_obj_t BreakoutEncoder_set_brightness(size_t n_args, const mp_obj_t *po
 extern mp_obj_t BreakoutEncoder_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutEncoder_available(mp_obj_t self_in);
 extern mp_obj_t BreakoutEncoder_read(mp_obj_t self_in);
+extern mp_obj_t BreakoutEncoder_clear(mp_obj_t self_in);

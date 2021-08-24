@@ -14,6 +14,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_brightness_obj, 2, BreakoutEncode
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoder_set_led_obj, 4, BreakoutEncoder_set_led);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoder_available_obj, BreakoutEncoder_available);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoder_read_obj, BreakoutEncoder_read);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoder_clear_obj, BreakoutEncoder_clear);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutEncoder_locals_dict_table[] = {
@@ -26,6 +27,7 @@ STATIC const mp_rom_map_elem_t BreakoutEncoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_led), MP_ROM_PTR(&BreakoutEncoder_set_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_available), MP_ROM_PTR(&BreakoutEncoder_available_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutEncoder_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&BreakoutEncoder_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_DIRECTION_CW), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_DIRECTION_CCW), MP_ROM_INT(0) },
 };
