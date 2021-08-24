@@ -35,10 +35,9 @@ const int16_t DEFAULT_ANGLE = 120;
 // The brightness (between 0 and 31) to set the LEDs to
 const int16_t DEFAULT_BRIGHTNESS = 16;
 
-
-
 // How many times the LEDs will be updated per second
 const uint UPDATES = 60;
+
 
 // Pick *one* LED type by uncommenting the relevant line below:
 
@@ -62,7 +61,7 @@ enum ENCODER_MODE {
   COLOUR,
   ANGLE,
   BRIGHTNESS,
-  TIME
+  SPEED
 };
 
 float wrap(float v, float min, float max) {
@@ -159,7 +158,7 @@ int main() {
             brightness_gauge(brightness, 31);
             break;
 
-          case ENCODER_MODE::TIME:
+          case ENCODER_MODE::SPEED:
             speed += count;
             speed = std::min((int16_t)100, std::max((int16_t)0, speed));
             speed_gauge(speed, 100);
@@ -197,10 +196,10 @@ int main() {
 
       case ENCODER_MODE::BRIGHTNESS:
         led.set_rgb(0, 255, 0);
-        if(a_pressed) mode = ENCODER_MODE::TIME;
+        if(a_pressed) mode = ENCODER_MODE::SPEED;
         break;
 
-      case ENCODER_MODE::TIME:
+      case ENCODER_MODE::SPEED:
         led.set_rgb(0, 0, 255);
         if(a_pressed) mode = ENCODER_MODE::COLOUR;
         break;
@@ -209,8 +208,8 @@ int main() {
     if(cycle)
       colour_cycle(hue, (float)(t * speed) / 100.0f, (float)angle);
 
-    auto first_led = led_strip.get(led_strip.num_leds / 2);
-    enc.set_led(first_led.r, first_led.g, first_led.b);
+    auto mid_led = led_strip.get(led_strip.num_leds / 2);
+    enc.set_led(mid_led.r, mid_led.g, mid_led.b);
 
     // Sleep time controls the rate at which the LED buffer is updated
     // but *not* the actual framerate at which the buffer is sent to the LEDs
