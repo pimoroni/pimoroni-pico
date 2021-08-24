@@ -182,6 +182,29 @@ mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     return mp_const_none;
 }
 
+mp_obj_t PlasmaWS2812_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_index };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int index = args[ARG_index].u_int;
+
+    _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaWS2812_obj_t);
+    WS2812::RGB rgb = self->ws2812->get(index);
+
+    mp_obj_t tuple[4];
+    tuple[0] = mp_obj_new_int(rgb.r);
+    tuple[1] = mp_obj_new_float(rgb.g);
+    tuple[2] = mp_obj_new_float(rgb.b);
+    tuple[3] = mp_obj_new_float(rgb.w);
+    return mp_obj_new_tuple(4, tuple);
+}
+
 /********** APA102 **********/
 
 /***** Variables Struct *****/
@@ -355,6 +378,29 @@ mp_obj_t PlasmaAPA102_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     self->apa102->set_hsv(index, h, s, v);
 
     return mp_const_none;
+}
+
+mp_obj_t PlasmaAPA102_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_index };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int index = args[ARG_index].u_int;
+
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaAPA102_obj_t);
+    APA102::RGB rgb = self->apa102->get(index);
+
+    mp_obj_t tuple[4];
+    tuple[0] = mp_obj_new_int(rgb.r);
+    tuple[1] = mp_obj_new_float(rgb.g);
+    tuple[2] = mp_obj_new_float(rgb.b);
+    tuple[3] = mp_obj_new_float(rgb.sof);
+    return mp_obj_new_tuple(4, tuple);
 }
 
 }
