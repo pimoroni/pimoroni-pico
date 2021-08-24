@@ -57,7 +57,7 @@ button_a = Button(plasma2040.BUTTON_A, repeat_time=0)
 button_b = Button(plasma2040.BUTTON_B, repeat_time=0)
 led = RGBLED(plasma2040.LED_R, plasma2040.LED_G, plasma2040.LED_B)
 
-PINS_PLASMA2040 = {"sda": 20, "scl": 21}
+PINS_PLASMA2040 = {"sda": plasma2040.SDA, "scl": plasma2040.SCL}
 
 i2c = PimoroniI2C(**PINS_PLASMA2040)
 bme = BreakoutBME68X(i2c)
