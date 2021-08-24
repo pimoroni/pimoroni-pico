@@ -4,6 +4,10 @@
 /* SPI pin assignment */
 
 /* Pico Wireless */
+#ifndef SDCARD_SPI_BUS
+#define SDCARD_SPI_BUS spi0
+#endif
+
 #ifndef SDCARD_PIN_SPI0_CS
 #define SDCARD_PIN_SPI0_CS     22
 #endif

@@ -3,7 +3,11 @@
 #include "pico.h"
 #include "pico/stdlib.h"
 #include "hardware/clocks.h"
+#ifndef SDCARD_PIO
 #include "hardware/spi.h"
+#else
+#include "pio_spi.h"
+#endif
 #include "hardware/gpio.h"
 //#include "hardware/gpio_ex.h"
 
@@ -55,6 +59,13 @@ DSTATUS Stat = STA_NOINIT;	/* Physical drive status */
 static
 BYTE CardType;			/* Card type flags */
 
+#ifdef SDCARD_PIO
+pio_spi_inst_t pio_spi = {
+		.pio = SDCARD_PIO,
+		.sm = SDCARD_PIO_SM
+};
+#endif
+
 static inline uint32_t _millis(void)
 {
 	return to_ms_since_boot(get_absolute_time());
@@ -78,12 +89,16 @@ static inline void cs_deselect(uint cs_pin) {
 
 static void FCLK_SLOW(void)
 {
-    spi_set_baudrate(spi0, CLK_SLOW);
+#ifndef SDCARD_PIO
+    spi_set_baudrate(SDCARD_SPI_BUS, CLK_SLOW);
+#endif
 }
 
 static void FCLK_FAST(void)
 {
-    spi_set_baudrate(spi0, CLK_FAST);
+#ifndef SDCARD_PIO
+    spi_set_baudrate(SDCARD_SPI_BUS, CLK_FAST);
+#endif
 }
 
 static void CS_HIGH(void)
@@ -107,18 +122,15 @@ void init_spi(void)
 	//gpio_pull_up(SDCARD_PIN_SPI0_SCK);
 	//gpio_set_drive_strength(SDCARD_PIN_SPI0_SCK, PADS_BANK0_GPIO0_DRIVE_VALUE_4MA); // 2mA, 4mA (default), 8mA, 12mA
 	//gpio_set_slew_rate(SDCARD_PIN_SPI0_SCK, 0); // 0: SLOW (default), 1: FAST
-	gpio_set_function(SDCARD_PIN_SPI0_SCK, GPIO_FUNC_SPI);
 
 	gpio_init(SDCARD_PIN_SPI0_MISO);
 	gpio_pull_up(SDCARD_PIN_SPI0_MISO);
 	//gpio_set_schmitt(SDCARD_PIN_SPI0_MISO, 1); // 0: Off, 1: On (default)
-	gpio_set_function(SDCARD_PIN_SPI0_MISO, GPIO_FUNC_SPI);
 
 	gpio_init(SDCARD_PIN_SPI0_MOSI);
 	gpio_pull_up(SDCARD_PIN_SPI0_MOSI);
 	//gpio_set_drive_strength(SDCARD_PIN_SPI0_MOSI, PADS_BANK0_GPIO0_DRIVE_VALUE_4MA); // 2mA, 4mA (default), 8mA, 12mA
 	//gpio_set_slew_rate(SDCARD_PIN_SPI0_MOSI, 0); // 0: SLOW (default), 1: FAST
-	gpio_set_function(SDCARD_PIN_SPI0_MOSI, GPIO_FUNC_SPI);
 
 	gpio_init(SDCARD_PIN_SPI0_CS);
 	//gpio_pull_up(SDCARD_PIN_SPI0_CS);
@@ -129,15 +141,40 @@ void init_spi(void)
 	/* chip _select invalid*/
 	CS_HIGH();
 
-	spi_init(spi0, CLK_SLOW);
+#ifndef SDCARD_PIO
+	gpio_set_function(SDCARD_PIN_SPI0_SCK, GPIO_FUNC_SPI);
+	gpio_set_function(SDCARD_PIN_SPI0_MISO, GPIO_FUNC_SPI);
+	gpio_set_function(SDCARD_PIN_SPI0_MOSI, GPIO_FUNC_SPI);
+
+	spi_init(SDCARD_SPI_BUS, CLK_SLOW);
 
 	/* SPI0 parameter config */
-	spi_set_format(spi0,
+	spi_set_format(SDCARD_SPI_BUS,
 		8, /* data_bits */
 		SPI_CPOL_0, /* cpol */
 		SPI_CPHA_0, /* cpha */
 		SPI_MSB_FIRST /* order */
 	);
+#else
+    gpio_set_dir(SDCARD_PIN_SPI0_SCK, GPIO_OUT);
+    gpio_set_dir(SDCARD_PIN_SPI0_MISO, GPIO_OUT);
+    gpio_set_dir(SDCARD_PIN_SPI0_MOSI, GPIO_OUT);
+
+	float clkdiv = 3.0f;
+	int cpol = 0;
+	int cpha = 0;
+	uint cpha0_prog_offs = pio_add_program(pio_spi.pio, &spi_cpha0_program);
+	pio_spi_init(pio_spi.pio, pio_spi.sm,
+				cpha0_prog_offs,
+				8,       // 8 bits per SPI frame
+				clkdiv,
+				cpha,
+				cpol,
+				SDCARD_PIN_SPI0_SCK,
+				SDCARD_PIN_SPI0_MOSI,
+				SDCARD_PIN_SPI0_MISO
+	);
+#endif
 }
 
 /* Exchange a byte */
@@ -147,7 +184,11 @@ BYTE xchg_spi (
 )
 {
 	uint8_t *buff = (uint8_t *) &dat;
-	spi_write_read_blocking(spi0, buff, buff, 1);
+#ifndef SDCARD_PIO
+	spi_write_read_blocking(SDCARD_SPI_BUS, buff, buff, 1);
+#else
+	pio_spi_write8_read8_blocking(&pio_spi, buff, buff, 1);
+#endif
 	return (BYTE) *buff;
 }
 
@@ -160,7 +201,11 @@ void rcvr_spi_multi (
 )
 {
 	uint8_t *b = (uint8_t *) buff;
-	spi_read_blocking(spi0, 0xff, b, btr);
+#ifndef SDCARD_PIO
+	spi_read_blocking(SDCARD_SPI_BUS, 0xff, b, btr);
+#else
+	pio_spi_repeat8_read8_blocking(&pio_spi, 0xff, b, btr);
+#endif
 }
 
 
@@ -427,7 +472,11 @@ void xmit_spi_multi (
 )
 {
 	const uint8_t *b = (const uint8_t *) buff;
-	spi_write_blocking(spi0, b, btx);
+#ifndef SDCARD_PIO
+	spi_write_blocking(SDCARD_SPI_BUS, b, btx);
+#else
+	pio_spi_write8_blocking(&pio_spi, b, btx);
+#endif
 }
 
 /*-----------------------------------------------------------------------*/
