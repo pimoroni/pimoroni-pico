@@ -53,18 +53,17 @@ enc = BreakoutEncoder(i2c)
 enc.set_brightness(1.0)
 
 
-
 COLOUR, ANGLE, BRIGHTNESS, SPEED = range(4)
 
 
 def wrap(v, mn, mx):
-  if v <= mn:
-    v += mx - mn
+    if v <= mn:
+        v += mx - mn
 
-  if v > mx:
-    v -= mx - mn
+    if v > mx:
+        v -= mx - mn
 
-  return v
+    return v
 
 
 def colour_cycle(hue, t, angle):
@@ -87,7 +86,7 @@ def speed_gauge(v, vmax=100):
             led_strip.set_rgb(i, 255, 0, 0)
 
 
-def brightness_gauge(v, vmax = 100):
+def brightness_gauge(v, vmax=100):
     light_pixels = NUM_LEDS * v / vmax
 
     for i in range(NUM_LEDS):
@@ -114,14 +113,14 @@ start_time = time.ticks_ms()
 
 while True:
     t = time.ticks_ms() - start_time
-    
+
     if enc.get_interrupt_flag():
         count = enc.read()
         enc.clear_interrupt_flag()
         enc.clear()
-        
+
         cycle = False
-        
+
         if mode == COLOUR:
             hue += count
             hue = min(359, max(0, hue))
@@ -142,12 +141,11 @@ while True:
             speed += count
             speed = min(100, max(0, speed))
             speed_gauge(brightness, 100)
-        
-        
+
     sw_pressed = user_sw.read()
     a_pressed = button_a.read()
     b_pressed = button_b.read()
-    
+
     if sw_pressed:
         speed = DEFAULT_SPEED
         hue = DEFAULT_HUE
@@ -156,10 +154,10 @@ while True:
 
     if b_pressed:
         if not cycle:
-            start_time = time.millis();
+            start_time = time.ticks_ms()
         cycle = True
     speed = min(255, max(1, speed))
-    
+
     if mode == COLOUR:
         led.set_rgb(255, 0, 0)
         if a_pressed:
@@ -179,10 +177,10 @@ while True:
         led.set_rgb(0, 0, 255)
         if a_pressed:
             mode = COLOUR
-            
+
     if cycle:
         colour_cycle(hue, float(t * speed) / 100.0, angle)
-        
+
     mid_led = led_strip.get(int(NUM_LEDS / 2))
     enc.set_led(int(mid_led[0]), int(mid_led[1]), int(mid_led[2]))
 
