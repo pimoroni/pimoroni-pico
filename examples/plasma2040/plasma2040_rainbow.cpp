@@ -47,46 +47,46 @@ Analog sense(plasma2040::CURRENT_SENSE, plasma2040::ADC_GAIN, plasma2040::SHUNT_
 
 
 int main() {
-    stdio_init_all();
+  stdio_init_all();
 
-    led_strip.start(UPDATES);
+  led_strip.start(UPDATES);
 
-    int speed = DEFAULT_SPEED;
-    float offset = 0.0f;
+  int speed = DEFAULT_SPEED;
+  float offset = 0.0f;
 
-    uint count = 0;
-    while (true) {
-        bool sw = user_sw.read();
-        bool a = button_a.read();
-        bool b = button_b.read();
+  uint count = 0;
+  while(true) {
+    bool sw_pressed = user_sw.read();
+    bool a_pressed = button_a.read();
+    bool b_pressed = button_b.read();
 
-        if(sw) {
-            speed = DEFAULT_SPEED;
-        }
-        else {
-            if(a) speed--;
-            if(b) speed++;
-        }
-        speed = std::min((int)255, std::max((int)1, speed));
-
-        offset += float(speed) / 2000.0f;
-
-        for(auto i = 0u; i < led_strip.num_leds; ++i) {
-            float hue = float(i) / led_strip.num_leds;
-            led_strip.set_hsv(i, hue + offset, 1.0f, 1.0f);
-        }
-
-        led.set_rgb(speed, 0, 255 - speed);
-
-        count += 1;
-        if(count >= UPDATES) {
-            // Display the current value once every second
-            printf("Current = %f A\n", sense.read_current());
-            count = 0;
-        }
-
-        // Sleep time controls the rate at which the LED buffer is updated
-        // but *not* the actual framerate at which the buffer is sent to the LEDs
-        sleep_ms(1000 / UPDATES);
+    if(sw_pressed) {
+      speed = DEFAULT_SPEED;
     }
+    else {
+      if(a_pressed) speed--;
+      if(b_pressed) speed++;
+    }
+    speed = std::min((int)255, std::max((int)1, speed));
+
+    offset += float(speed) / 2000.0f;
+
+    for(auto i = 0u; i < led_strip.num_leds; ++i) {
+      float hue = float(i) / led_strip.num_leds;
+      led_strip.set_hsv(i, hue + offset, 1.0f, 1.0f);
+    }
+
+    led.set_rgb(speed, 0, 255 - speed);
+
+    count += 1;
+    if(count >= UPDATES) {
+      // Display the current value once every second
+      printf("Current = %f A\n", sense.read_current());
+      count = 0;
+    }
+
+    // Sleep time controls the rate at which the LED buffer is updated
+    // but *not* the actual framerate at which the buffer is sent to the LEDs
+    sleep_ms(1000 / UPDATES);
+  }
 }
