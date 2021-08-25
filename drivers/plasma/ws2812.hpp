@@ -75,7 +75,10 @@ namespace plasma {
                 // pio_sm_unclaim seems to hardfault in MicroPython
                 pio_sm_unclaim(pio, sm);
 #endif
-                delete[] buffer;
+                if(managed_buffer) {
+                    // Only delete buffers we have allocated ourselves.
+                    delete[] buffer;
+                }
             }
             bool start(uint fps=60);
             bool stop();
@@ -95,5 +98,6 @@ namespace plasma {
             uint pio_program_offset;
             int dma_channel;
             struct repeating_timer timer;
+            bool managed_buffer = false;
     };
 }

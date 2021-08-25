@@ -34,6 +34,7 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
 
     if(this->buffer == nullptr) {
         this->buffer = new RGB[num_leds];
+        managed_buffer = true;
     }
 }
 

@@ -33,6 +33,7 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
 
     if(!this->buffer) {
         this->buffer = new RGB[num_leds];
+        managed_buffer = true;
     }
 }
 
