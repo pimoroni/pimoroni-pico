@@ -58,10 +58,10 @@ SMOOTHING_FACTOR = 0.1
 # Pick *one* LED type by uncommenting the relevant line below:
 
 # APA102 / DotStar™ LEDs
-# led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
+led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+# led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
 
 user_sw = Button(plasma2040.USER_SW, repeat_time=0)
 button_a = Button(plasma2040.BUTTON_A, repeat_time=0)
@@ -149,7 +149,7 @@ while True:
     measured_angle = ((new_measured_angle - measured_angle) * SMOOTHING_FACTOR) + measured_angle
 
     if mode == ANGLE:
-        # Apply the measured angle directly to the used angle, clamping it between -1 and +1
+        # Apply the measured angle directly to the band position, clamping it between -1 and +1
         band_position = measured_angle * ANGLE_SENSITIVITY
         band_position = min(1.0, max(-1.0, band_position))
 
@@ -158,6 +158,7 @@ while True:
         hue = map(position_diff, 0.0, 1.0, ANGLE_MODE_GOAL_HUE, ANGLE_MODE_EDGE_HUE)
 
     elif mode == VELOCITY:
+        # Apply the measured angle as a velocity to the band position, clamping it between -1 and +1
         band_position += measured_angle * VELOCITY_SENSITIVITY
         band_position = min(1.0, max(-1.0, band_position))
 
