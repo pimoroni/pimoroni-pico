@@ -268,14 +268,21 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int clk = args[ARG_clk].u_int;
     int freq = args[ARG_freq].u_int;
 
-    void *buffer = nullptr;
+    APA102::RGB *buffer = nullptr;
 
     if (args[ARG_buffer].u_obj) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        buffer = bufinfo.buf;
+        buffer = (APA102::RGB *)bufinfo.buf;
         if(bufinfo.len < (size_t)(num_leds * 4)) {
             mp_raise_ValueError("Supplied buffer is too small for LED count!");
+        }
+        // If a bytearray is supplied it'll be raw, uninitialized bytes
+        // iterate through the RGB elements and call "brightness"
+        // to set up the SOF bytes, otherwise a flickery mess will happen!
+        // Oh for such niceties as "placement new"...
+        for(auto i = 0; i < num_leds; i++) {
+            buffer[i].brightness(15);
         }
     }
 
@@ -283,7 +290,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->base.type = &PlasmaAPA102_type;
     self->buf = buffer;
 
-    self->apa102 = new APA102(num_leds, pio, sm, dat, clk, freq, (APA102::RGB *)buffer);
+    self->apa102 = new APA102(num_leds, pio, sm, dat, clk, freq, buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }
