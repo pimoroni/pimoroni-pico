@@ -140,7 +140,7 @@ while True:
         elif mode == SPEED:
             speed += count
             speed = min(100, max(0, speed))
-            speed_gauge(brightness, 100)
+            speed_gauge(speed, 100)
 
     sw_pressed = user_sw.read()
     a_pressed = button_a.read()
