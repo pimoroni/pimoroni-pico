@@ -58,10 +58,10 @@ SMOOTHING_FACTOR = 0.1
 # Pick *one* LED type by uncommenting the relevant line below:
 
 # APA102 / DotStar™ LEDs
-led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
+# led_strip = plasma.APA102(NUM_LEDS, 0, 0, plasma2040.DAT, plasma2040.CLK)
 
 # WS2812 / NeoPixel™ LEDs
-# led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
 
 user_sw = Button(plasma2040.USER_SW, repeat_time=0)
 button_a = Button(plasma2040.BUTTON_A, repeat_time=0)
@@ -76,9 +76,11 @@ msa = BreakoutMSA301(i2c)
 
 ANGLE, VELOCITY = range(2)
 
+
 # Maps a value from one range to another
 def map(x, in_min, in_max, out_min, out_max):
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
 
 # Shows a band and goal with the given widths at the positions on the strip
 def colour_band(centre_position, width, goal_position, goal_width, hue):
@@ -91,7 +93,6 @@ def colour_band(centre_position, width, goal_position, goal_width, hue):
 
         # Go through each led in the strip
         for i in range(NUM_LEDS):
-            
             # Set saturation and brightness values for if the led is inside or outside of the goal
             saturation = BAND_SATURATION
             brightness = 0.0
@@ -143,7 +144,7 @@ while True:
     if invert:
         new_measured_angle = -new_measured_angle
     print("Angle:", new_measured_angle, "deg")
-    
+
     # Smooth out the measured angle
     measured_angle = ((new_measured_angle - measured_angle) * SMOOTHING_FACTOR) + measured_angle
 
@@ -199,8 +200,9 @@ while True:
 
     if game_mode:
         # Check if the band is within the goal, and if so, set a new goal
-        if(strip_band_position >= strip_goal_position - (GOAL_PIXEL_WIDTH - BAND_PIXEL_WIDTH) / 2 and
-        strip_band_position <= strip_goal_position + (GOAL_PIXEL_WIDTH - BAND_PIXEL_WIDTH) / 2):
+        above_lower = strip_band_position >= strip_goal_position - (GOAL_PIXEL_WIDTH - BAND_PIXEL_WIDTH) / 2
+        below_upper = strip_band_position <= strip_goal_position + (GOAL_PIXEL_WIDTH - BAND_PIXEL_WIDTH) / 2
+        if above_lower and below_upper:
             goal_position = random.uniform(-1.0, 1.0)
 
     time.sleep(1.0 / UPDATES)
