@@ -3,12 +3,12 @@
 namespace plasma {
 
 WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, COLOR_ORDER color_order, RGB* buffer) : buffer(buffer), num_leds(num_leds), color_order(color_order), pio(pio), sm(sm) {
-    uint offset = pio_add_program(pio, &ws2812_program);
+    pio_program_offset = pio_add_program(pio, &ws2812_program);
 
     pio_gpio_init(pio, pin);
     pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
 
-    pio_sm_config c = ws2812_program_get_default_config(offset);
+    pio_sm_config c = ws2812_program_get_default_config(pio_program_offset);
     sm_config_set_sideset_pins(&c, pin);
     
     sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24); // Discard first (APA102 global brightness) byte. TODO support RGBW WS281X LEDs
@@ -18,7 +18,7 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
     sm_config_set_clkdiv(&c, div);
 
-    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_init(pio, sm, pio_program_offset, &c);
     pio_sm_set_enabled(pio, sm, true);
 
     dma_channel = dma_claim_unused_channel(true);

@@ -69,7 +69,12 @@ namespace plasma {
                 clear();
                 update(true);
                 dma_channel_unclaim(dma_channel);
+                pio_sm_set_enabled(pio, sm, false);
+                pio_remove_program(pio, &ws2812_program, pio_program_offset);
+#ifndef MICROPY_BUILD_TYPE
+                // pio_sm_unclaim seems to hardfault in MicroPython
                 pio_sm_unclaim(pio, sm);
+#endif
                 delete[] buffer;
             }
             bool start(uint fps=60);
@@ -87,6 +92,7 @@ namespace plasma {
             uint32_t fps;
             PIO pio;
             uint sm;
+            uint pio_program_offset;
             int dma_channel;
             struct repeating_timer timer;
     };
