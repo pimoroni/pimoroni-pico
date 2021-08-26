@@ -101,10 +101,6 @@ namespace pimoroni {
       dma_hw->ints0 = (1u << dma_channel); // clear irq flag
       dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
       dma_channel_set_read_addr(dma_channel, bitstream, true);
-
-      static bool hilo = false;
-      gpio_put(2, hilo);
-      hilo = !hilo;
     }
   }
 
@@ -125,13 +121,15 @@ namespace pimoroni {
   }
 
   void PicoUnicorn::init() {
+    // todo: shouldn't need to do this if things were cleaned up properly but without
+    // this any attempt to run a micropython script twice will fail
+    static bool already_init = false;
+
     // setup pins
     gpio_init(pin::LED_DATA); gpio_set_dir(pin::LED_DATA, GPIO_OUT);
     gpio_init(pin::LED_CLOCK); gpio_set_dir(pin::LED_CLOCK, GPIO_OUT);
     gpio_init(pin::LED_LATCH); gpio_set_dir(pin::LED_LATCH, GPIO_OUT);
     gpio_init(pin::LED_BLANK); gpio_set_dir(pin::LED_BLANK, GPIO_OUT);
-
-    gpio_init(2); gpio_set_dir(2, GPIO_OUT);
 
     gpio_init(pin::ROW_0); gpio_set_dir(pin::ROW_0, GPIO_OUT);
     gpio_init(pin::ROW_1); gpio_set_dir(pin::ROW_1, GPIO_OUT);
@@ -186,25 +184,36 @@ namespace pimoroni {
       }
     }
 
-    // setup the pio
-    bitstream_pio = pio0;
-    bitstream_sm = pio_claim_unused_sm(pio0, true);
-    uint offset = pio_add_program(bitstream_pio, &unicorn_program);
-    unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, offset);
-
     // setup button inputs
     gpio_set_function(pin::A, GPIO_FUNC_SIO); gpio_set_dir(pin::A, GPIO_IN); gpio_pull_up(pin::A);
     gpio_set_function(pin::B, GPIO_FUNC_SIO); gpio_set_dir(pin::B, GPIO_IN); gpio_pull_up(pin::B);
     gpio_set_function(pin::X, GPIO_FUNC_SIO); gpio_set_dir(pin::X, GPIO_IN); gpio_pull_up(pin::X);
     gpio_set_function(pin::Y, GPIO_FUNC_SIO); gpio_set_dir(pin::Y, GPIO_IN); gpio_pull_up(pin::Y);
 
-    // todo: shouldn't need to do this if things were cleaned up properly but without
-    // this any attempt to run a micropython script twice will fail
-    static bool already_init = false;
-
     if(already_init) {
-      return;
+      // stop and release the dma channel
+      irq_set_enabled(DMA_IRQ_0, false);
+      dma_channel_abort(dma_channel);
+      dma_channel_wait_for_finish_blocking(dma_channel);
+
+      dma_channel_set_irq0_enabled(dma_channel, false);
+      irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), false);
+      irq_remove_handler(DMA_IRQ_0, dma_complete);
+
+      dma_channel_unclaim(dma_channel);
+
+      // release the pio and sm
+      pio_sm_unclaim(bitstream_pio, bitstream_sm);
+      pio_clear_instruction_memory(bitstream_pio);
+      pio_sm_restart(bitstream_pio, bitstream_sm);
+      //return;
     }
+
+    // setup the pio
+    bitstream_pio = pio0;
+    bitstream_sm = pio_claim_unused_sm(pio0, true);
+    sm_offset = pio_add_program(bitstream_pio, &unicorn_program);
+    unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, sm_offset);
 
     // setup dma transfer for pixel data to the pio
     dma_channel = dma_claim_unused_channel(true);

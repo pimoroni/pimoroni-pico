@@ -13,10 +13,9 @@ namespace pimoroni {
     static const uint8_t X = 14;
     static const uint8_t Y = 15;
   private:
-    uint32_t __fb[WIDTH * HEIGHT];
     PIO bitstream_pio = pio0;
     uint bitstream_sm = 0;
-
+    uint sm_offset = 0;
   public:
     ~PicoUnicorn();
 
