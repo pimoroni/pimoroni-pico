@@ -51,6 +51,16 @@ void APA102::update(bool blocking) {
     dma_channel_set_read_addr(dma_channel, buffer, true);
     if (!blocking) return;
     while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    // This is necessary to prevent a single LED remaining lit when clearing and updating.
+    // This code will only run in *blocking* mode since it's assumed non-blocking will be continuously updating anyway.
+    // Yes this will slow down LED updates... don't use blocking mode unless you're clearing LEDs before shutdown,
+    // or you *really* want to avoid actively driving your APA102s for some reason.
+    for(auto x = 0u; x < (num_leds / 16) + 1; x++) {
+        pio->txf[sm] = 0x00000000;
+        // Some delay is needed, since the PIO is async
+        // and this could be happening during a destructor/MicroPython soft reset
+        sleep_ms(1); // Chosen by fair dice roll
+    }
 }
 
 bool APA102::start(uint fps) {
