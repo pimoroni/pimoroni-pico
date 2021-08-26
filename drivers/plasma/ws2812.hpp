@@ -63,14 +63,22 @@ namespace plasma {
             uint32_t num_leds;
             COLOR_ORDER color_order;
 
-            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::RGB, RGB* buffer=nullptr);
+            WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::GRB, RGB* buffer=nullptr);
             ~WS2812() {
                 stop();
                 clear();
                 update(true);
                 dma_channel_unclaim(dma_channel);
+                pio_sm_set_enabled(pio, sm, false);
+                pio_remove_program(pio, &ws2812_program, pio_program_offset);
+#ifndef MICROPY_BUILD_TYPE
+                // pio_sm_unclaim seems to hardfault in MicroPython
                 pio_sm_unclaim(pio, sm);
-                delete[] buffer;
+#endif
+                if(managed_buffer) {
+                    // Only delete buffers we have allocated ourselves.
+                    delete[] buffer;
+                }
             }
             bool start(uint fps=60);
             bool stop();
@@ -87,7 +95,9 @@ namespace plasma {
             uint32_t fps;
             PIO pio;
             uint sm;
+            uint pio_program_offset;
             int dma_channel;
             struct repeating_timer timer;
+            bool managed_buffer = false;
     };
 }

@@ -1,3 +1,5 @@
-include(plasma2040_rotary.cmake)
+include(plasma2040_level.cmake)
+include(plasma2040_monitor.cmake)
 include(plasma2040_rainbow.cmake)
+include(plasma2040_rotary.cmake)
 include(plasma2040_stacker.cmake)

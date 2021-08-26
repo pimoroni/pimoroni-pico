@@ -7,12 +7,14 @@ MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_set_rgb_obj, 5, PlasmaAPA102_set_rgb);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_set_hsv_obj, 3, PlasmaAPA102_set_hsv);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_set_brightness_obj, 2, PlasmaAPA102_set_brightness);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_start_obj, 1, PlasmaAPA102_start);
+MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_get_obj, 2, PlasmaAPA102_get);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaAPA102_clear_obj, PlasmaAPA102_clear);
 
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812___del___obj, PlasmaWS2812___del__);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_set_rgb_obj, 5, PlasmaWS2812_set_rgb);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_set_hsv_obj, 3, PlasmaWS2812_set_hsv);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_start_obj, 1, PlasmaWS2812_start);
+MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_get_obj, 2, PlasmaAPA102_get);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812_clear_obj, PlasmaWS2812_clear);
 
 /***** Binding of Methods *****/
@@ -22,6 +24,7 @@ STATIC const mp_rom_map_elem_t PlasmaAPA102_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_hsv), MP_ROM_PTR(&PlasmaAPA102_set_hsv_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&PlasmaAPA102_set_brightness_obj) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&PlasmaAPA102_start_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get), MP_ROM_PTR(&PlasmaAPA102_get_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&PlasmaAPA102_clear_obj) },
 };
 STATIC const mp_rom_map_elem_t PlasmaWS2812_locals_dict_table[] = {
@@ -29,6 +32,7 @@ STATIC const mp_rom_map_elem_t PlasmaWS2812_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_rgb), MP_ROM_PTR(&PlasmaWS2812_set_rgb_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_hsv), MP_ROM_PTR(&PlasmaWS2812_set_hsv_obj) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&PlasmaWS2812_start_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get), MP_ROM_PTR(&PlasmaWS2812_get_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&PlasmaWS2812_clear_obj) },
 };
 
@@ -70,6 +74,8 @@ STATIC const mp_map_elem_t plasma2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_CLK), MP_ROM_INT(14) },
     { MP_ROM_QSTR(MP_QSTR_DAT), MP_ROM_INT(15) },
     { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE), MP_ROM_INT(29) },
+    { MP_ROM_QSTR(MP_QSTR_SDA), MP_ROM_INT(20) },
+    { MP_ROM_QSTR(MP_QSTR_SCL), MP_ROM_INT(21) },
 
     { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&shunt_resistor) },
     { MP_ROM_QSTR(MP_QSTR_ADC_GAIN), MP_ROM_INT(50) },

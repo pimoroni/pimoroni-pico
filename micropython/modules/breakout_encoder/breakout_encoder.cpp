@@ -199,4 +199,11 @@ mp_obj_t BreakoutEncoder_read(mp_obj_t self_in) {
     breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_BreakoutEncoder_obj_t);
     return mp_obj_new_int(self->breakout->read());
 }
+
+mp_obj_t BreakoutEncoder_clear(mp_obj_t self_in) {
+    breakout_encoder_BreakoutEncoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_BreakoutEncoder_obj_t);
+    self->breakout->clear();
+
+    return mp_const_none;
+}
 }
