@@ -756,27 +756,19 @@ namespace pimoroni {
   }
 
   void IOExpander::set_bits(uint8_t reg, uint8_t bits) {
-    // Set the specified bits (using a mask) in a register.
-
-    // Deal with special case registers first
-    bool reg_in_bit_addressed_regs = false;
-    for(uint8_t i = 0; i < NUM_BIT_ADDRESSED_REGISTERS; i++) {
-      if(BIT_ADDRESSED_REGS[i] == reg) {
+    if(reg == reg::P0 || reg == reg::P1 || reg == reg::P2 || reg == reg::P3) {
         for(uint8_t bit = 0; bit < 8; bit++) {
-          if(bits & (1 << bit))
+          if(bits & (1 << bit)) {
             i2c->reg_write_uint8(address, reg, 0b1000 | (bit & 0b111));
+            sleep_us(50);
+          }
         }
-        reg_in_bit_addressed_regs = true;
-        break;
-      }
+        return;
     }
 
-    // Now deal with any other registers
-    if(!reg_in_bit_addressed_regs) {
-      uint8_t value = i2c->reg_read_uint8(address, reg);
-      sleep_us(10);
-      i2c->reg_write_uint8(address, reg, value | bits);
-    }
+    uint8_t value = i2c->reg_read_uint8(address, reg);
+    sleep_us(50);
+    i2c->reg_write_uint8(address, reg, value | bits);
   }
 
   void IOExpander::set_bit(uint8_t reg, uint8_t bit) {
@@ -785,24 +777,20 @@ namespace pimoroni {
   }
 
   void IOExpander::clr_bits(uint8_t reg, uint8_t bits) {
-    bool reg_in_bit_addressed_regs = false;
-    for(uint8_t i = 0; i < NUM_BIT_ADDRESSED_REGISTERS; i++) {
-      if(BIT_ADDRESSED_REGS[i] == reg) {
-        for(uint8_t bit = 0; bit < 8; bit++) {
-          if(bits & (1 << bit))
-            i2c->reg_write_uint8(address, reg, 0b0000 | (bit & 0b111));
+    if(reg == reg::P0 || reg == reg::P1 || reg == reg::P2 || reg == reg::P3) {
+      for(uint8_t bit = 0; bit < 8; bit++) {
+        if(bits & (1 << bit)) {
+          i2c->reg_write_uint8(address, reg, 0b0000 | (bit & 0b111));
+          sleep_us(50);
         }
-        reg_in_bit_addressed_regs = true;
-        break;
       }
+      return;
     }
 
     // Now deal with any other registers
-    if(!reg_in_bit_addressed_regs) {
-      uint8_t value = i2c->reg_read_uint8(address, reg);
-      sleep_us(10);
-      i2c->reg_write_uint8(address, reg, value & ~bits);
-    }
+    uint8_t value = i2c->reg_read_uint8(address, reg);
+    sleep_us(50);
+    i2c->reg_write_uint8(address, reg, value & ~bits);
   }
 
   void IOExpander::clr_bit(uint8_t reg, uint8_t bit) {
