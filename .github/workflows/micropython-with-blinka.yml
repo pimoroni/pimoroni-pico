@@ -8,7 +8,7 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  MICROPYTHON_VERSION: v1.15
+  MICROPYTHON_VERSION: v1.16
   BLINKA_VERSION: 6.13.0
   PLATFORMDETECT_VERSION: 3.15.3
   BUILD_TYPE: Release
@@ -103,11 +103,16 @@ jobs:
       working-directory: micropython/ports/rp2
       run: make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -j2
 
+    - name: Rename .uf2 for artifact
+      shell: bash
+      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}
+      run: cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}-blinka-${{env.BLINKA_VERSION}}-platformdetect-${{env.PLATFORMDETECT_VERSION}}.uf2
+
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}-blinka-${{env.BLINKA_VERSION}}-platformdetect-${{env.PLATFORMDETECT_VERSION}}.uf2
-        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}-blinka-${{env.BLINKA_VERSION}}-platformdetect-${{env.PLATFORMDETECT_VERSION}}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
