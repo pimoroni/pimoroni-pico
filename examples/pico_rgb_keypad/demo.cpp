@@ -44,7 +44,7 @@ int main() {
     // for any pressed buttons set the corresponding bit in "lit_buttons"
     lit_buttons |= pico_keypad.get_button_states();
 
-    // You could use a bitwise OR (^) to make the buttons toggle their respective "lit" bits on and off:
+    // You could use a bitwise XOR (^) to make the buttons toggle their respective "lit" bits on and off:
     // lit_buttons ^= pico_keypad.get_button_states();
 
     // Iterate through the lights
