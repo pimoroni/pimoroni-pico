@@ -115,17 +115,17 @@ namespace pimoroni {
 
       if(width == 320 && height == 240) {
         command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
-        command(reg::GCTRL, 1, "\x74");
-        command(reg::VCOMS, 1, "\x2f");
-        command(reg::LCMCTRL, 1, "\x22");
+        command(reg::GCTRL, 1, "\x35");
+        command(reg::VCOMS, 1, "\x1f");
+        command(reg::LCMCTRL, 1, "\x2c");
         command(reg::VDVVRHEN, 1, "\x01");
-        command(reg::VRHS, 1, "\x19");
+        command(reg::VRHS, 1, "\x12");
         command(reg::VDVS, 1, "\x20");
         command(reg::FRCTRL2, 1, "\x0f");
         command(reg::PWCTRL1, 2, "\xa4\xa1");
         command(0xd6, 1, "\xa1"); // ???
-        command(reg::GMCTRP1, 14, "\xF0\x08\x0F\x0B\x0B\x07\x34\x43\x4B\x38\x14\x13\x2C\x31");
-        command(reg::GMCTRN1, 14, "\xF0\x0C\x11\x09\x08\x24\x34\x33\x4A\x3A\x16\x16\x2E\x32");
+        command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
+        command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
       }
 
       command(reg::INVON);   // set inversion mode
@@ -164,7 +164,7 @@ namespace pimoroni {
         caset[1] = 319;
         raset[0] = 0;
         raset[1] = 239;
-        madctl = 0;
+        madctl = 0x70;
       }
 
       // Byte swap the 16bit rows/cols values
