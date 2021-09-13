@@ -171,7 +171,7 @@ namespace pimoroni {
     return false;
   }
 
-  bool PMW3901::frame_capture(uint8_t (&raw_data_out)[RAW_DATA_LEN], uint16_t& data_size_out, uint16_t timeout_ms) {
+  bool PMW3901::frame_capture(uint8_t (&data_out)[FRAME_BYTES], uint16_t& data_size_out, uint16_t timeout_ms) {
     bool success = false;
 
     data_size_out = 0;
@@ -205,7 +205,7 @@ namespace pimoroni {
 
     if(success) {
       write_register(reg::RAWDATA_GRAB, 0x00);
-      memset(raw_data_out, 0, RAW_DATA_LEN * sizeof(uint8_t));
+      memset(data_out, 0, FRAME_BYTES * sizeof(uint8_t));
       
       uint8_t data = 0;
       uint16_t x = 0;
@@ -214,16 +214,16 @@ namespace pimoroni {
       start_time = millis();
       while(millis() - start_time < timeout_ms) {
         data = read_register(reg::RAWDATA_GRAB);
-        if((data & 0b11000000) == 0b01000000) {  // Upper 6-bits
-          raw_data_out[x] &= ~0b11111100;
-          raw_data_out[x] |= (data & 0b00111111) << 2;         // Held in 5:0
+        if((data & 0b11000000) == 0b01000000) {     // Upper 6-bits
+          data_out[x] &= ~0b11111100;
+          data_out[x] |= (data & 0b00111111) << 2;  // Held in 5:0
         }
-        if((data & 0b11000000) == 0b10000000) {  // Lower 2-bits
-          raw_data_out[x] &= ~0b00000011;
-          raw_data_out[x] |= (data & 0b00001100) >> 2;  // Held in 3:2
+        if((data & 0b11000000) == 0b10000000) {     // Lower 2-bits
+          data_out[x] &= ~0b00000011;
+          data_out[x] |= (data & 0b00001100) >> 2;  // Held in 3:2
           x++;
         }
-        if(x == RAW_DATA_LEN) {
+        if(x == FRAME_BYTES) {
           success = true;
           break;
         }

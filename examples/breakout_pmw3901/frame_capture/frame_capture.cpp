@@ -2,21 +2,30 @@
 #include "pico/stdlib.h"
 #include <string>
 
-#include "breakout_pmw3901.hpp"
-
 using namespace pimoroni;
 
-BreakoutPMW3901 flo(BG_SPI_FRONT);
-BreakoutPMW3901::Degrees rotation = BreakoutPMW3901::DEGREES_0;
-const uint8_t SIZE = BreakoutPMW3901::FRAME_SIZE;
-uint8_t data[BreakoutPMW3901::RAW_DATA_LEN];
+// Pick *one* sensor type by uncommenting the relevant lines below:
+
+// PMW3901
+#include "breakout_pmw3901.hpp"
+typedef BreakoutPMW3901 FlowSensor;
+
+// PAA5100
+//include "breakout_paa5100.hpp"
+//typedef BreakoutPAA5100 FlowSensor;
+
+
+
+FlowSensor flo(BG_SPI_FRONT);
+FlowSensor::Degrees rotation = FlowSensor::DEGREES_0;
+const uint8_t SIZE = FlowSensor::FRAME_SIZE;
+uint8_t data[FlowSensor::FRAME_BYTES];
 
 std::string value_to_char(uint8_t value) {
   const std::string charmap = " .:-=+*#%@";
   float val = (float)value / 255.0f;
   val *= charmap.length() - 1;
-  value = (uint8_t)val;
-  std::string chosen_char = charmap.substr(val, 1);
+  std::string chosen_char = charmap.substr((uint8_t)val, 1);
   return chosen_char.append(chosen_char);  // Double chars to - sort of - correct aspect ratio
 }
 
@@ -34,14 +43,14 @@ int main() {
     uint16_t data_size = 0;
     if(flo.frame_capture(data, data_size)) {
       for(uint8_t y = 0; y < SIZE; y++) {
-        if(rotation == BreakoutPMW3901::DEGREES_180 || rotation == BreakoutPMW3901::DEGREES_270)
+        if(rotation == FlowSensor::DEGREES_180 || rotation == FlowSensor::DEGREES_270)
           y = SIZE - y - 1;
 
         for(uint8_t x = 0; x < SIZE; x++) {
-          if(rotation == BreakoutPMW3901::DEGREES_180 || rotation == BreakoutPMW3901::DEGREES_90)
+          if(rotation == FlowSensor::DEGREES_180 || rotation == FlowSensor::DEGREES_90)
             x = SIZE - x - 1;
 
-          if(rotation == BreakoutPMW3901::DEGREES_90 || rotation == BreakoutPMW3901::DEGREES_270)
+          if(rotation == FlowSensor::DEGREES_90 || rotation == FlowSensor::DEGREES_270)
             offset = (x * 35) + y;
           else
             offset = (y * 35) + x;
@@ -53,7 +62,7 @@ int main() {
       }
     }
     else {
-      printf("Capture failed. %d bytes received, of %d. Recapturing in ", data_size, BreakoutPMW3901::RAW_DATA_LEN);
+      printf("Capture failed. %d bytes received, of %d. Recapturing in ", data_size, FlowSensor::FRAME_BYTES);
     }
     printf("5...\n");
     sleep_ms(1000);
