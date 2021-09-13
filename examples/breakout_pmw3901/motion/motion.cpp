@@ -1,17 +1,22 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
+// Uncomment the below line to switch from the PMW3901 to the PAA5100
+//#define USE_PAA5100
+
+#ifndef USE_PAA5100
+  #include "breakout_pmw3901.hpp"
+#else
+  #include "breakout_paa5100.hpp"
+#endif
+
 using namespace pimoroni;
 
-// Pick *one* sensor type by uncommenting the relevant lines below:
-
-// PMW3901
-#include "breakout_pmw3901.hpp"
-typedef BreakoutPMW3901 FlowSensor;
-
-// PAA5100
-//include "breakout_paa5100.hpp"
-//typedef BreakoutPAA5100 FlowSensor;
+#ifndef USE_PAA5100
+  typedef BreakoutPMW3901 FlowSensor;
+#else
+  typedef BreakoutPAA5100 FlowSensor;
+#endif
 
 FlowSensor flo(BG_SPI_FRONT);
 
