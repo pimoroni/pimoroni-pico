@@ -85,7 +85,7 @@ namespace plasma {
             void update(bool blocking=false);
             void clear();
             void set_hsv(uint32_t index, float h, float s, float v);
-            void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w=0);
+            void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w=0, bool gamma=true);
             void set_brightness(uint8_t b);
             RGB get(uint32_t index) {return buffer[index];};
 
