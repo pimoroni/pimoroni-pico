@@ -149,22 +149,32 @@ Connection: close
         data = picowireless.get_data_buf(client_sock)
         response += data
 
-    response = response.decode("utf-8")
-
-    head, body = response.split("\r\n\r\n", 1)
+    head, body = response.split(b"\r\n\r\n", 1)
+    head = head.decode("utf-8")
     dhead = {}
 
     for line in head.split("\r\n")[1:]:
         key, value = line.split(": ", 1)
         dhead[key] = value
 
-    # Fudge to handle JSON data type, which is prefixed with a content length.
-    # This ignores the charset, if specified, since we've already assumed utf-8 above!
-    # TODO maybe pay attention to Content-Type charset
-    if "Content-Type" in dhead and dhead["Content-Type"].startswith("application/json"):
-        length, body = body.split("\n", 1)
+    encoding = "iso-8869-1"
+    content_type = "application/octet-stream"
+
+    if "Content-Type" in dhead:
+        ctype = dhead["Content-Type"].split("; ")
+        content_type = ctype[0].lower()
+        for c in ctype:
+            if c.startswith("encoding="):
+                encoding = c[9:]
+
+    # Handle JSON content type, this is prefixed with a length
+    # which we'll parse and use to truncate the body
+    if content_type == "application/json":
+        length, body = body.split(b"\r\n", 1)
         length = int(length, 16)
         body = body[:length]
+
+    body = body.decode(encoding)
 
     handler(dhead, body)
 
