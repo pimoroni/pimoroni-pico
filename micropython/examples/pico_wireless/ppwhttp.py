@@ -158,6 +158,14 @@ Connection: close
         key, value = line.split(": ", 1)
         dhead[key] = value
 
+    # Fudge to handle JSON data type, which is prefixed with a content length.
+    # This ignores the charset, if specified, since we've already assumed utf-8 above!
+    # TODO maybe pay attention to Content-Type charset
+    if "Content-Type" in dhead and dhead["Content-Type"].startswith("application/json"):
+        length, body = body.split("\n", 1)
+        length = int(length, 16)
+        body = body[:length]
+
     handler(dhead, body)
 
     picowireless.client_stop(client_sock)

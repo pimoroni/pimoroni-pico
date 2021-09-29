@@ -1,4 +1,10 @@
 import time
+import json
+try:
+    import xmltok  # https://pypi.org/project/micropython-xmltok/
+    import io
+except ImportError:
+    xmltok = None
 from micropython import const
 
 try:
@@ -23,7 +29,23 @@ print("Local IP: {}.{}.{}.{}".format(*my_ip))
 
 def handler(head, body):
     if head["Status"] == "200 OK":
-        color = body[1:]
+        if HTTP_REQUEST_PATH.endswith(".json"):
+            # Parse as JSON
+            data = json.loads(body)
+            color = data['field2'][1:]
+
+        elif HTTP_REQUEST_PATH.endswith(".xml") and xmltok is not None:
+            # Parse as XML
+            data = xmltok.tokenize(io.StringIO(body))
+            color = xmltok.text_of(data, "field2")[1:]
+
+        elif HTTP_REQUEST_PATH.endswith(".txt"):
+            # Parse as plain text
+            color = body[1:]
+
+        else:
+            print("Unable to parse API response!")
+            return
         r = int(color[0:2], 16)
         g = int(color[2:4], 16)
         b = int(color[4:6], 16)
