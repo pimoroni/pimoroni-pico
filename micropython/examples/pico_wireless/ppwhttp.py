@@ -181,6 +181,38 @@ Connection: close
     picowireless.client_stop(client_sock)
 
 
+def find_route(route, url, method, data):
+    if len(url) > 0:
+        for key, value in route.items():
+            if key == url[0]:
+                return find_route(route[url[0]], url[1:], method, data)
+
+            elif key.startswith("<") and key.endswith(">"):
+                key = key[1:-1]
+                if ":" in key:
+                    dtype, key = key.split(":")
+                else:
+                    dtype = "str"
+
+                if dtype == "int":
+                    try:
+                        data[key] = int(url[0])
+                    except ValueError:
+                        continue
+
+                else:
+                    data[key] = url[0]
+
+                return find_route(value, url[1:], method, data)
+
+        return None, None
+
+    if method in route:
+        return route[method], data
+
+    return None, None
+
+
 def handle_http_request(server_sock, timeout=5000):
     t_start = time.ticks_ms()
 
@@ -221,16 +253,24 @@ def handle_http_request(server_sock, timeout=5000):
 
     response = None
 
+    data = {}
+
+    if url.startswith("/"):
+        url = url[1:]
+    url = url.split("/")
+    handler, data = find_route(routes, url, method, data)
+
     # Dispatch the request to the relevant route
-    if url in routes and method in routes[url] and callable(routes[url][method]):
+    if callable(handler):
         if method == "POST":
-            data = {}
             for var in body.split("&"):
                 key, value = var.split("=")
                 data[key] = value
-            response = routes[url][method](method, url, data)
+
+        if data == {}:
+            response = handler(method, url)
         else:
-            response = routes[url][method](method, url)
+            response = handler(method, url, data)
 
     if response is not None:
         response = "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nContent-Type: text/html\r\n\r\n".format(len(response)) + response
@@ -249,10 +289,20 @@ def route(url, methods="GET"):
     if type(methods) is str:
         methods = [methods]
 
+    if url.startswith("/"):
+        url = url[1:]
+
+    url = url.split("/")
+
     def decorate(handler):
+        route = routes
+        for part in url:
+            if part not in route:
+                route[part] = {}
+
+            route = route[part]
+
         for method in methods:
-            if url not in routes:
-                routes[url] = {}
-            routes[url][method] = handler
+            route[method] = handler
 
     return decorate
