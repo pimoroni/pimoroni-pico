@@ -1,6 +1,5 @@
 # This example lets you plug a BME680 or BME688 breakout into your Pico Explorer to make a little indoor weather station, with barometer style descriptions.
 
-import machine
 import utime
 
 from breakout_bme68x import BreakoutBME68X
@@ -20,10 +19,11 @@ i2c = PimoroniI2C(**PINS_PICO_EXPLORER)
 bme = BreakoutBME68X(i2c)
 
 # lets set up some pen colours to make drawing easier
-tempcolour = display.create_pen(255, 255, 255) # this colour will get changed in a bit
+tempcolour = display.create_pen(255, 255, 255)  # this colour will get changed in a bit
 white = display.create_pen(255, 255, 255)
 black = display.create_pen(0, 0, 0)
 red = display.create_pen(255, 0, 0)
+
 
 # converts the temperature into a barometer-type description and pen colour
 def describe_temperature(temperature):
@@ -46,7 +46,8 @@ def describe_temperature(temperature):
     else:
         description = ""
         tempcolour = display.create_pen(0, 0, 0)
-    return description 
+    return description
+
 
 # comment out the function above and uncomment this one for yorkshire mode
 """
@@ -73,7 +74,8 @@ def describe_temperature(temperature):
     return description
 """
 
-# converts pressure into barometer-type description    
+
+# converts pressure into barometer-type description
 def describe_pressure(pressure):
     if pressure < 970:
         description = "storm"
@@ -89,6 +91,7 @@ def describe_pressure(pressure):
         description = ""
     return description
 
+
 # converts humidity into good/bad description
 def describe_humidity(humidity):
     if 40 < humidity < 60:
@@ -97,41 +100,42 @@ def describe_humidity(humidity):
         description = "bad"
     return description
 
+
 while True:
     # read the sensors
     temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = bme.read()
-    
+
     # pressure comes in pascals which is a reight long number, lets convert it to the more manageable hPa
-    pressurehpa = pressure/100
-    
+    pressurehpa = pressure / 100
+
     # draw a thermometer/barometer thingy
     display.set_pen(125, 125, 125)
     display.circle(190, 190, 40)
     display.rectangle(180, 45, 20, 140)
-    
+
     # switch to red to draw the 'mercury'
     display.set_pen(red)
     display.circle(190, 190, 30)
-    thermometerheight = int(120/30 * temperature)
+    thermometerheight = int(120 / 30 * temperature)
     if thermometerheight > 120:
         thermometerheight = 120
     if thermometerheight < 1:
         thermometerheight = 1
     display.rectangle(186, 50 + 120 - thermometerheight, 10, thermometerheight)
-    
+
     # drawing the temperature text
-    display.set_pen(white)    
+    display.set_pen(white)
     display.text("temperature:", 10, 10, 240, 3)
-    display.set_pen(tempcolour)  
+    display.set_pen(tempcolour)
     display.text('{:.1f}'.format(temperature) + 'C', 10, 30, 240, 5)
     display.set_pen(white)
     display.text(describe_temperature(temperature), 10, 60, 240, 3)
-    
+
     # and the pressure text
     display.text("pressure:", 10, 90, 240, 3)
     display.text('{:.0f}'.format(pressurehpa) + 'hPa', 10, 110, 240, 5)
     display.text(describe_pressure(pressurehpa), 10, 140, 240, 3)
-    
+
     # and the humidity text
     display.text("humidity:", 10, 170, 240, 3)
     display.text('{:.0f}'.format(humidity) + '%', 10, 190, 240, 5)
