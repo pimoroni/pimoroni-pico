@@ -17,6 +17,24 @@ except ImportError:
 TCP_CLOSED = const(0)
 TCP_LISTEN = const(1)
 
+TCP_MODE = const(0)
+UDP_MODE = const(1)
+TLS_MODE = const(2)
+UDP_MULTICAST_MODE = const(3)
+TLS_BEARSSL_MODE = const(4)
+
+TCP_STATE_CLOSED = const(0)
+TCP_STATE_LISTEN = const(1)
+TCP_STATE_SYN_SENT = const(2)
+TCP_STATE_SVN_RCVD = const(3)
+TCP_STATE_ESTABLISHED = const(4)
+TCP_STATE_FIN_WAIT_1 = const(5)
+TCP_STATE_FIN_WAIT_2 = const(6)
+TCP_STATE_CLOSE_WAIT = const(7)
+TCP_STATE_CLOSING = const(8)
+TCP_STATE_LAST_ACK = const(9)
+TCP_STATE_TIME_WAIT = const(10)
+
 CLOUDFLARE_DNS = (1, 1, 1, 1)
 GOOGLE_DNS = (8, 8, 8, 8)
 
@@ -95,31 +113,38 @@ def start_server(http_port=DEFAULT_HTTP_PORT, timeout=5000):
     return None
 
 
-def connect_to_server(host_address, port, client_sock, timeout=5000):
-    picowireless.client_start(host_address, port, client_sock, TCP_CLOSED)
+def connect_to_server(host_address, port, client_sock, timeout=5000, connection_mode=TCP_MODE):
+    if connection_mode in (TLS_MODE, TLS_BEARSSL_MODE):
+        print("Connecting to {1}:{0}...".format(port, host_address))
+        picowireless.client_start(host_address, (0, 0, 0, 0), port, client_sock, connection_mode)
+    else:
+        host_address = get_host_by_name(host_address)
+        print("Connecting to {1}.{2}.{3}.{4}:{0}...".format(port, *host_address))
+        picowireless.client_start(host_address, port, client_sock, connection_mode)
 
     t_start = time.ticks_ms()
 
     while time.ticks_ms() - t_start < timeout:
         state = picowireless.get_client_state(client_sock)
-        if state == 4:
+        if state == TCP_STATE_ESTABLISHED:
+            print("Connected!")
             return True
-        time.sleep(1.0)
+        if state == TCP_STATE_CLOSED:
+            print("Connection failed!")
+            return False
+        print(state)
+        time.sleep(0.5)
 
+    print("Connection timeout!")
     return False
 
 
-def http_request(host_address, port, request_host, request_path, handler, timeout=5000, client_sock=None):
+def http_request(host_address, port, request_host, request_path, handler, timeout=5000, client_sock=None, connection_mode=TCP_MODE):
     if client_sock is None:
         client_sock = get_socket()
 
-    host_address = get_host_by_name(host_address)
-
-    print("Connecting to {1}.{2}.{3}.{4}:{0}...".format(port, *host_address))
-    if not connect_to_server(host_address, port, client_sock):
-        print("Connection failed!")
+    if not connect_to_server(host_address, port, client_sock, connection_mode=connection_mode):
         return False
-    print("Connected!")
 
     http_request = """GET {} HTTP/1.1
 Host: {}
@@ -170,9 +195,10 @@ Connection: close
     # Handle JSON content type, this is prefixed with a length
     # which we'll parse and use to truncate the body
     if content_type == "application/json":
-        length, body = body.split(b"\r\n", 1)
-        length = int(length, 16)
-        body = body[:length]
+        if not body.startswith(b"{"):
+            length, body = body.split(b"\r\n", 1)
+            length = int(length, 16)
+            body = body[:length]
 
     body = body.decode(encoding)
 
