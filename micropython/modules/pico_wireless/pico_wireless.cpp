@@ -370,8 +370,7 @@ mp_obj_t picowireless_get_ssid_networks(size_t n_args, const mp_obj_t *pos_args,
         uint8_t network_item = args[ARG_network_item].u_int;
         const char* ssid = wireless->get_ssid_networks(network_item);
         if(ssid != nullptr) {
-            std::string str_ssid(ssid, WL_SSID_MAX_LENGTH);
-            return mp_obj_new_str(str_ssid.c_str(), str_ssid.length());
+            return mp_obj_new_str(ssid, strnlen(ssid, WL_SSID_MAX_LENGTH));
         }
     }
     else
@@ -516,8 +515,7 @@ mp_obj_t picowireless_get_host_by_name(size_t n_args, const mp_obj_t *pos_args, 
 mp_obj_t picowireless_get_fw_version() {
     if(wireless != nullptr) {
         const char* fw_ver = wireless->get_fw_version();
-        std::string str_fw_ver(fw_ver, WL_FW_VER_LENGTH);
-        return mp_obj_new_str(str_fw_ver.c_str(), str_fw_ver.length());
+        return mp_obj_new_str(fw_ver, strnlen(fw_ver, WL_FW_VER_LENGTH));
     }
     else
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
