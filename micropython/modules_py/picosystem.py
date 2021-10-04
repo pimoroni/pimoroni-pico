@@ -13,6 +13,8 @@ PICOSYSTEM_LCD_VSYNC = const(8)
 PICOSYSTEM_LCD_DC = const(9)
 PICOSYSTEM_LCD_BL = const(12)
 
+PICOSYSTEM_AUDIO = const(11)
+
 PICOSYSTEM_A = const(18)
 PICOSYSTEM_B = const(19)
 PICOSYSTEM_X = const(17)
@@ -48,6 +50,20 @@ DPAD_RIGHT = const(7)
 
 BUTTON_PINS = (PICOSYSTEM_A, PICOSYSTEM_B, PICOSYSTEM_X, PICOSYSTEM_Y, PICOSYSTEM_UP, PICOSYSTEM_DOWN, PICOSYSTEM_LEFT, PICOSYSTEM_RIGHT)
 buttons = [machine.Pin(p, machine.Pin.IN, machine.Pin.PULL_UP) for p in BUTTON_PINS]
+
+# PicoSystem Audio
+audio_pin = machine.Pin(PICOSYSTEM_AUDIO)
+buzzer = machine.PWM(audio_pin)
+buzzer.duty_u16(0)
+
+
+def buzz(freq, duty=0.5):
+    if freq < 50.0:  # uh... https://github.com/micropython/micropython/blob/af64c2ddbd758ab6bac0fcca94c66d89046663be/ports/rp2/machine_pwm.c#L105-L119
+        buzzer.duty_u16(0)
+    else:
+        buzzer.freq(freq)
+        buzzer.duty_u16(int(65535 * duty))
+
 
 # PicoSystem LED
 led = pimoroni.RGBLED(PICOSYSTEM_LED_R, PICOSYSTEM_LED_G, PICOSYSTEM_LED_B, invert=False)
