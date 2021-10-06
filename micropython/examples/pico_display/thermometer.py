@@ -6,7 +6,9 @@ import utime
 import gc
 
 # Pico Display boilerplate
-import picodisplay as display
+import picodisplay as display  # Comment this line out to use PicoDisplay2
+# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+
 width = display.get_width()
 height = display.get_height()
 gc.collect()

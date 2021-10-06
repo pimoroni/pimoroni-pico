@@ -50,10 +50,11 @@ namespace pimoroni {
     RAMWR     = 0x2C,
     INVON     = 0x21,
     CASET     = 0x2A,
-    RASET     = 0x2B
+    RASET     = 0x2B,
+    PWMFRSEL  = 0xCC
   };
 
-  void ST7789::init(bool auto_init_sequence, bool round) {
+  void ST7789::init(bool auto_init_sequence, bool round, uint32_t spi_baud) {
     // configure spi interface and pins
     spi_init(spi, spi_baud);
 
@@ -112,6 +113,21 @@ namespace pimoroni {
         command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
       }
 
+      if(width == 320 && height == 240) {
+        command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
+        command(reg::GCTRL, 1, "\x35");
+        command(reg::VCOMS, 1, "\x1f");
+        command(reg::LCMCTRL, 1, "\x2c");
+        command(reg::VDVVRHEN, 1, "\x01");
+        command(reg::VRHS, 1, "\x12");
+        command(reg::VDVS, 1, "\x20");
+        command(reg::FRCTRL2, 1, "\x0f");
+        command(reg::PWCTRL1, 2, "\xa4\xa1");
+        command(0xd6, 1, "\xa1"); // ???
+        command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
+        command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
+      }
+
       command(reg::INVON);   // set inversion mode
       command(reg::SLPOUT);  // leave sleep mode
       command(reg::DISPON);  // turn display on
@@ -141,6 +157,14 @@ namespace pimoroni {
         raset[0] = 40;   // 240 rows
         raset[1] = 279;
         madctl = 0;
+      }
+
+      if(width == 320 && height == 240) {
+        caset[0] = 0;
+        caset[1] = 319;
+        raset[0] = 0;
+        raset[1] = 239;
+        madctl = 0x70;
       }
 
       // Byte swap the 16bit rows/cols values
