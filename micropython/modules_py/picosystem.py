@@ -65,10 +65,6 @@ def buzz(freq, duty=0.5):
         buzzer.duty_u16(int(65535 * duty))
 
 
-# PicoSystem LED
-led = pimoroni.RGBLED(PICOSYSTEM_LED_R, PICOSYSTEM_LED_G, PICOSYSTEM_LED_B, invert=False)
-led.set_rgb(0, 0, 0)
-
 # PicoSystem Status
 battery_sense = pimoroni.Analog(PICOSYSTEM_BAT_SENSE)
 charge_status = machine.Pin(PICOSYSTEM_CHARGE_STATUS, machine.Pin.IN)
@@ -91,3 +87,7 @@ display = BreakoutColourLCD240x240(
 
 display.update()
 display.set_backlight(1.0)
+
+# PicoSystem LED
+led = pimoroni.RGBLED(PICOSYSTEM_LED_R, PICOSYSTEM_LED_G, PICOSYSTEM_LED_B, invert=False)
+led.set_rgb(0, 0, 0)
