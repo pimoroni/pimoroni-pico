@@ -1,119 +1,60 @@
 import time
-import picowireless
+import json
+try:
+    import xmltok  # https://pypi.org/project/micropython-xmltok/
+    import io
+except ImportError:
+    xmltok = None
 from micropython import const
 
-WIFI_SSID = "Your SSID here!"
-WIFI_PASS = "Your PSK here!"
+try:
+    import ppwhttp
+except ImportError:
+    raise RuntimeError("Cannot find ppwhttp. Have you copied ppwhttp.py to your Pico?")
 
-CLOUDFLARE_DNS = (1, 1, 1, 1)
-GOOGLE_DNS = (8, 8, 8, 8)
-USE_DNS = CLOUDFLARE_DNS
 
-TCP_MODE = const(0)
-HTTP_REQUEST_DELAY = const(30)
-HTTP_PORT = 80
+HTTP_REQUEST_DELAY = const(60)
+HTTP_REQUEST_PORT = const(80)
 HTTP_REQUEST_HOST = "api.thingspeak.com"
 HTTP_REQUEST_PATH = "/channels/1417/field/2/last.txt"
 
 
-def connect(host_address, port, client_sock, timeout=1000):
-    picowireless.client_start(host_address, port, client_sock, TCP_MODE)
-
-    t_start = time.time()
-    timeout /= 1000.0
-
-    while time.time() - t_start < timeout:
-        state = picowireless.get_client_state(client_sock)
-        if state == 4:
-            return True
-        time.sleep(1.0)
-
-    return False
-
-
-def http_request(client_sock, host_address, port, request_host, request_path, handler, timeout=5000):
-    print("Connecting to {1}.{2}.{3}.{4}:{0}...".format(port, *host_address))
-    if not connect(host_address, port, client_sock):
-        print("Connection failed!")
-        return False
-    print("Connected!")
-
-    http_request = """GET {} HTTP/1.1
-Host: {}
-Connection: close
-
-""".format(request_path, request_host).replace("\n", "\r\n")
-
-    picowireless.send_data(client_sock, http_request)
-
-    t_start = time.time()
-
-    while True:
-        if time.time() - t_start > timeout:
-            picowireless.client_stop(client_sock)
-            print("HTTP request to {}:{} timed out...".format(host_address, port))
-            return False
-
-        avail_length = picowireless.avail_data(client_sock)
-        if avail_length > 0:
-            break
-
-    print("Got response: {} bytes".format(avail_length))
-
-    response = b""
-
-    while len(response) < avail_length:
-        data = picowireless.get_data_buf(client_sock)
-        response += data
-
-    response = response.decode("utf-8")
-
-    head, body = response.split("\r\n\r\n", 1)
-    dhead = {}
-
-    for line in head.split("\r\n")[1:]:
-        key, value = line.split(": ", 1)
-        dhead[key] = value
-
-    handler(dhead, body)
-
-    picowireless.client_stop(client_sock)
-
-
-picowireless.init()
-
-print("Connecting to {}...".format(WIFI_SSID))
-picowireless.wifi_set_passphrase(WIFI_SSID, WIFI_PASS)
-
-while True:
-    if picowireless.get_connection_status() == 3:
-        break
-print("Connected!")
+ppwhttp.start_wifi()
+ppwhttp.set_dns(ppwhttp.GOOGLE_DNS)
 
 # Get our own local IP!
-my_ip = picowireless.get_ip_address()
+my_ip = ppwhttp.get_ip_address()
 print("Local IP: {}.{}.{}.{}".format(*my_ip))
-
-# Resolve and cache the IP address
-picowireless.set_dns(USE_DNS)
-http_address = picowireless.get_host_by_name(HTTP_REQUEST_HOST)
-print("Resolved {} to {}.{}.{}.{}".format(HTTP_REQUEST_HOST, *http_address))
-
-client_sock = picowireless.get_socket()
 
 
 def handler(head, body):
     if head["Status"] == "200 OK":
-        color = body[1:]
+        if HTTP_REQUEST_PATH.endswith(".json"):
+            # Parse as JSON
+            data = json.loads(body)
+            color = data['field2'][1:]
+
+        elif HTTP_REQUEST_PATH.endswith(".xml") and xmltok is not None:
+            # Parse as XML
+            data = xmltok.tokenize(io.StringIO(body))
+            color = xmltok.text_of(data, "field2")[1:]
+
+        elif HTTP_REQUEST_PATH.endswith(".txt"):
+            # Parse as plain text
+            color = body[1:]
+
+        else:
+            print("Unable to parse API response!")
+            return
         r = int(color[0:2], 16)
         g = int(color[2:4], 16)
         b = int(color[4:6], 16)
-        picowireless.set_led(r, g, b)
+        ppwhttp.set_led(r, g, b)
         print("Set LED to {} {} {}".format(r, g, b))
     else:
         print("Error: {}".format(head["Status"]))
 
 
 while True:
-    http_request(client_sock, http_address, HTTP_PORT, HTTP_REQUEST_HOST, HTTP_REQUEST_PATH, handler)
-    time.sleep(60.0)
+    ppwhttp.http_request(HTTP_REQUEST_HOST, HTTP_REQUEST_PORT, HTTP_REQUEST_HOST, HTTP_REQUEST_PATH, handler)
+    time.sleep(HTTP_REQUEST_DELAY)
