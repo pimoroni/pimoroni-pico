@@ -66,7 +66,7 @@ def buzz(freq, duty=0.5):
 
 
 # PicoSystem Status
-battery_sense = pimoroni.Analog(PICOSYSTEM_BAT_SENSE)
+battery_sense = pimoroni.Analog(PICOSYSTEM_BAT_SENSE, amplifier_gain=(1.0 / 3.0))
 charge_status = machine.Pin(PICOSYSTEM_CHARGE_STATUS, machine.Pin.IN)
 vbus_status = machine.Pin(PICOSYSTEM_VBUS_STATUS, machine.Pin.IN)
 
