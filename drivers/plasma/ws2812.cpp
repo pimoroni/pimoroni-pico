@@ -1,4 +1,5 @@
 #include "ws2812.hpp"
+#include "common/pimoroni_common.hpp"
 
 namespace plasma {
 
@@ -84,7 +85,13 @@ void WS2812::set_hsv(uint32_t index, float h, float s, float v) {
     }
 }
 
-void WS2812::set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
+void WS2812::set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w, bool gamma) {
+    if(gamma) {
+        r = pimoroni::GAMMA[r];
+        g = pimoroni::GAMMA[g];
+        b = pimoroni::GAMMA[b];
+        w = pimoroni::GAMMA[w];
+    }
     switch(color_order) {
         case COLOR_ORDER::RGB:
             buffer[index].rgb(r, g, b, w);
