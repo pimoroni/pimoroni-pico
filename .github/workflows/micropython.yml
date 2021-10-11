@@ -8,7 +8,7 @@ on:
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
-  MICROPYTHON_VERSION: v1.16
+  MICROPYTHON_VERSION: v1.17
   BUILD_TYPE: Release
   BOARD_TYPE: PICO
 
