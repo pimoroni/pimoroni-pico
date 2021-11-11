@@ -29,7 +29,9 @@ namespace pimoroni {
     uint bl     = SPI_BG_FRONT_PWM;
     uint vsync  = PIN_UNUSED; // only available on some products
 
-    static const uint32_t SPI_BAUD = 16 * 1000 * 1000;
+    // The ST7789 requires 16 ns between SPI rising edges.
+    // 16 ns = 62,500,000 Hz
+    static const uint32_t SPI_BAUD = 62'500'000;
 
   public:
     // frame buffer where pixel data is stored
