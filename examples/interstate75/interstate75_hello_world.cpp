@@ -71,6 +71,8 @@ const uint PIN_LED_R = 16;
 const uint PIN_LED_G = 17;
 const uint PIN_LED_B = 18;
 
+volatile bool flip = false;
+
 // This gamma table is used to correct our 8-bit (0-255) colours up to 11-bit,
 // allowing us to gamma correct without losing dynamic range.
 const uint16_t GAMMA[256] = {
@@ -101,7 +103,6 @@ struct alignas(4) Pixel {
     uint8_t _;
     constexpr Pixel() : r(0), g(0), b(0), _(0) {};
     constexpr Pixel(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b), _(0) {};
-    constexpr Pixel(uint r, uint g, uint b) : r(r), g(g), b(b), _(0) {};
     constexpr Pixel(float r, float g, float b) : r((uint8_t)(r * 255.0f)), g((uint8_t)(g * 255.0f)), b((uint8_t)(b * 255.0f)), _(0) {};
 };
 #pragma pack(pop)
@@ -165,6 +166,10 @@ void FM6126A_write_register(uint16_t value, uint8_t position) {
     }
 }
 
+void hub75_flip () {
+    flip = true; // TODO: rewrite to semaphore
+}
+
 void hub75_display_update() {
     // Ridiculous register write nonsense for the FM6126A-based 64x64 matrix
     FM6126A_write_register(0b1111111111111110, 12);
@@ -173,7 +178,10 @@ void hub75_display_update() {
     while (true) {
         // 0. Copy the contents of the front buffer into our backbuffer for output to the display.
         //    This uses another whole backbuffer worth of memory, but prevents visual tearing at low frequencies.
-        memcpy((uint8_t *)backbuffer, (uint8_t *)frontbuffer, WIDTH * HEIGHT * sizeof(Pixel));
+        if (flip) {
+            memcpy((uint8_t *)backbuffer, (uint8_t *)frontbuffer, WIDTH * HEIGHT * sizeof(Pixel));
+            flip = false;
+        }
 
         // Step through 0b00000001, 0b00000010, 0b00000100 etc
         for(auto bit = 1u; bit < 1 << 11; bit <<= 1) {
@@ -303,5 +311,9 @@ int main() {
                 frontbuffer[x][y] = hsv_to_rgb(h, 1.0f, 1.0f);
             }
         }
+
+        hub75_flip();
+
+        sleep_ms(1000 / 60);
     }
 }
