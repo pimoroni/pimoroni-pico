@@ -75,7 +75,7 @@ volatile bool flip = false;
 
 // This gamma table is used to correct our 8-bit (0-255) colours up to 11-bit,
 // allowing us to gamma correct without losing dynamic range.
-const uint16_t GAMMA[256] = {
+const uint16_t GAMMA_12BIT[256] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
     32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47, 50,
@@ -197,13 +197,13 @@ void hub75_display_update() {
                     Pixel pixel_bottom  = backbuffer[x][y + HEIGHT / 2];
 
                     // Gamma correct the colour values from 8-bit to 11-bit
-                    uint16_t pixel_top_b  = GAMMA[pixel_top.b];
-                    uint16_t pixel_top_g  = GAMMA[pixel_top.g];
-                    uint16_t pixel_top_r  = GAMMA[pixel_top.r];
+                    uint16_t pixel_top_b  = GAMMA_12BIT[pixel_top.b];
+                    uint16_t pixel_top_g  = GAMMA_12BIT[pixel_top.g];
+                    uint16_t pixel_top_r  = GAMMA_12BIT[pixel_top.r];
             
-                    uint16_t pixel_bottom_b = GAMMA[pixel_bottom.b];
-                    uint16_t pixel_bottom_g = GAMMA[pixel_bottom.g];
-                    uint16_t pixel_bottom_r = GAMMA[pixel_bottom.r];
+                    uint16_t pixel_bottom_b = GAMMA_12BIT[pixel_bottom.b];
+                    uint16_t pixel_bottom_g = GAMMA_12BIT[pixel_bottom.g];
+                    uint16_t pixel_bottom_r = GAMMA_12BIT[pixel_bottom.r];
     
                     // Set the clock low while we set up the data pins
                     gpio_put(PIN_CLK, !CLK_POLARITY);
