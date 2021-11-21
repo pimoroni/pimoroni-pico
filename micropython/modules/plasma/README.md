@@ -81,7 +81,7 @@ You can set the colour of an LED in either the RGB colourspace, or HSV (Hue, Sat
 Set the first LED - `0` - to Purple `255, 0, 255`:
 
 ```python
-led_strip.set_led(0, 255, 0, 255)
+led_strip.set_rgb(0, 255, 0, 255)
 ```
 
 #### HSV
@@ -133,7 +133,7 @@ You can set the colour of an LED in either the RGB colourspace, or HSV (Hue, Sat
 Set the first LED - `0` - to Purple `255, 0, 255`:
 
 ```python
-led_strip.set_led(0, 255, 0, 255)
+led_strip.set_rgb(0, 255, 0, 255)
 ```
 
 #### HSV
