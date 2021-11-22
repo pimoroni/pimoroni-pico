@@ -28,9 +28,14 @@ typedef struct _Hub75_obj_t {
 
 _Hub75_obj_t *hub75_obj;
 
+
+void __isr dma_complete() {
+    if(hub75_obj) hub75_obj->hub75->dma_complete();
+}
+
 /***** Print *****/
 void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter
+    (void)kind; // Unused input parameter
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     mp_print_str(print, "Hub75(");
 
@@ -38,6 +43,11 @@ void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
     mp_obj_print_helper(print, mp_obj_new_int(self->hub75->width), PRINT_REPR);
     mp_print_str(print, " x ");
     mp_obj_print_helper(print, mp_obj_new_int(self->hub75->height), PRINT_REPR);
+
+    mp_print_str(print, "addr = front: ");
+    mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->front_buffer[0]), PRINT_REPR);
+    mp_print_str(print, " back: ");
+    mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->back_buffer[0]), PRINT_REPR);
 
     mp_print_str(print, ")");
 }
@@ -51,8 +61,6 @@ mp_obj_t Hub75___del__(mp_obj_t self_in) {
 
 /***** Constructor *****/
 mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    _Hub75_obj_t *self = nullptr;
-
     enum { 
         ARG_width,
         ARG_height,
@@ -84,13 +92,12 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         buffer = m_new(Pixel, width * height * 2);
     }
 
-    self = m_new_obj_with_finaliser(_Hub75_obj_t);
-    self->base.type = &Hub75_type;
-    self->buf = buffer;
-    self->hub75 = new Hub75(width, height, buffer);
-    hub75_obj = self;
+    hub75_obj = m_new_obj_with_finaliser(_Hub75_obj_t);
+    hub75_obj->base.type = &Hub75_type;
+    hub75_obj->buf = buffer;
+    hub75_obj->hub75 = new Hub75(width, height, buffer);
 
-    return MP_OBJ_FROM_PTR(self);
+    return MP_OBJ_FROM_PTR(hub75_obj);
 }
 
 mp_obj_t Hub75_clear(mp_obj_t self_in) {
@@ -107,15 +114,17 @@ mp_obj_t Hub75_flip(mp_obj_t self_in) {
 
 void Hub75_display_update() {
     if(hub75_obj) {
-        hub75_obj->hub75->start();
+        hub75_obj->hub75->start(nullptr);
     }
 }
 
 mp_obj_t Hub75_start(mp_obj_t self_in) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     //size_t stack_size = 0;
     //mp_thread_create(&Hub75_display_update, nullptr, &stack_size);
-    multicore_reset_core1();
-    multicore_launch_core1(Hub75_display_update);
+    //multicore_reset_core1();
+    //multicore_launch_core1(Hub75_display_update);
+    self->hub75->start(dma_complete);
     return mp_const_none;
 }
 

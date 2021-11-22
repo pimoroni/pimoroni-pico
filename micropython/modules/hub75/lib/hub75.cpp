@@ -2,21 +2,11 @@
 #include <algorithm>
 
 #include "hub75.hpp"
-#include "pico/stdlib.h"
-#include "pico/multicore.h"
 
 
 Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer)
  : width(width), height(height), front_buffer(buffer), back_buffer(buffer + width * height)
  {
-    // 1.3v allows overclock to ~280000-300000 but YMMV. Faster clock = faster screen update rate!
-    // vreg_set_voltage(VREG_VOLTAGE_1_30);
-    // sleep_ms(100);
-
-    // 200MHz is roughly about the lower limit for driving a 64x64 display smoothly.
-    // Just don't look at it out of the corner of your eye.
-    //set_sys_clock_khz(200000, true);
-
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true);
     gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true);
@@ -38,7 +28,15 @@ Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer)
 }
 
 void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-    front_buffer[y * width + x] = Pixel(r, g, b);
+    int offset = 0;
+    if(y >= height / 2) {
+        y -= height / 2;
+        offset = (y * width + x) * 2;
+        offset += 1;
+    } else {
+        offset = (y * width + x) * 2;
+    }
+    front_buffer[offset] = Pixel(r, g, b);
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
@@ -46,6 +44,7 @@ void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
     for(auto i = 0u; i < width; i++) {
         auto j = i % 16;
         bool b = value & (1 << j);
+
         gpio_put(pin_r0, b);
         gpio_put(pin_g0, b);
         gpio_put(pin_b0, b);
@@ -62,24 +61,81 @@ void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
     }
 }
 
-void Hub75::start() {
+void Hub75::start(irq_handler_t handler) {
     running = true;
 
     // Ridiculous register write nonsense for the FM6126A-based 64x64 matrix
     FM6126A_write_register(0b1111111111111110, 12);
     FM6126A_write_register(0b0000001000000000, 13);
 
-    while (running) {
-        display_update();
+    if(handler) {
+        pio_sm_claim(pio, sm_data);
+        pio_sm_claim(pio, sm_row);
+
+        data_prog_offs = pio_add_program(pio, &hub75_data_rgb888_program);
+        row_prog_offs = pio_add_program(pio, &hub75_row_program);
+        hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, CLK_PIN);
+        hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, STROBE_PIN);
+
+        dma_channel = 0;
+        dma_channel_claim(dma_channel);
+        dma_channel_config config = dma_channel_get_default_config(dma_channel);
+        channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
+        channel_config_set_bswap(&config, false);
+        channel_config_set_dreq(&config, pio_get_dreq(pio, sm_data, true));
+        dma_channel_configure(dma_channel, &config, &pio->txf[sm_data], NULL, 0, false);
+        dma_channel_set_irq0_enabled(dma_channel, true);
+        irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
+        irq_set_exclusive_handler(DMA_IRQ_0, handler);
+        irq_set_enabled(DMA_IRQ_0, true);
+
+        row = 0;
+        bit = 0;
+
+        dma_channel_set_trans_count(dma_channel, width * 4, false);
+        dma_channel_set_read_addr(dma_channel, &back_buffer, true);
+    } else {
+        while (running) {
+            display_update();
+        }
     }
 }
 
 void Hub75::stop() {
     running = false;
+
+    // stop and release the dma channel
+    irq_set_enabled(DMA_IRQ_0, false);
+    dma_channel_set_irq0_enabled(dma_channel, false);
+    irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
+    //irq_remove_handler(DMA_IRQ_0, dma_complete);
+
+    dma_channel_wait_for_finish_blocking(dma_channel);
+    dma_channel_unclaim(dma_channel);
+
+    hub75_wait_tx_stall(pio, sm_row);
+
+    // release the pio and sm
+    pio_sm_unclaim(pio, sm_data);
+    pio_sm_unclaim(pio, sm_row);
+    pio_clear_instruction_memory(pio);
+    pio_sm_restart(pio, sm_data);
+    pio_sm_restart(pio, sm_row);
+
+    gpio_put(pin_stb, !STB_POLARITY);
+    gpio_put(pin_oe, !OE_POLARITY);
+}
+
+Hub75::~Hub75() {
+    stop();
 }
 
 void Hub75::clear() {
-
+    for(auto x = 0u; x < width; x++) {
+        for(auto y = 0u; y < height; y++) {
+            set_rgb(x, y, 0, 0, 0);
+        }
+    }
 }
 
 void Hub75::flip() {
@@ -88,16 +144,17 @@ void Hub75::flip() {
 
 void Hub75::display_update() {
     if (do_flip) {
-        //std::swap(front_buffer, back_buffer);
-        memcpy((uint8_t *)back_buffer, (uint8_t *)front_buffer, width * height * sizeof(Pixel));
+        memcpy(back_buffer, front_buffer, width * height * sizeof(Pixel));
         do_flip = false;
     }
 
     for(auto bit = 1u; bit < 1 << 11; bit <<= 1) {
         for(auto y = 0u; y < height / 2; y++) {
+            auto row_top = y * width;
+            auto row_bottom = (y + height / 2) * width;
             for(auto x = 0u; x < width; x++) {
-                Pixel pixel_top     = back_buffer[y * width + x];
-                Pixel pixel_bottom  = back_buffer[(y + height / 2) * width + x];
+                Pixel pixel_top     = back_buffer[row_top + x];
+                Pixel pixel_bottom  = back_buffer[row_bottom + x];
 
                 gpio_put(pin_clk, !clk_polarity);
 
@@ -123,6 +180,40 @@ void Hub75::display_update() {
             gpio_put(pin_stb, !stb_polarity);
             gpio_put(pin_oe, !oe_polarity);
         }
-        sleep_us(1);
     }
+}
+
+void Hub75::dma_complete() {
+    if (do_flip && bit == 0 && row == 0) {
+        memcpy(back_buffer, front_buffer, width * height * sizeof(Pixel));
+        do_flip = false;
+    }
+
+    if(dma_channel_get_irq0_status(dma_channel)) {
+        dma_channel_acknowledge_irq0(dma_channel);
+
+        // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
+        //hub75_wait_tx_stall(pio, sm_data);
+
+        // Check that previous OEn pulse is finished, else things WILL get out of sequence
+        hub75_wait_tx_stall(pio, sm_row);
+
+        // Latch row data, pulse output enable for new row.
+        pio_sm_put_blocking(pio, sm_row, row | (3u * (1u << bit) << 5));
+
+        row++;
+
+        if(row == height / 2) {
+            row = 0;
+            bit++;
+            if (bit == 12) {
+                bit = 0;
+            }
+            hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
+        }
+    }
+
+    dma_channel_set_trans_count(dma_channel, width * 4, false);
+    //dma_channel_set_read_addr(dma_channel, dma_buffer, true);
+    dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
 }

@@ -21,3 +21,5 @@ set_source_files_properties(
     PROPERTIES COMPILE_FLAGS
     "-Wno-discarded-qualifiers -Wno-implicit-int"
 )
+
+pico_generate_pio_header(usermod_hub75 ${CMAKE_CURRENT_LIST_DIR}/lib/hub75.pio)

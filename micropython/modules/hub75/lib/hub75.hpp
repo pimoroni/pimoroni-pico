@@ -1,4 +1,23 @@
 #include <stdint.h>
+#include "pico/stdlib.h"
+#include "pico/multicore.h"
+
+#include "hardware/pio.h"
+#include "hardware/dma.h"
+#include "hardware/irq.h"
+#include "hub75.pio.h"
+
+const uint DATA_BASE_PIN = 0;
+const uint DATA_N_PINS = 6;
+const uint ROWSEL_BASE_PIN = 6;
+const uint ROWSEL_N_PINS = 5;
+const uint CLK_PIN = 11;
+const uint STROBE_PIN = 12;
+const uint OEN_PIN = 13;
+
+const bool CLK_POLARITY = 1;
+const bool STB_POLARITY = 1;
+const bool OE_POLARITY = 0;
 
 // This gamma table is used to correct our 8-bit (0-255) colours up to 11-bit,
 // allowing us to gamma correct without losing dynamic range.
@@ -24,12 +43,12 @@ constexpr uint16_t GAMMA_12BIT[256] = {
 // We don't *need* to make Pixel a fancy struct with RGB values, but it helps.
 #pragma pack(push, 1)
 struct alignas(4) Pixel {
+    uint16_t _;
     uint16_t r;
     uint16_t g;
     uint16_t b;
-    uint16_t _;
-    constexpr Pixel() : r(0), g(0), b(0), _(0) {};
-    constexpr Pixel(uint8_t r, uint8_t g, uint8_t b) : r(GAMMA_12BIT[r]), g(GAMMA_12BIT[g]), b(GAMMA_12BIT[b]), _(0) {};
+    constexpr Pixel() : _(0), r(0), g(0), b(0) {};
+    constexpr Pixel(uint8_t r, uint8_t g, uint8_t b) : _(0), r(GAMMA_12BIT[r]), g(GAMMA_12BIT[g]), b(GAMMA_12BIT[b]) {};
 };
 #pragma pack(pop)
 
@@ -40,6 +59,20 @@ class Hub75 {
     Pixel *front_buffer;
     Pixel *back_buffer;
     bool running = false;
+
+    // DMA & PIO
+    uint dma_channel = 0;
+    volatile bool do_flip = false;
+    uint bit = 0;
+    uint row = 0;
+
+    PIO pio = pio0;
+    uint sm_data = 0;
+    uint sm_row = 1;
+
+    uint data_prog_offs = 0;
+    uint row_prog_offs = 0;
+
 
     // Top half of display - 16 rows on a 32x32 panel
     unsigned int pin_r0 = 0;
@@ -75,17 +108,15 @@ class Hub75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    volatile bool do_flip = false;
-
     Hub75(uint8_t width, uint8_t height, Pixel *buffer);
-    ~Hub75() {
-    };
+    ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
     void display_update();
     void clear();
-    void start();
+    void start(irq_handler_t handler);
     void stop();
     void flip();
+    void dma_complete();
 };
