@@ -69,6 +69,18 @@ void Hub75::start(irq_handler_t handler) {
     FM6126A_write_register(0b0000001000000000, 13);
 
     if(handler) {
+        dma_channel = 0;
+
+        if(pio_sm_is_claimed(pio, sm_data) || pio_sm_is_claimed(pio, sm_row)) {
+            irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
+
+            pio_sm_set_enabled(pio, sm_data, false);
+            pio_sm_unclaim(pio, sm_data);
+            pio_sm_set_enabled(pio, sm_row, false);
+            pio_sm_unclaim(pio, sm_row);
+            pio_clear_instruction_memory(pio);
+        }
+
         pio_sm_claim(pio, sm_data);
         pio_sm_claim(pio, sm_row);
 
@@ -77,7 +89,15 @@ void Hub75::start(irq_handler_t handler) {
         hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, CLK_PIN);
         hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, STROBE_PIN);
 
-        dma_channel = 0;
+        if(dma_channel_is_claimed(dma_channel)) {
+            irq_set_enabled(DMA_IRQ_0, false);
+            dma_channel_set_irq0_enabled(dma_channel, false);
+            irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
+            irq_remove_handler(DMA_IRQ_0, handler);
+            dma_channel_wait_for_finish_blocking(dma_channel);
+            dma_channel_unclaim(dma_channel);
+        }
+
         dma_channel_claim(dma_channel);
         dma_channel_config config = dma_channel_get_default_config(dma_channel);
         channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
@@ -101,33 +121,35 @@ void Hub75::start(irq_handler_t handler) {
     }
 }
 
-void Hub75::stop() {
+void Hub75::stop(irq_handler_t handler) {
     running = false;
 
-    // stop and release the dma channel
-    irq_set_enabled(DMA_IRQ_0, false);
-    dma_channel_set_irq0_enabled(dma_channel, false);
-    irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
-    //irq_remove_handler(DMA_IRQ_0, dma_complete);
+    if(dma_channel_is_claimed(dma_channel)) {
+        // stop and release the dma channel
+        irq_set_enabled(DMA_IRQ_0, false);
+        dma_channel_set_irq0_enabled(dma_channel, false);
+        irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
+        irq_remove_handler(DMA_IRQ_0, handler);
 
-    dma_channel_wait_for_finish_blocking(dma_channel);
-    dma_channel_unclaim(dma_channel);
+        dma_channel_wait_for_finish_blocking(dma_channel);
+        dma_channel_unclaim(dma_channel);
+    }
 
     hub75_wait_tx_stall(pio, sm_row);
 
-    // release the pio and sm
-    pio_sm_unclaim(pio, sm_data);
-    pio_sm_unclaim(pio, sm_row);
-    pio_clear_instruction_memory(pio);
-    pio_sm_restart(pio, sm_data);
-    pio_sm_restart(pio, sm_row);
+    pio_sm_set_enabled(pio, sm_data, false);
+    pio_sm_set_enabled(pio, sm_row, false);
 
-    gpio_put(pin_stb, !STB_POLARITY);
+    // release the pio and sm
+    if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_data);
+    if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_row);
+    pio_clear_instruction_memory(pio);
+
     gpio_put(pin_oe, !OE_POLARITY);
+    //gpio_put(pin_stb, !STB_POLARITY);
 }
 
 Hub75::~Hub75() {
-    stop();
 }
 
 void Hub75::clear() {
@@ -193,7 +215,7 @@ void Hub75::dma_complete() {
         dma_channel_acknowledge_irq0(dma_channel);
 
         // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
-        //hub75_wait_tx_stall(pio, sm_data);
+        // hub75_wait_tx_stall(pio, sm_data);
 
         // Check that previous OEn pulse is finished, else things WILL get out of sequence
         hub75_wait_tx_stall(pio, sm_row);
@@ -214,6 +236,5 @@ void Hub75::dma_complete() {
     }
 
     dma_channel_set_trans_count(dma_channel, width * 4, false);
-    //dma_channel_set_read_addr(dma_channel, dma_buffer, true);
     dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
 }

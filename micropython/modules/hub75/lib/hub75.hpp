@@ -116,7 +116,7 @@ class Hub75 {
     void display_update();
     void clear();
     void start(irq_handler_t handler);
-    void stop();
+    void stop(irq_handler_t handler);
     void flip();
     void dma_complete();
 };

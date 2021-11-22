@@ -55,6 +55,7 @@ void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 /***** Destructor ******/
 mp_obj_t Hub75___del__(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+    self->hub75->stop(dma_complete);
     delete self->hub75;
     return mp_const_none;
 }
@@ -130,7 +131,7 @@ mp_obj_t Hub75_start(mp_obj_t self_in) {
 
 mp_obj_t Hub75_stop(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
-    self->hub75->stop();
+    self->hub75->stop(dma_complete);
     return mp_const_none;
 }
 
