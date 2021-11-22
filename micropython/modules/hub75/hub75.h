@@ -11,5 +11,7 @@ extern mp_obj_t Hub75___del__(mp_obj_t self_in);
 extern mp_obj_t Hub75_start(mp_obj_t self_in);
 extern mp_obj_t Hub75_stop(mp_obj_t self_in);
 extern mp_obj_t Hub75_set_rgb(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t Hub75_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t Hub75_set_all_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t Hub75_clear(mp_obj_t self_in);
 extern mp_obj_t Hub75_flip(mp_obj_t self_in);

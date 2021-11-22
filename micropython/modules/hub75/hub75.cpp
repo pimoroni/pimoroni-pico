@@ -162,4 +162,59 @@ mp_obj_t Hub75_set_rgb(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_arg
     return mp_const_none;
 }
 
+mp_obj_t Hub75_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_h, ARG_s, ARG_v };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_s, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_v, MP_ARG_REQUIRED | MP_ARG_OBJ }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    float h = mp_obj_get_float(args[ARG_h].u_obj);
+    float s = mp_obj_get_float(args[ARG_s].u_obj);
+    float v = mp_obj_get_float(args[ARG_v].u_obj);
+
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
+    self->hub75->set_hsv(x, y, h, s, v);
+
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_set_all_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_h, ARG_s, ARG_v };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_s, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_v, MP_ARG_REQUIRED | MP_ARG_OBJ }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    float h = mp_obj_get_float(args[ARG_h].u_obj);
+    float s = mp_obj_get_float(args[ARG_s].u_obj);
+    float v = mp_obj_get_float(args[ARG_v].u_obj);
+
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
+
+    for (auto x = 0u; x < self->hub75->width; x++) {
+        for (auto y = 0u; y < self->hub75->height; y++) {
+            self->hub75->set_hsv(x, y, h, s, v);
+        }
+    }
+
+    return mp_const_none;
+}
+
 }

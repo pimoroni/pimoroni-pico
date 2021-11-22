@@ -11,13 +11,6 @@ const uint DATA_BASE_PIN = 0;
 const uint DATA_N_PINS = 6;
 const uint ROWSEL_BASE_PIN = 6;
 const uint ROWSEL_N_PINS = 5;
-const uint CLK_PIN = 11;
-const uint STROBE_PIN = 12;
-const uint OEN_PIN = 13;
-
-const bool CLK_POLARITY = 1;
-const bool STB_POLARITY = 1;
-const bool OE_POLARITY = 0;
 
 // This gamma table is used to correct our 8-bit (0-255) colours up to 11-bit,
 // allowing us to gamma correct without losing dynamic range.
@@ -113,6 +106,7 @@ class Hub75 {
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
+    void set_hsv(uint8_t x, uint8_t y, float r, float g, float b);
     void display_update();
     void clear();
     void start(irq_handler_t handler);

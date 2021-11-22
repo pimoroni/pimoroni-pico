@@ -1,30 +1,63 @@
 #include <cstring>
 #include <algorithm>
+#include <cmath>
 
 #include "hub75.hpp"
+
+
+// Basic function to convert Hue, Saturation and Value to an RGB colour
+Pixel hsv_to_rgb(float h, float s, float v) {
+    if(h < 0.0f) {
+        h = 1.0f + fmod(h, 1.0f);
+    }
+
+    int i = int(h * 6);
+    float f = h * 6 - i;
+
+    v = v * 255.0f;
+
+    float sv = s * v;
+    float fsv = f * sv;
+
+    auto p = uint8_t(-sv + v);
+    auto q = uint8_t(-fsv + v);
+    auto t = uint8_t(fsv - sv + v);
+
+    uint8_t bv = uint8_t(v);
+
+    switch (i % 6) {
+        default:
+        case 0: return Pixel(bv, t, p);
+        case 1: return Pixel(q, bv, p);
+        case 2: return Pixel(p, bv, t);
+        case 3: return Pixel(p, q, bv);
+        case 4: return Pixel(t, p, bv);
+        case 5: return Pixel(bv, p, q);
+    }
+}
 
 
 Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer)
  : width(width), height(height), front_buffer(buffer), back_buffer(buffer + width * height)
  {
     // Set up allllll the GPIO
-    gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true);
-    gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true);
-    gpio_init(pin_b0); gpio_set_function(pin_b0, GPIO_FUNC_SIO); gpio_set_dir(pin_b0, true);
+    gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
+    gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true); gpio_put(pin_g0, 0);
+    gpio_init(pin_b0); gpio_set_function(pin_b0, GPIO_FUNC_SIO); gpio_set_dir(pin_b0, true); gpio_put(pin_b0, 0);
 
-    gpio_init(pin_r1); gpio_set_function(pin_r1, GPIO_FUNC_SIO); gpio_set_dir(pin_r1, true);
-    gpio_init(pin_g1); gpio_set_function(pin_g1, GPIO_FUNC_SIO); gpio_set_dir(pin_g1, true);
-    gpio_init(pin_b1); gpio_set_function(pin_b1, GPIO_FUNC_SIO); gpio_set_dir(pin_b1, true);
+    gpio_init(pin_r1); gpio_set_function(pin_r1, GPIO_FUNC_SIO); gpio_set_dir(pin_r1, true); gpio_put(pin_r1, 0);
+    gpio_init(pin_g1); gpio_set_function(pin_g1, GPIO_FUNC_SIO); gpio_set_dir(pin_g1, true); gpio_put(pin_g1, 0);
+    gpio_init(pin_b1); gpio_set_function(pin_b1, GPIO_FUNC_SIO); gpio_set_dir(pin_b1, true); gpio_put(pin_b1, 0);
 
-    gpio_init(pin_row_a); gpio_set_function(pin_row_a, GPIO_FUNC_SIO); gpio_set_dir(pin_row_a, true);
-    gpio_init(pin_row_b); gpio_set_function(pin_row_b, GPIO_FUNC_SIO); gpio_set_dir(pin_row_b, true);
-    gpio_init(pin_row_c); gpio_set_function(pin_row_c, GPIO_FUNC_SIO); gpio_set_dir(pin_row_c, true);
-    gpio_init(pin_row_d); gpio_set_function(pin_row_d, GPIO_FUNC_SIO); gpio_set_dir(pin_row_d, true);
-    gpio_init(pin_row_e); gpio_set_function(pin_row_e, GPIO_FUNC_SIO); gpio_set_dir(pin_row_e, true);
+    gpio_init(pin_row_a); gpio_set_function(pin_row_a, GPIO_FUNC_SIO); gpio_set_dir(pin_row_a, true); gpio_put(pin_row_a, 0);
+    gpio_init(pin_row_b); gpio_set_function(pin_row_b, GPIO_FUNC_SIO); gpio_set_dir(pin_row_b, true); gpio_put(pin_row_b, 0);
+    gpio_init(pin_row_c); gpio_set_function(pin_row_c, GPIO_FUNC_SIO); gpio_set_dir(pin_row_c, true); gpio_put(pin_row_c, 0);
+    gpio_init(pin_row_d); gpio_set_function(pin_row_d, GPIO_FUNC_SIO); gpio_set_dir(pin_row_d, true); gpio_put(pin_row_d, 0);
+    gpio_init(pin_row_e); gpio_set_function(pin_row_e, GPIO_FUNC_SIO); gpio_set_dir(pin_row_e, true); gpio_put(pin_row_e, 0);
 
-    gpio_init(pin_clk); gpio_set_function(pin_clk, GPIO_FUNC_SIO); gpio_set_dir(pin_clk, true);
-    gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true);
-    gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true);
+    gpio_init(pin_clk); gpio_set_function(pin_clk, GPIO_FUNC_SIO); gpio_set_dir(pin_clk, true); gpio_put(pin_clk, !clk_polarity);
+    gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
+    gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
 }
 
 void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
@@ -39,7 +72,22 @@ void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
     front_buffer[offset] = Pixel(r, g, b);
 }
 
+void Hub75::set_hsv(uint8_t x, uint8_t y, float h, float s, float v) {
+    int offset = 0;
+    if(y >= 32) {
+        y -= 32;
+        offset = (y * width + x) * 2;
+        offset += 1;
+    } else {
+        offset = (y * width + x) * 2;
+    }
+    front_buffer[offset] = hsv_to_rgb(h, s, v);
+}
+
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
+    gpio_put(pin_clk, !clk_polarity);
+    gpio_put(pin_stb, !stb_polarity);
+
     uint8_t threshold = width - position;
     for(auto i = 0u; i < width; i++) {
         auto j = i % 16;
@@ -86,8 +134,8 @@ void Hub75::start(irq_handler_t handler) {
 
         data_prog_offs = pio_add_program(pio, &hub75_data_rgb888_program);
         row_prog_offs = pio_add_program(pio, &hub75_row_program);
-        hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, CLK_PIN);
-        hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, STROBE_PIN);
+        hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, pin_clk);
+        hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb);
 
         if(dma_channel_is_claimed(dma_channel)) {
             irq_set_enabled(DMA_IRQ_0, false);
@@ -145,8 +193,8 @@ void Hub75::stop(irq_handler_t handler) {
     if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_row);
     pio_clear_instruction_memory(pio);
 
-    gpio_put(pin_oe, !OE_POLARITY);
-    //gpio_put(pin_stb, !STB_POLARITY);
+    gpio_put(pin_oe, !oe_polarity);
+    gpio_put(pin_stb, !stb_polarity);
 }
 
 Hub75::~Hub75() {
@@ -162,6 +210,7 @@ void Hub75::clear() {
 
 void Hub75::flip() {
     do_flip = true;
+    while(do_flip) {};
 }
 
 void Hub75::display_update() {
@@ -215,7 +264,7 @@ void Hub75::dma_complete() {
         dma_channel_acknowledge_irq0(dma_channel);
 
         // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
-        // hub75_wait_tx_stall(pio, sm_data);
+        hub75_wait_tx_stall(pio, sm_data);
 
         // Check that previous OEn pulse is finished, else things WILL get out of sequence
         hub75_wait_tx_stall(pio, sm_row);
