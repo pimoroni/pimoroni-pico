@@ -56,7 +56,9 @@ class Hub75 {
     uint8_t height;
     Pixel *front_buffer;
     Pixel *back_buffer;
+    bool managed_buffer = false;
     bool running = false;
+    PanelType panel_type;
 
     // DMA & PIO
     uint dma_channel = 0;

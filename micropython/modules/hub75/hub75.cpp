@@ -1,5 +1,5 @@
 #include <cstdio>
-#include "lib/hub75.hpp"
+#include "hub75.hpp"
 #include "pico/multicore.h"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
@@ -37,19 +37,28 @@ void __isr dma_complete() {
 void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind; // Unused input parameter
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
-    mp_print_str(print, "Hub75(");
+    mp_print_str(print, "Hub75( ");
 
     mp_print_str(print, "dimensions = ");
     mp_obj_print_helper(print, mp_obj_new_int(self->hub75->width), PRINT_REPR);
     mp_print_str(print, " x ");
     mp_obj_print_helper(print, mp_obj_new_int(self->hub75->height), PRINT_REPR);
 
-    mp_print_str(print, "addr = front: ");
+    mp_print_str(print, ", addr = front: ");
     mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->front_buffer[0]), PRINT_REPR);
     mp_print_str(print, " back: ");
     mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->back_buffer[0]), PRINT_REPR);
 
-    mp_print_str(print, ")");
+    switch(self->hub75->panel_type) {
+        case PANEL_GENERIC:
+            mp_print_str(print, ", panel: generic ");
+            break;
+        case PANEL_FM6126A:
+            mp_print_str(print, ", panel: generic ");
+            break;
+    }
+
+    mp_print_str(print, " )");
 }
 
 /***** Destructor ******/

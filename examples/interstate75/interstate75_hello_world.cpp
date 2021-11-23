@@ -234,12 +234,14 @@ void hub75_display_update() {
                 //    This latches all the values we've just clocked into the column shift registers.
                 //    The values will appear on the output pins, ready for the display to be driven.
                 gpio_put(PIN_STB, STB_POLARITY);
+                asm volatile("nop \nnop"); // Batman!
+                gpio_put(PIN_STB, !STB_POLARITY);
 
                 // 4. Asset the output-enable signal (OE)
                 //    This turns on the display for a brief period to light the selected rows/columns.
                 gpio_put(PIN_OE, OE_POLARITY);
 
-                // 4. Delay
+                // 5. Delay
                 //    Delay for a period of time coressponding to "bit"'s significance
                 for(auto s = 0u; s < bit; ++s) {
                     // The basic premise here is that "bit" will step through the values:
@@ -252,12 +254,11 @@ void hub75_display_update() {
                     asm volatile("nop \nnop"); // Batman!
                 }
 
-                // 5. De-assert latch/strobe signal (STB) + output-enable signal (OE)
+                // 6. De-assert output-enable signal (OE)
                 //    Ready to go again!
-                gpio_put(PIN_STB, !STB_POLARITY);
                 gpio_put(PIN_OE, !OE_POLARITY);
 
-                // 6. GOTO 1.
+                // 7. GOTO 1.
             }
             sleep_us(1);
         }

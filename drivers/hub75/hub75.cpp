@@ -38,7 +38,7 @@ Pixel hsv_to_rgb(float h, float s, float v) {
 
 
 Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type)
- : width(width), height(height), front_buffer(buffer), back_buffer(buffer + width * height)
+ : width(width), height(height), panel_type(panel_type)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -59,8 +59,14 @@ Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type)
     gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
     gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
 
-    if (panel_type == PANEL_FM6126A) {
-        FM6126A_setup();
+    if (buffer == nullptr) {
+        front_buffer = new Pixel[width * height];
+        back_buffer = new Pixel[width * height];
+        managed_buffer = true;
+    } else {
+        front_buffer = buffer;
+        back_buffer = buffer + width * height;
+        managed_buffer = false;
     }
 }
 
@@ -135,6 +141,10 @@ void Hub75::start(irq_handler_t handler) {
             pio_clear_instruction_memory(pio);
         }
 
+        if (panel_type == PANEL_FM6126A) {
+            FM6126A_setup();
+        }
+
         pio_sm_claim(pio, sm_data);
         pio_sm_claim(pio, sm_row);
 
@@ -204,6 +214,10 @@ void Hub75::stop(irq_handler_t handler) {
 }
 
 Hub75::~Hub75() {
+    if (managed_buffer) {
+        delete[] front_buffer;
+        delete[] back_buffer;
+    }
 }
 
 void Hub75::clear() {
