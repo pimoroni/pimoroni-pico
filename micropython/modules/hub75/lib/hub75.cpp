@@ -37,7 +37,7 @@ Pixel hsv_to_rgb(float h, float s, float v) {
 }
 
 
-Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer)
+Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type)
  : width(width), height(height), front_buffer(buffer), back_buffer(buffer + width * height)
  {
     // Set up allllll the GPIO
@@ -58,6 +58,10 @@ Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer)
     gpio_init(pin_clk); gpio_set_function(pin_clk, GPIO_FUNC_SIO); gpio_set_dir(pin_clk, true); gpio_put(pin_clk, !clk_polarity);
     gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
     gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
+
+    if (panel_type == PANEL_FM6126A) {
+        FM6126A_setup();
+    }
 }
 
 void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
@@ -74,8 +78,8 @@ void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
 
 void Hub75::set_hsv(uint8_t x, uint8_t y, float h, float s, float v) {
     int offset = 0;
-    if(y >= 32) {
-        y -= 32;
+    if(y >= height / 2) {
+        y -= height / 2;
         offset = (y * width + x) * 2;
         offset += 1;
     } else {
@@ -109,12 +113,14 @@ void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
     }
 }
 
-void Hub75::start(irq_handler_t handler) {
-    running = true;
-
+void Hub75::FM6126A_setup() {
     // Ridiculous register write nonsense for the FM6126A-based 64x64 matrix
     FM6126A_write_register(0b1111111111111110, 12);
     FM6126A_write_register(0b0000001000000000, 13);
+}
+
+void Hub75::start(irq_handler_t handler) {
+    running = true;
 
     if(handler) {
         dma_channel = 0;

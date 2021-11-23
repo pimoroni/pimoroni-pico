@@ -39,6 +39,8 @@ const mp_obj_type_t Hub75_type = {
 STATIC const mp_map_elem_t hub75_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_hub75) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Hub75), (mp_obj_t)&Hub75_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_PANEL_GENERIC), MP_ROM_INT(0) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_PANEL_FM6126A), MP_ROM_INT(1) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_hub75_globals, hub75_globals_table);
 

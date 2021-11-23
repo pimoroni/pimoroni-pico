@@ -45,6 +45,11 @@ struct alignas(4) Pixel {
 };
 #pragma pack(pop)
 
+enum PanelType {
+    PANEL_GENERIC = 0,
+    PANEL_FM6126A,
+};
+
 class Hub75 {
     public:
     uint8_t width;
@@ -101,10 +106,12 @@ class Hub75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    Hub75(uint8_t width, uint8_t height, Pixel *buffer);
+    Hub75(uint8_t width, uint8_t height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
+    Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
+    void FM6126A_setup();
     void set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
     void set_hsv(uint8_t x, uint8_t y, float r, float g, float b);
     void display_update();
