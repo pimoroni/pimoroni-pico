@@ -131,20 +131,34 @@ void Hub75::start(irq_handler_t handler) {
     if(handler) {
         dma_channel = 0;
 
+        // Try as I might, I can't seem to coax MicroPython into leaving PIO in a known state upon soft reset
+        // check for claimed PIO and prepare a clean slate.
         if(pio_sm_is_claimed(pio, sm_data) || pio_sm_is_claimed(pio, sm_row)) {
             irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
 
+            pio_sm_drain_tx_fifo(pio, sm_data);
             pio_sm_set_enabled(pio, sm_data, false);
             pio_sm_unclaim(pio, sm_data);
+
+            pio_sm_drain_tx_fifo(pio, sm_row);
             pio_sm_set_enabled(pio, sm_row, false);
             pio_sm_unclaim(pio, sm_row);
+
             pio_clear_instruction_memory(pio);
+
+            // Make sure the GPIO is in a known good state
+            // since we don't know what the PIO might have done with it
+            gpio_put_masked(0b111111 << pin_r0, 0);
+            gpio_put_masked(0b11111 << pin_row_a, 0);
+            gpio_put(pin_clk, !clk_polarity);
+            gpio_put(pin_clk, !oe_polarity);
         }
 
         if (panel_type == PANEL_FM6126A) {
             FM6126A_setup();
         }
 
+        // Claim the PIO so we can clean it upon soft restart
         pio_sm_claim(pio, sm_data);
         pio_sm_claim(pio, sm_row);
 
@@ -204,7 +218,8 @@ void Hub75::stop(irq_handler_t handler) {
     pio_sm_set_enabled(pio, sm_data, false);
     pio_sm_set_enabled(pio, sm_row, false);
 
-    // release the pio and sm
+    // Release the pio and sm
+    // This *should* be happening upon soft reset!
     if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_data);
     if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_row);
     pio_clear_instruction_memory(pio);
@@ -304,6 +319,6 @@ void Hub75::dma_complete() {
         }
     }
 
-    dma_channel_set_trans_count(dma_channel, width * 4, false);
+    dma_channel_set_trans_count(dma_channel, width * 4, false); // This count is in uint32_t which is 1/2th the size of Pixel
     dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
 }
