@@ -48,13 +48,14 @@ enum PanelType {
 
 class Hub75 {
     public:
-    uint8_t width;
-    uint8_t height;
+    uint width;
+    uint height;
     Pixel *front_buffer;
     Pixel *back_buffer;
     bool managed_buffer = false;
     bool running = false;
     PanelType panel_type;
+    bool inverted_stb = false;
 
     // DMA & PIO
     uint dma_channel = 0;
@@ -105,15 +106,15 @@ class Hub75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    Hub75(uint8_t width, uint8_t height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC, false) {};
-    Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
+    Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC, false) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void FM6126A_setup();
-    void set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
-    void set_hsv(uint8_t x, uint8_t y, float r, float g, float b);
+    void set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
+    void set_hsv(uint x, uint y, float r, float g, float b);
     void display_update();
     void clear();
     void start(irq_handler_t handler);

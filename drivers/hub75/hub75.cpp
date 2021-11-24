@@ -37,8 +37,8 @@ Pixel hsv_to_rgb(float h, float s, float v) {
 }
 
 
-Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
- : width(width), height(height), panel_type(panel_type)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
+ : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -70,7 +70,7 @@ Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type,
     }
 }
 
-void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
     int offset = 0;
     if(y >= height / 2) {
         y -= height / 2;
@@ -82,7 +82,7 @@ void Hub75::set_rgb(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
     front_buffer[offset] = Pixel(r, g, b);
 }
 
-void Hub75::set_hsv(uint8_t x, uint8_t y, float h, float s, float v) {
+void Hub75::set_hsv(uint x, uint y, float h, float s, float v) {
     int offset = 0;
     if(y >= height / 2) {
         y -= height / 2;
@@ -163,12 +163,18 @@ void Hub75::start(irq_handler_t handler) {
         pio_sm_claim(pio, sm_row);
 
         data_prog_offs = pio_add_program(pio, &hub75_data_rgb888_program);
-        row_prog_offs = pio_add_program(pio, &hub75_row_program);
+        if (inverted_stb) {
+            row_prog_offs = pio_add_program(pio, &hub75_row_inverted_program);
+        } else {
+            row_prog_offs = pio_add_program(pio, &hub75_row_program);
+        }
         hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, pin_clk);
         hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb);
 
         // Prevent flicker in Python caused by the smaller dataset just blasting through the PIO too quickly
-        pio_sm_set_clkdiv(pio, sm_data, 2.0f);
+        if (width <= 32)  {
+            pio_sm_set_clkdiv(pio, sm_data, 2.0f);
+        }
 
         if(dma_channel_is_claimed(dma_channel)) {
             irq_set_enabled(DMA_IRQ_0, false);
