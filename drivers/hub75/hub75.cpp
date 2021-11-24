@@ -37,7 +37,7 @@ Pixel hsv_to_rgb(float h, float s, float v) {
 }
 
 
-Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type)
+Hub75::Hub75(uint8_t width, uint8_t height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
  : width(width), height(height), panel_type(panel_type)
  {
     // Set up allllll the GPIO
@@ -167,6 +167,9 @@ void Hub75::start(irq_handler_t handler) {
         hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, pin_clk);
         hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb);
 
+        // Prevent flicker in Python caused by the smaller dataset just blasting through the PIO too quickly
+        pio_sm_set_clkdiv(pio, sm_data, 2.0f);
+
         if(dma_channel_is_claimed(dma_channel)) {
             irq_set_enabled(DMA_IRQ_0, false);
             dma_channel_set_irq0_enabled(dma_channel, false);
@@ -174,6 +177,14 @@ void Hub75::start(irq_handler_t handler) {
             irq_remove_handler(DMA_IRQ_0, handler);
             dma_channel_wait_for_finish_blocking(dma_channel);
             dma_channel_unclaim(dma_channel);
+        }
+
+        if(dma_channel_is_claimed(dma_flip_channel)){
+            irq_set_enabled(DMA_IRQ_1, false);
+            dma_channel_set_irq1_enabled(dma_flip_channel, false);
+            irq_remove_handler(DMA_IRQ_1, handler);
+            dma_channel_wait_for_finish_blocking(dma_flip_channel);
+            dma_channel_unclaim(dma_flip_channel);
         }
 
         dma_channel_claim(dma_channel);
@@ -184,33 +195,53 @@ void Hub75::start(irq_handler_t handler) {
         dma_channel_configure(dma_channel, &config, &pio->txf[sm_data], NULL, 0, false);
         dma_channel_set_irq0_enabled(dma_channel, true);
         irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
+
+        dma_channel_claim(dma_flip_channel);
+        dma_channel_config flip_config = dma_channel_get_default_config(dma_flip_channel);
+        channel_config_set_transfer_data_size(&flip_config, DMA_SIZE_32);
+        channel_config_set_read_increment(&flip_config, true);
+        channel_config_set_write_increment(&flip_config, true);
+        channel_config_set_bswap(&flip_config, false);
+        dma_channel_configure(dma_flip_channel, &flip_config, nullptr, nullptr, 0, false);
+        dma_channel_set_irq1_enabled(dma_flip_channel, true);
+
+        // Same handler for both DMA channels
         irq_set_exclusive_handler(DMA_IRQ_0, handler);
         irq_set_enabled(DMA_IRQ_0, true);
+        irq_set_exclusive_handler(DMA_IRQ_1, handler);
+        irq_set_enabled(DMA_IRQ_1, true);
 
         row = 0;
         bit = 0;
 
-        dma_channel_set_trans_count(dma_channel, width * 4, false);
+        dma_channel_set_trans_count(dma_channel, width * 2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
-    } else {
-        while (running) {
-            display_update();
-        }
     }
 }
 
 void Hub75::stop(irq_handler_t handler) {
     running = false;
 
+
     if(dma_channel_is_claimed(dma_channel)) {
-        // stop and release the dma channel
         irq_set_enabled(DMA_IRQ_0, false);
+        // stop and release the dma channel
         dma_channel_set_irq0_enabled(dma_channel, false);
         irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
-        irq_remove_handler(DMA_IRQ_0, handler);
 
         dma_channel_wait_for_finish_blocking(dma_channel);
         dma_channel_unclaim(dma_channel);
+
+        irq_remove_handler(DMA_IRQ_0, handler);
+    }
+
+    if(dma_channel_is_claimed(dma_flip_channel)) {
+        dma_channel_wait_for_finish_blocking(dma_flip_channel);
+        irq_set_enabled(DMA_IRQ_1, false);
+        dma_channel_set_irq1_enabled(dma_flip_channel, false);
+        dma_channel_unclaim(dma_flip_channel);
+
+        irq_remove_handler(DMA_IRQ_1, handler);
     }
 
     hub75_wait_tx_stall(pio, sm_row);
@@ -244,59 +275,32 @@ void Hub75::clear() {
 }
 
 void Hub75::flip() {
+    // Flip and block until the front buffer has been prepared
     do_flip = true;
-    while(do_flip) {};
-}
-
-void Hub75::display_update() {
-    if (do_flip) {
-        memcpy(back_buffer, front_buffer, width * height * sizeof(Pixel));
-        do_flip = false;
-    }
-
-    for(auto bit = 1u; bit < 1 << 11; bit <<= 1) {
-        for(auto y = 0u; y < height / 2; y++) {
-            auto row_top = y * width;
-            auto row_bottom = (y + height / 2) * width;
-            for(auto x = 0u; x < width; x++) {
-                Pixel pixel_top     = back_buffer[row_top + x];
-                Pixel pixel_bottom  = back_buffer[row_bottom + x];
-
-                gpio_put(pin_clk, !clk_polarity);
-
-                gpio_put(pin_r0, (bool)(pixel_top.r & bit));
-                gpio_put(pin_g0, (bool)(pixel_top.g & bit));
-                gpio_put(pin_b0, (bool)(pixel_top.b & bit));
-
-                gpio_put(pin_r1, (bool)(pixel_bottom.r & bit));
-                gpio_put(pin_g1, (bool)(pixel_bottom.g & bit));
-                gpio_put(pin_b1, (bool)(pixel_bottom.b & bit));
-
-                gpio_put(pin_clk, clk_polarity);
-            }
-
-            gpio_put_masked(0b11111 << pin_row_a, y << pin_row_a);
-            gpio_put(pin_stb, stb_polarity);
-            gpio_put(pin_oe, oe_polarity);
-
-            for(auto s = 0u; s < bit; ++s) {
-                asm volatile("nop \nnop");
-            }
-
-            gpio_put(pin_stb, !stb_polarity);
-            gpio_put(pin_oe, !oe_polarity);
-        }
-    }
+    while(do_flip) {
+        best_effort_wfe_or_timeout(make_timeout_time_us(10));
+    };
 }
 
 void Hub75::dma_complete() {
-    if (do_flip && bit == 0 && row == 0) {
-        memcpy(back_buffer, front_buffer, width * height * sizeof(Pixel));
+    if(dma_channel_get_irq1_status(dma_flip_channel)) {
+        dma_channel_acknowledge_irq1(dma_flip_channel);
         do_flip = false;
     }
 
     if(dma_channel_get_irq0_status(dma_channel)) {
         dma_channel_acknowledge_irq0(dma_channel);
+
+        if (do_flip && bit == 0 && row == 0) {
+            // Literally flip the front and back buffers by swapping their addresses
+            Pixel *tmp = back_buffer;
+            back_buffer = front_buffer;
+            front_buffer = tmp;
+            // Then, read the contents of the back buffer into the front buffer
+            dma_channel_set_read_addr(dma_flip_channel, back_buffer, false);
+            dma_channel_set_write_addr(dma_flip_channel, front_buffer, false);
+            dma_channel_set_trans_count(dma_flip_channel, width * height, true);
+        }
 
         // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
         hub75_wait_tx_stall(pio, sm_data);
@@ -312,13 +316,13 @@ void Hub75::dma_complete() {
         if(row == height / 2) {
             row = 0;
             bit++;
-            if (bit == 12) {
+            if (bit == BIT_DEPTH) {
                 bit = 0;
             }
             hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
         }
-    }
 
-    dma_channel_set_trans_count(dma_channel, width * 4, false); // This count is in uint32_t which is 1/2th the size of Pixel
-    dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
+        dma_channel_set_trans_count(dma_channel, width * 2, false);
+        dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
+    }
 }

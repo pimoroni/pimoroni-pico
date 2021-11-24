@@ -26,6 +26,28 @@ pulse_loop:
     jmp x-- pulse_loop side 0x0 ; Assert OEn for x+1 cycles
 .wrap
 
+.program hub75_row_inverted
+
+; side-set pin 0 is LATCH
+; side-set pin 1 is OEn
+; OUT pins are row select A-E
+;
+; Each FIFO record consists of:
+; - 5-bit row select (LSBs)
+; - Pulse width - 1 (27 MSBs)
+;
+; Repeatedly select a row, pulse LATCH, and generate a pulse of a certain
+; width on OEn.
+
+.side_set 2
+
+.wrap_target
+    out pins, 5 [7]    side 0x3 ; Deassert OEn, output row select
+    out x, 27   [7]    side 0x2 ; Pulse LATCH, get OEn pulse width
+pulse_loop:
+    jmp x-- pulse_loop side 0x1 ; Assert OEn for x+1 cycles
+.wrap
+
 % c-sdk {
 static inline void hub75_row_program_init(PIO pio, uint sm, uint offset, uint row_base_pin, uint n_row_pins, uint latch_base_pin) {
     pio_sm_set_consecutive_pindirs(pio, sm, row_base_pin, n_row_pins, true);
@@ -74,29 +96,25 @@ public entry_point:
 
 public shift0:              ; R0 G0 B0 (Top half of 64x64 displays)
     pull             side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
-    out null, 16     side 0 ; discard _
-    in osr, 1        side 0 ; Red0
-    out null, 32     side 0 ; discard remaining bits
+    in osr, 1        side 0 ; Red0 N
+    out null, 10     side 0 ; Red0 discard
 
-public shift1:
-    pull             side 0 ; gets patched to out null, n if n is nonzero (otherwise PULL required)
-    in osr, 1        side 0 ; Green0
-    out null, 16     side 0 ; << next uint16
-    in osr, 1        side 0 ; Blue0
-    out null, 32     side 0 ; discard remaining bits
+    in osr, 1        side 0 ; Green0 N
+    out null, 10     side 0 ; Green0 discard
 
-public shift2:
-    pull             side 0 ; gets patched to out null, n if n is nonzero (otherwise PULL required)
-    out null, 16     side 0 ; discard _
-    in osr, 1        side 0 ; Red1
-    out null, 32     side 0 ; discard remaining bits
+    in osr, 1        side 0 ; Blue0 N
+    out null, 32     side 0 ; Remainder discard
 
-public shift3:              ; R1 G1 B1 (Bottom half of 64x64 displays)
-    pull             side 0 ; gets patched to out null, n if n is nonzero (otherwise PULL required)
-    in osr, 1        side 0 ; Green0, CLK rising edge
-    out null, 16     side 0 ; << next uint16
-    in osr, 1        side 0 ; Blue0
-    out null, 32     side 0 ; discard remaining bits
+public shift1:              ; R1 G1 B1 (Bottom half of 64x64 displays)
+    pull             side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
+    in osr, 1        side 0 ; Red1 N
+    out null, 10     side 0 ; Red1 discard
+
+    in osr, 1        side 0 ; Green1 N
+    out null, 10     side 0 ; Green1 discard
+
+    in osr, 1        side 0 ; Blue1 N
+    out null, 32     side 0 ; Remainder discard
 
     in null, 26      side 0 ; Note we are just doing this little manoeuvre here to get GPIOs in the order
     mov pins, ::isr [7] side 1 ; R0, G0, B0, R1, G1, B1. Can go 1 cycle faster if reversed
@@ -135,7 +153,5 @@ static inline void hub75_data_rgb888_set_shift(PIO pio, uint sm, uint offset, ui
         instr = pio_encode_out(pio_null, shamt);
     pio->instr_mem[offset + hub75_data_rgb888_offset_shift0] = instr;
     pio->instr_mem[offset + hub75_data_rgb888_offset_shift1] = instr;
-    pio->instr_mem[offset + hub75_data_rgb888_offset_shift2] = instr;
-    pio->instr_mem[offset + hub75_data_rgb888_offset_shift3] = instr;
 }
 %}
