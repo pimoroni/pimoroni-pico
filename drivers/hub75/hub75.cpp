@@ -72,6 +72,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
     int offset = 0;
+    if(x >= width || y >= height) return;
     if(y >= height / 2) {
         y -= height / 2;
         offset = (y * width + x) * 2;
@@ -84,6 +85,7 @@ void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
 
 void Hub75::set_hsv(uint x, uint y, float h, float s, float v) {
     int offset = 0;
+    if(x >= width || y >= height) return;
     if(y >= height / 2) {
         y -= height / 2;
         offset = (y * width + x) * 2;
@@ -126,33 +128,12 @@ void Hub75::FM6126A_setup() {
 }
 
 void Hub75::start(irq_handler_t handler) {
-    running = true;
-
     if(handler) {
         dma_channel = 0;
 
         // Try as I might, I can't seem to coax MicroPython into leaving PIO in a known state upon soft reset
         // check for claimed PIO and prepare a clean slate.
-        if(pio_sm_is_claimed(pio, sm_data) || pio_sm_is_claimed(pio, sm_row)) {
-            irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
-
-            pio_sm_drain_tx_fifo(pio, sm_data);
-            pio_sm_set_enabled(pio, sm_data, false);
-            pio_sm_unclaim(pio, sm_data);
-
-            pio_sm_drain_tx_fifo(pio, sm_row);
-            pio_sm_set_enabled(pio, sm_row, false);
-            pio_sm_unclaim(pio, sm_row);
-
-            pio_clear_instruction_memory(pio);
-
-            // Make sure the GPIO is in a known good state
-            // since we don't know what the PIO might have done with it
-            gpio_put_masked(0b111111 << pin_r0, 0);
-            gpio_put_masked(0b11111 << pin_row_a, 0);
-            gpio_put(pin_clk, !clk_polarity);
-            gpio_put(pin_clk, !oe_polarity);
-        }
+        stop(handler);
 
         if (panel_type == PANEL_FM6126A) {
             FM6126A_setup();
@@ -172,26 +153,7 @@ void Hub75::start(irq_handler_t handler) {
         hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb);
 
         // Prevent flicker in Python caused by the smaller dataset just blasting through the PIO too quickly
-        if (width <= 32)  {
-            pio_sm_set_clkdiv(pio, sm_data, 2.0f);
-        }
-
-        if(dma_channel_is_claimed(dma_channel)) {
-            irq_set_enabled(DMA_IRQ_0, false);
-            dma_channel_set_irq0_enabled(dma_channel, false);
-            irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
-            irq_remove_handler(DMA_IRQ_0, handler);
-            dma_channel_wait_for_finish_blocking(dma_channel);
-            dma_channel_unclaim(dma_channel);
-        }
-
-        if(dma_channel_is_claimed(dma_flip_channel)){
-            irq_set_enabled(DMA_IRQ_1, false);
-            dma_channel_set_irq1_enabled(dma_flip_channel, false);
-            irq_remove_handler(DMA_IRQ_1, handler);
-            dma_channel_wait_for_finish_blocking(dma_flip_channel);
-            dma_channel_unclaim(dma_flip_channel);
-        }
+        pio_sm_set_clkdiv(pio, sm_data, width <= 32 ? 2.0f : 1.0f);
 
         dma_channel_claim(dma_channel);
         dma_channel_config config = dma_channel_get_default_config(dma_channel);
@@ -199,8 +161,6 @@ void Hub75::start(irq_handler_t handler) {
         channel_config_set_bswap(&config, false);
         channel_config_set_dreq(&config, pio_get_dreq(pio, sm_data, true));
         dma_channel_configure(dma_channel, &config, &pio->txf[sm_data], NULL, 0, false);
-        dma_channel_set_irq0_enabled(dma_channel, true);
-        irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
 
         dma_channel_claim(dma_flip_channel);
         dma_channel_config flip_config = dma_channel_get_default_config(dma_flip_channel);
@@ -209,60 +169,73 @@ void Hub75::start(irq_handler_t handler) {
         channel_config_set_write_increment(&flip_config, true);
         channel_config_set_bswap(&flip_config, false);
         dma_channel_configure(dma_flip_channel, &flip_config, nullptr, nullptr, 0, false);
-        dma_channel_set_irq1_enabled(dma_flip_channel, true);
+
 
         // Same handler for both DMA channels
         irq_set_exclusive_handler(DMA_IRQ_0, handler);
-        irq_set_enabled(DMA_IRQ_0, true);
         irq_set_exclusive_handler(DMA_IRQ_1, handler);
+
+        dma_channel_set_irq1_enabled(dma_flip_channel, true);
+        dma_channel_set_irq0_enabled(dma_channel, true);
+
+        irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
+        irq_set_enabled(DMA_IRQ_0, true);
         irq_set_enabled(DMA_IRQ_1, true);
 
         row = 0;
         bit = 0;
 
+        hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
         dma_channel_set_trans_count(dma_channel, width * 2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
     }
 }
 
 void Hub75::stop(irq_handler_t handler) {
-    running = false;
+    do_flip = false;
 
+    irq_set_enabled(DMA_IRQ_0, false);
+    irq_set_enabled(DMA_IRQ_1, false);
+    irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
 
     if(dma_channel_is_claimed(dma_channel)) {
-        irq_set_enabled(DMA_IRQ_0, false);
-        // stop and release the dma channel
         dma_channel_set_irq0_enabled(dma_channel, false);
-        irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
-
-        dma_channel_wait_for_finish_blocking(dma_channel);
-        dma_channel_unclaim(dma_channel);
-
         irq_remove_handler(DMA_IRQ_0, handler);
+        //dma_channel_wait_for_finish_blocking(dma_channel);
+        dma_channel_abort(dma_channel);
+        dma_channel_acknowledge_irq1(dma_channel);
+        dma_channel_unclaim(dma_channel);
     }
 
-    if(dma_channel_is_claimed(dma_flip_channel)) {
-        dma_channel_wait_for_finish_blocking(dma_flip_channel);
-        irq_set_enabled(DMA_IRQ_1, false);
+    if(dma_channel_is_claimed(dma_flip_channel)){
         dma_channel_set_irq1_enabled(dma_flip_channel, false);
-        dma_channel_unclaim(dma_flip_channel);
-
         irq_remove_handler(DMA_IRQ_1, handler);
+        //dma_channel_wait_for_finish_blocking(dma_flip_channel);
+        dma_channel_abort(dma_flip_channel);
+        dma_channel_acknowledge_irq1(dma_flip_channel);
+        dma_channel_unclaim(dma_flip_channel);
     }
 
-    hub75_wait_tx_stall(pio, sm_row);
+    if(pio_sm_is_claimed(pio, sm_data)) {
+        pio_sm_set_enabled(pio, sm_data, false);
+        pio_sm_drain_tx_fifo(pio, sm_data);
+        pio_sm_unclaim(pio, sm_data);
+    }
 
-    pio_sm_set_enabled(pio, sm_data, false);
-    pio_sm_set_enabled(pio, sm_row, false);
+    if(pio_sm_is_claimed(pio, sm_row)) {
+        pio_sm_set_enabled(pio, sm_row, false);
+        pio_sm_drain_tx_fifo(pio, sm_row);
+        pio_sm_unclaim(pio, sm_row);
+    }
 
-    // Release the pio and sm
-    // This *should* be happening upon soft reset!
-    if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_data);
-    if(pio_sm_is_claimed(pio, sm_data)) pio_sm_unclaim(pio, sm_row);
     pio_clear_instruction_memory(pio);
 
-    gpio_put(pin_oe, !oe_polarity);
-    gpio_put(pin_stb, !stb_polarity);
+    // Make sure the GPIO is in a known good state
+    // since we don't know what the PIO might have done with it
+    gpio_put_masked(0b111111 << pin_r0, 0);
+    gpio_put_masked(0b11111 << pin_row_a, 0);
+    gpio_put(pin_clk, !clk_polarity);
+    gpio_put(pin_clk, !oe_polarity);
 }
 
 Hub75::~Hub75() {
@@ -297,6 +270,15 @@ void Hub75::dma_complete() {
     if(dma_channel_get_irq0_status(dma_channel)) {
         dma_channel_acknowledge_irq0(dma_channel);
 
+        // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
+        hub75_wait_tx_stall(pio, sm_data);
+
+        // Check that previous OEn pulse is finished, else things WILL get out of sequence
+        hub75_wait_tx_stall(pio, sm_row);
+
+        // Latch row data, pulse output enable for new row.
+        pio_sm_put_blocking(pio, sm_row, row | (6u << 5 << bit));
+
         if (do_flip && bit == 0 && row == 0) {
             // Literally flip the front and back buffers by swapping their addresses
             Pixel *tmp = back_buffer;
@@ -307,15 +289,6 @@ void Hub75::dma_complete() {
             dma_channel_set_write_addr(dma_flip_channel, front_buffer, false);
             dma_channel_set_trans_count(dma_flip_channel, width * height, true);
         }
-
-        // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
-        hub75_wait_tx_stall(pio, sm_data);
-
-        // Check that previous OEn pulse is finished, else things WILL get out of sequence
-        hub75_wait_tx_stall(pio, sm_row);
-
-        // Latch row data, pulse output enable for new row.
-        pio_sm_put_blocking(pio, sm_row, row | (6u << 5 << bit));
 
         row++;
 

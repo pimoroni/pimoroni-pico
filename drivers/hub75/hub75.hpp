@@ -53,7 +53,6 @@ class Hub75 {
     Pixel *front_buffer;
     Pixel *back_buffer;
     bool managed_buffer = false;
-    bool running = false;
     PanelType panel_type;
     bool inverted_stb = false;
 

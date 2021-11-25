@@ -124,7 +124,10 @@ mp_obj_t Hub75_clear(mp_obj_t self_in) {
 
 mp_obj_t Hub75_flip(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
-    self->hub75->flip();
+    self->hub75->do_flip = true;
+    while (self->hub75->do_flip) {
+        MICROPY_EVENT_POLL_HOOK
+    }
     return mp_const_none;
 }
 
