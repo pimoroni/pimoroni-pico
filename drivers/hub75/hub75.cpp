@@ -315,7 +315,7 @@ void Hub75::dma_complete() {
         hub75_wait_tx_stall(pio, sm_row);
 
         // Latch row data, pulse output enable for new row.
-        pio_sm_put_blocking(pio, sm_row, row | (3u * (1u << bit) << 5));
+        pio_sm_put_blocking(pio, sm_row, row | (6u << 5 << bit));
 
         row++;
 
