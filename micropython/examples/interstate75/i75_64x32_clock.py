@@ -1,5 +1,5 @@
 import hub75
-from time import ticks_ms, sleep
+from time import ticks_ms
 import math
 from machine import RTC
 
@@ -15,11 +15,8 @@ hue = 0
 rtc = RTC()
 
 hub = hub75.Hub75(WIDTH, HEIGHT, stb_invert=False)
-print("hub75: init")
 hub.start()
-print("hub75: start")
 hub.clear()
-print("hub75: clear")
 
 set_hsv = hub.set_hsv
 set_rgb = hub.set_rgb
@@ -78,6 +75,10 @@ def draw_number(x, y, number, fg=None, bg=None, digit_width=8, digit_height=15, 
         if digit == " ":
             x += digit_spacing
             continue
+
+        if digit == ".":
+            fg(x, y + v_line + v_line + 2)
+            x += digit_spacing
 
         try:
             parts = DIGITS[ord(digit) - 48]
@@ -145,4 +146,3 @@ while True:
     # hub.set_rgb(ox, oy, 255, 255, 255)
 
     hub.flip()
-    sleep(1.0 / 60)
