@@ -70,6 +70,8 @@ class Hub75 {
     uint data_prog_offs = 0;
     uint row_prog_offs = 0;
 
+    uint brightness = 6;
+
 
     // Top half of display - 16 rows on a 32x32 panel
     unsigned int pin_r0 = 0;

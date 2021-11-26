@@ -20,7 +20,7 @@
 .side_set 2
 
 .wrap_target
-    out pins, 5 [7]    side 0x2 ; Deassert OEn, output row select
+    out pins, 5 [1]    side 0x2 ; Deassert OEn, output row select
     out x, 27   [7]    side 0x3 ; Pulse LATCH, get OEn pulse width
 pulse_loop:
     jmp x-- pulse_loop side 0x0 ; Assert OEn for x+1 cycles
@@ -42,7 +42,7 @@ pulse_loop:
 .side_set 2
 
 .wrap_target
-    out pins, 5 [7]    side 0x3 ; Deassert OEn, output row select
+    out pins, 5 [1]    side 0x3 ; Deassert OEn, output row select
     out x, 27   [7]    side 0x2 ; Pulse LATCH, get OEn pulse width
 pulse_loop:
     jmp x-- pulse_loop side 0x1 ; Assert OEn for x+1 cycles
@@ -107,17 +107,18 @@ public shift0:              ; R0 G0 B0 (Top half of 64x64 displays)
 
 public shift1:              ; R1 G1 B1 (Bottom half of 64x64 displays)
     pull             side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
-    in osr, 1        side 0 ; Red1 N
-    out null, 10     side 0 ; Red1 discard
+    in osr, 1        side 1 ; Red1 N
+    out null, 10     side 1 ; Red1 discard
 
-    in osr, 1        side 0 ; Green1 N
-    out null, 10     side 0 ; Green1 discard
+    in osr, 1        side 1 ; Green1 N
+    out null, 10     side 1 ; Green1 discard
 
-    in osr, 1        side 0 ; Blue1 N
-    out null, 32     side 0 ; Remainder discard
+    in osr, 1        side 1 ; Blue1 N
+    out null, 32     side 1 ; Remainder discard
 
-    in null, 26      side 0 ; Note we are just doing this little manoeuvre here to get GPIOs in the order
-    mov pins, ::isr [7] side 1 ; R0, G0, B0, R1, G1, B1. Can go 1 cycle faster if reversed
+    in null, 26      side 1 ; Note we are just doing this little manoeuvre here to get GPIOs in the order
+    mov pins, ::isr  side 1 ; R0, G0, B0, R1, G1, B1. Can go 1 cycle faster if reversed
+
 .wrap
 ; Note that because the clock edge for pixel n is in the middle of pixel n +
 ; 1, a dummy pixel at the end is required to clock the last piece of genuine

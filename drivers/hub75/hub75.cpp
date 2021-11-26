@@ -68,6 +68,13 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
         back_buffer = buffer + width * height;
         managed_buffer = false;
     }
+
+    if (brightness == 0) {
+        if (width >= 64) brightness = 6;
+        if (width >= 96) brightness = 3;
+        if (width >= 128) brightness = 2;
+        if (width >= 160) brightness = 1;
+    }
 }
 
 void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
@@ -203,7 +210,7 @@ void Hub75::stop(irq_handler_t handler) {
         irq_remove_handler(DMA_IRQ_0, handler);
         //dma_channel_wait_for_finish_blocking(dma_channel);
         dma_channel_abort(dma_channel);
-        dma_channel_acknowledge_irq1(dma_channel);
+        dma_channel_acknowledge_irq0(dma_channel);
         dma_channel_unclaim(dma_channel);
     }
 
@@ -270,14 +277,18 @@ void Hub75::dma_complete() {
     if(dma_channel_get_irq0_status(dma_channel)) {
         dma_channel_acknowledge_irq0(dma_channel);
 
-        // SM is finished when it stalls on empty TX FIFO (or, y'know, DMA callback)
+        // Push out a dummy pixel for each row
+        pio_sm_put_blocking(pio, sm_data, 0);
+        pio_sm_put_blocking(pio, sm_data, 0);
+
+        // SM is finished when it stalls on empty TX FIFO
         hub75_wait_tx_stall(pio, sm_data);
 
         // Check that previous OEn pulse is finished, else things WILL get out of sequence
         hub75_wait_tx_stall(pio, sm_row);
 
         // Latch row data, pulse output enable for new row.
-        pio_sm_put_blocking(pio, sm_row, row | (6u << 5 << bit));
+        pio_sm_put_blocking(pio, sm_row, row | (brightness << 5 << bit));
 
         if (do_flip && bit == 0 && row == 0) {
             // Literally flip the front and back buffers by swapping their addresses
