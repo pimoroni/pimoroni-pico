@@ -24,6 +24,7 @@ add_subdirectory(breakout_scd41)
 add_subdirectory(breakout_vl53l5cx)
 add_subdirectory(breakout_pms5003)
 add_subdirectory(breakout_oled_128x128)
+add_subdirectory(breakout_mlx90640)
 
 add_subdirectory(pico_display)
 add_subdirectory(pico_display_2)
