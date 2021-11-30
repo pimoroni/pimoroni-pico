@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include "pico/stdlib.h"
-#include "pico/multicore.h"
 
 #include "hardware/pio.h"
 #include "hardware/dma.h"
