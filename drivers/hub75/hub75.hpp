@@ -37,6 +37,7 @@ constexpr uint16_t GAMMA_10BIT[256] = {
 struct Pixel {
     uint32_t color;
     constexpr Pixel() : color(0) {};
+    constexpr Pixel(uint32_t color) : color(color) {};
     constexpr Pixel(uint8_t r, uint8_t g, uint8_t b) : color((GAMMA_10BIT[b] << 20) | (GAMMA_10BIT[g] << 10) | GAMMA_10BIT[r]) {};
 };
 
@@ -44,6 +45,8 @@ enum PanelType {
     PANEL_GENERIC = 0,
     PANEL_FM6126A,
 };
+
+Pixel hsv_to_rgb(float h, float s, float v);
 
 class Hub75 {
     public:
@@ -113,6 +116,7 @@ class Hub75 {
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void FM6126A_setup();
+    void set_color(uint x, uint y, uint32_t c);
     void set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
     void set_hsv(uint x, uint y, float r, float g, float b);
     void display_update();

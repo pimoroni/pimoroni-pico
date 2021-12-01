@@ -139,10 +139,6 @@ void Hub75_display_update() {
 
 mp_obj_t Hub75_start(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
-    //size_t stack_size = 0;
-    //mp_thread_create(&Hub75_display_update, nullptr, &stack_size);
-    //multicore_reset_core1();
-    //multicore_launch_core1(Hub75_display_update);
     self->hub75->start(dma_complete);
     return mp_const_none;
 }
@@ -150,6 +146,67 @@ mp_obj_t Hub75_start(mp_obj_t self_in) {
 mp_obj_t Hub75_stop(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     self->hub75->stop(dma_complete);
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_set_color_masked(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_mask, ARG_color };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_mask, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_color, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    int c = args[ARG_color].u_int;
+    int m = args[ARG_mask].u_int;
+
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
+
+    for(auto py = 0; py < 32; py++) {
+        if(m & (1 << py)) {
+            self->hub75->set_color(x, py + y, c);
+        }
+    }
+
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_color(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
+    return mp_obj_new_int(Pixel(mp_obj_get_int(r), mp_obj_get_int(g), mp_obj_get_int(b)).color);
+}
+
+mp_obj_t Hub75_color_hsv(mp_obj_t h, mp_obj_t s, mp_obj_t v) {
+    return mp_obj_new_int(hsv_to_rgb(mp_obj_get_float(h), mp_obj_get_float(s), mp_obj_get_float(v)).color);
+}
+
+mp_obj_t Hub75_set_color(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_color };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_color, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    int c = args[ARG_color].u_int;
+
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
+    self->hub75->set_color(x, y, c);
+
     return mp_const_none;
 }
 
@@ -203,6 +260,20 @@ mp_obj_t Hub75_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_arg
 
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
     self->hub75->set_hsv(x, y, h, s, v);
+
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_set_all_color(mp_obj_t self_in, mp_obj_t color) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+
+    int c = mp_obj_get_int(color);
+
+    for (auto x = 0u; x < self->hub75->width; x++) {
+        for (auto y = 0u; y < self->hub75->height; y++) {
+            self->hub75->set_color(x, y, c);
+        }
+    }
 
     return mp_const_none;
 }

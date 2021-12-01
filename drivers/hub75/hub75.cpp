@@ -77,7 +77,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
     }
 }
 
-void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
+void Hub75::set_color(uint x, uint y, uint32_t c) {
     int offset = 0;
     if(x >= width || y >= height) return;
     if(y >= height / 2) {
@@ -87,20 +87,15 @@ void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
     } else {
         offset = (y * width + x) * 2;
     }
-    front_buffer[offset] = Pixel(r, g, b);
+    front_buffer[offset].color = c;
+}
+
+void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
+    set_color(x, y, Pixel(r, g, b).color);
 }
 
 void Hub75::set_hsv(uint x, uint y, float h, float s, float v) {
-    int offset = 0;
-    if(x >= width || y >= height) return;
-    if(y >= height / 2) {
-        y -= height / 2;
-        offset = (y * width + x) * 2;
-        offset += 1;
-    } else {
-        offset = (y * width + x) * 2;
-    }
-    front_buffer[offset] = hsv_to_rgb(h, s, v);
+    set_color(x, y, hsv_to_rgb(h, s, v).color);
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
