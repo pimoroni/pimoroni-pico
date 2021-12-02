@@ -57,6 +57,7 @@ class Hub75 {
     bool managed_buffer = false;
     PanelType panel_type;
     bool inverted_stb = false;
+    Pixel background = 0;
 
     // DMA & PIO
     uint dma_channel = 0;
@@ -116,13 +117,13 @@ class Hub75 {
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void FM6126A_setup();
-    void set_color(uint x, uint y, uint32_t c);
+    void set_color(uint x, uint y, Pixel c);
     void set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
     void set_hsv(uint x, uint y, float r, float g, float b);
     void display_update();
     void clear();
     void start(irq_handler_t handler);
     void stop(irq_handler_t handler);
-    void flip();
+    void flip(bool copybuffer=true);
     void dma_complete();
 };

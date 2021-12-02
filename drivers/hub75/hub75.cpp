@@ -36,7 +36,6 @@ Pixel hsv_to_rgb(float h, float s, float v) {
     }
 }
 
-
 Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
@@ -77,7 +76,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
     }
 }
 
-void Hub75::set_color(uint x, uint y, uint32_t c) {
+void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
     if(x >= width || y >= height) return;
     if(y >= height / 2) {
@@ -87,15 +86,15 @@ void Hub75::set_color(uint x, uint y, uint32_t c) {
     } else {
         offset = (y * width + x) * 2;
     }
-    front_buffer[offset].color = c;
+    front_buffer[offset] = c;
 }
 
 void Hub75::set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
-    set_color(x, y, Pixel(r, g, b).color);
+    set_color(x, y, Pixel(r, g, b));
 }
 
 void Hub75::set_hsv(uint x, uint y, float h, float s, float v) {
-    set_color(x, y, hsv_to_rgb(h, s, v).color);
+    set_color(x, y, hsv_to_rgb(h, s, v));
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
@@ -171,7 +170,6 @@ void Hub75::start(irq_handler_t handler) {
         channel_config_set_write_increment(&flip_config, true);
         channel_config_set_bswap(&flip_config, false);
         dma_channel_configure(dma_flip_channel, &flip_config, nullptr, nullptr, 0, false);
-
 
         // Same handler for both DMA channels
         irq_set_exclusive_handler(DMA_IRQ_0, handler);
@@ -255,7 +253,14 @@ void Hub75::clear() {
     }
 }
 
-void Hub75::flip() {
+void Hub75::flip(bool copybuffer) {
+    dma_channel_config flip_config = dma_get_channel_config(dma_flip_channel);
+    channel_config_set_read_increment(&flip_config, copybuffer);
+    dma_channel_configure(dma_flip_channel, &flip_config, nullptr, nullptr, 0, false);
+
+    dma_channel_set_read_addr(dma_flip_channel, copybuffer ? front_buffer : &background, false);
+    dma_channel_set_write_addr(dma_flip_channel, back_buffer, false);
+
     // Flip and block until the front buffer has been prepared
     do_flip = true;
     while(do_flip) {
@@ -291,8 +296,6 @@ void Hub75::dma_complete() {
             back_buffer = front_buffer;
             front_buffer = tmp;
             // Then, read the contents of the back buffer into the front buffer
-            dma_channel_set_read_addr(dma_flip_channel, back_buffer, false);
-            dma_channel_set_write_addr(dma_flip_channel, front_buffer, false);
             dma_channel_set_trans_count(dma_flip_channel, width * height, true);
         }
 

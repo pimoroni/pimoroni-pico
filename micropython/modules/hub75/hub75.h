@@ -21,3 +21,4 @@ extern mp_obj_t Hub75_set_all_hsv(size_t n_args, const mp_obj_t *pos_args, mp_ma
 extern mp_obj_t Hub75_set_all_color(mp_obj_t self_in, mp_obj_t color);
 extern mp_obj_t Hub75_clear(mp_obj_t self_in);
 extern mp_obj_t Hub75_flip(mp_obj_t self_in);
+extern mp_obj_t Hub75_flip_and_clear(mp_obj_t self_in, mp_obj_t color);

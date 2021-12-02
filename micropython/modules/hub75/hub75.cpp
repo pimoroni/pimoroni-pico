@@ -124,10 +124,17 @@ mp_obj_t Hub75_clear(mp_obj_t self_in) {
 
 mp_obj_t Hub75_flip(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
-    self->hub75->do_flip = true;
-    while (self->hub75->do_flip) {
-        MICROPY_EVENT_POLL_HOOK
-    }
+    self->hub75->flip();
+
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_flip_and_clear(mp_obj_t self_in, mp_obj_t color) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+
+    self->hub75->background.color = mp_obj_get_int(color);
+    self->hub75->flip(false);
+
     return mp_const_none;
 }
 
@@ -165,7 +172,8 @@ mp_obj_t Hub75_set_color_masked(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    int c = args[ARG_color].u_int;
+    Pixel c;
+    c.color = args[ARG_color].u_int;
     int m = args[ARG_mask].u_int;
 
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
@@ -202,7 +210,8 @@ mp_obj_t Hub75_set_color(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    int c = args[ARG_color].u_int;
+    Pixel c;
+    c.color = args[ARG_color].u_int;
 
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
     self->hub75->set_color(x, y, c);
@@ -267,7 +276,8 @@ mp_obj_t Hub75_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_arg
 mp_obj_t Hub75_set_all_color(mp_obj_t self_in, mp_obj_t color) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
 
-    int c = mp_obj_get_int(color);
+    Pixel c;
+    c.color = mp_obj_get_int(color);
 
     for (auto x = 0u; x < self->hub75->width; x++) {
         for (auto y = 0u; y < self->hub75->height; y++) {
