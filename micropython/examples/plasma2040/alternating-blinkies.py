@@ -36,7 +36,7 @@ while True:
         else:
             led_strip.set_hsv(i, HUE_2 / 360, 1.0, BRIGHTNESS)
     time.sleep(SPEED)
-    
+
     for i in range(NUM_LEDS):
         if (i % 2) == 0:
             led_strip.set_hsv(i, HUE_2 / 360, 1.0, BRIGHTNESS)
