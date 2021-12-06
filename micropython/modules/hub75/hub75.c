@@ -53,7 +53,19 @@ STATIC const mp_map_elem_t hub75_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_PANEL_GENERIC), MP_ROM_INT(0) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PANEL_FM6126A), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_color), MP_ROM_PTR(&Hub75_color_obj) },
-    { MP_ROM_QSTR(MP_QSTR_color_hsv), MP_ROM_PTR(&Hub75_color_hsv_obj) }
+    { MP_ROM_QSTR(MP_QSTR_color_hsv), MP_ROM_PTR(&Hub75_color_hsv_obj) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(14) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_USER), MP_ROM_INT(23) },
+    { MP_ROM_QSTR(MP_QSTR_LED_R), MP_ROM_INT(16) },
+    { MP_ROM_QSTR(MP_QSTR_LED_G), MP_ROM_INT(17) },
+    { MP_ROM_QSTR(MP_QSTR_LED_B), MP_ROM_INT(18) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_A0), MP_ROM_INT(26) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_A1), MP_ROM_INT(27) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_A2), MP_ROM_INT(28) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_INT), MP_ROM_INT(19) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_SDA), MP_ROM_INT(20) },
+    { MP_ROM_QSTR(MP_QSTR_PIN_SCL), MP_ROM_INT(21) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE), MP_ROM_INT(29) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_hub75_globals, hub75_globals_table);
 
