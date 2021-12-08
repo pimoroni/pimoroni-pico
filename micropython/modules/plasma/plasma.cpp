@@ -133,13 +133,14 @@ mp_obj_t PlasmaWS2812_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 
 
 mp_obj_t PlasmaWS2812_set_rgb(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_index, ARG_r, ARG_g, ARG_b };
+    enum { ARG_self, ARG_index, ARG_r, ARG_g, ARG_b, ARG_w };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
+        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_w, MP_ARG_INT, {.u_int = 0} }
     };
 
     // Parse args.
@@ -150,21 +151,24 @@ mp_obj_t PlasmaWS2812_set_rgb(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     int r = args[ARG_r].u_int;
     int g = args[ARG_g].u_int;
     int b = args[ARG_b].u_int;
+    int w = args[ARG_w].u_int;
 
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaWS2812_obj_t);
-    self->ws2812->set_rgb(index, r, g, b);
+
+    self->ws2812->set_rgb(index, r, g, b, w);
 
     return mp_const_none;
 }
 
 mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_index, ARG_h, ARG_s, ARG_v };
+    enum { ARG_self, ARG_index, ARG_h, ARG_s, ARG_v, ARG_w };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_hue, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_sat, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} },
-        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} }
+        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} },
+        { MP_QSTR_w, MP_ARG_INT, {.u_int = 0} }
     };
 
     // Parse args.
@@ -175,9 +179,11 @@ mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     float h = mp_obj_get_float(args[ARG_h].u_obj);
     float s = mp_obj_get_float(args[ARG_s].u_obj);
     float v = mp_obj_get_float(args[ARG_v].u_obj);
+    int w = args[ARG_w].u_int;
 
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaWS2812_obj_t);
-    self->ws2812->set_hsv(index, h, s, v);
+
+    self->ws2812->set_hsv(index, h, s, v, w);
 
     return mp_const_none;
 }

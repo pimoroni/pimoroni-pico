@@ -67,7 +67,7 @@ void WS2812::clear() {
     }
 }
 
-void WS2812::set_hsv(uint32_t index, float h, float s, float v) {
+void WS2812::set_hsv(uint32_t index, float h, float s, float v, uint8_t w) {
     float i = floor(h * 6.0f);
     float f = h * 6.0f - i;
     v *= 255.0f;
@@ -76,12 +76,12 @@ void WS2812::set_hsv(uint32_t index, float h, float s, float v) {
     uint8_t t = v * (1.0f - (1.0f - f) * s);
 
     switch (int(i) % 6) {
-      case 0: set_rgb(index, v, t, p); break;
-      case 1: set_rgb(index, q, v, p); break;
-      case 2: set_rgb(index, p, v, t); break;
-      case 3: set_rgb(index, p, q, v); break;
-      case 4: set_rgb(index, t, p, v); break;
-      case 5: set_rgb(index, v, p, q); break;
+      case 0: set_rgb(index, v, t, p, w); break;
+      case 1: set_rgb(index, q, v, p, w); break;
+      case 2: set_rgb(index, p, v, t, w); break;
+      case 3: set_rgb(index, p, q, v, w); break;
+      case 4: set_rgb(index, t, p, v, w); break;
+      case 5: set_rgb(index, v, p, q, w); break;
     }
 }
 
