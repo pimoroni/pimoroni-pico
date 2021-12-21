@@ -1,10 +1,8 @@
 # Pico Display Pack - MicroPython <!-- omit in toc -->
 
-Pico Display Pack is a vibrant 1.14", 240 x 135 pixel IPS LCD screen for your Raspberry Pi Pico, with four useful buttons and a RGB LED. [Click here](https://shop.pimoroni.com/products/pico-display-pack) to find out more!
+Pico Display Pack is a vibrant 1.14", 240 x 135 pixel IPS LCD screen for your Raspberry Pi Pico, with four useful buttons and a RGB LED. [Buy one here!](https://shop.pimoroni.com/products/pico-display-pack)
 
-We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons and LED. See the [function reference](#function-reference) for details.
-
-Check out [UnfinishedStuff's excellent Display Pack guide](https://github.com/UnfinishedStuff/Pimoroni_Pico_Display_Pack_documentation) for more detail on the functions and code examples, and [tonygo2's Display Pack Workout](https://www.instructables.com/Pimoroni-Pico-Display-Workout/) for a comprehensive demo!
+We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons and LED. See the [function reference](#function-reference) for details. Scroll down to the bottom for links to more resources!
 
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
@@ -24,6 +22,7 @@ Check out [UnfinishedStuff's excellent Display Pack guide](https://github.com/Un
   - [text](#text)
   - [set_clip](#set_clip)
   - [remove_clip](#remove_clip)
+ - [More Resources](#more-resources)
 
 ## Example Program
 
@@ -204,3 +203,9 @@ picodisplay.set_clip(x, y, w, h)
 ### remove_clip
 
 This function removes any currently implemented clip.
+
+## More Resources
+
+- [Display Pack Guide by UnfinishedStuff](https://github.com/UnfinishedStuff/Pimoroni_Pico_Display_Pack_documentation) - more detail on functions and code examples
+- [Display Pack Workout by tonygo2](https://www.instructables.com/Pimoroni-Pico-Display-Workout/) - a comprehensive demo
+- [picofont by Les Wright](https://github.com/leswright1977/picofont) - implementing custom fonts using pure MicroPython
