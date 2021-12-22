@@ -188,6 +188,15 @@ mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     return mp_const_none;
 }
 
+const int get_orders[6][4] = {                //  r  g  b  w
+    [static_cast<int>(WS2812::COLOR_ORDER::RGB)]={0, 1, 2, 3},
+    [static_cast<int>(WS2812::COLOR_ORDER::RBG)]={0, 2, 1, 3},
+    [static_cast<int>(WS2812::COLOR_ORDER::GRB)]={1, 0, 2, 3},
+    [static_cast<int>(WS2812::COLOR_ORDER::GBR)]={1, 2, 0, 3},
+    [static_cast<int>(WS2812::COLOR_ORDER::BRG)]={2, 0, 1, 3},
+    [static_cast<int>(WS2812::COLOR_ORDER::BGR)]={2, 1, 0, 3},
+};
+
 mp_obj_t PlasmaWS2812_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_index };
     static const mp_arg_t allowed_args[] = {
@@ -202,12 +211,13 @@ mp_obj_t PlasmaWS2812_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
 
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaWS2812_obj_t);
     WS2812::RGB rgb = self->ws2812->get(index);
+    const int *get_order = get_orders[static_cast<int>(self->ws2812->color_order)];
 
     mp_obj_t tuple[4];
-    tuple[0] = mp_obj_new_int(rgb.r);
-    tuple[1] = mp_obj_new_float(rgb.g);
-    tuple[2] = mp_obj_new_float(rgb.b);
-    tuple[3] = mp_obj_new_float(rgb.w);
+    tuple[get_order[0]] = mp_obj_new_int(rgb.r);
+    tuple[get_order[1]] = mp_obj_new_int(rgb.g);
+    tuple[get_order[2]] = mp_obj_new_int(rgb.b);
+    tuple[get_order[3]] = mp_obj_new_int(rgb.w);
     return mp_obj_new_tuple(4, tuple);
 }
 
@@ -410,9 +420,9 @@ mp_obj_t PlasmaAPA102_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
 
     mp_obj_t tuple[4];
     tuple[0] = mp_obj_new_int(rgb.r);
-    tuple[1] = mp_obj_new_float(rgb.g);
-    tuple[2] = mp_obj_new_float(rgb.b);
-    tuple[3] = mp_obj_new_float(rgb.sof);
+    tuple[1] = mp_obj_new_int(rgb.g);
+    tuple[2] = mp_obj_new_int(rgb.b);
+    tuple[3] = mp_obj_new_int(rgb.sof);
     return mp_obj_new_tuple(4, tuple);
 }
 
