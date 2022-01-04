@@ -181,7 +181,7 @@ button_a = Button(plasma2040.BUTTON_A)
 button_b = Button(plasma2040.BUTTON_B)
 ```
 
-To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `hold_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values such as hue:
+To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `repeat_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values such as hue:
 
 ```python
 state = button_a.read()
