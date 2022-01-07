@@ -114,6 +114,12 @@ mp_obj_t PlasmaWS2812_clear(mp_obj_t self_in) {
     return mp_const_none;
 }
 
+mp_obj_t PlasmaWS2812_update(mp_obj_t self_in) {
+    _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
+    self->ws2812->update(true);
+    return mp_const_none;
+}
+
 mp_obj_t PlasmaWS2812_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_fps };
     static const mp_arg_t allowed_args[] = {
@@ -304,6 +310,12 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 mp_obj_t PlasmaAPA102_clear(mp_obj_t self_in) {
     _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
     self->apa102->clear();
+    return mp_const_none;
+}
+
+mp_obj_t PlasmaAPA102_update(mp_obj_t self_in) {
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
+    self->apa102->update(true);
     return mp_const_none;
 }
 
