@@ -77,14 +77,7 @@ namespace pimoroni {
 
   void IS31FL3731::enable(std::initializer_list<uint8_t> pattern, uint8_t frame) {
     i2c->reg_write_uint8(address, reg::BANK, frame);
-    uint8_t enable_buf[19];
-    enable_buf[0] = ENABLE_OFFSET;
-    uint8_t offset = 1;
-    for(auto byte : pattern) {
-      enable_buf[offset] = byte;
-      offset++;
-    }
-    i2c->write_blocking(address, enable_buf, sizeof(enable_buf), false);
+    i2c->write_bytes(address, ENABLE_OFFSET, pattern.begin(), pattern.size());
   }
 
   void IS31FL3731::set(uint8_t index, uint8_t brightness) {
