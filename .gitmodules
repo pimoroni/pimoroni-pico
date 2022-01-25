@@ -11,3 +11,6 @@
 	path = drivers/bmp280/src
 	url = https://github.com/pimoroni/BMP280_driver
 	branch = patch-intf-ptr
+[submodule "drivers/scd4x/src"]
+	path = drivers/scd4x/src
+	url = https://github.com/Sensirion/embedded-i2c-scd4x
