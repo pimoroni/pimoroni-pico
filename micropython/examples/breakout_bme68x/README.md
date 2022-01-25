@@ -31,7 +31,7 @@ The `breakout_bme68x` module includes constants for the possible I2C addresses:
 
 ## Reading Data From The Sensor
 
-The `read` method will return a tuple containing Temperature (degrees C), Pressure (Pa) humidity, and gas resistance values, plus the status code and gas/measurement indexes:
+The `read` method will return a tuple containing Temperature (degrees C), Pressure (Pa), relative humidity (%rH), and gas resistance (Ω) values, plus the status code and gas/measurement indexes:
 
 ```python
 temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = bme.read()
