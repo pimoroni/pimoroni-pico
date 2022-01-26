@@ -13,7 +13,6 @@ We've included helper functions to handle every aspect of drawing to the screen 
     - [GPIO](#gpio)
   - [Functions](#functions)
     - [init](#init)
-    - [set_backlight](#set_backlight)
     - [set_motor](#set_motor)
     - [get_adc](#get_adc)
     - [set_audio_pin](#set_audio_pin)
