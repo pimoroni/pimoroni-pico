@@ -2,6 +2,10 @@ import time
 from machine import Pin, PWM, ADC
 
 
+BREAKOUT_GARDEN_I2C_PINS = {"sda": 4, "scl": 5}
+PICO_EXPLORER_I2C_PINS = {"sda": 20, "scl": 21}
+
+
 class Analog:
     def __init__(self, pin, amplifier_gain=1, resistor=0):
         self.gain = amplifier_gain
