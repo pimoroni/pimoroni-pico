@@ -115,6 +115,21 @@ namespace pimoroni {
     }
   }
 
+  void Badger2040::image(const uint8_t *data) {
+    for(uint32_t y = 0; y < 128; y++) {
+      for(uint32_t x = 0; x < 296; x++) {
+        // work out byte offset in source data
+        uint32_t o = (y * (296 >> 3)) + (x >> 3);
+
+        // extract bitmask for this pixel
+        uint32_t bm = 0b10000000 >> (x & 0b111);
+
+        // draw the pixel
+        uc8151.pixel(x, y, data[o] & bm);
+      }
+    }
+  }
+
   void Badger2040::rectangle(int32_t x, int32_t y, int32_t w, int32_t h) {
     for(int cy = y; cy < y + h; cy++) {
       for(int cx = x; cx < x + w; cx++) {
@@ -254,8 +269,14 @@ namespace pimoroni {
   }
 
   void Badger2040::wait_for_press() {
+    update_button_states();
     while(_button_states == 0) {
       update_button_states();
+      tight_loop_contents();
+    }
+
+    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
+    while(gpio_get_all() & mask) {
       tight_loop_contents();
     }
   }
