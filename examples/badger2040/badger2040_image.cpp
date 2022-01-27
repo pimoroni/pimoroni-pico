@@ -30,17 +30,17 @@ int main() {
 
   badger.init();
 
-  if(badger.pressed(badger.A)) {
+  if(badger.pressed_to_wake(badger.A)) {
     printf("> A pressed\n");
     badger.image(shaun);
   }
 
-  else if(badger.pressed(badger.B)) {
+  else if(badger.pressed_to_wake(badger.B)) {
     printf("> B pressed\n");
     badger.image(paul);
   }
 
-  else if(badger.pressed(badger.C)) {
+  else if(badger.pressed_to_wake(badger.C)) {
     printf("> C pressed\n");
     badger.image(adam);
   }
