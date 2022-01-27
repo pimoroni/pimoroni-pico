@@ -68,7 +68,7 @@ namespace pimoroni {
         return value;
     }
 
-    int I2C::write_bytes(uint8_t address, uint8_t reg, uint8_t *buf, int len) {
+    int I2C::write_bytes(uint8_t address, uint8_t reg, const uint8_t *buf, int len) {
         uint8_t buffer[len + 1];
         buffer[0] = reg;
         for(int x = 0; x < len; x++) {

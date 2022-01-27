@@ -36,8 +36,8 @@ int main() {
     while(true) {
         current_buttons = get_button_states();
         changed_buttons = current_buttons ^ last_buttons;
-        pressed_buttons = current_buttons & changed;
-        released_buttons =  last_buttons & changed;
+        pressed_buttons = current_buttons & changed_buttons;
+        released_buttons =  last_buttons & changed_buttons;
 
         // Toggle the LED states when a button is pressed
         led_states ^= pressed_buttons;
