@@ -22,7 +22,7 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
 
 The easiest way to get started. If you're new to Pico, we recommend you read our [getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico) tutorial.
 
-:warning:All of our MicroPython libraries are baked into a batteries-included, custom version of MicroPython which you can grab from releases: [https://github.com/pimoroni/pimoroni-pico/releases/latest/](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
+:warning: All of our MicroPython libraries are baked into a batteries-included, custom version of MicroPython which you can grab from releases: [https://github.com/pimoroni/pimoroni-pico/releases/latest/](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
 
 New releases are issued regularly with new libraries, bug fixes to our existing libraries and new features inherited from MicroPython upstream. Be sure to check back!
 
