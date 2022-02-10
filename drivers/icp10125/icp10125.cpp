@@ -39,7 +39,7 @@ namespace pimoroni {
     }
 
     void ICP10125::reset() {
-        uint16_t command = SOFT_RESET;
+        uint16_t command = __bswap16(SOFT_RESET);
         i2c->write_blocking(address, (uint8_t *)&command, 2, false);
         sleep_ms(10); // Soft reset time is 170us but you can never be too sure...
     }
@@ -86,7 +86,7 @@ namespace pimoroni {
         uint16_result result;
         uint16_t command = __bswap16(READ_ID);
 
-        i2c->write_blocking(address, (uint8_t *)&command, 2, false);
+        i2c->write_blocking(address, (uint8_t *)&command, 2, true);
         i2c->read_blocking(address, (uint8_t *)&result, 3, false);
 
         if(result.crc8 != crc8((uint8_t *)&result.data, 2)) {
