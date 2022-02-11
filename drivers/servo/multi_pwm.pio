@@ -1,0 +1,24 @@
+;
+; Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+.program multi_pwm
+.side_set 1
+
+.wrap_target
+    ;pull side 0                    ; Pull in the next DWord containing the pin states, and time counter
+    ;out pins, 16 side 1            ; Immediately set the pins to their new state
+    ;out y, 16 [1] side 0           ; Set the counter
+
+    pull side 0                    ; Pull in the next DWord containing the pin states, and time counter
+    out pins, 32 side 1            ; Immediately set the pins to their new state
+    pull side 0
+    out y, 32 side 0           ; Set the counter
+count_check:
+    jmp y-- delay side 0           ; Check if the counter is 0, and if so wrap around. If not decrement the counter and jump to the delay
+.wrap
+
+delay:
+    jmp count_check [3] side 1     ; Wait a few cycles then jump back to the loop
