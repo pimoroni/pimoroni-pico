@@ -40,6 +40,8 @@ WS2812 led_bar(N_LEDS, pio0, 0, servo2040::LED_DAT);
 
 Button user_sw(servo2040::USER_SW, Polarity::ACTIVE_LOW, 0);
 
+uint count = 0;
+uint servo_seq = 0;
 int main() {
   stdio_init_all();
 
@@ -47,7 +49,7 @@ int main() {
 
   sleep_ms(5000);
 
-  MultiPWM pwms(pio1, 0, 0);
+  MultiPWM pwms(pio1, 0, 0b111111111111111);
 
   int speed = DEFAULT_SPEED;
   float offset = 0.0f;
@@ -65,6 +67,19 @@ int main() {
     for(auto i = 0u; i < led_bar.num_leds; ++i) {
       float hue = float(i) / led_bar.num_leds;
       led_bar.set_hsv(i, hue + offset, 1.0f, 0.5f);
+    }
+
+    count++;
+    if(count >= 1000) {
+      count = 0;
+
+      pwms.start(servo_seq);
+      servo_seq++;
+      if(servo_seq >= 4)
+        servo_seq = 0;
+
+      pwms.set_servo_duty(1, 1000);
+      pwms.apply_servo_duty();
     }
 
     //pwms.update(true);
