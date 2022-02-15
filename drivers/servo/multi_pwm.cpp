@@ -5,8 +5,14 @@
 #include <vector>
 #include <algorithm>
 
+// Uncomment the below line to enable debugging
+// #define DEBUG_MULTI_PWM
+
 namespace servo {
 
+#ifdef DEBUG_MULTI_PWM
+    static const uint DEBUG_SIDESET = 17;
+#endif
 
 int data_dma_channel;
 int ctrl_dma_channel;
@@ -39,7 +45,6 @@ const bool use_loading_zone = true;
 
 uint irq_gpio = 15;
 uint write_gpio = 16;
-uint sideset_gpio = 17;
 
 void __isr pwm_dma_handler() {
     // Clear the interrupt request.
@@ -76,7 +81,11 @@ interrupt is fired, and the handler reconfigures channel A so that it is ready f
     
 
 MultiPWM::MultiPWM(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask(pin_mask) {
+#ifdef DEBUG_MULTI_PWM
+    pio_program_offset = pio_add_program(pio, &debug_multi_pwm_program);
+#else
     pio_program_offset = pio_add_program(pio, &multi_pwm_program);
+#endif
 
     gpio_init(irq_gpio);
     gpio_set_dir(irq_gpio, GPIO_OUT);
@@ -97,12 +106,20 @@ MultiPWM::MultiPWM(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask
         pio_sm_set_pindirs_with_mask(pio, sm, pin_mask, pin_mask);
     }
 
-    pio_gpio_init(pio, sideset_gpio);
-    pio_sm_set_consecutive_pindirs(pio, sm, sideset_gpio, 1, true);
+#ifdef DEBUG_MULTI_PWM
+    pio_gpio_init(pio, DEBUG_SIDESET);
+    pio_sm_set_consecutive_pindirs(pio, sm, DEBUG_SIDESET, 1, true);
+#endif
 
+#ifdef DEBUG_MULTI_PWM
+    pio_sm_config c = debug_multi_pwm_program_get_default_config(pio_program_offset);
+#else
     pio_sm_config c = multi_pwm_program_get_default_config(pio_program_offset);
+#endif
     sm_config_set_out_pins(&c, 0, irq_gpio); //TODO change this to be 32
-    sm_config_set_sideset_pins(&c, sideset_gpio);
+#ifdef DEBUG_MULTI_PWM
+    sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
+#endif
     sm_config_set_out_shift(&c, false, true, 32);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE); // We actively do not want a joined FIFO even though we are not needing the RX
 
@@ -185,7 +202,11 @@ MultiPWM::~MultiPWM() {
     dma_channel_unclaim(data_dma_channel);
     dma_channel_unclaim(ctrl_dma_channel);
     pio_sm_set_enabled(pio, sm, false);
+#ifdef DEBUG_MULTI_PWM
+    pio_remove_program(pio, &debug_multi_pwm_program, pio_program_offset);
+#else
     pio_remove_program(pio, &multi_pwm_program, pio_program_offset);
+#endif
 #ifndef MICROPY_BUILD_TYPE
     // pio_sm_unclaim seems to hardfault in MicroPython
     pio_sm_unclaim(pio, sm);
