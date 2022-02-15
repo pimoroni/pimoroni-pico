@@ -50,9 +50,11 @@ int main() {
   sleep_ms(5000);
 
   MultiPWM pwms(pio1, 0, 0b111111111111111);
+  pwms.set_wrap(20000);
 
   int speed = DEFAULT_SPEED;
   float offset = 0.0f;
+  bool toggle = false;
 
   while(true) {
     bool sw_pressed = user_sw.read();
@@ -70,16 +72,22 @@ int main() {
     }
 
     count++;
-    if(count >= 1000) {
+    if(count >= 100) {
       count = 0;
 
-      pwms.start(servo_seq);
+      pwms.set_chan_level(servo_seq, 2000);//toggle ? 2000 : 1000);
+      //pwms.set_chan_polarity(servo_seq, toggle);
+      //pwms.set_chan_offset(servo_seq, toggle ? 19000 : 0);
       servo_seq++;
-      if(servo_seq >= 4)
+      if(servo_seq >= 4) {
         servo_seq = 0;
+        toggle = !toggle;
+        //pwms.set_wrap(toggle ? 30000 : 20000);
+        float div = clock_get_hz(clk_sys) / (toggle ? 500000 : 5000000);
+        pwms.set_clkdiv(div);
+      }
 
-      pwms.set_servo_duty(1, 1000);
-      pwms.apply_servo_duty();
+      //pwms.load_pwm();
     }
 
     //pwms.update(true);

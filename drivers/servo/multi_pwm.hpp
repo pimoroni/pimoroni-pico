@@ -27,32 +27,41 @@ namespace servo {
 
     struct TransitionData {
         uint8_t servo;
-        uint32_t time;
+        uint32_t level;
         bool state;
 
-        TransitionData() : servo(0), time(0), state(false) {};
-        TransitionData(uint8_t servo, uint32_t time, bool new_state) : servo(servo), time(time), state(new_state) {};
+        TransitionData() : servo(0), level(0), state(false) {};
+        TransitionData(uint8_t servo, uint32_t level, bool new_state) : servo(servo), level(level), state(new_state) {};
 
         bool compare(const TransitionData& other) const {
-            return time <= other.time;
+            return level <= other.level;
         }
     };
 
     class MultiPWM {
         public:
-            MultiPWM(PIO pio, uint sm, uint pin);
+            MultiPWM(PIO pio, uint sm, uint channel_mask);
             ~MultiPWM();
-            bool start(uint sequence_num=0);
-            bool stop();
-            void clear();
-            void set_servo_duty(uint servo, uint32_t duty);
-            void apply_servo_duty();
+            void set_wrap(uint32_t wrap, bool load = true);
+            void set_chan_level(uint8_t channel, uint32_t level, bool load = true);
+            void set_chan_offset(uint8_t channel, uint32_t offset, bool load = true);
+            void set_chan_polarity(uint8_t channel, bool polarity, bool load = true);
+            void set_clkdiv(float divider);
+            void set_clkdiv_int_frac(uint16_t integer, uint8_t fract);
+            //void set_phase_correct(bool phase_correct);
+            //void set_enabled(bool enabled);
+            void load_pwm();
         private:
+            static bool bit_in_mask(uint bit, uint mask);
             static void sorted_insert(TransitionData array[], uint &size, const TransitionData &data);
+        private:
             PIO pio;
             uint sm;
             uint pio_program_offset;
-            uint pin_mask;
-            uint pin_duty[32];
+            uint channel_mask;
+            uint channel_levels[NUM_BANK0_GPIOS];
+            uint channel_offsets[NUM_BANK0_GPIOS];
+            uint channel_polarities;
+            uint wrap_level;
     };
 }

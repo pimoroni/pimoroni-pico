@@ -6,7 +6,7 @@
 #include <algorithm>
 
 // Uncomment the below line to enable debugging
-// #define DEBUG_MULTI_PWM
+#define DEBUG_MULTI_PWM
 
 namespace servo {
 
@@ -80,31 +80,32 @@ interrupt is fired, and the handler reconfigures channel A so that it is ready f
      * */
     
 
-MultiPWM::MultiPWM(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask(pin_mask) {
+MultiPWM::MultiPWM(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), channel_mask(channel_mask) {
 #ifdef DEBUG_MULTI_PWM
     pio_program_offset = pio_add_program(pio, &debug_multi_pwm_program);
 #else
     pio_program_offset = pio_add_program(pio, &multi_pwm_program);
 #endif
+    channel_polarities = 0x00000000;
+    wrap_level = 0;
 
     gpio_init(irq_gpio);
     gpio_set_dir(irq_gpio, GPIO_OUT);
     gpio_init(write_gpio);
     gpio_set_dir(write_gpio, GPIO_OUT);
 
-    if(pin_mask != 0) {
-        // Initialise all the pins this PWM will control
-        for(uint pin = 0; pin < 32; pin++) { // 32 is number of bits
-            if((pin_mask & (1u << pin)) != 0) {
-                pio_gpio_init(pio, pin);
-                pin_duty[pin] = 0u;
-            }
+    // Initialise all the channels this PWM will control
+    for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
+        if(bit_in_mask(channel, channel_mask)) {
+            pio_gpio_init(pio, channel);
+            channel_levels[channel] = 0u;
+            channel_offsets[channel] = 0u;
         }
-
-        // Set their default state and direction
-        pio_sm_set_pins_with_mask(pio, sm, 0x00, pin_mask);
-        pio_sm_set_pindirs_with_mask(pio, sm, pin_mask, pin_mask);
     }
+
+    // Set their default state and direction
+    pio_sm_set_pins_with_mask(pio, sm, 0x00, channel_mask);
+    pio_sm_set_pindirs_with_mask(pio, sm, channel_mask, channel_mask);
 
 #ifdef DEBUG_MULTI_PWM
     pio_gpio_init(pio, DEBUG_SIDESET);
@@ -189,16 +190,10 @@ MultiPWM::MultiPWM(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask
     // Manually call the handler once, to trigger the first transfer
     pwm_dma_handler();
 
-    for(uint i = 0; i < 32; i++) {
-        pin_duty[i] = 0;
-    }
-
     //dma_start_channel_mask(1u << ctrl_dma_channel);
 }
 
 MultiPWM::~MultiPWM() {
-    stop();
-    clear();
     dma_channel_unclaim(data_dma_channel);
     dma_channel_unclaim(ctrl_dma_channel);
     pio_sm_set_enabled(pio, sm, false);
@@ -220,8 +215,80 @@ MultiPWM::~MultiPWM() {
     
 }
 
-bool MultiPWM::start(uint sequence_num) {
+void MultiPWM::set_wrap(uint32_t wrap, bool load) {
+    wrap_level = MAX(wrap, 1);  // Cannot have a wrap of zero!
+    if(load)
+        load_pwm();
+}
+
+void MultiPWM::set_chan_level(uint8_t channel, uint32_t level, bool load) {
+    if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+        channel_levels[channel] = level;
+        if(load)
+            load_pwm();
+    }
+}
+
+void MultiPWM::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
+    if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+        channel_offsets[channel] = offset;
+        if(load)
+            load_pwm();
+    }
+}
+
+void MultiPWM::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
+    if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+        if(polarity)
+            channel_polarities |= (1u << channel);
+        else
+            channel_polarities &= ~(1u << channel);
+        if(load)
+            load_pwm();
+    }
+}
+
+// These apply immediately, so do not obey the PWM update trigger
+void MultiPWM::set_clkdiv(float divider) {
+    pio_sm_set_clkdiv(pio, sm, divider);
+}
+
+// These apply immediately, so do not obey the PWM update trigger
+void MultiPWM::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
+    pio_sm_set_clkdiv_int_frac(pio, sm, integer, fract);
+}
+
+/*
+void MultiPWM::set_phase_correct(bool phase_correct);
+
+void MultiPWM::set_enabled(bool enabled);*/
+
+void MultiPWM::load_pwm() {
     gpio_put(write_gpio, 1);
+
+    TransitionData transitions[64];
+    uint data_size = 0;
+
+    // Go through each channel that we are assigned to
+    for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
+        if(bit_in_mask(channel, channel_mask)) {
+            // Get the channel polarity, remembering that true means inverted
+            bool polarity = bit_in_mask(channel, channel_polarities);
+
+            // If the level is greater than zero, add a transition to high
+            if(channel_levels[channel] > 0) {
+                MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel], !polarity));
+                //if((channel_offsets[channel] < wrap_level) && (channel_offsets[channel] + channel_levels[channel] >= wrap_level)) {
+                //    MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, 0, !polarity)) // Adds an initial state for PWMs that have their end offset beyond the transition line
+                //}
+            }
+            // If the level is less than the wrap, add a transition to low
+            if(channel_levels[channel] < wrap_level) {
+                MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel] + channel_levels[channel], polarity));
+            }
+        }
+    }
+
     // Read | Last W = Write
     // 0    | 0      = 1 (or 2)
     // 0    | 1      = 2
@@ -233,127 +300,78 @@ bool MultiPWM::start(uint sequence_num) {
     // 2    | 1      = 0
     // 2    | 2      = 0 (or 1)
 
-    // Choose the write index based on the last index
-    // There's probably a single equation for this, but I couldn't work it out
+    // Choose the write index based on the read and last written indices (using the above table)
     uint write_index = (read_index + 1) % NUM_BUFFERS;
     if(write_index == last_written_index) {
         write_index = (write_index + 1) % NUM_BUFFERS;
     }
 
-    switch(sequence_num) {
-        case 0:
-        {
-            Sequence& seq = sequences[write_index];
-            Transition* trans = seq.data;
-            trans[0].mask = (1u << 0);
-            trans[0].delay = 1000 - 1;
+    Sequence& seq = sequences[write_index];
+    seq.size = 0; // Reset the sequence, otherwise we end up appending and weird things happen
 
-            trans[1].mask = (1u << 1);
-            trans[1].delay = 1000 - 1;
+    if(data_size > 0) {
+        uint pin_states = channel_polarities;
+        uint data_index = 0;
+        uint current_level = 0;
 
-            trans[2].mask = (1u << 1);
-            trans[2].delay = 1000 - 1;
+        // Populate the selected write sequence with pin states and delays
+        while(data_index < data_size) {
+            uint next_level = wrap_level; // Set the next level to be the wrap, initially
 
-            trans[3].mask = 0;
-            trans[3].delay = (20000 - 3000) - 1;
-            seq.size = 4;
+            do {
+                // Is the level of this transition at the current level being checked?
+                if(transitions[data_index].level <= current_level) {
+                    // Yes, so add the transition state to the pin states mask
+                    if(transitions[data_index].state)
+                        pin_states |= (1u << transitions[data_index].servo);
+                    else
+                        pin_states &= ~(1u << transitions[data_index].servo);
 
-            if(use_loading_zone){
-                trans[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-                for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-                    trans[seq.size].mask = 0;
-                    trans[seq.size].delay = 0;
-                    seq.size += 1;
+                    data_index++; // Move on to the next transition
                 }
-            }
-        }
-        break;
-
-        case 1:
-        {
-            Sequence& seq = sequences[write_index];
-            Transition* trans = seq.data;
-            trans[0].mask = (1u << 5);
-            trans[0].delay = 10000 - 1;
-
-            trans[1].mask = 0;
-            trans[1].delay = (20000 - 10000) - 1;
-            seq.size = 2;
-
-            if(use_loading_zone){
-                trans[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-                for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-                    trans[seq.size].mask = 0;
-                    trans[seq.size].delay = 0;
-                    seq.size += 1;
+                else {
+                    // No, it is higher, so set it as our next level and break out of the loop
+                    next_level = transitions[data_index].level;
+                    break;
                 }
-            }
+            } while(data_index < data_size);
+
+            // Add the transition to the sequence
+            seq.data[seq.size].mask = pin_states;
+            seq.data[seq.size].delay = (next_level - current_level) - 1;
+            seq.size++;
+
+            current_level = next_level;
         }
-        break;
-
-        case 2:
-        {
-            Sequence& seq = sequences[write_index];
-            Transition* trans = seq.data;
-
-            uint count = 0;
-            uint last = 14;
-            for(uint i = 0; i < last; i++) {
-                trans[i].mask = (1u << i);
-                trans[i].delay = 1000 - 1;
-                count += 1000;
-            }
-
-            trans[last].mask = 0;
-            trans[last].delay = (20000 - count) - 1;
-            seq.size = last + 1;
-
-            if(use_loading_zone){
-                trans[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-                for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-                    trans[seq.size].mask = 0;
-                    trans[seq.size].delay = 0;
-                    seq.size += 1;
-                }
-            }
-        }
-        break;
-
-        case 3:
-        default:
-        {
-            Sequence& seq = sequences[write_index];
-            Transition* trans = seq.data;
-            trans[0].mask = 0;
-            trans[0].delay = 20000 - 1;
-            seq.size = 1;
-
-            if(use_loading_zone){
-                trans[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-                for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-                    trans[seq.size].mask = 0;
-                    trans[seq.size].delay = 0;
-                    seq.size += 1;
-                }
-            }
-        }
-        break;
     }
+    else {
+        // There were no transitions (either because there was a zero wrap, or no channels because there was a zero wrap?),
+        // so initialise the sequence with something, so the PIO functions correctly
+        seq.data[seq.size].mask = 0u;
+        seq.data[seq.size].delay = wrap_level - 1;
+        seq.size++;
+    }
+
+    // Introduce "Loading Zone" transitions to the end of the sequence
+    // to prevent the DMA interrupt firing many milliseconds before the
+    // sequence end.
+    // TODO, have this account for PWMS close to 100% that may overlap with it
+    seq.data[seq.size - 1].delay -= LOADING_ZONE_SIZE;
+    for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
+        seq.data[seq.size].mask = channel_polarities;
+        seq.data[seq.size].delay = 0;
+        seq.size++;
+    }
+
+    // Update the last written index so that the next DMA interrupt picks up the new sequence
     last_written_index = write_index;
-    gpio_put(write_gpio, 0);
 
-    return true;
+    gpio_put(write_gpio, 0); //TOREMOVE
 }
 
-void MultiPWM::set_servo_duty(uint servo, uint32_t duty) {
-    if(servo > 0 && servo <= 18) {
-        pin_duty[servo - 1] = std::min<uint32_t>(duty, 20000);
-    }
+bool MultiPWM::bit_in_mask(uint bit, uint mask) {
+    return ((1u << bit) & mask) != 0;
 }
-
-struct myclass {
-  bool operator() (const TransitionData& i, const TransitionData& j) { return i.compare(j); }
-} myobject;
 
 void MultiPWM::sorted_insert(TransitionData array[], uint &size, const TransitionData &data) {
     uint i;
@@ -361,117 +379,7 @@ void MultiPWM::sorted_insert(TransitionData array[], uint &size, const Transitio
         array[i] = array[i - 1];
     }
     array[i] = data;
-    //printf("Added %d, %ld, %d\n", data.servo, data.time, data.state);
+    //printf("Added %d, %ld, %d\n", data.servo, data.level, data.state);
     size++;
-}
-
-void MultiPWM::apply_servo_duty() {
-    gpio_put(write_gpio, 1);
-    const uint window = 20000;
-
-    TransitionData transitions[64];
-    uint data_size = 0;
-
-    // Go through each pin that we are assigned to
-    for(uint pin = 0; pin < 32; pin++) {
-        if(((1u << pin) & pin_mask) != 0) {
-            // If the duty is greater than zero, add a transition to high
-            if(pin_duty[pin] > 0) {
-                MultiPWM::sorted_insert(transitions, data_size, TransitionData(pin, 0, true));
-            }
-            // If the duty is less than the window size, add a transition to low
-            if(pin_duty[pin] < window) {
-                MultiPWM::sorted_insert(transitions, data_size, TransitionData(pin, pin_duty[pin], false));
-            }
-        }
-    }
-
-
-    //for(uint i = 0; i < data_size; i++) {
-    //    printf("Added %d, %ld, %d\n", transitions[i].servo, transitions[i].time, transitions[i].state);
-    //}
-
-    // Read | Last W = Write
-    // 0    | 0      = 1 (or 2)
-    // 0    | 1      = 2
-    // 0    | 2      = 1
-    // 1    | 0      = 2
-    // 1    | 1      = 2 (or 0)
-    // 1    | 2      = 0
-    // 2    | 0      = 1
-    // 2    | 1      = 0
-    // 2    | 2      = 0 (or 1)
-
-    // Choose the write index based on the last index
-    // There's probably a single equation for this, but I couldn't work it out
-    uint write_index = (read_index + 1) % NUM_BUFFERS;
-    if(write_index == last_written_index) {
-        write_index = (write_index + 1) % NUM_BUFFERS;
-    }
-
-    Sequence& seq = sequences[write_index];
-    seq.size = 0; // Reset the sequence, otherwise we end up appending, and weird things happen
-    //printf("Write Index = %d\n", write_index);
-
-    uint pin_states = 0;
-
-
-    uint current_time = 0;
-    uint data_start = 0;
-
-    while(data_start < data_size) {
-        uint next_time = window; // Set the next time to be the Window, initially
-
-        do {
-            // Is the time of this transition the same as the current time?
-            if(transitions[data_start].time <= current_time) {
-                // Yes, so update the state of this pin
-                if(transitions[data_start].state)
-                    pin_states = pin_states | (1u << transitions[data_start].servo);
-                else
-                    pin_states = pin_states & ~(1u << transitions[data_start].servo);
-                data_start++;
-            }
-            else {
-                // No, so set the next time to be the time of this transition, and break out of the loop
-                next_time = transitions[data_start].time;
-                break;
-            }
-
-        } while(data_start < data_size);
-
-        //#print("0b{:016b}".format(pin_mask))
-        // Add the transition
-        seq.data[seq.size].mask = pin_states;
-        seq.data[seq.size].delay = (next_time - current_time) - 1;
-
-        //printf("%#010x, %ld\n", pin_states, seq.data[seq.size].delay + 1);
-        seq.size++;
-        //#print((next_time - time) - 1)
-
-        current_time = next_time;
-    }
-
-    if(use_loading_zone) {
-        seq.data[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-        for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-            seq.data[seq.size].mask = 0;
-            seq.data[seq.size].delay = 0;
-            seq.size++;
-        }
-    }
-
-    last_written_index = write_index;
-    gpio_put(write_gpio, 0);
-}
-
-bool MultiPWM::stop() {
-    return true;//cancel_repeating_timer(&timer);
-}
-
-void MultiPWM::clear() {
-    //for (auto i = 0u; i < num_leds; ++i) {
-    //    set_rgb(i, 0, 0, 0);
-    //}
 }
 }
