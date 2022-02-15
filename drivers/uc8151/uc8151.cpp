@@ -183,11 +183,18 @@ namespace pimoroni {
     gpio_put(DC, 0); // command mode
     spi_write_blocking(spi, &reg, 1);
 
-    if(data) {
+    if(len > 0) {
       gpio_put(DC, 1); // data mode
       spi_write_blocking(spi, (const uint8_t*)data, len);
     }
 
+    gpio_put(CS, 1);
+  }
+
+  void UC8151::data(size_t len, const uint8_t *data) {
+    gpio_put(CS, 0);
+    gpio_put(DC, 1); // data mode
+    spi_write_blocking(spi, (const uint8_t*)data, len);
     gpio_put(CS, 1);
   }
 
@@ -208,6 +215,49 @@ namespace pimoroni {
 
     *p &= m; // clear bit
     *p |= b; // set bit value
+  }
+
+  void UC8151::partial_update(int x, int y, int w, int h, bool blocking) {
+    // y is given in columns ("banks"), which are groups of 8 horiontal pixels
+    // x is given in pixels
+
+    int cols = h / 8;
+    int y1 = y / 8;
+    //int y2 = y1 + cols;
+
+    int rows = w;
+    int x1 = x;
+    //int x2 = x + rows;
+
+    uint8_t partial_window[7] = {
+      (uint8_t)(y),
+      (uint8_t)(y + h - 1),
+      (uint8_t)(x >> 8),
+      (uint8_t)(x & 0xff),
+      (uint8_t)((x + w - 1) >> 8),
+      (uint8_t)((x + w - 1) & 0xff),
+      0b00000001  // PT_SCAN
+    };
+    command(PON); // turn on
+    command(PTIN); // enable partial mode
+    command(PTL, sizeof(partial_window), partial_window);
+
+    command(DTM2);
+    for (auto dx = 0; dx < rows; dx++) {
+      int sx = dx + x1;
+      int sy = y1;
+      data(cols, &frame_buffer[sy + (sx * (height / 8))]);
+    }
+    command(DSP); // data stop
+
+    command(DRF); // start display refresh
+
+    if(blocking) {
+      busy_wait();
+
+      command(POF); // turn off
+    }
+    command(PTOU); // disable partial mode
   }
 
   void UC8151::update(bool blocking) {

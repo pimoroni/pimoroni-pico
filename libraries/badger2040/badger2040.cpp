@@ -15,7 +15,7 @@ namespace pimoroni {
     // set clock speed to 12MHz to reduce the maximum current draw on the
     // battery. when updating a small, monochrome, display only every few
     // seconds or so then you don't need much processing power anyway...
-    set_sys_clock_khz(48000, true);
+    //set_sys_clock_khz(48000, true);
 
     gpio_set_function(ENABLE_3V3, GPIO_FUNC_SIO);
     gpio_set_dir(ENABLE_3V3, GPIO_OUT);
@@ -164,6 +164,26 @@ namespace pimoroni {
   void Badger2040::update_button_states() {
     uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
     _button_states |= gpio_get_all() & mask;
+  }
+
+  void Badger2040::partial_update(int x, int y, int w, int h) {
+    // wait for display to not be busy
+    while(uc8151.is_busy()) {
+      tight_loop_contents();
+    }
+
+    uc8151.partial_update(x, y, w, h, true);
+
+    _button_states = 0;
+
+    // wait for display to not be busy but sample buttons in case they are
+    // pressed during this time
+    while(uc8151.is_busy()) {
+      update_button_states();
+      tight_loop_contents();
+    }
+
+    uc8151.off();
   }
 
   void Badger2040::update() {

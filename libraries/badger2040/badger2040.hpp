@@ -22,6 +22,7 @@ namespace pimoroni {
     Badger2040();
     void init();
     void update();
+    void partial_update(int x, int y, int w, int h);
     void halt();
     void sleep();
 
