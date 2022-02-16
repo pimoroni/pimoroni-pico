@@ -3,6 +3,7 @@
 
 #include "ws2812.hpp"
 #include "multi_pwm.hpp"
+#include "servo.hpp"
 
 namespace servo2040 {
   const uint SERVO_1 = 0;

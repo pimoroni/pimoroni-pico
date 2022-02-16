@@ -40,6 +40,8 @@ WS2812 led_bar(N_LEDS, pio0, 0, servo2040::LED_DAT);
 
 Button user_sw(servo2040::USER_SW, Polarity::ACTIVE_LOW, 0);
 
+Servo simple_servo(0);
+
 uint count = 0;
 uint servo_seq = 0;
 int main() {
@@ -49,8 +51,13 @@ int main() {
 
   sleep_ms(5000);
 
-  MultiPWM pwms(pio1, 0, 0b111111111111111);
-  pwms.set_wrap(20000);
+  //Calibration& calib = simple_servo.calibration();
+  //calib.create_three_point_calibration(500, 1500, 2500, 4);
+
+  simple_servo.init();
+
+  //MultiPWM pwms(pio1, 0, 0b111111111111111);
+  //pwms.set_wrap(20000);
 
   int speed = DEFAULT_SPEED;
   float offset = 0.0f;
@@ -75,16 +82,17 @@ int main() {
     if(count >= 100) {
       count = 0;
 
-      pwms.set_chan_level(servo_seq, 2000);//toggle ? 2000 : 1000);
+      //pwms.set_chan_level(servo_seq, 2000);//toggle ? 2000 : 1000);
       //pwms.set_chan_polarity(servo_seq, toggle);
       //pwms.set_chan_offset(servo_seq, toggle ? 19000 : 0);
+      simple_servo.set_value(servo_seq);
       servo_seq++;
       if(servo_seq >= 4) {
         servo_seq = 0;
         toggle = !toggle;
         //pwms.set_wrap(toggle ? 30000 : 20000);
-        float div = clock_get_hz(clk_sys) / (toggle ? 500000 : 5000000);
-        pwms.set_clkdiv(div);
+        //float div = clock_get_hz(clk_sys) / (toggle ? 500000 : 5000000);
+        //pwms.set_clkdiv(div);
       }
 
       //pwms.load_pwm();
