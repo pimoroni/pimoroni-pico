@@ -10,9 +10,9 @@ namespace servo {
     : pulse(pulse), value(value) {
   }
 
-  Calibration::Calibration()
+  Calibration::Calibration(Type type)
     : calibration(nullptr), calibration_points(0), limit_lower(true), limit_upper(true) {
-    create_default_calibration();
+    create_default_calibration(type);
   }
 
   Calibration::~Calibration() {
@@ -22,8 +22,22 @@ namespace servo {
     }
   }
 
-  void Calibration::create_default_calibration() {
-    create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE);
+  void Calibration::create_default_calibration(Type type) {
+    switch(type) {
+    default:
+    case ANGULAR:
+      create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                                     -90.0f,            0.0f,              +90.0f);
+      break;
+    case LINEAR:
+      create_two_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
+                                   0.0f,              1.0f);
+      break;
+    case CONTINUOUS:
+      create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                                     -1.0f,            0.0f,              +1.0f);
+      break;
+    }
   }
 
   bool Calibration::create_blank_calibration(uint num_points) {
@@ -39,11 +53,17 @@ namespace servo {
     return success;
   }
 
-  void Calibration::create_three_point_calibration(float minus_pulse, float zero_pulse, float plus_pulse, float value_extent) {
+  void Calibration::create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value) {
+    create_blank_calibration(2);
+    calibration[0] = CalibrationPoint(min_pulse, min_value);
+    calibration[1] = CalibrationPoint(max_pulse, max_value);
+  }
+
+  void Calibration::create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
     create_blank_calibration(3);
-    calibration[0] = CalibrationPoint(minus_pulse, -value_extent);
-    calibration[1] = CalibrationPoint(zero_pulse,           0.0f);
-    calibration[2] = CalibrationPoint(plus_pulse,  +value_extent);
+    calibration[0] = CalibrationPoint(min_pulse, min_value);
+    calibration[1] = CalibrationPoint(mid_pulse, mid_value);
+    calibration[2] = CalibrationPoint(max_pulse, max_value);
   }
 
   bool Calibration::create_uniform_calibration(uint num_points, float min_pulse, float min_value, float max_pulse, float max_value) {
@@ -85,25 +105,32 @@ namespace servo {
     limit_upper = upper;
   }
 
-
-  uint32_t Converter::pulse_to_level(float pulse, uint32_t resolution) {
-    if(pulse != 0) {
-      // Constrain the level to hardcoded limits to protect the servo
-      pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
+  float Converter::min_value() {
+    float value = 0.0f;
+    if(calibration_points >= 2) {
+      value = calibration[0].value;
     }
-    return (uint32_t)((pulse * (float)resolution) / SERVO_PERIOD);
+    return value;
   }
 
-  uint32_t Converter::pulse_to_level(uint16_t pulse, uint32_t resolution) {
-    if(pulse != 0) {
-      // Constrain the level to hardcoded limits to protect the servo
-      pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT_I), UPPER_HARD_LIMIT_I);
+  float Converter::mid_value() {
+    float value = 0.0f;
+    if(calibration_points >= 2) {
+      value = (calibration[0].value + calibration[calibration_points - 1].value) / 2.0f;
     }
-    return (uint32_t)(((uint64_t)pulse * (uint64_t)resolution) / SERVO_PERIOD);
+    return value;
+  }
+
+  float Converter::max_value() {
+    float value = 0.0f;
+    if(calibration_points >= 2) {
+      value = calibration[calibration_points - 1].value;
+    }
+    return value;
   }
 
   float Converter::value_to_pulse(float value) {
-    float pulse = 0;
+    float pulse = 0.0f;
     if(calibration_points >= 2) {
       uint8_t last = calibration_points - 1;
 
@@ -113,7 +140,7 @@ namespace servo {
         if(limit_lower)
           pulse = calibration[0].pulse;
         else
-          pulse = map_pulse(value, calibration[0].value, calibration[1].value,
+          pulse = map_float(value, calibration[0].value, calibration[1].value,
                                    calibration[0].pulse, calibration[1].pulse);
       }
       // Is the value above the top most calibration point?
@@ -122,14 +149,14 @@ namespace servo {
         if(limit_upper)
           pulse = calibration[last].pulse;
         else
-          pulse = map_pulse(value, calibration[last - 1].value, calibration[last].value,
+          pulse = map_float(value, calibration[last - 1].value, calibration[last].value,
                                    calibration[last - 1].pulse, calibration[last].pulse);
       }
       else {
         // The value must between two calibration points, so iterate through them to find which ones
         for(uint8_t i = 0; i < last; i++) {
           if(value <= calibration[i + 1].value) {
-            pulse = map_pulse(value, calibration[i].value, calibration[i + 1].value,
+            pulse = map_float(value, calibration[i].value, calibration[i + 1].value,
                                      calibration[i].pulse, calibration[i + 1].pulse);
             break; // No need to continue checking so break out of the loop
           }
@@ -140,13 +167,57 @@ namespace servo {
     return pulse;
   }
 
-  float Converter::map_pulse(float value, float min_value, float max_value, float min_pulse, float max_pulse) {
-    return (((value - min_value) * (max_pulse - min_pulse)) / (max_value - min_value)) + min_pulse;
+  float Converter::value_from_pulse(float pulse) {
+    float value = 0.0f;
+    if(calibration_points >= 2) {
+      uint8_t last = calibration_points - 1;
+
+      // Is the pulse below the bottom most calibration point?
+      if(pulse < calibration[0].pulse) {
+        // Should the pulse be limited to the calibration or projected below it?
+        if(limit_lower)
+          value = calibration[0].value;
+        else
+          value = map_float(pulse, calibration[0].pulse, calibration[1].pulse,
+                                   calibration[0].value, calibration[1].value);
+      }
+      // Is the pulse above the top most calibration point?
+      else if(pulse > calibration[last].pulse) {
+        // Should the pulse be limited to the calibration or projected above it?
+        if(limit_upper)
+          value = calibration[last].value;
+        else
+          value = map_float(pulse, calibration[last - 1].pulse, calibration[last].pulse,
+                                   calibration[last - 1].value, calibration[last].value);
+      }
+      else {
+        // The pulse must between two calibration points, so iterate through them to find which ones
+        for(uint8_t i = 0; i < last; i++) {
+          if(pulse <= calibration[i + 1].pulse) {
+            value = map_float(pulse, calibration[i].pulse, calibration[i + 1].pulse,
+                                     calibration[i].value, calibration[i + 1].value);
+            break; // No need to continue checking so break out of the loop
+          }
+        }
+      }
+    }
+
+    return value;
   }
 
-  Servo::Servo(uint pin)
-    : pin(pin) {
-  };
+  uint32_t Converter::pulse_to_level(float pulse, uint32_t resolution) {
+    // Constrain the level to hardcoded limits to protect the servo
+    pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
+    return (uint32_t)((pulse * (float)resolution) / SERVO_PERIOD);
+  }
+
+  float Converter::map_float(float in, float in_min, float in_max, float out_min, float out_max) {
+    return (((in - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
+  }
+
+  Servo::Servo(uint pin, Type type)
+    : pin(pin), converter(type) {
+  }
 
   Servo::~Servo() {
     gpio_set_function(pin, GPIO_FUNC_NULL);
@@ -162,54 +233,85 @@ namespace servo {
     pwm_init(pwm_gpio_to_slice_num(pin), &pwm_cfg, true);
     gpio_set_function(pin, GPIO_FUNC_PWM);
 
+    pwm_set_gpio_level(pin, 0);
+
     return true;
   }
 
-  void Servo::set_value(float value) {
-    float pulse = converter.value_to_pulse(value);
-    uint16_t level = (uint16_t)converter.pulse_to_level(pulse, 20000);
-    pwm_set_gpio_level(pin, level);
+  bool Servo::is_enabled() {
+    return enabled;
   }
 
-  // void RGBLED::set_brightness(uint8_t brightness) {
-  //   led_brightness = brightness;
-  //   update_pwm();
-  // }
+  void Servo::enable() {
+    if(last_enabled_pulse < MIN_VALID_PULSE) {
+      servo_value = converter.mid_value();
+      last_enabled_pulse = converter.value_to_pulse(servo_value);
+    }
+    pwm_set_gpio_level(pin, (uint16_t)converter.pulse_to_level(last_enabled_pulse, 20000));
+    enabled = true;
+  }
 
-  // void RGBLED::set_hsv(float h, float s, float v) {
-  //   float i = floor(h * 6.0f);
-  //   float f = h * 6.0f - i;
-  //   v *= 255.0f;
-  //   uint8_t p = v * (1.0f - s);
-  //   uint8_t q = v * (1.0f - f * s);
-  //   uint8_t t = v * (1.0f - (1.0f - f) * s);
+  void Servo::disable() {
+    pwm_set_gpio_level(pin, 0);
+    enabled = false;
+  }
 
-  //   switch (int(i) % 6) {
-  //     case 0: led_r = v; led_g = t; led_b = p; break;
-  //     case 1: led_r = q; led_g = v; led_b = p; break;
-  //     case 2: led_r = p; led_g = v; led_b = t; break;
-  //     case 3: led_r = p; led_g = q; led_b = v; break;
-  //     case 4: led_r = t; led_g = p; led_b = v; break;
-  //     case 5: led_r = v; led_g = p; led_b = q; break;
-  //   }
+  float Servo::get_value() {
+    return servo_value;
+  }
 
-  //   update_pwm();
-  // }
+  void Servo::set_value(float value) {
+    servo_value = value;
+    float pulse = converter.value_to_pulse(value);
+    if(pulse >= MIN_VALID_PULSE) {
+      last_enabled_pulse = pulse;
+      pwm_set_gpio_level(pin, (uint16_t)converter.pulse_to_level(last_enabled_pulse, 20000));
+      enabled = true;
+    }
+    else {
+      disable();
+    }
+  }
 
-  // void RGBLED::update_pwm() {
-  //   uint16_t r16 = GAMMA[led_r];
-  //   uint16_t g16 = GAMMA[led_g];
-  //   uint16_t b16 = GAMMA[led_b];
-  //   r16 *= led_brightness;
-  //   g16 *= led_brightness;
-  //   b16 *= led_brightness;
-  //   if(polarity == Polarity::ACTIVE_LOW) {
-  //     r16 = UINT16_MAX - r16;
-  //     g16 = UINT16_MAX - g16;
-  //     b16 = UINT16_MAX - b16;
-  //   }
-  //   pwm_set_gpio_level(pin_r, r16);
-  //   pwm_set_gpio_level(pin_g, g16);
-  //   pwm_set_gpio_level(pin_b, b16);
-  // }
+  float Servo::get_pulse() {
+    return last_enabled_pulse;
+  }
+
+  void Servo::set_pulse(float pulse) {
+    if(pulse >= MIN_VALID_PULSE) {
+      servo_value = converter.value_from_pulse(pulse);
+      last_enabled_pulse = pulse;
+      pwm_set_gpio_level(pin, (uint16_t)converter.pulse_to_level(last_enabled_pulse, 20000));
+      enabled = true;
+    }
+    else {
+      disable();
+    }
+  }
+
+  void Servo::to_min() {
+    set_value(converter.min_value());
+  }
+
+  void Servo::to_mid() {
+    set_value(converter.mid_value());
+  }
+
+  void Servo::to_max() {
+    set_value(converter.max_value());
+  }
+
+  void Servo::to_percent(float in, float in_min, float in_max) {
+    float value = Converter::map_float(in, in_min, in_max, converter.min_value(), converter.max_value());
+    set_value(value);
+  }
+
+  void Servo::to_percent(float in, float in_min, float in_max, float value_min, float value_max) {
+    float value = Converter::map_float(in, in_min, in_max, value_min, value_max);
+    set_value(value);
+  }
+
+  Calibration& Servo::calibration() {
+    return converter;
+  }
 };

@@ -10,6 +10,12 @@
 
 namespace servo {
 
+  enum Type {
+    ANGULAR = 0,
+    LINEAR,
+    CONTINUOUS
+  };
+
   class Calibration {
     //--------------------------------------------------
     // Constants
@@ -45,7 +51,7 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   protected:
-    Calibration();
+    Calibration(Type type);
     virtual ~Calibration();
 
 
@@ -53,9 +59,10 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    void create_default_calibration();
+    void create_default_calibration(Type type);
     bool create_blank_calibration(uint num_points); // Must have at least two points
-    void create_three_point_calibration(float minus_pulse, float zero_pulse, float plus_pulse, float value_extent = DEFAULT_VALUE_EXTENT);
+    void create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value);
+    void create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
     bool create_uniform_calibration(uint num_points, float min_pulse, float min_value, float max_pulse, float max_value); // Must have at least two points
 
     uint points();
@@ -84,17 +91,12 @@ namespace servo {
     static constexpr float UPPER_HARD_LIMIT = 2500.0f;  // The maximum microsecond pulse to send
     static constexpr float SERVO_PERIOD = 1000000 / 50;    // This is hardcoded as all servos *should* run at this frequency
 
-    //Integer equivalents
-    static const uint16_t LOWER_HARD_LIMIT_I = (uint16_t)LOWER_HARD_LIMIT;
-    static const uint16_t UPPER_HARD_LIMIT_I = (uint16_t)UPPER_HARD_LIMIT;
-    static const uint64_t SERVO_PERIOD_I = (uint64_t)SERVO_PERIOD;
-
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Converter() : Calibration() {}
+    Converter(Type type) : Calibration(type) {}
     virtual ~Converter() {}
 
 
@@ -102,11 +104,14 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    static uint32_t pulse_to_level(float pulse, uint32_t resolution);
-    static uint32_t pulse_to_level(uint16_t pulse, uint32_t resolution);
+    float min_value();
+    float mid_value();
+    float max_value();
     float value_to_pulse(float value);
-  private:
-    static float map_pulse(float value, float min_value, float max_value, float min_pulse, float max_pulse);
+    float value_from_pulse(float pulse);
+
+    static uint32_t pulse_to_level(float pulse, uint32_t resolution);
+    static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
   };
 
   class Servo {
@@ -120,6 +125,8 @@ namespace servo {
     static const uint32_t MAX_PWM_WRAP = UINT16_MAX;
     static constexpr uint16_t MAX_PWM_DIVIDER = (1 << 7);
 
+    static constexpr float MIN_VALID_PULSE = 1.0f;
+
 
     //--------------------------------------------------
     // Variables
@@ -130,7 +137,9 @@ namespace servo {
     uint16_t pwm_period;
     float pwm_frequency = DEFAULT_PWM_FREQUENCY;
 
-    float servo_angle = 0.0f;
+    float servo_value = 0.0f;
+    float last_enabled_pulse = 0.0f;
+    bool enabled = false;
 
     Converter converter;
 
@@ -139,7 +148,7 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Servo(uint pin);
+    Servo(uint pin, Type type = ANGULAR);
     ~Servo();
 
     //--------------------------------------------------
@@ -148,18 +157,23 @@ namespace servo {
   public:
     bool init();
 
-    void enable_servo();
-    void disable_servo();
+    bool is_enabled();
+    void enable();
+    void disable();
 
-    void set_pulse();
+    float get_value();
     void set_value(float value);
 
-    Calibration& calibration() {
-        return converter;
-    }
+    float get_pulse();
+    void set_pulse(float pulse);
 
-  private:
-    //void update_pwm();
+    void to_min();
+    void to_mid();
+    void to_max();
+    void to_percent(float in, float in_min = 0.0f, float in_max = 1.0f);
+    void to_percent(float in, float in_min, float in_max, float value_min, float value_max);
+
+    Calibration& calibration();
   };
 
 }
