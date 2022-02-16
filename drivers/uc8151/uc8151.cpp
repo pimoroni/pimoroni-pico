@@ -66,7 +66,7 @@ namespace pimoroni {
 
   void UC8151::init() {
     // configure spi interface and pins
-    spi_init(spi, 64'000'000);
+    spi_init(spi, 12'000'000);
 
     gpio_set_function(DC, GPIO_FUNC_SIO);
     gpio_set_dir(DC, GPIO_OUT);

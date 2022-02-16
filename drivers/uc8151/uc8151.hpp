@@ -129,6 +129,11 @@ namespace pimoroni {
     uint16_t width;
     uint16_t height;
 
+    // highest possible resolution is 160x296 which at 1 bit per pixel
+    // requires 5920 bytes of frame buffer
+    //uint8_t frame_buffer[5920] = {0};
+    uint8_t *frame_buffer;
+
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
@@ -139,13 +144,13 @@ namespace pimoroni {
     uint BUSY   = PIN_UNUSED;
     uint RESET  = PIN_UNUSED;
 
-    // highest possible resolution is 160x296 which at 1 bit per pixel
-    // requires 5920 bytes of framebuffer
-    uint8_t frame_buffer[5920] = {0};
-
   public:
     UC8151(uint16_t width, uint16_t height) :
-      width(width), height(height) {
+      width(width), height(height), frame_buffer(new uint8_t[width * height / 8]) {
+    }
+
+    UC8151(uint16_t width, uint16_t height, uint8_t *frame_buffer) :
+      width(width), height(height), frame_buffer(frame_buffer) {
     }
 
     UC8151(uint16_t width, uint16_t height,
@@ -153,6 +158,17 @@ namespace pimoroni {
            uint CS, uint DC, uint SCK, uint MOSI,
            uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
       width(width), height(height),
+      frame_buffer(new uint8_t[width * height / 8]),
+      spi(spi),
+      CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
+
+    UC8151(uint16_t width, uint16_t height,
+           uint8_t *frame_buffer,
+           spi_inst_t *spi,
+           uint CS, uint DC, uint SCK, uint MOSI,
+           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
+      width(width), height(height),
+      frame_buffer(frame_buffer),
       spi(spi),
       CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
 

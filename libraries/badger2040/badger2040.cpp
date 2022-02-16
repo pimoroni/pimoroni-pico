@@ -7,10 +7,6 @@
 
 namespace pimoroni {
 
-  Badger2040::Badger2040()
-    : uc8151(296, 128, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
-  }
-
   void Badger2040::init() {
     // set clock speed to 12MHz to reduce the maximum current draw on the
     // battery. when updating a small, monochrome, display only every few
