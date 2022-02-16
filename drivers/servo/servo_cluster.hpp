@@ -4,15 +4,15 @@
 #include <math.h>
 
 #include "pico/stdlib.h"
-#include "hardware/pwm.h"
 #include "hardware/clocks.h"
 #include "common/pimoroni_common.hpp"
 #include "calibration.hpp"
+#include "multi_pwm.hpp"
 #include "servo_state.hpp"
 
 namespace servo {
 
-  class Servo {
+  class ServoCluster {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -30,20 +30,16 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    uint pin;
-    pwm_config pwm_cfg;
-    uint16_t pwm_period;
-    float pwm_frequency = DEFAULT_PWM_FREQUENCY;
-
-    ServoState state;
+    MultiPWM multi_pwm;
+    ServoState servos[NUM_BANK0_GPIOS];
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Servo(uint pin, Type type = ANGULAR);
-    ~Servo();
+    ServoCluster(PIO pio, uint sm, uint channel_mask);
+    ~ServoCluster();
 
     //--------------------------------------------------
     // Methods
@@ -51,23 +47,23 @@ namespace servo {
   public:
     bool init();
 
-    bool is_enabled();
-    void enable();
-    void disable();
+    bool is_enabled(uint servo);
+    void enable(uint servo, bool load = true);
+    void disable(uint servo, bool load = true);
 
-    float get_value();
-    void set_value(float value);
+    float get_value(uint servo);
+    void set_value(uint servo, float value, bool load = true);
 
-    float get_pulse();
-    void set_pulse(float pulse);
+    float get_pulse(uint servo);
+    void set_pulse(uint servo, float pulse, bool load = true);
 
-    void to_min();
-    void to_mid();
-    void to_max();
-    void to_percent(float in, float in_min = 0.0f, float in_max = 1.0f);
-    void to_percent(float in, float in_min, float in_max, float value_min, float value_max);
+    void to_min(uint servo, bool load = true);
+    void to_mid(uint servo, bool load = true);
+    void to_max(uint servo, bool load = true);
+    void to_percent(uint servo, float in, float in_min = 0.0f, float in_max = 1.0f, bool load = true);
+    void to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
 
-    Calibration& calibration();
+    Calibration* calibration(uint servo);
   };
 
 }

@@ -58,6 +58,7 @@ int main() {
 
   //MultiPWM pwms(pio1, 0, 0b111111111111111);
   //pwms.set_wrap(20000);
+  ServoCluster cluster(pio1, 0, 0b111100);
 
   int speed = DEFAULT_SPEED;
   float offset = 0.0f;
@@ -83,9 +84,11 @@ int main() {
       count = 0;
 
       //pwms.set_chan_level(servo_seq, 2000);//toggle ? 2000 : 1000);
+      cluster.set_pulse(servo_seq + 2, toggle ? 2000 : 1000);
       //pwms.set_chan_polarity(servo_seq, toggle);
       //pwms.set_chan_offset(servo_seq, toggle ? 19000 : 0);
       simple_servo.set_pulse(servo_seq + 1500);
+      //cluster.set_pulse(0, servo_seq + 1500);
       servo_seq++;
       if(servo_seq >= 4) {
         servo_seq = 0;
@@ -95,7 +98,7 @@ int main() {
         //pwms.set_clkdiv(div);
         simple_servo.disable();
       }
-      printf("Angle = %f, Pulse = %f, Enabled = %s\n", simple_servo.get_value(), simple_servo.get_pulse(), simple_servo.is_enabled() ? "true" : "false");
+      //printf("Angle = %f, Pulse = %f, Enabled = %s\n", simple_servo.get_value(), simple_servo.get_pulse(), simple_servo.is_enabled() ? "true" : "false");
 
       //pwms.load_pwm();
     }
