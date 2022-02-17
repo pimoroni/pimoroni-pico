@@ -60,10 +60,10 @@ mp_obj_t Servo___del__(mp_obj_t self_in) {
 mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Servo_obj_t *self = nullptr;
 
-    enum { ARG_pin, ARG_servo_type };
+    enum { ARG_pin, ARG_type };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_type, MP_ARG_INT, {.u_int = (uint8_t)servo::Type::ANGULAR} },
+        { MP_QSTR_type, MP_ARG_INT, {.u_int = (uint8_t)servo::CalibrationType::ANGULAR} },
     };
 
     // Parse args.
@@ -71,12 +71,12 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int pin = args[ARG_pin].u_int;
-    servo::Type servo_type = (servo::Type)args[ARG_servo_type].u_int;
+    servo::CalibrationType calibration_type = (servo::CalibrationType)args[ARG_type].u_int;
 
     self = m_new_obj_with_finaliser(_Servo_obj_t);
     self->base.type = &Servo_type;
 
-    self->servo = new Servo(pin, servo_type);
+    self->servo = new Servo(pin, calibration_type);
     self->servo->init();
 
     return MP_OBJ_FROM_PTR(self);

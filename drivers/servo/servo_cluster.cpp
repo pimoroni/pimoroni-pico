@@ -24,28 +24,32 @@ namespace servo {
     return true;
   }
 
+  uint ServoCluster::get_pin_mask() const {
+    return multi_pwm.get_chan_mask();
+  }
+
   void ServoCluster::enable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].enable();
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   void ServoCluster::disable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].disable();
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
-  bool ServoCluster::is_enabled(uint servo) {
+  bool ServoCluster::is_enabled(uint servo) const {
     if(servo < NUM_BANK0_GPIOS)
       return servos[servo].is_enabled();
     else
       return false;
   }
 
-  float ServoCluster::get_value(uint servo) {
+  float ServoCluster::get_value(uint servo) const {
     if(servo < NUM_BANK0_GPIOS)
       return servos[servo].get_value();
     else
@@ -55,11 +59,11 @@ namespace servo {
   void ServoCluster::set_value(uint servo, float value, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_value(value);
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
-  float ServoCluster::get_pulse(uint servo) {
+  float ServoCluster::get_pulse(uint servo) const {
     if(servo < NUM_BANK0_GPIOS)
       return servos[servo].get_pulse();
     else
@@ -69,46 +73,74 @@ namespace servo {
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_pulse(pulse);
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
+  }
+
+  float ServoCluster::get_min_value(uint servo) const {
+    if(servo < NUM_BANK0_GPIOS)
+      return servos[servo].get_min_value();
+    else
+      return 0.0f;
+  }
+
+  float ServoCluster::get_mid_value(uint servo) const {
+    if(servo < NUM_BANK0_GPIOS)
+      return servos[servo].get_mid_value();
+    else
+      return 0.0f;
+  }
+
+  float ServoCluster::get_max_value(uint servo) const {
+    if(servo < NUM_BANK0_GPIOS)
+      return servos[servo].get_max_value();
+    else
+      return 0.0f;
   }
 
   void ServoCluster::to_min(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_min();
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   void ServoCluster::to_mid(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_mid();
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_max();
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max);
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max, value_min, value_max);
-      multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
+      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000), load);
     }
   }
 
   Calibration* ServoCluster::calibration(uint servo) {
+    if(servo < NUM_BANK0_GPIOS)
+        return &servos[servo].calibration();
+    else
+        return nullptr;
+  }
+
+  const Calibration* ServoCluster::calibration(uint servo) const {
     if(servo < NUM_BANK0_GPIOS)
         return &servos[servo].calibration();
     else

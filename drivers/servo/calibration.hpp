@@ -1,19 +1,14 @@
 #pragma once
 
-#include <stdint.h>
-#include <math.h>
-
 #include "pico/stdlib.h"
-#include "hardware/pwm.h"
-#include "hardware/clocks.h"
-#include "common/pimoroni_common.hpp"
 
 namespace servo {
 
-  enum Type {
+  enum CalibrationType {
     ANGULAR = 0,
     LINEAR,
-    CONTINUOUS
+    CONTINUOUS,
+    EMPTY
   };
 
   class Calibration {
@@ -31,12 +26,12 @@ namespace servo {
     // Substructures
     //--------------------------------------------------
   public:
-    struct CalibrationPoint {
+    struct Point {
         //--------------------------------------------------
         // Constructors/Destructor
         //--------------------------------------------------
-        CalibrationPoint();
-        CalibrationPoint(uint16_t pulse, float value);
+        Point();
+        Point(uint16_t pulse, float value);
 
 
         //--------------------------------------------------
@@ -46,13 +41,13 @@ namespace servo {
         float value;
     };
 
-    
+
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
-  protected:
+  public:
     Calibration();
-    Calibration(Type type);
+    Calibration(CalibrationType default_type);
     virtual ~Calibration();
 
 
@@ -60,62 +55,33 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    void create_default_calibration(Type type);
-    bool create_blank_calibration(uint num_points); // Must have at least two points
+    void create_blank_calibration(uint size);
     void create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value);
     void create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
-    bool create_uniform_calibration(uint num_points, float min_pulse, float min_value, float max_pulse, float max_value); // Must have at least two points
+    void create_uniform_calibration(uint size, float min_pulse, float min_value, float max_pulse, float max_value);
+    void create_default_calibration(CalibrationType default_type);
 
-    uint points();
-    bool get_point(uint8_t index, CalibrationPoint& point_out);
-    void set_point(uint8_t index, const CalibrationPoint& point); // Ensure the points are entered in ascending value order
+    uint size() const;
+    Point* point_at(uint8_t index) const; // Ensure the points are assigned in ascending value order
+    Point* first_point() const;
+    Point* last_point() const;
 
     void limit_to_calibration(bool lower, bool upper);
+
+    float value_to_pulse(float value) const;
+    float value_from_pulse(float pulse) const;
+
+    static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
 
 
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   protected:
-    CalibrationPoint* calibration;
-    uint calibration_points;
+    Point* calibration;
+    uint calibration_size;
     bool limit_lower;
     bool limit_upper;
-  };
-
-  class Converter : public Calibration {
-    //--------------------------------------------------
-    // Constants
-    //--------------------------------------------------
-  public:
-    static constexpr float MIN_VALID_PULSE = 1.0f;
-  private:
-    static constexpr float LOWER_HARD_LIMIT = 500.0f;   // The minimum microsecond pulse to send
-    static constexpr float UPPER_HARD_LIMIT = 2500.0f;  // The maximum microsecond pulse to send
-    static constexpr float SERVO_PERIOD = 1000000 / 50;    // This is hardcoded as all servos *should* run at this frequency
-
-
-    //--------------------------------------------------
-    // Constructors/Destructor
-    //--------------------------------------------------
-  public:
-    Converter() : Calibration() {}
-    Converter(Type type) : Calibration(type) {}
-    virtual ~Converter() {}
-
-
-    //--------------------------------------------------
-    // Methods
-    //--------------------------------------------------
-  public:
-    float get_min_value();
-    float get_mid_value();
-    float get_max_value();
-    float value_to_pulse(float value);
-    float value_from_pulse(float pulse);
-
-    static uint32_t pulse_to_level(float pulse, uint32_t resolution);
-    static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
   };
 
 }

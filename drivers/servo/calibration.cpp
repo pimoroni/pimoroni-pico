@@ -1,22 +1,22 @@
 #include "calibration.hpp"
 
 namespace servo {
-  Calibration::CalibrationPoint::CalibrationPoint()
+  Calibration::Point::Point()
     : pulse(0.0f), value(0.0f) {
   }
 
-  Calibration::CalibrationPoint::CalibrationPoint(uint16_t pulse, float value)
+  Calibration::Point::Point(uint16_t pulse, float value)
     : pulse(pulse), value(value) {
   }
 
   Calibration::Calibration()
-    : calibration(nullptr), calibration_points(0), limit_lower(true), limit_upper(true) {
+    : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
     create_default_calibration(ANGULAR);
   }
 
-  Calibration::Calibration(Type type)
-    : calibration(nullptr), calibration_points(0), limit_lower(true), limit_upper(true) {
-    create_default_calibration(type);
+  Calibration::Calibration(CalibrationType default_type)
+    : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
+    create_default_calibration(default_type);
   }
 
   Calibration::~Calibration() {
@@ -26,8 +26,48 @@ namespace servo {
     }
   }
 
-  void Calibration::create_default_calibration(Type type) {
-    switch(type) {
+  void Calibration::create_blank_calibration(uint size) {
+    if(calibration != nullptr) {
+      delete[] calibration;
+    }
+
+    if(size > 0) {
+      calibration = new Point[size];
+      calibration_size = size;
+    }
+    else {
+      calibration = nullptr;
+      calibration_size = 0;
+    }
+  }
+
+  void Calibration::create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value) {
+    create_blank_calibration(2);
+    calibration[0] = Point(min_pulse, min_value);
+    calibration[1] = Point(max_pulse, max_value);
+  }
+
+  void Calibration::create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
+    create_blank_calibration(3);
+    calibration[0] = Point(min_pulse, min_value);
+    calibration[1] = Point(mid_pulse, mid_value);
+    calibration[2] = Point(max_pulse, max_value);
+  }
+
+  void Calibration::create_uniform_calibration(uint size, float min_pulse, float min_value, float max_pulse, float max_value) {
+    create_blank_calibration(size);
+    if(size > 0) {
+      float size_minus_one = (float)(size - 1);
+      for(uint i = 0; i < size; i++) {
+        float pulse = ((max_pulse - min_pulse) * (float)i) / size_minus_one;
+        float value = ((max_value - min_value) * (float)i) / size_minus_one;
+        calibration[i] = Point(pulse, value);
+      }
+    }
+  }
+
+  void Calibration::create_default_calibration(CalibrationType default_type) {
+    switch(default_type) {
     default:
     case ANGULAR:
       create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
@@ -41,67 +81,34 @@ namespace servo {
       create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
                                      -1.0f,            0.0f,              +1.0f);
       break;
+    case EMPTY:
+      create_blank_calibration(0);
     }
   }
 
-  bool Calibration::create_blank_calibration(uint num_points) {
-    bool success = false;
-    if(num_points >= 2) {
-      if(calibration != nullptr)
-        delete[] calibration;
-      
-      calibration = new CalibrationPoint[num_points];
-      calibration_points = num_points;
-      success = true;
+  uint Calibration::size() const {
+    return calibration_size;
+  }
+
+  Calibration::Point* Calibration::point_at(uint8_t index) const {
+    if(index < calibration_size) {
+      return &calibration[index];
     }
-    return success;
+    return nullptr;
   }
 
-  void Calibration::create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value) {
-    create_blank_calibration(2);
-    calibration[0] = CalibrationPoint(min_pulse, min_value);
-    calibration[1] = CalibrationPoint(max_pulse, max_value);
-  }
-
-  void Calibration::create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
-    create_blank_calibration(3);
-    calibration[0] = CalibrationPoint(min_pulse, min_value);
-    calibration[1] = CalibrationPoint(mid_pulse, mid_value);
-    calibration[2] = CalibrationPoint(max_pulse, max_value);
-  }
-
-  bool Calibration::create_uniform_calibration(uint num_points, float min_pulse, float min_value, float max_pulse, float max_value) {
-    bool success = false;
-    if(create_blank_calibration(num_points)) {
-      float points_minus_one = (float)(num_points - 1);
-      for(uint i = 0; i < num_points; i++) {
-        float pulse = ((max_pulse - min_pulse) * (float)i) / points_minus_one;
-        float value = ((max_value - min_value) * (float)i) / points_minus_one;
-        calibration[i] = CalibrationPoint(pulse, value);
-      }
-      success = true;
+  Calibration::Point* Calibration::first_point() const {
+    if(calibration_size > 0) {
+      return &calibration[0];
     }
-    return success;
+    return nullptr;
   }
 
-  uint Calibration::points() {
-    return calibration_points;
-  }
-
-  bool Calibration::get_point(uint8_t index, CalibrationPoint& point_out) {
-    bool success = false;
-    if(index < calibration_points) {
-      point_out = CalibrationPoint(calibration[index]);
-      success = true;
+  Calibration::Point* Calibration::last_point() const {
+    if(calibration_size > 0) {
+      return &calibration[calibration_size - 1];
     }
-
-    return success;
-  }
-
-  void Calibration::set_point(uint8_t index, const CalibrationPoint& point) {
-    if(index < calibration_points) {
-      calibration[index] = CalibrationPoint(point);
-    }
+    return nullptr;
   }
 
   void Calibration::limit_to_calibration(bool lower, bool upper) {
@@ -109,34 +116,11 @@ namespace servo {
     limit_upper = upper;
   }
 
-  float Converter::get_min_value() {
-    float value = 0.0f;
-    if(calibration_points >= 2) {
-      value = calibration[0].value;
-    }
-    return value;
-  }
 
-  float Converter::get_mid_value() {
-    float value = 0.0f;
-    if(calibration_points >= 2) {
-      value = (calibration[0].value + calibration[calibration_points - 1].value) / 2.0f;
-    }
-    return value;
-  }
-
-  float Converter::get_max_value() {
-    float value = 0.0f;
-    if(calibration_points >= 2) {
-      value = calibration[calibration_points - 1].value;
-    }
-    return value;
-  }
-
-  float Converter::value_to_pulse(float value) {
+  float Calibration::value_to_pulse(float value) const {
     float pulse = 0.0f;
-    if(calibration_points >= 2) {
-      uint8_t last = calibration_points - 1;
+    if(calibration_size >= 2) {
+      uint8_t last = calibration_size - 1;
 
       // Is the value below the bottom most calibration point?
       if(value < calibration[0].value) {
@@ -171,10 +155,10 @@ namespace servo {
     return pulse;
   }
 
-  float Converter::value_from_pulse(float pulse) {
+  float Calibration::value_from_pulse(float pulse) const {
     float value = 0.0f;
-    if(calibration_points >= 2) {
-      uint8_t last = calibration_points - 1;
+    if(calibration_size >= 2) {
+      uint8_t last = calibration_size - 1;
 
       // Is the pulse below the bottom most calibration point?
       if(pulse < calibration[0].pulse) {
@@ -209,17 +193,7 @@ namespace servo {
     return value;
   }
 
-  uint32_t Converter::pulse_to_level(float pulse, uint32_t resolution) {
-    uint32_t level = 0;
-    if(pulse >= Converter::MIN_VALID_PULSE) {
-        // Constrain the level to hardcoded limits to protect the servo
-        pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
-        level = (uint32_t)((pulse * (float)resolution) / SERVO_PERIOD);
-    }
-    return level;
-  }
-
-  float Converter::map_float(float in, float in_min, float in_max, float out_min, float out_max) {
+  float Calibration::map_float(float in, float in_min, float in_max, float out_min, float out_max) {
     return (((in - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min;
   }
 };
