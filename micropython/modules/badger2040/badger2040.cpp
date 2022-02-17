@@ -9,6 +9,21 @@ extern "C" {
 #include "py/builtin.h"
 #include "py/mpthread.h"
 
+std::string mp_obj_to_string_r(const mp_obj_t &obj) {
+    if(mp_obj_is_str_or_bytes(obj)) {
+        GET_STR_DATA_LEN(obj, str, str_len);
+        return (const char*)str;
+    }
+    else if(mp_obj_is_float(obj))
+        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+    else if(mp_obj_is_int(obj))
+        mp_raise_TypeError("can't convert 'int' object to str implicitly");
+    else if(mp_obj_is_bool(obj))
+        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+    else
+        mp_raise_TypeError("can't convert object to str implicitly");
+}
+
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
@@ -121,7 +136,11 @@ mp_obj_t Badger2040_led(mp_obj_t self_in, mp_obj_t brightness) {
     return mp_const_none;
 }
 
-// font
+mp_obj_t Badger2040_font(mp_obj_t self_in, mp_obj_t font) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    self->badger2040->font(mp_obj_to_string_r(font));
+    return mp_const_none;
+}
 
 mp_obj_t Badger2040_pen(mp_obj_t self_in, mp_obj_t color) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
@@ -135,9 +154,16 @@ mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness) {
     return mp_const_none;
 }
 
+mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    self->badger2040->update_button_states();
+    bool state = self->badger2040->pressed(mp_obj_get_int(button));
+    return state ? mp_const_true : mp_const_false;
+}
+
 // pressed
 // pressed_to_wake
-// wait_for_press
+// wait_for_press - implement in terms of MicroPython!
 // update_button_states
 // button_states
 
@@ -204,7 +230,55 @@ mp_obj_t Badger2040_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 }
 
 // image
-// text
-// glyph
+
+mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_char, ARG_x, ARG_y, ARG_scale };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_scale, MP_ARG_REQUIRED | MP_ARG_OBJ }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int c = args[ARG_char].u_int;
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    float scale = mp_obj_get_float(args[ARG_scale].u_obj);
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    self->badger2040->glyph(c, x, y, scale);
+
+    return mp_const_none;
+}
+
+mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_message, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_scale, MP_ARG_REQUIRED | MP_ARG_OBJ }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    std::string message = mp_obj_to_string_r(args[ARG_message].u_obj);
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    float scale = mp_obj_get_float(args[ARG_scale].u_obj);
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    self->badger2040->text(message, x, y, scale);
+
+    return mp_const_none;
+}
 
 }

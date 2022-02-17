@@ -8,13 +8,19 @@ MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_update_obj, Badger2040_update);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_partial_update_obj, 4, Badger2040_partial_update);
 
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_led_obj, Badger2040_led);
+MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_font_obj, Badger2040_font);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pen_obj, Badger2040_pen);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_thickness_obj, Badger2040_thickness);
+
+MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pressed_obj, Badger2040_pressed);
 
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_clear_obj, Badger2040_clear);
 MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_pixel_obj, Badger2040_pixel);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_line_obj, 4, Badger2040_line);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_rectangle_obj, 4, Badger2040_rectangle);
+
+MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_glyph_obj, 4, Badger2040_glyph);
+MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_text_obj, 4, Badger2040_text);
 
 
 /***** Binding of Methods *****/
@@ -24,13 +30,19 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_partial_update), MP_ROM_PTR(&Badger2040_partial_update_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_led), MP_ROM_PTR(&Badger2040_led_obj) },
+    { MP_ROM_QSTR(MP_QSTR_font), MP_ROM_PTR(&Badger2040_font_obj) },
     { MP_ROM_QSTR(MP_QSTR_pen), MP_ROM_PTR(&Badger2040_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_thickness), MP_ROM_PTR(&Badger2040_thickness_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_pressed), MP_ROM_PTR(&Badger2040_pressed_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&Badger2040_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&Badger2040_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&Badger2040_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&Badger2040_rectangle_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_glyph), MP_ROM_PTR(&Badger2040_glyph_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&Badger2040_text_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table);
