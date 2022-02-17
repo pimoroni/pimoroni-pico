@@ -1,5 +1,5 @@
 # This example reads the voltage from a LiPo battery connected to Pimoroni Pico LiPo...
-# ...and uses this reading to calculate how much charge is left in the battery. 
+# ...and uses this reading to calculate how much charge is left in the battery.
 # It then displays the info on the screen of Pico Display or Pico Explorer.
 # With Pimoroni Pico LiPo, you can read the battery percentage while it's charging.
 # Save this code as main.py on your Pico if you want it to run automatically!
@@ -39,7 +39,7 @@ while True:
     display.rectangle(220, 40, 20, 55)
     display.set_pen(0, 0, 0)
     display.rectangle(3, 3, 214, 129)
-        
+
     # draw a green box for the battery level
     display.set_pen(0, 255, 0)
     display.rectangle(5, 5, int((210 / 100) * percentage), 125)
@@ -56,7 +56,6 @@ while True:
     # display.set_audio_pin(0)
     # if percentage < 5:               # if the battery is less than 5%
     #     display.set_tone(262)        # then make an annoying noise
-    
+
     display.update()
     time.sleep(0.5)
-
