@@ -19,23 +19,23 @@ namespace pimoroni {
 
     gpio_set_function(A, GPIO_FUNC_SIO);
     gpio_set_dir(A, GPIO_IN);
-    gpio_put(A, 1);
+    gpio_set_pulls(A, false, true);
 
     gpio_set_function(B, GPIO_FUNC_SIO);
     gpio_set_dir(B, GPIO_IN);
-    gpio_put(B, 1);
+    gpio_set_pulls(B, false, true);
 
     gpio_set_function(C, GPIO_FUNC_SIO);
     gpio_set_dir(C, GPIO_IN);
-    gpio_put(C, 1);
+    gpio_set_pulls(C, false, true)
 
     gpio_set_function(D, GPIO_FUNC_SIO);
     gpio_set_dir(D, GPIO_IN);
-    gpio_put(D, 1);
+    gpio_set_pulls(D, false, true);
 
     gpio_set_function(USER, GPIO_FUNC_SIO);
     gpio_set_dir(USER, GPIO_IN);
-    gpio_put(USER, 1);
+    gpio_set_pulls(USER, false, true);
 
     gpio_set_function(VBUS_DETECT, GPIO_FUNC_SIO);
     gpio_set_dir(VBUS_DETECT, GPIO_IN);
