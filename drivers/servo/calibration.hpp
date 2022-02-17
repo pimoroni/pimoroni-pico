@@ -108,9 +108,9 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    float min_value();
-    float mid_value();
-    float max_value();
+    float get_min_value();
+    float get_mid_value();
+    float get_max_value();
     float value_to_pulse(float value);
     float value_from_pulse(float pulse);
 

@@ -24,8 +24,8 @@ namespace servo {
     return true;
   }
 
-  bool Servo::is_enabled() {
-    return state.is_enabled();
+  uint Servo::get_pin() {
+    return pin;
   }
 
   void Servo::enable() {
@@ -36,6 +36,10 @@ namespace servo {
   void Servo::disable() {
     float new_pulse = state.disable();
     pwm_set_gpio_level(pin, (uint16_t)Converter::pulse_to_level(new_pulse, 20000));
+  }
+
+  bool Servo::is_enabled() {
+    return state.is_enabled();
   }
 
   float Servo::get_value() {
@@ -71,6 +75,11 @@ namespace servo {
     pwm_set_gpio_level(pin, (uint16_t)Converter::pulse_to_level(new_pulse, 20000));
   }
 
+  void Servo::to_percent(float in) {
+    float new_pulse = state.to_percent(in, 0.0f, 1.0f);
+    pwm_set_gpio_level(pin, (uint16_t)Converter::pulse_to_level(new_pulse, 20000));
+  }
+
   void Servo::to_percent(float in, float in_min, float in_max) {
     float new_pulse = state.to_percent(in, in_min, in_max);
     pwm_set_gpio_level(pin, (uint16_t)Converter::pulse_to_level(new_pulse, 20000));
@@ -79,6 +88,18 @@ namespace servo {
   void Servo::to_percent(float in, float in_min, float in_max, float value_min, float value_max) {
     float new_pulse = state.to_percent(in, in_min, in_max, value_min, value_max);
     pwm_set_gpio_level(pin, (uint16_t)Converter::pulse_to_level(new_pulse, 20000));
+  }
+
+  float Servo::get_min_value() {
+    return state.get_min_value();
+  }
+
+  float Servo::get_mid_value() {
+    return state.get_mid_value();
+  }
+
+  float Servo::get_max_value() {
+    return state.get_max_value();
   }
 
   Calibration& Servo::calibration() {

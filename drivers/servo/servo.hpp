@@ -51,9 +51,12 @@ namespace servo {
   public:
     bool init();
 
-    bool is_enabled();
+    // For print access in micropython
+    uint get_pin();
+
     void enable();
     void disable();
+    bool is_enabled();
 
     float get_value();
     void set_value(float value);
@@ -64,8 +67,13 @@ namespace servo {
     void to_min();
     void to_mid();
     void to_max();
-    void to_percent(float in, float in_min = 0.0f, float in_max = 1.0f);
+    void to_percent(float in);
+    void to_percent(float in, float in_min, float in_max);
     void to_percent(float in, float in_min, float in_max, float value_min, float value_max);
+
+    float get_min_value();
+    float get_mid_value();
+    float get_max_value();
 
     Calibration& calibration();
   };

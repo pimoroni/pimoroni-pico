@@ -24,13 +24,6 @@ namespace servo {
     return true;
   }
 
-  bool ServoCluster::is_enabled(uint servo) {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].is_enabled();
-    else
-      return false;
-  }
-
   void ServoCluster::enable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].enable();
@@ -43,6 +36,13 @@ namespace servo {
       float new_pulse = servos[servo].disable();
       multi_pwm.set_chan_level(servo, Converter::pulse_to_level(new_pulse, 20000), load);
     }
+  }
+
+  bool ServoCluster::is_enabled(uint servo) {
+    if(servo < NUM_BANK0_GPIOS)
+      return servos[servo].is_enabled();
+    else
+      return false;
   }
 
   float ServoCluster::get_value(uint servo) {

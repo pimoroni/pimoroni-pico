@@ -47,9 +47,9 @@ namespace servo {
   public:
     bool init();
 
-    bool is_enabled(uint servo);
     void enable(uint servo, bool load = true);
     void disable(uint servo, bool load = true);
+    bool is_enabled(uint servo);
 
     float get_value(uint servo);
     void set_value(uint servo, float value, bool load = true);

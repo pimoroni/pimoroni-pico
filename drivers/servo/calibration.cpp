@@ -109,7 +109,7 @@ namespace servo {
     limit_upper = upper;
   }
 
-  float Converter::min_value() {
+  float Converter::get_min_value() {
     float value = 0.0f;
     if(calibration_points >= 2) {
       value = calibration[0].value;
@@ -117,7 +117,7 @@ namespace servo {
     return value;
   }
 
-  float Converter::mid_value() {
+  float Converter::get_mid_value() {
     float value = 0.0f;
     if(calibration_points >= 2) {
       value = (calibration[0].value + calibration[calibration_points - 1].value) / 2.0f;
@@ -125,7 +125,7 @@ namespace servo {
     return value;
   }
 
-  float Converter::max_value() {
+  float Converter::get_max_value() {
     float value = 0.0f;
     if(calibration_points >= 2) {
       value = calibration[calibration_points - 1].value;
