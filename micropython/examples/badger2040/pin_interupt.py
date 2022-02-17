@@ -31,6 +31,7 @@ display.update()
 dirty = False
 pressed = None
 
+
 def button(pin):
     global dirty, pressed
     if pin == button_a:
@@ -42,14 +43,16 @@ def button(pin):
         dirty = True
         return
 
+
 button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 # This breaks Thonny, since it's no longer possible to Stop the code
 # need to press the reset button on the board...
-@micropython.asm_thumb
-def lightsleep():
-    wfi()
+# It will also crash your USB bus, probably, your whole bus...
+# @micropython.asm_thumb
+# def lightsleep():
+#    wfi()
 
 while True:
     if dirty:
@@ -59,6 +62,4 @@ while True:
         display.text(pressed, 10, 60, 2.0)
         display.update()
         dirty = False
-    lightsleep()
-
-
+    # machine.lightsleep()  # Currently imposible to wake from this on IRQ

@@ -27,7 +27,7 @@ namespace pimoroni {
 
     gpio_set_function(C, GPIO_FUNC_SIO);
     gpio_set_dir(C, GPIO_IN);
-    gpio_set_pulls(C, false, true)
+    gpio_set_pulls(C, false, true);
 
     gpio_set_function(D, GPIO_FUNC_SIO);
     gpio_set_dir(D, GPIO_IN);
