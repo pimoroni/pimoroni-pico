@@ -59,8 +59,8 @@ namespace pimoroni {
   }
 
   void UC8151::reset() {
-    gpio_put(RESET, 0); sleep_ms(1);
-    gpio_put(RESET, 1); sleep_ms(1);
+    gpio_put(RESET, 0); sleep_ms(10);
+    gpio_put(RESET, 1); sleep_ms(10);
     busy_wait();
   }
 
@@ -81,10 +81,12 @@ namespace pimoroni {
 
     gpio_set_function(BUSY, GPIO_FUNC_SIO);
     gpio_set_dir(BUSY, GPIO_IN);
-    gpio_put(BUSY, 1);
+    gpio_set_pulls(BUSY, true, false);
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
+
+    reset();
 
     command(PSR, {
       RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
