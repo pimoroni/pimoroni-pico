@@ -22,6 +22,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_rectangle_obj, 4, Badger2040_rectangle);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_glyph_obj, 4, Badger2040_glyph);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_text_obj, 4, Badger2040_text);
 
+MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_command_obj, Badger2040_command);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
@@ -43,6 +44,8 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_glyph), MP_ROM_PTR(&Badger2040_glyph_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&Badger2040_text_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_command), MP_ROM_PTR(&Badger2040_command_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table);

@@ -27,3 +27,5 @@ extern mp_obj_t Badger2040_rectangle(size_t n_args, const mp_obj_t *pos_args, mp
 
 extern mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+
+extern mp_obj_t Badger2040_command(mp_obj_t self_in, mp_obj_t reg, mp_obj_t data);

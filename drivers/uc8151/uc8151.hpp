@@ -182,6 +182,10 @@ namespace pimoroni {
     bool is_busy();
     void reset();
 
+    void default_luts();
+    void fast_luts();
+
+    void read(uint8_t reg, size_t len, uint8_t *data);
     void command(uint8_t reg, size_t len, const uint8_t *data);
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg) {command(reg, 0, nullptr);};

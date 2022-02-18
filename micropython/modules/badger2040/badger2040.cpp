@@ -118,8 +118,8 @@ mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    int w = args[ARG_x].u_int;
-    int h = args[ARG_y].u_int;
+    int w = args[ARG_w].u_int;
+    int h = args[ARG_h].u_int;
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
     self->badger2040->partial_update(x, y, w, h);
@@ -176,6 +176,16 @@ mp_obj_t Badger2040_clear(mp_obj_t self_in) {
 mp_obj_t Badger2040_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->pixel(mp_obj_get_int(x), mp_obj_get_int(y));
+    return mp_const_none;
+}
+
+mp_obj_t Badger2040_command(mp_obj_t self_in, mp_obj_t reg, mp_obj_t data) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(data, &bufinfo, MP_BUFFER_RW);
+
+    self->badger2040->debug_command(mp_obj_get_int(reg), bufinfo.len, (const uint8_t *)bufinfo.buf);
     return mp_const_none;
 }
 

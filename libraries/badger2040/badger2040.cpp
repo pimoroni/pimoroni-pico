@@ -157,6 +157,14 @@ namespace pimoroni {
     }
   }
 
+  void Badger2040::debug_command(uint8_t reg, size_t len, const uint8_t *data) {
+    uc8151.command(reg, len, data);
+  }
+
+  void Badger2040::dump_otp(uint8_t *data) {
+    uc8151.read(0xa2,  0xFFF, data);
+  }
+
   void Badger2040::update_button_states() {
     uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
     _button_states |= gpio_get_all() & mask;

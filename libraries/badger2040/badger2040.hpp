@@ -57,6 +57,9 @@ namespace pimoroni {
     const hershey_font_glyph_t* glyph_data(unsigned char c);
     int32_t glyph(unsigned char c, int32_t x, int32_t y, float s);
 
+    void debug_command(uint8_t command, size_t len, const uint8_t *data);
+    void dump_otp(uint8_t *otp_data);
+
   public:
     enum pin {
       A           = 12,
