@@ -58,7 +58,7 @@ namespace servo {
     void create_blank_calibration(uint size);
     void create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value);
     void create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
-    void create_uniform_calibration(uint size, float min_pulse, float min_value, float max_pulse, float max_value);
+    void create_uniform_calibration(uint size, float min_pulse, float max_pulse, float min_value, float max_value);
     void create_default_calibration(CalibrationType default_type);
 
     uint size() const;

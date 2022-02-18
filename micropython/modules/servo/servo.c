@@ -2,55 +2,118 @@
 
 
 /***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_1(Calibration___del___obj, Calibration___del__);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_blank_calibration_obj, 2, Calibration_create_blank_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_two_point_calibration_obj, 5, Calibration_create_two_point_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_three_point_calibration_obj, 7, Calibration_create_three_point_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_uniform_calibration_obj, 6, Calibration_create_uniform_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_default_calibration_obj, 2, Calibration_create_default_calibration);
+MP_DEFINE_CONST_FUN_OBJ_1(Calibration_size_obj, Calibration_size);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_point_at_obj, 2, Calibration_point_at);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_point_obj, 1, Calibration_first_point);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_point_obj, 1, Calibration_last_point);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_limit_to_calibration_obj, 3, Calibration_limit_to_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_value_to_pulse_obj, 2, Calibration_value_to_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_value_from_pulse_obj, 2, Calibration_value_from_pulse);
+
 MP_DEFINE_CONST_FUN_OBJ_1(Servo___del___obj, Servo___del__);
+MP_DEFINE_CONST_FUN_OBJ_1(Servo_pin_obj, Servo_pin);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_enable_obj, Servo_enable);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_disable_obj, Servo_disable);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_is_enabled_obj, Servo_is_enabled);
 MP_DEFINE_CONST_FUN_OBJ_KW(Servo_value_obj, 1, Servo_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(Servo_pulse_obj, 1, Servo_pulse);
+MP_DEFINE_CONST_FUN_OBJ_1(Servo_min_value_obj, Servo_min_value);
+MP_DEFINE_CONST_FUN_OBJ_1(Servo_mid_value_obj, Servo_mid_value);
+MP_DEFINE_CONST_FUN_OBJ_1(Servo_max_value_obj, Servo_max_value);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_min_obj, Servo_to_min);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_mid_obj, Servo_to_mid);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_max_obj, Servo_to_max);
-MP_DEFINE_CONST_FUN_OBJ_KW(Servo_to_percent_obj, 1, Servo_to_percent);
+MP_DEFINE_CONST_FUN_OBJ_KW(Servo_to_percent_obj, 2, Servo_to_percent);
+MP_DEFINE_CONST_FUN_OBJ_1(Servo_calibration_obj, Servo_calibration);
 
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster___del___obj, ServoCluster___del__);
-// MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_set_rgb_obj, 5, ServoCluster_set_rgb);
-// MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_set_hsv_obj, 3, ServoCluster_set_hsv);
-// MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_set_brightness_obj, 2, ServoCluster_set_brightness);
-// MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_start_obj, 1, ServoCluster_start);
-// MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_get_obj, 2, ServoCluster_get);
-// MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_clear_obj, ServoCluster_clear);
-// MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_update_obj, ServoCluster_update);
+MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_pin_mask_obj, ServoCluster_pin_mask);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_enable_obj, 2, ServoCluster_enable);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_obj, 2, ServoCluster_disable);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_is_enabled_obj, 2, ServoCluster_is_enabled);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_value_obj, 2, ServoCluster_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_pulse_obj, 2, ServoCluster_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_min_value_obj, 2, ServoCluster_min_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_mid_value_obj, 2, ServoCluster_mid_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_max_value_obj, 2, ServoCluster_max_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_min_obj, 2, ServoCluster_to_min);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_mid_obj, 2, ServoCluster_to_mid);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_max_obj, 2, ServoCluster_to_max);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_percent_obj, 3, ServoCluster_to_percent);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_calibration_obj, 2, ServoCluster_calibration);
 
 /***** Binding of Methods *****/
+STATIC const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Calibration___del___obj) },
+    { MP_ROM_QSTR(MP_QSTR_create_blank_calibration), MP_ROM_PTR(&Calibration_create_blank_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_create_two_point_calibration), MP_ROM_PTR(&Calibration_create_two_point_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_create_three_point_calibration), MP_ROM_PTR(&Calibration_create_three_point_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_create_uniform_calibration), MP_ROM_PTR(&Calibration_create_uniform_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_create_default_calibration), MP_ROM_PTR(&Calibration_create_default_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_size), MP_ROM_PTR(&Calibration_size_obj) },
+    { MP_ROM_QSTR(MP_QSTR_point_at), MP_ROM_PTR(&Calibration_point_at_obj) },
+    { MP_ROM_QSTR(MP_QSTR_first_point), MP_ROM_PTR(&Calibration_first_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_last_point), MP_ROM_PTR(&Calibration_last_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_limit_to_calibration), MP_ROM_PTR(&Calibration_limit_to_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value_to_pulse), MP_ROM_PTR(&Calibration_value_to_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value_from_pulse), MP_ROM_PTR(&Calibration_value_from_pulse_obj) },
+};
+
 STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Servo___del___obj) },
+    { MP_ROM_QSTR(MP_QSTR_pin), MP_ROM_PTR(&Servo_pin_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&Servo_enable_obj) },
     { MP_ROM_QSTR(MP_QSTR_disable), MP_ROM_PTR(&Servo_disable_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&Servo_is_enabled_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&Servo_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&Servo_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_min_value), MP_ROM_PTR(&Servo_min_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_mid_value), MP_ROM_PTR(&Servo_mid_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_max_value), MP_ROM_PTR(&Servo_max_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_min), MP_ROM_PTR(&Servo_to_min_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_mid), MP_ROM_PTR(&Servo_to_mid_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_max), MP_ROM_PTR(&Servo_to_max_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&Servo_to_percent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_calibration), MP_ROM_PTR(&Servo_calibration_obj) },
 };
 
 STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&ServoCluster___del___obj) },
-    // { MP_ROM_QSTR(MP_QSTR_set_rgb), MP_ROM_PTR(&ServoCluster_set_rgb_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_set_hsv), MP_ROM_PTR(&ServoCluster_set_hsv_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&ServoCluster_set_brightness_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&ServoCluster_start_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_get), MP_ROM_PTR(&ServoCluster_get_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&ServoCluster_clear_obj) },
-    // { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&ServoCluster_update_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pin_mask), MP_ROM_PTR(&ServoCluster_pin_mask_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&ServoCluster_enable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_disable), MP_ROM_PTR(&ServoCluster_disable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&ServoCluster_is_enabled_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&ServoCluster_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&ServoCluster_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_min_value), MP_ROM_PTR(&ServoCluster_min_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_mid_value), MP_ROM_PTR(&ServoCluster_mid_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_max_value), MP_ROM_PTR(&ServoCluster_max_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_to_min), MP_ROM_PTR(&ServoCluster_to_min_obj) },
+    { MP_ROM_QSTR(MP_QSTR_to_mid), MP_ROM_PTR(&ServoCluster_to_mid_obj) },
+    { MP_ROM_QSTR(MP_QSTR_to_max), MP_ROM_PTR(&ServoCluster_to_max_obj) },
+    { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&ServoCluster_to_percent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_calibration), MP_ROM_PTR(&ServoCluster_calibration_obj) },
 };
 
+STATIC MP_DEFINE_CONST_DICT(Calibration_locals_dict, Calibration_locals_dict_table);
 STATIC MP_DEFINE_CONST_DICT(Servo_locals_dict, Servo_locals_dict_table);
 STATIC MP_DEFINE_CONST_DICT(ServoCluster_locals_dict, ServoCluster_locals_dict_table);
 
 /***** Class Definition *****/
+const mp_obj_type_t Calibration_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_calibration,
+    .print = Calibration_print,
+    .make_new = Calibration_make_new,
+    .locals_dict = (mp_obj_dict_t*)&Calibration_locals_dict,
+};
+
 const mp_obj_type_t Servo_type = {
     { &mp_type_type },
     .name = MP_QSTR_servo,
@@ -67,6 +130,7 @@ const mp_obj_type_t ServoCluster_type = {
     .locals_dict = (mp_obj_dict_t*)&ServoCluster_locals_dict,
 };
 
+// TODO What is this? Should remove?
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
@@ -100,6 +164,7 @@ const mp_obj_module_t servo2040_user_cmodule = {
 
 STATIC const mp_map_elem_t servo_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_servo) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Calibration), (mp_obj_t)&Calibration_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Servo), (mp_obj_t)&Servo_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_ServoCluster), (mp_obj_t)&ServoCluster_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_servo2040), (mp_obj_t)&servo2040_user_cmodule },
@@ -107,6 +172,7 @@ STATIC const mp_map_elem_t servo_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ANGULAR), MP_ROM_INT(0x00) },
     { MP_ROM_QSTR(MP_QSTR_LINEAR), MP_ROM_INT(0x01) },
     { MP_ROM_QSTR(MP_QSTR_CONTINUOUS), MP_ROM_INT(0x02) },
+    { MP_ROM_QSTR(MP_QSTR_EMPTY), MP_ROM_INT(0x03) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_servo_globals, servo_globals_table);
 

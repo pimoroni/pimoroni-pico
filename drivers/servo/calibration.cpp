@@ -54,13 +54,13 @@ namespace servo {
     calibration[2] = Point(max_pulse, max_value);
   }
 
-  void Calibration::create_uniform_calibration(uint size, float min_pulse, float min_value, float max_pulse, float max_value) {
+  void Calibration::create_uniform_calibration(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
     create_blank_calibration(size);
     if(size > 0) {
       float size_minus_one = (float)(size - 1);
       for(uint i = 0; i < size; i++) {
-        float pulse = ((max_pulse - min_pulse) * (float)i) / size_minus_one;
-        float value = ((max_value - min_value) * (float)i) / size_minus_one;
+        float pulse = Calibration::map_float((float)i, 0.0f, size_minus_one, min_pulse, max_pulse);
+        float value = Calibration::map_float((float)i, 0.0f, size_minus_one, min_value, max_value);
         calibration[i] = Point(pulse, value);
       }
     }
