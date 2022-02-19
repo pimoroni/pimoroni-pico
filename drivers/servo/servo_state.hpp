@@ -16,7 +16,7 @@ namespace servo {
   private:
     static constexpr float LOWER_HARD_LIMIT = 500.0f;   // The minimum microsecond pulse to send
     static constexpr float UPPER_HARD_LIMIT = 2500.0f;  // The maximum microsecond pulse to send
-    static constexpr float SERVO_PERIOD = 1000000 / 50;    // This is hardcoded as all servos *should* run at this frequency
+    static constexpr float SERVO_PERIOD = 20000;    // This is hardcoded as all servos *should* run at this frequency
     static constexpr float MIN_VALID_PULSE = 1.0f;
 
 
@@ -67,7 +67,7 @@ namespace servo {
     const Calibration& calibration() const;
 
     //--------------------------------------------------
-    static uint32_t pulse_to_level(float pulse, uint32_t resolution);
+    static uint32_t pulse_to_level(float pulse, uint32_t resolution, float freq);
   };
 
 }

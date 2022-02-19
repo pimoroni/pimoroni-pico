@@ -11,11 +11,10 @@ namespace servo {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint16_t DEFAULT_PWM_FREQUENCY = 50;       //The standard servo update rate
+    static const uint16_t DEFAULT_FREQUENCY = 50;       //The standard servo update rate
 
   private:
     static const uint32_t MAX_PWM_WRAP = UINT16_MAX;
-    static constexpr uint16_t MAX_PWM_DIVIDER = (1 << 7);
 
 
     //--------------------------------------------------
@@ -25,8 +24,7 @@ namespace servo {
     uint pin;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
-    float pwm_frequency = DEFAULT_PWM_FREQUENCY;
-
+    float pwm_frequency = DEFAULT_FREQUENCY;
     ServoState state;
 
 
@@ -56,6 +54,9 @@ namespace servo {
     float get_pulse() const;
     void set_pulse(float pulse);
 
+    float get_frequency() const;
+    bool set_frequency(float freq);
+
     float get_min_value() const;
     float get_mid_value() const;
     float get_max_value() const;
@@ -68,6 +69,8 @@ namespace servo {
 
     Calibration& calibration();
     const Calibration& calibration() const;
+  private:
+    static bool calculate_pwm_factors(float freq, uint16_t& top_out, uint16_t& div16_out);
   };
 
 }

@@ -23,6 +23,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Servo_disable_obj, Servo_disable);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_is_enabled_obj, Servo_is_enabled);
 MP_DEFINE_CONST_FUN_OBJ_KW(Servo_value_obj, 1, Servo_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(Servo_pulse_obj, 1, Servo_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Servo_frequency_obj, 1, Servo_frequency);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_min_value_obj, Servo_min_value);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_mid_value_obj, Servo_mid_value);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_max_value_obj, Servo_max_value);
@@ -73,6 +74,7 @@ STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&Servo_is_enabled_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&Servo_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&Servo_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_frequency), MP_ROM_PTR(&Servo_frequency_obj) },
     { MP_ROM_QSTR(MP_QSTR_min_value), MP_ROM_PTR(&Servo_min_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_mid_value), MP_ROM_PTR(&Servo_mid_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_max_value), MP_ROM_PTR(&Servo_max_value_obj) },

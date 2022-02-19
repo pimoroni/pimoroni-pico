@@ -32,6 +32,7 @@ extern mp_obj_t Servo_disable(mp_obj_t self_in);
 extern mp_obj_t Servo_is_enabled(mp_obj_t self_in);
 extern mp_obj_t Servo_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t Servo_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t Servo_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t Servo_min_value(mp_obj_t self_in);
 extern mp_obj_t Servo_mid_value(mp_obj_t self_in);
 extern mp_obj_t Servo_max_value(mp_obj_t self_in);
@@ -58,6 +59,3 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
 extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
-
-
-extern bool Pimoroni_mp_obj_to_calibration(mp_obj_t in, void *out);

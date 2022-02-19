@@ -114,12 +114,12 @@ namespace servo {
     return table;
   }
 
-  uint32_t ServoState::pulse_to_level(float pulse, uint32_t resolution) {
+  uint32_t ServoState::pulse_to_level(float pulse, uint32_t resolution, float freq) {
     uint32_t level = 0;
     if(pulse >= MIN_VALID_PULSE) {
         // Constrain the level to hardcoded limits to protect the servo
         pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
-        level = (uint32_t)((pulse * (float)resolution) / SERVO_PERIOD);
+        level = (uint32_t)((pulse * (float)resolution * freq) / 1000000);
     }
     return level;
   }

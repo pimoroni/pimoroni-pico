@@ -495,12 +495,14 @@ void Servo_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 
     mp_print_str(print, "pin = ");
     mp_obj_print_helper(print, mp_obj_new_int(self->servo->get_pin()), PRINT_REPR);
+    mp_print_str(print, ", enabled = ");
+    mp_obj_print_helper(print, self->servo->is_enabled() ? mp_const_true : mp_const_false, PRINT_REPR);
     mp_print_str(print, ", pulse = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->servo->get_pulse()), PRINT_REPR);
     mp_print_str(print, ", value = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->servo->get_value()), PRINT_REPR);
-    mp_print_str(print, ", enabled = ");
-    mp_obj_print_helper(print, self->servo->is_enabled() ? mp_const_true : mp_const_false, PRINT_REPR);
+    mp_print_str(print, ", freq = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->servo->get_frequency()), PRINT_REPR);
 
     mp_print_str(print, ")");
 }
@@ -628,6 +630,43 @@ extern mp_obj_t Servo_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 
         self->servo->set_pulse(pulse);
         return mp_const_none;
+    }
+}
+
+extern mp_obj_t Servo_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(n_args <= 1) {
+        enum { ARG_self };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
+
+        return mp_obj_new_float(self->servo->get_frequency());
+    }
+    else {
+        enum { ARG_self, ARG_freq };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_freq, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
+
+        float freq = mp_obj_get_float(args[ARG_freq].u_obj);
+
+        if(!self->servo->set_frequency(freq))
+            mp_raise_ValueError("freq out of range");
+        else
+            return mp_const_none;
     }
 }
 
