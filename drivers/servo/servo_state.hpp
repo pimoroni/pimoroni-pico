@@ -14,9 +14,6 @@ namespace servo {
     static constexpr float ONEHUNDRED_PERCENT = 1.0f;
 
   private:
-    static constexpr float LOWER_HARD_LIMIT = 500.0f;   // The minimum microsecond pulse to send
-    static constexpr float UPPER_HARD_LIMIT = 2500.0f;  // The maximum microsecond pulse to send
-    static constexpr float SERVO_PERIOD = 20000;    // This is hardcoded as all servos *should* run at this frequency
     static constexpr float MIN_VALID_PULSE = 1.0f;
 
 
@@ -46,13 +43,16 @@ namespace servo {
     float enable();
     float disable();
     bool is_enabled() const;
-
+  private:
+    float _enable(); // Internal version of enable without convenient initialisation to mid point
+  public:
     float get_value() const;
     float set_value(float value);
 
     float get_pulse() const;
     float set_pulse(float pulse);
 
+  public:
     float get_min_value() const;
     float get_mid_value() const;
     float get_max_value() const;

@@ -6,17 +6,22 @@ namespace servo {
   }
 
   float ServoState::enable() {
+    // Has the servo not had a pulse value set before being enabled?
     if(last_enabled_pulse < MIN_VALID_PULSE) {
-      servo_value = get_mid_value();
-      last_enabled_pulse = table.value_to_pulse(servo_value);
+      // Set the servo to its mid point
+      return to_mid();
     }
-    enabled = true;
-    return last_enabled_pulse;
+    return _enable();
   }
 
   float ServoState::disable() {
     enabled = false;
     return 0.0f; // A zero pulse
+  }
+
+  float ServoState::_enable() {
+    enabled = true;
+    return last_enabled_pulse;
   }
 
   bool ServoState::is_enabled() const {
@@ -28,16 +33,13 @@ namespace servo {
   }
 
   float ServoState::set_value(float value) {
-    servo_value = value;
-    float pulse = table.value_to_pulse(value);
-    if(pulse >= MIN_VALID_PULSE) {
-      last_enabled_pulse = pulse;
-      enabled = true;
+    float pulse_out, value_out;
+    if(table.value_to_pulse(value, pulse_out, value_out)) {
+      last_enabled_pulse = pulse_out;
+      servo_value = value_out;
+      return _enable();
     }
-    else {
-      pulse = disable();
-    }
-    return pulse;
+    return disable();
   }
 
   float ServoState::get_pulse() const {
@@ -46,14 +48,14 @@ namespace servo {
 
   float ServoState::set_pulse(float pulse) {
     if(pulse >= MIN_VALID_PULSE) {
-      servo_value = table.value_from_pulse(pulse);
-      last_enabled_pulse = pulse;
-      enabled = true;
+      float value_out, pulse_out;
+      if(table.value_from_pulse(pulse, value_out, pulse_out)) {
+        servo_value = value_out;
+        last_enabled_pulse = pulse_out;
+        return _enable();
+      }
     }
-    else {
-      pulse = disable();
-    }
-    return pulse;
+    return disable();
   }
 
   float ServoState::get_min_value() const {
@@ -117,8 +119,6 @@ namespace servo {
   uint32_t ServoState::pulse_to_level(float pulse, uint32_t resolution, float freq) {
     uint32_t level = 0;
     if(pulse >= MIN_VALID_PULSE) {
-        // Constrain the level to hardcoded limits to protect the servo
-        pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
         level = (uint32_t)((pulse * (float)resolution * freq) / 1000000);
     }
     return level;
