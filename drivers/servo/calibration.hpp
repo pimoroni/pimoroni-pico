@@ -72,7 +72,7 @@ namespace servo {
     void limit_to_calibration(bool lower, bool upper);
 
     bool value_to_pulse(float value, float &pulse_out, float &value_out) const;
-    bool value_from_pulse(float pulse, float &value_out, float &pulse_out) const;
+    bool pulse_to_value(float pulse, float &value_out, float &pulse_out) const;
 
     static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
 

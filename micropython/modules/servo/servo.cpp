@@ -471,7 +471,7 @@ mp_obj_t Calibration_value_to_pulse(size_t n_args, const mp_obj_t *pos_args, mp_
     return mp_const_none;
 }
 
-mp_obj_t Calibration_value_from_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_pulse_to_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_pulse };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -487,14 +487,14 @@ mp_obj_t Calibration_value_from_pulse(size_t n_args, const mp_obj_t *pos_args, m
     float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
 
     float value_out, pulse_out;
-    if(self->calibration->value_from_pulse(pulse, value_out, pulse_out)) {
+    if(self->calibration->pulse_to_value(pulse, value_out, pulse_out)) {
         mp_obj_t tuple[2];
         tuple[0] = mp_obj_new_float(pulse_out);
         tuple[1] = mp_obj_new_float(value_out);
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert value from pulse. Calibration invalid");
+        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert pulse to value. Calibration invalid");
     }
     return mp_const_none;
 }

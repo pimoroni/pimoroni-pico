@@ -14,7 +14,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_point_obj, 1, Calibration_first_poi
 MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_point_obj, 1, Calibration_last_point);
 MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_limit_to_calibration_obj, 3, Calibration_limit_to_calibration);
 MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_value_to_pulse_obj, 2, Calibration_value_to_pulse);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_value_from_pulse_obj, 2, Calibration_value_from_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_pulse_to_value_obj, 2, Calibration_pulse_to_value);
 
 MP_DEFINE_CONST_FUN_OBJ_1(Servo___del___obj, Servo___del__);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_pin_obj, Servo_pin);
@@ -63,7 +63,7 @@ STATIC const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_last_point), MP_ROM_PTR(&Calibration_last_point_obj) },
     { MP_ROM_QSTR(MP_QSTR_limit_to_calibration), MP_ROM_PTR(&Calibration_limit_to_calibration_obj) },
     { MP_ROM_QSTR(MP_QSTR_value_to_pulse), MP_ROM_PTR(&Calibration_value_to_pulse_obj) },
-    { MP_ROM_QSTR(MP_QSTR_value_from_pulse), MP_ROM_PTR(&Calibration_value_from_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pulse_to_value), MP_ROM_PTR(&Calibration_pulse_to_value_obj) },
 };
 
 STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {

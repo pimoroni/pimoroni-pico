@@ -49,7 +49,7 @@ namespace servo {
   float ServoState::set_pulse(float pulse) {
     if(pulse >= MIN_VALID_PULSE) {
       float value_out, pulse_out;
-      if(table.value_from_pulse(pulse, value_out, pulse_out)) {
+      if(table.pulse_to_value(pulse, value_out, pulse_out)) {
         servo_value = value_out;
         last_enabled_pulse = pulse_out;
         return _enable();

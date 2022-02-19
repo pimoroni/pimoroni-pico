@@ -191,7 +191,7 @@ namespace servo {
     return success;
   }
 
-  bool Calibration::value_from_pulse(float pulse, float &value_out, float &pulse_out) const {
+  bool Calibration::pulse_to_value(float pulse, float &value_out, float &pulse_out) const {
     bool success = false;
     if(calibration_size >= 2) {
       uint8_t last = calibration_size - 1;
