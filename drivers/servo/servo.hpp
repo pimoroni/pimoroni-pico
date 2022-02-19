@@ -11,9 +11,12 @@ namespace servo {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint16_t DEFAULT_FREQUENCY = 50;       //The standard servo update rate
+    static constexpr float DEFAULT_FREQUENCY = 50.0f;       // The standard servo update rate
 
   private:
+    static constexpr float MIN_FREQUENCY = 10.0f;           // Lowest achievable with hardware PWM with good resolution
+    static constexpr float MAX_FREQUENCY = 350.0f;          // Highest nice value that still allows the full uS pulse range
+                                                            // Some servos are rated for 333Hz for instance
     static const uint32_t MAX_PWM_WRAP = UINT16_MAX;
 
 

@@ -71,7 +71,6 @@ namespace servo {
     pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
   }
 
-
   float Servo::get_frequency() const {
     return pwm_frequency;
   }
@@ -79,41 +78,43 @@ namespace servo {
   bool Servo::set_frequency(float freq) {
     bool success = false;
 
-    // Calculate a suitable pwm wrap period for this frequency
-    uint16_t period; uint16_t div16;
-    if(Servo::calculate_pwm_factors(freq, period, div16)) {
+    if((freq >= MIN_FREQUENCY) && (freq <= MAX_FREQUENCY)) {
+      // Calculate a suitable pwm wrap period for this frequency
+      uint16_t period; uint16_t div16;
+      if(Servo::calculate_pwm_factors(freq, period, div16)) {
 
-      // Record if the new period will be larger or smaller.
-      // This is used to apply new pwm values either before or after the wrap is applied,
-      // to avoid momentary blips in PWM output on SLOW_DECAY
-      bool pre_update_pwm = (period > pwm_period);
+        // Record if the new period will be larger or smaller.
+        // This is used to apply new pwm values either before or after the wrap is applied,
+        // to avoid momentary blips in PWM output on SLOW_DECAY
+        bool pre_update_pwm = (period > pwm_period);
 
-      pwm_period = period;
-      pwm_frequency = freq;
+        pwm_period = period;
+        pwm_frequency = freq;
 
-      uint pin_num = pwm_gpio_to_slice_num(pin);
+        uint pin_num = pwm_gpio_to_slice_num(pin);
 
-      // Apply the new divider
-      uint8_t div = div16 >> 4;
-      uint8_t mod = div16 % 16;
-      pwm_set_clkdiv_int_frac(pin_num, div, mod);
+        // Apply the new divider
+        uint8_t div = div16 >> 4;
+        uint8_t mod = div16 % 16;
+        pwm_set_clkdiv_int_frac(pin_num, div, mod);
 
-      // If the the period is larger, update the pwm before setting the new wraps
-      if(pre_update_pwm) {
-        float current_pulse = get_pulse();
-        pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
+        // If the the period is larger, update the pwm before setting the new wraps
+        if(pre_update_pwm) {
+          float current_pulse = get_pulse();
+          pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
+        }
+
+        // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+        pwm_set_wrap(pin_num, pwm_period - 1);
+
+        // If the the period is smaller, update the pwm after setting the new wraps
+        if(!pre_update_pwm) {
+          float current_pulse = get_pulse();
+          pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
+        }
+
+        success = true;
       }
-
-      // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwm_set_wrap(pin_num, pwm_period - 1);
-
-      // If the the period is smaller, update the pwm after setting the new wraps
-      if(!pre_update_pwm) {
-        float current_pulse = get_pulse();
-        pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
-      }
-
-      success = true;
     }
     return success;
   }

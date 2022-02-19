@@ -664,7 +664,7 @@ extern mp_obj_t Servo_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
         if(!self->servo->set_frequency(freq))
-            mp_raise_ValueError("freq out of range");
+            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz");
         else
             return mp_const_none;
     }
