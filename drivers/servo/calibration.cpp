@@ -122,6 +122,8 @@ namespace servo {
     if(calibration_size >= 2) {
       uint8_t last = calibration_size - 1;
 
+      value_out = value;
+
       // Is the value below the bottom most calibration point?
       if(value < calibration[0].value) {
         // Should the value be limited to the calibration or projected below it?
@@ -132,7 +134,6 @@ namespace servo {
         else {
           pulse_out = map_float(value, calibration[0].value, calibration[1].value,
                                        calibration[0].pulse, calibration[1].pulse);
-          value_out = value;
         }
       }
       // Is the value above the top most calibration point?
@@ -145,7 +146,6 @@ namespace servo {
         else {
           pulse_out = map_float(value, calibration[last - 1].value, calibration[last].value,
                                        calibration[last - 1].pulse, calibration[last].pulse);
-          value_out = value;
         }
       }
       else {
@@ -154,24 +154,35 @@ namespace servo {
           if(value <= calibration[i + 1].value) {
             pulse_out = map_float(value, calibration[i].value, calibration[i + 1].value,
                                          calibration[i].pulse, calibration[i + 1].pulse);
-            value_out = value;
             break; // No need to continue checking so break out of the loop
           }
         }
       }
 
       // Clamp the pulse between the hard limits
-      pulse_out = MIN(MAX(pulse_out, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
+      if(pulse_out < LOWER_HARD_LIMIT || pulse_out > UPPER_HARD_LIMIT) {
+        pulse_out = MIN(MAX(pulse_out, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
 
-      // Is the pulse below the bottom most calibration point?
-      if(pulse_out < calibration[0].pulse) {
-        value_out = map_float(pulse_out, calibration[0].pulse, calibration[1].pulse,
-                                         calibration[0].value, calibration[1].value);
-      }
-      // Is the pulse above the top most calibration point?
-      else if(pulse_out > calibration[last].pulse) {
-        value_out = map_float(pulse_out, calibration[last - 1].pulse, calibration[last].pulse,
-                                         calibration[last - 1].value, calibration[last].value);
+        // Is the pulse below the bottom most calibration point?
+        if(pulse_out < calibration[0].pulse) {
+          value_out = map_float(pulse_out, calibration[0].pulse, calibration[1].pulse,
+                                           calibration[0].value, calibration[1].value);
+        }
+        // Is the pulse above the top most calibration point?
+        else if(pulse_out > calibration[last].pulse) {
+          value_out = map_float(pulse_out, calibration[last - 1].pulse, calibration[last].pulse,
+                                           calibration[last - 1].value, calibration[last].value);
+        }
+        else {
+          // The pulse must between two calibration points, so iterate through them to find which ones
+          for(uint8_t i = 0; i < last; i++) {
+            if(pulse_out <= calibration[i + 1].pulse) {
+              value_out = map_float(pulse_out, calibration[i].pulse, calibration[i + 1].pulse,
+                                               calibration[i].value, calibration[i + 1].value);
+              break; // No need to continue checking so break out of the loop
+            }
+          }
+        }
       }
 
       success = true;
@@ -186,10 +197,10 @@ namespace servo {
       uint8_t last = calibration_size - 1;
 
       // Clamp the pulse between the hard limits
-      pulse = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
+      pulse_out = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
 
       // Is the pulse below the bottom most calibration point?
-      if(pulse < calibration[0].pulse) {
+      if(pulse_out < calibration[0].pulse) {
         // Should the pulse be limited to the calibration or projected below it?
         if(limit_lower) {
           value_out = calibration[0].value;
@@ -198,7 +209,6 @@ namespace servo {
         else {
           value_out = map_float(pulse, calibration[0].pulse, calibration[1].pulse,
                                        calibration[0].value, calibration[1].value);
-          pulse_out = pulse;
         }
       }
       // Is the pulse above the top most calibration point?
@@ -211,7 +221,6 @@ namespace servo {
         else {
           value_out = map_float(pulse, calibration[last - 1].pulse, calibration[last].pulse,
                                        calibration[last - 1].value, calibration[last].value);
-          pulse_out = pulse;
         }
       }
       else {
@@ -220,7 +229,6 @@ namespace servo {
           if(pulse <= calibration[i + 1].pulse) {
             value_out = map_float(pulse, calibration[i].pulse, calibration[i + 1].pulse,
                                          calibration[i].value, calibration[i + 1].value);
-            pulse_out = pulse;
             break; // No need to continue checking so break out of the loop
           }
         }
