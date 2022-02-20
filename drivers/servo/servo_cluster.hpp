@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pico/stdlib.h"
-#include "multi_pwm.hpp"
+#include "pwm_cluster.hpp"
 #include "servo_state.hpp"
 
 namespace servo {
@@ -22,7 +22,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    MultiPWM multi_pwm;
+    pimoroni::PWMCluster pwms;
     ServoState servos[NUM_BANK0_GPIOS]; // TODO change this to array of pointers
                                         // so that only the servos actually assigned
                                         // to this cluster have states

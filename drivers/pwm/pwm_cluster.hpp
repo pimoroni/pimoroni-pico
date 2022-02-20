@@ -4,27 +4,26 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
-#include "multi_pwm.pio.h"
 
-namespace servo {
+namespace pimoroni {
 
   struct TransitionData {
-    uint8_t servo;
+    uint8_t channel;
     uint32_t level;
     bool state;
 
-    TransitionData() : servo(0), level(0), state(false) {};
-    TransitionData(uint8_t servo, uint32_t level, bool new_state) : servo(servo), level(level), state(new_state) {};
+    TransitionData() : channel(0), level(0), state(false) {};
+    TransitionData(uint8_t channel, uint32_t level, bool new_state) : channel(channel), level(level), state(new_state) {};
 
     bool compare(const TransitionData& other) const {
       return level <= other.level;
     }
   };
 
-  class MultiPWM {
+  class PWMCluster {
   public:
-    MultiPWM(PIO pio, uint sm, uint channel_mask);
-    ~MultiPWM();
+    PWMCluster(PIO pio, uint sm, uint channel_mask);
+    ~PWMCluster();
     uint get_chan_mask() const;
     void set_wrap(uint32_t wrap, bool load = true);
     void set_chan_level(uint8_t channel, uint32_t level, bool load = true);

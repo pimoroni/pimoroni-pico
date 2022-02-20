@@ -1,2 +1,2 @@
 include(servo.cmake)
-include(multi_pwm.cmake)
+include(servo_cluster.cmake)

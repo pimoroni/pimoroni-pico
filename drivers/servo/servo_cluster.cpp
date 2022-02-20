@@ -2,8 +2,8 @@
 
 namespace servo {
   ServoCluster::ServoCluster(PIO pio, uint sm, uint channel_mask)
-    : multi_pwm(pio, sm, channel_mask) {
-    multi_pwm.set_wrap(20000);
+    : pwms(pio, sm, channel_mask) {
+    pwms.set_wrap(20000);
   }
 
   ServoCluster::~ServoCluster() {
@@ -25,20 +25,20 @@ namespace servo {
   }
 
   uint ServoCluster::get_pin_mask() const {
-    return multi_pwm.get_chan_mask();
+    return pwms.get_chan_mask();
   }
 
   void ServoCluster::enable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].enable();
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
   void ServoCluster::disable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].disable();
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
@@ -59,7 +59,7 @@ namespace servo {
   void ServoCluster::set_value(uint servo, float value, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_value(value);
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
@@ -73,7 +73,7 @@ namespace servo {
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_pulse(pulse);
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
@@ -101,35 +101,35 @@ namespace servo {
   void ServoCluster::to_min(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_min();
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
   void ServoCluster::to_mid(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_mid();
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_max();
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max);
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max, value_min, value_max);
-      multi_pwm.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
     }
   }
 

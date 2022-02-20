@@ -37,7 +37,7 @@
 
 ; PWM Program
 ; --------------------------------------------------
-.program multi_pwm
+.program pwm_cluster
 
 .wrap_target
     pull                    ; Pull in the new pin states
@@ -55,7 +55,7 @@ delay:
 
 ; Debug PWM Program
 ; --------------------------------------------------
-.program debug_multi_pwm
+.program debug_pwm_cluster
 .side_set 1
 
 .wrap_target

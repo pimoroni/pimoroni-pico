@@ -17,7 +17,6 @@ namespace servo {
     static constexpr float MIN_FREQUENCY = 10.0f;           // Lowest achievable with hardware PWM with good resolution
     static constexpr float MAX_FREQUENCY = 350.0f;          // Highest nice value that still allows the full uS pulse range
                                                             // Some servos are rated for 333Hz for instance
-    static const uint32_t MAX_PWM_WRAP = UINT16_MAX;
 
 
     //--------------------------------------------------
@@ -72,8 +71,6 @@ namespace servo {
 
     Calibration& calibration();
     const Calibration& calibration() const;
-  private:
-    static bool calculate_pwm_factors(float freq, uint16_t& top_out, uint16_t& div16_out);
   };
 
 }

@@ -1,12 +1,13 @@
-#include "multi_pwm.hpp"
+#include "pwm_cluster.hpp"
 #include <cstdio> // TOREMOVE once done debugging
 #include "hardware/gpio.h" // TOREMOVE once done debugging
 #include "hardware/clocks.h"
+#include "pwm_cluster.pio.h"
 
 // Uncomment the below line to enable debugging
 #define DEBUG_MULTI_PWM
 
-namespace servo {
+namespace pimoroni {
 
 #ifdef DEBUG_MULTI_PWM
     static const uint DEBUG_SIDESET = 17;
@@ -76,11 +77,11 @@ interrupt is fired, and the handler reconfigures channel A so that it is ready f
      * */
     
 
-MultiPWM::MultiPWM(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), channel_mask(channel_mask) {
+PWMCluster::PWMCluster(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), channel_mask(channel_mask) {
 #ifdef DEBUG_MULTI_PWM
-  pio_program_offset = pio_add_program(pio, &debug_multi_pwm_program);
+  pio_program_offset = pio_add_program(pio, &debug_pwm_cluster_program);
 #else
-  pio_program_offset = pio_add_program(pio, &multi_pwm_program);
+  pio_program_offset = pio_add_program(pio, &pwm_cluster_program);
 #endif
   channel_polarities = 0x00000000;
   wrap_level = 0;
@@ -109,9 +110,9 @@ MultiPWM::MultiPWM(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), chan
 #endif
 
 #ifdef DEBUG_MULTI_PWM
-  pio_sm_config c = debug_multi_pwm_program_get_default_config(pio_program_offset);
+  pio_sm_config c = debug_pwm_cluster_program_get_default_config(pio_program_offset);
 #else
-  pio_sm_config c = multi_pwm_program_get_default_config(pio_program_offset);
+  pio_sm_config c = pwm_cluster_program_get_default_config(pio_program_offset);
 #endif
   sm_config_set_out_pins(&c, 0, irq_gpio); //TODO change this to be 32
 #ifdef DEBUG_MULTI_PWM
@@ -189,14 +190,14 @@ MultiPWM::MultiPWM(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), chan
   //dma_start_channel_mask(1u << ctrl_dma_channel);
 }
 
-MultiPWM::~MultiPWM() {
+PWMCluster::~PWMCluster() {
   dma_channel_unclaim(data_dma_channel);
   dma_channel_unclaim(ctrl_dma_channel);
   pio_sm_set_enabled(pio, sm, false);
 #ifdef DEBUG_MULTI_PWM
-  pio_remove_program(pio, &debug_multi_pwm_program, pio_program_offset);
+  pio_remove_program(pio, &debug_pwm_cluster_program, pio_program_offset);
 #else
-  pio_remove_program(pio, &multi_pwm_program, pio_program_offset);
+  pio_remove_program(pio, &pwm_cluster_program, pio_program_offset);
 #endif
 #ifndef MICROPY_BUILD_TYPE
   // pio_sm_unclaim seems to hardfault in MicroPython
@@ -210,17 +211,17 @@ MultiPWM::~MultiPWM() {
   }
 }
 
-uint MultiPWM::get_chan_mask() const {
+uint PWMCluster::get_chan_mask() const {
   return channel_mask;
 }
 
-void MultiPWM::set_wrap(uint32_t wrap, bool load) {
+void PWMCluster::set_wrap(uint32_t wrap, bool load) {
   wrap_level = MAX(wrap, 1);  // Cannot have a wrap of zero!
   if(load)
     load_pwm();
 }
 
-void MultiPWM::set_chan_level(uint8_t channel, uint32_t level, bool load) {
+void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
   if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
     channel_levels[channel] = level;
     if(load)
@@ -228,7 +229,7 @@ void MultiPWM::set_chan_level(uint8_t channel, uint32_t level, bool load) {
   }
 }
 
-void MultiPWM::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
+void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
   if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
     channel_offsets[channel] = offset;
     if(load)
@@ -236,7 +237,7 @@ void MultiPWM::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
   }
 }
 
-void MultiPWM::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
+void PWMCluster::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
   if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
     if(polarity)
       channel_polarities |= (1u << channel);
@@ -248,21 +249,21 @@ void MultiPWM::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
 }
 
 // These apply immediately, so do not obey the PWM update trigger
-void MultiPWM::set_clkdiv(float divider) {
+void PWMCluster::set_clkdiv(float divider) {
   pio_sm_set_clkdiv(pio, sm, divider);
 }
 
 // These apply immediately, so do not obey the PWM update trigger
-void MultiPWM::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
+void PWMCluster::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
   pio_sm_set_clkdiv_int_frac(pio, sm, integer, fract);
 }
 
 /*
-void MultiPWM::set_phase_correct(bool phase_correct);
+void PWMCluster::set_phase_correct(bool phase_correct);
 
-void MultiPWM::set_enabled(bool enabled);*/
+void PWMCluster::set_enabled(bool enabled);*/
 
-void MultiPWM::load_pwm() {
+void PWMCluster::load_pwm() {
   gpio_put(write_gpio, 1);
 
   TransitionData transitions[64];
@@ -276,14 +277,14 @@ void MultiPWM::load_pwm() {
 
       // If the level is greater than zero, add a transition to high
       if(channel_levels[channel] > 0) {
-        MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel], !polarity));
+        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel], !polarity));
         //if((channel_offsets[channel] < wrap_level) && (channel_offsets[channel] + channel_levels[channel] >= wrap_level)) {
-        //    MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, 0, !polarity)) // Adds an initial state for PWMs that have their end offset beyond the transition line
+        //    PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, 0, !polarity)) // Adds an initial state for PWMs that have their end offset beyond the transition line
         //}
       }
       // If the level is less than the wrap, add a transition to low
       if(channel_levels[channel] < wrap_level) {
-        MultiPWM::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel] + channel_levels[channel], polarity));
+        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_offsets[channel] + channel_levels[channel], polarity));
       }
     }
   }
@@ -322,9 +323,9 @@ void MultiPWM::load_pwm() {
         if(transitions[data_index].level <= current_level) {
           // Yes, so add the transition state to the pin states mask
           if(transitions[data_index].state)
-            pin_states |= (1u << transitions[data_index].servo);
+            pin_states |= (1u << transitions[data_index].channel);
           else
-            pin_states &= ~(1u << transitions[data_index].servo);
+            pin_states &= ~(1u << transitions[data_index].channel);
 
           data_index++; // Move on to the next transition
         }
@@ -368,17 +369,17 @@ void MultiPWM::load_pwm() {
   gpio_put(write_gpio, 0); //TOREMOVE
 }
 
-bool MultiPWM::bit_in_mask(uint bit, uint mask) {
+bool PWMCluster::bit_in_mask(uint bit, uint mask) {
   return ((1u << bit) & mask) != 0;
 }
 
-void MultiPWM::sorted_insert(TransitionData array[], uint &size, const TransitionData &data) {
+void PWMCluster::sorted_insert(TransitionData array[], uint &size, const TransitionData &data) {
   uint i;
   for(i = size; (i > 0 && !array[i - 1].compare(data)); i--) {
     array[i] = array[i - 1];
   }
   array[i] = data;
-  //printf("Added %d, %ld, %d\n", data.servo, data.level, data.state);
+  //printf("Added %d, %ld, %d\n", data.channel, data.level, data.state);
   size++;
 }
 }

@@ -5,16 +5,18 @@ add_library(usermod_${MOD_NAME} INTERFACE)
 target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_state.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/calibration.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/multi_pwm.cpp
 )
-pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/multi_pwm.pio)
+pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.pio)
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/
 )
 

@@ -56,7 +56,7 @@ int main() {
 
   simple_servo.init();
 
-  //MultiPWM pwms(pio1, 0, 0b111111111111111);
+  //PWMCluster pwms(pio1, 0, 0b111111111111111);
   //pwms.set_wrap(20000);
   ServoCluster cluster(pio1, 0, 0b111100);
 
