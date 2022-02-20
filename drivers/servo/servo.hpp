@@ -8,25 +8,13 @@ namespace servo {
 
   class Servo {
     //--------------------------------------------------
-    // Constants
-    //--------------------------------------------------
-  public:
-    static constexpr float DEFAULT_FREQUENCY = 50.0f;       // The standard servo update rate
-
-  private:
-    static constexpr float MIN_FREQUENCY = 10.0f;           // Lowest achievable with hardware PWM with good resolution
-    static constexpr float MAX_FREQUENCY = 350.0f;          // Highest nice value that still allows the full uS pulse range
-                                                            // Some servos are rated for 333Hz for instance
-
-
-    //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
     uint pin;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
-    float pwm_frequency = DEFAULT_FREQUENCY;
+    float pwm_frequency = ServoState::DEFAULT_FREQUENCY;
     ServoState state;
 
 
@@ -59,6 +47,7 @@ namespace servo {
     float get_frequency() const;
     bool set_frequency(float freq);
 
+    //--------------------------------------------------
     float get_min_value() const;
     float get_mid_value() const;
     float get_max_value() const;
@@ -71,6 +60,10 @@ namespace servo {
 
     Calibration& calibration();
     const Calibration& calibration() const;
+
+    //--------------------------------------------------
+  private:
+    void apply_pulse(float pulse);
   };
 
 }

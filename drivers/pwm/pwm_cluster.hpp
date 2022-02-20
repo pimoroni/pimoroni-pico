@@ -46,5 +46,10 @@ namespace pimoroni {
     uint channel_offsets[NUM_BANK0_GPIOS];
     uint channel_polarities;
     uint wrap_level;
+
+  public:
+    static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint16_t& div16_out);
+  private:
+    static const uint64_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX; // UINT32_MAX works too, but seems to produce less accurate counters
   };
 }

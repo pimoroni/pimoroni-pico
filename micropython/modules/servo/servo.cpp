@@ -1055,6 +1055,43 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
     }
 }
 
+extern mp_obj_t ServoCluster_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(n_args <= 1) {
+        enum { ARG_self };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+        return mp_obj_new_float(self->cluster->get_frequency());
+    }
+    else {
+        enum { ARG_self, ARG_freq };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_freq, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+        float freq = mp_obj_get_float(args[ARG_freq].u_obj);
+
+        if(!self->cluster->set_frequency(freq))
+            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz");
+        else
+            return mp_const_none;
+    }
+}
+
 extern mp_obj_t ServoCluster_min_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_servo };
     static const mp_arg_t allowed_args[] = {

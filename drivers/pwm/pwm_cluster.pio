@@ -32,7 +32,7 @@
 
 ; Debounce Constants
 ; --------------------------------------------------
-.define public MULT_PWM_CYCLES     5
+.define public PWM_CLUSTER_CYCLES     5
 
 
 ; PWM Program

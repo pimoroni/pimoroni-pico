@@ -1,9 +1,30 @@
 #include "servo_cluster.hpp"
+#include "pwm.hpp"
+#include <cstdio>
 
 namespace servo {
   ServoCluster::ServoCluster(PIO pio, uint sm, uint channel_mask)
     : pwms(pio, sm, channel_mask) {
-    pwms.set_wrap(20000);
+
+    // Calculate a suitable pwm wrap period for this frequency
+    uint32_t period; uint16_t div16;
+    if(pimoroni::PWMCluster::calculate_pwm_factors(pwm_frequency, period, div16)) {
+      pwm_period = period;
+
+      // Update the pwm before setting the new wrap
+      for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
+        pwms.set_chan_level(servo, 0, false);
+      }
+
+      // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+      pwms.set_wrap(pwm_period); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
+
+      // Apply the new divider
+      // This is done after loading new PWM values to avoid a lockup condition
+      uint8_t div = div16 >> 4;
+      uint8_t mod = div16 % 16;
+      pwms.set_clkdiv_int_frac(div, mod);
+    }
   }
 
   ServoCluster::~ServoCluster() {
@@ -31,14 +52,14 @@ namespace servo {
   void ServoCluster::enable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].enable();
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
   void ServoCluster::disable(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].disable();
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
@@ -59,7 +80,7 @@ namespace servo {
   void ServoCluster::set_value(uint servo, float value, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_value(value);
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
@@ -73,8 +94,44 @@ namespace servo {
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].set_pulse(pulse);
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
+  }
+
+ float ServoCluster::get_frequency() const {
+    return pwm_frequency;
+  }
+
+  bool ServoCluster::set_frequency(float freq) {
+    bool success = false;
+
+    if((freq >= ServoState::MIN_FREQUENCY) && (freq <= ServoState::MAX_FREQUENCY)) {
+      // Calculate a suitable pwm wrap period for this frequency
+      uint32_t period; uint16_t div16;
+      if(pimoroni::PWMCluster::calculate_pwm_factors(freq, period, div16)) {
+
+        pwm_period = period;
+        pwm_frequency = freq;
+
+        // Update the pwm before setting the new wrap
+        for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
+          float current_pulse = servos[servo].get_pulse();
+          apply_pulse(servo, current_pulse, false);
+        }
+
+        // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+        pwms.set_wrap(pwm_period, true);
+
+        // Apply the new divider
+        // This is done after loading new PWM values to avoid a lockup condition
+        uint8_t div = div16 >> 4;
+        uint8_t mod = div16 % 16;
+        pwms.set_clkdiv_int_frac(div, mod);
+
+        success = true;
+      }
+    }
+    return success;
   }
 
   float ServoCluster::get_min_value(uint servo) const {
@@ -101,35 +158,35 @@ namespace servo {
   void ServoCluster::to_min(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_min();
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
   void ServoCluster::to_mid(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_mid();
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_max();
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max);
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     if(servo < NUM_BANK0_GPIOS) {
       float new_pulse = servos[servo].to_percent(in, in_min, in_max, value_min, value_max);
-      pwms.set_chan_level(servo, ServoState::pulse_to_level(new_pulse, 20000, 50), load);
+      apply_pulse(servo, new_pulse, load);
     }
   }
 
@@ -145,5 +202,9 @@ namespace servo {
         return &servos[servo].calibration();
     else
         return nullptr;
+  }
+
+  void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {
+    pwms.set_chan_level(servo, ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
   }
 };

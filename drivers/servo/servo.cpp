@@ -41,13 +41,11 @@ namespace servo {
   }
 
   void Servo::enable() {
-    float new_pulse = state.enable();
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.enable());
   }
 
   void Servo::disable() {
-    float new_pulse = state.disable();
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.disable());
   }
 
   bool Servo::is_enabled() const {
@@ -59,8 +57,7 @@ namespace servo {
   }
 
   void Servo::set_value(float value) {
-    float new_pulse = state.set_value(value);
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.set_value(value));
   }
 
   float Servo::get_pulse() const {
@@ -68,8 +65,7 @@ namespace servo {
   }
 
   void Servo::set_pulse(float pulse) {
-    float new_pulse = state.set_pulse(pulse);
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.set_pulse(pulse));
   }
 
   float Servo::get_frequency() const {
@@ -79,7 +75,7 @@ namespace servo {
   bool Servo::set_frequency(float freq) {
     bool success = false;
 
-    if((freq >= MIN_FREQUENCY) && (freq <= MAX_FREQUENCY)) {
+    if((freq >= ServoState::MIN_FREQUENCY) && (freq <= ServoState::MAX_FREQUENCY)) {
       // Calculate a suitable pwm wrap period for this frequency
       uint16_t period; uint16_t div16;
       if(pimoroni::calculate_pwm_factors(freq, period, div16)) {
@@ -101,8 +97,7 @@ namespace servo {
 
         // If the the period is larger, update the pwm before setting the new wraps
         if(pre_update_pwm) {
-          float current_pulse = get_pulse();
-          pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
+          apply_pulse(state.get_pulse());
         }
 
         // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
@@ -110,8 +105,7 @@ namespace servo {
 
         // If the the period is smaller, update the pwm after setting the new wraps
         if(!pre_update_pwm) {
-          float current_pulse = get_pulse();
-          pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(current_pulse, pwm_period, pwm_frequency));
+          apply_pulse(state.get_pulse());
         }
 
         success = true;
@@ -133,28 +127,23 @@ namespace servo {
   }
 
   void Servo::to_min() {
-    float new_pulse = state.to_min();
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.to_min());
   }
 
   void Servo::to_mid() {
-    float new_pulse = state.to_mid();
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.to_mid());
   }
 
   void Servo::to_max() {
-    float new_pulse = state.to_max();
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.to_max());
   }
 
   void Servo::to_percent(float in, float in_min, float in_max) {
-    float new_pulse = state.to_percent(in, in_min, in_max);
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.to_percent(in, in_min, in_max));
   }
 
   void Servo::to_percent(float in, float in_min, float in_max, float value_min, float value_max) {
-    float new_pulse = state.to_percent(in, in_min, in_max, value_min, value_max);
-    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(new_pulse, pwm_period, pwm_frequency));
+    apply_pulse(state.to_percent(in, in_min, in_max, value_min, value_max));
   }
 
   Calibration& Servo::calibration() {
@@ -165,4 +154,7 @@ namespace servo {
     return state.calibration();
   }
 
+  void Servo::apply_pulse(float pulse) {
+    pwm_set_gpio_level(pin, (uint16_t)ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency));
+  }
 };

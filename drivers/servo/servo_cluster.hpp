@@ -8,21 +8,12 @@ namespace servo {
 
   class ServoCluster {
     //--------------------------------------------------
-    // Constants
-    //--------------------------------------------------
-  public:
-    static const uint16_t DEFAULT_PWM_FREQUENCY = 50;       //The standard servo update rate
-
-  private:
-    static const uint32_t MAX_PWM_WRAP = UINT16_MAX;
-    static constexpr uint16_t MAX_PWM_DIVIDER = (1 << 7);
-
-
-    //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
     pimoroni::PWMCluster pwms;
+    uint32_t pwm_period;
+    float pwm_frequency = ServoState::DEFAULT_FREQUENCY;
     ServoState servos[NUM_BANK0_GPIOS]; // TODO change this to array of pointers
                                         // so that only the servos actually assigned
                                         // to this cluster have states
@@ -54,6 +45,10 @@ namespace servo {
     float get_pulse(uint servo) const;
     void set_pulse(uint servo, float pulse, bool load = true);
 
+    float get_frequency() const;
+    bool set_frequency(float freq);
+
+    //--------------------------------------------------
     float get_min_value(uint servo) const;
     float get_mid_value(uint servo) const;
     float get_max_value(uint servo) const;
@@ -66,6 +61,10 @@ namespace servo {
 
     Calibration* calibration(uint servo);
     const Calibration* calibration(uint servo) const;
+
+    //--------------------------------------------------
+  private:
+    void apply_pulse(uint servo, float pulse, bool load);
   };
 
 }

@@ -40,6 +40,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_obj, 2, ServoCluster_disable);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_is_enabled_obj, 2, ServoCluster_is_enabled);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_value_obj, 2, ServoCluster_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_pulse_obj, 2, ServoCluster_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_frequency_obj, 1, ServoCluster_frequency);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_min_value_obj, 2, ServoCluster_min_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_mid_value_obj, 2, ServoCluster_mid_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_max_value_obj, 2, ServoCluster_max_value);
@@ -93,6 +94,7 @@ STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&ServoCluster_is_enabled_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&ServoCluster_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&ServoCluster_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_frequency), MP_ROM_PTR(&ServoCluster_frequency_obj) },
     { MP_ROM_QSTR(MP_QSTR_min_value), MP_ROM_PTR(&ServoCluster_min_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_mid_value), MP_ROM_PTR(&ServoCluster_mid_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_max_value), MP_ROM_PTR(&ServoCluster_max_value_obj) },
