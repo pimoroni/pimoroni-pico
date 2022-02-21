@@ -55,9 +55,9 @@ namespace pimoroni {
     void image(const uint8_t *data);
 
     // text (fonts: sans, sans_bold, gothic, cursive_bold, cursive, serif_italic, serif, serif_bold)
-    void text(std::string message, int32_t x, int32_t y, float s = 1.0f);
+    void text(std::string message, int32_t x, int32_t y, float s = 1.0f, float a = 0.0f);
     const hershey_font_glyph_t* glyph_data(unsigned char c);
-    int32_t glyph(unsigned char c, int32_t x, int32_t y, float s);
+    int32_t glyph(unsigned char c, int32_t x, int32_t y, float s, float a = 0.0f);
 
     void debug_command(uint8_t command, size_t len, const uint8_t *data);
     void dump_otp(uint8_t *otp_data);

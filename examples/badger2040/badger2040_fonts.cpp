@@ -65,6 +65,7 @@ int main() {
   printf("\n\n=======\nbadger2040 starting up\n\n");
 
   badger.init();
+  badger.update_speed(1);
 
   uint32_t i = 0;
 

@@ -194,7 +194,11 @@ namespace pimoroni {
     return &_font->chars[c - 32];
   }
 
-  int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s) {
+  inline float deg2rad(float degrees) {
+    return (degrees * M_PI) / 180.0f;
+  }
+
+  int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s, float a) {
     // if space character then return a width to move the caret by
     const hershey_font_glyph_t *gd = glyph_data(c);
 
@@ -202,6 +206,10 @@ namespace pimoroni {
     if(!gd) {
       return 0;
     }
+
+    a = deg2rad(a);
+    float as = sin(a);
+    float ac = cos(a);
 
     const int8_t *pv = gd->vertices;
     int8_t cx = (*pv++) * s;
@@ -216,8 +224,14 @@ namespace pimoroni {
         int8_t nx = (*pv++) * s;
         int8_t ny = (*pv++) * s;
 
+        int rcx = cx * ac - cy * as;
+        int rcy = cx * as + cy * ac;
+
+        int rnx = nx * ac - ny * as;
+        int rny = nx * as + ny * ac;
+
         if(pen_down) {
-          line(cx + x, cy + y, nx + x, ny + y);
+          line(rcx + x, rcy + y, rnx + x, rny + y);
         }
 
         cx = nx;
@@ -229,12 +243,20 @@ namespace pimoroni {
     return gd->width * s;
   }
 
-  void Badger2040::text(std::string message, int32_t x, int32_t y, float s) {
+  void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a) {
     int32_t cx = x;
     int32_t cy = y;
 
+    int32_t ox = 0;
+
+    float as = sin(deg2rad(a));
+    float ac = cos(deg2rad(a));
+
     for(auto &c : message) {
-      cx += glyph(c, cx, cy, s);
+      int rcx = ox * ac;
+      int rcy = ox * as;
+
+      ox += glyph(c, cx + rcx, cy + rcy, s, a);
     }
   }
 
