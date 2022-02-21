@@ -291,6 +291,7 @@ namespace pimoroni {
   }
 
   void Badger2040::wait_for_press() {
+    _button_states = 0;
     update_button_states();
     while(_button_states == 0) {
       update_button_states();
