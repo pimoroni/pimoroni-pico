@@ -845,12 +845,12 @@ static const hershey_font_t timesrb {
 
 static std::map<std::string, const hershey_font_t*> fonts = {
   { "sans",         &futural },
-  { "sans_bold",    &futuram },
+  //{ "sans_bold",    &futuram },
   { "gothic",       &gothgbt },
-  { "cursive_bold", &scriptc },
+  //{ "cursive_bold", &scriptc },
   { "cursive",      &scripts },
   { "serif_italic", &timesi  },
   { "serif",        &timesr  },
-  { "serif_bold",   &timesrb }
+  //{ "serif_bold",   &timesrb }
 };
 
