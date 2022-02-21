@@ -4,6 +4,8 @@
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040___del___obj, Badger2040___del__);
 
+MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_update_speed_obj, Badger2040_update_speed);
+MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_is_busy_obj, Badger2040_is_busy);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_update_obj, Badger2040_update);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_partial_update_obj, 4, Badger2040_partial_update);
 
@@ -13,7 +15,6 @@ MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pen_obj, Badger2040_pen);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_thickness_obj, Badger2040_thickness);
 
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pressed_obj, Badger2040_pressed);
-
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_clear_obj, Badger2040_clear);
 MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_pixel_obj, Badger2040_pixel);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_line_obj, 4, Badger2040_line);
@@ -27,6 +28,8 @@ MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_command_obj, Badger2040_command);
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Badger2040___del___obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_busy), MP_ROM_PTR(&Badger2040_is_busy_obj) },
+    { MP_ROM_QSTR(MP_QSTR_update_speed), MP_ROM_PTR(&Badger2040_update_speed_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&Badger2040_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_partial_update), MP_ROM_PTR(&Badger2040_partial_update_obj) },
 
@@ -64,6 +67,10 @@ const mp_obj_type_t Badger2040_type = {
 STATIC const mp_map_elem_t badger2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_badger2040) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Badger2040), (mp_obj_t)&Badger2040_type },
+
+    { MP_ROM_QSTR(MP_QSTR_UPDATE_NORMAL), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_UPDATE_FAST), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_UPDATE_TURBO), MP_ROM_INT(2) },
 
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(13) },

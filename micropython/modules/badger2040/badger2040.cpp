@@ -94,10 +94,33 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
     return MP_OBJ_FROM_PTR(badger2040_obj);
 }
 
+mp_obj_t Badger2040_is_busy(mp_obj_t self_in) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    return self->badger2040->is_busy() ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_update_speed(mp_obj_t self_in, mp_obj_t speed) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    self->badger2040->update_speed(mp_obj_get_int(speed));
+    return mp_const_none;
+}
+
 mp_obj_t Badger2040_update(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
 
-    self->badger2040->update();
+    while(self->badger2040->is_busy()) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+    }
+
+    self->badger2040->update(false);
+
+    while(self->badger2040->is_busy()) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+    }
 
     return mp_const_none;
 }
@@ -122,7 +145,21 @@ mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_m
     int h = args[ARG_h].u_int;
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+
+
+    while(self->badger2040->is_busy()) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+    }
+
     self->badger2040->partial_update(x, y, w, h);
+
+    while(self->badger2040->is_busy()) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+    }
 
     return mp_const_none;
 }

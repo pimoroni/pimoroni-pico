@@ -181,15 +181,19 @@ namespace pimoroni {
     void busy_wait();
     bool is_busy();
     void reset();
+    void setup(uint8_t speed=0);
 
     void default_luts();
     void fast_luts();
+    void faster_luts();
 
     void read(uint8_t reg, size_t len, uint8_t *data);
     void command(uint8_t reg, size_t len, const uint8_t *data);
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg) {command(reg, 0, nullptr);};
     void data(size_t len, const uint8_t *data);
+
+    void update_speed(uint8_t speed);
     void update(bool blocking = true);
     void partial_update(int x, int y, int w, int h, bool blocking = true);
     void off();

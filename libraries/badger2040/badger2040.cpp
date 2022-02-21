@@ -170,44 +170,20 @@ namespace pimoroni {
     _button_states |= gpio_get_all() & mask;
   }
 
-  void Badger2040::partial_update(int x, int y, int w, int h) {
-    // wait for display to not be busy
-    while(uc8151.is_busy()) {
-      tight_loop_contents();
-    }
-
-    uc8151.partial_update(x, y, w, h, true);
-
-    _button_states = 0;
-
-    // wait for display to not be busy but sample buttons in case they are
-    // pressed during this time
-    while(uc8151.is_busy()) {
-      update_button_states();
-      tight_loop_contents();
-    }
-
-    uc8151.off();
+  bool Badger2040::is_busy() {
+    return uc8151.is_busy();
   }
 
-  void Badger2040::update() {
-    // wait for display to not be busy
-    while(uc8151.is_busy()) {
-      tight_loop_contents();
-    }
+  void Badger2040::update_speed(uint8_t speed) {
+    uc8151.update_speed(speed);
+  }
 
-    uc8151.update(false);
+  void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {
+    uc8151.partial_update(x, y, w, h, blocking);
+  }
 
-    _button_states = 0;
-
-    // wait for display to not be busy but sample buttons in case they are
-    // pressed during this time
-    while(uc8151.is_busy()) {
-      update_button_states();
-      tight_loop_contents();
-    }
-
-    uc8151.off();
+  void Badger2040::update(bool blocking) {
+    uc8151.update(blocking);
   }
 
   const hershey_font_glyph_t* Badger2040::glyph_data(unsigned char c) {

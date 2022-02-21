@@ -27,10 +27,12 @@ namespace pimoroni {
       : uc8151(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
     };
     void init();
-    void update();
-    void partial_update(int x, int y, int w, int h);
+    void update(bool blocking=false);
+    void partial_update(int x, int y, int w, int h, bool blocking=false);
+    void update_speed(uint8_t speed);
     void halt();
     void sleep();
+    bool is_busy();
 
     // state
     void led(uint8_t brightness);
