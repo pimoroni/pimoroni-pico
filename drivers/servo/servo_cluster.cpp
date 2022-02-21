@@ -3,50 +3,53 @@
 #include <cstdio>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint channel_mask)
-    : pwms(pio, sm, channel_mask) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask)
+    : pwms(pio, sm, pin_mask) {
+  }
 
-    // Calculate a suitable pwm wrap period for this frequency
-    uint32_t period; uint16_t div16;
-    if(pimoroni::PWMCluster::calculate_pwm_factors(pwm_frequency, period, div16)) {
-      pwm_period = period;
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
+    : pwms(pio, sm, pin_base, pin_count) {
+  }
 
-      // Update the pwm before setting the new wrap
-      for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
-        pwms.set_chan_level(servo, 0, false);
-      }
-
-      // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwms.set_wrap(pwm_period); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
-
-      // Apply the new divider
-      // This is done after loading new PWM values to avoid a lockup condition
-      uint8_t div = div16 >> 4;
-      uint8_t mod = div16 % 16;
-      pwms.set_clkdiv_int_frac(div, mod);
-    }
+  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
+    : pwms(pio, sm, pins) {
   }
 
   ServoCluster::~ServoCluster() {
   }
 
   bool ServoCluster::init() {
-    // pwm_cfg = pwm_get_default_config();
-    // pwm_config_set_wrap(&pwm_cfg, 20000 - 1);
+    bool success = false;
 
-    // float div = clock_get_hz(clk_sys) / 1000000;
-    // pwm_config_set_clkdiv(&pwm_cfg, div);
+    if(pwms.init()) {
+      // Calculate a suitable pwm wrap period for this frequency
+      uint32_t period; uint16_t div16;
+      if(pimoroni::PWMCluster::calculate_pwm_factors(pwm_frequency, period, div16)) {
+        pwm_period = period;
 
-    // pwm_init(pwm_gpio_to_slice_num(pin), &pwm_cfg, true);
-    // gpio_set_function(pin, GPIO_FUNC_PWM);
+        // Update the pwm before setting the new wrap
+        for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
+          pwms.set_chan_level(servo, 0, false);
+        }
 
-    // pwm_set_gpio_level(pin, 0);
+        // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+        pwms.set_wrap(pwm_period); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
 
-    return true;
+        // Apply the new divider
+        // This is done after loading new PWM values to avoid a lockup condition
+        uint8_t div = div16 >> 4;
+        uint8_t mod = div16 % 16;
+        pwms.set_clkdiv_int_frac(div, mod);
+
+        success = true;
+      }
+    }
+
+    return success;
   }
 
   uint ServoCluster::get_pin_mask() const {
-    return pwms.get_chan_mask();
+    return pwms.get_pin_mask();
   }
 
   void ServoCluster::enable(uint servo, bool load) {

@@ -77,14 +77,81 @@ interrupt is fired, and the handler reconfigures channel A so that it is ready f
      * */
     
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), channel_mask(channel_mask) {
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask(pin_mask) {
+  channel_polarities = 0x00000000;
+  wrap_level = 0;
+
+  // Initialise all the channels this PWM will control
+  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
+    channel_levels[channel] = 0u;
+    channel_offsets[channel] = 0u;
+  }
+}
+
+
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count) : pio(pio), sm(sm) {
+  pin_mask = 0x00000000;
+  channel_polarities = 0x00000000;
+  wrap_level = 0;
+
+  // Initialise all the channels this PWM will control
+  uint pin_end = MIN(pin_count, NUM_BANK0_GPIOS);
+  for(uint channel = pin_base; channel < pin_end; channel++) {
+    pin_mask |= (1u << channel);
+  }
+
+  // Initialise all the channels this PWM will control
+  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
+    channel_levels[channel] = 0u;
+    channel_offsets[channel] = 0u;
+  }
+}
+
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins) : pio(pio), sm(sm) {
+  pin_mask = 0x00000000;
+  channel_polarities = 0x00000000;
+  wrap_level = 0;
+
+  for(auto pin : pins) {
+    if(pin < NUM_BANK0_GPIOS) {
+      pin_mask |= (1u << pin);
+    }
+  }
+
+  // Initialise all the channels this PWM will control
+  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
+    channel_levels[channel] = 0u;
+    channel_offsets[channel] = 0u;
+  }
+}
+
+PWMCluster::~PWMCluster() {
+  dma_channel_unclaim(data_dma_channel);
+  dma_channel_unclaim(ctrl_dma_channel);
+  pio_sm_set_enabled(pio, sm, false);
+#ifdef DEBUG_MULTI_PWM
+  pio_remove_program(pio, &debug_pwm_cluster_program, pio_program_offset);
+#else
+  pio_remove_program(pio, &pwm_cluster_program, pio_program_offset);
+#endif
+#ifndef MICROPY_BUILD_TYPE
+  // pio_sm_unclaim seems to hardfault in MicroPython
+  pio_sm_unclaim(pio, sm);
+#endif
+  // Reset all the pins this PWM will control back to an unused state
+  for(uint pin = 0; pin < 32; pin++) { // 32 is number of bits
+    if((1u << pin) != 0) {
+      gpio_set_function(pin, GPIO_FUNC_NULL);
+    }
+  }
+}
+
+bool PWMCluster::init() {
 #ifdef DEBUG_MULTI_PWM
   pio_program_offset = pio_add_program(pio, &debug_pwm_cluster_program);
 #else
   pio_program_offset = pio_add_program(pio, &pwm_cluster_program);
 #endif
-  channel_polarities = 0x00000000;
-  wrap_level = 0;
 
   gpio_init(irq_gpio);
   gpio_set_dir(irq_gpio, GPIO_OUT);
@@ -93,16 +160,14 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), 
 
   // Initialise all the channels this PWM will control
   for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    if(bit_in_mask(channel, channel_mask)) {
+    if(bit_in_mask(channel, pin_mask)) {
       pio_gpio_init(pio, channel);
-      channel_levels[channel] = 0u;
-      channel_offsets[channel] = 0u;
     }
   }
 
   // Set their default state and direction
-  pio_sm_set_pins_with_mask(pio, sm, 0x00, channel_mask);
-  pio_sm_set_pindirs_with_mask(pio, sm, channel_mask, channel_mask);
+  pio_sm_set_pins_with_mask(pio, sm, 0x00, pin_mask);
+  pio_sm_set_pindirs_with_mask(pio, sm, pin_mask, pin_mask);
 
 #ifdef DEBUG_MULTI_PWM
   pio_gpio_init(pio, DEBUG_SIDESET);
@@ -189,31 +254,11 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint channel_mask) : pio(pio), sm(sm), 
   pwm_dma_handler();
 
   //dma_start_channel_mask(1u << ctrl_dma_channel);
+  return true;
 }
 
-PWMCluster::~PWMCluster() {
-  dma_channel_unclaim(data_dma_channel);
-  dma_channel_unclaim(ctrl_dma_channel);
-  pio_sm_set_enabled(pio, sm, false);
-#ifdef DEBUG_MULTI_PWM
-  pio_remove_program(pio, &debug_pwm_cluster_program, pio_program_offset);
-#else
-  pio_remove_program(pio, &pwm_cluster_program, pio_program_offset);
-#endif
-#ifndef MICROPY_BUILD_TYPE
-  // pio_sm_unclaim seems to hardfault in MicroPython
-  pio_sm_unclaim(pio, sm);
-#endif
-  // Reset all the pins this PWM will control back to an unused state
-  for(uint pin = 0; pin < 32; pin++) { // 32 is number of bits
-    if((1u << pin) != 0) {
-      gpio_set_function(pin, GPIO_FUNC_NULL);
-    }
-  }
-}
-
-uint PWMCluster::get_chan_mask() const {
-  return channel_mask;
+uint PWMCluster::get_pin_mask() const {
+  return pin_mask;
 }
 
 void PWMCluster::set_wrap(uint32_t wrap, bool load) {
@@ -223,7 +268,7 @@ void PWMCluster::set_wrap(uint32_t wrap, bool load) {
 }
 
 void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
     channel_levels[channel] = level;
     if(load)
       load_pwm();
@@ -231,7 +276,7 @@ void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
 }
 
 void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
     channel_offsets[channel] = offset;
     if(load)
       load_pwm();
@@ -239,7 +284,7 @@ void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
 }
 
 void PWMCluster::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, channel_mask)) {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
     if(polarity)
       channel_polarities |= (1u << channel);
     else
@@ -272,7 +317,7 @@ void PWMCluster::load_pwm() {
 
   // Go through each channel that we are assigned to
   for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    if(bit_in_mask(channel, channel_mask)) {
+    if(bit_in_mask(channel, pin_mask)) {
       // Get the channel polarity, remembering that true means inverted
       bool polarity = bit_in_mask(channel, channel_polarities);
 

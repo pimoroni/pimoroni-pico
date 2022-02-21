@@ -58,7 +58,9 @@ int main() {
 
   //PWMCluster pwms(pio1, 0, 0b111111111111111);
   //pwms.set_wrap(20000);
-  ServoCluster cluster(pio1, 0, 0b111100);
+  //ServoCluster cluster(pio1, 0, 0b111100);
+  ServoCluster cluster(pio1, 0, {2, 3, 4, 5});
+  cluster.init();
 
   int speed = DEFAULT_SPEED;
   float offset = 0.0f;

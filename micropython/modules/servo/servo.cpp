@@ -819,14 +819,23 @@ typedef struct _ServoCluster_obj_t {
 /***** Print *****/
 void ServoCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind; //Unused input parameter
-    //_ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
     mp_print_str(print, "ServoCluster(");
 
-    // TODO
-    //mp_print_str(print, "num_leds = ");
-    //mp_obj_print_helper(print, mp_obj_new_int(self->apa102->num_leds), PRINT_REPR);
+    mp_print_str(print, "pins = {");
+    uint pin_mask = self->cluster->get_pin_mask();
+    bool first = true;
+    for(uint pin = 0; pin < NUM_BANK0_GPIOS; pin++) {
+        if(pimoroni::PWMCluster::bit_in_mask(pin, pin_mask)) {
+            if(!first) {
+                mp_print_str(print, ", ");
+            }
+            mp_obj_print_helper(print, mp_obj_new_int(pin), PRINT_REPR);
+            first = false;
+        }
+    }
 
-    mp_print_str(print, ")");
+    mp_print_str(print, "})");
 }
 
 /***** Destructor ******/
@@ -893,6 +902,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->base.type = &ServoCluster_type;
 
     self->cluster = new ServoCluster(pio1, 0, 0b11111100); //TODO Expose parameters
+    self->cluster->init();
 
     return MP_OBJ_FROM_PTR(self);
 }

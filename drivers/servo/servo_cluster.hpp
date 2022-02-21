@@ -23,7 +23,9 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoCluster(PIO pio, uint sm, uint channel_mask);
+    ServoCluster(PIO pio, uint sm, uint pin_mask);
+    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count);
+    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins);
     ~ServoCluster();
 
     //--------------------------------------------------

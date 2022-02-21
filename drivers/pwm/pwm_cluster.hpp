@@ -4,6 +4,7 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include <initializer_list>
 
 namespace pimoroni {
 
@@ -22,9 +23,14 @@ namespace pimoroni {
 
   class PWMCluster {
   public:
-    PWMCluster(PIO pio, uint sm, uint channel_mask);
+    PWMCluster(PIO pio, uint sm, uint pin_mask);
+    PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins);
     ~PWMCluster();
-    uint get_chan_mask() const;
+
+    bool init();
+
+    uint get_pin_mask() const;
     void set_wrap(uint32_t wrap, bool load = true);
     void set_chan_level(uint8_t channel, uint32_t level, bool load = true);
     void set_chan_offset(uint8_t channel, uint32_t offset, bool load = true);
@@ -34,14 +40,14 @@ namespace pimoroni {
     //void set_phase_correct(bool phase_correct);
     //void set_enabled(bool enabled);
     void load_pwm();
-  private:
     static bool bit_in_mask(uint bit, uint mask);
+  private:
     static void sorted_insert(TransitionData array[], uint &size, const TransitionData &data);
   private:
     PIO pio;
     uint sm;
     uint pio_program_offset;
-    uint channel_mask;
+    uint pin_mask;
     uint channel_levels[NUM_BANK0_GPIOS];
     uint channel_offsets[NUM_BANK0_GPIOS];
     uint channel_polarities;
