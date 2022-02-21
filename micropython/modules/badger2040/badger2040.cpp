@@ -285,7 +285,8 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_scale, MP_ARG_REQUIRED | MP_ARG_OBJ }
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_obj_new_float(1.0f)} },
+        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_obj_new_float(0.0f)} }
     };
 
     // Parse args.
@@ -304,13 +305,14 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
 }
 
 mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale };
+    enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale, ARG_rotation };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_message, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_scale, MP_ARG_REQUIRED | MP_ARG_OBJ }
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_obj_new_float(1.0f)} },
+        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_obj_new_float(0.0f)} }
     };
 
     // Parse args.
@@ -321,9 +323,10 @@ mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     float scale = mp_obj_get_float(args[ARG_scale].u_obj);
+    float rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
-    self->badger2040->text(message, x, y, scale);
+    self->badger2040->text(message, x, y, scale, rotation);
 
     return mp_const_none;
 }
