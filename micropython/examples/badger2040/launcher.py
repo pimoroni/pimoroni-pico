@@ -25,8 +25,9 @@ button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOW
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
-# Early exit if a button is pressed
-if button_a.value() or button_b.value() or button_c.value():
+# Early exit if b + c button is pressed
+# A button must be held briefly to power on, so we use a combo instead
+if button_b.value() and button_c.value():
     sys.exit(0)
 
 
@@ -94,13 +95,19 @@ def button(pin):
             render()
 
 
+render()
+
+# Wait for wakeup button to be released
+while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
+    pass
+
+
 button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
-render()
 
 while True:
     time.sleep(1.0)

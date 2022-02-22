@@ -41,6 +41,7 @@ namespace pimoroni {
     gpio_set_dir(VBUS_DETECT, GPIO_IN);
     gpio_put(VBUS_DETECT, 1);
 
+/*
     // read initial button states
     uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
     _wake_button_states |= gpio_get_all() & mask;
@@ -49,6 +50,7 @@ namespace pimoroni {
     while(gpio_get_all() & mask) {
       tight_loop_contents();
     }
+*/
 
     // led control pin
     pwm_config cfg = pwm_get_default_config();
