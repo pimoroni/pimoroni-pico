@@ -26,9 +26,9 @@ button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_D
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
 # Early exit if a button is pressed
-if button_a.value():
+if button_a.value() or button_b.value() or button_c.value():
     sys.exit(0)
- 
+
 
 screen = badger2040.Badger2040()
 screen.update_speed(1)
@@ -39,7 +39,7 @@ def render():
     screen.clear()
     screen.pen(0)
     screen.thickness(2)
-    
+
     max_icons = min(3, len(examples[(page * 3):]))
 
     for i in range(max_icons):
@@ -47,7 +47,7 @@ def render():
         label = examples[i + (page * 3)].replace(".py", "")
         screen.rectangle(x, 24, 80, 80)
         screen.text(label, x, 24 + 80 + 10, 0.5)
-        
+
     for i in range(MAX_PAGE):
         x = 286
         y = int((128 / 2) - (MAX_PAGE * 10 / 2) + (i * 10))
@@ -66,26 +66,24 @@ def launch(file):
             del locals()[k]
     gc.collect()
     __import__(file)
-    
 
-def get_example(index):
+
+def launch_example(index):
     try:
-        return examples[(page * 3) + index]
+        launch(examples[(page * 3) + index])
+        return True
     except IndexError:
-        return None
+        return False
 
 
 def button(pin):
     global page
     if pin == button_a:
-        example = get_example(0)
-        if example: launch(example)
+        launch_example(0)
     if pin == button_b:
-        example = get_example(1)
-        if example: launch(example)
+        launch_example(1)
     if pin == button_c:
-        example = get_example(2)
-        if example: launch(example)
+        launch_example(2)
     if pin == button_up:
         if page > 0:
             page -= 1
@@ -106,4 +104,3 @@ render()
 
 while True:
     time.sleep(1.0)
-
