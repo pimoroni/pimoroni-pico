@@ -45,7 +45,7 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&Badger2040_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&Badger2040_rectangle_obj) },
 
-    { MP_ROM_QSTR(MP_QSTR_glyph), MP_ROM_PTR(&Badger2040_glyph_obj) },
+    //{ MP_ROM_QSTR(MP_QSTR_glyph), MP_ROM_PTR(&Badger2040_glyph_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&Badger2040_text_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_command), MP_ROM_PTR(&Badger2040_command_obj) },
@@ -71,6 +71,7 @@ STATIC const mp_map_elem_t badger2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_UPDATE_NORMAL), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_FAST), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_TURBO), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_UPDATE_SUPER_EXTRA_TURBO), MP_ROM_INT(3) },
 
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(296) },
     { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(128) },

@@ -33,6 +33,7 @@ namespace pimoroni {
     void halt();
     void sleep();
     bool is_busy();
+    void power_off();
 
     // state
     void led(uint8_t brightness);

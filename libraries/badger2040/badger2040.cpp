@@ -174,6 +174,10 @@ namespace pimoroni {
     return uc8151.is_busy();
   }
 
+  void Badger2040::power_off() {
+    uc8151.power_off();
+  }
+
   void Badger2040::update_speed(uint8_t speed) {
     uc8151.update_speed(speed);
   }
