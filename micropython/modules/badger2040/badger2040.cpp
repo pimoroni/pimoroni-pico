@@ -282,6 +282,39 @@ mp_obj_t Badger2040_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 
 // image
 
+mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale, ARG_rotation };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_message, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_const_none} }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    std::string message = mp_obj_to_string_r(args[ARG_message].u_obj);
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    float scale = 1.0f;
+    if (args[ARG_scale].u_obj != mp_const_none) {
+        scale = mp_obj_get_float(args[ARG_scale].u_obj);
+    }
+    float rotation = 0.0f;
+    if (args[ARG_rotation].u_obj != mp_const_none) {
+        rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
+    }
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    self->badger2040->text(message, x, y, scale, rotation);
+
+    return mp_const_none;
+}
+
 mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_char, ARG_x, ARG_y, ARG_scale, ARG_rotation };
     static const mp_arg_t allowed_args[] = {
@@ -315,15 +348,12 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     return mp_const_none;
 }
 
-mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale, ARG_rotation };
+mp_obj_t Badger2040_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_message, ARG_scale };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_message, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_const_none} }
     };
 
     // Parse args.
@@ -331,21 +361,35 @@ mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     std::string message = mp_obj_to_string_r(args[ARG_message].u_obj);
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
     float scale = 1.0f;
     if (args[ARG_scale].u_obj != mp_const_none) {
         scale = mp_obj_get_float(args[ARG_scale].u_obj);
     }
-    float rotation = 0.0f;
-    if (args[ARG_rotation].u_obj != mp_const_none) {
-        rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    return mp_obj_new_int(self->badger2040->measure_text(message, scale));
+}
+
+mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_char, ARG_scale };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int c = args[ARG_char].u_int;
+    float scale = 1.0f;
+    if (args[ARG_scale].u_obj != mp_const_none) {
+        scale = mp_obj_get_float(args[ARG_scale].u_obj);
     }
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
-    self->badger2040->text(message, x, y, scale, rotation);
-
-    return mp_const_none;
+    return mp_obj_new_int(self->badger2040->measure_glyph(c, scale));
 }
 
 }
