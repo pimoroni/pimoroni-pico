@@ -20,10 +20,10 @@ TITLE_TEXT_SIZE = 0.7
 ITEM_TEXT_SIZE = 0.6
 ITEM_SPACING = 20
 
-LIST_START = 42
+LIST_START = 40
 LIST_PADDING = 2
 LIST_WIDTH = WIDTH - LIST_PADDING - LIST_PADDING - ARROW_WIDTH
-LIST_HEIGHT = HEIGHT - LIST_START - ARROW_HEIGHT
+LIST_HEIGHT = HEIGHT - LIST_START - LIST_PADDING - ARROW_HEIGHT
 
 
 # ------------------------------
@@ -48,9 +48,7 @@ def draw_list(items, item_states, start_item, highlighted_item, x, y, width, hei
             item_y = 0
             current_col += 1
             if current_col >= columns:
-                return i  # Return how many items were left over
-                break
-    return 0
+                return
 
 
 # Draw a upward arrow
@@ -159,7 +157,7 @@ list_columns = 1
 while longest_item + ITEM_SPACING < (LIST_WIDTH // (list_columns + 1)):
     list_columns += 1
 
-items_per_page = (LIST_HEIGHT // ITEM_SPACING) * list_columns
+items_per_page = ((LIST_HEIGHT // ITEM_SPACING) + 1) * list_columns
 
 
 # Button handling function
@@ -233,8 +231,8 @@ while True:
             # Draw the list
             display.pen(0)
             display.thickness(2)
-            items_remaining = draw_list(list_content, list_states, page_item, current_item, LIST_PADDING, LIST_START,
-                                        LIST_WIDTH, LIST_HEIGHT, ITEM_SPACING, list_columns)
+            draw_list(list_content, list_states, page_item, current_item, LIST_PADDING, LIST_START,
+                      LIST_WIDTH, LIST_HEIGHT, ITEM_SPACING, list_columns)
 
             # Draw the interaction button icons
             display.pen(0)
