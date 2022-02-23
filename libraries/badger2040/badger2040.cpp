@@ -205,7 +205,6 @@ namespace pimoroni {
   }
 
   int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s, float a) {
-    // if space character then return a width to move the caret by
     const hershey_font_glyph_t *gd = glyph_data(c);
 
     // if glyph data not found (id too great) then skip
@@ -265,6 +264,26 @@ namespace pimoroni {
       ox += glyph(c, cx + rcx, cy + rcy, s, a);
     }
   }
+
+  int32_t Badger2040::measure_text(std::string message, float s) {
+    int32_t width = 0;
+    for(auto &c : message) {
+      width += measure_glyph(c, s);
+    }
+    return width;
+  }
+
+  int32_t Badger2040::measure_glyph(unsigned char c, float s) {
+    const hershey_font_glyph_t *gd = glyph_data(c);
+
+    // if glyph data not found (id too great) then skip
+    if(!gd) {
+      return 0;
+    }
+
+    return gd->width * s;
+  }
+
 
   void Badger2040::font(std::string name) {
     // check that font exists and assign it
