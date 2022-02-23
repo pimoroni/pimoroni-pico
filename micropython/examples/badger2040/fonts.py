@@ -72,7 +72,6 @@ def draw_fonts():
         display.text(name, MENU_PADDING, (i * MENU_SPACING) + (MENU_SPACING // 2), MENU_TEXT_SIZE)
 
     display.font(FONT_NAMES[selected_font])
-    print(selected_font, FONT_NAMES[selected_font])
     display.thickness(2)
 
     display.pen(0)
