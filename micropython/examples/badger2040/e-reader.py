@@ -124,13 +124,13 @@ def render_page():
 
         # Advance our position further if the word contains special characters
         if '\u201c' in next_word:
-            next_word.replace('\u201c', '\"')
+            next_word = next_word.replace('\u201c', '\"')
             next_pos += 2
         if '\u201d' in next_word:
-            next_word.replace('\u201d', '\"')
+            next_word = next_word.replace('\u201d', '\"')
             next_pos += 2
         if '\u2019' in next_word:
-            next_word.replace('\u2019', '\'')
+            next_word = next_word.replace('\u2019', '\'')
             next_pos += 2
 
         # Rewind the file back from the line end to the start of the next word
