@@ -3,10 +3,22 @@ import machine
 import time
 import gc
 
+try:
+    open("witw.txt", "r")
+except OSError:
+    try:
+        import witw
+        open("witw.txt", "wb").write(witw.data())
+        del witw
+    except ImportError:
+        pass
+
+
 gc.collect()
 
+
 # **** Put the name of your text file here *****
-text_file = "289-0.txt"  # File must be on the MicroPython device
+text_file = "witw.txt"  # File must be on the MicroPython device
 
 # Global Constants
 WIDTH = badger2040.WIDTH

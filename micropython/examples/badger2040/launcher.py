@@ -4,18 +4,26 @@ import time
 import math
 import machine
 import badger2040
+import launchericons
 
 page = 0
+font_size = 1
+
+icons = bytearray(launchericons.data())
 
 examples = [
-    "clock.py",
-    "fonts.py",
-    "clean.py",
-    "interrupt.py",
-    "scanline.py",
-    "lut-test.py",
-    "quictest.py"
+    ("clock.py", 0),
+    ("fonts.py", 1),
+    ("ebook.py", 2),
+    ("image.py", 3),
+    ("list.py", 4),
+    ("badge.py", 5)
 ]
+
+font_sizes = (0.5, 0.7, 0.9)
+
+# Approximate center lines for buttons A, B and C
+centers = (41, 147, 253)
 
 MAX_PAGE = math.ceil(len(examples) / 3)
 
@@ -25,40 +33,42 @@ button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOW
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
-# Early exit if b + c button is pressed
-# A button must be held briefly to power on, so we use a combo instead
-if button_b.value() and button_c.value():
-    sys.exit(0)
+# Inverted. For reasons.
+button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
-
-screen = badger2040.Badger2040()
-screen.update_speed(1)
+display = badger2040.Badger2040()
+display.update_speed(1)
 
 
 def render():
-    screen.pen(15)
-    screen.clear()
-    screen.pen(0)
-    screen.thickness(2)
+    display.pen(15)
+    display.clear()
+    display.pen(0)
+    display.thickness(2)
 
     max_icons = min(3, len(examples[(page * 3):]))
 
     for i in range(max_icons):
-        x = (14 + 80) * i + 14
-        label = examples[i + (page * 3)].replace(".py", "")
-        screen.rectangle(x, 24, 80, 80)
-        screen.text(label, x, 24 + 80 + 10, 0.5)
+        x = centers[i]
+        label, icon = examples[i + (page * 3)]
+        label = label.replace(".py", "")
+        display.pen(0)
+        display.icon(icons, icon, 384, 64, x - 32, 24)
+        w = display.measure_text(label, font_sizes[font_size])
+        display.text(label, x - int(w / 2), 16 + 80, font_sizes[font_size])
 
     for i in range(MAX_PAGE):
         x = 286
         y = int((128 / 2) - (MAX_PAGE * 10 / 2) + (i * 10))
-        screen.pen(0)
-        screen.rectangle(x, y, 8, 8)
+        display.pen(0)
+        display.rectangle(x, y, 8, 8)
         if page != i:
-            screen.pen(15)
-            screen.rectangle(x + 1, y + 1, 6, 6)
+            display.pen(15)
+            display.rectangle(x + 1, y + 1, 6, 6)
 
-    screen.update()
+    display.pen(0)
+
+    display.update()
 
 
 def launch(file):
@@ -67,18 +77,24 @@ def launch(file):
             del locals()[k]
     gc.collect()
     __import__(file)
+    sys.exit(0)
 
 
 def launch_example(index):
     try:
-        launch(examples[(page * 3) + index])
+        launch(examples[(page * 3) + index][0])
         return True
     except IndexError:
         return False
 
 
 def button(pin):
-    global page
+    global page, font_size
+    if pin == button_user:
+        font_size += 1
+        if font_size == len(font_sizes):
+            font_size = 0
+        render()
     if pin == button_a:
         launch_example(0)
     if pin == button_b:
@@ -102,12 +118,18 @@ while button_a.value() or button_b.value() or button_c.value() or button_up.valu
     pass
 
 
-button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-
-
 while True:
-    time.sleep(1.0)
+    if button_a.value():
+        button(button_a)
+    if button_b.value():
+        button(button_b)
+    if button_c.value():
+        button(button_c)
+    if button_up.value():
+        button(button_up)
+    if button_down.value():
+        button(button_down)
+    if not button_user.value():
+        button(button_user)
+
+    time.sleep(0.01)
