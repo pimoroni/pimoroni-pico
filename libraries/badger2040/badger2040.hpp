@@ -53,7 +53,11 @@ namespace pimoroni {
     void pixel(int32_t x, int32_t y);
     void line(int32_t x1, int32_t y1, int32_t x2, int32_t y2);
     void rectangle(int32_t x, int32_t y, int32_t w, int32_t h);
-    void image(const uint8_t *data);
+
+    void icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy);
+    void image(const uint8_t* data);
+    void image(const uint8_t *data, int w, int h, int x, int y);
+    void image(const uint8_t *data, int stride, int sx, int sy, int dw, int dh, int dx, int dy);
 
     // text (fonts: sans, sans_bold, gothic, cursive_bold, cursive, serif_italic, serif, serif_bold)
     const hershey_font_glyph_t* glyph_data(unsigned char c);

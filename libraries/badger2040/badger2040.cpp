@@ -113,17 +113,32 @@ namespace pimoroni {
     }
   }
 
-  void Badger2040::image(const uint8_t *data) {
-    for(uint32_t y = 0; y < 128; y++) {
-      for(uint32_t x = 0; x < 296; x++) {
+  // Display a portion of an image (icon sheet) at dx, dy
+  void Badger2040::icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy) {
+    image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
+  }
+
+  // Display an image that fills the screen (286*128)
+  void Badger2040::image(const uint8_t* data) {
+    image(data, 296, 0, 0, 296, 128, 0, 0);
+  }
+
+  // Display an image smaller than the screen (sw*sh) at dx, dy
+  void Badger2040::image(const uint8_t *data, int w, int h, int x, int y) {
+    image(data, w, 0, 0, w, h, x, y);
+  }
+
+  void Badger2040::image(const uint8_t *data, int stride, int sx, int sy, int dw, int dh, int dx, int dy) {
+    for(auto y = 0; y < dh; y++) {
+      for(auto x = 0; x < dw; x++) {
         // work out byte offset in source data
-        uint32_t o = (y * (296 >> 3)) + (x >> 3);
+        uint32_t o = ((y + sy) * (stride >> 3)) + ((x + sx) >> 3);
 
         // extract bitmask for this pixel
-        uint32_t bm = 0b10000000 >> (x & 0b111);
+        uint32_t bm = 0b10000000 >> ((x + sx) & 0b111);
 
         // draw the pixel
-        uc8151.pixel(x, y, data[o] & bm);
+        uc8151.pixel(dx + x, dy + y, data[o] & bm);
       }
     }
   }

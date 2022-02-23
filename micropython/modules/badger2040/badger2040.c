@@ -20,6 +20,9 @@ MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_pixel_obj, Badger2040_pixel);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_line_obj, 4, Badger2040_line);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_rectangle_obj, 4, Badger2040_rectangle);
 
+MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_icon_obj, 4, Badger2040_icon);
+MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_image_obj, 2, Badger2040_image);
+
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_text_obj, 4, Badger2040_text);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_glyph_obj, 4, Badger2040_glyph);
 
@@ -47,6 +50,9 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&Badger2040_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&Badger2040_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&Badger2040_rectangle_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_icon), MP_ROM_PTR(&Badger2040_icon_obj) },
+    { MP_ROM_QSTR(MP_QSTR_image), MP_ROM_PTR(&Badger2040_image_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&Badger2040_text_obj) },
     { MP_ROM_QSTR(MP_QSTR_glyph), MP_ROM_PTR(&Badger2040_glyph_obj) },

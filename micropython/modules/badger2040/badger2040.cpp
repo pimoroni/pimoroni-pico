@@ -280,7 +280,74 @@ mp_obj_t Badger2040_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     return mp_const_none;
 }
 
-// image
+mp_obj_t Badger2040_image(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_data, ARG_w, ARG_h, ARG_x, ARG_y };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_data, MP_ARG_REQUIRED | MP_ARG_OBJ },
+
+        { MP_QSTR_w, MP_ARG_INT, {.u_int = 296} },
+        { MP_QSTR_h, MP_ARG_INT, {.u_int = 128} },
+        { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int dw = args[ARG_w].u_int;
+    int dh = args[ARG_h].u_int;
+    int dx = args[ARG_x].u_int;
+    int dy = args[ARG_y].u_int;
+
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_RW);
+    if(bufinfo.len < (size_t)(dw * dh / 8)) {
+        mp_raise_ValueError("image: Supplied buffer is too small!");
+    }
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    self->badger2040->image((uint8_t *)bufinfo.buf, dw, dh, dx, dy);
+
+    return mp_const_none;   
+}
+
+mp_obj_t Badger2040_icon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_data, ARG_icon_index, ARG_sheet_size, ARG_icon_size, ARG_dx, ARG_dy };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_data, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_icon_index, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_sheet_size, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_icon_size, MP_ARG_INT, {.u_int = 64} },
+
+        { MP_QSTR_dx, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_dy, MP_ARG_INT, {.u_int = 0} }
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    int ssize = args[ARG_sheet_size].u_int;
+    int isize = args[ARG_icon_size].u_int;
+    int index = args[ARG_icon_index].u_int;
+    int dx = args[ARG_dx].u_int;
+    int dy = args[ARG_dy].u_int;
+
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_RW);
+        if(bufinfo.len < (size_t)(ssize * isize / 8)) {
+        mp_raise_ValueError("icon: Supplied buffer is too small!");
+    }
+
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
+    self->badger2040->icon((uint8_t *)bufinfo.buf, ssize, isize, index, dx, dy);
+
+    return mp_const_none;   
+}
+
 
 mp_obj_t Badger2040_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_message, ARG_x, ARG_y, ARG_scale, ARG_rotation };
