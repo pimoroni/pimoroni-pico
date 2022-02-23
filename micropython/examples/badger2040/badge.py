@@ -88,6 +88,7 @@ def draw_badge():
 
     # Replace with drawing an image
     display.pen(15)
+    display.thickness(1)
     display.rectangle(WIDTH - IMAGE_WIDTH, 0, IMAGE_WIDTH, HEIGHT)
 
     # Draw a border around the image
