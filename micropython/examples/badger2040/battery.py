@@ -53,17 +53,36 @@ def draw_battery(level, resolution):
     display.rectangle((WIDTH - BATT_WIDTH) // 2 + BATT_BORDER, (HEIGHT - BATT_HEIGHT) // 2 + BATT_BORDER,
                       BATT_WIDTH - BATT_BORDER * 2, BATT_HEIGHT - BATT_BORDER * 2)
 
-    # Draw the battery bars
-    display.pen(0)
-    length = (BATT_BAR_END - BATT_BAR_START - ((NUM_BATT_BARS - 1) * BATT_BAR_PADDING)) // NUM_BATT_BARS
-    current_level = 0.0
-    normalised_level = level / resolution
-    for i in range(NUM_BATT_BARS):
-        current_level = (1.0 * i) / NUM_BATT_BARS
-        if normalised_level > current_level:
-            pos = i * (length + BATT_BAR_PADDING)
-            display.rectangle(BATT_BAR_START + pos, (HEIGHT - BATT_BAR_HEIGHT) // 2,
-                              length, BATT_BAR_HEIGHT)
+    # Add a special check for no battery
+    if level < 1:
+        X = WIDTH // 2
+        Y = HEIGHT // 2
+
+        display.pen(0)
+        display.thickness(1)
+        thickness = (BATT_BORDER * 3) // 2
+        start_extra = thickness // 3
+        end_extra = (thickness * 2) // 3
+        for i in range(0, thickness):
+            excess = (i // 2)
+            display.line(X - (BATT_HEIGHT // 2) + i - excess - start_extra, Y - (BATT_HEIGHT // 2) - excess - start_extra,
+                         X + (BATT_HEIGHT // 2) + i - excess + end_extra, Y + (BATT_HEIGHT // 2) - excess + end_extra)
+        display.pen(15)
+        for i in range(0 - thickness, 0):
+            display.line(X - (BATT_HEIGHT // 2) + i, Y - (BATT_HEIGHT // 2),
+                         X + (BATT_HEIGHT // 2) + i, Y + (BATT_HEIGHT // 2))
+    else:
+        # Draw the battery bars
+        display.pen(0)
+        length = (BATT_BAR_END - BATT_BAR_START - ((NUM_BATT_BARS - 1) * BATT_BAR_PADDING)) // NUM_BATT_BARS
+        current_level = 0.0
+        normalised_level = level / resolution
+        for i in range(NUM_BATT_BARS):
+            current_level = (1.0 * i) / NUM_BATT_BARS
+            if normalised_level > current_level:
+                pos = i * (length + BATT_BAR_PADDING)
+                display.rectangle(BATT_BAR_START + pos, (HEIGHT - BATT_BAR_HEIGHT) // 2,
+                                  length, BATT_BAR_HEIGHT)
 
     display.update()
 
