@@ -13,12 +13,14 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description='Converts images into the format used by Badger2040.')
 parser.add_argument('file', nargs="+", help='input files to convert')
 parser.add_argument('--binary', action="store_true", help='output binary file for MicroPython')
+parser.add_argument('--resize', action="store_true", help='force images to 296x128 pixels')
 
 options = parser.parse_args()
 
 
 def convert_image(img):
-    # img = img.resize((296, 128)) # resize and crop
+    if options.resize:
+        img = img.resize((296, 128)) # resize
     enhancer = ImageEnhance.Contrast(img)
     img = enhancer.enhance(2.0)
     img = img.convert("1") # convert to black and white
@@ -37,8 +39,8 @@ for input_filename in options.file:
         output_data = [~b & 0xff for b in list(img.tobytes())]
 
         if options.binary:
-            output_filename = input_filename + ".bin"
-            print(f"Saving to {output_filename}")
+            output_filename = Path(input_filename).with_suffix(".bin")
+            print(f"Saving to {output_filename}, {w}x{h}")
             with open(output_filename, "wb") as out:
                 out.write(bytearray(output_data))
         else:
