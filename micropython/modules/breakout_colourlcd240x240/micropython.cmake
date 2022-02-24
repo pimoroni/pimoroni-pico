@@ -7,6 +7,8 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/${MOD_NAME}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/st7789/st7789.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/types.cpp
 )
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
