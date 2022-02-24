@@ -6,6 +6,12 @@ import machine
 import badger2040
 import launchericons
 
+MAX_BATTERY_VOLTAGE = 4.0
+MIN_BATTERY_VOLTAGE = 3.2
+
+WIDTH = badger2040.WIDTH
+HEIGHT = badger2040.HEIGHT
+
 page = 0
 font_size = 1
 
@@ -36,8 +42,51 @@ button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PU
 # Inverted. For reasons.
 button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
+# Battery measurement
+vbat_adc = machine.ADC(badger2040.PIN_BATTERY)
+vref_adc = machine.ADC(badger2040.PIN_1V2_REF)
+vref_en = machine.Pin(badger2040.PIN_VREF_POWER)
+vref_en.init(machine.Pin.OUT)
+vref_en.value(0)
+
+
 display = badger2040.Badger2040()
 display.update_speed(1)
+
+
+def map_value(input, in_min, in_max, out_min, out_max):
+    return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
+
+
+def get_battery_level():
+    # Enable the onboard voltage reference
+    vref_en.value(1)
+
+    # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
+    vdd = 1.24 * (65535 / vref_adc.read_u16())
+    vbat = (vbat_adc.read_u16() / 65535) * 3 * vdd  # 3 in this is a gain, not rounding of 3.3V
+
+    # Disable the onboard voltage reference
+    vref_en.value(0)
+
+    # Convert the voltage to a level to display onscreen
+    return int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, 4))
+
+
+def draw_battery(level, x, y):
+    # Outline
+    display.thickness(1)
+    display.pen(15)
+    display.rectangle(x, y, 19, 10)
+    # Terminal
+    display.rectangle(x + 19, y + 3, 2, 4)
+    display.pen(0)
+    display.rectangle(x + 1, y + 1, 17, 8)
+    # Battery Bars
+    display.pen(15)
+    for i in range(4):
+        if level / 4 > (1.0 * i) / 4:
+            display.rectangle(i * 4 + x + 2, y + 2, 3, 6)
 
 
 def render():
@@ -67,6 +116,10 @@ def render():
             display.rectangle(x + 1, y + 1, 6, 6)
 
     display.pen(0)
+    display.rectangle(0, 0, WIDTH, 16)
+    draw_battery(get_battery_level(), WIDTH - 22 - 3, 3)
+    display.pen(15)
+    display.text("badgerOS", 3, 8, 0.4)
 
     display.update()
 
@@ -125,10 +178,12 @@ while True:
         button(button_b)
     if button_c.value():
         button(button_c)
+
     if button_up.value():
         button(button_up)
     if button_down.value():
         button(button_down)
+
     if not button_user.value():
         button(button_user)
 
