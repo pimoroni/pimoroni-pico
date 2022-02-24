@@ -52,6 +52,7 @@ jobs:
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/image.py micropython/ports/rp2/modules/
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/checklist.py micropython/ports/rp2/modules/list.py
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/badge.py micropython/ports/rp2/modules/
+        cp pimoroni-pico-${GITHUB_SHA}/micropython/badger2040-mpconfigboard.h micropython/ports/rp2/boards/PICO/mpconfigboard.h
 
     # Linux deps
     - name: Install deps
