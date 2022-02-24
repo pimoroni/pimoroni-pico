@@ -25,6 +25,12 @@ OVERLAY_BORDER = 40
 OVERLAY_SPACING = 20
 OVERLAY_TEXT_SIZE = 0.6
 
+DEFAULT_TEXT = """mustelid inc
+H. Badger
+RP2040
+2MB Flash
+E ink
+296x128px"""
 
 BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
 
@@ -176,11 +182,10 @@ display.update_speed(badger2040.UPDATE_NORMAL)
 try:
     badge = open("badge.txt", "r")
 except OSError:
-    display.pen(15)
-    display.clear()
-    draw_overlay("To run this Badge demo, make sure there is a badge.txt file on your MicroPython device.", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
-    display.update()
-    sys.exit()
+    badge = open("badge.txt", "w")
+    badge.write(DEFAULT_TEXT)
+    badge.flush()
+    badge.seek(0)
 
 # Read in the next 6 lines
 company = badge.readline()        # "mustelid inc"
