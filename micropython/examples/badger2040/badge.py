@@ -7,7 +7,7 @@ import sys
 WIDTH = badger2040.WIDTH
 HEIGHT = badger2040.HEIGHT
 
-IMAGE_WIDTH = 110
+IMAGE_WIDTH = 104
 
 COMPANY_HEIGHT = 30
 DETAILS_HEIGHT = 20
@@ -24,6 +24,19 @@ DETAIL_SPACING = 10
 OVERLAY_BORDER = 40
 OVERLAY_SPACING = 20
 OVERLAY_TEXT_SIZE = 0.6
+
+
+BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
+
+try:
+    open("badge-image.bin", "rb").read_into(BADGE_IMAGE)
+except OSError:
+    try:
+        import badge_image
+        BADGE_IMAGE = bytearray(badge_image.data())
+        del badge_image
+    except ImportError:
+        pass
 
 
 # ------------------------------
@@ -86,10 +99,8 @@ def draw_badge():
     display.pen(0)
     display.clear()
 
-    # Replace with drawing an image
-    display.pen(15)
-    display.thickness(1)
-    display.rectangle(WIDTH - IMAGE_WIDTH, 0, IMAGE_WIDTH, HEIGHT)
+    # Draw badge image
+    display.image(BADGE_IMAGE, IMAGE_WIDTH, HEIGHT, WIDTH - IMAGE_WIDTH, 0)
 
     # Draw a border around the image
     display.pen(0)
@@ -161,17 +172,15 @@ show_overlay = False
 display = badger2040.Badger2040()
 display.update_speed(badger2040.UPDATE_NORMAL)
 
+# Open the badge file
 try:
-    open("badge.txt", "r")
+    badge = open("badge.txt", "r")
 except OSError:
     display.pen(15)
     display.clear()
     draw_overlay("To run this Badge demo, make sure there is a badge.txt file on your MicroPython device.", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
     display.update()
     sys.exit()
-
-# Open the badge file
-badge = open("badge.txt", "r")
 
 # Read in the next 6 lines
 company = badge.readline()        # "mustelid inc"
