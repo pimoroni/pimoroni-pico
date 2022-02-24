@@ -82,6 +82,14 @@ def draw_battery(level, x, y):
     display.rectangle(x + 19, y + 3, 2, 4)
     display.pen(0)
     display.rectangle(x + 1, y + 1, 17, 8)
+    if level < 1:
+        display.pen(0)
+        display.line(x + 3, y, x + 3 + 10, y + 10)
+        display.line(x + 3 + 1, y, x + 3 + 11, y + 10)
+        display.pen(15)
+        display.line(x + 2 + 2, y - 1, x + 4 + 12, y + 11)
+        display.line(x + 2 + 3, y - 1, x + 4 + 13, y + 11)
+        return
     # Battery Bars
     display.pen(15)
     for i in range(4):

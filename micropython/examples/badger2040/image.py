@@ -9,7 +9,7 @@ from badger2040 import WIDTH, HEIGHT
 REAMDE = """
 Images must be 296x128 pixel with 1bit colour depth.
 
-You can use examples/badger200/image_converter/convert.py to convert them:
+You can use examples/badger2040/image_converter/convert.py to convert them:
 
 python3 convert.py --binary --resize image_file_1.png image_file_2.png image_file_3.png
 
@@ -22,21 +22,21 @@ OVERLAY_TEXT_SIZE = 0.5
 
 TOTAL_IMAGES = 0
 
-# Try to preload awful Phil image
+# Try to preload BadgerPunk image
 try:
     os.mkdir("images")
 except OSError:
     pass
 
 try:
-    import phil
-    with open("images/phil.bin", "wb") as f:
-        f.write(phil.data())
+    import badgerpunk
+    with open("images/badgerpunk.bin", "wb") as f:
+        f.write(badgerpunk.data())
         f.flush()
     with open("images/readme.txt", "w") as f:
         f.write(REAMDE)
         f.flush()
-    del phil
+    del badgerpunk
 except (OSError, ImportError):
     pass
 

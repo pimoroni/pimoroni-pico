@@ -6,6 +6,19 @@ import time
 list_title = "Checklist"
 list_content = ["Badger", "Badger", "Badger", "Badger", "Badger", "Mushroom", "Mushroom", "Snake"]
 
+list_states = [False] * len(list_content)
+
+try:
+    with open("checklist.txt", "r") as f:
+        list_content = f.read().split("\n")
+        list_title = list_content.pop(0)
+        for i in range(len(list_content)):
+            if list_content[i].endswith(" X"):
+                list_states[i] = True
+                list_content[i] = list_content[i][:-2]
+except OSError:
+    pass
+
 # Global Constants
 WIDTH = badger2040.WIDTH
 HEIGHT = badger2040.HEIGHT
@@ -126,7 +139,6 @@ def draw_checkbox(x, y, size, background, foreground, thickness, tick, padding):
 update = True
 current_item = 0
 items_per_page = 0
-list_states = [False] * len(list_content)
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
