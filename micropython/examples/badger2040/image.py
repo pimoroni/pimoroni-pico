@@ -6,7 +6,7 @@ import badger2040
 from badger2040 import WIDTH, HEIGHT
 
 
-"""
+REAMDE = """
 Images must be 296x128 pixel with 1bit colour depth.
 
 You can use examples/badger200/image_converter/convert.py to convert them:
@@ -22,6 +22,24 @@ OVERLAY_TEXT_SIZE = 0.5
 
 TOTAL_IMAGES = 0
 
+# Try to preload awful Phil image
+try:
+    os.mkdir("images")
+except OSError:
+    pass
+
+try:
+    import phil
+    with open("images/phil.bin", "wb") as f:
+        f.write(phil.data())
+        f.flush()
+    with open("images/readme.txt", "w") as f:
+        f.write(REAMDE)
+        f.flush()
+    del phil
+except (OSError, ImportError):
+    pass
+
 try:
     IMAGES = [f for f in os.listdir("/images") if f.endswith(".bin")]
     TOTAL_IMAGES = len(IMAGES)
@@ -30,6 +48,10 @@ except OSError:
 
 
 display = badger2040.Badger2040()
+
+button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
+button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
+button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
@@ -48,20 +70,16 @@ def draw_overlay(message, width, height, line_spacing, text_size):
     # Take the provided message and split it up into
     # lines that fit within the specified width
     words = message.split(" ")
+
     lines = []
-    line = ""
-    appended_line = ""
+    current_line = ""
     for word in words:
-        if len(word) > 0:
-            appended_line += " "
-        appended_line += word
-        if display.measure_text(appended_line, text_size) >= width:
-            lines.append(line)
-            appended_line = word
+        if display.measure_text(current_line + word + " ", text_size) < width:
+            current_line += word + " "
         else:
-            line = appended_line
-    if len(line) != 0:
-        lines.append(line)
+            lines.append(current_line.strip())
+            current_line = word + " "
+    lines.append(current_line.strip())
 
     display.pen(0)
     display.thickness(2)
@@ -116,8 +134,15 @@ while True:
             current_image -= 1
         show_image(current_image)
     if button_down.value():
-        if current_image < TOTAL_IMAGES:
+        if current_image < TOTAL_IMAGES - 1:
             current_image += 1
+        show_image(current_image)
+    if button_a.value() or button_b.value() or button_c.value():
+        display.pen(15)
+        display.clear()
+        draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+        display.update()
+        time.sleep(4)
         show_image(current_image)
 
     time.sleep(0.01)
