@@ -8,9 +8,9 @@ FONT_NAMES = ("sans", "gothic", "cursive", "serif", "serif_italic")
 WIDTH = badger2040.WIDTH
 HEIGHT = badger2040.HEIGHT
 
-MENU_TEXT_SIZE = 0.4
-MENU_SPACING = 16
-MENU_WIDTH = 80
+MENU_TEXT_SIZE = 0.5
+MENU_SPACING = 20
+MENU_WIDTH = 84
 MENU_PADDING = 2
 
 TEXT_SIZE = 0.8
