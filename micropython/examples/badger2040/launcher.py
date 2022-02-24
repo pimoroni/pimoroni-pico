@@ -4,13 +4,12 @@ import time
 import math
 import machine
 import badger2040
+from badger2040 import WIDTH
 import launchericons
 
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
-WIDTH = badger2040.WIDTH
-HEIGHT = badger2040.HEIGHT
 
 page = 0
 font_size = 1
@@ -51,7 +50,6 @@ vref_en.value(0)
 
 
 display = badger2040.Badger2040()
-display.update_speed(1)
 
 
 def map_value(input, in_min, in_max, out_min, out_max):
@@ -172,7 +170,10 @@ def button(pin):
             render()
 
 
+display.update_speed(0)
 render()
+display.update_speed(1)
+
 
 # Wait for wakeup button to be released
 while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
