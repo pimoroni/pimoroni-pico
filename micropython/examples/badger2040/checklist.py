@@ -285,6 +285,7 @@ while True:
             display.text(empty_text, ((LIST_PADDING + LIST_WIDTH) - text_length) // 2, (LIST_HEIGHT // 2) + LIST_START - (ITEM_SPACING // 4), ITEM_TEXT_SIZE)
 
         display.update()
+        display.update_speed(badger2040.UPDATE_TURBO)
         update = False
 
     time.sleep(0.1)
