@@ -83,13 +83,15 @@ jobs:
     - name: Rename .uf2 for artifact
       shell: bash
       working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}
-      run: cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+      run: |
+        cp firmware.uf2 ${{github.event.repository.name}}-${{github.sha}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
-        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{github.event.repository.name}}-${{github.event.release.tag_name}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        name: ${{github.event.repository.name}}-${{github.sha}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{github.event.repository.name}}-${{github.sha}}-badger2040-micropython-${{env.MICROPYTHON_VERSION}}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
