@@ -14,6 +14,7 @@ MIN_BATTERY_VOLTAGE = 3.2
 
 page = 0
 font_size = 1
+inverted = False
 
 icons = bytearray(launchericons.data())
 
@@ -181,25 +182,37 @@ def launch_example(index):
 
 
 def button(pin):
-    global page, font_size
-    if pin == button_user:
-        font_size += 1
-        if font_size == len(font_sizes):
-            font_size = 0
-        render()
-    if pin == button_a:
-        launch_example(0)
-    if pin == button_b:
-        launch_example(1)
-    if pin == button_c:
-        launch_example(2)
-    if pin == button_up:
-        if page > 0:
-            page -= 1
+    global page, font_size, inverted
+
+    if button_user.value():  # User button is NOT held down
+        if pin == button_a:
+            launch_example(0)
+        if pin == button_b:
+            launch_example(1)
+        if pin == button_c:
+            launch_example(2)
+        if pin == button_up:
+            if page > 0:
+                page -= 1
+                render()
+        if pin == button_down:
+            if page < MAX_PAGE - 1:
+                page += 1
+                render()
+    else:  # User button IS held down
+        if pin == button_up:
+            font_size += 1
+            if font_size == len(font_sizes):
+                font_size = 0
             render()
-    if pin == button_down:
-        if page < MAX_PAGE - 1:
-            page += 1
+        if pin == button_down:
+            font_size -= 1
+            if font_size < 0:
+                font_size = 0
+            render()
+        if pin == button_a:
+            inverted = not inverted
+            display.invert(inverted)
             render()
 
 
@@ -225,8 +238,5 @@ while True:
         button(button_up)
     if button_down.value():
         button(button_down)
-
-    if not button_user.value():
-        button(button_user)
 
     time.sleep(0.01)
