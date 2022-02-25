@@ -1,4 +1,5 @@
 import gc
+import os
 import sys
 import time
 import math
@@ -95,6 +96,36 @@ def draw_battery(level, x, y):
             display.rectangle(i * 4 + x + 2, y + 2, 3, 6)
 
 
+def draw_disk_usage(x):
+    # f_bfree and f_bavail should be the same?
+    # f_files, f_ffree, f_favail and f_flag are unsupported.
+    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs("/")
+
+    f_total_size = f_frsize * f_blocks
+    f_total_free = f_bsize * f_bfree
+    f_total_used = f_total_size - f_total_free
+
+    f_used = 100 / f_total_size * f_total_used
+    # f_free = 100 / f_total_size * f_total_free
+
+    display.image(bytearray((
+        0b00000000,
+        0b00111100,
+        0b00111100,
+        0b00111100,
+        0b00111000,
+        0b00000000,
+        0b00000000,
+        0b00000001)), 8, 8, x, 4)
+    display.pen(15)
+    display.rectangle(x + 10, 3, 80, 10)
+    display.pen(0)
+    display.rectangle(x + 11, 4, 78, 8)
+    display.pen(15)
+    display.rectangle(x + 12, 5, int(76 / 100.0 * f_used), 6)
+    display.text("{:.2f}%".format(f_used), x + 91, 8, 0.4)
+
+
 def render():
     display.pen(15)
     display.clear()
@@ -123,6 +154,8 @@ def render():
 
     display.pen(0)
     display.rectangle(0, 0, WIDTH, 16)
+    display.thickness(1)
+    draw_disk_usage(90)
     draw_battery(get_battery_level(), WIDTH - 22 - 3, 3)
     display.pen(15)
     display.text("badgerOS", 3, 8, 0.4)
