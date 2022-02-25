@@ -86,7 +86,7 @@ namespace pimoroni {
       pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
       pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
       gpio_set_function(bl, GPIO_FUNC_PWM);
-      set_backlight(255); // Turn backlight on by default to avoid nasty surprises
+      set_backlight(0); // Turn backlight off initially to avoid nasty surprises
     }
 
     // if auto_init_sequence then send initialisation sequence
@@ -176,6 +176,12 @@ namespace pimoroni {
       command(reg::CASET,     4, (char *)caset);
       command(reg::RASET,     4, (char *)raset);
       command(reg::MADCTL,    1, (char *)&madctl);
+
+      if(bl != PIN_UNUSED) {
+        update(); // Send the new buffer to the display to clear any previous content
+        sleep_ms(50); // Wait for the update to apply
+        set_backlight(255); // Turn backlight on now surprises have passed
+      }
     }
 
     // the dma transfer works but without vsync it's not that useful as you could

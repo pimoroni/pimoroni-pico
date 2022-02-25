@@ -20,9 +20,16 @@ mp_obj_t picoexplorer_init(mp_obj_t buf_obj) {
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(buf_obj, &bufinfo, MP_BUFFER_RW);
     picoexplorer_buf_obj = buf_obj;
-    if(explorer == nullptr)
-        explorer = new PicoExplorer((uint16_t *)bufinfo.buf);
+
+    // If a display already exists, delete it
+    if(explorer != nullptr) {
+        delete explorer;
+    }
+
+    // Create a new display pointing to the newly provided buffer
+    explorer = new PicoExplorer((uint16_t *)bufinfo.buf);
     explorer->init();
+
     return mp_const_none;
 }
 

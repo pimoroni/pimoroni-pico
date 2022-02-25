@@ -20,9 +20,16 @@ mp_obj_t picodisplay2_init(mp_obj_t buf_obj) {
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(buf_obj, &bufinfo, MP_BUFFER_RW);
     picodisplay2_buf_obj = buf_obj;
-    if(display2 == nullptr)
-        display2 = new PicoDisplay2((uint16_t *)bufinfo.buf);
+
+    // If a display already exists, delete it
+    if(display2 != nullptr) {
+        delete display2;
+    }
+
+    // Create a new display pointing to the newly provided buffer
+    display2 = new PicoDisplay2((uint16_t *)bufinfo.buf);
     display2->init();
+
     return mp_const_none;
 }
 
