@@ -377,7 +377,7 @@ namespace pimoroni {
     });
 
     command(TCON, {0x22}); // tcon setting
-    command(CDI, {0b01'00'1100}); // vcom and data interval
+    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
 
     command(PLL, {
       HZ_100
@@ -457,6 +457,11 @@ namespace pimoroni {
 
     *p &= m; // clear bit
     *p |= b; // set bit value
+  }
+
+  void UC8151::invert(bool inv) {
+    inverted = inv;
+    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
   }
 
   void UC8151::update_speed(uint8_t speed) {

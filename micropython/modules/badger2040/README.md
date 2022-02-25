@@ -32,6 +32,7 @@ Badger 2040 is an RP2040 powered EInk badge.
     - [Update](#update)
     - [Clear](#clear)
     - [Partial Update](#partial-update)
+    - [Invert (aka Dark Mode)](#invert-aka-dark-mode)
     - [Update Speed](#update-speed-1)
   - [LED](#led)
 
@@ -95,6 +96,7 @@ clear()
 update()
 partial_update(x, y, w, h)
 update_speed(speed)
+invert(inverted)
 ```
 
 ## Other Constants
@@ -362,6 +364,16 @@ partial_update(
     y,  # int: y coordinate of the update region (must be a multiple of 8)
     w,  # int: width of the update region
     h   # int: height of the update region (must be a multiple of 8)
+)
+```
+
+### Invert (aka Dark Mode)
+
+Badger2040 can invert all your display data for a quick and easy dark mode:
+
+```python
+invert(
+    inverted  # bool: True to invert, False to... not invert!
 )
 ```
 

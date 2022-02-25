@@ -144,6 +144,8 @@ namespace pimoroni {
     uint BUSY   = PIN_UNUSED;
     uint RESET  = PIN_UNUSED;
 
+    bool inverted = false;
+
   public:
     UC8151(uint16_t width, uint16_t height) :
       width(width), height(height), frame_buffer(new uint8_t[width * height / 8]) {
@@ -195,6 +197,7 @@ namespace pimoroni {
     void command(uint8_t reg) {command(reg, 0, nullptr);};
     void data(size_t len, const uint8_t *data);
 
+    void invert(bool invert);
     void update_speed(uint8_t speed);
     void update(bool blocking = true);
     void partial_update(int x, int y, int w, int h, bool blocking = true);

@@ -9,6 +9,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_is_busy_obj, Badger2040_is_busy);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_update_obj, Badger2040_update);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_partial_update_obj, 4, Badger2040_partial_update);
 
+MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_invert_obj, Badger2040_invert);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_led_obj, Badger2040_led);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_font_obj, Badger2040_font);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pen_obj, Badger2040_pen);
@@ -39,6 +40,7 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&Badger2040_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_partial_update), MP_ROM_PTR(&Badger2040_partial_update_obj) },
 
+    { MP_ROM_QSTR(MP_QSTR_invert), MP_ROM_PTR(&Badger2040_invert_obj) },
     { MP_ROM_QSTR(MP_QSTR_led), MP_ROM_PTR(&Badger2040_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_font), MP_ROM_PTR(&Badger2040_font_obj) },
     { MP_ROM_QSTR(MP_QSTR_pen), MP_ROM_PTR(&Badger2040_pen_obj) },

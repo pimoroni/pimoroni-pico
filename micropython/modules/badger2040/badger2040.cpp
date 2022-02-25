@@ -173,6 +173,12 @@ MICROPY_EVENT_POLL_HOOK
 // halt
 // sleep
 
+mp_obj_t Badger2040_invert(mp_obj_t self_in, mp_obj_t invert) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    self->badger2040->invert(invert == mp_const_true);
+    return mp_const_none;
+}
+
 mp_obj_t Badger2040_led(mp_obj_t self_in, mp_obj_t brightness) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->led(mp_obj_get_int(brightness));

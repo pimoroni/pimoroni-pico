@@ -195,6 +195,10 @@ namespace pimoroni {
     uc8151.power_off();
   }
 
+  void Badger2040::invert(bool invert) {
+    uc8151.invert(invert);
+  }
+
   void Badger2040::update_speed(uint8_t speed) {
     uc8151.update_speed(speed);
   }
