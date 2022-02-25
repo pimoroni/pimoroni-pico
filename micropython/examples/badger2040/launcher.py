@@ -19,12 +19,14 @@ inverted = False
 icons = bytearray(launchericons.data())
 
 examples = [
-    ("clock.py", 0),
-    ("fonts.py", 1),
-    ("ebook.py", 2),
-    ("image.py", 3),
-    ("list.py", 4),
-    ("badge.py", 5)
+    ("_clock.py", 0),
+    ("_fonts.py", 1),
+    ("_ebook.py", 2),
+    ("_image.py", 3),
+    ("_list.py", 4),
+    ("_badge.py", 5),
+    ("_info.py", 6),
+    ("_help.py", 7)
 ]
 
 font_sizes = (0.5, 0.7, 0.9)
@@ -138,9 +140,9 @@ def render():
     for i in range(max_icons):
         x = centers[i]
         label, icon = examples[i + (page * 3)]
-        label = label.replace(".py", "")
+        label = label[1:-3]
         display.pen(0)
-        display.icon(icons, icon, 384, 64, x - 32, 24)
+        display.icon(icons, icon, 512, 64, x - 32, 24)
         w = display.measure_text(label, font_sizes[font_size])
         display.text(label, x - int(w / 2), 16 + 80, font_sizes[font_size])
 
