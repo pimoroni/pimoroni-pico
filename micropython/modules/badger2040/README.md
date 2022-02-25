@@ -51,9 +51,9 @@ This will create a `Badger2040` class called `badger` that will be used in the r
 The EInk display on Badger 2040 supports several update speeds. These can be set using `update_speed(speed)` where `speed` is a value from `0` to `3`. For convenience these speeds have been given the following constants:
 
 * `UPDATE_NORMAL` = `0`
-* `UPDATE_FAST` = `1`
-* `UPDATE_TURBO` = `2`
-* `UPDATE_SUPER_EXTRA_TURBO` = `3`
+* `UPDATE_MEDIUM` = `1`
+* `UPDATE_FAST` = `2`
+* `UPDATE_TURBO` = `3`
 
 ## Buttons
 
@@ -374,9 +374,9 @@ These offer a tradeoff between the quality of the final image and the speed of t
 There are currently four constants naming the different update speeds from 0 to 3:
 
 * `UPDATE_NORMAL` - a normal update, great for display the first screen of your application and ensuring good contrast and no ghosting
-* `UPDATE_FAST` = a fast update, good for stepping through screens such as the pages of a book or the launcher
-* `UPDATE_TURBO` = a super fast update, prone to ghosting, great for making minor changes such as moving a cursor through a menu
-* `UPDATE_SUPER_EXTRA_TURBO` = yolo update speed, great for changing a region very quickly, but prone to ghosting and image retention
+* `UPDATE_MEDIUM` - a good balance of speed and clarity, you probably want this most of the time
+* `UPDATE_FAST` - a fast update, good for stepping through screens such as the pages of a book or the launcher
+* `UPDATE_TURBO` - a super fast update, prone to ghosting, great for making minor changes such as moving a cursor through a menu
 
 ```python
 update_speed(

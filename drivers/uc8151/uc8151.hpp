@@ -185,8 +185,8 @@ namespace pimoroni {
     void power_off();
 
     void default_luts();
+    void medium_luts();
     void fast_luts();
-    void faster_luts();
     void turbo_luts();
 
     void read(uint8_t reg, size_t len, uint8_t *data);

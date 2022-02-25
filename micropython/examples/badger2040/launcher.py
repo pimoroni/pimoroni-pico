@@ -170,9 +170,9 @@ def button(pin):
             render()
 
 
-display.update_speed(0)
+display.update_speed(badger2040.UPDATE_MEDIUM)
 render()
-display.update_speed(1)
+display.update_speed(badger2040.UPDATE_FAST)
 
 
 # Wait for wakeup button to be released
