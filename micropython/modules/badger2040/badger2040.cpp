@@ -54,6 +54,8 @@ void Badger2040_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t
 /***** Destructor ******/
 mp_obj_t Badger2040___del__(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    // Try to ensure power is cut off when soft reset (IE: "Stop" in Thonny)
+    self->badger2040->power_off();
     delete self->badger2040;
     return mp_const_none;
 }
