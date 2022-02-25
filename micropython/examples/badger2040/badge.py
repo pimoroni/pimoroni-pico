@@ -1,7 +1,6 @@
 import badger2040
 import machine
 import time
-import sys
 
 # Global Constants
 WIDTH = badger2040.WIDTH
