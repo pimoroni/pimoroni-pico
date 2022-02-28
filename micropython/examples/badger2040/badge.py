@@ -34,7 +34,7 @@ E ink
 BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
 
 try:
-    open("badge-image.bin", "rb").read_into(BADGE_IMAGE)
+    open("badge-image.bin", "rb").readinto(BADGE_IMAGE)
 except OSError:
     try:
         import badge_image
