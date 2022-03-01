@@ -3,6 +3,7 @@
 - [Function Examples](#function-examples)
   - [Battery](#battery)
   - [Button Test](#button-test)
+  - [LED](#LED)
 - [Application Examples](#application-examples)
   - [Badge](#badge)
   - [Checklist](#checklist)
