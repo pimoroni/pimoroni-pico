@@ -45,7 +45,7 @@ jobs:
     - name: Copy modules & examples
       run: |
         cp -r pimoroni-pico-${GITHUB_SHA}/micropython/badger2040_modules_py/* micropython/ports/rp2/modules/
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/launcher.py micropython/ports/rp2/modules/
+        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/launcher.py micropython/ports/rp2/modules/_launcher.py
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/clock.py micropython/ports/rp2/modules/_clock.py
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/fonts.py micropython/ports/rp2/modules/_fonts.py
         cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/e-reader.py micropython/ports/rp2/modules/_ebook.py

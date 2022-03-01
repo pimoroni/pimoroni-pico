@@ -171,7 +171,10 @@ def launch(file):
         if k not in ("gc", "file"):
             del locals()[k]
     gc.collect()
-    __import__(file)
+    try:
+        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
+    except ImportError:
+        __import__(file)      # Failover to importing [_file]
     sys.exit(0)
 
 
