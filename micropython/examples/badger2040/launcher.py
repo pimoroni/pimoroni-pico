@@ -1,6 +1,5 @@
 import gc
 import os
-import sys
 import time
 import math
 import machine
@@ -19,14 +18,14 @@ inverted = False
 icons = bytearray(launchericons.data())
 
 examples = [
-    ("_clock.py", 0),
-    ("_fonts.py", 1),
-    ("_ebook.py", 2),
-    ("_image.py", 3),
-    ("_list.py", 4),
-    ("_badge.py", 5),
-    ("_info.py", 6),
-    ("_help.py", 7)
+    ("_clock", 0),
+    ("_fonts", 1),
+    ("_ebook", 2),
+    ("_image", 3),
+    ("_list", 4),
+    ("_badge", 5),
+    ("_info", 6),
+    ("_help", 7)
 ]
 
 font_sizes = (0.5, 0.7, 0.9)
@@ -140,7 +139,7 @@ def render():
     for i in range(max_icons):
         x = centers[i]
         label, icon = examples[i + (page * 3)]
-        label = label[1:-3]
+        label = label[1:]
         display.pen(0)
         display.icon(icons, icon, 512, 64, x - 32, 24)
         w = display.measure_text(label, font_sizes[font_size])
@@ -168,14 +167,14 @@ def render():
 
 def launch(file):
     for k in locals().keys():
-        if k not in ("gc", "file"):
+        if k not in ("gc", "file", "machine"):
             del locals()[k]
     gc.collect()
     try:
         __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
     except ImportError:
         __import__(file)      # Failover to importing [_file]
-    sys.exit(0)
+    machine.reset()           # Exit back to launcher
 
 
 def launch_example(index):
