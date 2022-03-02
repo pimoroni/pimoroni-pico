@@ -3,34 +3,34 @@
 #include <cstdio>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask)
-    : pwms(pio, sm, pin_mask) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq)
+    : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
       if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState();
+        servos[i] = new ServoState(default_type);
       }
     }
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
-    : pwms(pio, sm, pin_base, pin_count) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq)
+    : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
     uint pin_mask = pwms.get_pin_mask();
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
       if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState();
+        servos[i] = new ServoState(default_type);
       }
     }
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
-    : pwms(pio, sm, pins) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq)
+    : pwms(pio, sm, pins), pwm_frequency(freq) {
     uint pin_mask = pwms.get_pin_mask();
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
       if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState();
+        servos[i] = new ServoState(default_type);
       }
     }
   }

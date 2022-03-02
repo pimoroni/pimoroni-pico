@@ -13,7 +13,7 @@ namespace servo {
   private:
     pimoroni::PWMCluster pwms;
     uint32_t pwm_period;
-    float pwm_frequency = ServoState::DEFAULT_FREQUENCY;
+    float pwm_frequency;
     ServoState* servos[NUM_BANK0_GPIOS];
 
 
@@ -21,9 +21,9 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoCluster(PIO pio, uint sm, uint pin_mask);
-    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count);
-    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins);
+    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
+    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
+    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
     ~ServoCluster();
 
     //--------------------------------------------------

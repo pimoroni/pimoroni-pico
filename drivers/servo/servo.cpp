@@ -3,8 +3,8 @@
 #include "pwm.hpp"
 
 namespace servo {
-  Servo::Servo(uint pin, CalibrationType type)
-    : pin(pin), state(type) {
+  Servo::Servo(uint pin, CalibrationType type, float freq)
+    : pin(pin), state(type), pwm_frequency(freq) {
   }
 
   Servo::~Servo() {

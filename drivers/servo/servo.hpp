@@ -12,17 +12,17 @@ namespace servo {
     //--------------------------------------------------
   private:
     uint pin;
+    ServoState state;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
-    float pwm_frequency = ServoState::DEFAULT_FREQUENCY;
-    ServoState state;
+    float pwm_frequency;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Servo(uint pin, CalibrationType default_type = ANGULAR);
+    Servo(uint pin, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
     ~Servo();
 
     //--------------------------------------------------

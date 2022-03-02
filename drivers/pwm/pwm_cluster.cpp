@@ -77,9 +77,12 @@ interrupt is fired, and the handler reconfigures channel A so that it is ready f
      * */
     
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_mask(pin_mask) {
-  channel_polarities = 0x00000000;
-  wrap_level = 0;
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
+: pio(pio)
+, sm(sm)
+, pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
+, channel_polarities(0x00000000)
+, wrap_level(0) {
 
   // Initialise all the channels this PWM will control
   for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
@@ -89,10 +92,12 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask) : pio(pio), sm(sm), pin_
 }
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count) : pio(pio), sm(sm) {
-  pin_mask = 0x00000000;
-  channel_polarities = 0x00000000;
-  wrap_level = 0;
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_polarities(0x00000000)
+, wrap_level(0) {
 
   // Initialise all the channels this PWM will control
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
@@ -107,11 +112,14 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count) : pio(pi
   }
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins) : pio(pio), sm(sm) {
-  pin_mask = 0x00000000;
-  channel_polarities = 0x00000000;
-  wrap_level = 0;
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_polarities(0x00000000)
+, wrap_level(0) {
 
+  // Populate the pin mask
   for(auto pin : pins) {
     if(pin < NUM_BANK0_GPIOS) {
       pin_mask |= (1u << pin);

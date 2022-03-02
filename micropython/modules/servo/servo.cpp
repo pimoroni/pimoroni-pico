@@ -537,10 +537,11 @@ mp_obj_t Servo___del__(mp_obj_t self_in) {
 mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Servo_obj_t *self = nullptr;
 
-    enum { ARG_pin, ARG_type };
+    enum { ARG_pin, ARG_type, ARG_freq };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_type, MP_ARG_INT, {.u_int = (uint8_t)servo::CalibrationType::ANGULAR} },
+        { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     // Parse args.
@@ -550,10 +551,15 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     int pin = args[ARG_pin].u_int;
     servo::CalibrationType calibration_type = (servo::CalibrationType)args[ARG_type].u_int;
 
+    float freq = servo::ServoState::DEFAULT_FREQUENCY;
+    if(args[ARG_freq].u_obj != mp_const_none) {
+        freq = mp_obj_get_float(args[ARG_freq].u_obj);
+    }
+
     self = m_new_obj_with_finaliser(_Servo_obj_t);
     self->base.type = &Servo_type;
 
-    self->servo = new Servo(pin, calibration_type);
+    self->servo = new Servo(pin, calibration_type, freq);
     self->servo->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -831,8 +837,10 @@ void ServoCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
             first = false;
         }
     }
+    mp_print_str(print, "}, freq = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->cluster->get_frequency()), PRINT_REPR);
 
-    mp_print_str(print, "})");
+    mp_print_str(print, ")");
 }
 
 /***** Destructor ******/
@@ -846,59 +854,35 @@ mp_obj_t ServoCluster___del__(mp_obj_t self_in) {
 mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _ServoCluster_obj_t *self = nullptr;
 
-    // TODO
-    /*enum { 
-        ARG_num_leds,
-        ARG_pio,
-        ARG_sm,
-        ARG_dat,
-        ARG_clk,
-        ARG_freq,
-        ARG_buffer
-    };
+    enum { ARG_pio, ARG_sm, ARG_pin_base, ARG_pin_count, ARG_type, ARG_freq };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_pio, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_clk, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_freq, MP_ARG_INT, {.u_int = APA102::DEFAULT_SERIAL_FREQ} },
-        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
+        { MP_QSTR_pin_base, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pin_count, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_type, MP_ARG_INT, {.u_int = (uint8_t)servo::CalibrationType::ANGULAR} },
+        { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     // Parse args.
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    int num_leds = args[ARG_num_leds].u_int;
     PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
     int sm = args[ARG_sm].u_int;
-    int dat = args[ARG_dat].u_int;
-    int clk = args[ARG_clk].u_int;
-    int freq = args[ARG_freq].u_int;
+    int pin_base = args[ARG_pin_base].u_int;
+    int pin_count = args[ARG_pin_count].u_int;
+    servo::CalibrationType calibration_type = (servo::CalibrationType)args[ARG_type].u_int;
 
-    APA102::RGB *buffer = nullptr;
-
-    if (args[ARG_buffer].u_obj) {
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        buffer = (APA102::RGB *)bufinfo.buf;
-        if(bufinfo.len < (size_t)(num_leds * 4)) {
-            mp_raise_ValueError("Supplied buffer is too small for LED count!");
-        }
-        // If a bytearray is supplied it'll be raw, uninitialized bytes
-        // iterate through the RGB elements and call "brightness"
-        // to set up the SOF bytes, otherwise a flickery mess will happen!
-        // Oh for such niceties as "placement new"...
-        for(auto i = 0; i < num_leds; i++) {
-            buffer[i].brightness(15);
-        }
-    }*/
+    float freq = servo::ServoState::DEFAULT_FREQUENCY;
+    if(args[ARG_freq].u_obj != mp_const_none) {
+        freq = mp_obj_get_float(args[ARG_freq].u_obj);
+    }
 
     self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
     self->base.type = &ServoCluster_type;
 
-    self->cluster = new ServoCluster(pio1, 0, 0b11111100); //TODO Expose parameters
+    self->cluster = new ServoCluster(pio, sm, (uint)pin_base, (uint)pin_count, calibration_type, freq);
     self->cluster->init();
 
     return MP_OBJ_FROM_PTR(self);
