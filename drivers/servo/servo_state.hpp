@@ -37,13 +37,10 @@ namespace servo {
   public:
     ServoState(CalibrationType default_type = ANGULAR);
 
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    bool init();
-
     float enable();
     float disable();
     bool is_enabled() const;

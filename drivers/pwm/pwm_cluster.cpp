@@ -95,7 +95,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count) : pio(pi
   wrap_level = 0;
 
   // Initialise all the channels this PWM will control
-  uint pin_end = MIN(pin_count, NUM_BANK0_GPIOS);
+  uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
   for(uint channel = pin_base; channel < pin_end; channel++) {
     pin_mask |= (1u << channel);
   }

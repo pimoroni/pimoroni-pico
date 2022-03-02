@@ -14,9 +14,7 @@ namespace servo {
     pimoroni::PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency = ServoState::DEFAULT_FREQUENCY;
-    ServoState servos[NUM_BANK0_GPIOS]; // TODO change this to array of pointers
-                                        // so that only the servos actually assigned
-                                        // to this cluster have states
+    ServoState* servos[NUM_BANK0_GPIOS];
 
 
     //--------------------------------------------------
@@ -36,6 +34,8 @@ namespace servo {
 
     // For print access in micropython
     uint get_pin_mask() const;
+
+    bool is_assigned(uint servo) const;
 
     void enable(uint servo, bool load = true);
     void disable(uint servo, bool load = true);

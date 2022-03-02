@@ -5,17 +5,42 @@
 namespace servo {
   ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask)
     : pwms(pio, sm, pin_mask) {
+
+    for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
+      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
+        servos[i] = new ServoState();
+      }
+    }
   }
 
   ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
     : pwms(pio, sm, pin_base, pin_count) {
+    uint pin_mask = pwms.get_pin_mask();
+
+    for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
+      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
+        servos[i] = new ServoState();
+      }
+    }
   }
 
   ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
     : pwms(pio, sm, pins) {
+    uint pin_mask = pwms.get_pin_mask();
+
+    for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
+      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
+        servos[i] = new ServoState();
+      }
+    }
   }
 
   ServoCluster::~ServoCluster() {
+    for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
+      if(servos[i] != nullptr) {
+        delete servos[i];
+      }
+    }
   }
 
   bool ServoCluster::init() {
@@ -52,53 +77,47 @@ namespace servo {
     return pwms.get_pin_mask();
   }
 
+  bool ServoCluster::is_assigned(uint servo) const {
+    return (servo < NUM_BANK0_GPIOS) && (servos[servo] != nullptr);
+  }
+
   void ServoCluster::enable(uint servo, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].enable();
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->enable();
+    apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::disable(uint servo, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].disable();
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->disable();
+    apply_pulse(servo, new_pulse, load);
   }
 
   bool ServoCluster::is_enabled(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].is_enabled();
-    else
-      return false;
+    assert(is_assigned(servo));
+    return servos[servo]->is_enabled();
   }
 
   float ServoCluster::get_value(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].get_value();
-    else
-      return 0.0f;
+    assert(is_assigned(servo));
+    return servos[servo]->get_value();
   }
 
   void ServoCluster::set_value(uint servo, float value, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].set_value(value);
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->set_value(value);
+    apply_pulse(servo, new_pulse, load);
   }
 
   float ServoCluster::get_pulse(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].get_pulse();
-    else
-      return 0.0f;
+    assert(is_assigned(servo));
+    return servos[servo]->get_pulse();
   }
 
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].set_pulse(pulse);
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->set_pulse(pulse);
+    apply_pulse(servo, new_pulse, load);
   }
 
  float ServoCluster::get_frequency() const {
@@ -118,8 +137,10 @@ namespace servo {
 
         // Update the pwm before setting the new wrap
         for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
-          float current_pulse = servos[servo].get_pulse();
-          apply_pulse(servo, current_pulse, false);
+          if(servos[servo] != nullptr) {
+            float current_pulse = servos[servo]->get_pulse();
+            apply_pulse(servo, current_pulse, false);
+          }
         }
 
         // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
@@ -138,73 +159,58 @@ namespace servo {
   }
 
   float ServoCluster::get_min_value(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].get_min_value();
-    else
-      return 0.0f;
+    assert(is_assigned(servo));
+    return servos[servo]->get_min_value();
   }
 
   float ServoCluster::get_mid_value(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].get_mid_value();
-    else
-      return 0.0f;
+    assert(is_assigned(servo));
+    return servos[servo]->get_mid_value();
   }
 
   float ServoCluster::get_max_value(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-      return servos[servo].get_max_value();
-    else
-      return 0.0f;
+    assert(is_assigned(servo));
+    return servos[servo]->get_max_value();
   }
 
   void ServoCluster::to_min(uint servo, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].to_min();
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->to_min();
+    apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_mid(uint servo, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].to_mid();
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->to_mid();
+    apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].to_max();
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->to_max();
+    apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].to_percent(in, in_min, in_max);
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->to_percent(in, in_min, in_max);
+    apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
-    if(servo < NUM_BANK0_GPIOS) {
-      float new_pulse = servos[servo].to_percent(in, in_min, in_max, value_min, value_max);
-      apply_pulse(servo, new_pulse, load);
-    }
+    assert(is_assigned(servo));
+    float new_pulse = servos[servo]->to_percent(in, in_min, in_max, value_min, value_max);
+    apply_pulse(servo, new_pulse, load);
   }
 
   Calibration* ServoCluster::calibration(uint servo) {
-    if(servo < NUM_BANK0_GPIOS)
-        return &servos[servo].calibration();
-    else
-        return nullptr;
+    assert(is_assigned(servo));
+    return &servos[servo]->calibration();
   }
 
   const Calibration* ServoCluster::calibration(uint servo) const {
-    if(servo < NUM_BANK0_GPIOS)
-        return &servos[servo].calibration();
-    else
-        return nullptr;
+    assert(is_assigned(servo));
+    return &servos[servo]->calibration();
   }
 
   void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {
