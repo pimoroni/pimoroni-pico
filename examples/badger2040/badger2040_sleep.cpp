@@ -54,6 +54,10 @@ int main() {
   badger.text("(press any button to wake up.)", 10, 70, 0.4f);
   badger.update();
 
+  while (badger.is_busy()) {
+    sleep_ms(10);
+  }
+
   badger.halt();
 
   // proof we halted, the LED will not turn on
