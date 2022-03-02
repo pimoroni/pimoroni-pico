@@ -33,6 +33,10 @@ namespace pimoroni {
     gpio_set_dir(D, GPIO_IN);
     gpio_set_pulls(D, false, true);
 
+    gpio_set_function(E, GPIO_FUNC_SIO);
+    gpio_set_dir(E, GPIO_IN);
+    gpio_set_pulls(E, false, true);
+
     gpio_set_function(USER, GPIO_FUNC_SIO);
     gpio_set_dir(USER, GPIO_IN);
     gpio_set_pulls(USER, false, true);
@@ -41,11 +45,11 @@ namespace pimoroni {
     gpio_set_dir(VBUS_DETECT, GPIO_IN);
     gpio_put(VBUS_DETECT, 1);
 
-/*
     // read initial button states
     uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
     _wake_button_states |= gpio_get_all() & mask;
 
+/*
     // wait for button to be released before continuing
     while(gpio_get_all() & mask) {
       tight_loop_contents();
@@ -184,7 +188,11 @@ namespace pimoroni {
 
   void Badger2040::update_button_states() {
     uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
-    _button_states |= gpio_get_all() & mask;
+    _button_states = gpio_get_all() & mask;
+  }
+
+  uint32_t Badger2040::button_states() {
+    return _button_states;
   }
 
   bool Badger2040::is_busy() {
@@ -335,7 +343,6 @@ namespace pimoroni {
   }
 
   void Badger2040::wait_for_press() {
-    _button_states = 0;
     update_button_states();
     while(_button_states == 0) {
       update_button_states();
