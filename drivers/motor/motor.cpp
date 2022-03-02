@@ -1,6 +1,5 @@
 #include "motor.hpp"
-#include "hardware/clocks.h"
-#include <math.h>
+#include "pwm.hpp"
 
 namespace pimoroni {
   Motor::Motor(uint pin_pos, uint pin_neg, float freq, DecayMode mode)
@@ -16,7 +15,7 @@ namespace pimoroni {
     bool success = false;
 
     uint16_t period; uint16_t div16;
-    if(Motor::calculate_pwm_factors(pwm_frequency, period, div16)) {
+    if(pimoroni::calculate_pwm_factors(pwm_frequency, period, div16)) {
       pwm_period = period;
 
       pwm_cfg = pwm_get_default_config();
@@ -44,7 +43,7 @@ namespace pimoroni {
   }
 
   void Motor::set_speed(float speed) {
-    motor_speed = std::min(std::max(speed, -1.0f), 1.0f);
+    motor_speed = MIN(MAX(speed, -1.0f), 1.0f);
     update_pwm();
   }
 
@@ -57,7 +56,7 @@ namespace pimoroni {
 
     //Calculate a suitable pwm wrap period for this frequency
     uint16_t period; uint16_t div16;
-    if(Motor::calculate_pwm_factors(freq, period, div16)) {
+    if(pimoroni::calculate_pwm_factors(freq, period, div16)) {
 
       //Record if the new period will be larger or smaller.
       //This is used to apply new pwm values either before or after the wrap is applied,
@@ -115,43 +114,6 @@ namespace pimoroni {
     motor_speed = 0.0f;
     pwm_set_gpio_level(pin_pos, 0);
     pwm_set_gpio_level(pin_neg, 0);
-  }
-
-  //Based on Micropython implementation: https://github.com/micropython/micropython/blob/master/ports/rp2/machine_pwm.c
-  bool Motor::calculate_pwm_factors(float freq, uint16_t& period_out, uint16_t& div16_out) {
-    bool success = false;
-    uint32_t source_hz = clock_get_hz(clk_sys);
-
-    //Check the provided frequency is valid
-    if((freq >= 1.0f) && (freq <= (float)(source_hz >> 1))) {
-      uint32_t div16 = (uint32_t)((float)(source_hz << 4) / freq);
-      uint16_t period = 1;
-
-      while(true) {
-        //Try a few small prime factors to get close to the desired frequency
-        if(div16 >= (5 << 4) && div16 % 5 == 0 && period * 5 < MAX_PWM_PERIOD) {
-          div16 /= 5;
-          period *= 5;
-        }
-        else if(div16 >= (3 << 4) && div16 % 3 == 0 && period * 3 < MAX_PWM_PERIOD) {
-          div16 /= 3;
-          period *= 3;
-        }
-        else if(div16 >= (2 << 4) && period * 2 <= MAX_PWM_PERIOD) {
-          div16 /= 2;
-          period *= 2;
-        }
-        else
-          break;
-      }
-      if(div16 >= 16 && div16 < (256 << 4)) {
-        period_out = period;
-        div16_out = div16;
-
-        success = true;
-      }
-    }
-    return success;
   }
 
   void Motor::update_pwm() {

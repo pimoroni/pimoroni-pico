@@ -1,11 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <math.h>
-
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
-#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
@@ -26,10 +22,6 @@ namespace pimoroni {
     static const uint16_t DEFAULT_PWM_FREQUENCY = 25000;      // Chose 25KHz because it is outside of hearing
                                                               // and divides nicely into the RP2040's 125MHz PWM frequency
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;
-
-  private:
-    static const uint32_t MAX_PWM_PERIOD = UINT16_MAX;
-    static constexpr uint8_t MAX_PWM_DIVIDER = (1 << 7);
 
 
     //--------------------------------------------------
@@ -72,8 +64,8 @@ namespace pimoroni {
     void stop();
     void disable();
 
+    //--------------------------------------------------
   private:
-    static bool calculate_pwm_factors(float freq, uint16_t& period_out, uint16_t& div16_out);
     void update_pwm();
   };
 

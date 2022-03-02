@@ -5,6 +5,7 @@
 #include "motor.hpp"
 #include "button.hpp"
 #include "breakout_msa301.hpp"
+#include <math.h>
 
 /*
 A very basic balancing robot implementation, using an MSA301 to give accelerating values that are passed to the motors using proportional control.
