@@ -14,3 +14,6 @@
 [submodule "drivers/scd4x/src"]
 	path = drivers/scd4x/src
 	url = https://github.com/Sensirion/embedded-i2c-scd4x
+[submodule "micropython/modules/qrcode"]
+	path = micropython/modules/qrcode
+	url = https://github.com/pimoroni/QR-Code-Generator
