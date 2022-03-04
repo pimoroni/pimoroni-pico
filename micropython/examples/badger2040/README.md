@@ -3,6 +3,7 @@
 - [Function Examples](#function-examples)
   - [Battery](#battery)
   - [Button Test](#button-test)
+  - [LED](#LED)
 - [Application Examples](#application-examples)
   - [Badge](#badge)
   - [Checklist](#checklist)
@@ -25,6 +26,11 @@ An example of how to read the battery voltage and display a battery level indica
 
 An example of how to read Badger2040's buttons and display a unique message for each.
 
+### LED
+[led.py](led.py)
+
+Blinks Badger's LED on and off.
+
 
 ## Application Examples
 
@@ -45,7 +51,7 @@ A checklist application, letting you navigate through items and tick each of the
 ### Clock
 [clock.py](clock.py)
 
-A simple clock showing the time and date, that uses the EInk's fast speed to update every second
+A simple clock showing the time and date, that uses the E Ink's fast speed to update every second
 
 ### E-Reader
 [e-reader.py](e-reader.py)

@@ -75,8 +75,9 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 ## RP2040 Boards
 
-* Plasma 2040 - https://shop.pimoroni.com/products/plasma-2040
-* Interstate 75 - HUB75 driver https://shop.pimoroni.com/products/interstate-75
+* Plasma 2040 (LED strip driver) - https://shop.pimoroni.com/products/plasma-2040
+* Interstate 75 (HUB75 driver) - https://shop.pimoroni.com/products/interstate-75
+* Badger 2040 (E Ink badge) - https://shop.pimoroni.com/products/badger-2040
 
 ## Breakouts
 
