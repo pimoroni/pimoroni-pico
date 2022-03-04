@@ -29,7 +29,7 @@ An example of how to read Badger2040's buttons and display a unique message for 
 ### LED
 [led.py](led.py)
 
-Blinks Badger's LED on and off. A lot.
+Blinks Badger's LED on and off.
 
 
 ## Application Examples
