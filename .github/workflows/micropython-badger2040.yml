@@ -51,6 +51,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
+        python3 -m pip install pillow
 
     - name: Fetch base MicroPython submodules
       shell: bash
