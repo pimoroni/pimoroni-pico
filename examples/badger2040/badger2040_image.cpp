@@ -56,6 +56,9 @@ int main() {
   }
 
   badger.update();
+  while (badger.is_busy()) {
+    sleep_ms(10);
+  }
   badger.halt();
 
 }
