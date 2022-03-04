@@ -3,22 +3,25 @@ import machine
 import time
 import gc
 
+
+# **** Put the name of your text file here *****
+text_file = "book.txt"  # File must be on the MicroPython device
+
+
 try:
-    open("witw.txt", "r")
+    open(text_file, "r")
 except OSError:
     try:
+        # If the specified file doesn't exist,
+        # pre-populate with Wind In The Willows
         import witw
-        open("witw.txt", "wb").write(witw.data())
+        open(text_file, "wb").write(witw.data())
         del witw
     except ImportError:
         pass
 
 
 gc.collect()
-
-
-# **** Put the name of your text file here *****
-text_file = "witw.txt"  # File must be on the MicroPython device
 
 # Global Constants
 WIDTH = badger2040.WIDTH
