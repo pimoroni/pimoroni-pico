@@ -31,6 +31,6 @@ include(breakout_icp10125/micropython)
 include(breakout_scd41/micropython)
 
 include(badger2040/micropython)
-include(badger2040/micropython-builtins)
+include(micropython/examples/badger2040/micropython-builtins)
 include(plasma/micropython)
 include(ulab/code/micropython)
