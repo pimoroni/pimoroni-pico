@@ -3,22 +3,25 @@ import machine
 import time
 import gc
 
+
+# **** Put the name of your text file here *****
+text_file = "book.txt"  # File must be on the MicroPython device
+
+
 try:
-    open("witw.txt", "r")
+    open(text_file, "r")
 except OSError:
     try:
+        # If the specified file doesn't exist,
+        # pre-populate with Wind In The Willows
         import witw
-        open("witw.txt", "wb").write(witw.data())
+        open(text_file, "wb").write(witw.data())
         del witw
     except ImportError:
         pass
 
 
 gc.collect()
-
-
-# **** Put the name of your text file here *****
-text_file = "witw.txt"  # File must be on the MicroPython device
 
 # Global Constants
 WIDTH = badger2040.WIDTH
@@ -30,14 +33,17 @@ ARROW_HEIGHT = 14
 ARROW_PADDING = 2
 
 TEXT_PADDING = 4
-TEXT_SPACING = 20
+
 TEXT_SIZE = 0.5
+TEXT_SPACING = int(34 * TEXT_SIZE)
 TEXT_WIDTH = WIDTH - TEXT_PADDING - TEXT_PADDING - ARROW_WIDTH
 
-
+FONTS = ["sans", "gothic", "cursive", "serif"]
+FONT_THICKNESSES = [2, 1, 1, 2]
 # ------------------------------
 #      Drawing functions
 # ------------------------------
+
 
 # Draw a upward arrow
 def draw_up(x, y, width, height, thickness, padding):
@@ -79,6 +85,8 @@ def draw_frame():
 # Global variables
 next_page = True
 prev_page = False
+change_font_size = False
+change_font = False
 last_offset = 0
 current_page = 0
 
@@ -90,6 +98,9 @@ display.update_speed(badger2040.UPDATE_FAST)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
+button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
+button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
+
 # Set up the activity LED
 led = machine.Pin(badger2040.PIN_LED, machine.Pin.OUT)
 
@@ -98,7 +109,7 @@ offsets = []
 
 # Button handling function
 def button(pin):
-    global next_page, prev_page
+    global next_page, prev_page, change_font_size, change_font
 
     if pin == button_down:
         next_page = True
@@ -106,10 +117,18 @@ def button(pin):
     if pin == button_up:
         prev_page = True
 
+    if pin == button_a:
+        change_font_size = True
+
+    if pin == button_b:
+        change_font = True
+
 
 # Register the button handling function with the buttons
 button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
+button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
+button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 
 # ------------------------------
@@ -122,6 +141,7 @@ def render_page():
     pos = ebook.tell()
     next_pos = pos
     add_newline = False
+    display.font(FONTS[0])
 
     while True:
         # Read a full line and split it into words
@@ -168,7 +188,7 @@ def render_page():
             # Yes, so write out the line prior to the append
             print(line)
             display.pen(0)
-            display.thickness(2)
+            display.thickness(FONT_THICKNESSES[0])
             display.text(line, TEXT_PADDING, (row * TEXT_SPACING) + (TEXT_SPACING // 2) + TEXT_PADDING, TEXT_SIZE)
 
             # Clear the line and move on to the next row
@@ -230,5 +250,27 @@ while True:
             draw_frame()
             render_page()
         prev_page = False  # Clear the prev page button flag
+
+    if change_font_size:
+        TEXT_SIZE += 0.1
+        if TEXT_SIZE > 0.8:
+            TEXT_SIZE = 0.5
+        TEXT_SPACING = int(34 * TEXT_SIZE)
+        offsets = [0]
+        ebook.seek(0)
+        current_page = 1
+        draw_frame()
+        render_page()
+        change_font_size = False
+
+    if change_font:
+        FONTS.append(FONTS.pop(0))
+        FONT_THICKNESSES.append(FONT_THICKNESSES.pop(0))
+        offsets = [0]
+        ebook.seek(0)
+        current_page = 1
+        draw_frame()
+        render_page()
+        change_font = False
 
     time.sleep(0.1)

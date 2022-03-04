@@ -58,6 +58,7 @@ button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PU
 
 image = bytearray(int(296 * 128 / 8))
 current_image = 0
+show_info = True
 
 
 # Draw an overlay box with a given message within it
@@ -97,22 +98,24 @@ def show_image(n):
     name = file.split(".")[0]
     open("images/{}".format(file), "r").readinto(image)
     display.image(image)
-    name_length = display.measure_text(name, 0.5)
-    display.pen(0)
-    display.rectangle(0, HEIGHT - 21, name_length + 11, 21)
-    display.pen(15)
-    display.rectangle(0, HEIGHT - 20, name_length + 10, 20)
-    display.pen(0)
-    display.text(name, 5, HEIGHT - 10, 0.5)
 
-    for i in range(TOTAL_IMAGES):
-        x = 286
-        y = int((128 / 2) - (TOTAL_IMAGES * 10 / 2) + (i * 10))
+    if show_info:
+        name_length = display.measure_text(name, 0.5)
         display.pen(0)
-        display.rectangle(x, y, 8, 8)
-        if current_image != i:
-            display.pen(15)
-            display.rectangle(x + 1, y + 1, 6, 6)
+        display.rectangle(0, HEIGHT - 21, name_length + 11, 21)
+        display.pen(15)
+        display.rectangle(0, HEIGHT - 20, name_length + 10, 20)
+        display.pen(0)
+        display.text(name, 5, HEIGHT - 10, 0.5)
+
+        for i in range(TOTAL_IMAGES):
+            x = 286
+            y = int((128 / 2) - (TOTAL_IMAGES * 10 / 2) + (i * 10))
+            display.pen(0)
+            display.rectangle(x, y, 8, 8)
+            if current_image != i:
+                display.pen(15)
+                display.rectangle(x + 1, y + 1, 6, 6)
 
     display.update()
 
@@ -137,7 +140,10 @@ while True:
         if current_image < TOTAL_IMAGES - 1:
             current_image += 1
         show_image(current_image)
-    if button_a.value() or button_b.value() or button_c.value():
+    if button_a.value():
+        show_info = not show_info
+        show_image(current_image)
+    if button_b.value() or button_c.value():
         display.pen(15)
         display.clear()
         draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)

@@ -5,19 +5,9 @@ import time
 # **** Put your list title and contents here *****
 list_title = "Checklist"
 list_content = ["Badger", "Badger", "Badger", "Badger", "Badger", "Mushroom", "Mushroom", "Snake"]
-
 list_states = [False] * len(list_content)
+list_file = "checklist.txt"
 
-try:
-    with open("checklist.txt", "r") as f:
-        list_content = f.read().split("\n")
-        list_title = list_content.pop(0)
-        for i in range(len(list_content)):
-            if list_content[i].endswith(" X"):
-                list_states[i] = True
-                list_content[i] = list_content[i][:-2]
-except OSError:
-    pass
 
 # Global Constants
 WIDTH = badger2040.WIDTH
@@ -37,6 +27,16 @@ LIST_START = 40
 LIST_PADDING = 2
 LIST_WIDTH = WIDTH - LIST_PADDING - LIST_PADDING - ARROW_WIDTH
 LIST_HEIGHT = HEIGHT - LIST_START - LIST_PADDING - ARROW_HEIGHT
+
+
+def save_list():
+    with open(list_file, "w") as f:
+        f.write(list_title + "\n")
+        for i in range(len(list_content)):
+            list_item = list_content[i]
+            if list_states[i]:
+                list_item += " X"
+            f.write(list_item + "\n")
 
 
 # ------------------------------
@@ -137,6 +137,7 @@ def draw_checkbox(x, y, size, background, foreground, thickness, tick, padding):
 
 # Global variables
 update = True
+needs_save = False
 current_item = 0
 items_per_page = 0
 
@@ -174,8 +175,7 @@ items_per_page = ((LIST_HEIGHT // ITEM_SPACING) + 1) * list_columns
 
 # Button handling function
 def button(pin):
-    global update
-    global current_item
+    global update, current_item, needs_save
 
     if len(list_content) > 0 and not update:
         if pin == button_a:
@@ -185,6 +185,7 @@ def button(pin):
             return
         if pin == button_b:
             list_states[current_item] = not list_states[current_item]
+            needs_save = True
             update = True
             return
         if pin == button_c:
@@ -216,7 +217,26 @@ button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 #       Main program loop
 # ------------------------------
 
+try:
+    with open(list_file, "r") as f:
+        list_content = f.read().strip().split("\n")
+        list_title = list_content.pop(0)
+        list_states = [False] * len(list_content)
+        for i in range(len(list_content)):
+            list_content[i] = list_content[i].strip()
+            if list_content[i].endswith(" X"):
+                list_states[i] = True
+                list_content[i] = list_content[i][:-2]
+
+except OSError:
+    save_list()
+
+
 while True:
+    if needs_save:
+        save_list()
+        needs_save = False
+
     if update:
         display.pen(15)
         display.clear()
