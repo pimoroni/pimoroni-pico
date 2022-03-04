@@ -42,18 +42,8 @@ jobs:
         path: pimoroni-pico-${{ github.sha }}
 
     # Copy Python module files
-    - name: Copy modules & examples
+    - name: HACK - Copy board config fixup
       run: |
-        cp -r pimoroni-pico-${GITHUB_SHA}/micropython/badger2040_modules_py/* micropython/ports/rp2/modules/
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/launcher.py micropython/ports/rp2/modules/_launcher.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/clock.py micropython/ports/rp2/modules/_clock.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/fonts.py micropython/ports/rp2/modules/_fonts.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/e-reader.py micropython/ports/rp2/modules/_ebook.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/image.py micropython/ports/rp2/modules/_image.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/checklist.py micropython/ports/rp2/modules/_list.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/badge.py micropython/ports/rp2/modules/_badge.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/help.py micropython/ports/rp2/modules/_help.py
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/examples/badger2040/info.py micropython/ports/rp2/modules/_info.py
         cp pimoroni-pico-${GITHUB_SHA}/micropython/badger2040-mpconfigboard.h micropython/ports/rp2/boards/PICO/mpconfigboard.h
 
     # Linux deps
@@ -61,6 +51,7 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
+        python3 -m pip install pillow
 
     - name: Fetch base MicroPython submodules
       shell: bash
