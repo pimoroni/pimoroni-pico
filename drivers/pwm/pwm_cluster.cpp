@@ -94,6 +94,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
     channel_levels[channel] = 0u;
     channel_offsets[channel] = 0u;
     channel_overruns[channel] = 0u;
+    next_channel_overruns[channel] = 0u;
   }
 }
 
@@ -116,6 +117,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
     channel_levels[channel] = 0u;
     channel_offsets[channel] = 0u;
     channel_overruns[channel] = 0u;
+    next_channel_overruns[channel] = 0u;
   }
 }
 
@@ -138,6 +140,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
     channel_levels[channel] = 0u;
     channel_offsets[channel] = 0u;
     channel_overruns[channel] = 0u;
+    next_channel_overruns[channel] = 0u;
   }
 }
 
@@ -334,6 +337,9 @@ void PWMCluster::load_pwm() {
 
   uint pin_states = channel_polarities;
 
+  // Check if the data we last wrote has been picked up by the DMA yet?
+  bool read_since_last_write = (read_index == last_written_index);
+
   // Go through each channel that we are assigned to
   for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
     if(bit_in_mask(channel, pin_mask)) {
@@ -342,6 +348,14 @@ void PWMCluster::load_pwm() {
 
       uint channel_start = channel_offsets[channel];
       uint channel_end = (channel_offsets[channel] + channel_levels[channel]) % wrap_level;
+
+      // If the data has been read, copy the channel overruns from that sequence. Otherwise, keep the ones we had previously stored.
+      if(read_since_last_write) {
+        // This condition was added to deal with cases of load_pwm() being called multiple
+        // times between DMA reads, and thus loosing memory of the previous sequence's overruns
+        channel_overruns[channel] = next_channel_overruns[channel];
+      }
+      next_channel_overruns[channel] = 0u;  // Always clear the next channel overruns, as we are loading new data
 
       // Did the previous sequence overrun the wrap level?
       if(channel_overruns[channel] > 0) {
@@ -358,7 +372,6 @@ void PWMCluster::load_pwm() {
           // Add a transition to "low" (or "high" if inverted) at the overrun level of the previous sequence
           PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_overruns[channel], polarity));
         }
-        channel_overruns[channel] = 0u;
       }
 
       if(channel_levels[channel] > 0 && channel_start < wrap_level) {
@@ -367,7 +380,7 @@ void PWMCluster::load_pwm() {
 
         // If the channel has overrun the wrap level, record by how much
         if(channel_end < channel_start) {
-            channel_overruns[channel] = channel_end;
+            next_channel_overruns[channel] = channel_end;
         }
       }
 
