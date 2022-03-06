@@ -55,6 +55,8 @@ namespace pimoroni {
     uint channel_polarities;
     uint wrap_level;
 
+    uint channel_overruns[NUM_BANK0_GPIOS];
+
   public:
     static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint16_t& div16_out);
   private:
