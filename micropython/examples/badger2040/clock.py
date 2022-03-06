@@ -127,7 +127,7 @@ def draw_clock():
 year, month, day, wd, hour, minute, second, _ = rtc.datetime()
 
 if (year, month, day) == (2021, 1, 1):
-    rtc.datetime((2022, 2, 29, 3, 12, 0, 0, 0))
+    rtc.datetime((2022, 2, 28, 0, 12, 0, 0, 0))
 
 last_second = second
 
