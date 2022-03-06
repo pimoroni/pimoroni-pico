@@ -343,6 +343,13 @@ void PWMCluster::load_pwm() {
     }
   }
 
+  // Introduce "Loading Zone" transitions to the end of the sequence to
+  // prevent the DMA interrupt firing many milliseconds before the sequence ends.
+  uint32_t zone_inserts = MIN(LOADING_ZONE_SIZE, wrap_level);
+  for(uint i = 0; i < zone_inserts; i++) {
+    PWMCluster::sorted_insert(transitions, data_size, TransitionData(wrap_level - 1 - i));
+  }
+
   // Read | Last W = Write
   // 0    | 0      = 1 (or 2)
   // 0    | 1      = 2
@@ -375,11 +382,13 @@ void PWMCluster::load_pwm() {
       do {
         // Is the level of this transition at the current level being checked?
         if(transitions[data_index].level <= current_level) {
-          // Yes, so add the transition state to the pin states mask
-          if(transitions[data_index].state)
-            pin_states |= (1u << transitions[data_index].channel);
-          else
-            pin_states &= ~(1u << transitions[data_index].channel);
+          // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
+          if(!transitions[data_index].dummy) {
+            if(transitions[data_index].state)
+              pin_states |= (1u << transitions[data_index].channel);
+            else
+              pin_states &= ~(1u << transitions[data_index].channel);
+          }
 
           data_index++; // Move on to the next transition
         }
@@ -403,17 +412,6 @@ void PWMCluster::load_pwm() {
     // so initialise the sequence with something, so the PIO functions correctly
     seq.data[seq.size].mask = 0u;
     seq.data[seq.size].delay = wrap_level - 1;
-    seq.size++;
-  }
-
-  // Introduce "Loading Zone" transitions to the end of the sequence
-  // to prevent the DMA interrupt firing many milliseconds before the
-  // sequence end.
-  // TODO, have this account for PWMS close to 100% that may overlap with it
-  seq.data[seq.size - 1].delay -= LOADING_ZONE_SIZE;
-  for(uint i = 0; i < LOADING_ZONE_SIZE; i++) {
-    seq.data[seq.size].mask = channel_polarities;
-    seq.data[seq.size].delay = 0;
     seq.size++;
   }
 

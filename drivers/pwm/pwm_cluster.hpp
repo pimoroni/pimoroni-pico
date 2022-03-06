@@ -12,9 +12,11 @@ namespace pimoroni {
     uint8_t channel;
     uint32_t level;
     bool state;
+    bool dummy;
 
-    TransitionData() : channel(0), level(0), state(false) {};
-    TransitionData(uint8_t channel, uint32_t level, bool new_state) : channel(channel), level(level), state(new_state) {};
+    TransitionData() : channel(0), level(0), state(false), dummy(false) {};
+    TransitionData(uint8_t channel, uint32_t level, bool new_state) : channel(channel), level(level), state(new_state), dummy(false) {};
+    TransitionData(uint32_t level) : channel(0), level(level), state(false), dummy(true) {};
 
     bool compare(const TransitionData& other) const {
       return level <= other.level;
