@@ -22,6 +22,12 @@ button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOW
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
 
+def days_in_month(month, year):
+    if month == 2 and ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0):
+        return 29
+    return (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[month - 1]
+
+
 # Button handling function
 def button(pin):
     global last, set_clock, cursor, year, month, day, hour, minute
@@ -57,12 +63,14 @@ def button(pin):
         if cursors[cursor] == "year":
             year += adjust
             year = max(year, 2022)
+            day = min(day, days_in_month(month, year))
         if cursors[cursor] == "month":
             month += adjust
             month = min(max(month, 1), 12)
+            day = min(day, days_in_month(month, year))
         if cursors[cursor] == "day":
             day += adjust
-            day = min(max(day, 1), 31)
+            day = min(max(day, 1), days_in_month(month, year))
         if cursors[cursor] == "hour":
             hour += adjust
             hour %= 60
