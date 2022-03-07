@@ -87,19 +87,19 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
 , sm(sm)
 , pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
 , channel_count(0)
-, channel_polarities(0x00000000)
+, channels(nullptr)
 , wrap_level(0) {
 
   // Initialise all the channels this PWM will control
-  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    channel_levels[channel] = 0u;
-    channel_offsets[channel] = 0u;
-    channel_overruns[channel] = 0u;
-    next_channel_overruns[channel] = 0u;
-
-    if(bit_in_mask(channel, pin_mask)) {
+  for(uint pin = 0; pin < NUM_BANK0_GPIOS; pin++) {
+    if(bit_in_mask(pin, pin_mask)) {
+      channel_to_pin_map[channel_count] = pin;
       channel_count++;
     }
+  }
+
+  if(channel_count > 0) {
+    channels = new ChannelState[channel_count];
   }
 }
 
@@ -109,22 +109,19 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channel_polarities(0x00000000)
+, channels(nullptr)
 , wrap_level(0) {
 
   // Initialise all the channels this PWM will control
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
-  for(uint channel = pin_base; channel < pin_end; channel++) {
-    pin_mask |= (1u << channel);
+  for(uint pin = pin_base; pin < pin_end; pin++) {
+    pin_mask |= (1u << pin);
+    channel_to_pin_map[channel_count] = pin;
     channel_count++;
   }
 
-  // Initialise all the channels this PWM will control
-  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    channel_levels[channel] = 0u;
-    channel_offsets[channel] = 0u;
-    channel_overruns[channel] = 0u;
-    next_channel_overruns[channel] = 0u;
+  if(channel_count > 0) {
+    channels = new ChannelState[channel_count];
   }
 }
 
@@ -133,23 +130,20 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channel_polarities(0x00000000)
+, channels(nullptr)
 , wrap_level(0) {
 
   // Populate the pin mask
   for(auto pin : pins) {
     if(pin < NUM_BANK0_GPIOS) {
       pin_mask |= (1u << pin);
+      channel_to_pin_map[channel_count] = pin;
       channel_count++;
     }
   }
 
-  // Initialise all the channels this PWM will control
-  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    channel_levels[channel] = 0u;
-    channel_offsets[channel] = 0u;
-    channel_overruns[channel] = 0u;
-    next_channel_overruns[channel] = 0u;
+  if(channel_count > 0) {
+    channels = new ChannelState[channel_count];
   }
 }
 
@@ -167,11 +161,11 @@ PWMCluster::~PWMCluster() {
   pio_sm_unclaim(pio, sm);
 #endif
   // Reset all the pins this PWM will control back to an unused state
-  for(uint pin = 0; pin < 32; pin++) { // 32 is number of bits
-    if((1u << pin) != 0) {
-      gpio_set_function(pin, GPIO_FUNC_NULL);
-    }
+  for(uint channel = 0; channel < channel_count; channel++) {
+    gpio_set_function(channel_to_pin_map[channel], GPIO_FUNC_NULL);
   }
+
+  delete[] channels;
 }
 
 bool PWMCluster::init() {
@@ -187,10 +181,8 @@ bool PWMCluster::init() {
   gpio_set_dir(write_gpio, GPIO_OUT);
 
   // Initialise all the channels this PWM will control
-  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    if(bit_in_mask(channel, pin_mask)) {
-      pio_gpio_init(pio, channel);
-    }
+  for(uint channel = 0; channel < channel_count; channel++) {
+    pio_gpio_init(pio, channel_to_pin_map[channel]);
   }
 
   // Set their default state and direction
@@ -286,70 +278,59 @@ bool PWMCluster::init() {
   return true;
 }
 
-uint PWMCluster::get_pin_mask() const {
-  return pin_mask;
-}
-
 uint8_t PWMCluster::get_chan_count() const {
   return channel_count;
+}
+
+uint8_t PWMCluster::get_chan_pin(uint8_t channel) const {
+  assert(channel < channel_count);
+  return channel_to_pin_map[channel];
+}
+
+uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
+  assert(channel < channel_count);
+  return channels[channel].level;
+}
+
+void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
+  assert(channel < channel_count);
+  channels[channel].level = level;
+  if(load)
+    load_pwm();
+}
+
+uint32_t PWMCluster::get_chan_offset(uint8_t channel) const {
+  assert(channel < channel_count);
+  return channels[channel].offset;
+}
+
+void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
+  assert(channel < channel_count);
+  channels[channel].offset = offset;
+  if(load)
+    load_pwm();
+}
+
+bool PWMCluster::get_chan_polarity(uint8_t channel) const {
+  assert(channel < channel_count);
+  return channels[channel].polarity;
+}
+
+void PWMCluster::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
+  assert(channel < channel_count);
+  channels[channel].polarity = polarity;
+  if(load)
+    load_pwm();
 }
 
 uint32_t PWMCluster::get_wrap() const {
   return wrap_level;
 }
 
-uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
-    return channel_levels[channel];
-  else
-    return 0;
-}
-
-uint32_t PWMCluster::get_chan_offset(uint8_t channel) const {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
-    return channel_offsets[channel];
-  else
-    return 0;
-}
-
-bool PWMCluster::get_chan_polarity(uint8_t channel) const {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
-    return bit_in_mask(channel, channel_polarities);
-  else
-    return false;
-}
-
 void PWMCluster::set_wrap(uint32_t wrap, bool load) {
   wrap_level = MAX(wrap, 1);  // Cannot have a wrap of zero!
   if(load)
     load_pwm();
-}
-
-void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
-    channel_levels[channel] = level;
-    if(load)
-      load_pwm();
-  }
-}
-
-void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
-    channel_offsets[channel] = offset;
-    if(load)
-      load_pwm();
-  }
-}
-
-void PWMCluster::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
-  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask)) {
-    if(polarity)
-      channel_polarities |= (1u << channel);
-    else
-      channel_polarities &= ~(1u << channel);
-    if(load)
-      load_pwm();
-  }
 }
 
 // These apply immediately, so do not obey the PWM update trigger
@@ -362,70 +343,63 @@ void PWMCluster::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
   pio_sm_set_clkdiv_int_frac(pio, sm, integer, fract);
 }
 
-/*
-void PWMCluster::set_phase_correct(bool phase_correct);
-
-void PWMCluster::set_enabled(bool enabled);*/
-
 void PWMCluster::load_pwm() {
   gpio_put(write_gpio, 1);
 
   TransitionData transitions[64];
   uint data_size = 0;
 
-  uint pin_states = channel_polarities;
+  uint pin_states = 0; // Start with all pins low
 
   // Check if the data we last wrote has been picked up by the DMA yet?
   bool read_since_last_write = (read_index == last_written_index);
 
   // Go through each channel that we are assigned to
-  for(uint channel = 0; channel < NUM_BANK0_GPIOS; channel++) {
-    if(bit_in_mask(channel, pin_mask)) {
-      // Get the channel polarity, remembering that true means inverted
-      bool polarity = bit_in_mask(channel, channel_polarities);
+  for(uint channel = 0; channel < channel_count; channel++) {
+    ChannelState &state = channels[channel];
 
-      uint channel_start = channel_offsets[channel];
-      uint channel_end = (channel_offsets[channel] + channel_levels[channel]) % wrap_level;
+    // Invert this channel's initial state if it's polarity invert is set
+    if(state.polarity) {
+      pin_states |= (1u << channel); // Set the pin
+    }
 
-      // If the data has been read, copy the channel overruns from that sequence. Otherwise, keep the ones we had previously stored.
-      if(read_since_last_write) {
-        // This condition was added to deal with cases of load_pwm() being called multiple
-        // times between DMA reads, and thus loosing memory of the previous sequence's overruns
-        channel_overruns[channel] = next_channel_overruns[channel];
+    uint channel_start = state.offset;
+    uint channel_end = (state.offset + state.level) % wrap_level;
+
+    // If the data has been read, copy the channel overruns from that sequence. Otherwise, keep the ones we had previously stored.
+    if(read_since_last_write) {
+      // This condition was added to deal with cases of load_pwm() being called multiple
+      // times between DMA reads, and thus loosing memory of the previous sequence's overruns
+      state.overrun = state.next_overrun;
+    }
+    state.next_overrun = 0u; // Always clear the next channel overruns, as we are loading new data
+
+    // Did the previous sequence overrun the wrap level?
+    if(state.overrun > 0) {
+      // Flip the initial state so the pin starts "high" (or "low" if polarity inverted)
+      pin_states ^= (1u << channel);
+
+      // Check for a few edge cases when pulses change length across the wrap level
+      // Not entirely sure I understand which statements does what, but they seem to work
+      if((channel_end >= channel_start) || (state.overrun > channel_end)) {
+        // Add a transition to "low" (or "high" if polarity inverted) at the overrun level of the previous sequence
+        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, state.overrun, state.polarity));
       }
-      next_channel_overruns[channel] = 0u;  // Always clear the next channel overruns, as we are loading new data
+    }
 
-      // Did the previous sequence overrun the wrap level?
-      if(channel_overruns[channel] > 0) {
+    if(state.level > 0 && channel_start < wrap_level) {
+      // Add a transition to "high" (or "low" if polarity inverted) at the start level
+      PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_start, !state.polarity));
 
-        // Set this channel's initial state to "high" (or "low" if inverted)
-        if(polarity)
-          pin_states &= ~(1u << channel);
-        else
-          pin_states |= (1u << channel);
-
-        // Check for a few edge cases when pulses change length across the wrap level
-        // Not entirely sure I understand which statements does what, but they seem to work
-        if((channel_end >= channel_start) || (channel_overruns[channel] > channel_end)) {
-          // Add a transition to "low" (or "high" if inverted) at the overrun level of the previous sequence
-          PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_overruns[channel], polarity));
-        }
+      // If the channel has overrun the wrap level, record by how much
+      if(channel_end < channel_start) {
+          state.next_overrun = channel_end;
       }
+    }
 
-      if(channel_levels[channel] > 0 && channel_start < wrap_level) {
-        // Add a transition to "high" (or "low" if inverted) at the start level
-        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_start, !polarity));
-
-        // If the channel has overrun the wrap level, record by how much
-        if(channel_end < channel_start) {
-            next_channel_overruns[channel] = channel_end;
-        }
-      }
-
-      if(channel_levels[channel] < wrap_level) {
-        // Add a transition to "low" (or "high" if inverted) at the end level
-        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_end, polarity));
-      }
+    if(state.level < wrap_level) {
+      // Add a transition to "low" (or "high" if polarity inverted) at the end level
+      PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_end, state.polarity));
     }
   }
 
@@ -470,9 +444,9 @@ void PWMCluster::load_pwm() {
           // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
           if(!transitions[data_index].dummy) {
             if(transitions[data_index].state)
-              pin_states |= (1u << transitions[data_index].channel);
+              pin_states |= (1u << channel_to_pin_map[transitions[data_index].channel]);
             else
-              pin_states &= ~(1u << transitions[data_index].channel);
+              pin_states &= ~(1u << channel_to_pin_map[transitions[data_index].channel]);
 
             //printf("L[%d] = %ld, P = %d\n", data_index, transitions[data_index].level, pin_states);
           }
@@ -503,9 +477,9 @@ void PWMCluster::load_pwm() {
         // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
         if(!transitions[data_index].dummy) {
           if(transitions[data_index].state)
-            pin_states |= (1u << transitions[data_index].channel);
+            pin_states |= (1u << channel_to_pin_map[transitions[data_index].channel]);
           else
-            pin_states &= ~(1u << transitions[data_index].channel);
+            pin_states &= ~(1u << channel_to_pin_map[transitions[data_index].channel]);
         }
 
         data_index++; // Move on to the next transition
@@ -534,6 +508,46 @@ void PWMCluster::load_pwm() {
   gpio_put(write_gpio, 0); //TOREMOVE
 }
 
+// Derived from the rp2 Micropython implementation: https://github.com/micropython/micropython/blob/master/ports/rp2/machine_pwm.c
+bool PWMCluster::calculate_pwm_factors(float freq, uint32_t& top_out, uint16_t& div16_out) {
+  bool success = false;
+  uint32_t source_hz = clock_get_hz(clk_sys) / PWM_CLUSTER_CYCLES;
+
+  // Check the provided frequency is valid
+  if((freq >= 0.01f) && (freq <= (float)(source_hz >> 1))) {
+    uint32_t div16_top = (uint32_t)((float)(source_hz << 4) / freq);
+    uint64_t top = 1;
+
+    while(true) {
+        // Try a few small prime factors to get close to the desired frequency.
+        if((div16_top >= (5 << 4)) && (div16_top % 5 == 0) && (top * 5 <= MAX_PWM_CLUSTER_WRAP)) {
+            div16_top /= 5;
+            top *= 5;
+        }
+        else if((div16_top >= (3 << 4)) && (div16_top % 3 == 0) && (top * 3 <= MAX_PWM_CLUSTER_WRAP)) {
+            div16_top /= 3;
+            top *= 3;
+        }
+        else if((div16_top >= (2 << 4)) && (top * 2 <= MAX_PWM_CLUSTER_WRAP)) {
+            div16_top /= 2;
+            top *= 2;
+        }
+        else {
+            break;
+        }
+    }
+
+    // Only return valid factors if the divisor is actually achievable
+    if(div16_top >= 16 && div16_top <= (UINT8_MAX << 4)) {
+      top_out = top;
+      div16_out = div16_top;
+
+      success = true;
+    }
+  }
+  return success;
+}
+
 bool PWMCluster::bit_in_mask(uint bit, uint mask) {
   return ((1u << bit) & mask) != 0;
 }
@@ -547,44 +561,4 @@ void PWMCluster::sorted_insert(TransitionData array[], uint &size, const Transit
   //printf("Added %d, %ld, %d\n", data.channel, data.level, data.state);
   size++;
 }
-
-  // Derived from the rp2 Micropython implementation: https://github.com/micropython/micropython/blob/master/ports/rp2/machine_pwm.c
-  bool PWMCluster::calculate_pwm_factors(float freq, uint32_t& top_out, uint16_t& div16_out) {
-    bool success = false;
-    uint32_t source_hz = clock_get_hz(clk_sys) / PWM_CLUSTER_CYCLES;
-
-    // Check the provided frequency is valid
-    if((freq >= 0.01f) && (freq <= (float)(source_hz >> 1))) {
-      uint32_t div16_top = (uint32_t)((float)(source_hz << 4) / freq);
-      uint64_t top = 1;
-
-      while(true) {
-          // Try a few small prime factors to get close to the desired frequency.
-          if((div16_top >= (5 << 4)) && (div16_top % 5 == 0) && (top * 5 <= MAX_PWM_CLUSTER_WRAP)) {
-              div16_top /= 5;
-              top *= 5;
-          }
-          else if((div16_top >= (3 << 4)) && (div16_top % 3 == 0) && (top * 3 <= MAX_PWM_CLUSTER_WRAP)) {
-              div16_top /= 3;
-              top *= 3;
-          }
-          else if((div16_top >= (2 << 4)) && (top * 2 <= MAX_PWM_CLUSTER_WRAP)) {
-              div16_top /= 2;
-              top *= 2;
-          }
-          else {
-              break;
-          }
-      }
-
-      // Only return valid factors if the divisor is actually achievable
-      if(div16_top >= 16 && div16_top <= (UINT8_MAX << 4)) {
-        top_out = top;
-        div16_out = div16_top;
-
-        success = true;
-      }
-    }
-    return success;
-  }
 }

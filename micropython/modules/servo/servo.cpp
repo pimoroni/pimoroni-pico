@@ -826,16 +826,16 @@ void ServoCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
     mp_print_str(print, "ServoCluster(");
 
     mp_print_str(print, "pins = {");
-    uint pin_mask = self->cluster->get_pin_mask();
+
     bool first = true;
-    for(uint pin = 0; pin < NUM_BANK0_GPIOS; pin++) {
-        if(pimoroni::PWMCluster::bit_in_mask(pin, pin_mask)) {
-            if(!first) {
-                mp_print_str(print, ", ");
-            }
-            mp_obj_print_helper(print, mp_obj_new_int(pin), PRINT_REPR);
-            first = false;
+    uint8_t servo_count = self->cluster->get_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+        if(!first) {
+            mp_print_str(print, ", ");
         }
+        uint8_t pin = self->cluster->get_pin(servo);
+        mp_obj_print_helper(print, mp_obj_new_int(pin), PRINT_REPR);
+        first = false;
     }
     mp_print_str(print, "}, freq = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->cluster->get_frequency()), PRINT_REPR);
@@ -889,11 +889,6 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 }
 
 /***** Methods *****/
-extern mp_obj_t ServoCluster_pin_mask(mp_obj_t self_in) {
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
-    return mp_obj_new_int(self->cluster->get_pin_mask());
-}
-
 extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_servo };
     static const mp_arg_t allowed_args[] = {
@@ -908,10 +903,14 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         self->cluster->enable((uint)servo);
+
     return mp_const_none;
 }
 
@@ -929,10 +928,14 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         self->cluster->disable((uint)servo);
+
     return mp_const_none;
 }
 
@@ -950,10 +953,15 @@ extern mp_obj_t ServoCluster_is_enabled(size_t n_args, const mp_obj_t *pos_args,
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         return self->cluster->is_enabled((uint)servo) ? mp_const_true : mp_const_false;
+
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -971,8 +979,11 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else
             return mp_obj_new_float(self->cluster->get_value((uint)servo));
     }
@@ -991,14 +1002,17 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float value = mp_obj_get_float(args[ARG_value].u_obj);
             self->cluster->set_value((uint)servo, value);
         }
-        return mp_const_none;
     }
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1016,8 +1030,11 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else
             return mp_obj_new_float(self->cluster->get_pulse((uint)servo));
     }
@@ -1036,14 +1053,17 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
             self->cluster->set_pulse((uint)servo, pulse);
         }
-        return mp_const_none;
     }
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1097,10 +1117,15 @@ extern mp_obj_t ServoCluster_min_value(size_t n_args, const mp_obj_t *pos_args, 
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         return mp_obj_new_float(self->cluster->get_min_value((uint)servo));
+
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_mid_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1117,10 +1142,15 @@ extern mp_obj_t ServoCluster_mid_value(size_t n_args, const mp_obj_t *pos_args, 
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         return mp_obj_new_float(self->cluster->get_mid_value((uint)servo));
+
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_max_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1137,10 +1167,15 @@ extern mp_obj_t ServoCluster_max_value(size_t n_args, const mp_obj_t *pos_args, 
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         return mp_obj_new_float(self->cluster->get_max_value((uint)servo));
+
+    return mp_const_none;
 }
 
 extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1157,8 +1192,11 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         self->cluster->to_min((uint)servo);
 
@@ -1179,8 +1217,11 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         self->cluster->to_mid((uint)servo);
 
@@ -1201,8 +1242,11 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
         self->cluster->to_max((uint)servo);
 
@@ -1225,8 +1269,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             self->cluster->to_percent((uint)servo, in);
@@ -1249,8 +1296,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
@@ -1277,8 +1327,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
-        if(!self->cluster->is_assigned((uint)servo))
-            mp_raise_ValueError("servo not assigned to this cluster");
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
@@ -1305,8 +1358,11 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
     int servo = args[ARG_servo].u_int;
-    if(!self->cluster->is_assigned((uint)servo))
-        mp_raise_ValueError("servo not assigned to this cluster");
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
+    else if(servo < 0 || servo >= servo_count)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else {
         // NOTE This seems to work, in that it give MP access to the calibration object
         // Could very easily mess up in weird ways once object deletion is considered

@@ -34,7 +34,6 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Servo_to_percent_obj, 2, Servo_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_calibration_obj, Servo_calibration);
 
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster___del___obj, ServoCluster___del__);
-MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_pin_mask_obj, ServoCluster_pin_mask);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_enable_obj, 2, ServoCluster_enable);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_obj, 2, ServoCluster_disable);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_is_enabled_obj, 2, ServoCluster_is_enabled);
@@ -88,7 +87,6 @@ STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {
 
 STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&ServoCluster___del___obj) },
-    { MP_ROM_QSTR(MP_QSTR_pin_mask), MP_ROM_PTR(&ServoCluster_pin_mask_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&ServoCluster_enable_obj) },
     { MP_ROM_QSTR(MP_QSTR_disable), MP_ROM_PTR(&ServoCluster_disable_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&ServoCluster_is_enabled_obj) },

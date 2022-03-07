@@ -14,8 +14,8 @@ namespace servo {
     pimoroni::PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    ServoState* servos[NUM_BANK0_GPIOS];
-    float servo_phases[NUM_BANK0_GPIOS];
+    ServoState* servos;
+    float* servo_phases;
 
 
     //--------------------------------------------------
@@ -33,10 +33,8 @@ namespace servo {
   public:
     bool init();
 
-    // For print access in micropython
-    uint get_pin_mask() const;
-
-    bool is_assigned(uint servo) const;
+    uint8_t get_count() const;
+    uint8_t get_pin(uint8_t servo) const;
 
     void enable(uint servo, bool load = true);
     void disable(uint servo, bool load = true);
@@ -48,8 +46,8 @@ namespace servo {
     float get_pulse(uint servo) const;
     void set_pulse(uint servo, float pulse, bool load = true);
 
-    float get_pulse_phase(uint servo) const;
-    void set_pulse_phase(uint servo, float phase, bool load = true);
+    float get_phase(uint servo) const;
+    void set_phase(uint servo, float phase, bool load = true);
 
     float get_frequency() const;
     bool set_frequency(float freq);
@@ -71,7 +69,7 @@ namespace servo {
     //--------------------------------------------------
   private:
     void apply_pulse(uint servo, float pulse, bool load);
-    void apply_uniform_phases();
+    void create_servo_states(CalibrationType default_type, bool auto_phase);
   };
 
 }
