@@ -15,15 +15,16 @@ namespace servo {
     uint32_t pwm_period;
     float pwm_frequency;
     ServoState* servos[NUM_BANK0_GPIOS];
+    float servo_phases[NUM_BANK0_GPIOS];
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
-    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
-    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
+    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ~ServoCluster();
 
     //--------------------------------------------------
@@ -47,6 +48,9 @@ namespace servo {
     float get_pulse(uint servo) const;
     void set_pulse(uint servo, float pulse, bool load = true);
 
+    float get_pulse_phase(uint servo) const;
+    void set_pulse_phase(uint servo, float phase, bool load = true);
+
     float get_frequency() const;
     bool set_frequency(float freq);
 
@@ -67,6 +71,7 @@ namespace servo {
     //--------------------------------------------------
   private:
     void apply_pulse(uint servo, float pulse, bool load);
+    void apply_uniform_phases();
   };
 
 }

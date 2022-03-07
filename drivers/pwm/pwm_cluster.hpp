@@ -33,6 +33,13 @@ namespace pimoroni {
     bool init();
 
     uint get_pin_mask() const;
+    uint8_t get_chan_count() const;
+
+    uint32_t get_wrap() const;
+    uint32_t get_chan_level(uint8_t channel) const;
+    uint32_t get_chan_offset(uint8_t channel) const;
+    bool get_chan_polarity(uint8_t channel) const;
+
     void set_wrap(uint32_t wrap, bool load = true);
     void set_chan_level(uint8_t channel, uint32_t level, bool load = true);
     void set_chan_offset(uint8_t channel, uint32_t offset, bool load = true);
@@ -50,6 +57,7 @@ namespace pimoroni {
     uint sm;
     uint pio_program_offset;
     uint pin_mask;
+    uint8_t channel_count;
     uint channel_levels[NUM_BANK0_GPIOS];
     uint channel_offsets[NUM_BANK0_GPIOS];
     uint channel_polarities;

@@ -3,35 +3,44 @@
 #include <cstdio>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq)
-    : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase)
+  : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
-      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState(default_type);
-      }
+      servos[i] = (pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) ?
+                  new ServoState(default_type) : nullptr;
+    }
+
+    if(auto_phase) {
+      apply_uniform_phases();
     }
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq)
-    : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq, bool auto_phase)
+  : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
     uint pin_mask = pwms.get_pin_mask();
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
-      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState(default_type);
-      }
+      servos[i] = (pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) ?
+                  new ServoState(default_type) : nullptr;
+    }
+
+    if(auto_phase) {
+      apply_uniform_phases();
     }
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq)
-    : pwms(pio, sm, pins), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq, bool auto_phase)
+  : pwms(pio, sm, pins), pwm_frequency(freq) {
     uint pin_mask = pwms.get_pin_mask();
 
     for(uint i = 0; i < NUM_BANK0_GPIOS; i++) {
-      if(pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) {
-        servos[i] = new ServoState(default_type);
-      }
+      servos[i] = (pimoroni::PWMCluster::bit_in_mask(i, pin_mask)) ?
+                  new ServoState(default_type) : nullptr;
+    }
+
+    if(auto_phase) {
+      apply_uniform_phases();
     }
   }
 
@@ -55,10 +64,11 @@ namespace servo {
         // Update the pwm before setting the new wrap
         for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
           pwms.set_chan_level(servo, 0, false);
+          pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwm_period), false);
         }
 
         // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-        pwms.set_wrap(pwm_period); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
+        pwms.set_wrap(pwm_period, true); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
 
         // Apply the new divider
         // This is done after loading new PWM values to avoid a lockup condition
@@ -120,6 +130,17 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
+  float ServoCluster::get_pulse_phase(uint servo) const {
+    assert(is_assigned(servo));
+    return servo_phases[servo];
+  }
+
+  void ServoCluster::set_pulse_phase(uint servo, float phase, bool load) {
+    assert(is_assigned(servo));
+    servo_phases[servo] = MIN(MAX(phase, 0.0f), 1.0f);
+    pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwms.get_wrap()), load);
+  }
+
  float ServoCluster::get_frequency() const {
     return pwm_frequency;
   }
@@ -140,6 +161,7 @@ namespace servo {
           if(servos[servo] != nullptr) {
             float current_pulse = servos[servo]->get_pulse();
             apply_pulse(servo, current_pulse, false);
+            pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwm_period), false);
           }
         }
 
@@ -215,5 +237,16 @@ namespace servo {
 
   void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {
     pwms.set_chan_level(servo, ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
+  }
+
+  void ServoCluster::apply_uniform_phases() {
+    uint i = 0;
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint servo = 0; servo < NUM_BANK0_GPIOS; servo++) {
+      if(is_assigned(servo)) {
+        servo_phases[servo] = (float)i / (float)servo_count;
+        i++;
+      }
+    }
   }
 };

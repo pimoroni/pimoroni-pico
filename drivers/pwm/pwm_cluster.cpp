@@ -86,6 +86,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
 : pio(pio)
 , sm(sm)
 , pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
+, channel_count(0)
 , channel_polarities(0x00000000)
 , wrap_level(0) {
 
@@ -95,6 +96,10 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
     channel_offsets[channel] = 0u;
     channel_overruns[channel] = 0u;
     next_channel_overruns[channel] = 0u;
+
+    if(bit_in_mask(channel, pin_mask)) {
+      channel_count++;
+    }
   }
 }
 
@@ -103,6 +108,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
+, channel_count(0)
 , channel_polarities(0x00000000)
 , wrap_level(0) {
 
@@ -110,6 +116,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
   for(uint channel = pin_base; channel < pin_end; channel++) {
     pin_mask |= (1u << channel);
+    channel_count++;
   }
 
   // Initialise all the channels this PWM will control
@@ -125,6 +132,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
+, channel_count(0)
 , channel_polarities(0x00000000)
 , wrap_level(0) {
 
@@ -132,6 +140,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
   for(auto pin : pins) {
     if(pin < NUM_BANK0_GPIOS) {
       pin_mask |= (1u << pin);
+      channel_count++;
     }
   }
 
@@ -279,6 +288,35 @@ bool PWMCluster::init() {
 
 uint PWMCluster::get_pin_mask() const {
   return pin_mask;
+}
+
+uint8_t PWMCluster::get_chan_count() const {
+  return channel_count;
+}
+
+uint32_t PWMCluster::get_wrap() const {
+  return wrap_level;
+}
+
+uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
+    return channel_levels[channel];
+  else
+    return 0;
+}
+
+uint32_t PWMCluster::get_chan_offset(uint8_t channel) const {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
+    return channel_offsets[channel];
+  else
+    return 0;
+}
+
+bool PWMCluster::get_chan_polarity(uint8_t channel) const {
+  if((channel < NUM_BANK0_GPIOS) && bit_in_mask(channel, pin_mask))
+    return bit_in_mask(channel, channel_polarities);
+  else
+    return false;
 }
 
 void PWMCluster::set_wrap(uint32_t wrap, bool load) {
