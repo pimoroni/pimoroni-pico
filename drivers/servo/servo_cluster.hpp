@@ -68,6 +68,8 @@ namespace servo {
     Calibration& calibration(uint servo);
     const Calibration& calibration(uint servo) const;
 
+    void load();
+
     //--------------------------------------------------
   private:
     void apply_pulse(uint servo, float pulse, bool load);

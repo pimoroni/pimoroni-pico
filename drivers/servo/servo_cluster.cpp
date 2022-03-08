@@ -211,6 +211,10 @@ namespace servo {
     return servos[servo].calibration();
   }
 
+  void ServoCluster::load() {
+    pwms.load_pwm();
+  }
+
   void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {
     pwms.set_chan_level(servo, ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
   }

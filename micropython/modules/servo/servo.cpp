@@ -1076,7 +1076,7 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
-        self->cluster->enable((uint)servo, args[ARG_servo].u_bool);
+        self->cluster->enable((uint)servo, args[ARG_load].u_bool);
 
     return mp_const_none;
 }
@@ -1102,7 +1102,7 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
-        self->cluster->disable((uint)servo);
+        self->cluster->disable((uint)servo, args[ARG_load].u_bool);
 
     return mp_const_none;
 }
@@ -1178,7 +1178,7 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
-            self->cluster->set_pulse((uint)servo, pulse, args[ARG_servo].u_bool);
+            self->cluster->set_pulse((uint)servo, pulse, args[ARG_load].u_bool);
         }
     }
     return mp_const_none;
@@ -1230,7 +1230,7 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float value = mp_obj_get_float(args[ARG_value].u_obj);
-            self->cluster->set_value((uint)servo, value, args[ARG_servo].u_bool);
+            self->cluster->set_value((uint)servo, value, args[ARG_load].u_bool);
         }
     }
     return mp_const_none;
@@ -1282,7 +1282,7 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float phase = mp_obj_get_float(args[ARG_phase].u_obj);
-            self->cluster->set_phase((uint)servo, phase, args[ARG_servo].u_bool);
+            self->cluster->set_phase((uint)servo, phase, args[ARG_load].u_bool);
         }
     }
     return mp_const_none;
@@ -1421,7 +1421,7 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
-        self->cluster->to_min((uint)servo, args[ARG_servo].u_bool);
+        self->cluster->to_min((uint)servo, args[ARG_load].u_bool);
 
     return mp_const_none;
 }
@@ -1447,7 +1447,7 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
-        self->cluster->to_mid((uint)servo, args[ARG_servo].u_bool);
+        self->cluster->to_mid((uint)servo, args[ARG_load].u_bool);
 
     return mp_const_none;
 }
@@ -1473,7 +1473,7 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
     else
-        self->cluster->to_max((uint)servo, args[ARG_servo].u_bool);
+        self->cluster->to_max((uint)servo, args[ARG_load].u_bool);
 
     return mp_const_none;
 }
@@ -1502,7 +1502,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
-            self->cluster->to_percent((uint)servo, in, args[ARG_servo].u_bool);
+            self->cluster->to_percent((uint)servo, in, args[ARG_load].u_bool);
         }
     }
     else if(n_args <= 6) {
@@ -1532,7 +1532,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
             float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
-            self->cluster->to_percent((uint)servo, in, in_min, in_max, args[ARG_servo].u_bool);
+            self->cluster->to_percent((uint)servo, in, in_min, in_max, args[ARG_load].u_bool);
         }
     }
     else {
@@ -1566,7 +1566,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
             float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
             float value_min = mp_obj_get_float(args[ARG_value_min].u_obj);
             float value_max = mp_obj_get_float(args[ARG_value_max].u_obj);
-            self->cluster->to_percent((uint)servo, in, in_min, in_max, value_min, value_max, args[ARG_servo].u_bool);
+            self->cluster->to_percent((uint)servo, in, in_min, in_max, value_min, value_max, args[ARG_load].u_bool);
         }
     }
     return mp_const_none;
@@ -1626,6 +1626,12 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
         }
     }
 
+    return mp_const_none;
+}
+
+extern mp_obj_t ServoCluster_load(mp_obj_t self_in) {
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
+    self->cluster->load();
     return mp_const_none;
 }
 }
