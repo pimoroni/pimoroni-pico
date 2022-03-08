@@ -41,7 +41,7 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     mp_print_str(print, ", points = {");
     for(uint i = 0; i < size; i++) {
         Calibration::Point *point = calib->point_at(i);
-        mp_print_str(print, "{");
+        mp_print_str(print, "\n\t{");
         mp_obj_print_helper(print, mp_obj_new_float(point->pulse), PRINT_REPR);
         mp_print_str(print, ", ");
         mp_obj_print_helper(print, mp_obj_new_float(point->value), PRINT_REPR);
@@ -49,12 +49,14 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
         if(i < size - 1)
             mp_print_str(print, ", ");
     }
-
-    mp_print_str(print, "}, limits = {");
+    if(size > 0) {
+        mp_print_str(print, "\n");
+    }
+    mp_print_str(print, "}, lower_limit = ");
     mp_obj_print_helper(print, calib->has_lower_limit() ? mp_const_true : mp_const_false, PRINT_REPR);
-    mp_print_str(print, ", ");
+    mp_print_str(print, ", upper_limit = ");
     mp_obj_print_helper(print, calib->has_upper_limit() ? mp_const_true : mp_const_false, PRINT_REPR);
-    mp_print_str(print, "})");
+    mp_print_str(print, ")");
 }
 
 
@@ -869,14 +871,9 @@ void ServoCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 
     mp_print_str(print, "servos = {");
 
-    bool first = true;
     uint8_t servo_count = self->cluster->get_count();
     for(uint8_t servo = 0; servo < servo_count; servo++) {
-        if(!first) {
-            mp_print_str(print, ", ");
-        }
-
-        mp_print_str(print, "{ pin = ");
+        mp_print_str(print, "\n\t{pin = ");
         mp_obj_print_helper(print, mp_obj_new_int(self->cluster->get_pin(servo)), PRINT_REPR);
         mp_print_str(print, ", enabled = ");
         mp_obj_print_helper(print, self->cluster->is_enabled(servo) ? mp_const_true : mp_const_false, PRINT_REPR);
@@ -887,7 +884,11 @@ void ServoCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
         mp_print_str(print, ", phase = ");
         mp_obj_print_helper(print, mp_obj_new_float(self->cluster->get_phase(servo)), PRINT_REPR);
         mp_print_str(print, "}");
-        first = false;
+        if(servo < servo_count - 1)
+            mp_print_str(print, ", ");
+    }
+    if(servo_count > 0) {
+        mp_print_str(print, "\n");
     }
     mp_print_str(print, "}, freq = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->cluster->get_frequency()), PRINT_REPR);
@@ -924,7 +925,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     // Determine what pins this cluster will use
     const mp_obj_t object = args[ARG_pins].u_obj;
-    if(mp_obj_is_type(object, &mp_type_int)) {
+    if(mp_obj_is_int(object)) {
         pin_mask = (uint)mp_obj_get_int(object);
     }
     else if(mp_obj_is_type(object, &mp_type_list)) {
