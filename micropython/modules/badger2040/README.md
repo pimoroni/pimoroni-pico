@@ -1,6 +1,6 @@
 # Badger 2040 <!-- omit in toc -->
 
-Badger 2040 is an RP2040 powered EInk badge.
+Badger 2040 is an RP2040 powered E Ink badge.
 
 - [Summary](#summary)
   - [Getting Started](#getting-started)
@@ -9,7 +9,7 @@ Badger 2040 is an RP2040 powered EInk badge.
   - [Other Functions](#other-functions)
   - [Other Constants](#other-constants)
     - [Screen Size](#screen-size)
-    - [EInk Pins](#eink-pins)
+    - [E Ink Pins](#e-ink-pins)
     - [Power Pins](#power-pins)
     - [Activity LED Pin](#activity-led-pin)
 - [Function Reference](#function-reference)
@@ -49,7 +49,7 @@ This will create a `Badger2040` class called `badger` that will be used in the r
 
 ## Update Speed
 
-The EInk display on Badger 2040 supports several update speeds. These can be set using `update_speed(speed)` where `speed` is a value from `0` to `3`. For convenience these speeds have been given the following constants:
+The E Ink display on Badger 2040 supports several update speeds. These can be set using `update_speed(speed)` where `speed` is a value from `0` to `3`. For convenience these speeds have been given the following constants:
 
 * `UPDATE_NORMAL` = `0`
 * `UPDATE_MEDIUM` = `1`
@@ -107,7 +107,7 @@ Below is a list of other constants that have been made available, to help with t
 * `WIDTH` = `296`
 * `HEIGHT` = `128`
 
-### EInk Pins
+### E Ink Pins
 * `PIN_CS` = `17`
 * `PIN_CLK` = `18`
 * `PIN_MOSI` = `19`
@@ -271,9 +271,9 @@ screen.update()
 
 We've supplied a script - `convert.py` - which will help you get your images converted.
 
-Ideally you should pick something already 298x128 pixels or smaller, and in monochrome, but it will dither and convert images for you.
+Ideally you should pick something already 296x128 pixels or smaller, and in monochrome, but it will dither and convert images for you.
 
-Find it in [examples/badger2040/image_converter](examples/badger2040/image_converter).
+Find it in [examples/badger2040/image_converter](/../../../examples/badger2040/image_converter).
 
 To convert an oversized image use:
 
@@ -281,7 +281,7 @@ To convert an oversized image use:
 python3 convert.py --resize --binary my_image.png
 ```
 
-This will output `my_image.bin`, which you can save to your Badger2040 via Thonny and display with the code above.
+This will output `my_image.bin`, which you can save to your Badger 2040 via Thonny and display with the code above.
 
 For smaller images such as icons you can omit the `--resize` flag:
 
@@ -369,7 +369,7 @@ partial_update(
 
 ### Invert (aka Dark Mode)
 
-Badger2040 can invert all your display data for a quick and easy dark mode:
+Badger 2040 can invert all your display data for a quick and easy dark mode:
 
 ```python
 invert(
@@ -379,7 +379,7 @@ invert(
 
 ### Update Speed
 
-Badger2040 is capable of updating the display at multiple different speeds.
+Badger 2040 is capable of updating the display at multiple different speeds.
 
 These offer a tradeoff between the quality of the final image and the speed of the update.
 
