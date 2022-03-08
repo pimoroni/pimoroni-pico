@@ -10,12 +10,6 @@ extern "C" {
 #include "servo.h"
 #include "py/builtin.h"
 
-typedef struct _mp_obj_float_t {
-    mp_obj_base_t base;
-    mp_float_t value;
-} mp_obj_float_t;
-
-const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
 
 /********** Calibration **********/
 
@@ -535,7 +529,6 @@ mp_obj_t Calibration_pulse_to_value(size_t n_args, const mp_obj_t *pos_args, mp_
 typedef struct _Servo_obj_t {
     mp_obj_base_t base;
     Servo* servo;
-    // NOTE should this keep track of all calibration objects released?
 } _Servo_obj_t;
 
 
