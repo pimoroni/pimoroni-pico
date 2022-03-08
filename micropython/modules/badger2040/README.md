@@ -273,7 +273,7 @@ We've supplied a script - `convert.py` - which will help you get your images con
 
 Ideally you should pick something already 296x128 pixels or smaller, and in monochrome, but it will dither and convert images for you.
 
-Find it in [examples/badger2040/image_converter](/../../../examples/badger2040/image_converter).
+Find it in [examples/badger2040/image_converter](/../../examples/badger2040/image_converter).
 
 To convert an oversized image use:
 
