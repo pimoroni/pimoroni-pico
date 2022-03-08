@@ -38,11 +38,11 @@ namespace servo {
     void disable();
     bool is_enabled() const;
 
-    float get_value() const;
-    void set_value(float value);
-
     float get_pulse() const;
     void set_pulse(float pulse);
+
+    float get_value() const;
+    void set_value(float value);
 
     float get_frequency() const;
     bool set_frequency(float freq);

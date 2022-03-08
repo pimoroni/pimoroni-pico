@@ -28,20 +28,6 @@ namespace servo {
     return enabled;
   }
 
-  float ServoState::get_value() const {
-    return servo_value;
-  }
-
-  float ServoState::set_value(float value) {
-    float pulse_out, value_out;
-    if(table.value_to_pulse(value, pulse_out, value_out)) {
-      last_enabled_pulse = pulse_out;
-      servo_value = value_out;
-      return _enable();
-    }
-    return disable();
-  }
-
   float ServoState::get_pulse() const {
     return last_enabled_pulse;
   }
@@ -54,6 +40,20 @@ namespace servo {
         last_enabled_pulse = pulse_out;
         return _enable();
       }
+    }
+    return disable();
+  }
+
+  float ServoState::get_value() const {
+    return servo_value;
+  }
+
+  float ServoState::set_value(float value) {
+    float pulse_out, value_out;
+    if(table.value_to_pulse(value, pulse_out, value_out)) {
+      last_enabled_pulse = pulse_out;
+      servo_value = value_out;
+      return _enable();
     }
     return disable();
   }

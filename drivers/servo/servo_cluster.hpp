@@ -24,8 +24,10 @@ namespace servo {
   public:
     ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ~ServoCluster();
+
 
     //--------------------------------------------------
     // Methods
@@ -40,11 +42,11 @@ namespace servo {
     void disable(uint servo, bool load = true);
     bool is_enabled(uint servo) const;
 
-    float get_value(uint servo) const;
-    void set_value(uint servo, float value, bool load = true);
-
     float get_pulse(uint servo) const;
     void set_pulse(uint servo, float pulse, bool load = true);
+
+    float get_value(uint servo) const;
+    void set_value(uint servo, float value, bool load = true);
 
     float get_phase(uint servo) const;
     void set_phase(uint servo, float phase, bool load = true);

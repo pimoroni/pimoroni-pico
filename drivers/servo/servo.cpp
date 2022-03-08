@@ -52,20 +52,20 @@ namespace servo {
     return state.is_enabled();
   }
 
-  float Servo::get_value() const {
-    return state.get_value();
-  }
-
-  void Servo::set_value(float value) {
-    apply_pulse(state.set_value(value));
-  }
-
   float Servo::get_pulse() const {
     return state.get_pulse();
   }
 
   void Servo::set_pulse(float pulse) {
     apply_pulse(state.set_pulse(pulse));
+  }
+
+  float Servo::get_value() const {
+    return state.get_value();
+  }
+
+  void Servo::set_value(float value) {
+    apply_pulse(state.set_value(value));
   }
 
   float Servo::get_frequency() const {

@@ -4,17 +4,22 @@
 
 namespace servo {
   ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase)
-  : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
+    : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
   ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq, bool auto_phase)
-  : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
+    : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
+    create_servo_states(default_type, auto_phase);
+  }
+
+  ServoCluster::ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type, float freq, bool auto_phase)
+    : pwms(pio, sm, pins, length), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
   ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq, bool auto_phase)
-  : pwms(pio, sm, pins), pwm_frequency(freq) {
+    : pwms(pio, sm, pins), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
@@ -80,17 +85,6 @@ namespace servo {
     return servos[servo].is_enabled();
   }
 
-  float ServoCluster::get_value(uint servo) const {
-    assert(servo < pwms.get_chan_count());
-    return servos[servo].get_value();
-  }
-
-  void ServoCluster::set_value(uint servo, float value, bool load) {
-    assert(servo < pwms.get_chan_count());
-    float new_pulse = servos[servo].set_value(value);
-    apply_pulse(servo, new_pulse, load);
-  }
-
   float ServoCluster::get_pulse(uint servo) const {
     assert(servo < pwms.get_chan_count());
     return servos[servo].get_pulse();
@@ -99,6 +93,17 @@ namespace servo {
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
     assert(servo < pwms.get_chan_count());
     float new_pulse = servos[servo].set_pulse(pulse);
+    apply_pulse(servo, new_pulse, load);
+  }
+
+  float ServoCluster::get_value(uint servo) const {
+    assert(servo < pwms.get_chan_count());
+    return servos[servo].get_value();
+  }
+
+  void ServoCluster::set_value(uint servo, float value, bool load) {
+    assert(servo < pwms.get_chan_count());
+    float new_pulse = servos[servo].set_value(value);
     apply_pulse(servo, new_pulse, load);
   }
 

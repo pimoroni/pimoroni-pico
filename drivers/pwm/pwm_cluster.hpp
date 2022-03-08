@@ -84,6 +84,7 @@ namespace pimoroni {
   public:
     PWMCluster(PIO pio, uint sm, uint pin_mask);
     PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count);
+    PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length);
     PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins);
     ~PWMCluster();
 

@@ -34,7 +34,7 @@ namespace servo {
         // Constructors/Destructor
         //--------------------------------------------------
         Point();
-        Point(uint16_t pulse, float value);
+        Point(float pulse, float value);
 
 
         //--------------------------------------------------
@@ -69,6 +69,8 @@ namespace servo {
     Point* first_point() const;
     Point* last_point() const;
 
+    bool has_lower_limit() const;
+    bool has_upper_limit() const;
     void limit_to_calibration(bool lower, bool upper);
 
     bool value_to_pulse(float value, float &pulse_out, float &value_out) const;
@@ -80,7 +82,7 @@ namespace servo {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
-  protected:
+  private:
     Point* calibration;
     uint calibration_size;
     bool limit_lower;

@@ -90,7 +90,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
 , channels(nullptr)
 , wrap_level(0) {
 
-  // Initialise all the channels this PWM will control
+  // Create the channel mapping
   for(uint pin = 0; pin < NUM_BANK0_GPIOS; pin++) {
     if(bit_in_mask(pin, pin_mask)) {
       channel_to_pin_map[channel_count] = pin;
@@ -98,6 +98,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask)
     }
   }
 
+  // Initialise all the channels this PWM will control
   if(channel_count > 0) {
     channels = new ChannelState[channel_count];
   }
@@ -112,7 +113,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
 , channels(nullptr)
 , wrap_level(0) {
 
-  // Initialise all the channels this PWM will control
+  // Create the pin mask and channel mapping
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
   for(uint pin = pin_base; pin < pin_end; pin++) {
     pin_mask |= (1u << pin);
@@ -120,6 +121,31 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count)
     channel_count++;
   }
 
+  // Initialise all the channels this PWM will control
+  if(channel_count > 0) {
+    channels = new ChannelState[channel_count];
+  }
+}
+
+PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_count(0)
+, channels(nullptr)
+, wrap_level(0) {
+
+  // Create the pin mask and channel mapping
+  for(uint i = 0; i < length; i++) {
+    uint8_t pin = pins[i];
+    if(pin < NUM_BANK0_GPIOS) {
+      pin_mask |= (1u << pin);
+      channel_to_pin_map[channel_count] = pin;
+      channel_count++;
+    }
+  }
+
+  // Initialise all the channels this PWM will control
   if(channel_count > 0) {
     channels = new ChannelState[channel_count];
   }
@@ -133,7 +159,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
 , channels(nullptr)
 , wrap_level(0) {
 
-  // Populate the pin mask
+  // Create the pin mask and channel mapping
   for(auto pin : pins) {
     if(pin < NUM_BANK0_GPIOS) {
       pin_mask |= (1u << pin);
@@ -142,6 +168,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins)
     }
   }
 
+  // Initialise all the channels this PWM will control
   if(channel_count > 0) {
     channels = new ChannelState[channel_count];
   }

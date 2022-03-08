@@ -5,7 +5,7 @@ namespace servo {
     : pulse(0.0f), value(0.0f) {
   }
 
-  Calibration::Point::Point(uint16_t pulse, float value)
+  Calibration::Point::Point(float pulse, float value)
     : pulse(pulse), value(value) {
   }
 
@@ -111,11 +111,18 @@ namespace servo {
     return nullptr;
   }
 
+  bool Calibration::has_lower_limit() const {
+    return limit_lower;
+  }
+
+  bool Calibration::has_upper_limit() const {
+    return limit_upper;
+  }
+
   void Calibration::limit_to_calibration(bool lower, bool upper) {
     limit_lower = lower;
     limit_upper = upper;
   }
-
 
   bool Calibration::value_to_pulse(float value, float &pulse_out, float &value_out) const {
     bool success = false;

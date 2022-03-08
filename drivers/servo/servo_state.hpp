@@ -47,11 +47,11 @@ namespace servo {
   private:
     float _enable(); // Internal version of enable without convenient initialisation to mid point
   public:
-    float get_value() const;
-    float set_value(float value);
-
     float get_pulse() const;
     float set_pulse(float pulse);
+
+    float get_value() const;
+    float set_value(float value);
 
   public:
     float get_min_value() const;
