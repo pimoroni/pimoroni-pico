@@ -23,7 +23,6 @@ const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
 typedef struct _Calibration_obj_t {
     mp_obj_base_t base;
     Calibration *calibration;
-    bool owner;
 } _Calibtration_obj_t;
 
 
@@ -41,16 +40,13 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     mp_print_str(print, ", points = {");
     for(uint i = 0; i < size; i++) {
         Calibration::Point *point = calib->point_at(i);
-        mp_print_str(print, "\n\t{");
+        mp_print_str(print, "{");
         mp_obj_print_helper(print, mp_obj_new_float(point->pulse), PRINT_REPR);
         mp_print_str(print, ", ");
         mp_obj_print_helper(print, mp_obj_new_float(point->value), PRINT_REPR);
         mp_print_str(print, "}");
         if(i < size - 1)
             mp_print_str(print, ", ");
-    }
-    if(size > 0) {
-        mp_print_str(print, "\n");
     }
     mp_print_str(print, "}, limit_lower = ");
     mp_obj_print_helper(print, calib->has_lower_limit() ? mp_const_true : mp_const_false, PRINT_REPR);
@@ -79,7 +75,6 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     self->base.type = &Calibration_type;
 
     self->calibration = new Calibration(calibration_type);
-    self->owner = true;
     return MP_OBJ_FROM_PTR(self);
 }
 
@@ -87,8 +82,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 /***** Destructor ******/
 mp_obj_t Calibration___del__(mp_obj_t self_in) {
     _Calibtration_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Calibtration_obj_t);
-    if(self->owner)
-        delete self->calibration;
+    delete self->calibration;
     return mp_const_none;
 }
 
@@ -851,14 +845,11 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
 
         _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
 
-        // NOTE This seems to work, in that it give MP access to the calibration object
-        // Could very easily mess up in weird ways once object deletion is considered
+        // Create a new MP Calibration instance and assign a copy of the servo's calibration to it
         _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
         calib->base.type = &Calibration_type;
 
-        calib->calibration = &self->servo->calibration();
-        calib->owner = false;
-
+        calib->calibration = new Calibration(self->servo->calibration());
         return MP_OBJ_FROM_PTR(calib);
     }
     else {
@@ -1609,14 +1600,11 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
         else if(servo < 0 || servo >= servo_count)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
         else {
-            // NOTE This seems to work, in that it give MP access to the calibration object
-            // Could very easily mess up in weird ways once object deletion is considered
+            // Create a new MP Calibration instance and assign a copy of the servo's calibration to it
             _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
             calib->base.type = &Calibration_type;
 
-            calib->calibration = &self->cluster->calibration((uint)servo);
-            calib->owner = false;
-
+            calib->calibration = new Calibration(self->cluster->calibration((uint)servo));
             return MP_OBJ_FROM_PTR(calib);
         }
     }
