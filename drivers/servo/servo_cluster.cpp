@@ -201,14 +201,14 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
-  Calibration* ServoCluster::calibration(uint servo) {
+  Calibration& ServoCluster::calibration(uint servo) {
     assert(is_assigned(servo));
-    return &servos[servo].calibration();
+    return servos[servo].calibration();
   }
 
-  const Calibration* ServoCluster::calibration(uint servo) const {
+  const Calibration& ServoCluster::calibration(uint servo) const {
     assert(is_assigned(servo));
-    return &servos[servo].calibration();
+    return servos[servo].calibration();
   }
 
   void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {

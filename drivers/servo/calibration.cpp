@@ -19,12 +19,34 @@ namespace servo {
     create_default_calibration(default_type);
   }
 
+  Calibration::Calibration(const Calibration &other)
+    : calibration(nullptr), calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
+    uint size = other.size();
+    create_blank_calibration(size);
+    for(uint i = 0; i < size; i++) {
+      calibration[i] = other.calibration[i];
+    }
+  }
+
   Calibration::~Calibration() {
     if(calibration != nullptr) {
       delete[] calibration;
       calibration = nullptr;
     }
   }
+
+  Calibration& Calibration::operator=(const Calibration &other) {
+    uint size = other.size();
+    create_blank_calibration(size);
+    for(uint i = 0; i < size; i++) {
+      calibration[i] = other.calibration[i];
+    }
+    limit_lower = other.limit_lower;
+    limit_upper = other.limit_upper;
+
+    return *this;
+  }
+
 
   void Calibration::create_blank_calibration(uint size) {
     if(calibration != nullptr) {

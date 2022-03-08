@@ -65,8 +65,8 @@ namespace servo {
     void to_percent(uint servo, float in, float in_min = ServoState::ZERO_PERCENT, float in_max = ServoState::ONEHUNDRED_PERCENT, bool load = true);
     void to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
 
-    Calibration* calibration(uint servo);
-    const Calibration* calibration(uint servo) const;
+    Calibration& calibration(uint servo);
+    const Calibration& calibration(uint servo) const;
 
     //--------------------------------------------------
   private:

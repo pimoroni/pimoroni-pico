@@ -52,9 +52,9 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     if(size > 0) {
         mp_print_str(print, "\n");
     }
-    mp_print_str(print, "}, lower_limit = ");
+    mp_print_str(print, "}, limit_lower = ");
     mp_obj_print_helper(print, calib->has_lower_limit() ? mp_const_true : mp_const_false, PRINT_REPR);
-    mp_print_str(print, ", upper_limit = ");
+    mp_print_str(print, ", limit_upper = ");
     mp_obj_print_helper(print, calib->has_upper_limit() ? mp_const_true : mp_const_false, PRINT_REPR);
     mp_print_str(print, ")");
 }
@@ -62,7 +62,6 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
 
 /***** Constructor *****/
 mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    //NOTE Wonder if I can make it so calibration objects cannot be created in MP?
     _Calibtration_obj_t *self = nullptr;
 
     enum { ARG_type };
@@ -839,18 +838,55 @@ extern mp_obj_t Servo_to_percent(size_t n_args, const mp_obj_t *pos_args, mp_map
     return mp_const_none;
 }
 
-extern mp_obj_t Servo_calibration(mp_obj_t self_in) {
-    _Servo_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Servo_obj_t);
+extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(n_args <= 1) {
+        enum { ARG_self };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
 
-    // NOTE This seems to work, in that it give MP access to the calibration object
-    // Could very easily mess up in weird ways once object deletion is considered
-    _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
-    calib->base.type = &Calibration_type;
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    calib->calibration = &self->servo->calibration();
-    calib->owner = false;
+        _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
 
-    return MP_OBJ_FROM_PTR(calib);
+        // NOTE This seems to work, in that it give MP access to the calibration object
+        // Could very easily mess up in weird ways once object deletion is considered
+        _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
+        calib->base.type = &Calibration_type;
+
+        calib->calibration = &self->servo->calibration();
+        calib->owner = false;
+
+        return MP_OBJ_FROM_PTR(calib);
+    }
+    else {
+        enum { ARG_self, ARG_calibration };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_calibration, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
+
+        const mp_obj_t object = args[ARG_calibration].u_obj;
+        if(mp_obj_is_type(object, &Calibration_type)) {
+            _Calibration_obj_t *calib = MP_OBJ_TO_PTR2(object, _Calibration_obj_t);
+            self->servo->calibration() = *(calib->calibration);
+        }
+        else {
+            mp_raise_TypeError("cannot convert object to a Calibration class instance");
+        }
+    }
+
+    return mp_const_none;
+
+
 }
 
 
@@ -1553,34 +1589,60 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
 }
 
 extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_servo };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_servo, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
+    if(n_args <= 2) {
+        enum { ARG_self, ARG_servo };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_servo, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
 
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
-    int servo = args[ARG_servo].u_int;
-    int servo_count = (int)self->cluster->get_count();
-    if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
-    else if(servo < 0 || servo >= servo_count)
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
+        int servo = args[ARG_servo].u_int;
+        int servo_count = (int)self->cluster->get_count();
+        if(servo_count == 0)
+            mp_raise_ValueError("this cluster does not have any servos");
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count);
+        else {
+            // NOTE This seems to work, in that it give MP access to the calibration object
+            // Could very easily mess up in weird ways once object deletion is considered
+            _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
+            calib->base.type = &Calibration_type;
+
+            calib->calibration = &self->cluster->calibration((uint)servo);
+            calib->owner = false;
+
+            return MP_OBJ_FROM_PTR(calib);
+        }
+    }
     else {
-        // NOTE This seems to work, in that it give MP access to the calibration object
-        // Could very easily mess up in weird ways once object deletion is considered
-        _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
-        calib->base.type = &Calibration_type;
+        enum { ARG_self, ARG_servo, ARG_calibration };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_servo, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_calibration, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
 
-        calib->calibration = self->cluster->calibration((uint)servo);
-        calib->owner = false;
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        return MP_OBJ_FROM_PTR(calib);
+        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+        int servo = args[ARG_servo].u_int;
+        const mp_obj_t object = args[ARG_calibration].u_obj;
+        if(mp_obj_is_type(object, &Calibration_type)) {
+            _Calibration_obj_t *calib = MP_OBJ_TO_PTR2(object, _Calibration_obj_t);
+            self->cluster->calibration((uint)servo) = *(calib->calibration);
+        }
+        else {
+            mp_raise_TypeError("cannot convert object to a Calibration class instance");
+        }
     }
 
     return mp_const_none;

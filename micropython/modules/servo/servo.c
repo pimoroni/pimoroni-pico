@@ -33,7 +33,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_min_obj, Servo_to_min);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_mid_obj, Servo_to_mid);
 MP_DEFINE_CONST_FUN_OBJ_1(Servo_to_max_obj, Servo_to_max);
 MP_DEFINE_CONST_FUN_OBJ_KW(Servo_to_percent_obj, 2, Servo_to_percent);
-MP_DEFINE_CONST_FUN_OBJ_1(Servo_calibration_obj, Servo_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Servo_calibration_obj, 1, Servo_calibration);
 
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster___del___obj, ServoCluster___del__);
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_count_obj, ServoCluster_count);

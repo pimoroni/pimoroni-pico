@@ -51,7 +51,15 @@ namespace servo {
   public:
     Calibration();
     Calibration(CalibrationType default_type);
+    Calibration(const Calibration &other);
     virtual ~Calibration();
+
+
+    //--------------------------------------------------
+    // Operators
+    //--------------------------------------------------
+  public:
+    Calibration& operator=(const Calibration &other);
 
 
     //--------------------------------------------------
