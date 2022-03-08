@@ -89,7 +89,7 @@ font(font)
 
 led(brightness)
 
-image(data, w=298, h=128, x=0, y=0)
+image(data, w=296, h=128, x=0, y=0)
 icon(data, icon_index, sheet_size, icon_size)
 
 clear()
@@ -296,7 +296,7 @@ In all cases your images should be a multiple of 8 pixels wide.
 ```python
 image(
     data,   # bytearray: raw image data 1bpp
-    w=298,  # int: width in pixels
+    w=296,  # int: width in pixels
     h=128,  # int: height in pixels
     x=0,    # int: destination x
     y=0,    # int: destination y
