@@ -271,7 +271,7 @@ screen.update()
 
 We've supplied a script - `convert.py` - which will help you get your images converted.
 
-Ideally you should pick something already 298x128 pixels or smaller, and in monochrome, but it will dither and convert images for you.
+Ideally you should pick something already 296x128 pixels or smaller, and in monochrome, but it will dither and convert images for you.
 
 Find it in [examples/badger2040/image_converter](examples/badger2040/image_converter).
 
@@ -296,7 +296,7 @@ In all cases your images should be a multiple of 8 pixels wide.
 ```python
 image(
     data,   # bytearray: raw image data 1bpp
-    w=298,  # int: width in pixels
+    w=296,  # int: width in pixels
     h=128,  # int: height in pixels
     x=0,    # int: destination x
     y=0,    # int: destination y
