@@ -82,7 +82,12 @@ namespace pimoroni {
 
     // If running on USB we will not actually power down, so emulate the behaviour
     // of battery powered badge by listening for a button press and then resetting
-    wait_for_press();
+    // Note: Don't use wait_for_press as that waits for the button to be release and
+    //       we want the reboot to complete before the button is released.
+    update_button_states();
+    while(_button_states == 0) {
+      update_button_states();
+    }
     watchdog_reboot(0, 0, 0);
   }
 
