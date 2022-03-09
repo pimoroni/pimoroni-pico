@@ -24,8 +24,11 @@ options = parser.parse_args()
 def convert_image(img):
     if options.resize:
         img = img.resize((296, 128)) # resize
-    enhancer = ImageEnhance.Contrast(img)
-    img = enhancer.enhance(2.0)
+    try:
+      enhancer = ImageEnhance.Contrast(img)
+      img = enhancer.enhance(2.0)
+    except ValueError:
+      pass
     img = img.convert("1") # convert to black and white
     return img
 
