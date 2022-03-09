@@ -65,7 +65,7 @@ def button(pin):
             day = min(max(day, 1), 31)
         if cursors[cursor] == "hour":
             hour += adjust
-            hour %= 60
+            hour %= 24
         if cursors[cursor] == "minute":
             minute += adjust
             minute %= 60
