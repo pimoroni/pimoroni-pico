@@ -967,7 +967,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
             mp_raise_TypeError("list or tuple must contain at least one integer");
         else {
             // Create and populate a local array of pins
-            uint8_t *pins = new uint8_t[pin_count];
+            pins = new uint8_t[pin_count];
             for(size_t i = 0; i < pin_count; i++) {
                 int pin = mp_obj_get_int(items[i]);
                 if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
