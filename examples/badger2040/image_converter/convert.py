@@ -11,7 +11,7 @@ from PIL import Image, ImageEnhance
 from pathlib import Path
 try:
     import data_to_py
-except ImportError as error:
+except ImportError:
     pass
 
 parser = argparse.ArgumentParser(description='Converts images into the format used by Badger2040.')
