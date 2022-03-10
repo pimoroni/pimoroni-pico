@@ -7,9 +7,7 @@ on:
     types: [created]
 
 env:
-  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   MICROPYTHON_VERSION: v1.18
-  BUILD_TYPE: Release
 
 jobs:
   deps:
@@ -61,13 +59,24 @@ jobs:
 
   build:
     needs: deps
+    name: Build ${{matrix.board}}
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        board: [PICO, PIMORONI_TINY2040, PIMORONI_PICOLIPO_16MB]
+        include:
+        - name: pico
+          board: PICO
+        - name: tiny2040
+          board: PIMORONI_TINY2040
+        - name: picolipo_16mb
+          board: PIMORONI_PICOLIPO_16MB
+
+    env:
+      # MicroPython version will be contained in github.event.release.tag_name for releases
+      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython.uf2
 
     steps:
-    - name: Cache
+    - name: Compiler Cache
       uses: actions/cache@v2
       with:
         path: /home/runner/.ccache
@@ -76,7 +85,7 @@ jobs:
           ccache-micropython-${{github.ref}}
           ccache-micropython-
   
-    - name: Cache
+    - name: Workspace Cache
       uses: actions/cache@v2
       with:
         path: ${{runner.workspace}}
@@ -89,23 +98,31 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         sudo apt update && sudo apt install ccache gcc-arm-none-eabi
-  
+
+    - name: Configure MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -DMICROPY_BOARD=${{matrix.board}}
+
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake BOARD=${{matrix.board}} -j2
+        ccache --zero-stats || true
+        cmake --build build-${{matrix.board}} -j 2
+        ccache --show-stats || true
 
     - name: Rename .uf2 for artifact
       shell: bash
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
-      run: cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+      run: cp firmware.uf2 $RELEASE_FILE
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
-        path: micropython/ports/rp2/build-${{matrix.board}}/${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        name: ${{env.RELEASE_FILE}}
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}
 
     - name: Upload .uf2
       if: github.event_name == 'release'
@@ -115,5 +132,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build-${{matrix.board}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        asset_name: ${{env.RELEASE_FILE}}
         asset_content_type: application/octet-stream
