@@ -10,22 +10,11 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   MICROPYTHON_VERSION: v1.18
   BUILD_TYPE: Release
-  BOARD_TYPE: PICO
 
 jobs:
-  build:
-    name: ${{matrix.name}}
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-20.04
-            name: Linux
-            cache-key: linux
-            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk'
-            apt-packages: clang-tidy gcc-arm-none-eabi libnewlib-arm-none-eabi libstdc++-arm-none-eabi-newlib
-
-    runs-on: ${{matrix.os}}
-
+  deps:
+    runs-on: ubuntu-20.04
+    name: Dependencies
     steps:
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -46,12 +35,6 @@ jobs:
       run: |
         cp -r pimoroni-pico-${GITHUB_SHA}/micropython/modules_py/* micropython/ports/rp2/modules/
 
-    # Linux deps
-    - name: Install deps
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update && sudo apt install ${{matrix.apt-packages}}
-
     - name: Fetch base MicroPython submodules
       shell: bash
       working-directory: micropython
@@ -67,21 +50,62 @@ jobs:
       working-directory: micropython/mpy-cross
       run: make
 
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          workspace-${{github.ref}}
+          workspace-micropython-
+
+  build:
+    needs: deps
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        board: [PICO, PIMORONI_TINY2040, PIMORONI_PICOLIPO_16MB]
+
+    steps:
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: /home/runner/.ccache
+        key: ccache-micropython-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          ccache-micropython-${{github.ref}}
+          ccache-micropython-
+  
+    - name: Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          workspace-${{github.ref}}
+          workspace-micropython-
+
+    - name: Install Compiler & CCache
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+  
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
-      run: make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -j2
+      run: |
+        make USER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake BOARD=${{matrix.board}} -j2
 
     - name: Rename .uf2 for artifact
       shell: bash
-      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}
-      run: cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+      working-directory: micropython/ports/rp2/build-${{matrix.board}}
+      run: cp firmware.uf2 ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
-        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
@@ -89,7 +113,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       with:
-        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
+        asset_path: micropython/ports/rp2/build-${{matrix.board}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
+        asset_name: ${{github.event.repository.name}}-${{github.event.release.tag_name}}-${{matrix.board}}-micropython-${{env.MICROPYTHON_VERSION}}.uf2
         asset_content_type: application/octet-stream
