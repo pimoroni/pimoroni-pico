@@ -196,7 +196,7 @@ def render_page():
             row += 1
 
             # Have we reached the end of the page?
-            if (row * TEXT_SPACING) + (TEXT_SPACING // 2) > HEIGHT:
+            if (row * TEXT_SPACING) + TEXT_SPACING >= HEIGHT:
                 print("+++++")
                 display.update()
 
@@ -212,7 +212,7 @@ def render_page():
             if add_newline:
                 print("")
                 row += 1
-                if (row * TEXT_SPACING) + (TEXT_SPACING // 2) > HEIGHT:
+                if (row * TEXT_SPACING) + TEXT_SPACING >= HEIGHT:
                     print("+++++")
                     display.update()
                     return
