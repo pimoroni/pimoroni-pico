@@ -25,7 +25,7 @@ examples = [
     ("_image", 3),
     ("_list", 4),
     ("_badge", 5),
-    ("_qr_code", 8),
+    ("_qrgen", 8),
     ("_info", 6),
     ("_help", 7)
 ]
