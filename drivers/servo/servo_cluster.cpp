@@ -24,7 +24,7 @@ namespace servo {
   }
 
   ServoCluster::~ServoCluster() {
-    delete[] servos;
+    delete[] states;
     delete[] servo_phases;
   }
 
@@ -70,40 +70,92 @@ namespace servo {
 
   void ServoCluster::enable(uint servo, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = servos[servo].enable();
+    float new_pulse = states[servo].enable();
     apply_pulse(servo, new_pulse, load);
+  }
+
+  void ServoCluster::enable(const uint8_t *servos, uint8_t length, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      enable(servos[i], false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::enable(std::initializer_list<uint8_t> servos, bool load) {
+    for(auto servo : servos) {
+      enable(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::enable_all(bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      enable(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
   }
 
   void ServoCluster::disable(uint servo, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = servos[servo].disable();
+    float new_pulse = states[servo].disable();
     apply_pulse(servo, new_pulse, load);
+  }
+
+  void ServoCluster::disable(const uint8_t *servos, uint8_t length, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      disable(servos[i], false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::disable(std::initializer_list<uint8_t> servos, bool load) {
+    for(auto servo : servos) {
+      disable(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::disable_all(bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      disable(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
   }
 
   bool ServoCluster::is_enabled(uint servo) const {
     assert(servo < pwms.get_chan_count());
-    return servos[servo].is_enabled();
+    return states[servo].is_enabled();
   }
 
   float ServoCluster::get_pulse(uint servo) const {
     assert(servo < pwms.get_chan_count());
-    return servos[servo].get_pulse();
+    return states[servo].get_pulse();
   }
 
   void ServoCluster::set_pulse(uint servo, float pulse, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = servos[servo].set_pulse(pulse);
+    float new_pulse = states[servo].set_pulse(pulse);
     apply_pulse(servo, new_pulse, load);
   }
 
   float ServoCluster::get_value(uint servo) const {
     assert(servo < pwms.get_chan_count());
-    return servos[servo].get_value();
+    return states[servo].get_value();
   }
 
   void ServoCluster::set_value(uint servo, float value, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = servos[servo].set_value(value);
+    float new_pulse = states[servo].set_value(value);
     apply_pulse(servo, new_pulse, load);
   }
 
@@ -136,8 +188,8 @@ namespace servo {
         // Update the pwm before setting the new wrap
         uint8_t servo_count = pwms.get_chan_count();
         for(uint servo = 0; servo < servo_count; servo++) {
-          if(servos[servo].is_enabled()) {
-            apply_pulse(servo, servos[servo].get_pulse(), false);
+          if(states[servo].is_enabled()) {
+            apply_pulse(servo, states[servo].get_pulse(), false);
           }
           pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwm_period), false);
         }
@@ -158,57 +210,57 @@ namespace servo {
 
   float ServoCluster::get_min_value(uint servo) const {
     assert(is_assigned(servo));
-    return servos[servo].get_min_value();
+    return states[servo].get_min_value();
   }
 
   float ServoCluster::get_mid_value(uint servo) const {
     assert(is_assigned(servo));
-    return servos[servo].get_mid_value();
+    return states[servo].get_mid_value();
   }
 
   float ServoCluster::get_max_value(uint servo) const {
     assert(is_assigned(servo));
-    return servos[servo].get_max_value();
+    return states[servo].get_max_value();
   }
 
   void ServoCluster::to_min(uint servo, bool load) {
     assert(is_assigned(servo));
-    float new_pulse = servos[servo].to_min();
+    float new_pulse = states[servo].to_min();
     apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_mid(uint servo, bool load) {
     assert(is_assigned(servo));
-    float new_pulse = servos[servo].to_mid();
+    float new_pulse = states[servo].to_mid();
     apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
     assert(is_assigned(servo));
-    float new_pulse = servos[servo].to_max();
+    float new_pulse = states[servo].to_max();
     apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
     assert(is_assigned(servo));
-    float new_pulse = servos[servo].to_percent(in, in_min, in_max);
+    float new_pulse = states[servo].to_percent(in, in_min, in_max);
     apply_pulse(servo, new_pulse, load);
   }
 
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     assert(is_assigned(servo));
-    float new_pulse = servos[servo].to_percent(in, in_min, in_max, value_min, value_max);
+    float new_pulse = states[servo].to_percent(in, in_min, in_max, value_min, value_max);
     apply_pulse(servo, new_pulse, load);
   }
 
   Calibration& ServoCluster::calibration(uint servo) {
     assert(is_assigned(servo));
-    return servos[servo].calibration();
+    return states[servo].calibration();
   }
 
   const Calibration& ServoCluster::calibration(uint servo) const {
     assert(is_assigned(servo));
-    return servos[servo].calibration();
+    return states[servo].calibration();
   }
 
   void ServoCluster::load() {
@@ -222,11 +274,11 @@ namespace servo {
   void ServoCluster::create_servo_states(CalibrationType default_type, bool auto_phase) {
     uint8_t servo_count = pwms.get_chan_count();
     if(servo_count > 0) {
-      servos = new ServoState[servo_count];
+      states = new ServoState[servo_count];
       servo_phases = new float[servo_count];
 
       for(uint servo = 0; servo < servo_count; servo++) {
-        servos[servo] = ServoState(default_type);
+        states[servo] = ServoState(default_type);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }

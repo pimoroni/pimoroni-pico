@@ -14,7 +14,7 @@ namespace servo {
     pimoroni::PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    ServoState* servos;
+    ServoState* states;
     float* servo_phases;
 
 
@@ -39,7 +39,14 @@ namespace servo {
     uint8_t get_pin(uint8_t servo) const;
 
     void enable(uint servo, bool load = true);
+    void enable(const uint8_t *servos, uint8_t length, bool load = true);
+    void enable(std::initializer_list<uint8_t> servos, bool load = true);
+    void enable_all(bool load = true);
+
     void disable(uint servo, bool load = true);
+    void disable(const uint8_t *servos, uint8_t length, bool load = true);
+    void disable(std::initializer_list<uint8_t> servos, bool load = true);
+    void disable_all(bool load = true);
     bool is_enabled(uint servo) const;
 
     float get_pulse(uint servo) const;

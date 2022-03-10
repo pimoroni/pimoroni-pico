@@ -39,7 +39,9 @@ MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster___del___obj, ServoCluster___del__);
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_count_obj, ServoCluster_count);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_pin_obj, 2, ServoCluster_pin);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_enable_obj, 2, ServoCluster_enable);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_enable_all_obj, 1, ServoCluster_enable_all);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_obj, 2, ServoCluster_disable);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_all_obj, 1, ServoCluster_disable_all);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_is_enabled_obj, 2, ServoCluster_is_enabled);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_value_obj, 2, ServoCluster_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_pulse_obj, 2, ServoCluster_pulse);
@@ -98,7 +100,9 @@ STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_count), MP_ROM_PTR(&ServoCluster_count_obj) },
     { MP_ROM_QSTR(MP_QSTR_pin), MP_ROM_PTR(&ServoCluster_pin_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&ServoCluster_enable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable_all), MP_ROM_PTR(&ServoCluster_enable_all_obj) },
     { MP_ROM_QSTR(MP_QSTR_disable), MP_ROM_PTR(&ServoCluster_disable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_disable_all), MP_ROM_PTR(&ServoCluster_disable_all_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&ServoCluster_is_enabled_obj) },
     { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&ServoCluster_pulse_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&ServoCluster_value_obj) },
