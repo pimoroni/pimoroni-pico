@@ -33,8 +33,8 @@ namespace servo {
 
     if(pwms.init()) {
       // Calculate a suitable pwm wrap period for this frequency
-      uint32_t period; uint16_t div16;
-      if(pimoroni::PWMCluster::calculate_pwm_factors(pwm_frequency, period, div16)) {
+      uint32_t period; uint32_t div256;
+      if(pimoroni::PWMCluster::calculate_pwm_factors(pwm_frequency, period, div256)) {
         pwm_period = period;
 
         // Update the pwm before setting the new wrap
@@ -49,8 +49,8 @@ namespace servo {
 
         // Apply the new divider
         // This is done after loading new PWM values to avoid a lockup condition
-        uint8_t div = div16 >> 4;
-        uint8_t mod = div16 % 16;
+        uint8_t div = div256 >> 8;
+        uint8_t mod = div256 % 256;
         pwms.set_clkdiv_int_frac(div, mod);
 
         success = true;
@@ -127,8 +127,8 @@ namespace servo {
 
     if((freq >= ServoState::MIN_FREQUENCY) && (freq <= ServoState::MAX_FREQUENCY)) {
       // Calculate a suitable pwm wrap period for this frequency
-      uint32_t period; uint16_t div16;
-      if(pimoroni::PWMCluster::calculate_pwm_factors(freq, period, div16)) {
+      uint32_t period; uint32_t div256;
+      if(pimoroni::PWMCluster::calculate_pwm_factors(freq, period, div256)) {
 
         pwm_period = period;
         pwm_frequency = freq;
@@ -146,8 +146,8 @@ namespace servo {
         pwms.set_wrap(pwm_period, true);
 
         // Apply the new divider
-        uint16_t div = div16 >> 4;
-        uint8_t mod = div16 % 16;
+        uint16_t div = div256 >> 8;
+        uint8_t mod = div256 % 256;
         pwms.set_clkdiv_int_frac(div, mod);
 
         success = true;

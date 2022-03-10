@@ -117,7 +117,7 @@ namespace pimoroni {
 
     //--------------------------------------------------
   public:
-    static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint16_t& div16_out);
+    static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& div256_out);
   private:
     static bool bit_in_mask(uint bit, uint mask);
     static void sorted_insert(TransitionData array[], uint &size, const TransitionData &data);
