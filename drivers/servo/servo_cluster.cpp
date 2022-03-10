@@ -136,8 +136,9 @@ namespace servo {
         // Update the pwm before setting the new wrap
         uint8_t servo_count = pwms.get_chan_count();
         for(uint servo = 0; servo < servo_count; servo++) {
-          float current_pulse = servos[servo].get_pulse();
-          apply_pulse(servo, current_pulse, false);
+          if(servos[servo].is_enabled()) {
+            apply_pulse(servo, servos[servo].get_pulse(), false);
+          }
           pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwm_period), false);
         }
 
@@ -145,8 +146,7 @@ namespace servo {
         pwms.set_wrap(pwm_period, true);
 
         // Apply the new divider
-        // This is done after loading new PWM values to avoid a lockup condition
-        uint8_t div = div16 >> 4;
+        uint16_t div = div16 >> 4;
         uint8_t mod = div16 % 16;
         pwms.set_clkdiv_int_frac(div, mod);
 

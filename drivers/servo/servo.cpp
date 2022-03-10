@@ -96,7 +96,7 @@ namespace servo {
         pwm_set_clkdiv_int_frac(pin_num, div, mod);
 
         // If the the period is larger, update the pwm before setting the new wraps
-        if(pre_update_pwm) {
+        if(state.is_enabled() && pre_update_pwm) {
           apply_pulse(state.get_pulse());
         }
 
@@ -104,7 +104,7 @@ namespace servo {
         pwm_set_wrap(pin_num, pwm_period - 1);
 
         // If the the period is smaller, update the pwm after setting the new wraps
-        if(!pre_update_pwm) {
+        if(state.is_enabled() && !pre_update_pwm) {
           apply_pulse(state.get_pulse());
         }
 

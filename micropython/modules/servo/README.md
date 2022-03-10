@@ -172,8 +172,6 @@ frequency(
   freq   # float: the frequency between 10 and 350Hz
 )
 ```
-If the servo is disabled, this will enable it with the last pulse it was provided with.
-TODO change this behaviour!
 
 #### Useful Values
 
@@ -397,9 +395,6 @@ frequency(
   freq   # float: the frequency between 10 and 350Hz
 )
 ```
-If the servo is disabled, this will enable it with the last pulse it was provided with.
-TODO change this behaviour!
-
 Note, currently the frequency changes immediately, even if part-way through a pulse. It is recommended to disable all servos first before changing the frequency.
 
 #### Useful Values
