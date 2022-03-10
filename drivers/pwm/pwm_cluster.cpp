@@ -387,7 +387,7 @@ void PWMCluster::load_pwm() {
 
     // Invert this channel's initial state if it's polarity invert is set
     if(state.polarity) {
-      pin_states |= (1u << channel); // Set the pin
+      pin_states |= (1u << channel_to_pin_map[channel]); // Set the pin
     }
 
     uint channel_start = state.offset;
@@ -404,19 +404,21 @@ void PWMCluster::load_pwm() {
     // Did the previous sequence overrun the wrap level?
     if(state.overrun > 0) {
       // Flip the initial state so the pin starts "high" (or "low" if polarity inverted)
-      pin_states ^= (1u << channel);
+      pin_states ^= (1u << channel_to_pin_map[channel]);
 
       // Check for a few edge cases when pulses change length across the wrap level
       // Not entirely sure I understand which statements does what, but they seem to work
       if((channel_end >= channel_start) || (state.overrun > channel_end)) {
         // Add a transition to "low" (or "high" if polarity inverted) at the overrun level of the previous sequence
         PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, state.overrun, state.polarity));
+        //printf("C = %d, Added Low at %d\n", channel, state.overrun);
       }
     }
 
     if(state.level > 0 && channel_start < wrap_level) {
       // Add a transition to "high" (or "low" if polarity inverted) at the start level
       PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_start, !state.polarity));
+      //printf("C = %d, Added High at %d\n", channel, channel_start);
 
       // If the channel has overrun the wrap level, record by how much
       if(channel_end < channel_start) {
@@ -427,7 +429,10 @@ void PWMCluster::load_pwm() {
     if(state.level < wrap_level) {
       // Add a transition to "low" (or "high" if polarity inverted) at the end level
       PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_end, state.polarity));
+      //printf("C = %d, Added Low at %d\n", channel, channel_end);
     }
+
+    //printf("C = %d, Start = %d, End = %d, Overrun = %d\n", channel, channel_start, channel_end, state.overrun);
   }
 
   // Introduce "Loading Zone" transitions to the end of the sequence to
@@ -518,6 +523,9 @@ void PWMCluster::load_pwm() {
 
     // Record the looping pin states
     looping_mask[write_index] = pin_states;
+    //BUG It's not just the first one that needs overriding! D'oh!
+    // It could be a whole load of pulses that need updating to account for when multiple pulses pass the looping line
+    // May be best to have an intermediary sequence?
   }
   else {
     // There were no transitions (either because there was a zero wrap, or no channels because there was a zero wrap?),
