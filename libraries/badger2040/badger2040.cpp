@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "hardware/pwm.h"
+#include "hardware/watchdog.h"
 
 #include "badger2040.hpp"
 
@@ -79,8 +80,15 @@ namespace pimoroni {
   void Badger2040::halt() {
     gpio_put(ENABLE_3V3, 0);
 
-    // don't allow any more code to execute while power rail drops
-    while(true) {}
+    // If running on USB we will not actually power down, so emulate the behaviour
+    // of battery powered badge by listening for a button press and then resetting
+    // Note: Don't use wait_for_press as that waits for the button to be release and
+    //       we want the reboot to complete before the button is released.
+    update_button_states();
+    while(_button_states == 0) {
+      update_button_states();
+    }
+    watchdog_reboot(0, 0, 0);
   }
 
   uint8_t _dither_value(int32_t x, int32_t y, uint8_t p) {

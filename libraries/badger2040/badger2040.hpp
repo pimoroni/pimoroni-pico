@@ -9,7 +9,7 @@
 namespace pimoroni {
 
   class Badger2040 {
-  private:
+  protected:
     UC8151 uc8151;
     const hershey_font_t *_font = &futural;
     uint8_t _pen = 0;
