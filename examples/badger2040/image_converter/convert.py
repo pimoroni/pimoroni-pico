@@ -9,7 +9,10 @@ import io
 import argparse
 from PIL import Image, ImageEnhance
 from pathlib import Path
-import data_to_py
+try:
+    import data_to_py
+except ImportError as error:
+    pass
 
 parser = argparse.ArgumentParser(description='Converts images into the format used by Badger2040.')
 parser.add_argument('file', nargs="+", help='input files to convert')
