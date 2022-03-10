@@ -44,16 +44,23 @@ MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_obj, 2, ServoCluster_disable);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_disable_all_obj, 1, ServoCluster_disable_all);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_is_enabled_obj, 2, ServoCluster_is_enabled);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_value_obj, 2, ServoCluster_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_values_obj, 1, ServoCluster_all_values);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_pulse_obj, 2, ServoCluster_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_pulses_obj, 1, ServoCluster_all_pulses);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_phase_obj, 2, ServoCluster_phase);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_phases_obj, 1, ServoCluster_all_phases);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_frequency_obj, 1, ServoCluster_frequency);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_min_value_obj, 2, ServoCluster_min_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_mid_value_obj, 2, ServoCluster_mid_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_max_value_obj, 2, ServoCluster_max_value);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_min_obj, 2, ServoCluster_to_min);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_to_min_obj, 1, ServoCluster_all_to_min);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_mid_obj, 2, ServoCluster_to_mid);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_to_mid_obj, 1, ServoCluster_all_to_mid);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_max_obj, 2, ServoCluster_to_max);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_to_max_obj, 1, ServoCluster_all_to_max);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_to_percent_obj, 3, ServoCluster_to_percent);
+MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_all_to_percent_obj, 2, ServoCluster_all_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_calibration_obj, 2, ServoCluster_calibration);
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_load_obj, ServoCluster_load);
 
@@ -105,16 +112,23 @@ STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_disable_all), MP_ROM_PTR(&ServoCluster_disable_all_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&ServoCluster_is_enabled_obj) },
     { MP_ROM_QSTR(MP_QSTR_pulse), MP_ROM_PTR(&ServoCluster_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_pulses), MP_ROM_PTR(&ServoCluster_all_pulses_obj) },
     { MP_ROM_QSTR(MP_QSTR_value), MP_ROM_PTR(&ServoCluster_value_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_values), MP_ROM_PTR(&ServoCluster_all_values_obj) },
     { MP_ROM_QSTR(MP_QSTR_phase), MP_ROM_PTR(&ServoCluster_phase_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_phases), MP_ROM_PTR(&ServoCluster_all_phases_obj) },
     { MP_ROM_QSTR(MP_QSTR_frequency), MP_ROM_PTR(&ServoCluster_frequency_obj) },
     { MP_ROM_QSTR(MP_QSTR_min_value), MP_ROM_PTR(&ServoCluster_min_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_mid_value), MP_ROM_PTR(&ServoCluster_mid_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_max_value), MP_ROM_PTR(&ServoCluster_max_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_min), MP_ROM_PTR(&ServoCluster_to_min_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_min), MP_ROM_PTR(&ServoCluster_all_to_min_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_mid), MP_ROM_PTR(&ServoCluster_to_mid_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_mid), MP_ROM_PTR(&ServoCluster_all_to_mid_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_max), MP_ROM_PTR(&ServoCluster_to_max_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_max), MP_ROM_PTR(&ServoCluster_all_to_max_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&ServoCluster_to_percent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_percent), MP_ROM_PTR(&ServoCluster_all_to_percent_obj) },
     { MP_ROM_QSTR(MP_QSTR_calibration), MP_ROM_PTR(&ServoCluster_calibration_obj) },
     { MP_ROM_QSTR(MP_QSTR_load), MP_ROM_PTR(&ServoCluster_load_obj) },
 };

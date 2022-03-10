@@ -148,6 +148,32 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
+  void ServoCluster::set_pulse(const uint8_t *servos, uint8_t length, float pulse, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      set_pulse(servos[i], pulse, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_pulse(std::initializer_list<uint8_t> servos, float pulse, bool load) {
+    for(auto servo : servos) {
+      set_pulse(servo, pulse, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_all_pulses(float pulse, bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      set_pulse(servo, pulse, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   float ServoCluster::get_value(uint servo) const {
     assert(servo < pwms.get_chan_count());
     return states[servo].get_value();
@@ -159,6 +185,32 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
+  void ServoCluster::set_value(const uint8_t *servos, uint8_t length, float value, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      set_value(servos[i], value, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_value(std::initializer_list<uint8_t> servos, float value, bool load) {
+    for(auto servo : servos) {
+      set_value(servo, value, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_all_values(float value, bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      set_value(servo, value, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   float ServoCluster::get_phase(uint servo) const {
     assert(servo < pwms.get_chan_count());
     return servo_phases[servo];
@@ -168,6 +220,32 @@ namespace servo {
     assert(servo < pwms.get_chan_count());
     servo_phases[servo] = MIN(MAX(phase, 0.0f), 1.0f);
     pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwms.get_wrap()), load);
+  }
+
+  void ServoCluster::set_phase(const uint8_t *servos, uint8_t length, float phase, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      set_phase(servos[i], phase, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_phase(std::initializer_list<uint8_t> servos, float phase, bool load) {
+    for(auto servo : servos) {
+      set_phase(servo, phase, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::set_all_phases(float phase, bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      set_phase(servo, phase, false);
+    }
+    if(load)
+      pwms.load_pwm();
   }
 
   float ServoCluster::get_frequency() const {
@@ -229,10 +307,62 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
+  void ServoCluster::to_min(const uint8_t *servos, uint8_t length, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      to_min(servos[i], false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::to_min(std::initializer_list<uint8_t> servos, bool load) {
+    for(auto servo : servos) {
+      to_min(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::all_to_min(bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      to_min(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   void ServoCluster::to_mid(uint servo, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_mid();
     apply_pulse(servo, new_pulse, load);
+  }
+
+  void ServoCluster::to_mid(const uint8_t *servos, uint8_t length, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      to_mid(servos[i], false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::to_mid(std::initializer_list<uint8_t> servos, bool load) {
+    for(auto servo : servos) {
+      to_mid(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::all_to_mid(bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      to_mid(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
   }
 
   void ServoCluster::to_max(uint servo, bool load) {
@@ -241,16 +371,94 @@ namespace servo {
     apply_pulse(servo, new_pulse, load);
   }
 
+  void ServoCluster::to_max(const uint8_t *servos, uint8_t length, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      to_max(servos[i], false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::to_max(std::initializer_list<uint8_t> servos, bool load) {
+    for(auto servo : servos) {
+      to_max(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::all_to_max(bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      to_max(servo, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_percent(in, in_min, in_max);
     apply_pulse(servo, new_pulse, load);
   }
 
+  void ServoCluster::to_percent(const uint8_t *servos, uint8_t length, float in, float in_min, float in_max, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      to_percent(servos[i], in, in_min, in_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::to_percent(std::initializer_list<uint8_t> servos, float in, float in_min, float in_max, bool load) {
+    for(auto servo : servos) {
+      to_percent(servo, in, in_min, in_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::all_to_percent(float in, float in_min, float in_max, bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      to_percent(servo, in, in_min, in_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_percent(in, in_min, in_max, value_min, value_max);
     apply_pulse(servo, new_pulse, load);
+  }
+
+  void ServoCluster::to_percent(const uint8_t *servos, uint8_t length, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
+    assert(servos != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      to_percent(servos[i], in, in_min, in_max, value_min, value_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::to_percent(std::initializer_list<uint8_t> servos, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
+    for(auto servo : servos) {
+      to_percent(servo, in, in_min, in_max, value_min, value_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void ServoCluster::all_to_percent(float in, float in_min, float in_max, float value_min, float value_max, bool load) {
+    uint8_t servo_count = pwms.get_chan_count();
+    for(uint8_t servo = 0; servo < servo_count; servo++) {
+      to_percent(servo, in, in_min, in_max, value_min, value_max, false);
+    }
+    if(load)
+      pwms.load_pwm();
   }
 
   Calibration& ServoCluster::calibration(uint servo) {

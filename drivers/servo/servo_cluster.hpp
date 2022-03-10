@@ -47,16 +47,26 @@ namespace servo {
     void disable(const uint8_t *servos, uint8_t length, bool load = true);
     void disable(std::initializer_list<uint8_t> servos, bool load = true);
     void disable_all(bool load = true);
+
     bool is_enabled(uint servo) const;
 
     float get_pulse(uint servo) const;
     void set_pulse(uint servo, float pulse, bool load = true);
+    void set_pulse(const uint8_t *servos, uint8_t length, float pulse, bool load = true);
+    void set_pulse(std::initializer_list<uint8_t> servos, float pulse, bool load = true);
+    void set_all_pulses(float pulse, bool load = true);
 
     float get_value(uint servo) const;
     void set_value(uint servo, float value, bool load = true);
+    void set_value(const uint8_t *servos, uint8_t length, float value, bool load = true);
+    void set_value(std::initializer_list<uint8_t> servos, float value, bool load = true);
+    void set_all_values(float value, bool load = true);
 
     float get_phase(uint servo) const;
     void set_phase(uint servo, float phase, bool load = true);
+    void set_phase(const uint8_t *servos, uint8_t length, float phase, bool load = true);
+    void set_phase(std::initializer_list<uint8_t> servos, float phase, bool load = true);
+    void set_all_phases(float phase, bool load = true);
 
     float get_frequency() const;
     bool set_frequency(float freq);
@@ -67,10 +77,29 @@ namespace servo {
     float get_max_value(uint servo) const;
 
     void to_min(uint servo, bool load = true);
+    void to_min(const uint8_t *servos, uint8_t length, bool load = true);
+    void to_min(std::initializer_list<uint8_t> servos, bool load = true);
+    void all_to_min(bool load = true);
+
     void to_mid(uint servo, bool load = true);
+    void to_mid(const uint8_t *servos, uint8_t length, bool load = true);
+    void to_mid(std::initializer_list<uint8_t> servos, bool load = true);
+    void all_to_mid(bool load = true);
+
     void to_max(uint servo, bool load = true);
+    void to_max(const uint8_t *servos, uint8_t length, bool load = true);
+    void to_max(std::initializer_list<uint8_t> servos, bool load = true);
+    void all_to_max(bool load = true);
+
     void to_percent(uint servo, float in, float in_min = ServoState::ZERO_PERCENT, float in_max = ServoState::ONEHUNDRED_PERCENT, bool load = true);
+    void to_percent(const uint8_t *servos, uint8_t length, float in, float in_min = ServoState::ZERO_PERCENT, float in_max = ServoState::ONEHUNDRED_PERCENT, bool load = true);
+    void to_percent(std::initializer_list<uint8_t> servos, float in, float in_min = ServoState::ZERO_PERCENT, float in_max = ServoState::ONEHUNDRED_PERCENT, bool load = true);
+    void all_to_percent(float in, float in_min = ServoState::ZERO_PERCENT, float in_max = ServoState::ONEHUNDRED_PERCENT, bool load = true);
+
     void to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
+    void to_percent(const uint8_t *servos, uint8_t length, float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
+    void to_percent(std::initializer_list<uint8_t> servos, float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
+    void all_to_percent(float in, float in_min, float in_max, float value_min, float value_max, bool load = true);
 
     Calibration& calibration(uint servo);
     const Calibration& calibration(uint servo) const;
