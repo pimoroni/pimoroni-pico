@@ -62,6 +62,8 @@ jobs:
           board: PICO
         - name: tiny2040
           board: PIMORONI_TINY2040
+        - name: picolipo_4mb
+          board: PIMORONI_PICOLIPO_4MB
         - name: picolipo_16mb
           board: PIMORONI_PICOLIPO_16MB
 
