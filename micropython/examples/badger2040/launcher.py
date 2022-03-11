@@ -16,6 +16,7 @@ font_size = 1
 inverted = False
 
 icons = bytearray(launchericons.data())
+icons_width = 576
 
 examples = [
     ("_clock", 0),
@@ -24,6 +25,7 @@ examples = [
     ("_image", 3),
     ("_list", 4),
     ("_badge", 5),
+    ("_qrgen", 8),
     ("_info", 6),
     ("_help", 7)
 ]
@@ -139,9 +141,9 @@ def render():
     for i in range(max_icons):
         x = centers[i]
         label, icon = examples[i + (page * 3)]
-        label = label[1:]
+        label = label[1:].replace("_", " ")
         display.pen(0)
-        display.icon(icons, icon, 512, 64, x - 32, 24)
+        display.icon(icons, icon, icons_width, 64, x - 32, 24)
         w = display.measure_text(label, font_sizes[font_size])
         display.text(label, x - int(w / 2), 16 + 80, font_sizes[font_size])
 
