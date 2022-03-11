@@ -264,11 +264,11 @@ namespace pimoroni {
         int8_t nx = (*pv++) * s;
         int8_t ny = (*pv++) * s;
 
-        int rcx = cx * ac - cy * as;
-        int rcy = cx * as + cy * ac;
+        int rcx = (cx * ac - cy * as) + 0.5f;
+        int rcy = (cx * as + cy * ac) + 0.5f;
 
-        int rnx = nx * ac - ny * as;
-        int rny = nx * as + ny * ac;
+        int rnx = (nx * ac - ny * as) + 0.5f;
+        int rny = (nx * as + ny * ac) + 0.5f;
 
         if(pen_down) {
           line(rcx + x, rcy + y, rnx + x, rny + y);
@@ -293,8 +293,8 @@ namespace pimoroni {
     float ac = cos(deg2rad(a));
 
     for(auto &c : message) {
-      int rcx = ox * ac;
-      int rcy = ox * as;
+      int rcx = (ox * ac) + 0.5f;
+      int rcy = (ox * as) + 0.5f;
 
       ox += glyph(c, cx + rcx, cy + rcy, s, a);
     }
