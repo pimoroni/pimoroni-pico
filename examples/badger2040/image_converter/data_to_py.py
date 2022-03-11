@@ -85,8 +85,9 @@ STR02 = """_mvdata = memoryview(_data)
 
 def data():
     return _mvdata
- 
+
 """
+
 
 def write_func(stream, name, arg):
     stream.write('def {}():\n    return {}\n\n'.format(name, arg))
@@ -123,6 +124,7 @@ def quit(msg):
     print(msg)
     sys.exit(1)
 
+
 DESC = """data_to_py.py
 Utility to convert an arbitrary binary file to Python source.
 Sample usage:
@@ -136,7 +138,6 @@ if __name__ == "__main__":
     parser.add_argument('infile', type=str, help='Input file path')
     parser.add_argument('outfile', type=str,
                         help='Path and name of output file. Must have .py extension.')
-
 
     args = parser.parse_args()
 
