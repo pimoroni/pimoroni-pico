@@ -8,12 +8,32 @@ The Servo library lets you drive 3-pin hobby servo motors from a Raspberry Pi Pi
   - [PWM Limitations](#pwm-limitations)
   - [PIO Limitations](#pio-limitations)
 - [Servo](#servo)
-  - [Function Reference](#function-reference)
   - [Getting Started](#getting-started)
+  - [Function Reference](#function-reference)
+  - [Pin](#pin)
+  - [Enabling and Disabling](#enabling-and-disabling)
+  - [Control by Pulse Width](#control-by-pulse-width)
+  - [Control by Value](#control-by-value)
+  - [Frequency Control](#frequency-control)
+  - [Useful Values](#useful-values)
+  - [Control by Percent](#control-by-percent)
+  - [Calibrating](#calibrating)
 - [ServoCluster](#servocluster)
-  - [Function Reference](#function-reference)
   - [Getting Started](#getting-started)
+  - [Function Reference](#function-reference)
+  - [Count](#count)
+  - [Pin](#pin)
+  - [Enabling and Disabling](#enabling-and-disabling)
+  - [Control by Pulse Width](#control-by-pulse-width)
+  - [Control by Value](#control-by-value)
+  - [Phase Control](#phase-control)
+  - [Frequency Control](#frequency-control)
+  - [Useful Values](#useful-values)
+  - [Control by Percent](#control-by-percent)
+  - [Calibrating](#calibrating)
+  - [Delayed Loading](#delayed-loading)
 - [Calibration](#calibration)
+  - [Getting Started](#getting-started)
   - [Function Reference](#function-reference)
 
 ## Implementations
@@ -50,6 +70,18 @@ When creating a ServoCluster, in most cases you'll use `0` for PIO and `0` for P
 
 ## Servo
 
+### Getting Started
+
+#### Constructing a Servo
+
+```python
+Servo(
+  pin,            # int: the hardware pin to use for the servo
+  type=ANGULAR,   # int: the type the servo will start as (options are ANGULAR, LINEAR, CONTINUOUS, and EMPTY)
+  freq=50         # float: the frequency the servo will receive pulses at
+)
+```
+
 ### Function Reference
 
 Here is the complete list of functions available on the `Servo` class:
@@ -78,106 +110,14 @@ calibration()
 calibration(calibration)
 ```
 
-### Getting Started
-
-Hello
-
-
-## ServoCluster
-
-### Function Reference
-
-Here is the complete list of functions available on the `ServoCluster` class:
-
-```python
-ServoCluster(pio, sm, pins, type=ANGULAR, freq=50, auto_phase=True)
-count()
-pin(servo)
-enable(servo, load=True)
-disable(servo, load=True)
-is_enabled(servo)
-pulse(servo)
-pulse(servo, pulse, load=True)
-value(servo)
-value(servo, value, load=True)
-phase(servo)
-phase(servo, phase, load=True)
-frequency()
-frequency(freq)
-min_value(servo)
-mid_value(servo)
-max_value(servo)
-to_min(servo, load=True)
-to_mid(servo, load=True)
-to_max(servo, load=True)
-to_percent(servo, in, load=True)
-to_percent(servo, in, in_min, in_max, load=True)
-to_percent(servo, in, in_min, in_max, value_min, value_max, load=True)
-calibration(servo)
-calibration(servo, calibration)
-load()
-```
-
-### Getting Started
-
-Hello
-
-
-## Calibration
-
-### Function Reference
-
-Here is the complete list of functions available on the `Calibration` class:
-
-```python
-Calibration(type=ANGULAR)
-
-create_blank_calibration(size)
-create_two_point_calibration(min_pulse, max_pulse, min_value, max_value)
-create_three_point_calibration(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)
-create_uniform_calibration(size, min_pulse, max_pulse, min_value, max_value)
-create_default_calibration(type)
-size()
-point_at(index)
-point_at(index, point)
-first_point()
-first_point(point)
-last_point()
-last_point(point)
-has_lower_limit()
-has_upper_limit()
-limit_to_calibration(lower, upper)
-value_to_pulse(value)
-pulse_to_value(pulse)
-```
-
-### Getting Started
-
-Hello
-
-
-## Breakdown
-
-### Servo Class
-
-#### Constructing a Servo
-
-```python
-Servo(
-  pin,            # int: the hardware pin to use for the servo
-  type=ANGULAR,   # int: the type the servo will start as (options are ANGULAR, LINEAR, CONTINUOUS, and EMPTY)
-  freq=50         # float: the frequency the servo will receive pulses at
-)
-```
-
-#### Pin
+### Pin
 
 To get the pin number the servo is assigned to:
 ```python
 pin() # returns int: the hardware pin of the servo
 ```
 
-#### Enabling and Disabling
+### Enabling and Disabling
 
 To enable the servo:
 ```python
@@ -195,7 +135,7 @@ To check the enabled state of the servo:
 is_enabled() # returns bool: True if enabled, False if disabled
 ```
 
-#### Control by Pulse Width
+### Control by Pulse Width
 
 Servos operate by receiving a digital signal with specific pulse widths. Typically values are between 500 microseconds and 2500 microseconds.
 
@@ -213,8 +153,7 @@ pulse(
 ```
 If the servo is disabled, this will also enable it. It will also recalculate the related value.
 
-
-#### Control by Value
+### Control by Value
 
 Value is a way to control servos using numbers that have a real-world meaning, rather than with pulse widths. For instance, -90 to +90 degrees for an angular servo, or -1 to +1 for a continous rotation servo. See [Calibration](#calibration) for more details.
 
@@ -233,7 +172,7 @@ value(
 If the servo is disabled, this will also enable it. The resulting pulse width will also be stored.
 
 
-#### Frequency Control
+### Frequency Control
 
 The vast majority of Servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
 
@@ -249,7 +188,7 @@ frequency(
 )
 ```
 
-#### Useful Values
+### Useful Values
 
 When performing motion patterns on a servo, it can sometimes be useful to know what a servo's minimum, middle, and maximum values are.
 
@@ -285,7 +224,7 @@ To move the servo to its maximum value.
 to_max()
 ```
 
-#### Control by Percent
+### Control by Percent
 
 Sometimes there are projects where you want a servo to move based on the reading from a sensor or another device, but the numbers given out are not easy to convert to values the servo accepts. To overcome this the library lets you move the servo to a percent between its minimum and maximum values, or two values you provided, based on that input.
 
@@ -316,7 +255,7 @@ to_percent(
 )
 ```
 
-#### Calibration
+### Calibrating
 
 There are different types of servos, with angular, linear, and continuous being common. To support these different types, each Servo class contains a calibration object that stores the specific value to pulse mapping needed for its type. This object can be accessed for each servo as well as updated on the fly.
 
@@ -333,7 +272,9 @@ calibration(
 ```
 
 
-### ServoCluster Class
+## ServoCluster
+
+### Getting Started
 
 #### Constructing a ServoCluster
 
@@ -347,14 +288,47 @@ ServoCluster(
 )
 ```
 
-#### Pin
+### Function Reference
+
+Here is the complete list of functions available on the `ServoCluster` class:
+
+```python
+ServoCluster(pio, sm, pins, type=ANGULAR, freq=50, auto_phase=True)
+count()
+pin(servo)
+enable(servo, load=True)
+disable(servo, load=True)
+is_enabled(servo)
+pulse(servo)
+pulse(servo, pulse, load=True)
+value(servo)
+value(servo, value, load=True)
+phase(servo)
+phase(servo, phase, load=True)
+frequency()
+frequency(freq)
+min_value(servo)
+mid_value(servo)
+max_value(servo)
+to_min(servo, load=True)
+to_mid(servo, load=True)
+to_max(servo, load=True)
+to_percent(servo, in, load=True)
+to_percent(servo, in, in_min, in_max, load=True)
+to_percent(servo, in, in_min, in_max, value_min, value_max, load=True)
+calibration(servo)
+calibration(servo, calibration)
+load()
+```
+
+### Count
 
 To get the number of servos assigned to this cluster:
 ```python
 count() # returns int: the number of servos
 ```
 
-#### Pin
+### Pin
 
 To get the pin number a servo on the cluster is assigned to:
 ```python
@@ -363,7 +337,7 @@ pin(
 ) # returns int: the hardware pin of the servo
 ```
 
-#### Enabling and Disabling
+### Enabling and Disabling
 
 To enable a servo on the cluster:
 ```python
@@ -389,7 +363,7 @@ is_enabled(
 ) # returns bool: True if enabled, False if disabled
 ```
 
-#### Control by Pulse Width
+### Control by Pulse Width
 
 Servos operate by receiving a digital signal with specific pulse widths. Typically values are between 500 microseconds and 2500 microseconds.
 
@@ -411,8 +385,7 @@ pulse(
 ```
 If the servo is disabled, this will also enable it. It will also recalculate the related value.
 
-
-#### Control by Value
+### Control by Value
 
 Value is a way to control servos using numbers that have a real-world meaning, rather than with pulse widths. For instance, -90 to +90 degrees for an angular servo, or -1 to +1 for a continous rotation servo. See [Calibration](#calibration) for more details.
 
@@ -434,8 +407,7 @@ value(
 ```
 If the servo is disabled, this will also enable it. The resulting pulse width will also be stored.
 
-
-#### Phase Control
+### Phase Control
 
 When dealing with many servos, there can often be large current draw spikes caused by them all responding to pulses at the same time. To minimise this, a servo cluster allows for the start time of a servo's pulses to be delayed by a percentage of the available time period. This is called their phase.
 
@@ -455,7 +427,7 @@ phase(
 )
 ```
 
-#### Frequency Control
+### Frequency Control
 
 The vast majority of Servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
 All servos on a cluster share the same frequency.
@@ -473,7 +445,8 @@ frequency(
 ```
 Note, currently the frequency changes immediately, even if part-way through a pulse. It is recommended to disable all servos first before changing the frequency.
 
-#### Useful Values
+
+### Useful Values
 
 When performing motion patterns on a servo, it can sometimes be useful to know what a servo's minimum, middle, and maximum values are.
 
@@ -524,7 +497,7 @@ to_max(
 )
 ```
 
-#### Control by Percent
+### Control by Percent
 
 Sometimes there are projects where you want a servo to move based on the reading from a sensor or another device, but the numbers given out are not easy to convert to values the servo accepts. To overcome this the library lets you move the servo to a percent between its minimum and maximum values, or two values you provided, based on that input.
 
@@ -561,7 +534,7 @@ to_percent(
 )
 ```
 
-#### Calibration
+### Calibrating
 
 There are different types of servos, with angular, linear, and continuous being common. To support these different types, each Servo class contains a calibration object that stores the specific value to pulse mapping needed for its type. This object can be accessed for each servo as well as updated on the fly.
 
@@ -580,7 +553,7 @@ calibration(
 )
 ```
 
-#### Delayed Loading
+### Delayed Loading
 
 To match behaviour with the regular Servo class, the ServoCluster automatically applies each change to a servo's state immediately. However, sometimes this may not be wanted, and instead you want all servos to receive updated pulses at the same time, regardless of how long the code ran that calculated the update.
 
@@ -588,3 +561,35 @@ For this purpose, all the functions that modify a servo state include an optiona
 ```python
 load()
 ```
+
+
+## Calibration
+
+### Getting Started
+
+### Function Reference
+
+Here is the complete list of functions available on the `Calibration` class:
+
+```python
+Calibration(type=ANGULAR)
+
+create_blank_calibration(size)
+create_two_point_calibration(min_pulse, max_pulse, min_value, max_value)
+create_three_point_calibration(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)
+create_uniform_calibration(size, min_pulse, max_pulse, min_value, max_value)
+create_default_calibration(type)
+size()
+point_at(index)
+point_at(index, point)
+first_point()
+first_point(point)
+last_point()
+last_point(point)
+has_lower_limit()
+has_upper_limit()
+limit_to_calibration(lower, upper)
+value_to_pulse(value)
+pulse_to_value(pulse)
+```
+
