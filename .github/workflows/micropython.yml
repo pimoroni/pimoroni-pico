@@ -97,11 +97,6 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
 
-    # Copy Python module files
-    - name: Copy modules
-      run: |
-        cp -r pimoroni-pico-${GITHUB_SHA}/micropython/modules_py/* micropython/ports/rp2/modules/
-
     - name: Configure MicroPython
       shell: bash
       working-directory: micropython/ports/rp2

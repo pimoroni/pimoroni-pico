@@ -1,6 +1,7 @@
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 
 include(pimoroni_i2c/micropython)
@@ -41,3 +42,5 @@ include(pico_wireless/micropython)
 include(plasma/micropython)
 include(hub75/micropython)
 include(ulab/code/micropython)
+
+include(modules_py/modules_py)
