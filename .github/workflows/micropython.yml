@@ -14,8 +14,19 @@ jobs:
     runs-on: ubuntu-20.04
     name: Dependencies
     steps:
+    - name: Workspace Cache
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          workspace-${{github.ref}}
+          workspace-micropython-
+
     # Check out MicroPython
     - name: Checkout MicroPython
+      if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: micropython/micropython
@@ -24,38 +35,34 @@ jobs:
         path: micropython
 
     - uses: actions/checkout@v2
+      if: steps.cache.outputs.cache-hit != 'true'
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
 
     # Copy Python module files
     - name: Copy modules
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cp -r pimoroni-pico-${GITHUB_SHA}/micropython/modules_py/* micropython/ports/rp2/modules/
 
     - name: Fetch base MicroPython submodules
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       working-directory: micropython
       run: git submodule update --init
 
     - name: Fetch Pico SDK submodules
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       working-directory: micropython/lib/pico-sdk
       run: git submodule update --init
 
     - name: Build mpy-cross
+      if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       working-directory: micropython/mpy-cross
       run: make
-
-    - name: Cache
-      uses: actions/cache@v2
-      with:
-        path: ${{runner.workspace}}
-        key: workspace-micropython-${{github.ref}}-${{github.sha}}
-        restore-keys: |
-          workspace-${{github.ref}}
-          workspace-micropython-
 
   build:
     needs: deps
