@@ -1,7 +1,58 @@
-# Servo <!-- omit in toc -->
+# Servos and Servo 2040 <!-- omit in toc -->
 
-## At a glance
-### Servo
+The Servo library lets you drive 3-pin hobby servo motors from a Raspberry Pi Pico or any other RP2040-based board, such as the [Pimoroni Servo 2040](https://pimoroni.com/servo2040).
+
+## Table of Content
+
+- [Implementations](#implementations)
+  - [PWM Limitations](#pwm-limitations)
+  - [PIO Limitations](#pio-limitations)
+- [Servo](#servo)
+  - [Function Reference](#function-reference)
+  - [Getting Started](#getting-started)
+- [ServoCluster](#servocluster)
+  - [Function Reference](#function-reference)
+  - [Getting Started](#getting-started)
+- [Calibration](#calibration)
+  - [Function Reference](#function-reference)
+
+## Implementations
+
+This library offers two servo implementations:
+* a `Servo` class that uses hardware PWM to drive a single servo, with support for up to 16 servos.
+* a `ServoCluster` class that uses Programmable IO (PIO) hardware to drive up to 30 servos.
+
+There is also a `Calibration` class for performing advanced tweaking of each servo's movement behaviour.
+
+### PWM Limitations
+
+Although the RP2040 is capable of outputting up to 16 PWM signals, there are limitations of which pins can be used together:
+* The PWMs output from pins 0 to 15 are repeated for pins 16 to 29, meaning that those pins share the same signals if PWM is enabled on both. For example if you used pin 3 for PWM and then tried to use pin 19, they would both output the same signal and it would not be possible to control them independently.
+* The 16 PWM channels are grouped into 8 PWM slices, each containing A and B sub channels that are synchronised with each other. This means that parameters such as frequency are shared, which can cause issues if you want one servo to operate at a different frequency to it's pin neighbour or to drive an LED with PWM at a high frequency.
+
+The official [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf), includes the handy _Table 525_ that details the pwm channel for each GPIO pin. This is shown below for convenience:
+
+| GPIO        | 0  | 1  | 2  | 3  | 4  | 5  | 6  | 7  | 8  | 9  | 10 | 11 | 12 | 13 | 14 | 15 |
+|-------------|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|----|
+| PWM Channel | 0A | 0B | 1A | 1B | 2A | 2B | 3A | 3B | 4A | 4B | 5A | 5B | 6A | 6B | 7A | 7B |
+
+| GPIO        | 16 | 17 | 18 | 19 | 20 | 21 | 22 | 23 | 24 | 25 | 26 | 27 | 28 | 29 |
+|-------------|----|----|----|----|----|----|----|----|----|----|----|----|----|----|
+| PWM Channel | 0A | 0B | 1A | 1B | 2A | 2B | 3A | 3B | 4A | 4B | 5A | 5B | 6A | 6B |
+
+
+### PIO Limitations
+
+The RP2040 features two PIOs with four state machines each. This places a hard limit on how many ServoClusters can be created. As this class is capable of driving all 30 GPIO pins, the only time this limit will be of concern is when servos with different frequencies are wanted, as all the outputs a ServoCluster controls share the same frequency. Relating this to the hardware PWM, think of it as a single PWM slice with up to 30 sub channels, A, B, C, D etc.
+
+When creating a ServoCluster, in most cases you'll use `0` for PIO and `0` for PIO state-machine. You should change these though if you plan on running multiple clusters, or using a cluster alongside something else that uses PIO, such as our [Plasma library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
+
+
+## Servo
+
+### Function Reference
+
+Here is the complete list of functions available on the `Servo` class:
 ```python
 Servo(pin, type=ANGULAR, freq=50)
 pin()
@@ -27,7 +78,17 @@ calibration()
 calibration(calibration)
 ```
 
-### ServoCluster
+### Getting Started
+
+Hello
+
+
+## ServoCluster
+
+### Function Reference
+
+Here is the complete list of functions available on the `ServoCluster` class:
+
 ```python
 ServoCluster(pio, sm, pins, type=ANGULAR, freq=50, auto_phase=True)
 count()
@@ -57,7 +118,17 @@ calibration(servo, calibration)
 load()
 ```
 
-### Calibration
+### Getting Started
+
+Hello
+
+
+## Calibration
+
+### Function Reference
+
+Here is the complete list of functions available on the `Calibration` class:
+
 ```python
 Calibration(type=ANGULAR)
 
@@ -79,6 +150,11 @@ limit_to_calibration(lower, upper)
 value_to_pulse(value)
 pulse_to_value(pulse)
 ```
+
+### Getting Started
+
+Hello
+
 
 ## Breakdown
 
