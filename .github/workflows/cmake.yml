@@ -18,7 +18,7 @@ jobs:
             name: Linux
             cache-key: linux
             cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras'
-            apt-packages: ccache gcc-arm-none-eabi
+            apt-packages: ccache
 
     runs-on: ${{matrix.os}}
 
@@ -61,13 +61,22 @@ jobs:
       run: |
         sudo apt update && sudo apt install ${{matrix.apt-packages}}
 
+    - name: Install ARM Toolchain
+      if: runner.os == 'Linux'
+      working-directory: ${{runner.workspace}}
+      run: |
+        wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+        tar xf gcc-*.tar.bz2
+        cd gcc*/bin
+        pwd >> $GITHUB_PATH
+
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
 
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{matrix.cmake-args}}
+      run: cmake $GITHUB_WORKSPACE  -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{matrix.cmake-args}}
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
