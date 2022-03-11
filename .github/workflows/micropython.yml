@@ -80,10 +80,10 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /home/runner/.ccache
-        key: ccache-micropython-${{github.ref}}-${{github.sha}}
+        key: ccache-micropython-${{matrix.name}}-${{github.ref}}-${{github.sha}}
         restore-keys: |
-          ccache-micropython-${{github.ref}}
-          ccache-micropython-
+          ccache-micropython-${{matrix.name}}-${{github.ref}}
+          ccache-micropython-${{matrix.name}}-
   
     - name: Workspace Cache
       uses: actions/cache@v2
@@ -103,7 +103,7 @@ jobs:
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -DMICROPY_BOARD=${{matrix.board}}
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython.cmake -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
     - name: Build MicroPython
       shell: bash
