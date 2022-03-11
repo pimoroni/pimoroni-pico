@@ -19,10 +19,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{github.ref}}-${{github.sha}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
         restore-keys: |
-          workspace-${{github.ref}}
-          workspace-micropython-
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -84,10 +83,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{github.ref}}-${{github.sha}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
         restore-keys: |
-          workspace-${{github.ref}}
-          workspace-micropython-
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
