@@ -23,13 +23,13 @@ options = parser.parse_args()
 
 def convert_image(img):
     if options.resize:
-        img = img.resize((296, 128)) # resize
+        img = img.resize((296, 128))  # resize
     try:
-      enhancer = ImageEnhance.Contrast(img)
-      img = enhancer.enhance(2.0)
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(2.0)
     except ValueError:
-      pass
-    img = img.convert("1") # convert to black and white
+        pass
+    img = img.convert("1")  # convert to black and white
     return img
 
 
@@ -68,5 +68,3 @@ static const uint8_t {image_name}[{count}] = {{
     '''.format(image_name=image_name, count=len(output_data), byte_data=", ".join(str(b) for b in output_data))
 
             print(image_code)
-
-
