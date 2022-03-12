@@ -1,4 +1,5 @@
 import badger2040
+import time
 from badger2040 import WIDTH
 
 TEXT_SIZE = 0.45
@@ -32,3 +33,6 @@ y += LINE_HEIGHT
 display.text("https://pimoroni.com/badger2040", 0, y, TEXT_SIZE)
 
 display.update()
+
+while True:
+    time.sleep(1)
