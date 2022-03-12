@@ -1,4 +1,5 @@
 import badger2040
+import time
 from badger2040 import WIDTH
 
 TEXT_SIZE = 0.45
@@ -35,3 +36,5 @@ display.text("a  - Toggle invert", 0, y, TEXT_SIZE)
 y += LINE_HEIGHT
 
 display.update()
+while True:
+    time.sleep(1)
