@@ -7,6 +7,7 @@ import badger2040
 from badger2040 import WIDTH
 import launchericons
 
+# for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
@@ -27,7 +28,7 @@ examples = [
     ("_badge", 5),
     ("_qrgen", 8),
     ("_info", 6),
-    ("_help", 7)
+    ("_help", 7),
 ]
 
 font_sizes = (0.5, 0.7, 0.9)
@@ -67,7 +68,9 @@ def get_battery_level():
 
     # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
     vdd = 1.24 * (65535 / vref_adc.read_u16())
-    vbat = (vbat_adc.read_u16() / 65535) * 3 * vdd  # 3 in this is a gain, not rounding of 3.3V
+    vbat = (
+        (vbat_adc.read_u16() / 65535) * 3 * vdd
+    )  # 3 in this is a gain, not rounding of 3.3V
 
     # Disable the onboard voltage reference
     vref_en.value(0)
@@ -112,15 +115,24 @@ def draw_disk_usage(x):
     f_used = 100 / f_total_size * f_total_used
     # f_free = 100 / f_total_size * f_total_free
 
-    display.image(bytearray((
-        0b00000000,
-        0b00111100,
-        0b00111100,
-        0b00111100,
-        0b00111000,
-        0b00000000,
-        0b00000000,
-        0b00000001)), 8, 8, x, 4)
+    display.image(
+        bytearray(
+            (
+                0b00000000,
+                0b00111100,
+                0b00111100,
+                0b00111100,
+                0b00111000,
+                0b00000000,
+                0b00000000,
+                0b00000001,
+            )
+        ),
+        8,
+        8,
+        x,
+        4,
+    )
     display.pen(15)
     display.rectangle(x + 10, 3, 80, 10)
     display.pen(0)
@@ -136,7 +148,7 @@ def render():
     display.pen(0)
     display.thickness(2)
 
-    max_icons = min(3, len(examples[(page * 3):]))
+    max_icons = min(3, len(examples[(page * 3) :]))
 
     for i in range(max_icons):
         x = centers[i]
@@ -175,8 +187,8 @@ def launch(file):
     try:
         __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
     except ImportError:
-        __import__(file)      # Failover to importing [_file]
-    machine.reset()           # Exit back to launcher
+        __import__(file)  # Failover to importing [_file]
+    machine.reset()  # Exit back to launcher
 
 
 def launch_example(index):
@@ -228,7 +240,13 @@ display.update_speed(badger2040.UPDATE_FAST)
 
 
 # Wait for wakeup button to be released
-while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
+while (
+    button_a.value()
+    or button_b.value()
+    or button_c.value()
+    or button_up.value()
+    or button_down.value()
+):
     pass
 
 

@@ -3,14 +3,16 @@
 - [Function Examples](#function-examples)
   - [Battery](#battery)
   - [Button Test](#button-test)
-  - [LED](#LED)
+  - [LED](#led)
+  - [Pin interrupt](#pin-interrupt)
 - [Application Examples](#application-examples)
   - [Badge](#badge)
   - [Checklist](#checklist)
   - [Clock](#clock)
-  - [E-Reader](#e-reader)
+  - [E-Book](#e-book)
   - [Fonts](#fonts)
   - [Image](#image)
+  - [QR gen](#qr-gen)
   - [Launcher](#launcher)
 
 
@@ -31,6 +33,10 @@ An example of how to read Badger2040's buttons and display a unique message for 
 
 Blinks Badger's LED on and off.
 
+### Pin interrupt
+[pin_interrupt.py](pin_interrupt.py)
+
+An example of drawing text and graphics and using the buttons.
 
 ## Application Examples
 
@@ -38,13 +44,15 @@ Blinks Badger's LED on and off.
 [badge.py](badge.py)
 
 Create your own name badge! This application looks for two files on your MicroPython drive:
-* "badge.txt" - A text file containing 6 lines, corresponding to the 6 different piece of text on the badge
-* "badge-image.bin" - A 108x128px 1bit colour depth image to display alongside the text. You can use examples/badger2040/image_converter/convert.py to convert them:
+* `badge.txt` - A text file containing 6 lines, corresponding to the 6 different pieces of text on the badge
+* `badge-image.bin` - A 108x128px 1-bit colour depth image to display alongside the text. You can use `examples/badger2040/image_converter/convert.py` to convert them:
 
+```shell
 python3 convert.py --binary --resize image_file_1.png image_file_2.png image_file_3.png
+```
 
 ### Checklist
-[checklist.py](checklist.py)
+[list.py](list.py)
 
 A checklist application, letting you navigate through items and tick each of them off.
 
@@ -53,24 +61,32 @@ A checklist application, letting you navigate through items and tick each of the
 
 A simple clock showing the time and date, that uses the E Ink's fast speed to update every second
 
-### E-Reader
-[e-reader.py](e-reader.py)
+### E-Book
+[ebook.py](ebook.py)
 
 A mini text file e-reader. Comes pre-loaded with an excerpt of The Wind In the Willows.
 
 ### Fonts
-[Fonts.py](checklist.py)
+[fonts.py](fonts.py)
 
 A demonstration of the various fonts that can be used in your programs.
 
 ### Image
 [image.py](image.py)
 
-An image gallery. Displays and lets you cycle through any images stored within the MicroPython device's `/images` directory. Images must be 296x128 pixels with 1bit colour depth. You can use examples/badger2040/image_converter/convert.py to convert them:
+An image gallery. Displays and lets you cycle through any images stored within the MicroPython device's `/images` directory. Images must be 296x128 pixels with 1-bit colour depth. You can use `examples/badger2040/image_converter/convert.py` to convert them:
 
+```shell
 python3 convert.py --binary --resize image_file_1.png image_file_2.png image_file_3.png
+```
+
+### QR gen
+[qrgen.py](qrgen.py)
+
+This application looks for a file on your MicroPython drive:
+- `qrcode.txt` - A text file containing 9 lines. The first line should be a URL which will be converted into and displayed as a QR code. Up to 8 more lines of information can be added, which will be shown as plain text to the right of the QR code.
 
 ### Launcher
-[Launcher.py](launcher.py)
+[launcher.py](launcher.py)
 
-A launcher style application, that gives a menu of other applications that can be loaded, as well as information such as battery level.
+A launcher-style application, that provide a menu of other applications that can be loaded, as well as information such as battery level.
