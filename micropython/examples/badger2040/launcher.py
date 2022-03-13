@@ -43,7 +43,6 @@ button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOW
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
 # Inverted. For reasons.
 button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
@@ -106,7 +105,8 @@ def draw_battery(level, x, y):
 def draw_disk_usage(x):
     # f_bfree and f_bavail should be the same?
     # f_files, f_ffree, f_favail and f_flag are unsupported.
-    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs("/")
+    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs(
+        "/")
 
     f_total_size = f_frsize * f_blocks
     f_total_free = f_bsize * f_bfree
@@ -148,7 +148,7 @@ def render():
     display.pen(0)
     display.thickness(2)
 
-    max_icons = min(3, len(examples[(page * 3) :]))
+    max_icons = min(3, len(examples[(page * 3):]))
 
     for i in range(max_icons):
         x = centers[i]
@@ -240,13 +240,7 @@ display.update_speed(badger2040.UPDATE_FAST)
 
 
 # Wait for wakeup button to be released
-while (
-    button_a.value()
-    or button_b.value()
-    or button_c.value()
-    or button_up.value()
-    or button_down.value()
-):
+while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
     pass
 
 
