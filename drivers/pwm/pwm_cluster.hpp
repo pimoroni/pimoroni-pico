@@ -8,6 +8,20 @@
 
 namespace pimoroni {
 
+static const uint BUFFER_SIZE = 64;     // Set to 64, the maximum number of single rises and falls for 32 channels within a looping time period
+struct Transition {
+  uint32_t mask;
+  uint32_t delay;
+  Transition() : mask(0), delay(0) {};
+};
+static const uint NUM_BUFFERS = 3;
+struct Sequence {
+  uint32_t size;
+  Transition data[BUFFER_SIZE];
+  Sequence() : size(1), data({Transition()}) {};
+};
+
+
   struct TransitionData {
     //--------------------------------------------------
     // Variables
@@ -24,14 +38,6 @@ namespace pimoroni {
     TransitionData() : channel(0), level(0), state(false), dummy(false) {};
     TransitionData(uint8_t channel, uint32_t level, bool new_state) : channel(channel), level(level), state(new_state), dummy(false) {};
     TransitionData(uint32_t level) : channel(0), level(level), state(false), dummy(true) {};
-
-
-    //--------------------------------------------------
-    // Methods
-    //--------------------------------------------------
-    bool compare(const TransitionData& other) const {
-      return level <= other.level;
-    }
   };
 
   class PWMCluster {
@@ -62,6 +68,10 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     static const uint64_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX; // UINT32_MAX works too, but seems to produce less accurate counters
+    static const uint32_t LOADING_ZONE_SIZE = 3;      // The number of dummy transitions to insert into the data to delay the DMA interrupt (if zero then no zone is used)
+    static const uint32_t LOADING_ZONE_POSITION = 55; // The number of levels before the wrap level to insert the load zone
+                                                      // Smaller values will make the DMA interrupt trigger closer to the time the data is needed,
+                                                      // but risks stalling the PIO if the interrupt takes longer due to other processes
 
 
     //--------------------------------------------------
@@ -77,6 +87,8 @@ namespace pimoroni {
     uint8_t channel_to_pin_map[NUM_BANK0_GPIOS];
     uint wrap_level;
 
+    TransitionData transitions[64];
+    TransitionData looping_transitions[64];
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -121,5 +133,6 @@ namespace pimoroni {
   private:
     static bool bit_in_mask(uint bit, uint mask);
     static void sorted_insert(TransitionData array[], uint &size, const TransitionData &data);
+    void populate_sequence(const TransitionData transitions[], const uint &data_size, Sequence &seq_out, uint &pin_states_in_out) const;
   };
 }

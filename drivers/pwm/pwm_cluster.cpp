@@ -15,30 +15,12 @@ namespace pimoroni {
 
 int data_dma_channel;
 int ctrl_dma_channel;
-
-static const uint BUFFER_SIZE = 64;     // Set to 64, the maximum number of single rises and falls for 32 channels within a looping time period
-struct alignas(8) Transition {
-  uint32_t mask;
-  uint32_t delay;
-  Transition() : mask(0), delay(0) {};
-};
-static const uint NUM_BUFFERS = 3;
-static const uint LOADING_ZONE_SIZE = 3;
-struct Sequence {
-  uint32_t size;
-  Transition data[BUFFER_SIZE];
-  Sequence() : size(1), data({Transition()}) {};
-};
-
-
 Sequence sequences[NUM_BUFFERS];
+Sequence loop_sequences[NUM_BUFFERS];
 uint sequence_index = 0;
-volatile uint32_t looping_mask[NUM_BUFFERS];
 
 volatile uint read_index = 0;
 volatile uint last_written_index = 0;
-
-const bool use_loading_zone = true;
 
 
 uint irq_gpio = 15;
@@ -50,20 +32,19 @@ void __isr pwm_dma_handler() {
 
   gpio_put(irq_gpio, 1); //TOREMOVE Just for debug
 
+  Sequence* seq;
+
   // If new data been written since the last time, switch to reading that buffer
   if(last_written_index != read_index) {
     read_index = last_written_index;
+    seq = &sequences[read_index];
   }
   else {
-    // We're looping the same data so make the start mask match the end mask
-    sequences[read_index].data[0].mask = looping_mask[read_index];
+    seq = &loop_sequences[read_index];
   }
 
-  uint32_t transitions = sequences[read_index].size * 2;
-  uint32_t* buffer = (uint32_t *)sequences[read_index].data;
-
-  dma_channel_set_trans_count(data_dma_channel, transitions, false);
-  dma_channel_set_read_addr(data_dma_channel, buffer, true);
+  dma_channel_set_trans_count(data_dma_channel, seq->size << 1, false);
+  dma_channel_set_read_addr(data_dma_channel, seq->data, true);
 
   gpio_put(irq_gpio, 0); //TOREMOVE Just for debug
 }
@@ -295,7 +276,9 @@ bool PWMCluster::init() {
     Sequence& seq = sequences[i];
     seq = Sequence();
     seq.data[0].delay = 10; // Need to set a delay otherwise a lockup occurs when first changing frequency
-    looping_mask[i] = 0x00;
+    Sequence& looping_seq = loop_sequences[i];
+    looping_seq = Sequence();
+    looping_seq.data[0].delay = 10; // Need to set a delay otherwise a lockup occurs when first changing frequency
   }
 
   // Manually call the handler once, to trigger the first transfer
@@ -373,13 +356,13 @@ void PWMCluster::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
 void PWMCluster::load_pwm() {
   gpio_put(write_gpio, 1);
 
-  TransitionData transitions[64];
   uint data_size = 0;
+  uint looping_data_size = 0;
 
   uint pin_states = 0; // Start with all pins low
 
   // Check if the data we last wrote has been picked up by the DMA yet?
-  bool read_since_last_write = (read_index == last_written_index);
+  const bool read_since_last_write = (read_index == last_written_index);
 
   // Go through each channel that we are assigned to
   for(uint channel = 0; channel < channel_count; channel++) {
@@ -390,8 +373,9 @@ void PWMCluster::load_pwm() {
       pin_states |= (1u << channel_to_pin_map[channel]); // Set the pin
     }
 
-    uint channel_start = state.offset;
-    uint channel_end = (state.offset + state.level) % wrap_level;
+    const uint channel_start = state.offset;
+    const uint channel_end = (state.offset + state.level);
+    const uint channel_wrapped_end = channel_end % wrap_level;
 
     // If the data has been read, copy the channel overruns from that sequence. Otherwise, keep the ones we had previously stored.
     if(read_since_last_write) {
@@ -406,41 +390,53 @@ void PWMCluster::load_pwm() {
       // Flip the initial state so the pin starts "high" (or "low" if polarity inverted)
       pin_states ^= (1u << channel_to_pin_map[channel]);
 
-      // Check for a few edge cases when pulses change length across the wrap level
-      // Not entirely sure I understand which statements does what, but they seem to work
-      if((channel_end >= channel_start) || (state.overrun > channel_end)) {
-        // Add a transition to "low" (or "high" if polarity inverted) at the overrun level of the previous sequence
+      // Is our end level before our start level?
+      if(channel_wrapped_end < channel_start) {
+        // Yes, so add a transition to "low" (or "high" if polarity inverted) at the end level, rather than the overrun (so our pulse takes effect earlier)
+        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_wrapped_end, state.polarity));
+      }
+      else if(state.overrun < channel_start) {
+        // No, so add a transition to "low" (or "high" if polarity inverted) at the overrun instead
         PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, state.overrun, state.polarity));
-        //printf("C = %d, Added Low at %d\n", channel, state.overrun);
       }
     }
 
+    // Is the state level greater than zero, and the start level within the wrap?
     if(state.level > 0 && channel_start < wrap_level) {
       // Add a transition to "high" (or "low" if polarity inverted) at the start level
       PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_start, !state.polarity));
-      //printf("C = %d, Added High at %d\n", channel, channel_start);
+      PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(channel, channel_start, !state.polarity));
 
       // If the channel has overrun the wrap level, record by how much
-      if(channel_end < channel_start) {
-          state.next_overrun = channel_end;
+      if(channel_wrapped_end < channel_start) {
+          state.next_overrun = channel_wrapped_end;
       }
     }
 
+    // Is the state level within the wrap?
     if(state.level < wrap_level) {
-      // Add a transition to "low" (or "high" if polarity inverted) at the end level
-      PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_end, state.polarity));
-      //printf("C = %d, Added Low at %d\n", channel, channel_end);
-    }
+      // Is the end level within the wrap too?
+      if(channel_end < wrap_level) {
+        // Add a transition to "low" (or "high" if polarity inverted) at the end level
+        PWMCluster::sorted_insert(transitions, data_size, TransitionData(channel, channel_end, state.polarity));
+      }
 
-    //printf("C = %d, Start = %d, End = %d, Overrun = %d\n", channel, channel_start, channel_end, state.overrun);
+      // Add a transition to "low" (or "high" if polarity inverted) at the wrapped end level
+      PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(channel, channel_wrapped_end, state.polarity));
+    }
   }
+
+  gpio_put(write_gpio, 0); //TOREMOVE
 
   // Introduce "Loading Zone" transitions to the end of the sequence to
   // prevent the DMA interrupt firing many milliseconds before the sequence ends.
-  uint32_t zone_inserts = MIN(LOADING_ZONE_SIZE, wrap_level);
-  for(uint i = 0; i < zone_inserts; i++) {
-    PWMCluster::sorted_insert(transitions, data_size, TransitionData(wrap_level - 1 - i));
+  uint32_t zone_inserts = MIN(LOADING_ZONE_SIZE, wrap_level - LOADING_ZONE_POSITION);
+  for(uint32_t i = zone_inserts + LOADING_ZONE_POSITION; i > LOADING_ZONE_POSITION; i--) {
+    PWMCluster::sorted_insert(transitions, data_size, TransitionData(wrap_level - i));
+    PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(wrap_level - i));
   }
+
+  gpio_put(write_gpio, 1); //TOREMOVE
 
   // Read | Last W = Write
   // 0    | 0      = 1 (or 2)
@@ -459,83 +455,8 @@ void PWMCluster::load_pwm() {
     write_index = (write_index + 1) % NUM_BUFFERS;
   }
 
-  Sequence& seq = sequences[write_index];
-  seq.size = 0; // Reset the sequence, otherwise we end up appending and weird things happen
-
-  if(data_size > 0) {
-    uint data_index = 0;
-    uint current_level = 0;
-
-    // Populate the selected write sequence with pin states and delays
-    while(data_index < data_size) {
-      uint next_level = wrap_level; // Set the next level to be the wrap, initially
-
-      do {
-        // Is the level of this transition at the current level being checked?
-        if(transitions[data_index].level <= current_level) {
-          // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
-          if(!transitions[data_index].dummy) {
-            if(transitions[data_index].state)
-              pin_states |= (1u << channel_to_pin_map[transitions[data_index].channel]);
-            else
-              pin_states &= ~(1u << channel_to_pin_map[transitions[data_index].channel]);
-
-            //printf("L[%d] = %ld, P = %d\n", data_index, transitions[data_index].level, pin_states);
-          }
-
-          data_index++; // Move on to the next transition
-        }
-        else {
-          // No, it is higher, so set it as our next level and break out of the loop
-          next_level = transitions[data_index].level;
-          break;
-        }
-      } while(data_index < data_size);
-
-      // Add the transition to the sequence
-      seq.data[seq.size].mask = pin_states;
-      seq.data[seq.size].delay = (next_level - current_level) - 1;
-      //printf("S = %ld, M = %ld, D = %ld\n", seq.size, seq.data[seq.size].mask, seq.data[seq.size].delay + 1);
-      seq.size++;
-
-      current_level = next_level;
-    }
-
-    // Now the sequence has been generated, calculate what the pin state should be between looping cycles
-    data_index = 0;
-    do {
-      // Is the level of this transition at the current level being checked?
-      if(transitions[data_index].level <= 0) {
-        // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
-        if(!transitions[data_index].dummy) {
-          if(transitions[data_index].state)
-            pin_states |= (1u << channel_to_pin_map[transitions[data_index].channel]);
-          else
-            pin_states &= ~(1u << channel_to_pin_map[transitions[data_index].channel]);
-        }
-
-        data_index++; // Move on to the next transition
-      }
-      else {
-        break;
-      }
-    } while(data_index < data_size);
-
-    // Record the looping pin states
-    looping_mask[write_index] = pin_states;
-    //BUG It's not just the first one that needs overriding! D'oh!
-    // It could be a whole load of pulses that need updating to account for when multiple pulses pass the looping line
-    // May be best to have an intermediary sequence?
-  }
-  else {
-    // There were no transitions (either because there was a zero wrap, or no channels because there was a zero wrap?),
-    // so initialise the sequence with something, so the PIO functions correctly
-    seq.data[seq.size].mask = 0u;
-    seq.data[seq.size].delay = wrap_level - 1;
-    seq.size++;
-
-    looping_mask[write_index] = 0x00;
-  }
+  populate_sequence(transitions, data_size, sequences[write_index], pin_states);
+  populate_sequence(looping_transitions, looping_data_size, loop_sequences[write_index], pin_states);
 
   // Update the last written index so that the next DMA interrupt picks up the new sequence
   last_written_index = write_index;
@@ -596,12 +517,61 @@ bool PWMCluster::bit_in_mask(uint bit, uint mask) {
 }
 
 void PWMCluster::sorted_insert(TransitionData array[], uint &size, const TransitionData &data) {
-  uint i;
-  for(i = size; (i > 0 && !array[i - 1].compare(data)); i--) {
+  uint i = size;
+  for(; (i > 0 && array[i - 1].level > data.level); i--) {
     array[i] = array[i - 1];
   }
   array[i] = data;
-  //printf("Added %d, %ld, %d\n", data.channel, data.level, data.state);
   size++;
+}
+
+void PWMCluster::populate_sequence(const TransitionData transitions[], const uint &data_size, Sequence &seq_out, uint &pin_states_in_out) const {
+  seq_out.size = 0; // Reset the sequence, otherwise we end up appending and weird things happen
+
+  if(data_size > 0) {
+    uint data_index = 0;
+    uint current_level = 0;
+
+    // Populate the selected write sequence with pin states and delays
+    while(data_index < data_size) {
+      uint next_level = wrap_level; // Set the next level to be the wrap, initially
+
+      do {
+        const TransitionData &transition = transitions[data_index];
+
+        // Is the level of this transition at the current level being checked?
+        if(transition.level <= current_level) {
+          // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
+          if(!transition.dummy) {
+            if(transition.state)
+              pin_states_in_out |= (1u << channel_to_pin_map[transition.channel]);
+            else
+              pin_states_in_out &= ~(1u << channel_to_pin_map[transition.channel]);
+          }
+
+          data_index++; // Move on to the next transition
+        }
+        else {
+          // No, it is higher, so set it as our next level and break out of the loop
+          next_level = transition.level;
+          break;
+        }
+      } while(data_index < data_size);
+
+      // Add the transition to the sequence
+      seq_out.data[seq_out.size].mask = pin_states_in_out;
+      seq_out.data[seq_out.size].delay = (next_level - current_level) - 1;
+      seq_out.size++;
+
+      current_level = next_level;
+    }
+  }
+  else {
+    // There were no transitions (either because there was a zero wrap, or no channels because there was a zero wrap?),
+    // so initialise the sequence with something, so the PIO functions correctly
+    seq_out.data[seq_out.size].mask = 0u;
+    seq_out.data[seq_out.size].delay = wrap_level - 1;
+    seq_out.size++;
+  }
 }
 }
