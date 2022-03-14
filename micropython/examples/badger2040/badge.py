@@ -1,6 +1,7 @@
 import badger2040
 import machine
 import time
+import qrcode
 
 # Global Constants
 WIDTH = badger2040.WIDTH
@@ -99,13 +100,38 @@ def draw_overlay(message, width, height, line_spacing, text_size):
         display.text(lines[i], (WIDTH - length) // 2, (HEIGHT // 2) + current_line, text_size)
 
 
+def measure_qr_code(size, code):
+    w, h = code.get_size()
+    module_size = int(size / w)
+    return module_size * w, module_size
+
+
+def draw_qr_code(ox, oy, size, code):
+    size, module_size = measure_qr_code(size, code)
+    display.pen(15)
+    display.rectangle(ox, oy, size, size)
+    display.pen(0)
+    for x in range(size):
+        for y in range(size):
+            if code.get_module(x, y):
+                display.rectangle(ox + x * module_size, oy + y * module_size, module_size, module_size)
+
+
 # Draw the badge, including user text
 def draw_badge():
     display.pen(0)
     display.clear()
 
-    # Draw badge image
-    display.image(BADGE_IMAGE, IMAGE_WIDTH, HEIGHT, WIDTH - IMAGE_WIDTH, 0)
+    if qrcode_url == "":
+        # Draw badge image
+        display.image(BADGE_IMAGE, IMAGE_WIDTH, HEIGHT, WIDTH - IMAGE_WIDTH, 0)
+    else:
+        display.pen(15)
+        display.rectangle(WIDTH - IMAGE_WIDTH, 0, IMAGE_WIDTH, HEIGHT)
+        size, _ = measure_qr_code(IMAGE_WIDTH, code)
+        offset_x = int(IMAGE_WIDTH / 2 - size / 2)
+        offset_y = int(HEIGHT / 2 - size / 2)
+        draw_qr_code(WIDTH - IMAGE_WIDTH + offset_x, offset_y, IMAGE_WIDTH, code)
 
     # Draw a border around the image
     display.pen(0)
@@ -193,6 +219,7 @@ detail1_title = badge.readline()  # "RP2040"
 detail1_text = badge.readline()   # "2MB Flash"
 detail2_title = badge.readline()  # "E ink"
 detail2_text = badge.readline()   # "296x128px"
+qrcode_url = badge.readline()     # https://pimoroni.com/badger2040
 
 # Truncate all of the text (except for the name as that is scaled)
 company = truncatestring(company, COMPANY_TEXT_SIZE, TEXT_WIDTH)
@@ -211,6 +238,9 @@ button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOW
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
+
+code = qrcode.QRCode()
+code.set_text(qrcode_url)
 
 
 # Button handling function
