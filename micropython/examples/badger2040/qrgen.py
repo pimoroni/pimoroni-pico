@@ -27,7 +27,7 @@ more about Badger 2040.
 """)
     text.flush()
     text.seek(0)
-    
+
 # Load all available QR Code Files
 try:
     CODES = [f for f in os.listdir("/qrcodes") if f.endswith(".txt")]
@@ -41,7 +41,6 @@ for codename in CODES:
     print(f'File: {codename}')
 
 
-
 display = badger2040.Badger2040()
 code = qrcode.QRCode()
 
@@ -49,7 +48,6 @@ code = qrcode.QRCode()
 OVERLAY_BORDER = 40
 OVERLAY_SPACING = 20
 OVERLAY_TEXT_SIZE = 0.5
-
 
 
 button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
@@ -60,6 +58,7 @@ button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_D
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
 current_qr = 0
+
 
 # Draw an overlay box with a given message within it
 def draw_overlay(message, width, height, line_spacing, text_size):
@@ -91,7 +90,7 @@ def draw_overlay(message, width, height, line_spacing, text_size):
         length = display.measure_text(lines[i], text_size)
         current_line = (i * line_spacing) - ((num_lines - 1) * line_spacing) // 2
         display.text(lines[i], (badger2040.WIDTH - length) // 2, (badger2040.HEIGHT // 2) + current_line, text_size)
-        
+
 
 def measure_qr_code(size, code):
     w, h = code.get_size()
@@ -108,30 +107,23 @@ def draw_qr_code(ox, oy, size, code):
         for y in range(size):
             if code.get_module(x, y):
                 display.rectangle(ox + x * module_size, oy + y * module_size, module_size, module_size)
-                
+
 
 def draw_qr_file(n):
     file = CODES[n]
-    name = file.split(".")[0]
-    #print(f'Reading file: {file}')
+    # print(f'Reading file: {file}')
     codetext = open("qrcodes/{}".format(file), "r")
-    
-    
+
     lines = codetext.read().strip().split("\n")
     code_text = lines.pop(0)
     title_text = lines.pop(0)
     detail_text = lines
-    
-    #print(f'Code Text: {code_text}')
-    #print(f'Title Text: {title_text}')
-    #print(f'Detail: {detail_text}')
-    
+
     # Clear the Display
     display.pen(15)  # Change this to 0 if a white background is used
     display.clear()
     display.pen(0)
-    
-    
+
     code.set_text(code_text)
     size, _ = measure_qr_code(128, code)
     left = top = int((badger2040.HEIGHT / 2) - (size / 2))
@@ -166,7 +158,7 @@ while True:
     if(TOTAL_CODES > 1):
         if button_up.value():
             if current_qr > 0:
-                current_qr -=1
+                current_qr -= 1
             draw_qr_file(current_qr)
         if button_down.value():
             if current_qr < TOTAL_CODES - 1:
@@ -175,9 +167,8 @@ while True:
     if button_b.value() or button_c.value():
         display.pen(15)
         display.clear()
-        draw_overlay("To add QR codes, connect Badger2040 to a PC, load up Thonny, and see qrgen.py", badger2040.WIDTH - OVERLAY_BORDER, badger2040.HEIGHT-OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+        draw_overlay("To add QR codes, connect Badger2040 to a PC, load up Thonny, and see qrgen.py", badger2040.WIDTH - OVERLAY_BORDER, badger2040.HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
         display.update()
         time.sleep(4)
         draw_qr_file(current_qr)
     time.sleep(0.01)
-
