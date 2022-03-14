@@ -7,6 +7,7 @@ import badger2040
 from badger2040 import WIDTH
 import launchericons
 
+# for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
@@ -27,7 +28,7 @@ examples = [
     ("_badge", 5),
     ("_qrgen", 8),
     ("_info", 6),
-    ("_help", 7)
+    ("_help", 7),
 ]
 
 font_sizes = (0.5, 0.7, 0.9)
@@ -42,7 +43,6 @@ button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOW
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
 # Inverted. For reasons.
 button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
@@ -67,7 +67,9 @@ def get_battery_level():
 
     # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
     vdd = 1.24 * (65535 / vref_adc.read_u16())
-    vbat = (vbat_adc.read_u16() / 65535) * 3 * vdd  # 3 in this is a gain, not rounding of 3.3V
+    vbat = (
+        (vbat_adc.read_u16() / 65535) * 3 * vdd
+    )  # 3 in this is a gain, not rounding of 3.3V
 
     # Disable the onboard voltage reference
     vref_en.value(0)
@@ -103,7 +105,8 @@ def draw_battery(level, x, y):
 def draw_disk_usage(x):
     # f_bfree and f_bavail should be the same?
     # f_files, f_ffree, f_favail and f_flag are unsupported.
-    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs("/")
+    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs(
+        "/")
 
     f_total_size = f_frsize * f_blocks
     f_total_free = f_bsize * f_bfree
@@ -112,15 +115,24 @@ def draw_disk_usage(x):
     f_used = 100 / f_total_size * f_total_used
     # f_free = 100 / f_total_size * f_total_free
 
-    display.image(bytearray((
-        0b00000000,
-        0b00111100,
-        0b00111100,
-        0b00111100,
-        0b00111000,
-        0b00000000,
-        0b00000000,
-        0b00000001)), 8, 8, x, 4)
+    display.image(
+        bytearray(
+            (
+                0b00000000,
+                0b00111100,
+                0b00111100,
+                0b00111100,
+                0b00111000,
+                0b00000000,
+                0b00000000,
+                0b00000001,
+            )
+        ),
+        8,
+        8,
+        x,
+        4,
+    )
     display.pen(15)
     display.rectangle(x + 10, 3, 80, 10)
     display.pen(0)
@@ -175,8 +187,8 @@ def launch(file):
     try:
         __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
     except ImportError:
-        __import__(file)      # Failover to importing [_file]
-    machine.reset()           # Exit back to launcher
+        __import__(file)  # Failover to importing [_file]
+    machine.reset()  # Exit back to launcher
 
 
 def launch_example(index):

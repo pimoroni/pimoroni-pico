@@ -3,6 +3,7 @@ from machine import Pin, ADC
 import time
 
 # Global Constants
+# for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
@@ -26,6 +27,7 @@ NUM_BATT_BARS = 4
 #      Utility functions
 # ------------------------------
 
+
 def map_value(input, in_min, in_max, out_min, out_max):
     return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
 
@@ -43,15 +45,24 @@ def draw_battery(level, resolution):
 
     # Draw the battery outline
     display.pen(0)
-    display.rectangle((WIDTH - BATT_WIDTH) // 2, (HEIGHT - BATT_HEIGHT) // 2,
-                      BATT_WIDTH, BATT_HEIGHT)
+    display.rectangle(
+        (WIDTH - BATT_WIDTH) // 2, (HEIGHT - BATT_HEIGHT) // 2, BATT_WIDTH, BATT_HEIGHT
+    )
 
-    display.rectangle((WIDTH + BATT_WIDTH) // 2, (HEIGHT - BATT_TERM_HEIGHT) // 2,
-                      BATT_TERM_WIDTH, BATT_TERM_HEIGHT)
+    display.rectangle(
+        (WIDTH + BATT_WIDTH) // 2,
+        (HEIGHT - BATT_TERM_HEIGHT) // 2,
+        BATT_TERM_WIDTH,
+        BATT_TERM_HEIGHT,
+    )
 
     display.pen(15)
-    display.rectangle((WIDTH - BATT_WIDTH) // 2 + BATT_BORDER, (HEIGHT - BATT_HEIGHT) // 2 + BATT_BORDER,
-                      BATT_WIDTH - BATT_BORDER * 2, BATT_HEIGHT - BATT_BORDER * 2)
+    display.rectangle(
+        (WIDTH - BATT_WIDTH) // 2 + BATT_BORDER,
+        (HEIGHT - BATT_HEIGHT) // 2 + BATT_BORDER,
+        BATT_WIDTH - BATT_BORDER * 2,
+        BATT_HEIGHT - BATT_BORDER * 2,
+    )
 
     # Add a special check for no battery
     if level < 1:
@@ -64,25 +75,39 @@ def draw_battery(level, resolution):
         start_extra = thickness // 3
         end_extra = (thickness * 2) // 3
         for i in range(0, thickness):
-            excess = (i // 2)
-            display.line(X - (BATT_HEIGHT // 2) + i - excess - start_extra, Y - (BATT_HEIGHT // 2) - excess - start_extra,
-                         X + (BATT_HEIGHT // 2) + i - excess + end_extra, Y + (BATT_HEIGHT // 2) - excess + end_extra)
+            excess = i // 2
+            display.line(
+                X - (BATT_HEIGHT // 2) + i - excess - start_extra,
+                Y - (BATT_HEIGHT // 2) - excess - start_extra,
+                X + (BATT_HEIGHT // 2) + i - excess + end_extra,
+                Y + (BATT_HEIGHT // 2) - excess + end_extra,
+            )
         display.pen(15)
         for i in range(0 - thickness, 0):
-            display.line(X - (BATT_HEIGHT // 2) + i, Y - (BATT_HEIGHT // 2),
-                         X + (BATT_HEIGHT // 2) + i, Y + (BATT_HEIGHT // 2))
+            display.line(
+                X - (BATT_HEIGHT // 2) + i,
+                Y - (BATT_HEIGHT // 2),
+                X + (BATT_HEIGHT // 2) + i,
+                Y + (BATT_HEIGHT // 2),
+            )
     else:
         # Draw the battery bars
         display.pen(0)
-        length = (BATT_BAR_END - BATT_BAR_START - ((NUM_BATT_BARS - 1) * BATT_BAR_PADDING)) // NUM_BATT_BARS
+        length = (
+            BATT_BAR_END - BATT_BAR_START - ((NUM_BATT_BARS - 1) * BATT_BAR_PADDING)
+        ) // NUM_BATT_BARS
         current_level = 0.0
         normalised_level = level / resolution
         for i in range(NUM_BATT_BARS):
             current_level = (1.0 * i) / NUM_BATT_BARS
             if normalised_level > current_level:
                 pos = i * (length + BATT_BAR_PADDING)
-                display.rectangle(BATT_BAR_START + pos, (HEIGHT - BATT_BAR_HEIGHT) // 2,
-                                  length, BATT_BAR_HEIGHT)
+                display.rectangle(
+                    BATT_BAR_START + pos,
+                    (HEIGHT - BATT_BAR_HEIGHT) // 2,
+                    length,
+                    BATT_BAR_HEIGHT,
+                )
 
     display.update()
 
@@ -115,7 +140,9 @@ while True:
 
     # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
     vdd = 1.24 * (65535 / vref_adc.read_u16())
-    vbat = (vbat_adc.read_u16() / 65535) * 3 * vdd  # 3 in this is a gain, not rounding of 3.3V
+    vbat = (
+        (vbat_adc.read_u16() / 65535) * 3 * vdd
+    )  # 3 in this is a gain, not rounding of 3.3V
 
     # Disable the onboard voltage reference
     vref_en.value(0)
@@ -124,7 +151,9 @@ while True:
     print("Battery Voltage = ", vbat, "V", sep="")
 
     # Convert the voltage to a level to display onscreen
-    level = int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, NUM_BATT_BARS))
+    level = int(
+        map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, NUM_BATT_BARS)
+    )
 
     # Only draw if the battery level has changed significantly
     if level != last_level:

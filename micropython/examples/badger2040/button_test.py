@@ -13,6 +13,9 @@ button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOW
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
+# the User button (boot/usr on back of board) is inverted from the others
+button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
+
 
 message = None
 message_y = 60
@@ -23,19 +26,22 @@ def button(pin):
     if message is not None:
         return
     if pin == button_a:
-        message = "Button A"
+        message = "Button a"
         return
     if pin == button_b:
-        message = "Button B"
+        message = "Button b"
         return
     if pin == button_c:
-        message = "Button C"
+        message = "Button c"
         return
     if pin == button_up:
-        message = "Button U"
+        message = "Button Up"
         return
     if pin == button_down:
-        message = "Button D"
+        message = "Button Down"
+        return
+    if pin == button_user:
+        message = "Button Usr"
         return
 
 
@@ -45,6 +51,7 @@ button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
+button_user.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 
 while True:
@@ -53,7 +60,7 @@ while True:
         display.clear()
         display.pen(0)
         display.thickness(4)
-        display.text(message, 10, message_y, 2.0)
+        display.text(message, 6, message_y, 1.4)
         for _ in range(2):
             display.update()
         message = None
