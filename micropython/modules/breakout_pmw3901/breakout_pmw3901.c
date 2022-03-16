@@ -40,7 +40,6 @@ const mp_obj_type_t breakout_pmw3901_BreakoutPMW3901_type = {
     .locals_dict = (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict,
 };
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_pmw3901 Module
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,4 +60,35 @@ const mp_obj_module_t breakout_pmw3901_user_cmodule = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 MP_REGISTER_MODULE(MP_QSTR_breakout_pmw3901, breakout_pmw3901_user_cmodule, MODULE_BREAKOUT_PMW3901_ENABLED);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Class Definition *****/
+const mp_obj_type_t breakout_paa5100_BreakoutPAA5100_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_breakout_pmw3901,
+    .print = BreakoutPMW3901_print,
+    .make_new = BreakoutPAA5100_make_new,
+    .locals_dict = (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict,
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// breakout_paa5100 Module
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/***** Globals Table *****/
+STATIC const mp_map_elem_t breakout_paa5100_globals_table[] = {
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_paa5100) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutPAA5100), (mp_obj_t)&breakout_paa5100_BreakoutPAA5100_type },
+};
+STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_paa5100_globals, breakout_paa5100_globals_table);
+
+/***** Module Definition *****/
+const mp_obj_module_t breakout_paa5100_user_cmodule = {
+    .base = { &mp_type_module },
+    .globals = (mp_obj_dict_t*)&mp_module_breakout_paa5100_globals,
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+MP_REGISTER_MODULE(MP_QSTR_breakout_paa5100, breakout_paa5100_user_cmodule, MODULE_BREAKOUT_PMW3901_ENABLED);
 ////////////////////////////////////////////////////////////////////////////////////////////////////

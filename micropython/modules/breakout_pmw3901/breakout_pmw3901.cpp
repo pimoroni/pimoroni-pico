@@ -18,6 +18,7 @@ extern "C" {
 typedef struct _breakout_pmw3901_BreakoutPMW3901_obj_t {
     mp_obj_base_t base;
     BreakoutPMW3901 *breakout;
+    ChipType chip;
 } breakout_pmw3901_BreakoutPMW3901_obj_t;
 
 /***** Print *****/
@@ -25,7 +26,12 @@ void BreakoutPMW3901_print(const mp_print_t *print, mp_obj_t self_in, mp_print_k
     (void)kind; //Unused input parameter
     breakout_pmw3901_BreakoutPMW3901_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_pmw3901_BreakoutPMW3901_obj_t);
     BreakoutPMW3901* breakout = self->breakout;
-    mp_print_str(print, "BreakoutPMW3901(");
+
+    if(self->chip == ChipType::PMW3901) {
+        mp_print_str(print, "BreakoutPMW3901(");
+    } else {
+        mp_print_str(print, "BreakoutPAA5100(");
+    }
 
     mp_print_str(print, "spi = ");
     mp_obj_print_helper(print, mp_obj_new_int((breakout->get_spi() == spi0) ? 0 : 1), PRINT_REPR);
@@ -49,7 +55,16 @@ void BreakoutPMW3901_print(const mp_print_t *print, mp_obj_t self_in, mp_print_k
 }
 
 /***** Constructor *****/
+
 mp_obj_t BreakoutPMW3901_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    return make_new(ChipType::PMW3901, type, n_args, n_kw, all_args);
+}
+
+mp_obj_t BreakoutPAA5100_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    return make_new(ChipType::PAA5100, type, n_args, n_kw, all_args);
+}
+
+mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_pmw3901_BreakoutPMW3901_obj_t *self = nullptr;
 
     if(n_args + n_kw == 1) {
@@ -120,6 +135,7 @@ mp_obj_t BreakoutPMW3901_make_new(const mp_obj_type_t *type, size_t n_args, size
         self->breakout = new BreakoutPMW3901(spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
     }
 
+    self->chip = chip;
     self->breakout->init();
 
     return MP_OBJ_FROM_PTR(self);
