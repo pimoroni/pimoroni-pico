@@ -190,7 +190,7 @@ mp_obj_t BreakoutPMW3901_get_motion(size_t n_args, const mp_obj_t *pos_args, mp_
     enum { ARG_self, ARG_timeout };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_obj_new_float((float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000)} },
+        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -198,8 +198,13 @@ mp_obj_t BreakoutPMW3901_get_motion(size_t n_args, const mp_obj_t *pos_args, mp_
 
     breakout_pmw3901_BreakoutPMW3901_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_pmw3901_BreakoutPMW3901_obj_t);
 
-    float timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
-    uint16_t timeout_ms = (uint16_t)(timeout * 1000.0f);
+    float timeout = (float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000.0f;
+    uint16_t timeout_ms = BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS;
+
+    if (args[ARG_timeout].u_obj != mp_const_none) {
+        timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
+        timeout_ms = (uint16_t)(timeout * 1000.0f);
+    }
     int16_t x = 0;
     int16_t y = 0;
     if(self->breakout->get_motion(x, y, timeout_ms)) {
@@ -215,7 +220,7 @@ mp_obj_t BreakoutPMW3901_get_motion_slow(size_t n_args, const mp_obj_t *pos_args
     enum { ARG_self, ARG_timeout };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_obj_new_float((float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000)} },
+        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -223,8 +228,13 @@ mp_obj_t BreakoutPMW3901_get_motion_slow(size_t n_args, const mp_obj_t *pos_args
 
     breakout_pmw3901_BreakoutPMW3901_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_pmw3901_BreakoutPMW3901_obj_t);
 
-    float timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
-    uint16_t timeout_ms = (uint16_t)(timeout * 1000.0f);
+    float timeout = (float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000.0f;
+    uint16_t timeout_ms = BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS;
+
+    if (args[ARG_timeout].u_obj != mp_const_none) {
+        timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
+        timeout_ms = (uint16_t)(timeout * 1000.0f);
+    }
     int16_t x = 0;
     int16_t y = 0;
     if(self->breakout->get_motion_slow(x, y, timeout_ms)) {
@@ -241,7 +251,7 @@ mp_obj_t BreakoutPMW3901_frame_capture(size_t n_args, const mp_obj_t *pos_args, 
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_buffer, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_obj_new_float((float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000)} },
+        { MP_QSTR_timeout, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -256,8 +266,13 @@ mp_obj_t BreakoutPMW3901_frame_capture(size_t n_args, const mp_obj_t *pos_args, 
         mp_raise_ValueError("Supplied buffer is the wrong size for frame capture. Needs to be 1225.");
     }
 
-    float timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
-    uint16_t timeout_ms = (uint16_t)(timeout * 1000.0f);
+    float timeout = (float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000.0f;
+    uint16_t timeout_ms = BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS;
+
+    if (args[ARG_timeout].u_obj != mp_const_none) {
+        timeout = mp_obj_get_float(args[ARG_timeout].u_obj);
+        timeout_ms = (uint16_t)(timeout * 1000.0f);
+    }
 
     uint16_t data_size = 0;
     uint8_t data[BreakoutPMW3901::FRAME_BYTES];
