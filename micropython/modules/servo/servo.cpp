@@ -4,6 +4,7 @@
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
+using namespace pimoroni;
 using namespace servo;
 
 extern "C" {
@@ -880,6 +881,8 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
 typedef struct _ServoCluster_obj_t {
     mp_obj_base_t base;
     ServoCluster* cluster;
+    PWMCluster::Sequence *seq_buf;
+    PWMCluster::TransitionData *dat_buf;
 } _ServoCluster_obj_t;
 
 
@@ -991,18 +994,30 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     bool auto_phase = args[ARG_auto_phase].u_bool;
 
-    self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
-    self->base.type = &ServoCluster_type;
-
+    ServoCluster *cluster;
+    PWMCluster::Sequence *seq_buffer = m_new(PWMCluster::Sequence, PWMCluster::NUM_BUFFERS * 2);
+    PWMCluster::TransitionData *dat_buffer = m_new(PWMCluster::TransitionData, PWMCluster::BUFFER_SIZE * 2);
     if(mask_provided)
-        self->cluster = new ServoCluster(pio, sm, pin_mask, calibration_type, freq, auto_phase);
+        cluster = new ServoCluster(pio, sm, pin_mask, calibration_type, freq, auto_phase, seq_buffer, dat_buffer);
     else
-        self->cluster = new ServoCluster(pio, sm, pins, pin_count, calibration_type, freq, auto_phase);
-    self->cluster->init();
+        cluster = new ServoCluster(pio, sm, pins, pin_count, calibration_type, freq, auto_phase, seq_buffer, dat_buffer);
 
     // Cleanup the pins array
     if(pins != nullptr)
         delete[] pins;
+
+    if(!cluster->init()) {
+        delete cluster;
+        m_del(PWMCluster::Sequence, seq_buffer, PWMCluster::NUM_BUFFERS * 2);
+        m_del(PWMCluster::TransitionData, dat_buffer, PWMCluster::BUFFER_SIZE * 2);
+        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()`, then create this ServoCluster");
+    }
+
+    self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
+    self->base.type = &ServoCluster_type;
+    self->cluster = cluster;
+    self->seq_buf = seq_buffer;
+    self->dat_buf = dat_buffer;
 
     return MP_OBJ_FROM_PTR(self);
 }

@@ -4,6 +4,8 @@
 #include "pwm_cluster.hpp"
 #include "servo_state.hpp"
 
+using namespace pimoroni;
+
 namespace servo {
 
   class ServoCluster {
@@ -11,7 +13,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    pimoroni::PWMCluster pwms;
+    PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
     ServoState* states;
@@ -22,10 +24,10 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
-    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
-    ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
-    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
     ~ServoCluster();
 
 

@@ -3,23 +3,23 @@
 #include <cstdio>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase)
-    : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pin_mask, seq_buffer, dat_buffer), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq, bool auto_phase)
-    : pwms(pio, sm, pin_base, pin_count), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pin_base, pin_count, seq_buffer, dat_buffer), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type, float freq, bool auto_phase)
-    : pwms(pio, sm, pins, length), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pins, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq, bool auto_phase)
-    : pwms(pio, sm, pins), pwm_frequency(freq) {
+  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pins, seq_buffer, dat_buffer), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
 
