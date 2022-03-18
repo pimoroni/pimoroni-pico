@@ -2,10 +2,11 @@ import time
 import math
 from servo import ServoCluster, servo2040
 
-# NOTE: ServoCluster lets you control up to 30 servos at once. This is done using the
-# RP2040's PIO system. As such it is experimental and may have edge-cases that will
-# need to be fixed. This is particularly true when attempting to run a program multiple
-# times. If you do encounter issues, try resetting your board.
+# NOTE: ServoCluster lets you control up to 30 servos at once. This is
+# done using the RP2040's PIO system. As such it is experimental and may
+# have edge-cases that will need to be fixed. This is particularly true
+# when attempting to run a program multiple times.
+# If you do encounter issues, try resetting your board.
 
 # Create a servo cluster for pins 0 to 3, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1
@@ -28,10 +29,10 @@ time.sleep(2)
 servos.all_to_mid()
 time.sleep(2)
 
-SWEEPS = 3  # How many sweeps of the servo to perform
-STEPS = 10  # The number of discrete sweep steps
-STEPS_INTERVAL = 0.5  # The time in seconds between each step of the sequence
-SWEEP_EXTENT = 90.0 # How far from zero to move the servo when sweeping
+SWEEPS = 3              # How many sweeps of the servo to perform
+STEPS = 10              # The number of discrete sweep steps
+STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
+SWEEP_EXTENT = 90.0     # How far from zero to move the servos when sweeping
 
 # Do a sine sweep
 for j in range(SWEEPS):
