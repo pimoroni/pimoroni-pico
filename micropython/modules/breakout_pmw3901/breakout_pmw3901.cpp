@@ -1,4 +1,5 @@
 #include "libraries/breakout_pmw3901/breakout_pmw3901.hpp"
+#include "libraries/breakout_paa5100/breakout_paa5100.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
@@ -82,7 +83,21 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
             self = m_new_obj_with_finaliser(breakout_pmw3901_BreakoutPMW3901_obj_t);
             self->base.type = &breakout_pmw3901_BreakoutPMW3901_type;
 
-            self->breakout = new BreakoutPMW3901((BG_SPI_SLOT)slot);
+            if(chip == ChipType::PMW3901) {
+                BreakoutPMW3901 *breakout = new BreakoutPMW3901((BG_SPI_SLOT)slot);
+                if (!breakout->init()) {
+                    delete breakout;
+                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+                }
+                self->breakout = breakout;
+            } else {
+                BreakoutPAA5100 *breakout = new BreakoutPAA5100((BG_SPI_SLOT)slot);
+                if (!breakout->init()) {
+                    delete breakout;
+                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+                }
+                self->breakout = breakout;
+            }
         }
         else {
             mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
@@ -132,11 +147,24 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
         self->base.type = &breakout_pmw3901_BreakoutPMW3901_type;
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
-        self->breakout = new BreakoutPMW3901(spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
+        if(chip == ChipType::PMW3901) {
+            BreakoutPMW3901 *breakout = new BreakoutPMW3901(spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
+            if (!breakout->init()) {
+                delete breakout;
+                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+            }
+            self->breakout = breakout;
+        } else {
+            BreakoutPAA5100 *breakout = new BreakoutPAA5100(spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
+            if (!breakout->init()) {
+                delete breakout;
+                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+            }
+            self->breakout = breakout;
+        }
     }
 
     self->chip = chip;
-    self->breakout->init();
 
     return MP_OBJ_FROM_PTR(self);
 }
