@@ -167,6 +167,8 @@ typedef struct _mp_obj_float_t {
     mp_float_t value;
 } mp_obj_float_t;
 mp_obj_float_t servo2040_shunt_resistor = {{&mp_type_float}, 0.003f};
+mp_obj_float_t servo2040_voltage_gain = {{&mp_type_float}, 0.5f};
+mp_obj_float_t servo2040_current_offset = {{&mp_type_float}, -0.02f};
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t servo2040_globals_table[] = {
@@ -211,7 +213,9 @@ STATIC const mp_map_elem_t servo2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_VOLTAGE_SENSE_ADDR), MP_ROM_INT(0b110) },
     { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_ADDR), MP_ROM_INT(0b111) },
     { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&servo2040_shunt_resistor) },
-    { MP_ROM_QSTR(MP_QSTR_ADC_GAIN), MP_ROM_INT(69) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_GAIN), MP_ROM_INT(69) },
+    { MP_ROM_QSTR(MP_QSTR_VOLTAGE_GAIN), MP_ROM_PTR(&servo2040_voltage_gain) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MP_ROM_PTR(&servo2040_current_offset) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_servo2040_globals, servo2040_globals_table);
 

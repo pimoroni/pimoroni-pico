@@ -14,7 +14,7 @@ from servo import ServoCluster, servo2040
 
 SPEED = 5             # The speed that the LEDs will cycle at
 BRIGHTNESS = 0.4      # The brightness of the LEDs
-UPDATES = 50          # How many times the LEDs and Servos will be updated per second
+UPDATES = 50          # How many times to update LEDs and Servos per second
 SERVO_EXTENT = 80.0   # How far from zero to move the servos
 
 # Create a servo cluster for pins 0 to 7, using PIO 0 and State Machine 0

@@ -7,19 +7,72 @@ PICO_EXPLORER_I2C_PINS = {"sda": 20, "scl": 21}
 
 
 class Analog:
-    def __init__(self, pin, amplifier_gain=1, resistor=0):
+    def __init__(self, pin, amplifier_gain=1, resistor=0, offset=0):
         self.gain = amplifier_gain
         self.resistor = resistor
+        self.offset = offset
         self.pin = ADC(pin)
 
     def read_voltage(self):
-        return self.pin.read_u16() * 3.3 / 65535 / self.gain
+        return max((((self.pin.read_u16() * 3.3) / 65535) + self.offset) / self.gain, 0.0)
 
     def read_current(self):
         if self.resistor > 0:
             return self.read_voltage() / self.resistor
         else:
             return self.read_voltage()
+
+
+class AnalogMux:
+    def __init__(self, addr0, addr1=None, addr2=None, en=None, muxed_pin=None):
+        self.addr0_pin = Pin(addr0, Pin.OUT)
+        self.addr1_pin = Pin(addr1, Pin.OUT) if addr1 is not None else None
+        self.addr2_pin = Pin(addr2, Pin.OUT) if addr2 is not None else None
+        self.en_pin = Pin(en, Pin.OUT) if en is not None else None
+        self.max_address = 0b001
+        if addr1 is not None:
+            self.max_address = 0b011
+            if addr2 is not None:
+                self.max_address = 0b111
+        self.pulls = [None] * (self.max_address + 1)
+        self.muxed_pin = muxed_pin
+
+    def select(self, address):
+        if address < 0:
+            raise ValueError("address is less than zero")
+        elif address > self.max_address:
+            raise ValueError("address is greater than number of available addresses")
+        else:
+            if self.muxed_pin and self.pulls[address] is None:
+                self.muxed_pin.init(Pin.IN, None)
+
+            self.addr0_pin.value(address & 0b001)
+
+            if self.addr1_pin is not None:
+                self.addr1_pin.value(address & 0b010)
+
+            if self.addr2_pin is not None:
+                self.addr2_pin.value(address & 0b100)
+
+            if self.en_pin is not None:
+                self.en_pin.value(1)
+
+            if self.muxed_pin and self.pulls[address] is not None:
+                self.muxed_pin.init(Pin.IN, self.pulls[address])
+
+    def disable(self):
+        if self.en_pin is not None:
+            self.en_pin.value(0)
+        else:
+            raise RuntimeError("there is no enable pin assigned to this mux")
+
+    def configure_pull(self, address, pull=None):
+        if address < 0:
+            raise ValueError("address is less than zero")
+        elif address > self.max_address:
+            raise ValueError("address is greater than number of available addresses")
+        else:
+            self.pulls[address] = pull
 
 
 class Button:
