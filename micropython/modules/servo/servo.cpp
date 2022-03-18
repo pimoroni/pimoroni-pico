@@ -1010,7 +1010,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         delete cluster;
         m_del(PWMCluster::Sequence, seq_buffer, PWMCluster::NUM_BUFFERS * 2);
         m_del(PWMCluster::TransitionData, dat_buffer, PWMCluster::BUFFER_SIZE * 2);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()`, then create this ServoCluster");
+        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster");//. Try running `import gc` followed by `gc.collect()`, then create this ServoCluster");
     }
 
     self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
@@ -1349,8 +1349,8 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
-extern mp_obj_t ServoCluster_all_pulses(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    if(n_args <= 1) {
+extern mp_obj_t ServoCluster_all_to_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    /*if(n_args <= 1) {
         enum { ARG_self };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -1373,28 +1373,28 @@ extern mp_obj_t ServoCluster_all_pulses(size_t n_args, const mp_obj_t *pos_args,
             return MP_OBJ_FROM_PTR(tuple);
         }
     }
+    else {*/
+    enum { ARG_self, ARG_pulse, ARG_load };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_pulse, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
     else {
-        enum { ARG_self, ARG_pulse, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_pulse, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->get_count();
-        if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
-        else {
-            float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
-            self->cluster->set_all_pulses(pulse, args[ARG_load].u_bool);
-        }
+        float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+        self->cluster->set_all_pulses(pulse, args[ARG_load].u_bool);
     }
+    //}
     return mp_const_none;
 }
 
@@ -1492,8 +1492,8 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
-extern mp_obj_t ServoCluster_all_values(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    if(n_args <= 1) {
+extern mp_obj_t ServoCluster_all_to_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    /*if(n_args <= 1) {
         enum { ARG_self, ARG_servo };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -1516,28 +1516,28 @@ extern mp_obj_t ServoCluster_all_values(size_t n_args, const mp_obj_t *pos_args,
             return MP_OBJ_FROM_PTR(tuple);
         }
     }
+    else {*/
+    enum { ARG_self, ARG_value, ARG_load };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
     else {
-        enum { ARG_self, ARG_value, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_value, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->get_count();
-        if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
-        else {
-            float value = mp_obj_get_float(args[ARG_value].u_obj);
-            self->cluster->set_all_values(value, args[ARG_load].u_bool);
-        }
+        float value = mp_obj_get_float(args[ARG_value].u_obj);
+        self->cluster->set_all_values(value, args[ARG_load].u_bool);
     }
+    //}
     return mp_const_none;
 }
 
@@ -1635,8 +1635,8 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
     return mp_const_none;
 }
 
-extern mp_obj_t ServoCluster_all_phases(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    if(n_args <= 1) {
+extern mp_obj_t ServoCluster_all_to_phase(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    /*if(n_args <= 1) {
         enum { ARG_self };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -1659,28 +1659,28 @@ extern mp_obj_t ServoCluster_all_phases(size_t n_args, const mp_obj_t *pos_args,
             return MP_OBJ_FROM_PTR(tuple);
         }
     }
+    else {*/
+    enum { ARG_self, ARG_phase, ARG_load };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_phase, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
+
+    int servo_count = (int)self->cluster->get_count();
+    if(servo_count == 0)
+        mp_raise_ValueError("this cluster does not have any servos");
     else {
-        enum { ARG_self, ARG_phase, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_phase, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->get_count();
-        if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
-        else {
-            float phase = mp_obj_get_float(args[ARG_phase].u_obj);
-            self->cluster->set_all_phases(phase, args[ARG_load].u_bool);
-        }
+        float phase = mp_obj_get_float(args[ARG_phase].u_obj);
+        self->cluster->set_all_phases(phase, args[ARG_load].u_bool);
     }
+    //}
     return mp_const_none;
 }
 
