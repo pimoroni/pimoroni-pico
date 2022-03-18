@@ -53,8 +53,6 @@ namespace pimoroni {
     uint8_t product_id = get_id();
     uint8_t revision = get_revision();
 
-    printf("Product ID and Revision for PMW3901: %d, %d\n", product_id, revision);
-
     if(product_id != 0x49 || revision != 0x00) {
       return false;
     }
