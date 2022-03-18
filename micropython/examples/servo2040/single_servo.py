@@ -1,10 +1,9 @@
 import time
 import math
-from servo import Servo
+from servo import Servo, servo2040
 
 # Create a servo on pin 0
-PIN = 0
-s = Servo(PIN)
+s = Servo(servo2040.SERVO_1)
 
 # Enable the servo (this puts it at the middle)
 s.enable()
