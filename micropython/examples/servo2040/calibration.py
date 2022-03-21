@@ -1,4 +1,4 @@
-from servo import *
+from servo import Calibration, Servo, servo2040, ANGULAR, LINEAR, CONTINUOUS
 
 # --------------------------------------------------
 #      An example of how to create and modify
@@ -6,7 +6,7 @@ from servo import *
 # --------------------------------------------------
 
 # Create an angular servo on pin 0. By default its value ranges from -90 to +90
-angular_servo = Servo(servo2040.SERVO_1)
+angular_servo = Servo(servo2040.SERVO_1, ANGULAR)
 
 # Access its calibration and print it out
 cal = angular_servo.calibration()
