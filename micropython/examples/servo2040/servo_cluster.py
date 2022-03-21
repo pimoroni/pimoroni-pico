@@ -13,7 +13,7 @@ START_PIN = servo2040.SERVO_1
 END_PIN = servo2040.SERVO_4
 servos = ServoCluster(pio=0, sm=0, pins=list(range(START_PIN, END_PIN + 1)))
 
-# Enable all servos (this puts it at the middle)
+# Enable all servos (this puts them at the middle)
 servos.enable_all()
 time.sleep(2)
 

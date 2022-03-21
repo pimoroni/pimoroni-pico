@@ -38,11 +38,11 @@ while user_sw.raw() is not True:
     for i in range(len(sensor_addrs)):
         mux.select(sensor_addrs[i])
         sensor_voltage = sen_adc.read_voltage()
-        
+
         # Calculate the LED's hue, with Green for high voltages and Blue for low
         hue = (2.0 - (sensor_voltage / 3.3)) * 0.333
-        led_bar.set_hsv(i, hue, 1.0, BRIGHTNESS)            
-            
+        led_bar.set_hsv(i, hue, 1.0, BRIGHTNESS)
+
         print("S", i + 1, " = ", round(sensor_voltage, 3), sep="", end=", ")
     print()
 
