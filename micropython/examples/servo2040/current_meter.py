@@ -65,7 +65,7 @@ while user_sw.raw() is not True:
 
     # Update all the LEDs
     for i in range(servo2040.NUM_LEDS):
-        # Calculate the LED's hue, with Red for high currents and green for low
+        # Calculate the LED's hue, with Red for high currents and Green for low
         hue = (1.0 - i / (servo2040.NUM_LEDS - 1)) * 0.333
 
         # Calculate the current level the LED represents
