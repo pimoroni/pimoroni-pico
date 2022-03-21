@@ -7,7 +7,7 @@ START_PIN = servo2040.SERVO_1
 END_PIN = servo2040.SERVO_3
 servos = [Servo(i) for i in range(START_PIN, END_PIN + 1)]
 
-# Enable all servos (this puts it at the middle)
+# Enable all servos (this puts them at the middle)
 for s in servos:
     s.enable()
 time.sleep(2)

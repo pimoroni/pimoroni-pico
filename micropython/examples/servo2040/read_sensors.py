@@ -36,6 +36,7 @@ while user_sw.raw() is not True:
     mux.select(servo2040.VOLTAGE_SENSE_ADDR)
     print("Voltage =", round(vol_adc.read_voltage(), 4), end=", ")
 
+    # Read the current sense and print the value
     mux.select(servo2040.CURRENT_SENSE_ADDR)
     print("Current =", round(cur_adc.read_current(), 4))
 

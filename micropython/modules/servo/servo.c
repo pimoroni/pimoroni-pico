@@ -167,7 +167,7 @@ typedef struct _mp_obj_float_t {
     mp_float_t value;
 } mp_obj_float_t;
 mp_obj_float_t servo2040_shunt_resistor = {{&mp_type_float}, 0.003f};
-mp_obj_float_t servo2040_voltage_gain = {{&mp_type_float}, 0.5f};
+mp_obj_float_t servo2040_voltage_gain = {{&mp_type_float}, 3.9f / 13.9f};
 mp_obj_float_t servo2040_current_offset = {{&mp_type_float}, -0.02f};
 
 /***** Globals Table *****/
