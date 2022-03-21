@@ -53,6 +53,9 @@ namespace pimoroni {
           bl = SPI_BG_BACK_PWM;
           break;
       }
+      if(!this->frame_buffer) {
+        this->frame_buffer = new uint16_t(width * height);
+      }
     }
 
     ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer) :

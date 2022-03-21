@@ -43,4 +43,6 @@ include(hub75/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
 
+include(st7789/micropython)
+
 include(modules_py/modules_py)

@@ -1,0 +1,1 @@
+include(generic_st7789.cmake)
