@@ -28,14 +28,17 @@ namespace servo {
     float servo_value = 0.0f;
     float last_enabled_pulse = 0.0f;
     bool enabled = false;
-    Calibration table;
+    Calibration calib;
 
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoState(CalibrationType default_type = ANGULAR);
+    ServoState();
+    ServoState(CalibrationType default_type);
+    ServoState(const Calibration& calibration);
+
 
     //--------------------------------------------------
     // Methods

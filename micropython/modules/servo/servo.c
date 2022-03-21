@@ -3,15 +3,21 @@
 
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(Calibration___del___obj, Calibration___del__);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_blank_calibration_obj, 2, Calibration_create_blank_calibration);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_two_point_calibration_obj, 5, Calibration_create_two_point_calibration);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_three_point_calibration_obj, 7, Calibration_create_three_point_calibration);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_uniform_calibration_obj, 6, Calibration_create_uniform_calibration);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_create_default_calibration_obj, 2, Calibration_create_default_calibration);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_apply_blank_obj, 2, Calibration_apply_blank);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_apply_two_point_obj, 5, Calibration_apply_two_point);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_apply_three_point_obj, 7, Calibration_apply_three_point);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_apply_uniform_obj, 6, Calibration_apply_uniform);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_apply_default_obj, 2, Calibration_apply_default);
 MP_DEFINE_CONST_FUN_OBJ_1(Calibration_size_obj, Calibration_size);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_point_at_obj, 2, Calibration_point_at);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_point_obj, 1, Calibration_first_point);
-MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_point_obj, 1, Calibration_last_point);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_point_at_obj, 2, Calibration_pulse_at);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_pulse_at_obj, 2, Calibration_pulse_at);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_value_at_obj, 2, Calibration_value_at);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_point_obj, 1, Calibration_first_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_pulse_obj, 1, Calibration_first_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_first_value_obj, 1, Calibration_first_value);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_point_obj, 1, Calibration_last_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_pulse_obj, 1, Calibration_last_pulse);
+MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_last_value_obj, 1, Calibration_last_value);
 MP_DEFINE_CONST_FUN_OBJ_1(Calibration_has_lower_limit_obj, Calibration_has_lower_limit);
 MP_DEFINE_CONST_FUN_OBJ_1(Calibration_has_upper_limit_obj, Calibration_has_upper_limit);
 MP_DEFINE_CONST_FUN_OBJ_KW(Calibration_limit_to_calibration_obj, 3, Calibration_limit_to_calibration);
@@ -67,15 +73,21 @@ MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_load_obj, ServoCluster_load);
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Calibration___del___obj) },
-    { MP_ROM_QSTR(MP_QSTR_create_blank_calibration), MP_ROM_PTR(&Calibration_create_blank_calibration_obj) },
-    { MP_ROM_QSTR(MP_QSTR_create_two_point_calibration), MP_ROM_PTR(&Calibration_create_two_point_calibration_obj) },
-    { MP_ROM_QSTR(MP_QSTR_create_three_point_calibration), MP_ROM_PTR(&Calibration_create_three_point_calibration_obj) },
-    { MP_ROM_QSTR(MP_QSTR_create_uniform_calibration), MP_ROM_PTR(&Calibration_create_uniform_calibration_obj) },
-    { MP_ROM_QSTR(MP_QSTR_create_default_calibration), MP_ROM_PTR(&Calibration_create_default_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_apply_blank), MP_ROM_PTR(&Calibration_apply_blank_obj) },
+    { MP_ROM_QSTR(MP_QSTR_apply_two_point), MP_ROM_PTR(&Calibration_apply_two_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_apply_three_point), MP_ROM_PTR(&Calibration_apply_three_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_apply_uniform), MP_ROM_PTR(&Calibration_apply_uniform_obj) },
+    { MP_ROM_QSTR(MP_QSTR_apply_default), MP_ROM_PTR(&Calibration_apply_default_obj) },
     { MP_ROM_QSTR(MP_QSTR_size), MP_ROM_PTR(&Calibration_size_obj) },
     { MP_ROM_QSTR(MP_QSTR_point_at), MP_ROM_PTR(&Calibration_point_at_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pulse_at), MP_ROM_PTR(&Calibration_pulse_at_obj) },
+    { MP_ROM_QSTR(MP_QSTR_value_at), MP_ROM_PTR(&Calibration_value_at_obj) },
     { MP_ROM_QSTR(MP_QSTR_first_point), MP_ROM_PTR(&Calibration_first_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_first_pulse), MP_ROM_PTR(&Calibration_first_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_first_value), MP_ROM_PTR(&Calibration_first_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_last_point), MP_ROM_PTR(&Calibration_last_point_obj) },
+    { MP_ROM_QSTR(MP_QSTR_last_pulse), MP_ROM_PTR(&Calibration_last_pulse_obj) },
+    { MP_ROM_QSTR(MP_QSTR_last_value), MP_ROM_PTR(&Calibration_last_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_has_lower_limit), MP_ROM_PTR(&Calibration_has_lower_limit_obj) },
     { MP_ROM_QSTR(MP_QSTR_has_upper_limit), MP_ROM_PTR(&Calibration_has_upper_limit_obj) },
     { MP_ROM_QSTR(MP_QSTR_limit_to_calibration), MP_ROM_PTR(&Calibration_limit_to_calibration_obj) },
@@ -234,7 +246,6 @@ STATIC const mp_map_elem_t servo_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ANGULAR), MP_ROM_INT(0x00) },
     { MP_ROM_QSTR(MP_QSTR_LINEAR), MP_ROM_INT(0x01) },
     { MP_ROM_QSTR(MP_QSTR_CONTINUOUS), MP_ROM_INT(0x02) },
-    { MP_ROM_QSTR(MP_QSTR_EMPTY), MP_ROM_INT(0x03) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_servo_globals, servo_globals_table);
 

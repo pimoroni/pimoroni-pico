@@ -23,6 +23,7 @@ namespace servo {
     //--------------------------------------------------
   public:
     Servo(uint pin, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY);
+    Servo(uint pin, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY);
     ~Servo();
 
     //--------------------------------------------------

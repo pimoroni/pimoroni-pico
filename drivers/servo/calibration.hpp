@@ -7,8 +7,7 @@ namespace servo {
   enum CalibrationType {
     ANGULAR = 0,
     LINEAR,
-    CONTINUOUS,
-    EMPTY
+    CONTINUOUS
   };
 
   class Calibration {
@@ -60,17 +59,18 @@ namespace servo {
     //--------------------------------------------------
   public:
     Calibration& operator=(const Calibration &other);
+    Point& operator[](uint8_t index) const;
 
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    void create_blank_calibration(uint size);
-    void create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value);
-    void create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
-    void create_uniform_calibration(uint size, float min_pulse, float max_pulse, float min_value, float max_value);
-    void create_default_calibration(CalibrationType default_type);
+    void apply_blank(uint size);
+    void apply_two_point(float min_pulse, float max_pulse, float min_value, float max_value);
+    void apply_three_point(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
+    void apply_uniform(uint size, float min_pulse, float max_pulse, float min_value, float max_value);
+    void apply_default(CalibrationType default_type);
 
     uint size() const;
     Point* point_at(uint8_t index) const; // Ensure the points are assigned in ascending value order

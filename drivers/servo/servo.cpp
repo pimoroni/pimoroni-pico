@@ -7,6 +7,10 @@ namespace servo {
     : pin(pin), state(type), pwm_frequency(freq) {
   }
 
+  Servo::Servo(uint pin, const Calibration& calibration, float freq)
+    : pin(pin), state(calibration), pwm_frequency(freq) {
+  }
+
   Servo::~Servo() {
     gpio_set_function(pin, GPIO_FUNC_NULL);
   }

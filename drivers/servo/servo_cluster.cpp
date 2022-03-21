@@ -23,6 +23,26 @@ namespace servo {
     create_servo_states(default_type, auto_phase);
   }
 
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pin_mask, seq_buffer, dat_buffer), pwm_frequency(freq) {
+    create_servo_states(calibration, auto_phase);
+  }
+
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pin_base, pin_count, seq_buffer, dat_buffer), pwm_frequency(freq) {
+    create_servo_states(calibration, auto_phase);
+  }
+
+  ServoCluster::ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pins, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
+    create_servo_states(calibration, auto_phase);
+  }
+
+  ServoCluster::ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+    : pwms(pio, sm, pins, seq_buffer, dat_buffer), pwm_frequency(freq) {
+    create_servo_states(calibration, auto_phase);
+  }
+
   ServoCluster::~ServoCluster() {
     delete[] states;
     delete[] servo_phases;
@@ -487,6 +507,19 @@ namespace servo {
 
       for(uint servo = 0; servo < servo_count; servo++) {
         states[servo] = ServoState(default_type);
+        servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
+      }
+    }
+  }
+
+  void ServoCluster::create_servo_states(const Calibration& calibration, bool auto_phase) {
+    uint8_t servo_count = pwms.get_chan_count();
+    if(servo_count > 0) {
+      states = new ServoState[servo_count];
+      servo_phases = new float[servo_count];
+
+      for(uint servo = 0; servo < servo_count; servo++) {
+        states[servo] = ServoState(calibration);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }

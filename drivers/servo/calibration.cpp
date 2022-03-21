@@ -2,27 +2,26 @@
 
 namespace servo {
   Calibration::Point::Point()
-    : pulse(0.0f), value(0.0f) {
+  : pulse(0.0f), value(0.0f) {
   }
 
   Calibration::Point::Point(float pulse, float value)
-    : pulse(pulse), value(value) {
+  : pulse(pulse), value(value) {
   }
 
   Calibration::Calibration()
     : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
-    create_default_calibration(ANGULAR);
   }
 
   Calibration::Calibration(CalibrationType default_type)
-    : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
-    create_default_calibration(default_type);
+    : Calibration() {
+    apply_default(default_type);
   }
 
   Calibration::Calibration(const Calibration &other)
     : calibration(nullptr), calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
     uint size = other.size();
-    create_blank_calibration(size);
+    apply_blank(size);
     for(uint i = 0; i < size; i++) {
       calibration[i] = other.calibration[i];
     }
@@ -37,7 +36,7 @@ namespace servo {
 
   Calibration& Calibration::operator=(const Calibration &other) {
     uint size = other.size();
-    create_blank_calibration(size);
+    apply_blank(size);
     for(uint i = 0; i < size; i++) {
       calibration[i] = other.calibration[i];
     }
@@ -47,8 +46,11 @@ namespace servo {
     return *this;
   }
 
+  Calibration::Point& Calibration::operator[](uint8_t index) const {
+    return calibration[index];
+  }
 
-  void Calibration::create_blank_calibration(uint size) {
+  void Calibration::apply_blank(uint size) {
     if(calibration != nullptr) {
       delete[] calibration;
     }
@@ -63,21 +65,21 @@ namespace servo {
     }
   }
 
-  void Calibration::create_two_point_calibration(float min_pulse, float max_pulse, float min_value, float max_value) {
-    create_blank_calibration(2);
+  void Calibration::apply_two_point(float min_pulse, float max_pulse, float min_value, float max_value) {
+    apply_blank(2);
     calibration[0] = Point(min_pulse, min_value);
     calibration[1] = Point(max_pulse, max_value);
   }
 
-  void Calibration::create_three_point_calibration(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
-    create_blank_calibration(3);
+  void Calibration::apply_three_point(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
+    apply_blank(3);
     calibration[0] = Point(min_pulse, min_value);
     calibration[1] = Point(mid_pulse, mid_value);
     calibration[2] = Point(max_pulse, max_value);
   }
 
-  void Calibration::create_uniform_calibration(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
-    create_blank_calibration(size);
+  void Calibration::apply_uniform(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
+    apply_blank(size);
     if(size > 0) {
       float size_minus_one = (float)(size - 1);
       for(uint i = 0; i < size; i++) {
@@ -88,23 +90,21 @@ namespace servo {
     }
   }
 
-  void Calibration::create_default_calibration(CalibrationType default_type) {
+  void Calibration::apply_default(CalibrationType default_type) {
     switch(default_type) {
     default:
     case ANGULAR:
-      create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                                     -90.0f,            0.0f,              +90.0f);
+      apply_three_point(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                                    -90.0f,            0.0f,              +90.0f);
       break;
     case LINEAR:
-      create_two_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
-                                   0.0f,              1.0f);
+      apply_two_point(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
+                                  0.0f,              1.0f);
       break;
     case CONTINUOUS:
-      create_three_point_calibration(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                                     -1.0f,            0.0f,              +1.0f);
+      apply_three_point(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                                    -1.0f,            0.0f,              +1.0f);
       break;
-    case EMPTY:
-      create_blank_calibration(0);
     }
   }
 

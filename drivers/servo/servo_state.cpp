@@ -1,8 +1,15 @@
 #include "servo_state.hpp"
 
 namespace servo {
+  ServoState::ServoState() {
+  }
+
   ServoState::ServoState(CalibrationType default_type)
-    : table(default_type) {
+    : calib(default_type) {
+  }
+
+  ServoState::ServoState(const Calibration& calibration) 
+    : calib(calibration) {
   }
 
   float ServoState::enable() {
@@ -35,7 +42,7 @@ namespace servo {
   float ServoState::set_pulse(float pulse) {
     if(pulse >= MIN_VALID_PULSE) {
       float value_out, pulse_out;
-      if(table.pulse_to_value(pulse, value_out, pulse_out)) {
+      if(calib.pulse_to_value(pulse, value_out, pulse_out)) {
         servo_value = value_out;
         last_enabled_pulse = pulse_out;
         return _enable();
@@ -50,7 +57,7 @@ namespace servo {
 
   float ServoState::set_value(float value) {
     float pulse_out, value_out;
-    if(table.value_to_pulse(value, pulse_out, value_out)) {
+    if(calib.value_to_pulse(value, pulse_out, value_out)) {
       last_enabled_pulse = pulse_out;
       servo_value = value_out;
       return _enable();
@@ -60,7 +67,7 @@ namespace servo {
 
   float ServoState::get_min_value() const {
     float value = 0.0f;
-    Calibration::Point *point = table.first_point();
+    Calibration::Point *point = calib.first_point();
     if(point != nullptr) {
       value = point->value;
     }
@@ -69,8 +76,8 @@ namespace servo {
 
   float ServoState::get_mid_value() const {
     float value = 0.0f;
-    Calibration::Point *first = table.first_point();
-    Calibration::Point *last = table.last_point();
+    Calibration::Point *first = calib.first_point();
+    Calibration::Point *last = calib.last_point();
     if((first != nullptr) && (last != nullptr)) {
       value = (first->value + last->value) / 2.0f;
     }
@@ -79,7 +86,7 @@ namespace servo {
 
   float ServoState::get_max_value() const {
     float value = 0.0f;
-    Calibration::Point *point = table.last_point();
+    Calibration::Point *point = calib.last_point();
     if(point != nullptr) {
       value = point->value;
     }
@@ -109,11 +116,11 @@ namespace servo {
   }
 
   Calibration& ServoState::calibration() {
-    return table;
+    return calib;
   }
 
   const Calibration& ServoState::calibration() const {
-    return table;
+    return calib;
   }
 
   uint32_t ServoState::pulse_to_level(float pulse, uint32_t resolution, float freq) {
