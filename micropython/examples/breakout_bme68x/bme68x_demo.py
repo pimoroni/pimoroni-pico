@@ -9,7 +9,7 @@ from pimoroni_i2c import PimoroniI2C
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
-i2c = PimoroniI2C(**PINS_PICO_EXPLORER)
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 bmp = BreakoutBME68X(i2c)
 
 while True:
