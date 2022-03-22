@@ -11,6 +11,9 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 
 ## Table of Content
 
+- [Servo 2040](#servo-2040)
+  - [Pin Defines](#pin-defines)
+  - [Constant Defines](#constant-defines)
 - [Servo](#servo)
   - [Getting Started](#getting-started)
   - [Control by Value](#control-by-value)
@@ -34,8 +37,66 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
   - [Function Reference](#function-reference)
   - [PIO Limitations](#pio-limitations)
 - [Calibration](#calibration)
-  - [Getting Started](#getting-started)
+  - [Common Types](#common-types)
+  - [Custom Calibration](#custom-calibration)
+  - [Modifying a Calibration](#modifying-a-calibration)
+  - [Movement Limits](#movement-limits)
+  - [Populating a Calibration](#populating-a-calibration)
+  - [Viewing the Mapping](#viewing-the-mapping)
   - [Function Reference](#function-reference)
+
+
+## Servo 2040
+
+### Pin Defines
+
+* `SERVO_1` = `0`
+* `SERVO_2` = `1`
+* `SERVO_3` = `2`
+* `SERVO_4` = `3`
+* `SERVO_5` = `4`
+* `SERVO_6` = `5`
+* `SERVO_7` = `6`
+* `SERVO_8` = `7`
+* `SERVO_9` = `8`
+* `SERVO_10` = `9`
+* `SERVO_11` = `10`
+* `SERVO_12` = `11`
+* `SERVO_13` = `12`
+* `SERVO_14` = `13`
+* `SERVO_15` = `14`
+* `SERVO_16` = `15`
+* `SERVO_17` = `16`
+* `SERVO_18` = `17`
+* `LED_DAT` = `18`
+* `INT` = `19`
+* `SDA` = `20`
+* `SCL` = `21`
+* `USER_SW` = `23`
+* `ADC_ADDR_0` = `22`
+* `ADC_ADDR_1` = `24`
+* `ADC_ADDR_2` = `25`
+* `ADC0` = `26`
+* `ADC1` = `27`
+* `ADC2` = `28`
+* `SHARED_ADC` = `29`
+
+
+### Constant Defines
+
+* `NUM_LEDS` = `6`
+* `SENSOR_1_ADDR` = `0b000`
+* `SENSOR_2_ADDR` = `0b001`
+* `SENSOR_3_ADDR` = `0b010`
+* `SENSOR_4_ADDR` = `0b011`
+* `SENSOR_5_ADDR` = `0b100`
+* `SENSOR_6_ADDR` = `0b101`
+* `VOLTAGE_SENSE_ADDR` = `0b110`
+* `CURRENT_SENSE_ADDR` = `0b111`
+* `SHUNT_RESISTOR` = `0.003`
+* `CURRENT_GAIN` = `69`
+* `VOLTAGE_GAIN` = `0.28058`
+* `CURRENT_OFFSET` = `-0.02`
 
 
 ## Servo
@@ -72,7 +133,7 @@ From here the servo can be controlled in several ways. These are covered in more
 
 The most intuitive way of controlling a servo is by value. Value can be any number that has a real-world meaning for that type of servo, for example its angle in degrees if it's a regular angular servo, or its speed as a percentage if it's a continuous rotation servo. See [Calibration](#calibration) for more details.
 
-The value of a servo can be set calling `.value(value)`, which takes a float as its input. If the servo is disabled, this will enable it. The resulting pulse width will also be stored.
+The value of a servo can be set by calling `.value(value)`, which takes a float as its `value` input. If the servo is disabled, this will enable it. The resulting pulse width will also be stored.
 
 To read back the current value of the servo, call `.value()` without any input. If the servo is disabled, this will be the last value that was provided when enabled.
 
@@ -88,11 +149,11 @@ It is also possible to read back the values each of those three commands is usin
 
 Sometimes there are projects where a servo needs to move based on the reading from a sensor or another device, but the numbers given out are not easy to convert to values the servo accepts. To overcome this the library lets you move the servo to a percent between its minimum and maximum values, or two values provided, based on that input.
 
-With an input between `-1.0` and `1.0`, a servo can be moved to a percent between its minimum and maximum values using `s.to_percent(in)`.
+With an input between `-1.0` and `1.0`, a servo can be moved to a percent between its minimum and maximum values using `.to_percent(in)`.
 
-With an input between a provided min and max, a servo can be moved to a percent between its minimum and maximum values using `s.to_percent(in, in_min, in_max)`.
+With an input between a provided min and max, a servo can be moved to a percent between its minimum and maximum values using `.to_percent(in, in_min, in_max)`.
 
-With an input between a provided min and max, a servo can be moved to a percent between two provided values using `s.to_percent(in, in_min, value_min, value_max)`.
+With an input between a provided min and max, a servo can be moved to a percent between two provided values using `.to_percent(in, in_min, value_min, value_max)`.
 
 If the servo is disabled, these will enable it.
 
@@ -101,25 +162,25 @@ If the servo is disabled, these will enable it.
 
 At a hardware level servos operate by receiving a digital signal with specific pulse widths. Typically pulses are between 500 microseconds and 2500 microseconds in length, and are usually repeated every 20 milliseconds (50Hz). These functions let you interact with pulse widths directly.
 
-The pulse width (in microseconds) of a servo can be set by calling `.pulse(pulse)`, which takes a float as its input. If the servo is disabled this will enable it, except for the case of `0` where instead the servo will be disabled. This function will also recalculate the related value.
+The pulse width (in microseconds) of a servo can be set by calling `.pulse(pulse)`, which takes a float as its `pulse` input. If the servo is disabled this will enable it, except for the case of `0` where instead the servo will be disabled. This function will also recalculate the related value.
 
 To read back the current pulse width (in microseconds) of the servo, call `.pulse()` without any input. If the servo is disabled, this will be the last pulse that was provided when enabled.
 
 
 ### Frequency Control
 
-The vast majority of Servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
+The vast majority of servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
 
-The frequency (in Hz) of a servo can be set by calling `.frequency(freq)`, which takes a float as its input. The supported range of this input is `10` to `350` Hz.
+The frequency (in Hz) of a servo can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. The supported range of this input is `10` to `350` Hz.
 
 To read back the current frequency (in Hz) of the servo, call `.frequency()` without any input.
 
-Note that changing the frequency does not change the pulse widths sent to the servos, only how frequently they are sent. This is why `350` is the upper limit, as any higher and the maximum pulse would be longer than the time period. If you encounter any servos where this behaviour is not what they expect, please raise it as aa Github issue.
+Note that changing the frequency does not change the pulse widths sent to the servos, only how frequently they are sent. This is why `350` is the upper limit, as any higher and the maximum pulse would be longer than the time period. If you encounter any servos where this behaviour is not what they expect, please raise it as a Github issue.
 
 
 ### Calibration
 
-There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` being common. To support these different types, each Servo class contains a calibration object that stores the specific value to pulse mapping needed for its type. A copy of this can be accessed using `.calibration()`. It is also possible to provide a servo with a new calibration using `.calibration(calibration)`.
+There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` being common. To support these different types, each `Servo` class contains a calibration object that stores the specific value to pulse mapping needed for its type. A copy of a servo's calibration can be accessed using `.calibration()`. It is also possible to provide a servo with a new calibration using `.calibration(calibration)`.
 
 
 ### Function Reference
@@ -179,41 +240,122 @@ from servo import ServoCluster, servo2040
 ```
 (If you are using another RP2040 based board, then `servo2040` can be omitted from the above line)
 
-The next step is to choose which GPIO pins the cluster will be connected to. The easiest way to do this for a contiguous block is to use a `range` to create each pin number, and convert that to a `list`. For example, the below line creates the list `[0, 1, 2, 3]`
+The next step is to choose which GPIO pins the cluster will be connected to and store them in a `list`. For a consecutive set of pins the easiest way to do this is to use a `range` to create each pin number, and convert that to a `list`. For example, using the handy constants of the `servo2040`, the below line creates the list `[0, 1, 2, 3]`
 ```python
 pins = list(range(servo2040.SERVO_1, servo2040.SERVO_4 + 1))
 ```
 
-To create your servo cluster, specify the PIO, PIO state-machine and GPIO pins you chose a moment ago, and pass those into `ServoCluster`. For this example we will use the handy constants of the `servo2040`.
+To create your servo cluster, specify the PIO, PIO state-machine and GPIO pins you chose a moment ago, and pass those into `ServoCluster`.
 
 ```python
 cluster = ServoCluster(0, 0, pins)
 ```
 
-You now have a `ServoCluster` class called `cluster` that will control the physical servos connected to `SERVO_1`, `SERVO_2`, `SERVO_3`, and `SERVO_4`.
-
-From here there are various ways to control these servos. These are covered in more detail in the following sections.
-
-
-
-#### Constructing a ServoCluster
-
+You now have a `ServoCluster` class called `cluster` that will control the physical servos connected to `SERVO_1`, `SERVO_2`, `SERVO_3`, and `SERVO_4`. To start using these servos, simply enable them using:
 ```python
-ServoCluster(
-  pio,              # int: the pio device to use for the cluster (0 or 1)
-  sm,               # int: the state machine on that pio to use for the cluster (0 to 3)
-  type=ANGULAR,     # int: the type the servos will start as (options are ANGULAR, LINEAR, CONTINUOUS, and EMPTY)
-  freq=50,          # float: the frequency the servos will receive pulses at
-  auto_phase=True   # bool: whether to automatically set the servo phases to reduce peak current draw
-)
+cluster.enable_all()
 ```
+or
+```python
+cluster.enable(servo)
+```
+where `servo` is the servo's number within the cluster from `0` to `cluster.count() - 1`.
+
+These functions activate the servos and move them to their last known positions. Since this is the first time enabling the servos, there are no last known positions, so instead they will move to the middle of their movement ranges instead.
+
+Once you have finished with the servos, they can be disabled by calling:
+```python
+cluster.disable_all()
+```
+or
+```python
+cluster.disable(servo)
+```
+where `servo` is the servo's number within the cluster from `0` to `cluster.count() - 1`.
+
+From here the servos can be controlled in several ways. These are covered in more detail in the following sections.
+
+
+### Control by Value
+
+The most intuitive way of controlling the servos is by their value. Value can be any number that has a real-world meaning for that type of servo, for example its angle in degrees if it's a regular angular servo, or its speed as a percentage if it's a continuous rotation servo. See [Calibration](#calibration) for more details.
+
+The value of a servo on a cluster can be set calling `.value(servo, value)` or `.all_to_value(value)`, which take a float as their `value` input. If a servo is disabled, these will enable it. The resulting pulse width will also be stored.
+
+To read back the current value of a servo on the cluster, call `.value(servo)`. If the servo is disabled, this will be the last value that was provided when enabled.
+
+
+#### Common Values
+
+To simplify certain motion patterns, servos on a cluster can be commanded to three common values. These are, their minimum, middle, and maximum. These are performed by calling `.to_min(servo)`, `.to_mid(servo)`, and `.to_max(servo)`, respectively. If the servo is disabled, these will enable it. There are also `.all_to_min()`, `.all_to_mid()`, and `.all_to_max()` for having all the servos on the cluster move at once.
+
+It is also possible to read back the values each of those three commands is using internally, using `.min_value(servo)`, `.mid_value(servo)`, and `.max_value(servo)`. These can be useful as inputs to equations that provide numbers directly to `.value(servo, value)`, for example.
+
+
+### Control by Percent
+
+Sometimes there are projects where servos need to move based on the readings from sensors or another devices, but the numbers given out are not easy to convert to values the servos accept. To overcome this the library lets you move the servos on a cluster to a percent between their minimum and maximum values, or two values provided, based on that input.
+
+With an input between `-1.0` and `1.0`, a servo on a cluster can be moved to a percent between its minimum and maximum values using `.to_percent(servo, in)`, or all servos using `.all_to_percent(in)`.
+
+With an input between a provided min and max, a servo on a cluster can be moved to a percent between its minimum and maximum values using `.to_percent(servo, in, in_min, in_max)`, or all servos using `s.all_to_percent(in, in_min, in_max)`.
+
+With an input between a provided min and max, a servo on a cluster can be moved to a percent between two provided values using `.to_percent(servo, in, in_min, value_min, value_max)`, or all servos using `.all_to_percent(in, in_min, value_min, value_max)`.
+
+If the servo is disabled, these will enable it.
+
+
+### Control by Pulse Width
+
+At a hardware level servos operate by receiving a digital signal with specific pulse widths. Typically pulses are between 500 microseconds and 2500 microseconds in length, and are usually repeated every 20 milliseconds (50Hz). These functions let you interact with pulse widths directly.
+
+The pulse width (in microseconds) of a servo on a cluster can be set by calling `.pulse(servo, pulse)` or `.all_to_pulse(pulse)`, which take a float as their `pulse` input. If a servo is disabled, these will enable it, except for the case of `0` where instead the servo will be disabled. These functions will also recalculate the related value.
+
+To read back the current pulse width (in microseconds) of a servo on a cluster, call `.pulse(servo)`. If the servo is disabled, this will be the last pulse that was provided when enabled.
+
+
+### Frequency Control
+
+The vast majority of servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz. Un
+
+The frequency (in Hz) of all the servos on a cluster can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. The supported range of this input is `10` to `350` Hz. Due to how `ServoCluster` works, there is no way to set independent frequencies for each servo.
+
+To read back the current frequency (in Hz) all the servos on a cluster, call `.frequency()` without any input.
+
+Note that changing the frequency does not change the pulse widths sent to the servos, only how frequently they are sent. This is why `350` is the upper limit, as any higher and the maximum pulse would be longer than the time period. If you encounter any servos where this behaviour is not what they expect, please raise it as a Github issue.
+
+Also, be aware that currently the frequency changes immediately, even if part-way through outputting a pulse. It is therefore recommended to disable all servos first before changing the frequency.
+
+
+### Phase Control
+
+When dealing with many servos, there can often be large current draw spikes caused by them all responding to pulses at the same time. To minimise this, the ServoCluster class allows for the start time of each servo's pulses to be delayed by a percentage of the available time period. This is called their phase.
+
+The phase of a servo on a cluster can be set by calling `.phase(servo, phase)` or `.all_to_phase(phase)`, which take a float between `0.0` and `1.0` as their `phase` input.
+
+To read back the current phase of a servo on a cluster, call `.phase(servo)`.
+
+By default all servos on a cluster will start with different phases unless `auto_phase=False` is provided when creating the `ServoCluster`.
+
+
+### Calibration
+
+There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` being common. To support these different types, each `ServoCluster` class contains calibration objects for each of its servos that store the specific value to pulse mappings needed for their types. A copy of a servo's calibration on a cluster can be accessed using `.calibration(servo)`. It is also possible to provide a servo on a cluster with a new calibration using `.calibration(servo, calibration)`.
+
+
+### Delayed Loading
+
+To match behaviour with the regular `Servo` class, `ServoCluster` automatically applies each change to its servo's states immediately. However, sometimes this may not be wanted, and instead you want all servos to receive updated pulses at the same time, regardless of how long the code ran that calculated the update.
+
+For this purpose, all the functions that modify a servo state on a cluster include an optional parameter `load`, which by default is `True`. To avoid this "loading" include `load=False` in the relevant function calls. Then either the last call can include `load=True`, or a specific call to `.load()` can be made.
+
 
 ### Function Reference
 
 Here is the complete list of functions available on the `ServoCluster` class:
 
 ```python
-ServoCluster(pio, sm, pins, calibration=ANGULAR, freq=50, auto_phase=True)
+ServoCluster(pio, sm, pins, calibration=ANGULAR, freq=50, auto_phase=True)    # calibration can either be an integer or a Calibration class
 count()
 pin(servo)
 enable(servo, load=True)
@@ -252,247 +394,6 @@ calibration(servo, calibration)
 load()
 ```
 
-### Count
-
-To get the number of servos assigned to this cluster:
-```python
-count() # returns int: the number of servos
-```
-
-### Pin
-
-To get the pin number a servo on the cluster is assigned to:
-```python
-pin(
-  servo   # int: the servo to get the pin of
-) # returns int: the hardware pin of the servo
-```
-
-### Enabling and Disabling
-
-To enable a servo on the cluster:
-```python
-enable(
-  servo,      # int: the servo to enable
-  load=True   # bool: whether to load the change immediately
-)
-```
-If the servo has not previously been enabled, it will default to the middle of its range.
-
-To disable a servo on the cluster:
-```python
-disable(
-  servo,      # int: the servo to disable
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-To check the enabled state of a servo on the cluster:
-```python
-is_enabled(
-  servo,      # int: the servo to check the enabled state of
-) # returns bool: True if enabled, False if disabled
-```
-
-### Control by Pulse Width
-
-Servos operate by receiving a digital signal with specific pulse widths. Typically values are between 500 microseconds and 2500 microseconds.
-
-To read the current pulse the servo is receiving:
-```python
-pulse(
-  servo       # int: the servo to read the pulse of
-) # returns float: the duration of the pulse in microseconds
-```
-If the servo is disabled, this will be the last pulse that was provided when enabled.
-
-To set a new pulse for the servo to receive:
-```python
-pulse(
-  servo,      # int: the servo to set the pulse of
-  pulse,      # float: the pulse duration in microseconds
-  load=True   # bool: whether to load the change immediately
-)
-```
-If the servo is disabled, this will also enable it. It will also recalculate the related value.
-
-### Control by Value
-
-Value is a way to control servos using numbers that have a real-world meaning, rather than with pulse widths. For instance, -90 to +90 degrees for an angular servo, or -1 to +1 for a continous rotation servo. See [Calibration](#calibration) for more details.
-
-To read the current value the servo is at:
-```python
-value(
-  servo       # int: the servo to read the value of
-) # returns float: the value
-```
-If the servo is disabled, this will be the last value that was provided when enabled.
-
-To set the servo to a new value:
-```python
-value(
-  servo,      # int: the servo to set the value of
-  value,      # float: the value
-  load=True   # bool: whether to load the change immediately
-)
-```
-If the servo is disabled, this will also enable it. The resulting pulse width will also be stored.
-
-### Phase Control
-
-When dealing with many servos, there can often be large current draw spikes caused by them all responding to pulses at the same time. To minimise this, a servo cluster allows for the start time of a servo's pulses to be delayed by a percentage of the available time period. This is called their phase.
-
-To read the current phase of a servo on the cluster:
-```python
-phase(
-  servo       # int: the servo to read the phase of
-) # returns float: the phase, between 0.0 and 1.0
-```
-
-To set the phase of a servo on the cluster:
-```python
-phase(
-  servo,      # int: the servo to set the phase of
-  phase,      # float: the phase, between 0.0 and 1.0
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-### Frequency Control
-
-The vast majority of Servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
-All servos on a cluster share the same frequency.
-
-To read the current servo cluster pulse frequency:
-```python
-frequency() # returns float: the frequency in Hz
-```
-
-To set a new servo cluster pulse frequency:
-```python
-frequency(
-  freq   # float: the frequency between 10 and 350Hz
-)
-```
-Note, currently the frequency changes immediately, even if part-way through a pulse. It is recommended to disable all servos first before changing the frequency.
-
-
-### Useful Values
-
-When performing motion patterns on a servo, it can sometimes be useful to know what a servo's minimum, middle, and maximum values are.
-
-To get the minimum value a servo on the cluster can reach:
-```python
-min_value(
-  servo,      # int: the servo to get the min value of
-)   # returns float: the minimum value
-```
-
-To get the middle value of a servo on the cluster:
-```python
-mid_value(
-  servo,      # int: the servo to get the mid value of
-)   # returns float: the middle value
-```
-
-To get the maximum value a servo on the cluster:
-```python
-mid_value(
-  servo,      # int: the servo to get the max value of
-)   # returns float: the maximum value
-```
-
-Similarly, it can be useful to command a servo to one of these values without needing to know the actual number.
-
-To move a servo on the cluster to its minimum value.
-```python
-to_min(
-  servo,      # int: the servo to move to its min value
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-To move a servo on the cluster to its middle value.
-```python
-to_mid(
-  servo,      # int: the servo to move to its mid value
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-To move a servo on the cluster to its maximum value.
-```python
-to_max(
-  servo,      # int: the servo to move to its max value
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-### Control by Percent
-
-Sometimes there are projects where you want a servo to move based on the reading from a sensor or another device, but the numbers given out are not easy to convert to values the servo accepts. To overcome this the library lets you move the servo to a percent between its minimum and maximum values, or two values you provided, based on that input.
-
-With an input between `-1.0` and `1.0`, move a servo on the cluster to a percent between its minimum and maximum values:
-```python
-to_percent(
-  servo,      # int: the servo to move to the percent
-  in          # float: the input, from -1.0 to +1.0
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-With an input between a provided min and max, move a servo on the cluster to a percent between its minimum and maximum values:
-```python
-to_percent(
-  servo,      # int: the servo to move to the percent
-  in,         # float: the input, from in_min to in_max
-  in_min,     # float: the minimum expected input
-  in_max      # float: the maximum expected input
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-With an input between a provided min and max, move a servo on the cluster to a percent between two provided values:
-```python
-to_percent(
-  servo,      # int: the servo to move to the percent
-  in,         # float: the input, from in_min to in_max
-  in_min,     # float: the minimum expected input
-  in_max      # float: the maximum expected input
-  value_min,  # float: the value the servo will go to when receiving a minimum input
-  value_max   # float: the value the servo will go to when receiving a maximum input
-  load=True   # bool: whether to load the change immediately
-)
-```
-
-### Calibrating
-
-There are different types of servos, with angular, linear, and continuous being common. To support these different types, each Servo class contains a calibration object that stores the specific value to pulse mapping needed for its type. This object can be accessed for each servo as well as updated on the fly.
-
-To get the calibration of a servo on the cluster:
-```python
-calibration(
-  servo,      # int: the servo to get the calibration of
-)   # returns Calibration: a copy of the servo's calibration
-```
-
-To update the calibration of a servo on the cluster.
-```python
-calibration(
-  servo,        # int: the servo to set the calibration of
-  calibration   # Calibration: the object to update the servo's calibration with
-)
-```
-
-### Delayed Loading
-
-To match behaviour with the regular Servo class, the ServoCluster automatically applies each change to a servo's state immediately. However, sometimes this may not be wanted, and instead you want all servos to receive updated pulses at the same time, regardless of how long the code ran that calculated the update.
-
-For this purpose, all the functions that modify a servo state include an optional parameter `load`, which by default is `True`. To avoid this "loading" include `load=False` in the relevant function calls. Then either the last call can include `load=True`, or the following function can be called:
-```python
-load()
-```
-
 
 ### PIO Limitations
 
@@ -503,15 +404,85 @@ When creating a ServoCluster, in most cases you'll use `0` for PIO and `0` for P
 
 ## Calibration
 
-### Getting Started
+After using servos for a while, you may notice that some don't quite go to the positions you would expect. Or perhaps you are giving values to a continuous rotation servo in degrees when it would make more sense to use a speed or rpm. To compensate for these cases, each `Servo` class or servo within a `ServoCluster` has an individual `Calibration` class. This class contains a set of pulse-value pairs that are used by the `.value(value)` functions (and those similar) to convert real-world numbers into pulses each servo understand.
+
+### Common Types
+
+There are three common `type`s of servo's supported:
+* `ANGULAR` = `0` - A servo with a value that ranges from -90 to +90 degrees.
+* `LINEAR` = `1` - A servo with a value that ranges from 0 to +1.0.
+* `CONTINUOUS` = `2` - A servo with a value that ranges from -1.0 to +1.0.
+
+By default all `Servo` classes or servo within a `ServoCluster` are `ANGULAR`. This can be changed by providing one of the other types as a parameter during their creation, as shown below:
+```python
+angular = Servo(servo2040.SERVO_1)  # ANGULAR is the default so does not need to be specified here
+linear = Servo(servo2040.SERVO_2, LINEAR)
+continuous = Servo(servo2040.SERVO_3, CONTINUOUS)
+```
+
+
+### Custom Calibration
+
+As well as the common types, a custom calibration can also be provided to one or more servos during creation. Below is an example that creates an angular servo that can only travel from -45 degrees to 45 degrees.
+
+```python
+cal = Calibration()
+cal.apply_two_pair(1000, 2000, -45, 45)
+s = Servo(servo2040.SERVO_1, cal)
+```
+
+This could be useful for example if the servo turning beyond those values would cause damage to whatever mechanism it is driving, since it would not be possible to go to angles beyond these unless limits were disabled (see [Limits](#limits)). Also it lets the exact pulse widths matching the angles be set (the `1000` and `2000` in the example). Discovering these values can take some trial and error, and will offen be different for each servo.
+
+
+
+# Modifying a Calibration
+
+It is also possible to access and modify the calibration of a `Servo` or a servo on a `ServoCluster` after their creation. This is done by first getting a copy of the servo's calibration using `.calibration()` or `.calibration(servo)`, modifying its pulses or values, then applying the modified calibration back onto to the servo.
+
+Below, an angular servo is modified to increase its reported rotation range from 180 degrees to 270 degrees.
+```python
+wide_angle = Servo(servo2040.SERVO_1)
+cal = wide_angle.calibration()
+cal.first_value(-135)
+cal.last_value(+135)
+wide_angle.calibration(cal)
+```
+
+
+### Movement Limits
+
+As well as providing a mapping between pulses and values, the calibration class also limits a servo from going beyond its minimum and maximum values. In some cases this may not be wanted, so the state of the limits can be modified by calling `.limit_to_calibration(lower, upper)` where `lower` and `upper` are booleans. Additionally, the current state of these limits can be queried by calling `.has_lower_limit()` and `.has_upper_limit()`, respectively.
+
+A case where you may want to disable limits is if you want a servo to go to a value (e.g. 90 degrees), but are not physically able to get a pulse measurement for that but can do another value instead (e.g. 60 degrees).
+
+Note, even with limits disables, servos still have hard limits of `400` and `2600` microsecond pulse widths. These are intended to protect servos from receiving pulses that are too far beyond their expected range. These can vary from servo to servo though, with some hitting a physical end-stop before getting to the typical `500` and `2500` associated with -90 and +90 degrees.
+
+
+### Populating a Calibration
+
+To aid in populating a `Calibration` class, there are five helper functions that fill the class with pulse-value pairs:
+* `apply_blank_pairs(size)` - Fills the calibration with the specified number of zero pairs
+* `apply_two_pairs(min_pulse, max_pulse, min_value, max_value)` - Fills the calibration with two pairs using the min and max numbers provided
+* `apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)` - Fills the calibration with three pairs using the min, mid and max numbers provided
+* `apply_uniform_pairs(size, min_pulse, max_pulse, min_value, max_value)` - Fills the calibration with the specified number of pairs, interpolated from the min to max numbers provided
+* `apply_default_pairs(type)` - Fills the calibration with the pairs of one of the common types
+
+Once a `Calibration` class contains pairs (as checked `.size() > 0`), these can then be accessed by calling `.pair(index)` and can then be modified by calling `.pair(index, pair)`. The former function returns a list containing the pulse and value of the pair, and the latter accepts a list or tuple containing the pulse and value. For situations when only a single element of each pair is needed, `.pulse(index)` and `.value(index)` will return the current numbers, and `.pulse(index, pulse)` and `.value(index, value)` will override them.
+
+For further convenience there are functions for accessing and modifying the `.first()` and `.last()` pair/pulse/value of the calibration.
+
+
+### Viewing the Mapping
+
+To aid in visualising a calibration's pulse-value mapping, the pulse for any given value can be queried by calling `.value_to_pulse(value)`. Similarly, the value for any given pulse can be queried by calling `.pulse_to_value(pulse)`. These are the same functions used by `Servo` and `ServoCluster` when controlling their servos.
+
 
 ### Function Reference
 
 Here is the complete list of functions available on the `Calibration` class:
-
 ```python
-Calibration(type=ANGULAR)
-
+Calibration()
+Calibration(type)
 apply_blank_pairs(size)
 apply_two_pairs(min_pulse, max_pulse, min_value, max_value)
 apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)
@@ -542,4 +513,3 @@ limit_to_calibration(lower, upper)
 value_to_pulse(value)
 pulse_to_value(pulse)
 ```
-
