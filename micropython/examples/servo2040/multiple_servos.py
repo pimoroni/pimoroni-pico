@@ -2,6 +2,10 @@ import time
 import math
 from servo import Servo, servo2040
 
+"""
+Demonstrates how to create multiple Servo objects and control them together.
+"""
+
 # Create a list of servos for pins 0 to 3. Up to 16 servos can be created
 START_PIN = servo2040.SERVO_1
 END_PIN = servo2040.SERVO_3

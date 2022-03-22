@@ -1,9 +1,14 @@
 from servo import Calibration, Servo, servo2040, ANGULAR, LINEAR, CONTINUOUS
 
-# --------------------------------------------------
-#      An example of how to create and modify
-#       the calibration of an angular servo
-# --------------------------------------------------
+"""
+Shows how to create servos with different common
+calibrations, modify a servo's existing calibration,
+and create a servo with a custom calibration.
+"""
+
+# -----------------------------------------------------
+# Create and modify the calibration of an angular servo
+# -----------------------------------------------------
 
 # Create an angular servo on pin 0. By default its value ranges from -90 to +90
 angular_servo = Servo(servo2040.SERVO_1, ANGULAR)
@@ -24,10 +29,9 @@ angular_servo.calibration(cal)
 print("Wide Angle Servo:", angular_servo.calibration(), end="\n\n")
 
 
-# --------------------------------------------------
-#      An example of how to create and modify
-#        the calibration of a linear servo
-# --------------------------------------------------
+# ---------------------------------------------------
+# Create and modify the calibration of a linear servo
+# ---------------------------------------------------
 
 LINEAR_RANGE = 50   # The range we want the linear servo to cover
 
@@ -43,10 +47,9 @@ linear_servo.calibration(cal)
 print("Linear Servo:", linear_servo.calibration(), end="\n\n")
 
 
-# --------------------------------------------------
-#    An example of how to create and modify the
-#    calibration of a continuous rotation servo
-# --------------------------------------------------
+# ----------------------------------------------------------------
+# Create and modify the calibration of a continuous rotation servo
+# ----------------------------------------------------------------
 
 CONTINUOUS_SPEED = 10   # The speed we want the continuous servo to cover
 
@@ -63,10 +66,9 @@ continuous_servo.calibration(cal)
 print("Continuous Servo:", continuous_servo.calibration(), end="\n\n")
 
 
-# --------------------------------------------------
-#      An example of how to create a custom
-#     calibration and build a servo using it
-# --------------------------------------------------
+# ------------------------------------------------------
+# Create a custom calibration and build a servo using it
+# ------------------------------------------------------
 
 # Create an empty calibration
 cal = Calibration()

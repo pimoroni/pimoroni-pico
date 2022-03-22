@@ -3,7 +3,15 @@ from pimoroni import Button
 from plasma import WS2812
 from servo import servo2040
 
-# Press "Boot" to exit the program.
+"""
+Displays a rotating rainbow pattern on the Servo 2040's onboard LED bar.
+
+Press "Boot" to exit the program.
+
+NOTE: Plasma WS2812 uses the RP2040's PIO system, and as
+such may have problems when running code multiple times.
+If you encounter issues, try resetting your board.
+"""
 
 SPEED = 5           # The speed that the LEDs will cycle at
 BRIGHTNESS = 0.4    # The brightness of the LEDs

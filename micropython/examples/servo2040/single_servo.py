@@ -2,6 +2,10 @@ import time
 import math
 from servo import Servo, servo2040
 
+"""
+Demonstrates how to create a Servo object and control it.
+"""
+
 # Create a servo on pin 0
 s = Servo(servo2040.SERVO_1)
 

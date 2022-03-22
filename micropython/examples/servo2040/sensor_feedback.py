@@ -4,7 +4,16 @@ from pimoroni import Analog, AnalogMux, Button
 from plasma import WS2812
 from servo import servo2040
 
-# Press "Boot" to exit the program.
+"""
+Show how to read the 6 external sensors and
+display their values on the neighbouring LEDs.
+
+Press "Boot" to exit the program.
+
+NOTE: Plasma WS2812 uses the RP2040's PIO system, and as
+such may have problems when running code multiple times.
+If you encounter issues, try resetting your board.
+"""
 
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 50          # How many times to update LEDs and Servos per second

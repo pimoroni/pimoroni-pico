@@ -3,7 +3,12 @@ from machine import Pin
 from pimoroni import Analog, AnalogMux, Button
 from servo import servo2040
 
-# Press "Boot" to exit the program.
+"""
+Shows how to initialise and read the 6 external
+and 2 internal sensors of Servo 2040.
+
+Press "Boot" to exit the program.
+"""
 
 # Create the user button
 user_sw = Button(servo2040.USER_SW)

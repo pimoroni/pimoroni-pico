@@ -4,13 +4,16 @@ from pimoroni import Analog, AnalogMux, Button
 from plasma import WS2812
 from servo import ServoCluster, servo2040
 
-# NOTE: ServoCluster lets you control up to 30 servos at once. This is
-# done using the RP2040's PIO system. As such it is experimental and may
-# have edge-cases that will need to be fixed. This is particularly true
-# when attempting to run a program multiple times.
-# If you do encounter issues, try resetting your board.
+"""
+An example of how to use Servo 2040's current measuring
+ability and display the value on the onboard LED bar.
 
-# Press "Boot" to exit the program.
+Press "Boot" to exit the program.
+
+NOTE: ServoCluster and Plasma WS2812 use the RP2040's PIO system,
+and as such may have problems when running code multiple times.
+If you encounter issues, try resetting your board.
+"""
 
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 50          # How many times to update LEDs and Servos per second

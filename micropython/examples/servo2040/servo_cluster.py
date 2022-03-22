@@ -2,11 +2,13 @@ import time
 import math
 from servo import ServoCluster, servo2040
 
-# NOTE: ServoCluster lets you control up to 30 servos at once. This is
-# done using the RP2040's PIO system. As such it is experimental and may
-# have edge-cases that will need to be fixed. This is particularly true
-# when attempting to run a program multiple times.
-# If you do encounter issues, try resetting your board.
+"""
+Demonstrates how to create a ServoCluster object to control multiple servos at once.
+
+NOTE: ServoCluster uses the RP2040's PIO system, and as
+such may have problems when running code multiple times.
+If you encounter issues, try resetting your board.
+"""
 
 # Create a servo cluster for pins 0 to 3, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1

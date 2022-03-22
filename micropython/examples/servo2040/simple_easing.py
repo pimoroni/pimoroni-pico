@@ -4,7 +4,11 @@ import random
 from pimoroni import Button
 from servo import Servo, servo2040
 
-# Press "Boot" to exit the program.
+"""
+An example of how to move a servo smoothly between random positions.
+
+Press "Boot" to exit the program.
+"""
 
 UPDATES = 50            # How many times to update Servos per second
 TIME_FOR_EACH_MOVE = 2  # The time to travel between each random value

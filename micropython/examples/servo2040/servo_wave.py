@@ -4,13 +4,15 @@ from pimoroni import Button
 from plasma import WS2812
 from servo import ServoCluster, servo2040
 
-# Press "Boot" to exit the program.
+"""
+An example of applying a wave pattern to a group of servos and the LEDs.
 
-# NOTE: ServoCluster lets you control up to 30 servos at once. This is
-# done using the RP2040's PIO system. As such it is experimental and may
-# have edge-cases that will need to be fixed. This is particularly true
-# when attempting to run a program multiple times.
-# If you do encounter issues, try resetting your board.
+Press "Boot" to exit the program.
+
+NOTE: ServoCluster and Plasma WS2812 use the RP2040's PIO system,
+and as such may have problems when running code multiple times.
+If you encounter issues, try resetting your board.
+"""
 
 SPEED = 5             # The speed that the LEDs will cycle at
 BRIGHTNESS = 0.4      # The brightness of the LEDs
