@@ -48,7 +48,7 @@ namespace servo {
     float disable();
     bool is_enabled() const;
   private:
-    float _enable(); // Internal version of enable without convenient initialisation to mid point
+    float _enable(); // Internal version of enable without convenient initialisation to the middle
   public:
     float get_pulse() const;
     float set_pulse(float pulse);

@@ -28,12 +28,12 @@ namespace servo {
     // Substructures
     //--------------------------------------------------
   public:
-    struct Point {
+    struct Pair {
         //--------------------------------------------------
         // Constructors/Destructor
         //--------------------------------------------------
-        Point();
-        Point(float pulse, float value);
+        Pair();
+        Pair(float pulse, float value);
 
 
         //--------------------------------------------------
@@ -58,24 +58,29 @@ namespace servo {
     // Operators
     //--------------------------------------------------
   public:
-    Calibration& operator=(const Calibration &other);
-    Point& operator[](uint8_t index) const;
+    Calibration &operator=(const Calibration &other);
+    Pair &operator[](uint8_t index);
+    const Pair &operator[](uint8_t index) const;
 
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    void apply_blank(uint size);
-    void apply_two_point(float min_pulse, float max_pulse, float min_value, float max_value);
-    void apply_three_point(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
-    void apply_uniform(uint size, float min_pulse, float max_pulse, float min_value, float max_value);
-    void apply_default(CalibrationType default_type);
+    void apply_blank_pairs(uint size);
+    void apply_two_pairs(float min_pulse, float max_pulse, float min_value, float max_value);
+    void apply_three_pairs(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
+    void apply_uniform_pairs(uint size, float min_pulse, float max_pulse, float min_value, float max_value);
+    void apply_default_pairs(CalibrationType default_type);
 
     uint size() const;
-    Point* point_at(uint8_t index) const; // Ensure the points are assigned in ascending value order
-    Point* first_point() const;
-    Point* last_point() const;
+    Pair &pair(uint8_t index); // Ensure the pairs are assigned in ascending value order
+    Pair &first();
+    Pair &last();
+
+    const Pair &pair(uint8_t index) const; // Ensure the pairs are assigned in ascending value order
+    const Pair &first() const;
+    const Pair &last() const;
 
     bool has_lower_limit() const;
     bool has_upper_limit() const;
@@ -91,7 +96,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    Point* calibration;
+    Pair* calibration;
     uint calibration_size;
     bool limit_lower;
     bool limit_upper;

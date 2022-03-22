@@ -17,7 +17,7 @@ USE_COSINE = True       # Whether or not to use a cosine path between values
 user_sw = Button(servo2040.USER_SW)
 
 # Create a servo on pin 0
-s = Servo(servo2040.SERVO_0)
+s = Servo(servo2040.SERVO_1)
 
 # Get the initial value and create a random end value between the extents
 start_value = s.mid_value()

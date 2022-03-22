@@ -1,11 +1,11 @@
 #include "calibration.hpp"
 
 namespace servo {
-  Calibration::Point::Point()
+  Calibration::Pair::Pair()
   : pulse(0.0f), value(0.0f) {
   }
 
-  Calibration::Point::Point(float pulse, float value)
+  Calibration::Pair::Pair(float pulse, float value)
   : pulse(pulse), value(value) {
   }
 
@@ -15,13 +15,13 @@ namespace servo {
 
   Calibration::Calibration(CalibrationType default_type)
     : Calibration() {
-    apply_default(default_type);
+    apply_default_pairs(default_type);
   }
 
   Calibration::Calibration(const Calibration &other)
     : calibration(nullptr), calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
     uint size = other.size();
-    apply_blank(size);
+    apply_blank_pairs(size);
     for(uint i = 0; i < size; i++) {
       calibration[i] = other.calibration[i];
     }
@@ -34,9 +34,9 @@ namespace servo {
     }
   }
 
-  Calibration& Calibration::operator=(const Calibration &other) {
+  Calibration &Calibration::operator=(const Calibration &other) {
     uint size = other.size();
-    apply_blank(size);
+    apply_blank_pairs(size);
     for(uint i = 0; i < size; i++) {
       calibration[i] = other.calibration[i];
     }
@@ -46,17 +46,23 @@ namespace servo {
     return *this;
   }
 
-  Calibration::Point& Calibration::operator[](uint8_t index) const {
+  Calibration::Pair &Calibration::operator[](uint8_t index) {
+    assert(index < calibration_size);
     return calibration[index];
   }
 
-  void Calibration::apply_blank(uint size) {
+  const Calibration::Pair &Calibration::operator[](uint8_t index) const {
+    assert(index < calibration_size);
+    return calibration[index];
+  }
+
+  void Calibration::apply_blank_pairs(uint size) {
     if(calibration != nullptr) {
       delete[] calibration;
     }
 
     if(size > 0) {
-      calibration = new Point[size];
+      calibration = new Pair[size];
       calibration_size = size;
     }
     else {
@@ -65,45 +71,45 @@ namespace servo {
     }
   }
 
-  void Calibration::apply_two_point(float min_pulse, float max_pulse, float min_value, float max_value) {
-    apply_blank(2);
-    calibration[0] = Point(min_pulse, min_value);
-    calibration[1] = Point(max_pulse, max_value);
+  void Calibration::apply_two_pairs(float min_pulse, float max_pulse, float min_value, float max_value) {
+    apply_blank_pairs(2);
+    calibration[0] = Pair(min_pulse, min_value);
+    calibration[1] = Pair(max_pulse, max_value);
   }
 
-  void Calibration::apply_three_point(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
-    apply_blank(3);
-    calibration[0] = Point(min_pulse, min_value);
-    calibration[1] = Point(mid_pulse, mid_value);
-    calibration[2] = Point(max_pulse, max_value);
+  void Calibration::apply_three_pairs(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
+    apply_blank_pairs(3);
+    calibration[0] = Pair(min_pulse, min_value);
+    calibration[1] = Pair(mid_pulse, mid_value);
+    calibration[2] = Pair(max_pulse, max_value);
   }
 
-  void Calibration::apply_uniform(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
-    apply_blank(size);
+  void Calibration::apply_uniform_pairs(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
+    apply_blank_pairs(size);
     if(size > 0) {
       float size_minus_one = (float)(size - 1);
       for(uint i = 0; i < size; i++) {
         float pulse = Calibration::map_float((float)i, 0.0f, size_minus_one, min_pulse, max_pulse);
         float value = Calibration::map_float((float)i, 0.0f, size_minus_one, min_value, max_value);
-        calibration[i] = Point(pulse, value);
+        calibration[i] = Pair(pulse, value);
       }
     }
   }
 
-  void Calibration::apply_default(CalibrationType default_type) {
+  void Calibration::apply_default_pairs(CalibrationType default_type) {
     switch(default_type) {
     default:
     case ANGULAR:
-      apply_three_point(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                                    -90.0f,            0.0f,              +90.0f);
+      apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                       -90.0f,            0.0f,              +90.0f);
       break;
     case LINEAR:
-      apply_two_point(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
-                                  0.0f,              1.0f);
+      apply_two_pairs(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
+                     0.0f,              1.0f);
       break;
     case CONTINUOUS:
-      apply_three_point(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                                    -1.0f,            0.0f,              +1.0f);
+      apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                       -1.0f,            0.0f,              +1.0f);
       break;
     }
   }
@@ -112,25 +118,34 @@ namespace servo {
     return calibration_size;
   }
 
-  Calibration::Point* Calibration::point_at(uint8_t index) const {
-    if(index < calibration_size) {
-      return &calibration[index];
-    }
-    return nullptr;
+  Calibration::Pair &Calibration::pair(uint8_t index) {
+    assert(index < calibration_size);
+    return calibration[index];
   }
 
-  Calibration::Point* Calibration::first_point() const {
-    if(calibration_size > 0) {
-      return &calibration[0];
-    }
-    return nullptr;
+  Calibration::Pair &Calibration::first() {
+    assert(calibration_size > 0);
+    return calibration[0];
   }
 
-  Calibration::Point* Calibration::last_point() const {
-    if(calibration_size > 0) {
-      return &calibration[calibration_size - 1];
-    }
-    return nullptr;
+  Calibration::Pair &Calibration::last() {
+    assert(calibration_size > 0);
+    return calibration[calibration_size - 1];
+  }
+
+  const Calibration::Pair &Calibration::pair(uint8_t index) const {
+    assert(index < calibration_size);
+    return calibration[index];
+  }
+
+  const Calibration::Pair &Calibration::first() const {
+    assert(calibration_size > 0);
+    return calibration[0];
+  }
+
+  const Calibration::Pair &Calibration::last() const {
+    assert(calibration_size > 0);
+    return calibration[calibration_size - 1];
   }
 
   bool Calibration::has_lower_limit() const {
@@ -153,7 +168,7 @@ namespace servo {
 
       value_out = value;
 
-      // Is the value below the bottom most calibration point?
+      // Is the value below the bottom most calibration pair?
       if(value < calibration[0].value) {
         // Should the value be limited to the calibration or projected below it?
         if(limit_lower) {
@@ -165,7 +180,7 @@ namespace servo {
                                        calibration[0].pulse, calibration[1].pulse);
         }
       }
-      // Is the value above the top most calibration point?
+      // Is the value above the top most calibration pair?
       else if(value > calibration[last].value) {
         // Should the value be limited to the calibration or projected above it?
         if(limit_upper) {
@@ -178,7 +193,7 @@ namespace servo {
         }
       }
       else {
-        // The value must between two calibration points, so iterate through them to find which ones
+        // The value must between two calibration pairs, so iterate through them to find which ones
         for(uint8_t i = 0; i < last; i++) {
           if(value <= calibration[i + 1].value) {
             pulse_out = map_float(value, calibration[i].value, calibration[i + 1].value,
@@ -192,18 +207,18 @@ namespace servo {
       if(pulse_out < LOWER_HARD_LIMIT || pulse_out > UPPER_HARD_LIMIT) {
         pulse_out = MIN(MAX(pulse_out, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
 
-        // Is the pulse below the bottom most calibration point?
+        // Is the pulse below the bottom most calibration pair?
         if(pulse_out < calibration[0].pulse) {
           value_out = map_float(pulse_out, calibration[0].pulse, calibration[1].pulse,
                                            calibration[0].value, calibration[1].value);
         }
-        // Is the pulse above the top most calibration point?
+        // Is the pulse above the top most calibration pair?
         else if(pulse_out > calibration[last].pulse) {
           value_out = map_float(pulse_out, calibration[last - 1].pulse, calibration[last].pulse,
                                            calibration[last - 1].value, calibration[last].value);
         }
         else {
-          // The pulse must between two calibration points, so iterate through them to find which ones
+          // The pulse must between two calibration pairs, so iterate through them to find which ones
           for(uint8_t i = 0; i < last; i++) {
             if(pulse_out <= calibration[i + 1].pulse) {
               value_out = map_float(pulse_out, calibration[i].pulse, calibration[i + 1].pulse,
@@ -228,7 +243,7 @@ namespace servo {
       // Clamp the pulse between the hard limits
       pulse_out = MIN(MAX(pulse, LOWER_HARD_LIMIT), UPPER_HARD_LIMIT);
 
-      // Is the pulse below the bottom most calibration point?
+      // Is the pulse below the bottom most calibration pair?
       if(pulse_out < calibration[0].pulse) {
         // Should the pulse be limited to the calibration or projected below it?
         if(limit_lower) {
@@ -240,7 +255,7 @@ namespace servo {
                                        calibration[0].value, calibration[1].value);
         }
       }
-      // Is the pulse above the top most calibration point?
+      // Is the pulse above the top most calibration pair?
       else if(pulse > calibration[last].pulse) {
         // Should the pulse be limited to the calibration or projected above it?
         if(limit_upper) {
@@ -253,7 +268,7 @@ namespace servo {
         }
       }
       else {
-        // The pulse must between two calibration points, so iterate through them to find which ones
+        // The pulse must between two calibration pairs, so iterate through them to find which ones
         for(uint8_t i = 0; i < last; i++) {
           if(pulse <= calibration[i + 1].pulse) {
             value_out = map_float(pulse, calibration[i].pulse, calibration[i + 1].pulse,

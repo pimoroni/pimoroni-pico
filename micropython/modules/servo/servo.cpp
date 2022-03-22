@@ -32,13 +32,13 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     mp_print_str(print, "size = ");
     mp_obj_print_helper(print, mp_obj_new_int(size), PRINT_REPR);
 
-    mp_print_str(print, ", points = {");
+    mp_print_str(print, ", pairs = {");
     for(uint i = 0; i < size; i++) {
-        Calibration::Point *point = calib->point_at(i);
+        const Calibration::Pair &pair = calib->pair(i);
         mp_print_str(print, "{");
-        mp_obj_print_helper(print, mp_obj_new_float(point->pulse), PRINT_REPR);
+        mp_obj_print_helper(print, mp_obj_new_float(pair.pulse), PRINT_REPR);
         mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_float(point->value), PRINT_REPR);
+        mp_obj_print_helper(print, mp_obj_new_float(pair.value), PRINT_REPR);
         mp_print_str(print, "}");
         if(i < size - 1)
             mp_print_str(print, ", ");
@@ -100,7 +100,7 @@ mp_obj_t Calibration___del__(mp_obj_t self_in) {
 
 
 /***** Methods *****/
-mp_obj_t Calibration_apply_blank(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_apply_blank_pairs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_size };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -117,12 +117,12 @@ mp_obj_t Calibration_apply_blank(size_t n_args, const mp_obj_t *pos_args, mp_map
     if(size < 0)
         mp_raise_ValueError("size out of range. Expected 0 or greater");
     else
-        self->calibration->apply_blank((uint)size);
+        self->calibration->apply_blank_pairs((uint)size);
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_apply_two_point(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_apply_two_pairs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_min_pulse, ARG_max_pulse, ARG_min_value, ARG_max_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -142,12 +142,12 @@ mp_obj_t Calibration_apply_two_point(size_t n_args, const mp_obj_t *pos_args, mp
     float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_two_point(min_pulse, max_pulse, min_value, max_value);
+    self->calibration->apply_two_pairs(min_pulse, max_pulse, min_value, max_value);
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_apply_three_point(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_apply_three_pairs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_min_pulse, ARG_mid_pulse, ARG_max_pulse, ARG_min_value, ARG_mid_value, ARG_max_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -171,12 +171,12 @@ mp_obj_t Calibration_apply_three_point(size_t n_args, const mp_obj_t *pos_args, 
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float mid_value = mp_obj_get_float(args[ARG_mid_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_three_point(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value);
+    self->calibration->apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value);
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_apply_uniform(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_apply_uniform_pairs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_size, ARG_min_pulse, ARG_max_pulse, ARG_min_value, ARG_max_value };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -201,13 +201,13 @@ mp_obj_t Calibration_apply_uniform(size_t n_args, const mp_obj_t *pos_args, mp_m
         float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
         float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
         float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-        self->calibration->apply_uniform((uint)size, min_pulse, max_pulse, min_value, max_value);
+        self->calibration->apply_uniform_pairs((uint)size, min_pulse, max_pulse, min_value, max_value);
     }
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_apply_default(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_apply_default_pairs(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_type };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -225,7 +225,7 @@ mp_obj_t Calibration_apply_default(size_t n_args, const mp_obj_t *pos_args, mp_m
         mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
     }
     servo::CalibrationType calibration_type = (servo::CalibrationType)type;
-    self->calibration->apply_default(calibration_type);
+    self->calibration->apply_default_pairs(calibration_type);
 
     return mp_const_none;
 }
@@ -235,7 +235,7 @@ mp_obj_t Calibration_size(mp_obj_t self_in) {
     return mp_obj_new_int(self->calibration->size());
 }
 
-mp_obj_t Calibration_point_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_pair(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 2) {
         enum { ARG_self, ARG_index };
         static const mp_arg_t allowed_args[] = {
@@ -252,24 +252,24 @@ mp_obj_t Calibration_point_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
+            const Calibration::Pair &pair = self->calibration->pair((uint)index);
 
             mp_obj_t list = mp_obj_new_list(0, NULL);
-            mp_obj_list_append(list, mp_obj_new_float(point->pulse));
-            mp_obj_list_append(list, mp_obj_new_float(point->value));
+            mp_obj_list_append(list, mp_obj_new_float(pair.pulse));
+            mp_obj_list_append(list, mp_obj_new_float(pair.value));
             return list;
         }
     }
     else {
-        enum { ARG_self, ARG_index, ARG_point };
+        enum { ARG_self, ARG_index, ARG_pair };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_point, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_pair, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         // Parse args.
@@ -281,18 +281,18 @@ mp_obj_t Calibration_point_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
+            Calibration::Pair &pair = self->calibration->pair((uint)index);
 
-            const mp_obj_t object = args[ARG_point].u_obj;
+            const mp_obj_t object = args[ARG_pair].u_obj;
             if(mp_obj_is_type(object, &mp_type_list)) {
                 mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
                 if(list->len == 2) {
-                    point->pulse = mp_obj_get_float(list->items[0]);
-                    point->value = mp_obj_get_float(list->items[1]);
+                    pair.pulse = mp_obj_get_float(list->items[0]);
+                    pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
                     mp_raise_ValueError("list must contain two numbers");
@@ -301,8 +301,8 @@ mp_obj_t Calibration_point_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
                 mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
                 if(tuple->len == 2) {
-                    point->pulse = mp_obj_get_float(tuple->items[0]);
-                    point->value = mp_obj_get_float(tuple->items[1]);
+                    pair.pulse = mp_obj_get_float(tuple->items[0]);
+                    pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
                     mp_raise_ValueError("tuple must contain two numbers");
@@ -317,7 +317,7 @@ mp_obj_t Calibration_point_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_pulse_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 2) {
         enum { ARG_self, ARG_index };
         static const mp_arg_t allowed_args[] = {
@@ -334,12 +334,12 @@ mp_obj_t Calibration_pulse_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
-            return mp_obj_new_float(point->pulse);
+            const Calibration::Pair &pair = self->calibration->pair((uint)index);
+            return mp_obj_new_float(pair.pulse);
         }
     }
     else {
@@ -359,19 +359,19 @@ mp_obj_t Calibration_pulse_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
-            point->pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            Calibration::Pair &pair = self->calibration->pair((uint)index);
+            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
         }
     }
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_value_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 2) {
         enum { ARG_self, ARG_index };
         static const mp_arg_t allowed_args[] = {
@@ -388,12 +388,12 @@ mp_obj_t Calibration_value_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
-            return mp_obj_new_float(point->value);
+            const Calibration::Pair &pair = self->calibration->pair((uint)index);
+            return mp_obj_new_float(pair.value);
         }
     }
     else {
@@ -413,19 +413,19 @@ mp_obj_t Calibration_value_at(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any points");
+            mp_raise_ValueError("this calibration does not have any pairs");
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Point *point = self->calibration->point_at((uint)index);
-            point->value = mp_obj_get_float(args[ARG_value].u_obj);
+            Calibration::Pair &pair = self->calibration->pair((uint)index);
+            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
         }
     }
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_first_point(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_first(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 1) {
         enum { ARG_self };
         static const mp_arg_t allowed_args[] = {
@@ -438,21 +438,22 @@ mp_obj_t Calibration_first_point(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
+            const Calibration::Pair &pair = self->calibration->first();
+
             mp_obj_t list = mp_obj_new_list(0, NULL);
-            mp_obj_list_append(list, mp_obj_new_float(point->pulse));
-            mp_obj_list_append(list, mp_obj_new_float(point->value));
+            mp_obj_list_append(list, mp_obj_new_float(pair.pulse));
+            mp_obj_list_append(list, mp_obj_new_float(pair.value));
             return list;
         }
     }
     else {
-        enum { ARG_self, ARG_point };
+        enum { ARG_self, ARG_pair };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_point, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_pair, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         // Parse args.
@@ -461,16 +462,17 @@ mp_obj_t Calibration_first_point(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const mp_obj_t object = args[ARG_point].u_obj;
+            Calibration::Pair &pair = self->calibration->first();
+
+            const mp_obj_t object = args[ARG_pair].u_obj;
             if(mp_obj_is_type(object, &mp_type_list)) {
                 mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
                 if(list->len == 2) {
-                    point->pulse = mp_obj_get_float(list->items[0]);
-                    point->value = mp_obj_get_float(list->items[1]);
+                    pair.pulse = mp_obj_get_float(list->items[0]);
+                    pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
                     mp_raise_ValueError("list must contain two numbers");
@@ -479,8 +481,8 @@ mp_obj_t Calibration_first_point(size_t n_args, const mp_obj_t *pos_args, mp_map
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
                 mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
                 if(tuple->len == 2) {
-                    point->pulse = mp_obj_get_float(tuple->items[0]);
-                    point->value = mp_obj_get_float(tuple->items[1]);
+                    pair.pulse = mp_obj_get_float(tuple->items[0]);
+                    pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
                     mp_raise_ValueError("tuple must contain two numbers");
@@ -508,11 +510,11 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            return mp_obj_new_float(point->pulse);
+            const Calibration::Pair &pair = self->calibration->first();
+            return mp_obj_new_float(pair.pulse);
         }
     }
     else {
@@ -528,11 +530,11 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            point->pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            Calibration::Pair &pair = self->calibration->first();
+            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
         }
     }
 
@@ -552,11 +554,11 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            return mp_obj_new_float(point->value);
+            const Calibration::Pair &pair = self->calibration->first();
+            return mp_obj_new_float(pair.value);
         }
     }
     else {
@@ -572,18 +574,18 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->first_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            point->value = mp_obj_get_float(args[ARG_value].u_obj);
+            Calibration::Pair &pair = self->calibration->first();
+            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
         }
     }
 
     return mp_const_none;
 }
 
-mp_obj_t Calibration_last_point(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t Calibration_last(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 1) {
         enum { ARG_self };
         static const mp_arg_t allowed_args[] = {
@@ -596,21 +598,22 @@ mp_obj_t Calibration_last_point(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
+            const Calibration::Pair &pair = self->calibration->last();
+
             mp_obj_t list = mp_obj_new_list(0, NULL);
-            mp_obj_list_append(list, mp_obj_new_float(point->pulse));
-            mp_obj_list_append(list, mp_obj_new_float(point->value));
+            mp_obj_list_append(list, mp_obj_new_float(pair.pulse));
+            mp_obj_list_append(list, mp_obj_new_float(pair.value));
             return list;
         }
     }
     else {
-        enum { ARG_self, ARG_point };
+        enum { ARG_self, ARG_pair };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_point, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_pair, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         // Parse args.
@@ -619,16 +622,17 @@ mp_obj_t Calibration_last_point(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const mp_obj_t object = args[ARG_point].u_obj;
+            Calibration::Pair &pair = self->calibration->last();
+
+            const mp_obj_t object = args[ARG_pair].u_obj;
             if(mp_obj_is_type(object, &mp_type_list)) {
                 mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
                 if(list->len == 2) {
-                    point->pulse = mp_obj_get_float(list->items[0]);
-                    point->value = mp_obj_get_float(list->items[1]);
+                    pair.pulse = mp_obj_get_float(list->items[0]);
+                    pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
                     mp_raise_ValueError("list must contain two numbers");
@@ -637,8 +641,8 @@ mp_obj_t Calibration_last_point(size_t n_args, const mp_obj_t *pos_args, mp_map_
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
                 mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
                 if(tuple->len == 2) {
-                    point->pulse = mp_obj_get_float(tuple->items[0]);
-                    point->value = mp_obj_get_float(tuple->items[1]);
+                    pair.pulse = mp_obj_get_float(tuple->items[0]);
+                    pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
                     mp_raise_ValueError("tuple must contain two numbers");
@@ -666,11 +670,11 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            return mp_obj_new_float(point->pulse);
+            const Calibration::Pair &pair = self->calibration->last();
+            return mp_obj_new_float(pair.pulse);
         }
     }
     else {
@@ -686,11 +690,11 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            point->pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            Calibration::Pair &pair = self->calibration->last();
+            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
         }
     }
 
@@ -710,11 +714,11 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            return mp_obj_new_float(point->value);
+            const Calibration::Pair &pair = self->calibration->last();
+            return mp_obj_new_float(pair.value);
         }
     }
     else {
@@ -730,11 +734,11 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
-        Calibration::Point *point = self->calibration->last_point();
-        if(point == nullptr)
-            mp_raise_ValueError("this calibration does not have any points");
+        if(self->calibration->size() == 0)
+            mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            point->value = mp_obj_get_float(args[ARG_value].u_obj);
+            Calibration::Pair &pair = self->calibration->last();
+            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
         }
     }
 
@@ -795,7 +799,7 @@ mp_obj_t Calibration_value_to_pulse(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert value to pulse. Calibration needs at least 2 points");
+        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert value to pulse. Calibration needs at least 2 pairs");
     }
     return mp_const_none;
 }
@@ -823,7 +827,7 @@ mp_obj_t Calibration_pulse_to_value(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert pulse to value. Calibration needs at least 2 points");
+        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert pulse to value. Calibration needs at least 2 pairs");
     }
     return mp_const_none;
 }

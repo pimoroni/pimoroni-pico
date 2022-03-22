@@ -72,7 +72,7 @@ print("Continuous Servo:", continuous_servo.calibration(), end="\n\n")
 cal = Calibration()
 
 # Give it a range of -45 to 45 degrees, corresponding to pulses of 1000 and 2000 microseconds
-cal.apply_two_point(1000, 2000, -45, 45)
+cal.apply_two_pairs(1000, 2000, -45, 45)
 
 # Turn off the lower and upper limits, so the servo can go beyond 45 degrees
 cal.limit_to_calibration(False, False)

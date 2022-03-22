@@ -15,7 +15,7 @@ namespace servo {
   float ServoState::enable() {
     // Has the servo not had a pulse value set before being enabled?
     if(last_enabled_pulse < MIN_VALID_PULSE) {
-      // Set the servo to its mid point
+      // Set the servo to its middle
       return to_mid();
     }
     return _enable();
@@ -67,28 +67,26 @@ namespace servo {
 
   float ServoState::get_min_value() const {
     float value = 0.0f;
-    Calibration::Point *point = calib.first_point();
-    if(point != nullptr) {
-      value = point->value;
+    if(calib.size() > 0) {
+      value = calib.first().value;
     }
     return value;
   }
 
   float ServoState::get_mid_value() const {
     float value = 0.0f;
-    Calibration::Point *first = calib.first_point();
-    Calibration::Point *last = calib.last_point();
-    if((first != nullptr) && (last != nullptr)) {
-      value = (first->value + last->value) / 2.0f;
+    if(calib.size() > 0) {
+      const Calibration::Pair &first = calib.first();
+      const Calibration::Pair &last = calib.last();
+      value = (first.value + last.value) / 2.0f;
     }
     return value;
   }
 
   float ServoState::get_max_value() const {
     float value = 0.0f;
-    Calibration::Point *point = calib.last_point();
-    if(point != nullptr) {
-      value = point->value;
+    if(calib.size() > 0) {
+      value = calib.last().value;
     }
     return value;
   }
