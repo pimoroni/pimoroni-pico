@@ -3,7 +3,6 @@
 
 from pimoroni_i2c import PimoroniI2C
 from breakout_rtc import BreakoutRTC
-import time
 import machine
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}  # i2c pins 4, 5 for Breakout Garden
@@ -19,7 +18,7 @@ rtcbreakout.setup()
 print(f"Getting time from Pico RTC/Thonny: {rtcpico.datetime()}")
 year, month, day, weekday, hour, minute, second, microsecond = rtcpico.datetime()
 
-print(f"Setting the breakout RTC!")
+print("Setting the breakout RTC!")
 rtcbreakout.set_time(second, minute, hour, weekday, day, month, year)
 
 print(f"New breakout time: {rtcbreakout.string_date()} {rtcbreakout.string_time()}")
