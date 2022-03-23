@@ -49,17 +49,17 @@ except OSError:
 
 display = badger2040.Badger2040()
 
-button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
 image = bytearray(int(296 * 128 / 8))
 current_image = 0
 show_info = True
 
+try:
+    with open("appstate.txt", "r") as f:
+        f.readline()
+        current_image = int(f.readline().strip('\n'))
+        show_info = f.readline().strip('\n') == "True"
+except OSError:
+    pass
 
 # Draw an overlay box with a given message within it
 def draw_overlay(message, width, height, line_spacing, text_size):
@@ -127,28 +127,27 @@ if TOTAL_IMAGES == 0:
     display.update()
     sys.exit()
 
+if display.pressed_to_wake(badger2040.BUTTON_UP):
+    if current_image > 0:
+        current_image -= 1
+if display.pressed_to_wake(badger2040.BUTTON_DOWN):
+    if current_image < TOTAL_IMAGES - 1:
+        current_image += 1
+if display.pressed_to_wake(badger2040.BUTTON_A):
+    show_info = not show_info
+if display.pressed_to_wake(badger2040.BUTTON_B) or display.pressed_to_wake(badger2040.BUTTON_C):
+    display.pen(15)
+    display.clear()
+    draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+    display.update()
+    time.sleep(4)
 
 show_image(current_image)
 
 
-while True:
-    if button_up.value():
-        if current_image > 0:
-            current_image -= 1
-        show_image(current_image)
-    if button_down.value():
-        if current_image < TOTAL_IMAGES - 1:
-            current_image += 1
-        show_image(current_image)
-    if button_a.value():
-        show_info = not show_info
-        show_image(current_image)
-    if button_b.value() or button_c.value():
-        display.pen(15)
-        display.clear()
-        draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
-        display.update()
-        time.sleep(4)
-        show_image(current_image)
+with open("appstate.txt", "w") as f:
+    f.write("image\n")
+    f.write("{}\n{}\n".format(current_image,show_info))
 
-    time.sleep(0.01)
+display.halt()
+
