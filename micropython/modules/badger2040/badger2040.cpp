@@ -1,13 +1,17 @@
 #include <cstdio>
+#include "hardware/watchdog.h"
 #include "badger2040.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 namespace {
-    struct Badger2040_ButtonStateOnWake {
-        Badger2040_ButtonStateOnWake()
+    struct Badger2040_WakeUpInit {
+        Badger2040_WakeUpInit()
             : state(gpio_get_all())
-        {}
+        {
+          gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
+          gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
+        }
 
         uint32_t get() const { return state; }
         void clear() { state = 0; }
@@ -185,7 +189,19 @@ MICROPY_EVENT_POLL_HOOK
 
 mp_obj_t Badger2040_halt(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
-    self->badger2040->halt();
+
+    // Don't use the Badger halt so we can allow Micropython to be interrupted.
+    gpio_put(pimoroni::Badger2040::ENABLE_3V3, 0);
+
+    self->badger2040->update_button_states();
+    while (self->badger2040->button_states() == 0) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+      self->badger2040->update_button_states();
+    }
+    watchdog_reboot(0, SRAM_END, 0);
+
     return mp_const_none;
 }
 // sleep
@@ -230,6 +246,10 @@ mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
 mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
     bool state = (button_wake_state.get() >> mp_obj_get_int(button)) & 1;
     return state ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button) {
+    return Badger2040_pressed_to_wake(button);
 }
 
 mp_obj_t Badger2040_clear_pressed_to_wake() {
