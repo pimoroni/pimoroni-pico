@@ -1,5 +1,4 @@
 import badger2040
-import machine
 import time
 
 # Global Constants
@@ -206,12 +205,12 @@ detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
                               TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
 
 # Show overlay if any of the buttons were pressed to wake up the Badger
-if (display.pressed_to_wake(badger2040.BUTTON_A) or
-    display.pressed_to_wake(badger2040.BUTTON_B) or
-    display.pressed_to_wake(badger2040.BUTTON_C) or
-    display.pressed_to_wake(badger2040.BUTTON_UP) or
-    display.pressed_to_wake(badger2040.BUTTON_DOWN)):
-    show_overlay = True
+if (display.pressed_to_wake(badger2040.BUTTON_A)
+    or display.pressed_to_wake(badger2040.BUTTON_B)
+    or display.pressed_to_wake(badger2040.BUTTON_C)
+    or display.pressed_to_wake(badger2040.BUTTON_UP)
+    or display.pressed_to_wake(badger2040.BUTTON_DOWN)):
+        show_overlay = True
 
 # ------------------------------
 #       Main program

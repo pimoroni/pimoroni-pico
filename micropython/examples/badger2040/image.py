@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import machine
 import badger2040
 from badger2040 import WIDTH, HEIGHT
 
@@ -60,6 +59,7 @@ try:
         show_info = f.readline().strip('\n') == "True"
 except OSError:
     pass
+
 
 # Draw an overlay box with a given message within it
 def draw_overlay(message, width, height, line_spacing, text_size):
@@ -145,9 +145,10 @@ if display.pressed_to_wake(badger2040.BUTTON_B) or display.pressed_to_wake(badge
 show_image(current_image)
 
 
+# Tell launcher to relaunch this app on wake and record state
 with open("appstate.txt", "w") as f:
     f.write("image\n")
-    f.write("{}\n{}\n".format(current_image,show_info))
+    f.write("{}\n{}\n".format(current_image, show_info))
 
+# Halt the Badger to save power, it will wake up if any of the front buttons are pressed
 display.halt()
-

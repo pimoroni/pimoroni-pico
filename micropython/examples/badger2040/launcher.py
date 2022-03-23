@@ -14,6 +14,7 @@ MIN_BATTERY_VOLTAGE = 3.2
 # Reduce clock speed to 48MHz, that's fast enough!
 machine.freq(48000000)
 
+
 def launch(file):
     for k in locals().keys():
         if k not in ("gc", "file", "machine"):
@@ -24,6 +25,7 @@ def launch(file):
     except ImportError:
         __import__(file)  # Failover to importing [_file]
     machine.reset()  # Exit back to launcher
+
 
 # Restore previously running app
 try:
