@@ -205,63 +205,34 @@ detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
 detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
                               TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
 
-# Set up the buttons
-button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-
-# Button handling function
-def button(pin):
-    global show_overlay
-
-    if pin == button_a:
-        show_overlay = True
-        return
-
-    if pin == button_b:
-        show_overlay = True
-        return
-
-    if pin == button_c:
-        show_overlay = True
-        return
-
-    if pin == button_up:
-        show_overlay = True
-        return
-
-    if pin == button_down:
-        show_overlay = True
-        return
-
-
-# Register the button handling function with the buttons
-button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-
+# Show overlay if any of the buttons were pressed to wake up the Badger
+if (badger2040.pressed_to_wake(badger2040.BUTTON_A) or
+    badger2040.pressed_to_wake(badger2040.BUTTON_B) or
+    badger2040.pressed_to_wake(badger2040.BUTTON_C) or
+    badger2040.pressed_to_wake(badger2040.BUTTON_UP) or
+    badger2040.pressed_to_wake(badger2040.BUTTON_DOWN)):
+    show_overlay = True
 
 # ------------------------------
-#       Main program loop
+#       Main program
 # ------------------------------
 
 draw_badge()
-display.update()
 
-while True:
-    if show_overlay:
-        draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
-                     WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
-        display.update()
-        time.sleep(4)
+if show_overlay:
+    draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
+                 WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
+    display.update()
+    time.sleep(4)
 
-        draw_badge()
-        display.update()
-        show_overlay = False
+    draw_badge()
+    display.update()
+else:
+    display.update()
 
-    time.sleep(0.1)
+# Tell launcher to relaunch this app on wake
+with open("appstate.txt", "w") as f:
+    f.write("badge\n")
+
+# Halt the Badger to save power, it will wake up if any of the front buttons are pressed
+display.halt()

@@ -3,6 +3,19 @@
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
+namespace {
+    struct Badger2040_ButtonStateOnWake {
+        Badger2040_ButtonStateOnWake()
+            : state(gpio_get_all())
+        {}
+
+        uint32_t get() const { return state; }
+        void clear() { state = 0; }
+
+    private:
+        uint32_t state;
+    } button_wake_state __attribute__ ((init_priority (101)));
+};
 
 extern "C" {
 #include "badger2040.h"
@@ -170,7 +183,11 @@ MICROPY_EVENT_POLL_HOOK
     return mp_const_none;
 }
 
-// halt
+mp_obj_t Badger2040_halt(mp_obj_t self_in) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+    self->badger2040->halt();
+    return mp_const_none;
+}
 // sleep
 
 mp_obj_t Badger2040_invert(mp_obj_t self_in, mp_obj_t invert) {
@@ -208,6 +225,16 @@ mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
     self->badger2040->update_button_states();
     bool state = self->badger2040->pressed(mp_obj_get_int(button));
     return state ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
+    bool state = (button_wake_state.get() >> mp_obj_get_int(button)) & 1;
+    return state ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_clear_pressed_to_wake() {
+    button_wake_state.clear();
+    return mp_const_none;
 }
 
 // pressed

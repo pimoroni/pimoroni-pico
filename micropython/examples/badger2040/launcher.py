@@ -11,6 +11,39 @@ import launchericons
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
+# Reduce clock speed to 48MHz, that's fast enough!
+machine.freq(48000000)
+
+def launch(file):
+    for k in locals().keys():
+        if k not in ("gc", "file", "machine"):
+            del locals()[k]
+    gc.collect()
+    try:
+        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
+    except ImportError:
+        __import__(file)  # Failover to importing [_file]
+    machine.reset()  # Exit back to launcher
+
+# Restore previously running app
+try:
+    # Pressing A and C together at start quits app
+    if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
+        os.remove("appstate.txt")
+    else:
+        with open("appstate.txt", "r") as f:
+            # Try to launch app
+            launch("_" + f.readline().strip('\n'))
+except OSError:
+    pass
+except ImportError:
+    # Happens if appstate names an unknown app.  Delete appstate and reset
+    import os
+    os.remove("appstate.txt")
+    machine.reset()
+
+badger2040.clear_pressed_to_wake()
+
 
 page = 0
 font_size = 1
@@ -179,19 +212,9 @@ def render():
     display.update()
 
 
-def launch(file):
-    for k in locals().keys():
-        if k not in ("gc", "file", "machine"):
-            del locals()[k]
-    gc.collect()
-    try:
-        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
-    except ImportError:
-        __import__(file)  # Failover to importing [_file]
-    machine.reset()  # Exit back to launcher
-
-
 def launch_example(index):
+    while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
+        time.sleep(0.01)
     try:
         launch(examples[(page * 3) + index][0])
         return True
@@ -241,7 +264,7 @@ display.update_speed(badger2040.UPDATE_FAST)
 
 # Wait for wakeup button to be released
 while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
-    pass
+    time.sleep(0.01)
 
 
 while True:
