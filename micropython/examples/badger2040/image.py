@@ -6,7 +6,7 @@ import badger2040
 from badger2040 import WIDTH, HEIGHT
 
 
-REAMDE = """
+README = """
 Images must be 296x128 pixel with 1bit colour depth.
 
 You can use examples/badger2040/image_converter/convert.py to convert them:
@@ -22,24 +22,32 @@ OVERLAY_TEXT_SIZE = 0.5
 
 TOTAL_IMAGES = 0
 
-# Try to preload BadgerPunk image
+# I am using fastrefresh to keep track of which screen refresh speed I have selected using the C button.
+# 1 = MEDIUM. 2 = NORMAL. 3 = FAST. 4 = TURBO. Turbo is very very fast but gross. Fast is the best of both. I hate slow.
+fastrefresh = 3
+
+inverted = False
+
+#This makes the /images folder if it does not already exist.
 try:
     os.mkdir("images")
 except OSError:
     pass
 
+#This puts the badger photo and readme text file in the /images folder if they do not already exist.
 try:
     import badgerpunk
     with open("images/badgerpunk.bin", "wb") as f:
         f.write(badgerpunk.data())
         f.flush()
     with open("images/readme.txt", "w") as f:
-        f.write(REAMDE)
+        f.write(README)
         f.flush()
     del badgerpunk
 except (OSError, ImportError):
     pass
 
+#This loads up an array with the images in the /images folder.
 try:
     IMAGES = [f for f in os.listdir("/images") if f.endswith(".bin")]
     TOTAL_IMAGES = len(IMAGES)
@@ -49,16 +57,24 @@ except OSError:
 
 display = badger2040.Badger2040()
 
+#This is setting the initial screen refresh speed.
+display.update_speed(badger2040.UPDATE_FAST)
+
 button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
+# Inverted. For reasons.
+button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
 image = bytearray(int(296 * 128 / 8))
+
+#This is the first photo that will be shown. 
 current_image = 0
-show_info = True
+
+#This sets whether the filename and count is shown by default.
+show_info = False
 
 
 # Draw an overlay box with a given message within it
@@ -130,25 +146,85 @@ if TOTAL_IMAGES == 0:
 
 show_image(current_image)
 
-
+#Button Loop
 while True:
+    #Up/Down Buttons for Photo Navigation
+    #(I am not putting those under the User button shift)
     if button_up.value():
         if current_image > 0:
             current_image -= 1
+        else:
+            current_image = TOTAL_IMAGES - 1
         show_image(current_image)
     if button_down.value():
         if current_image < TOTAL_IMAGES - 1:
             current_image += 1
+        else:
+            current_image = 0
         show_image(current_image)
-    if button_a.value():
-        show_info = not show_info
-        show_image(current_image)
-    if button_b.value() or button_c.value():
-        display.pen(15)
-        display.clear()
-        draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
-        display.update()
-        time.sleep(4)
-        show_image(current_image)
+    #End Up/Down Buttons
+    
+    #Start ABC Buttons, with fancy User button modifier 
+    if button_user.value():  # User button is NOT held down
+        if button_a.value():
+            show_info = not show_info
+            show_image(current_image)
+        
+        if button_b.value():
+            inverted = not inverted
+            display.invert(inverted)
+            show_image(current_image)
+    
+        if button_c.value():
+            display.pen(15)
+            display.clear()
+            if fastrefresh == 3:
+                fastrefresh = 4
+                display.update_speed(badger2040.UPDATE_FAST)
+                draw_overlay("TURBO SCREEN SPEED! AAAAAA", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+                display.update()
+                time.sleep(2)
+                display.update_speed(badger2040.UPDATE_TURBO)
+            else:
+                fastrefresh = 3
+                display.update_speed(badger2040.UPDATE_FAST)
+                draw_overlay("Default Fast Refresh Speed", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+                display.update()
+                time.sleep(2)
+            show_image(current_image)
+            
+    else: #User button IS held down
+        if button_a.value():
+            display.update_speed(badger2040.UPDATE_TURBO)
+            show_image(current_image)
+            display.update_speed(badger2040.UPDATE_FAST)
+        
+        if button_b.value():
+            display.pen(15)
+            display.clear()
+            draw_overlay("Exiting Image Viewer! o3o", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+            display.update()
+            time.sleep(2)
+            machine.reset()
+    
+        if button_c.value():
+            display.pen(15)
+            display.clear()
+            if fastrefresh == 1:
+                fastrefresh = 2
+                display.update_speed(badger2040.UPDATE_FAST)
+                draw_overlay("Slowest refresh speed", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+                display.update()
+                time.sleep(2)
+                display.update_speed(badger2040.UPDATE_NORMAL)
+            else:
+                fastrefresh = 1
+                display.update_speed(badger2040.UPDATE_FAST)
+                draw_overlay("Medium screen refresh!", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+                display.update()
+                time.sleep(2)
+                display.update_speed(badger2040.UPDATE_MEDIUM)
+            show_image(current_image)
 
+    
     time.sleep(0.01)
