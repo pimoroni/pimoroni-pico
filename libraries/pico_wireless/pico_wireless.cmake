@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/esp32wireless/esp32wireless.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/esp32spi/esp32spi.cmake)
 add_library(pico_wireless INTERFACE)
 
 target_sources(pico_wireless INTERFACE
