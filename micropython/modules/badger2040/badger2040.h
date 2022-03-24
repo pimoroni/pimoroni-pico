@@ -16,6 +16,7 @@ extern mp_obj_t Badger2040_update(mp_obj_t self_in);
 extern mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
 extern mp_obj_t Badger2040_halt(mp_obj_t self_in);
+extern mp_obj_t Badger2040_woken(mp_obj_t self_in);
 
 extern mp_obj_t Badger2040_invert(mp_obj_t self_in, mp_obj_t invert);
 extern mp_obj_t Badger2040_led(mp_obj_t self_in, mp_obj_t brightness);

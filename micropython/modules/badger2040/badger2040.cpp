@@ -14,6 +14,10 @@ namespace {
           gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
         }
 
+        bool any() const {
+            return state > 0;
+        }
+
         bool get(uint32_t pin) const {
             return state & (0b1 << pin);
         }
@@ -197,6 +201,11 @@ MICROPY_EVENT_POLL_HOOK
     self->badger2040->power_off();
 
     return mp_const_none;
+}
+
+mp_obj_t Badger2040_woken(mp_obj_t self_in) {
+    (void)self_in;
+    return button_wake_state.any() ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_halt(mp_obj_t self_in) {
