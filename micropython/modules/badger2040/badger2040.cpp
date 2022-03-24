@@ -7,7 +7,7 @@
 namespace {
     struct Badger2040_WakeUpInit {
         Badger2040_WakeUpInit()
-            : state(gpio_get_all())
+            : state(gpio_get_all() & (0x1f << 11))  // Record state of all the front buttons
         {
           gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
           gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
