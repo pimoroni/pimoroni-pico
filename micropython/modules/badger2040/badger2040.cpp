@@ -14,12 +14,23 @@ namespace {
           gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
         }
 
-        uint32_t get() const { return state; }
+        bool get(uint32_t pin) const {
+            return state & (0b1 << pin);
+        }
+
+        bool get_once(uint32_t pin) {
+            uint32_t mask = 0b1 << pin;
+            bool value = state & mask;
+            state &= ~mask;
+            return value;
+        }
         void clear() { state = 0; }
 
     private:
         uint32_t state;
-    } button_wake_state __attribute__ ((init_priority (101)));
+    };
+
+    Badger2040_WakeUpInit button_wake_state __attribute__ ((init_priority (101)));
 };
 
 extern "C" {
@@ -201,7 +212,7 @@ MICROPY_EVENT_POLL_HOOK
 #endif
       self->badger2040->update_button_states();
     }
-    watchdog_reboot(0, SRAM_END, 0);
+    //watchdog_reboot(0, SRAM_END, 0);
 
     return mp_const_none;
 }
@@ -240,12 +251,13 @@ mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness) {
 mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->update_button_states();
+    bool wake_state = button_wake_state.get_once(mp_obj_get_int(button));
     bool state = self->badger2040->pressed(mp_obj_get_int(button));
-    return state ? mp_const_true : mp_const_false;
+    return (state || wake_state) ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
-    bool state = (button_wake_state.get() >> mp_obj_get_int(button)) & 1;
+    bool state = button_wake_state.get(mp_obj_get_int(button));
     return state ? mp_const_true : mp_const_false;
 }
 
