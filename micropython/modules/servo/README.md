@@ -37,25 +37,25 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
   - [Function Reference](#function-reference)
   - [PWM Limitations](#pwm-limitations)
 - [ServoCluster](#servocluster)
-  - [Getting Started](#getting-started)
-  - [Control by Value](#control-by-value)
-    - [Common Values](#common-values)
-  - [Control by Percent](#control-by-percent)
-  - [Control by Pulse Width](#control-by-pulse-width)
-  - [Frequency Control](#frequency-control)
+  - [Getting Started](#getting-started-1)
+  - [Control by Value](#control-by-value-1)
+    - [Common Values](#common-values-1)
+  - [Control by Percent](#control-by-percent-1)
+  - [Control by Pulse Width](#control-by-pulse-width-1)
+  - [Frequency Control](#frequency-control-1)
   - [Phase Control](#phase-control)
-  - [Calibration](#calibration)
+  - [Calibration](#calibration-1)
   - [Delayed Loading](#delayed-loading)
-  - [Function Reference](#function-reference)
+  - [Function Reference](#function-reference-1)
   - [PIO Limitations](#pio-limitations)
-- [Calibration](#calibration)
+- [Calibration](#calibration-2)
   - [Common Types](#common-types)
   - [Custom Calibration](#custom-calibration)
   - [Modifying a Calibration](#modifying-a-calibration)
   - [Movement Limits](#movement-limits)
   - [Populating a Calibration](#populating-a-calibration)
   - [Viewing the Mapping](#viewing-the-mapping)
-  - [Function Reference](#function-reference)
+  - [Function Reference](#function-reference-2)
 
 
 ## Servo 2040
@@ -249,7 +249,7 @@ The `servo` module contains a `servo2040` sub module with constants for the serv
 * `ADC_ADDR_2` = `25`
 
 
-#### Edge ADC Pins
+#### ADC Pins
 
 * `ADC0` = `26`
 * `ADC1` = `27`
