@@ -5,7 +5,6 @@ import machine
 import badger2040
 from badger2040 import WIDTH, HEIGHT
 
-
 README = """
 Images must be 296x128 pixel with 1bit colour depth.
 
@@ -28,13 +27,13 @@ fastrefresh = 3
 
 inverted = False
 
-#This makes the /images folder if it does not already exist.
+# This makes the /images folder if it does not already exist.
 try:
     os.mkdir("images")
 except OSError:
     pass
 
-#This puts the badger photo and readme text file in the /images folder if they do not already exist.
+# This puts the badger photo and readme text file in the /images folder if they do not already exist.
 try:
     import badgerpunk
     with open("images/badgerpunk.bin", "wb") as f:
@@ -47,17 +46,16 @@ try:
 except (OSError, ImportError):
     pass
 
-#This loads up an array with the images in the /images folder.
+# This loads up an array with the images in the /images folder.
 try:
     IMAGES = [f for f in os.listdir("/images") if f.endswith(".bin")]
     TOTAL_IMAGES = len(IMAGES)
 except OSError:
     pass
 
-
 display = badger2040.Badger2040()
 
-#This is setting the initial screen refresh speed.
+# This is setting the initial screen refresh speed.
 display.update_speed(badger2040.UPDATE_FAST)
 
 button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
@@ -70,10 +68,10 @@ button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PU
 
 image = bytearray(int(296 * 128 / 8))
 
-#This is the first photo that will be shown. 
+# This is the first photo that will be shown.
 current_image = 0
 
-#This sets whether the filename and count is shown by default.
+# This sets whether the filename and count is shown by default.
 show_info = False
 
 
@@ -143,13 +141,12 @@ if TOTAL_IMAGES == 0:
     display.update()
     sys.exit()
 
-
 show_image(current_image)
 
-#Button Loop
+# Button Loop
 while True:
-    #Up/Down Buttons for Photo Navigation
-    #(I am not putting those under the User button shift)
+    # Up/Down Buttons for Photo Navigation
+    # (I am not putting those under the User button shift)
     if button_up.value():
         if current_image > 0:
             current_image -= 1
@@ -162,19 +159,19 @@ while True:
         else:
             current_image = 0
         show_image(current_image)
-    #End Up/Down Buttons
-    
-    #Start ABC Buttons, with fancy User button modifier 
+    # End Up/Down Buttons
+
+    # Start ABC Buttons, with fancy User button modifier
     if button_user.value():  # User button is NOT held down
         if button_a.value():
             show_info = not show_info
             show_image(current_image)
-        
+
         if button_b.value():
             inverted = not inverted
             display.invert(inverted)
             show_image(current_image)
-    
+
         if button_c.value():
             display.pen(15)
             display.clear()
@@ -192,13 +189,13 @@ while True:
                 display.update()
                 time.sleep(2)
             show_image(current_image)
-            
-    else: #User button IS held down
+
+    else:  # User button IS held down
         if button_a.value():
             display.update_speed(badger2040.UPDATE_TURBO)
             show_image(current_image)
             display.update_speed(badger2040.UPDATE_FAST)
-        
+
         if button_b.value():
             display.pen(15)
             display.clear()
@@ -206,7 +203,7 @@ while True:
             display.update()
             time.sleep(2)
             machine.reset()
-    
+
         if button_c.value():
             display.pen(15)
             display.clear()
@@ -226,5 +223,4 @@ while True:
                 display.update_speed(badger2040.UPDATE_MEDIUM)
             show_image(current_image)
 
-    
     time.sleep(0.01)
