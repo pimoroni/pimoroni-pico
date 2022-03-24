@@ -10,10 +10,22 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 
 
 ## Table of Content
-
 - [Servo 2040](#servo-2040)
-  - [Pin Defines](#pin-defines)
-  - [Constant Defines](#constant-defines)
+  - [Reading the User Button](#reading-the-user-button)
+  - [Reading the Sensors](#reading-the-sensors)
+    - [Configuring Pulls](#configuring-pulls)
+  - [Controlling the LED Bar](#controlling-the-led-bar)
+  - [Pin Constants](#pin-constants)
+    - [Servo Pins](#servo-pins)
+    - [LED Pin](#led-pin)
+    - [I2C Pins](#i2c-pins)
+    - [Button Pin](#button-pin)
+    - [Address Pins](#address-pins)
+    - [ADC Pins](#adc-pins)
+  - [Other Constants](#other-constants)
+    - [Counts](#counts)
+    - [Addresses](#addresses)
+    - [Sensing](#sensing)
 - [Servo](#servo)
   - [Getting Started](#getting-started)
   - [Control by Value](#control-by-value)
@@ -48,7 +60,150 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 
 ## Servo 2040
 
-### Pin Defines
+Servo 2040 is a controller board for 3-pin hobby servos, with additional bells and whistles that make it ideal for many robotics projects! Key features include:
+* Drive up to 18 servos - enough for a hexapod walker!
+* 6 analog sensor headers - have your robot sense its environment
+* Current and voltage monitoring - be sure how your servos are performing
+* 6x RGB LEDs - show sensor states or current or voltage levels
+* Reverse polarity projection - protect all your servos
+
+
+### Reading the User Button
+
+As is the case for many of Pimoroni's RP2040-based boards, the boot button on Servo 2040 that is used for programming also acts as a user button once a program is running. To simplify the use of this and other buttons, the `pimoroni` module contains a `Button` class that handles button debounce and auto-repeat.
+
+```python
+Button(button, invert=True, repeat_time=200, hold_time=1000)
+```
+
+To set up the user button, first import the `Button` class from the `pimoroni` module and the pin constant for the button from `servo`:
+```python
+from pimoroni import Button
+from servo import servo2040
+```
+
+Then create an instance of `Button` for the user button:
+```python
+user_sw = Button(servo2040.USER_SW)
+```
+
+To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `repeat_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values:
+
+```python
+state = user_sw.read()
+```
+
+It is also possible to read the raw button state without the repeat feature, if you prefer:
+```python
+state = user_sw.raw()
+```
+
+
+### Reading the Sensors
+
+On the right-hand edge of Servo 2040 are six analog inputs, with neighbouring 3.3V and GND. These let you connect up sensors to enable your mechanical creations to sense how they are interacting with the world. For example, a servo driven gripper with analog force sensors in its fingers could report how much pressure it is applying as it grabs an object, or the extra pin of an analog feedback servo could be wired up to report its actual angle.
+
+Servo 2040 also has two internal sensors:
+* A voltage sensor, letting you measure the supply voltage to the servos.
+* A low-side current sensor, letting you measure how much current a set of servos is drawing.
+Both of these could be used just for monitoring, or as the trigger to turn off servos safely when voltage gets too low or current draw gets too high.
+
+To allow for all of these inputs, Servo 2040 has an onboard analog multiplexer that expands a single analog pin into eight, by use of three digital address pins that select a single input at a time. As such, the setup for these sensors is more involved than it would be to just read eight analog pins directly.
+
+To begin reading these inputs, first import the `Analog` and `AnalogMux` classes from `pimoroni` and the pin, address, and gain constants from `servo`:
+
+```python
+from pimoroni import Analog
+from servo import servo2040
+```
+
+Then set up three instances of `Analog` for the sensor, voltage, and current sensing:
+
+```python
+sen_adc = Analog(servo2040.SHARED_ADC)
+vol_adc = Analog(servo2040.SHARED_ADC, servo2040.VOLTAGE_GAIN)
+cur_adc = Analog(servo2040.SHARED_ADC, servo2040.CURRENT_GAIN,
+                 servo2040.SHUNT_RESISTOR, servo2040.CURRENT_OFFSET)
+```
+
+You may notice, all three of these use the same `SHARED_ADC` pin. This is intentional as it is just a single pin that is being used for all three different functions, only the gains differ.
+
+The next step is to set up the analog multiplexer, by providing it with the three address pins:
+```python
+mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2)
+```
+Note that the `AnalogMux` does not know about any of the `Analog` classes that were created before.
+
+With the multiplexer now configured, reading each sensor is simply a case of 'selecting' the sensor on the multiplexer then reading the value from one of the three `Analog` classes created at the start.
+
+To read the siz sensor headers:
+```python
+for addr in range(servo2040.NUM_SENSORS):
+    mux.select(addr)
+    print("Sensor", addr + 1, "=", sen_adc.read_voltage())
+```
+
+To read the voltage sense:
+```python
+mux.select(servo2040.VOLTAGE_SENSE_ADDR)
+print("Voltage =", vol_adc.read_voltage(), "V")
+```
+
+To read the current draw in amps (A):
+```python
+mux.select(servo2040.CURRENT_SENSE_ADDR)
+print("Current =", cur_adc.read_current(), "A")
+```
+
+
+#### Configuring Pulls
+
+For some sensors you may need to have the input be pulled high or low before taking a reading. To support this there is an optional `muxed_pin` parameter that can be passed into the `AnalogMux` when creating it, which gives the multiplexer access to the pin to control the pulls.
+
+```python
+mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2,
+                muxed_pin=Pin(servo2040.SHARED_ADC))
+```
+
+From there the pull state of each of the multiplexer's addresses can be configured independently by calling `.configure_pull()`, with the address and the pull state (either `Pin.PULL_UP`, `Pin.PULL_DOWN`, or `None`).
+
+The below example shows how to set all 6 sensor addresses to have pull-downs:
+```python
+sensor_addrs = list(range(servo2040.SENSOR_1_ADDR, servo2040.SENSOR_6_ADDR + 1))
+for addr in sensor_addrs:
+    mux.configure_pull(addr, Pin.PULL_DOWN)
+```
+
+
+#### Controlling the LED Bar
+
+Alongside Servo 2040's six sensor headers are six addressable RGB LEDs. These work using the same chainable 1-wire signalling as WS2812 LED's, commonly known as Neopixels. As such, they can be controlled using the same Plasma Library used by the (Pimoroni Plasma 2040)[https://shop.pimoroni.com/products/plasma-2040].
+
+To set up the LED bar, first import the `WS2812` class from the `plasma` module and the pin constants for the LEDs from `servo`:
+```
+from plasma import WS2812
+from servo import servo2040
+```
+
+Then construct a new `WS2812` instance, specifying the number of LEDs, PIO, PIO state-machine and GPIO pin.
+```python
+led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DAT)
+```
+
+Finally, start the LED bar by calling `start`:
+```python
+led_bar.start()
+```
+
+For more information on how to control the LEDs on the bar, please refer to the (Plasma Library)[https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma].
+
+
+### Pin Constants
+
+The `servo` module contains a `servo2040` sub module with constants for the servo, LED, sensor and button pins.
+
+
+#### Servo Pins
 
 * `SERVO_1` = `0`
 * `SERVO_2` = `1`
@@ -68,23 +223,54 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 * `SERVO_16` = `15`
 * `SERVO_17` = `16`
 * `SERVO_18` = `17`
+
+
+#### LED Pin
+
 * `LED_DAT` = `18`
+
+
+#### I2C Pins
+
 * `INT` = `19`
 * `SDA` = `20`
 * `SCL` = `21`
+
+
+#### Button Pin
+
 * `USER_SW` = `23`
+
+
+#### Address Pins
+
 * `ADC_ADDR_0` = `22`
 * `ADC_ADDR_1` = `24`
 * `ADC_ADDR_2` = `25`
+
+
+#### Edge ADC Pins
+
 * `ADC0` = `26`
 * `ADC1` = `27`
 * `ADC2` = `28`
 * `SHARED_ADC` = `29`
 
 
-### Constant Defines
+### Other Constants
 
+The `servo2040` sub module also contains other constants to help with the control of Servo 2040's various features:
+
+
+#### Counts
+
+* `NUM_SERVOS` = `18`
+* `NUM_SENSORS` = `6`
 * `NUM_LEDS` = `6`
+
+
+#### Addresses
+
 * `SENSOR_1_ADDR` = `0b000`
 * `SENSOR_2_ADDR` = `0b001`
 * `SENSOR_3_ADDR` = `0b010`
@@ -93,9 +279,13 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 * `SENSOR_6_ADDR` = `0b101`
 * `VOLTAGE_SENSE_ADDR` = `0b110`
 * `CURRENT_SENSE_ADDR` = `0b111`
+
+
+#### Sensing
+
+* `VOLTAGE_GAIN` = `0.28058`
 * `SHUNT_RESISTOR` = `0.003`
 * `CURRENT_GAIN` = `69`
-* `VOLTAGE_GAIN` = `0.28058`
 * `CURRENT_OFFSET` = `-0.02`
 
 
