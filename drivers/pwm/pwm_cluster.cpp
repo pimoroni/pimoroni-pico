@@ -150,9 +150,22 @@ PWMCluster::~PWMCluster() {
   if(initialised) {
     pio_sm_set_enabled(pio, sm, false);
 
-    dma_channel_abort(dma_channel);
-    dma_channel_set_irq0_enabled(dma_channel, false);
-    //dma_channel_unclaim(dma_channel); // This does not seem to work
+    // Tear down the DMA channel.
+    // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
+    uint32_t irq0_save = dma_hw->inte0 & (1u << dma_channel);
+    hw_clear_bits(&dma_hw->inte0, irq0_save);
+
+    dma_hw->abort = 1u << dma_channel;
+
+    // To fence off on in-flight transfers, the BUSY bit should be polled
+    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
+    while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
+
+    // Clear the interrupt (if any) and restore the interrupt masks.
+    dma_hw->ints0 = 1u << dma_channel;
+    hw_set_bits(&dma_hw->inte0, irq0_save);
+
+    dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
     clusters[dma_channel] = nullptr;
 
     pio_sm_unclaim(pio, sm);

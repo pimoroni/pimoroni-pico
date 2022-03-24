@@ -1,3 +1,4 @@
+import gc
 import time
 import math
 from pimoroni import Button
@@ -18,6 +19,9 @@ SPEED = 5             # The speed that the LEDs will cycle at
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 50          # How many times to update LEDs and Servos per second
 SERVO_EXTENT = 80.0   # How far from zero to move the servos
+
+# Free up hardware resources ahead of creating a new ServoCluster
+gc.collect()
 
 # Create a servo cluster for pins 0 to 7, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1

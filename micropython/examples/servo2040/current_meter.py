@@ -1,3 +1,4 @@
+import gc
 import time
 from machine import Pin
 from pimoroni import Analog, AnalogMux, Button
@@ -20,6 +21,9 @@ UPDATES = 50          # How many times to update LEDs and Servos per second
 MAX_CURRENT = 3.0     # The maximum current, in amps, to show on the meter
 SAMPLES = 50          # The number of current measurements to take per reading
 TIME_BETWEEN = 0.001  # The time between each current measurement
+
+# Free up hardware resources ahead of creating a new ServoCluster
+gc.collect()
 
 # Create the user button
 user_sw = Button(servo2040.USER_SW)

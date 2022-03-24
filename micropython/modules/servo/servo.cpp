@@ -1365,7 +1365,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         delete cluster;
         m_del(PWMCluster::Sequence, seq_buffer, PWMCluster::NUM_BUFFERS * 2);
         m_del(PWMCluster::TransitionData, dat_buffer, PWMCluster::BUFFER_SIZE * 2);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster");//. Try running `import gc` followed by `gc.collect()`, then create this ServoCluster");
+        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
     self = m_new_obj_with_finaliser(_ServoCluster_obj_t);

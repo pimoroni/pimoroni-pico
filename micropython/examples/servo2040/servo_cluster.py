@@ -1,3 +1,4 @@
+import gc
 import time
 import math
 from servo import ServoCluster, servo2040
@@ -9,6 +10,9 @@ NOTE: ServoCluster uses the RP2040's PIO system, and as
 such may have problems when running code multiple times.
 If you encounter issues, try resetting your board.
 """
+
+# Free up hardware resources ahead of creating a new ServoCluster
+gc.collect()
 
 # Create a servo cluster for pins 0 to 3, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1
