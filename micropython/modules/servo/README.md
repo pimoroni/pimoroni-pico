@@ -617,7 +617,7 @@ As well as the common types, a custom calibration can also be provided to one or
 
 ```python
 cal = Calibration()
-cal.apply_two_pair(1000, 2000, -45, 45)
+cal.apply_two_pairs(1000, 2000, -45, 45)
 s = Servo(servo2040.SERVO_1, cal)
 ```
 
