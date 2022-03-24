@@ -9,6 +9,7 @@ namespace {
         Badger2040_WakeUpInit()
             : state(gpio_get_all())
         {
+          gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
           gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
           gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
         }
