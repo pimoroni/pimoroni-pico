@@ -1,11 +1,10 @@
-import gc
-import os
 import time
 import math
 import machine
 import badger2040
 from badger2040 import WIDTH
 import launchericons
+import badger_os
 
 # for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
@@ -15,33 +14,18 @@ MIN_BATTERY_VOLTAGE = 3.2
 machine.freq(48000000)
 
 
-def launch(file):
-    for k in locals().keys():
-        if k not in ("gc", "file", "machine"):
-            del locals()[k]
-    gc.collect()
-    try:
-        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
-    except ImportError:
-        __import__(file)  # Failover to importing [_file]
-    machine.reset()  # Exit back to launcher
-
-
 # Restore previously running app
 try:
     # Pressing A and C together at start quits app
     if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
-        os.remove("appstate.txt")
+        badger_os.state_delete()
     else:
-        with open("appstate.txt", "r") as f:
-            # Try to launch app
-            launch("_" + f.readline().strip('\n'))
+        badger_os.state_launch()
 except OSError:
     pass
 except ImportError:
     # Happens if appstate names an unknown app.  Delete appstate and reset
-    import os
-    os.remove("appstate.txt")
+    badger_os.state_delete()
     machine.reset()
 
 badger2040.clear_pressed_to_wake()
@@ -96,23 +80,6 @@ def map_value(input, in_min, in_max, out_min, out_max):
     return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
 
 
-def get_battery_level():
-    # Enable the onboard voltage reference
-    vref_en.value(1)
-
-    # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
-    vdd = 1.24 * (65535 / vref_adc.read_u16())
-    vbat = (
-        (vbat_adc.read_u16() / 65535) * 3 * vdd
-    )  # 3 in this is a gain, not rounding of 3.3V
-
-    # Disable the onboard voltage reference
-    vref_en.value(0)
-
-    # Convert the voltage to a level to display onscreen
-    return int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, 4))
-
-
 def draw_battery(level, x, y):
     # Outline
     display.thickness(1)
@@ -138,17 +105,7 @@ def draw_battery(level, x, y):
 
 
 def draw_disk_usage(x):
-    # f_bfree and f_bavail should be the same?
-    # f_files, f_ffree, f_favail and f_flag are unsupported.
-    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs(
-        "/")
-
-    f_total_size = f_frsize * f_blocks
-    f_total_free = f_bsize * f_bfree
-    f_total_used = f_total_size - f_total_free
-
-    f_used = 100 / f_total_size * f_total_used
-    # f_free = 100 / f_total_size * f_total_free
+    _, f_used, _ = badger_os.get_disk_usage()
 
     display.image(
         bytearray(
@@ -207,7 +164,9 @@ def render():
     display.rectangle(0, 0, WIDTH, 16)
     display.thickness(1)
     draw_disk_usage(90)
-    draw_battery(get_battery_level(), WIDTH - 22 - 3, 3)
+    vbat = badger_os.get_battery_level()
+    bat = int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, 4))
+    draw_battery(bat, WIDTH - 22 - 3, 3)
     display.pen(15)
     display.text("badgerOS", 3, 8, 0.4)
 
@@ -218,7 +177,7 @@ def launch_example(index):
     while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
         time.sleep(0.01)
     try:
-        launch(examples[(page * 3) + index][0])
+        badger_os.launch(examples[(page * 3) + index][0])
         return True
     except IndexError:
         return False

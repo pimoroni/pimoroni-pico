@@ -3,6 +3,7 @@ import sys
 import time
 import badger2040
 from badger2040 import WIDTH, HEIGHT
+import badger_os
 
 
 REAMDE = """
@@ -51,14 +52,6 @@ display = badger2040.Badger2040()
 image = bytearray(int(296 * 128 / 8))
 current_image = 0
 show_info = True
-
-try:
-    with open("appstate.txt", "r") as f:
-        f.readline()
-        current_image = int(f.readline().strip('\n'))
-        show_info = f.readline().strip('\n') == "True"
-except OSError:
-    pass
 
 
 # Draw an overlay box with a given message within it
@@ -127,28 +120,37 @@ if TOTAL_IMAGES == 0:
     display.update()
     sys.exit()
 
-if display.pressed_to_wake(badger2040.BUTTON_UP):
-    if current_image > 0:
-        current_image -= 1
-if display.pressed_to_wake(badger2040.BUTTON_DOWN):
-    if current_image < TOTAL_IMAGES - 1:
-        current_image += 1
-if display.pressed_to_wake(badger2040.BUTTON_A):
-    show_info = not show_info
-if display.pressed_to_wake(badger2040.BUTTON_B) or display.pressed_to_wake(badger2040.BUTTON_C):
-    display.pen(15)
-    display.clear()
-    draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
-    display.update()
-    time.sleep(4)
 
-show_image(current_image)
+current_image, show_info = badger_os.state_load("image", 0, True)
+
+changed = not display.woken()
 
 
-# Tell launcher to relaunch this app on wake and record state
-with open("appstate.txt", "w") as f:
-    f.write("image\n")
-    f.write("{}\n{}\n".format(current_image, show_info))
+while True:
+    if display.pressed(badger2040.BUTTON_UP):
+        if current_image > 0:
+            current_image -= 1
+            changed = True
+    if display.pressed(badger2040.BUTTON_DOWN):
+        if current_image < TOTAL_IMAGES - 1:
+            current_image += 1
+            changed = True
+    if display.pressed(badger2040.BUTTON_A):
+        show_info = not show_info
+        changed = True
+    if display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C):
+        display.pen(15)
+        display.clear()
+        draw_overlay("To add images connect Badger2040 to a PC, load up Thonny, and see readme.txt in images/", WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, 0.5)
+        display.update()
+        print(current_image)
+        time.sleep(4)
+        changed = True
 
-# Halt the Badger to save power, it will wake up if any of the front buttons are pressed
-display.halt()
+    if changed:
+        badger_os.state_save("image", current_image, show_info)
+        show_image(current_image)
+        changed = False
+
+    # Halt the Badger to save power, it will wake up if any of the front buttons are pressed
+    display.halt()
