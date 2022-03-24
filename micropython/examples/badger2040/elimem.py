@@ -15,11 +15,8 @@ btnd = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN
 # Inverted. For reasons.
 btnr = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
 
-try:
-    squares = bytearray(open("support files/eliminationsquares.bin").read())
-except (OSError, ImportError):
-    machine.reset()
-    pass #Todo: Replace this with a message that just says what the error is and says to reset the badge
+import eliminationsquares
+squares = bytearray(eliminationsquares.data())
 
 roundWinMsgs = ("Nice!",
                 "Good job!",

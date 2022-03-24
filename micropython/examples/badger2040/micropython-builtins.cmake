@@ -38,6 +38,7 @@ endfunction()
 convert_image(usermod_badger2040 badge_image)
 convert_image(usermod_badger2040 badgerpunk)
 convert_image(usermod_badger2040 launchericons)
+convert_image(usermod_badger2040 eliminationsquares)
 
 convert_raw(usermod_badger2040 289-0-wind-in-the-willows-abridged.txt witw)
 
