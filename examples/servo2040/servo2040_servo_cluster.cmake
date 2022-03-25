@@ -1,10 +1,9 @@
-set(OUTPUT_NAME servo2040_rainbow)
-add_executable(${OUTPUT_NAME} servo2040_rainbow.cpp)
+set(OUTPUT_NAME servo2040_servo_cluster)
+add_executable(${OUTPUT_NAME} servo2040_servo_cluster.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
         pico_stdlib
         servo2040
-        button
         )
 
 # enable usb output
