@@ -14,6 +14,10 @@ namespace {
           gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
         }
 
+        bool get_current() {
+            return gpio_get_all() & (0x1f << pimoroni::Badger2040::DOWN);
+        }
+
         bool any() const {
             return state > 0;
         }
@@ -209,8 +213,7 @@ MICROPY_EVENT_POLL_HOOK
     return mp_const_none;
 }
 
-mp_obj_t Badger2040_woken(mp_obj_t self_in) {
-    (void)self_in;
+mp_obj_t Badger2040_woken_by_button() {
     return button_wake_state.any() ? mp_const_true : mp_const_false;
 }
 
@@ -282,6 +285,11 @@ mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button) {
 
 mp_obj_t Badger2040_clear_pressed_to_wake() {
     button_wake_state.clear();
+    while(button_wake_state.get_current()) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+    }
     return mp_const_none;
 }
 
