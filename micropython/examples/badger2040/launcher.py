@@ -160,9 +160,14 @@ def render():
     display.update()
 
 
-def launch_example(index):
-    while display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
+def wait_for_user_to_release_buttons():
+    pr = display.pressed
+    while pr(badger2040.BUTTON_A) or pr(badger2040.BUTTON_B) or pr(badger2040.BUTTON_C) or pr(badger2040.BUTTON_UP) or pr(badger2040.BUTTON_DOWN):
         time.sleep(0.01)
+
+
+def launch_example(index):
+    wait_for_user_to_release_buttons()
 
     file = examples[(state["page"] * 3) + index][0]
 
@@ -212,6 +217,7 @@ def button(pin):
 
 
 if exited_to_launcher or not woken_by_button:
+    wait_for_user_to_release_buttons()
     display.update_speed(badger2040.UPDATE_MEDIUM)
     render()
 
