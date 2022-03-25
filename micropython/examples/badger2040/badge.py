@@ -1,5 +1,6 @@
-import badger2040
 import time
+import badger2040
+import badger_os
 
 # Global Constants
 WIDTH = badger2040.WIDTH
@@ -169,9 +170,6 @@ def draw_badge():
 #        Program setup
 # ------------------------------
 
-# Global variables
-show_overlay = False
-
 # Create a new Badger and set it to update NORMAL
 display = badger2040.Badger2040()
 display.update_speed(badger2040.UPDATE_NORMAL)
@@ -204,9 +202,10 @@ detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
 detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
                               TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
 
-# Show overlay if any of the buttons were pressed to wake up the Badger
-if (display.pressed_to_wake(badger2040.BUTTON_A) or display.pressed_to_wake(badger2040.BUTTON_B) or display.pressed_to_wake(badger2040.BUTTON_C) or display.pressed_to_wake(badger2040.BUTTON_UP) or display.pressed_to_wake(badger2040.BUTTON_DOWN)):
-    show_overlay = True
+# Tell launcher to relaunch this app on wake
+if not display.woken():
+    badger_os.state_save("badge")
+
 
 # ------------------------------
 #       Main program
@@ -214,20 +213,21 @@ if (display.pressed_to_wake(badger2040.BUTTON_A) or display.pressed_to_wake(badg
 
 draw_badge()
 
-if show_overlay:
-    draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
-                 WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
-    display.update()
-    time.sleep(4)
+while True:
+    # Pressing A and C together quits the app
+    if display.pressed(badger2040.BUTTON_A) and display.pressed(badger2040.BUTTON_C):
+        break
+    
+    if display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
+        draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
+                     WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
+        display.update()
+        time.sleep(4)
 
-    draw_badge()
+        draw_badge()
+        
     display.update()
-else:
-    display.update()
-
-# Tell launcher to relaunch this app on wake
-with open("appstate.txt", "w") as f:
-    f.write("badge\n")
-
-# Halt the Badger to save power, it will wake up if any of the front buttons are pressed
-display.halt()
+    
+    # If on battery, halt the Badger to save power, it will wake up if any of the front buttons are pressed
+    display.halt()
+    time.sleep(0.1)
