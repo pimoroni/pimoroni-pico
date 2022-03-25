@@ -1,6 +1,8 @@
 include(servo2040_calibration.cmake)
+include(servo2040_current_meter.cmake)
 include(servo2040_led_rainbow.cmake)
 include(servo2040_multiple_servos.cmake)
+include(servo2040_read_sensors.cmake)
 include(servo2040_servo_cluster.cmake)
 include(servo2040_servo_wave.cmake)
 include(servo2040_simple_easing.cmake)
