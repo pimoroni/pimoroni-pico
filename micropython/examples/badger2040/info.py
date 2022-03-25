@@ -1,11 +1,12 @@
 import badger2040
-import time
 from badger2040 import WIDTH
 
 TEXT_SIZE = 0.45
 LINE_HEIGHT = 16
 
 display = badger2040.Badger2040()
+display.led(128)
+
 display.pen(0)
 display.rectangle(0, 0, WIDTH, 16)
 display.thickness(1)
@@ -33,6 +34,4 @@ y += LINE_HEIGHT
 display.text("https://pimoroni.com/badger2040", 0, y, TEXT_SIZE)
 
 display.update()
-
-while True:
-    time.sleep(1)
+display.halt()

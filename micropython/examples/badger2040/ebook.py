@@ -92,6 +92,7 @@ current_page = 0
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
+display.led(128)
 display.update_speed(badger2040.UPDATE_FAST)
 
 # Set up the buttons
@@ -100,9 +101,8 @@ button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_D
 
 button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
+button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 
-# Set up the activity LED
-led = machine.Pin(badger2040.PIN_LED, machine.Pin.OUT)
 
 offsets = []
 
@@ -110,6 +110,13 @@ offsets = []
 # Button handling function
 def button(pin):
     global next_page, prev_page, change_font_size, change_font
+
+    time.sleep(0.05)
+    if not pin.value():
+        return
+
+    if button_a.value() and button_c.value():
+        machine.reset()
 
     if pin == button_down:
         next_page = True
@@ -129,6 +136,7 @@ button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
+button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 
 # ------------------------------

@@ -172,16 +172,17 @@ def draw_badge():
 
 # Create a new Badger and set it to update NORMAL
 display = badger2040.Badger2040()
+display.led(128)
 display.update_speed(badger2040.UPDATE_NORMAL)
 
 # Open the badge file
 try:
     badge = open("badge.txt", "r")
 except OSError:
-    badge = open("badge.txt", "w")
-    badge.write(DEFAULT_TEXT)
-    badge.flush()
-    badge.seek(0)
+    with open("badge.txt", "w") as f:
+        f.write(DEFAULT_TEXT)
+        f.flush()
+    badge = open("badge.txt", "r")
 
 # Read in the next 6 lines
 company = badge.readline()        # "mustelid inc"

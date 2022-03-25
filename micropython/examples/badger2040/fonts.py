@@ -96,6 +96,7 @@ pressed = False
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
+display.led(128)
 display.update_speed(badger2040.UPDATE_FAST)
 
 # Set up the buttons
