@@ -25,7 +25,7 @@ namespace servo2040 {
   const uint SERVO_17 = 16;
   const uint SERVO_18 = 17;
 
-  const uint LED_DAT = 18;
+  const uint LED_DATA = 18;
 
   const uint ADC_ADDR_0 = 22;
   const uint ADC_ADDR_1 = 24;

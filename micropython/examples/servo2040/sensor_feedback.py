@@ -34,7 +34,7 @@ for addr in sensor_addrs:
     mux.configure_pull(addr, Pin.PULL_DOWN)
 
 # Create the LED bar, using PIO 1 and State Machine 0
-led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DAT)
+led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
 
 # Start updating the LED bar
 led_bar.start()

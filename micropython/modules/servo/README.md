@@ -187,7 +187,7 @@ from servo import servo2040
 
 Then construct a new `WS2812` instance, specifying the number of LEDs, PIO, PIO state-machine and GPIO pin.
 ```python
-led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DAT)
+led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
 ```
 
 Finally, start the LED bar by calling `start`:
@@ -227,7 +227,7 @@ The `servo` module contains a `servo2040` sub module with constants for the serv
 
 #### LED Pin
 
-* `LED_DAT` = `18`
+* `LED_DATA` = `18`
 
 
 #### I2C Pins

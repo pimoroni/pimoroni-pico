@@ -42,7 +42,7 @@ mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2
                 muxed_pin=Pin(servo2040.SHARED_ADC))
 
 # Create the LED bar, using PIO 1 and State Machine 0
-led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DAT)
+led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
 
 # Start updating the LED bar
 led_bar.start()
