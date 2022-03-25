@@ -130,7 +130,7 @@ while True:
     # Pressing A and C together quits the app
     if display.pressed(badger2040.BUTTON_A) and display.pressed(badger2040.BUTTON_C):
         break
-    
+
     if display.pressed(badger2040.BUTTON_UP):
         if current_image > 0:
             current_image -= 1

@@ -226,5 +226,5 @@ while True:
     if changed:
         badger_os.state_save("launcher", page, font_size, inverted)
         changed = False
-        
+
     display.halt()
