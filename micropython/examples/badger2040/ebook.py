@@ -1,6 +1,4 @@
 import badger2040
-import machine
-import time
 import gc
 import badger_os
 
@@ -257,6 +255,5 @@ while True:
         badger_os.state_save("ebook", state)
 
         changed = False
-
 
     display.halt()
