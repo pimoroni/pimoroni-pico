@@ -10,9 +10,13 @@ import badger_os
 # Reduce clock speed to 48MHz, that's fast enough!
 machine.freq(48000000)
 
+changed = False
+exited_to_launcher = False
+woken_by_button = badger2040.woken_by_button()  # Must be done before we clear_pressed_to_wake
+
 if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
     # Pressing A and C together at start quits app
-    badger_os.state_clear_running()
+    exited_to_launcher = badger_os.state_clear_running()
     badger2040.clear_pressed_to_wake()
 else:
     # Otherwise restore previously running app
@@ -33,7 +37,8 @@ state = {
 }
 
 badger_os.state_load("launcher", state)
-changed = state["running"] != "launcher"
+
+display.invert(state["inverted"])
 
 icons = bytearray(launchericons.data())
 icons_width = 576
@@ -206,16 +211,11 @@ def button(pin):
             render()
 
 
-if changed:
-    # Wait for any wakeup button to be released
-    while display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
-        time.sleep(0.01)
+if exited_to_launcher or not woken_by_button:
     display.update_speed(badger2040.UPDATE_MEDIUM)
     render()
 
 display.update_speed(badger2040.UPDATE_FAST)
-if not changed and not display.woken():
-    render()
 
 while True:
     if display.pressed(badger2040.BUTTON_A):

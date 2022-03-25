@@ -54,7 +54,9 @@ def state_running():
 
 
 def state_clear_running():
+    running = state_running()
     state_modify("launcher", {"running": "launcher"})
+    return running != "launcher"
 
 
 def state_set_running(app):

@@ -94,7 +94,7 @@ if TOTAL_IMAGES == 0:
 
 badger_os.state_load("image", state)
 
-changed = not display.woken()
+changed = not badger2040.woken_by_button()
 
 
 while True:
