@@ -1,6 +1,5 @@
 import badger2040
 import qrcode
-import time
 
 
 # Open the qrcode file
@@ -66,6 +65,4 @@ for line in detail_text:
     top += 10
 
 display.update()
-
-while True:
-    time.sleep(1.0)
+display.halt()
