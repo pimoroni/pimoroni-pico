@@ -29,7 +29,7 @@ function (copy_module TARGET SRC DST)
         COMMAND
             cp ${SRC} ${CMAKE_CURRENT_BINARY_DIR}/../modules/${DST}.py
 
-        DEPENDS ${src}
+        DEPENDS ${SRC}
     )
 
     target_sources(${TARGET} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${DST}.py)
