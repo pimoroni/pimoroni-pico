@@ -71,15 +71,23 @@ def state_launch():
 
 def state_delete(app):
     try:
-        os.remove("{}_state.txt".format(app))
+        os.remove("/state/{}.json".format(app))
     except OSError:
         pass
 
 
 def state_save(app, data):
-    with open("{}_state.txt".format(app), "w") as f:
-        f.write(json.dumps(data))
-        f.flush()
+    try:
+        with open("/state/{}.json".format(app), "w") as f:
+            f.write(json.dumps(data))
+            f.flush()
+    except OSError:
+        import os
+        try:
+            os.stat("/state")
+        except OSError:
+            os.mkdir("/state")
+            state_save(app, data)
 
 
 def state_modify(app, data):
@@ -91,7 +99,7 @@ def state_modify(app, data):
 
 def state_load(app, defaults):
     try:
-        data = json.loads(open("{}_state.txt".format(app), "r").read())
+        data = json.loads(open("/state/{}.json".format(app), "r").read())
         if type(data) is dict:
             defaults.update(data)
             return True
