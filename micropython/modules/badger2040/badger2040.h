@@ -44,4 +44,3 @@ extern mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args
 extern mp_obj_t Badger2040_command(mp_obj_t self_in, mp_obj_t reg, mp_obj_t data);
 
 extern mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button);
-extern mp_obj_t Badger2040_clear_pressed_to_wake();

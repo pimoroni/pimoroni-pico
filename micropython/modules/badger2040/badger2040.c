@@ -37,7 +37,6 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_measure_glyph_obj, 2, Badger2040_measure_g
 MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_command_obj, Badger2040_command);
 
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_pressed_to_wake_obj, Badger2040_pressed_to_wake);
-MP_DEFINE_CONST_FUN_OBJ_0(Badger2040_clear_pressed_to_wake_obj, Badger2040_clear_pressed_to_wake);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
@@ -94,7 +93,6 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_Badger2040), (mp_obj_t)&Badger2040_type },
 
     { MP_ROM_QSTR(MP_QSTR_pressed_to_wake), MP_ROM_PTR(&Badger2040_pressed_to_wake_obj) },
-    { MP_ROM_QSTR(MP_QSTR_clear_pressed_to_wake), MP_ROM_PTR(&Badger2040_clear_pressed_to_wake_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_UPDATE_NORMAL), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_MEDIUM), MP_ROM_INT(1) },

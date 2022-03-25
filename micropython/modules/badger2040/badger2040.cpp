@@ -274,11 +274,6 @@ mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button) {
     return Badger2040_pressed_to_wake(button);
 }
 
-mp_obj_t Badger2040_clear_pressed_to_wake() {
-    button_wake_state.clear();
-    return mp_const_none;
-}
-
 // pressed
 // pressed_to_wake
 // wait_for_press - implement in terms of MicroPython!
