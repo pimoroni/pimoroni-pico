@@ -31,6 +31,7 @@ except ImportError:
 
 
 display = badger2040.Badger2040()
+display.led(128)
 
 page, font_size, inverted = badger_os.state_load("launcher", 0, 1, False)
 changed = badger_os.state_app() != "launcher"
