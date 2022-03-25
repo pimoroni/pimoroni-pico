@@ -33,7 +33,7 @@ def days_in_month(month, year):
 def button(pin):
     global last, set_clock, cursor, year, month, day, hour, minute
 
-    time.sleep(0.05)
+    time.sleep(0.01)
     if not pin.value():
         return
 
@@ -149,4 +149,4 @@ while True:
         if second != last_second:
             draw_clock()
             last_second = second
-    time.sleep(0.1)
+    time.sleep(0.01)

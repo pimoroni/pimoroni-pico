@@ -1,6 +1,5 @@
 import badger2040
-import machine
-import time
+import badger_os
 
 # Global Constants
 FONT_NAMES = ("sans", "gothic", "cursive", "serif", "serif_italic")
@@ -65,13 +64,13 @@ def draw_fonts():
     for i in range(len(FONT_NAMES)):
         name = FONT_NAMES[i]
         display.pen(0)
-        if i == selected_font:
+        if i == state["selected_font"]:
             display.rectangle(0, i * MENU_SPACING, MENU_WIDTH, MENU_SPACING)
             display.pen(15)
 
         display.text(name, MENU_PADDING, (i * MENU_SPACING) + (MENU_SPACING // 2), MENU_TEXT_SIZE)
 
-    display.font(FONT_NAMES[selected_font])
+    display.font(FONT_NAMES[state["selected_font"]])
     display.thickness(2)
 
     display.pen(0)
@@ -91,52 +90,36 @@ def draw_fonts():
 # ------------------------------
 
 # Global variables
-selected_font = 0
-pressed = False
+state = {"selected_font": 0}
+badger_os.state_load("fonts", state)
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
 display.led(128)
 display.update_speed(badger2040.UPDATE_FAST)
 
-# Set up the buttons
-button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-
-# Button handling function
-def button(pin):
-    global pressed
-    global selected_font
-
-    if not pressed:
-        if pin == button_up:
-            selected_font -= 1
-            if selected_font < 0:
-                selected_font = len(FONT_NAMES) - 1
-            pressed = True
-            return
-        if pin == button_down:
-            selected_font += 1
-            if selected_font >= len(FONT_NAMES):
-                selected_font = 0
-            pressed = True
-            return
-
-
-# Register the button handling function with the buttons
-button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-
+changed = not badger2040.woken_by_button()
 
 # ------------------------------
 #       Main program loop
 # ------------------------------
 
 while True:
-    draw_frame()
-    draw_fonts()
+    if display.pressed(badger2040.BUTTON_UP):
+        state["selected_font"] -= 1
+        if state["selected_font"] < 0:
+            state["selected_font"] = len(FONT_NAMES) - 1
+        changed = True
+    if display.pressed(badger2040.BUTTON_DOWN):
+        state["selected_font"] += 1
+        if state["selected_font"] >= len(FONT_NAMES):
+            state["selected_font"] = 0
+        changed = True
 
-    pressed = False
-    while not pressed:
-        time.sleep(0.1)
+    if changed:
+        draw_frame()
+        draw_fonts()
+        badger_os.state_save("fonts", state)
+        changed = False
+
+    display.halt()
