@@ -1,8 +1,7 @@
 import badger2040
-import machine
 import time
 import gc
-
+import badger_os
 
 # **** Put the name of your text file here *****
 text_file = "book.txt"  # File must be on the MicroPython device
@@ -15,7 +14,10 @@ except OSError:
         # If the specified file doesn't exist,
         # pre-populate with Wind In The Willows
         import witw
-        open(text_file, "wb").write(witw.data())
+        with open(text_file, "wb") as f:
+            f.write(witw.data())
+            f.flush()
+            time.sleep(0.1)
         del witw
     except ImportError:
         pass
@@ -33,9 +35,6 @@ ARROW_HEIGHT = 14
 ARROW_PADDING = 2
 
 TEXT_PADDING = 4
-
-TEXT_SIZE = 0.5
-TEXT_SPACING = int(34 * TEXT_SIZE)
 TEXT_WIDTH = WIDTH - TEXT_PADDING - TEXT_PADDING - ARROW_WIDTH
 
 FONTS = ["sans", "gothic", "cursive", "serif"]
@@ -71,7 +70,7 @@ def draw_frame():
     display.rectangle(WIDTH - ARROW_WIDTH, 0, ARROW_WIDTH, HEIGHT)
     display.pen(0)
     display.thickness(ARROW_THICKNESS)
-    if current_page > 1:
+    if state["current_page"] > 0:
         draw_up(WIDTH - ARROW_WIDTH, (HEIGHT // 4) - (ARROW_HEIGHT // 2),
                 ARROW_WIDTH, ARROW_HEIGHT, ARROW_THICKNESS, ARROW_PADDING)
     draw_down(WIDTH - ARROW_WIDTH, ((HEIGHT * 3) // 4) - (ARROW_HEIGHT // 2),
@@ -83,52 +82,22 @@ def draw_frame():
 # ------------------------------
 
 # Global variables
-next_page = True
-prev_page = False
-change_font_size = False
-change_font = False
-last_offset = 0
-current_page = 0
+state = {
+    "last_offset": 0,
+    "current_page": 0,
+    "font_idx": 0,
+    "text_size": 0.5,
+    "offsets": []
+}
+badger_os.state_load("ebook", state)
+
+text_spacing = int(34 * state["text_size"])
+
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
+display.led(128)
 display.update_speed(badger2040.UPDATE_FAST)
-
-# Set up the buttons
-button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-# Set up the activity LED
-led = machine.Pin(badger2040.PIN_LED, machine.Pin.OUT)
-
-offsets = []
-
-
-# Button handling function
-def button(pin):
-    global next_page, prev_page, change_font_size, change_font
-
-    if pin == button_down:
-        next_page = True
-
-    if pin == button_up:
-        prev_page = True
-
-    if pin == button_a:
-        change_font_size = True
-
-    if pin == button_b:
-        change_font = True
-
-
-# Register the button handling function with the buttons
-button_down.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_up.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_b.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 
 # ------------------------------
@@ -141,7 +110,7 @@ def render_page():
     pos = ebook.tell()
     next_pos = pos
     add_newline = False
-    display.font(FONTS[0])
+    display.font(FONTS[state["font_idx"]])
 
     while True:
         # Read a full line and split it into words
@@ -180,7 +149,7 @@ def render_page():
         if len(line) > 0 and len(next_word) > 0:
             appended_line += " "
         appended_line += next_word
-        appended_length = display.measure_text(appended_line, TEXT_SIZE)
+        appended_length = display.measure_text(appended_line, state["text_size"])
 
         # Would this appended line be longer than the text display area, or was a blank line spotted?
         if appended_length >= TEXT_WIDTH or add_newline:
@@ -189,14 +158,14 @@ def render_page():
             print(line)
             display.pen(0)
             display.thickness(FONT_THICKNESSES[0])
-            display.text(line, TEXT_PADDING, (row * TEXT_SPACING) + (TEXT_SPACING // 2) + TEXT_PADDING, TEXT_SIZE)
+            display.text(line, TEXT_PADDING, (row * text_spacing) + (text_spacing // 2) + TEXT_PADDING, state["text_size"])
 
             # Clear the line and move on to the next row
             line = ""
             row += 1
 
             # Have we reached the end of the page?
-            if (row * TEXT_SPACING) + TEXT_SPACING >= HEIGHT:
+            if (row * text_spacing) + text_spacing >= HEIGHT:
                 print("+++++")
                 display.update()
 
@@ -212,7 +181,7 @@ def render_page():
             if add_newline:
                 print("")
                 row += 1
-                if (row * TEXT_SPACING) + TEXT_SPACING >= HEIGHT:
+                if (row * text_spacing) + text_spacing >= HEIGHT:
                     print("+++++")
                     display.update()
                     return
@@ -227,50 +196,68 @@ def render_page():
 #       Main program loop
 # ------------------------------
 
+launch = True
+changed = False
+
 # Open the book file
 ebook = open(text_file, "r")
+if len(state["offsets"]) > state["current_page"]:
+    ebook.seek(state["offsets"][state["current_page"]])
+else:
+    state["current_page"] = 0
+    state["offsets"] = []
 
 while True:
     # Was the next page button pressed?
-    if next_page:
-        current_page += 1
+    if display.pressed(badger2040.BUTTON_DOWN):
+        state["current_page"] += 1
 
-        # Is the next page one we've not displayed before?
-        if current_page > len(offsets):
-            offsets.append(ebook.tell())  # Add its start position to the offsets list
-        draw_frame()
-        render_page()
-        next_page = False  # Clear the next page button flag
+        changed = True
 
     # Was the previous page button pressed?
-    if prev_page:
-        if current_page > 1:
-            current_page -= 1
-            ebook.seek(offsets[current_page - 1])  # Retrieve the start position of the last page
-            draw_frame()
-            render_page()
-        prev_page = False  # Clear the prev page button flag
+    if display.pressed(badger2040.BUTTON_UP):
+        if state["current_page"] > 0:
+            state["current_page"] -= 1
+            if state["current_page"] == 0:
+                ebook.seek(0)
+            else:
+                ebook.seek(state["offsets"][state["current_page"] - 1])  # Retrieve the start position of the last page
+            changed = True
 
-    if change_font_size:
-        TEXT_SIZE += 0.1
-        if TEXT_SIZE > 0.8:
-            TEXT_SIZE = 0.5
-        TEXT_SPACING = int(34 * TEXT_SIZE)
-        offsets = [0]
+    if display.pressed(badger2040.BUTTON_A):
+        state["text_size"] += 0.1
+        if state["text_size"] > 0.8:
+            state["text_size"] = 0.5
+        text_spacing = int(34 * state["text_size"])
+        state["offsets"] = []
         ebook.seek(0)
-        current_page = 1
+        state["current_page"] = 0
+        changed = True
+
+    if display.pressed(badger2040.BUTTON_B):
+        state["font_idx"] += 1
+        if (state["font_idx"] >= len(FONTS)):
+            state["font_idx"] = 0
+        state["offsets"] = []
+        ebook.seek(0)
+        state["current_page"] = 0
+        changed = True
+
+    if launch and not changed:
+        if state["current_page"] > 0 and len(state["offsets"]) > state["current_page"] - 1:
+            ebook.seek(state["offsets"][state["current_page"] - 1])
+        changed = True
+        launch = False
+
+    if changed:
         draw_frame()
         render_page()
-        change_font_size = False
 
-    if change_font:
-        FONTS.append(FONTS.pop(0))
-        FONT_THICKNESSES.append(FONT_THICKNESSES.pop(0))
-        offsets = [0]
-        ebook.seek(0)
-        current_page = 1
-        draw_frame()
-        render_page()
-        change_font = False
+        # Is the next page one we've not displayed before?
+        if state["current_page"] >= len(state["offsets"]):
+            state["offsets"].append(ebook.tell())  # Add its start position to the state["offsets"] list
+        badger_os.state_save("ebook", state)
 
-    time.sleep(0.1)
+        changed = False
+
+    display.halt()

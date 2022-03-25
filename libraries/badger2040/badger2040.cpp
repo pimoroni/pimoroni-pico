@@ -40,7 +40,7 @@ namespace pimoroni {
 
     gpio_set_function(USER, GPIO_FUNC_SIO);
     gpio_set_dir(USER, GPIO_IN);
-    gpio_set_pulls(USER, false, true);
+    gpio_set_pulls(USER, true, false);
 
     gpio_set_function(VBUS_DETECT, GPIO_FUNC_SIO);
     gpio_set_dir(VBUS_DETECT, GPIO_IN);
@@ -195,8 +195,9 @@ namespace pimoroni {
   }
 
   void Badger2040::update_button_states() {
-    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
+    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E) | (1UL << USER);
     _button_states = gpio_get_all() & mask;
+    _button_states ^= (1UL << USER); // USER button state is inverted
   }
 
   uint32_t Badger2040::button_states() {
@@ -217,6 +218,10 @@ namespace pimoroni {
 
   void Badger2040::update_speed(uint8_t speed) {
     uc8151.update_speed(speed);
+  }
+
+  uint32_t Badger2040::update_time() {
+    return uc8151.update_time();
   }
 
   void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {

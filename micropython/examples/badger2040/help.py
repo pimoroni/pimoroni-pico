@@ -1,11 +1,12 @@
 import badger2040
-import time
 from badger2040 import WIDTH
 
 TEXT_SIZE = 0.45
 LINE_HEIGHT = 16
 
 display = badger2040.Badger2040()
+display.led(128)
+
 display.pen(0)
 display.rectangle(0, 0, WIDTH, 16)
 display.thickness(1)
@@ -27,7 +28,7 @@ y += LINE_HEIGHT
 y += LINE_HEIGHT
 
 display.thickness(2)
-display.text("Holding USER button:", 0, y, TEXT_SIZE)
+display.text("Hold USER after:", 0, y, TEXT_SIZE)
 display.thickness(1)
 y += LINE_HEIGHT
 display.text("Up / Down - Change font size", 0, y, TEXT_SIZE)
@@ -36,5 +37,4 @@ display.text("a  - Toggle invert", 0, y, TEXT_SIZE)
 y += LINE_HEIGHT
 
 display.update()
-while True:
-    time.sleep(1)
+display.halt()

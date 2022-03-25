@@ -1,8 +1,45 @@
 #include <cstdio>
+#include "hardware/watchdog.h"
 #include "badger2040.hpp"
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
+namespace {
+    struct Badger2040_WakeUpInit {
+        Badger2040_WakeUpInit()
+            : state(gpio_get_all() & (0x1f << pimoroni::Badger2040::DOWN)) // Record state of front buttons
+        {
+          gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
+          gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
+          gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
+
+          gpio_set_function(pimoroni::Badger2040::LED, GPIO_FUNC_SIO);
+          gpio_set_dir(pimoroni::Badger2040::LED, GPIO_OUT);
+          gpio_put(pimoroni::Badger2040::LED, 1);
+        }
+
+        bool any() const {
+            return state > 0;
+        }
+
+        bool get(uint32_t pin) const {
+            return state & (0b1 << pin);
+        }
+
+        bool get_once(uint32_t pin) {
+            uint32_t mask = 0b1 << pin;
+            bool value = state & mask;
+            state &= ~mask;
+            return value;
+        }
+        void clear() { state = 0; }
+
+    private:
+        uint32_t state;
+    };
+
+    Badger2040_WakeUpInit button_wake_state __attribute__ ((init_priority (101)));
+};
 
 extern "C" {
 #include "badger2040.h"
@@ -116,9 +153,12 @@ MICROPY_EVENT_POLL_HOOK
 #endif
     }
 
+    absolute_time_t t_end = make_timeout_time_ms(self->badger2040->update_time());
     self->badger2040->update(false);
 
-    while(self->badger2040->is_busy()) {
+    // Ensure blocking for the minimum amount of time
+    // in cases where "is_busy" is unreliable.
+    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
@@ -157,9 +197,12 @@ MICROPY_EVENT_POLL_HOOK
 #endif
     }
 
+    absolute_time_t t_end = make_timeout_time_ms(self->badger2040->update_time());
     self->badger2040->partial_update(x, y, w, h);
 
-    while(self->badger2040->is_busy()) {
+    // Ensure blocking for the minimum amount of time
+    // in cases where "is_busy" is unreliable.
+    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
@@ -170,7 +213,27 @@ MICROPY_EVENT_POLL_HOOK
     return mp_const_none;
 }
 
-// halt
+mp_obj_t Badger2040_woken_by_button() {
+    return button_wake_state.any() ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_halt(mp_obj_t self_in) {
+    _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
+
+    // Don't use the Badger halt so we can allow Micropython to be interrupted.
+    gpio_put(pimoroni::Badger2040::ENABLE_3V3, 0);
+
+    self->badger2040->update_button_states();
+    while (self->badger2040->button_states() == 0) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
+      self->badger2040->update_button_states();
+    }
+    //watchdog_reboot(0, SRAM_END, 0);
+
+    return mp_const_none;
+}
 // sleep
 
 mp_obj_t Badger2040_invert(mp_obj_t self_in, mp_obj_t invert) {
@@ -206,8 +269,23 @@ mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness) {
 mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->update_button_states();
+    bool wake_state = button_wake_state.get_once(mp_obj_get_int(button));
     bool state = self->badger2040->pressed(mp_obj_get_int(button));
+    return (state || wake_state) ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
+    bool state = button_wake_state.get(mp_obj_get_int(button));
     return state ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button) {
+    return Badger2040_pressed_to_wake(button);
+}
+
+mp_obj_t Badger2040_clear_pressed_to_wake() {
+    button_wake_state.clear();
+    return mp_const_none;
 }
 
 // pressed

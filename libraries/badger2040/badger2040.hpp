@@ -30,6 +30,7 @@ namespace pimoroni {
     void update(bool blocking=false);
     void partial_update(int x, int y, int w, int h, bool blocking=false);
     void update_speed(uint8_t speed);
+    uint32_t update_time();
     void halt();
     void sleep();
     bool is_busy();

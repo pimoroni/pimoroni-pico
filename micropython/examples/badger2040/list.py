@@ -143,6 +143,7 @@ items_per_page = 0
 
 # Create a new Badger and set it to update FAST
 display = badger2040.Badger2040()
+display.led(128)
 display.update_speed(badger2040.UPDATE_FAST)
 
 # Set up the buttons
@@ -176,6 +177,13 @@ items_per_page = ((LIST_HEIGHT // ITEM_SPACING) + 1) * list_columns
 # Button handling function
 def button(pin):
     global update, current_item, needs_save
+
+    time.sleep(0.05)
+    if not pin.value():
+        return
+
+    if button_a.value() and button_c.value():
+        machine.reset()
 
     if len(list_content) > 0 and not update:
         if pin == button_a:

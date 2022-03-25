@@ -1,14 +1,13 @@
 import badger2040
 import qrcode
-import time
 
 
 # Open the qrcode file
 try:
     text = open("qrcode.txt", "r")
 except OSError:
-    text = open("qrcode.txt", "w")
-    text.write("""https://pimoroni.com/badger2040
+    with open("qrcode.txt", "w") as text:
+        text.write("""https://pimoroni.com/badger2040
 Badger 2040
 * 296x128 1-bit e-ink
 * six user buttons
@@ -18,8 +17,8 @@ Badger 2040
 Scan this code to learn
 more about Badger 2040.
 """)
-    text.flush()
-    text.seek(0)
+        text.flush()
+    text = open("qrcode.txt", "r")
 
 
 lines = text.read().strip().split("\n")
@@ -28,6 +27,7 @@ title_text = lines.pop(0)
 detail_text = lines
 
 display = badger2040.Badger2040()
+display.led(128)
 code = qrcode.QRCode()
 
 
@@ -65,6 +65,4 @@ for line in detail_text:
     top += 10
 
 display.update()
-
-while True:
-    time.sleep(1.0)
+display.halt()

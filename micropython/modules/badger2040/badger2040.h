@@ -15,6 +15,8 @@ extern mp_obj_t Badger2040_update_speed(mp_obj_t self_in, mp_obj_t speed);
 extern mp_obj_t Badger2040_update(mp_obj_t self_in);
 extern mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
+extern mp_obj_t Badger2040_halt(mp_obj_t self_in);
+
 extern mp_obj_t Badger2040_invert(mp_obj_t self_in, mp_obj_t invert);
 extern mp_obj_t Badger2040_led(mp_obj_t self_in, mp_obj_t brightness);
 extern mp_obj_t Badger2040_font(mp_obj_t self_in, mp_obj_t font);
@@ -22,6 +24,7 @@ extern mp_obj_t Badger2040_pen(mp_obj_t self_in, mp_obj_t color);
 extern mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness);
 
 extern mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button);
+extern mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button);
 
 extern mp_obj_t Badger2040_clear(mp_obj_t self_in);
 extern mp_obj_t Badger2040_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y);
@@ -38,3 +41,7 @@ extern mp_obj_t Badger2040_measure_text(size_t n_args, const mp_obj_t *pos_args,
 extern mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
 extern mp_obj_t Badger2040_command(mp_obj_t self_in, mp_obj_t reg, mp_obj_t data);
+
+extern mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button);
+extern mp_obj_t Badger2040_clear_pressed_to_wake();
+extern mp_obj_t Badger2040_woken_by_button();

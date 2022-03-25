@@ -1,20 +1,44 @@
 import gc
-import os
 import time
 import math
 import machine
 import badger2040
 from badger2040 import WIDTH
 import launchericons
+import badger_os
+
+# Reduce clock speed to 48MHz, that's fast enough!
+machine.freq(48000000)
+
+changed = False
+exited_to_launcher = False
+woken_by_button = badger2040.woken_by_button()  # Must be done before we clear_pressed_to_wake
+
+if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
+    # Pressing A and C together at start quits app
+    exited_to_launcher = badger_os.state_clear_running()
+    badger2040.clear_pressed_to_wake()
+else:
+    # Otherwise restore previously running app
+    badger_os.state_launch()
 
 # for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
+display = badger2040.Badger2040()
+display.led(128)
 
-page = 0
-font_size = 1
-inverted = False
+state = {
+    "page": 0,
+    "font_size": 1,
+    "inverted": False,
+    "running": "launcher"
+}
+
+badger_os.state_load("launcher", state)
+
+display.invert(state["inverted"])
 
 icons = bytearray(launchericons.data())
 icons_width = 576
@@ -38,44 +62,9 @@ centers = (41, 147, 253)
 
 MAX_PAGE = math.ceil(len(examples) / 3)
 
-button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
-# Inverted. For reasons.
-button_user = machine.Pin(badger2040.BUTTON_USER, machine.Pin.IN, machine.Pin.PULL_UP)
-
-# Battery measurement
-vbat_adc = machine.ADC(badger2040.PIN_BATTERY)
-vref_adc = machine.ADC(badger2040.PIN_1V2_REF)
-vref_en = machine.Pin(badger2040.PIN_VREF_POWER)
-vref_en.init(machine.Pin.OUT)
-vref_en.value(0)
-
-
-display = badger2040.Badger2040()
-
 
 def map_value(input, in_min, in_max, out_min, out_max):
     return (((input - in_min) * (out_max - out_min)) / (in_max - in_min)) + out_min
-
-
-def get_battery_level():
-    # Enable the onboard voltage reference
-    vref_en.value(1)
-
-    # Calculate the logic supply voltage, as will be lower that the usual 3.3V when running off low batteries
-    vdd = 1.24 * (65535 / vref_adc.read_u16())
-    vbat = (
-        (vbat_adc.read_u16() / 65535) * 3 * vdd
-    )  # 3 in this is a gain, not rounding of 3.3V
-
-    # Disable the onboard voltage reference
-    vref_en.value(0)
-
-    # Convert the voltage to a level to display onscreen
-    return int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, 4))
 
 
 def draw_battery(level, x, y):
@@ -103,17 +92,7 @@ def draw_battery(level, x, y):
 
 
 def draw_disk_usage(x):
-    # f_bfree and f_bavail should be the same?
-    # f_files, f_ffree, f_favail and f_flag are unsupported.
-    f_bsize, f_frsize, f_blocks, f_bfree, _, _, _, _, _, f_namemax = os.statvfs(
-        "/")
-
-    f_total_size = f_frsize * f_blocks
-    f_total_free = f_bsize * f_bfree
-    f_total_used = f_total_size - f_total_free
-
-    f_used = 100 / f_total_size * f_total_used
-    # f_free = 100 / f_total_size * f_total_free
+    _, f_used, _ = badger_os.get_disk_usage()
 
     display.image(
         bytearray(
@@ -148,23 +127,23 @@ def render():
     display.pen(0)
     display.thickness(2)
 
-    max_icons = min(3, len(examples[(page * 3):]))
+    max_icons = min(3, len(examples[(state["page"] * 3):]))
 
     for i in range(max_icons):
         x = centers[i]
-        label, icon = examples[i + (page * 3)]
+        label, icon = examples[i + (state["page"] * 3)]
         label = label[1:].replace("_", " ")
         display.pen(0)
         display.icon(icons, icon, icons_width, 64, x - 32, 24)
-        w = display.measure_text(label, font_sizes[font_size])
-        display.text(label, x - int(w / 2), 16 + 80, font_sizes[font_size])
+        w = display.measure_text(label, font_sizes[state["font_size"]])
+        display.text(label, x - int(w / 2), 16 + 80, font_sizes[state["font_size"]])
 
     for i in range(MAX_PAGE):
         x = 286
         y = int((128 / 2) - (MAX_PAGE * 10 / 2) + (i * 10))
         display.pen(0)
         display.rectangle(x, y, 8, 8)
-        if page != i:
+        if state["page"] != i:
             display.pen(15)
             display.rectangle(x + 1, y + 1, 6, 6)
 
@@ -172,89 +151,93 @@ def render():
     display.rectangle(0, 0, WIDTH, 16)
     display.thickness(1)
     draw_disk_usage(90)
-    draw_battery(get_battery_level(), WIDTH - 22 - 3, 3)
+    vbat = badger_os.get_battery_level()
+    bat = int(map_value(vbat, MIN_BATTERY_VOLTAGE, MAX_BATTERY_VOLTAGE, 0, 4))
+    draw_battery(bat, WIDTH - 22 - 3, 3)
     display.pen(15)
     display.text("badgerOS", 3, 8, 0.4)
 
     display.update()
 
 
-def launch(file):
-    for k in locals().keys():
-        if k not in ("gc", "file", "machine"):
-            del locals()[k]
-    gc.collect()
-    try:
-        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
-    except ImportError:
-        __import__(file)  # Failover to importing [_file]
-    machine.reset()  # Exit back to launcher
+def wait_for_user_to_release_buttons():
+    pr = display.pressed
+    while pr(badger2040.BUTTON_A) or pr(badger2040.BUTTON_B) or pr(badger2040.BUTTON_C) or pr(badger2040.BUTTON_UP) or pr(badger2040.BUTTON_DOWN):
+        time.sleep(0.01)
 
 
 def launch_example(index):
-    try:
-        launch(examples[(page * 3) + index][0])
-        return True
-    except IndexError:
-        return False
+    wait_for_user_to_release_buttons()
+
+    file = examples[(state["page"] * 3) + index][0]
+
+    for k in locals().keys():
+        if k not in ("gc", "file", "badger_os"):
+            del locals()[k]
+
+    gc.collect()
+
+    badger_os.launch(file)
 
 
 def button(pin):
-    global page, font_size, inverted
+    global changed
+    changed = True
 
-    if button_user.value():  # User button is NOT held down
-        if pin == button_a:
+    if not display.pressed(badger2040.BUTTON_USER):  # User button is NOT held down
+        if pin == badger2040.BUTTON_A:
             launch_example(0)
-        if pin == button_b:
+        if pin == badger2040.BUTTON_B:
             launch_example(1)
-        if pin == button_c:
+        if pin == badger2040.BUTTON_C:
             launch_example(2)
-        if pin == button_up:
-            if page > 0:
-                page -= 1
-                render()
-        if pin == button_down:
-            if page < MAX_PAGE - 1:
-                page += 1
-                render()
+        if pin == badger2040.BUTTON_UP:
+            if state["page"] > 0:
+                state["page"] -= 1
+            render()
+        if pin == badger2040.BUTTON_DOWN:
+            if state["page"] < MAX_PAGE - 1:
+                state["page"] += 1
+            render()
     else:  # User button IS held down
-        if pin == button_up:
-            font_size += 1
-            if font_size == len(font_sizes):
-                font_size = 0
+        if pin == badger2040.BUTTON_UP:
+            state["font_size"] += 1
+            if state["font_size"] == len(font_sizes):
+                state["font_size"] = 0
             render()
-        if pin == button_down:
-            font_size -= 1
-            if font_size < 0:
-                font_size = 0
+        if pin == badger2040.BUTTON_DOWN:
+            state["font_size"] -= 1
+            if state["font_size"] < 0:
+                state["font_size"] = 0
             render()
-        if pin == button_a:
-            inverted = not inverted
-            display.invert(inverted)
+        if pin == badger2040.BUTTON_A:
+            state["inverted"] = not state["inverted"]
+            display.invert(state["inverted"])
             render()
 
 
-display.update_speed(badger2040.UPDATE_MEDIUM)
-render()
+if exited_to_launcher or not woken_by_button:
+    wait_for_user_to_release_buttons()
+    display.update_speed(badger2040.UPDATE_MEDIUM)
+    render()
+
 display.update_speed(badger2040.UPDATE_FAST)
 
-
-# Wait for wakeup button to be released
-while button_a.value() or button_b.value() or button_c.value() or button_up.value() or button_down.value():
-    pass
-
-
 while True:
-    if button_a.value():
-        button(button_a)
-    if button_b.value():
-        button(button_b)
-    if button_c.value():
-        button(button_c)
+    if display.pressed(badger2040.BUTTON_A):
+        button(badger2040.BUTTON_A)
+    if display.pressed(badger2040.BUTTON_B):
+        button(badger2040.BUTTON_B)
+    if display.pressed(badger2040.BUTTON_C):
+        button(badger2040.BUTTON_C)
 
-    if button_up.value():
-        button(button_up)
-    if button_down.value():
-        button(button_down)
+    if display.pressed(badger2040.BUTTON_UP):
+        button(badger2040.BUTTON_UP)
+    if display.pressed(badger2040.BUTTON_DOWN):
+        button(badger2040.BUTTON_DOWN)
 
-    time.sleep(0.01)
+    if changed:
+        badger_os.state_save("launcher", state)
+        changed = False
+
+    display.halt()
