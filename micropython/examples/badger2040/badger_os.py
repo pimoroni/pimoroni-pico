@@ -54,7 +54,9 @@ def state_running():
 
 
 def state_clear_running():
+    running = state_running()
     state_modify("launcher", {"running": "launcher"})
+    return running != "launcher"
 
 
 def state_set_running(app):
@@ -110,8 +112,6 @@ def launch(file):
 
     def quit_to_launcher(pin):
         if button_a.value() and button_c.value():
-            state_clear_running()
-            time.sleep(0.1)  # Needed to stop write fail
             machine.reset()
 
     button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)

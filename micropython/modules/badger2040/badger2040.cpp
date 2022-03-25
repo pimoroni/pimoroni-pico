@@ -213,8 +213,7 @@ MICROPY_EVENT_POLL_HOOK
     return mp_const_none;
 }
 
-mp_obj_t Badger2040_woken(mp_obj_t self_in) {
-    (void)self_in;
+mp_obj_t Badger2040_woken_by_button() {
     return button_wake_state.any() ? mp_const_true : mp_const_false;
 }
 
