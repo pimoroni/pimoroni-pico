@@ -220,6 +220,10 @@ namespace pimoroni {
     uc8151.update_speed(speed);
   }
 
+  uint32_t Badger2040::update_time() {
+    return uc8151.update_time();
+  }
+
   void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {
     uc8151.partial_update(x, y, w, h, blocking);
   }

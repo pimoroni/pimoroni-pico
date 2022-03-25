@@ -149,9 +149,12 @@ MICROPY_EVENT_POLL_HOOK
 #endif
     }
 
+    absolute_time_t t_end = make_timeout_time_ms(self->badger2040->update_time());
     self->badger2040->update(false);
 
-    while(self->badger2040->is_busy()) {
+    // Ensure blocking for the minimum amount of time
+    // in cases where "is_busy" is unreliable.
+    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
@@ -190,9 +193,12 @@ MICROPY_EVENT_POLL_HOOK
 #endif
     }
 
+    absolute_time_t t_end = make_timeout_time_ms(self->badger2040->update_time());
     self->badger2040->partial_update(x, y, w, h);
 
-    while(self->badger2040->is_busy()) {
+    // Ensure blocking for the minimum amount of time
+    // in cases where "is_busy" is unreliable.
+    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif

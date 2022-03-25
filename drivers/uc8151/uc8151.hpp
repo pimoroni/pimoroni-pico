@@ -146,6 +146,8 @@ namespace pimoroni {
 
     bool inverted = false;
 
+    uint8_t _update_speed = 0;
+
   public:
     UC8151(uint16_t width, uint16_t height) :
       width(width), height(height), frame_buffer(new uint8_t[width * height / 8]) {
@@ -199,6 +201,8 @@ namespace pimoroni {
 
     void invert(bool invert);
     void update_speed(uint8_t speed);
+    uint8_t update_speed();
+    uint32_t update_time();
     void update(bool blocking = true);
     void partial_update(int x, int y, int w, int h, bool blocking = true);
     void off();

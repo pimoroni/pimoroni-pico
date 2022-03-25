@@ -323,6 +323,8 @@ namespace pimoroni {
   void UC8151::setup(uint8_t speed) {
     reset();
 
+    _update_speed = speed;
+
     if(speed == 0) {
       command(PSR, {
         RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
@@ -466,6 +468,25 @@ namespace pimoroni {
 
   void UC8151::update_speed(uint8_t speed) {
     setup(speed);
+  }
+
+  uint8_t UC8151::update_speed() {
+    return _update_speed;
+  }
+
+  uint32_t UC8151::update_time() {
+    switch(_update_speed) {
+      case 0:
+        return 5500;
+      case 1:
+        return 2600;
+      case 2:
+        return 1000;
+      case 3:
+        return 300;
+      default:
+        return 5500;
+    }
   }
 
   void UC8151::partial_update(int x, int y, int w, int h, bool blocking) {
