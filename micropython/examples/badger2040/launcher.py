@@ -209,6 +209,8 @@ if changed:
     render()
 
 display.update_speed(badger2040.UPDATE_FAST)
+if not changed and not display.woken():
+    render()
 
 while True:
     if display.pressed(badger2040.BUTTON_A):

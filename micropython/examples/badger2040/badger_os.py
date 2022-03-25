@@ -97,6 +97,22 @@ def launch(file):
         if k not in ("gc", "file", "machine"):
             del locals()[k]
     gc.collect()
+
+    button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
+    button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
+
+    def quit_to_launcher(pin):
+        if button_a.value() and button_c.value():
+            import os
+            try:
+                os.remove(STATE_FILE)
+            except OSError:
+                pass
+            machine.reset()
+
+    button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
+    button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
+
     try:
         __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
     except ImportError:

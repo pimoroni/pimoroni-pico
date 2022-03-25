@@ -127,10 +127,6 @@ changed = not display.woken()
 
 
 while True:
-    # Pressing A and C together quits the app
-    if display.pressed(badger2040.BUTTON_A) and display.pressed(badger2040.BUTTON_C):
-        break
-
     if display.pressed(badger2040.BUTTON_UP):
         if current_image > 0:
             current_image -= 1
@@ -158,4 +154,3 @@ while True:
 
     # Halt the Badger to save power, it will wake up if any of the front buttons are pressed
     display.halt()
-    time.sleep(0.1)

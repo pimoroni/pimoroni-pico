@@ -214,10 +214,6 @@ if not display.woken():
 draw_badge()
 
 while True:
-    # Pressing A and C together quits the app
-    if display.pressed(badger2040.BUTTON_A) and display.pressed(badger2040.BUTTON_C):
-        break
-
     if display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
         draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
                      WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
@@ -230,4 +226,3 @@ while True:
 
     # If on battery, halt the Badger to save power, it will wake up if any of the front buttons are pressed
     display.halt()
-    time.sleep(0.1)
