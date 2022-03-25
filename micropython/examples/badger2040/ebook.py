@@ -1,4 +1,5 @@
 import badger2040
+import time
 import gc
 import badger_os
 
@@ -13,7 +14,10 @@ except OSError:
         # If the specified file doesn't exist,
         # pre-populate with Wind In The Willows
         import witw
-        open(text_file, "wb").write(witw.data())
+        with open(text_file, "wb") as f:
+            f.write(witw.data())
+            f.flush()
+            time.sleep(0.1)
         del witw
     except ImportError:
         pass
