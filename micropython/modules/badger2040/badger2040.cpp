@@ -12,6 +12,10 @@ namespace {
           gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
           gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
           gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
+
+          gpio_set_function(pimoroni::Badger2040::LED, GPIO_FUNC_SIO);
+          gpio_set_dir(pimoroni::Badger2040::LED, GPIO_OUT);
+          gpio_put(pimoroni::Badger2040::LED, 1);
         }
 
         bool any() const {
