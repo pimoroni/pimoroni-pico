@@ -22,13 +22,14 @@ OVERLAY_TEXT_SIZE = 0.5
 
 TOTAL_IMAGES = 0
 
+
+# Turn the act LED on as soon as possible
+display = badger2040.Badger2040()
+display.led(128)
+
 # Try to preload BadgerPunk image
 try:
     os.mkdir("images")
-except OSError:
-    pass
-
-try:
     import badgerpunk
     with open("images/badgerpunk.bin", "wb") as f:
         f.write(badgerpunk.data())
@@ -40,14 +41,13 @@ try:
 except (OSError, ImportError):
     pass
 
+# Load images
 try:
     IMAGES = [f for f in os.listdir("/images") if f.endswith(".bin")]
     TOTAL_IMAGES = len(IMAGES)
 except OSError:
     pass
 
-
-display = badger2040.Badger2040()
 
 image = bytearray(int(296 * 128 / 8))
 current_image = 0
