@@ -20,10 +20,6 @@ LEFT_PADDING = 5
 NAME_PADDING = 20
 DETAIL_SPACING = 10
 
-OVERLAY_BORDER = 40
-OVERLAY_SPACING = 20
-OVERLAY_TEXT_SIZE = 0.6
-
 DEFAULT_TEXT = """mustelid inc
 H. Badger
 RP2040
@@ -62,42 +58,6 @@ def truncatestring(text, text_size, width):
 # ------------------------------
 #      Drawing functions
 # ------------------------------
-
-# Draw an overlay box with a given message within it
-def draw_overlay(message, width, height, line_spacing, text_size):
-
-    # Draw a light grey background
-    display.pen(12)
-    display.rectangle((WIDTH - width) // 2, (HEIGHT - height) // 2, width, height)
-
-    # Take the provided message and split it up into
-    # lines that fit within the specified width
-    words = message.split(" ")
-    lines = []
-    line = ""
-    appended_line = ""
-    for word in words:
-        if len(word) > 0:
-            appended_line += " "
-        appended_line += word
-        if display.measure_text(appended_line, text_size) >= width:
-            lines.append(line)
-            appended_line = word
-        else:
-            line = appended_line
-    if len(line) != 0:
-        lines.append(line)
-
-    display.pen(0)
-    display.thickness(2)
-
-    # Display each line of text from the message, centre-aligned
-    num_lines = len(lines)
-    for i in range(num_lines):
-        length = display.measure_text(lines[i], text_size)
-        current_line = (i * line_spacing) - ((num_lines - 1) * line_spacing) // 2
-        display.text(lines[i], (WIDTH - length) // 2, (HEIGHT // 2) + current_line, text_size)
-
 
 # Draw the badge, including user text
 def draw_badge():
@@ -203,10 +163,6 @@ detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
 detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
                               TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
 
-# Tell launcher to relaunch this app on wake
-if not display.woken():
-    badger_os.state_save("badge")
-
 
 # ------------------------------
 #       Main program
@@ -216,9 +172,7 @@ draw_badge()
 
 while True:
     if display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
-        draw_overlay("To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt",
-                     WIDTH - OVERLAY_BORDER, HEIGHT - OVERLAY_BORDER, OVERLAY_SPACING, OVERLAY_TEXT_SIZE)
-        display.update()
+        badger_os.warning(display, "To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt")
         time.sleep(4)
 
         draw_badge()

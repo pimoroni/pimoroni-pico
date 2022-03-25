@@ -2,10 +2,10 @@
 
 import os
 import gc
+import time
+import json
 import machine
 import badger2040
-
-STATE_FILE = "appstate.txt"
 
 
 def get_battery_level():
@@ -47,55 +47,62 @@ def get_disk_usage():
     return f_total_size, f_used, f_free
 
 
-def state_app():
-    try:
-        with open(STATE_FILE, "r") as f:
-            return f.readline().strip()
-    except OSError:
-        return None
+def state_running():
+    state = {"running": "launcher"}
+    state_load("launcher", state)
+    return state["running"]
+
+
+def state_clear_running():
+    state_modify("launcher", {"running": "launcher"})
+
+
+def state_set_running(app):
+    state_modify("launcher", {"running": app})
 
 
 def state_launch():
-    app = state_app()
-    if app is not None:
+    app = state_running()
+    if app is not None and app != "launcher":
         launch("_" + app)
 
 
-def state_delete():
+def state_delete(app):
     try:
-        os.remove(STATE_FILE)
+        os.remove("{}_state.txt".format(app))
     except OSError:
         pass
 
 
-def state_save(title, *args):
-    with open(STATE_FILE, "w") as f:
-        f.write("{}\n".format(title))
-        for arg in args:
-            f.write("{}\n".format(arg))
+def state_save(app, data):
+    with open("{}_state.txt".format(app), "w") as f:
+        f.write(json.dumps(data))
+        f.flush()
 
 
-def state_load(title, *defaults):
-    data = []
+def state_modify(app, data):
+    state = {}
+    state_load(app, state)
+    state.update(data)
+    state_save(app, state)
+
+
+def state_load(app, defaults):
     try:
-        with open(STATE_FILE, "r") as f:
-            if f.readline().strip() != title:
-                return defaults
-            for default in defaults:
-                t = type(default)
-                if t is bool:
-                    data.append(f.readline().strip() == "True")
-                else:
-                    data.append(t(f.readline().strip()))
-            return data
-    except OSError:
-        return defaults
+        data = json.loads(open("{}_state.txt".format(app), "r").read())
+        if type(data) is dict:
+            defaults.update(data)
+            return True
+    except (OSError, ValueError):
+        pass
+
+    state_save(app, defaults)
+    return False
 
 
 def launch(file):
-    for k in locals().keys():
-        if k not in ("gc", "file", "machine"):
-            del locals()[k]
+    state_set_running(file[1:])
+
     gc.collect()
 
     button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
@@ -103,18 +110,66 @@ def launch(file):
 
     def quit_to_launcher(pin):
         if button_a.value() and button_c.value():
-            import os
-            try:
-                os.remove(STATE_FILE)
-            except OSError:
-                pass
+            state_clear_running()
+            time.sleep(0.1)  # Needed to stop write fail
             machine.reset()
 
     button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
     button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
 
     try:
-        __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
+        try:
+            __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
+        except ImportError:
+            __import__(file)      # Failover to importing [_file]
+
     except ImportError:
-        __import__(file)  # Failover to importing [_file]
+        # If the app doesn't exist, notify the user
+        warning(None, "Could not launch: " + file[1:])
+        time.sleep(4.0)
+    except Exception as e:
+        # If the app throws an error, catch it and display!
+        print(e)
+        warning(None, str(e))
+        time.sleep(4.0)
+
+    # If the app exits or errors, do not relaunch!
+    state_clear_running()
     machine.reset()  # Exit back to launcher
+
+
+# Draw an overlay box with a given message within it
+def warning(display, message, width=badger2040.WIDTH - 40, height=badger2040.HEIGHT - 40, line_spacing=20, text_size=0.6):
+    if display is None:
+        display = badger2040.Badger2040()
+        display.led(128)
+
+    # Draw a light grey background
+    display.pen(12)
+    display.rectangle((badger2040.WIDTH - width) // 2, (badger2040.HEIGHT - height) // 2, width, height)
+
+    # Take the provided message and split it up into
+    # lines that fit within the specified width
+    words = message.split(" ")
+
+    lines = []
+    current_line = ""
+    for word in words:
+        if display.measure_text(current_line + word + " ", text_size) < width:
+            current_line += word + " "
+        else:
+            lines.append(current_line.strip())
+            current_line = word + " "
+    lines.append(current_line.strip())
+
+    display.pen(0)
+    display.thickness(2)
+
+    # Display each line of text from the message, centre-aligned
+    num_lines = len(lines)
+    for i in range(num_lines):
+        length = display.measure_text(lines[i], text_size)
+        current_line = (i * line_spacing) - ((num_lines - 1) * line_spacing) // 2
+        display.text(lines[i], (badger2040.WIDTH - length) // 2, (badger2040.HEIGHT // 2) + current_line, text_size)
+
+    display.update()

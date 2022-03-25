@@ -1,3 +1,4 @@
+import gc
 import time
 import math
 import machine
@@ -6,35 +7,33 @@ from badger2040 import WIDTH
 import launchericons
 import badger_os
 
+# Reduce clock speed to 48MHz, that's fast enough!
+machine.freq(48000000)
+
+if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
+    # Pressing A and C together at start quits app
+    badger_os.state_clear_running()
+    badger2040.clear_pressed_to_wake()
+else:
+    # Otherwise restore previously running app
+    badger_os.state_launch()
+
 # for e.g. 2xAAA batteries, try max 3.4 min 3.0
 MAX_BATTERY_VOLTAGE = 4.0
 MIN_BATTERY_VOLTAGE = 3.2
 
-# Reduce clock speed to 48MHz, that's fast enough!
-machine.freq(48000000)
-
-
-# Restore previously running app
-try:
-    # Pressing A and C together at start quits app
-    if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
-        badger_os.state_delete()
-    else:
-        if badger_os.state_app() != "launcher":
-            badger_os.state_launch()
-except OSError:
-    pass
-except ImportError:
-    # Happens if appstate names an unknown app.  Delete appstate and reset
-    badger_os.state_delete()
-    machine.reset()
-
-
 display = badger2040.Badger2040()
 display.led(128)
 
-page, font_size, inverted = badger_os.state_load("launcher", 0, 1, False)
-changed = badger_os.state_app() != "launcher"
+state = {
+    "page": 0,
+    "font_size": 1,
+    "inverted": False,
+    "running": "launcher"
+}
+
+badger_os.state_load("launcher", state)
+changed = state["running"] != "launcher"
 
 icons = bytearray(launchericons.data())
 icons_width = 576
@@ -123,23 +122,23 @@ def render():
     display.pen(0)
     display.thickness(2)
 
-    max_icons = min(3, len(examples[(page * 3):]))
+    max_icons = min(3, len(examples[(state["page"] * 3):]))
 
     for i in range(max_icons):
         x = centers[i]
-        label, icon = examples[i + (page * 3)]
+        label, icon = examples[i + (state["page"] * 3)]
         label = label[1:].replace("_", " ")
         display.pen(0)
         display.icon(icons, icon, icons_width, 64, x - 32, 24)
-        w = display.measure_text(label, font_sizes[font_size])
-        display.text(label, x - int(w / 2), 16 + 80, font_sizes[font_size])
+        w = display.measure_text(label, font_sizes[state["font_size"]])
+        display.text(label, x - int(w / 2), 16 + 80, font_sizes[state["font_size"]])
 
     for i in range(MAX_PAGE):
         x = 286
         y = int((128 / 2) - (MAX_PAGE * 10 / 2) + (i * 10))
         display.pen(0)
         display.rectangle(x, y, 8, 8)
-        if page != i:
+        if state["page"] != i:
             display.pen(15)
             display.rectangle(x + 1, y + 1, 6, 6)
 
@@ -159,15 +158,20 @@ def render():
 def launch_example(index):
     while display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
         time.sleep(0.01)
-    try:
-        badger_os.launch(examples[(page * 3) + index][0])
-        return True
-    except IndexError:
-        return False
+
+    file = examples[(state["page"] * 3) + index][0]
+
+    for k in locals().keys():
+        if k not in ("gc", "file", "badger_os"):
+            del locals()[k]
+
+    gc.collect()
+
+    badger_os.launch(file)
 
 
 def button(pin):
-    global page, font_size, inverted, changed
+    global changed
     changed = True
 
     if not display.pressed(badger2040.BUTTON_USER):  # User button is NOT held down
@@ -178,27 +182,27 @@ def button(pin):
         if pin == badger2040.BUTTON_C:
             launch_example(2)
         if pin == badger2040.BUTTON_UP:
-            if page > 0:
-                page -= 1
+            if state["page"] > 0:
+                state["page"] -= 1
             render()
         if pin == badger2040.BUTTON_DOWN:
-            if page < MAX_PAGE - 1:
-                page += 1
+            if state["page"] < MAX_PAGE - 1:
+                state["page"] += 1
             render()
     else:  # User button IS held down
         if pin == badger2040.BUTTON_UP:
-            font_size += 1
-            if font_size == len(font_sizes):
-                font_size = 0
+            state["font_size"] += 1
+            if state["font_size"] == len(font_sizes):
+                state["font_size"] = 0
             render()
         if pin == badger2040.BUTTON_DOWN:
-            font_size -= 1
-            if font_size < 0:
-                font_size = 0
+            state["font_size"] -= 1
+            if state["font_size"] < 0:
+                state["font_size"] = 0
             render()
         if pin == badger2040.BUTTON_A:
-            inverted = not inverted
-            display.invert(inverted)
+            state["inverted"] = not state["inverted"]
+            display.invert(state["inverted"])
             render()
 
 
@@ -227,7 +231,7 @@ while True:
         button(badger2040.BUTTON_DOWN)
 
     if changed:
-        badger_os.state_save("launcher", page, font_size, inverted)
+        badger_os.state_save("launcher", state)
         changed = False
 
     display.halt()
