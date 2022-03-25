@@ -177,10 +177,10 @@ for addr in sensor_addrs:
 
 #### Controlling the LED Bar
 
-Alongside Servo 2040's six sensor headers are six addressable RGB LEDs. These work using the same chainable 1-wire signalling as WS2812 LED's, commonly known as Neopixels. As such, they can be controlled using the same Plasma Library used by the (Pimoroni Plasma 2040)[https://shop.pimoroni.com/products/plasma-2040].
+Alongside Servo 2040's six sensor headers are six addressable RGB LEDs. These work using the same chainable 1-wire signalling as WS2812 LED's, commonly known as Neopixels. As such, they can be controlled using the same Plasma Library used by the [Pimoroni Plasma 2040](https://shop.pimoroni.com/products/plasma-2040).
 
 To set up the LED bar, first import the `WS2812` class from the `plasma` module and the pin constants for the LEDs from `servo`:
-```
+```python
 from plasma import WS2812
 from servo import servo2040
 ```
@@ -195,7 +195,7 @@ Finally, start the LED bar by calling `start`:
 led_bar.start()
 ```
 
-For more information on how to control the LEDs on the bar, please refer to the (Plasma Library)[https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma].
+For more information on how to control the LEDs on the bar, please refer to the [Plasma Library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
 
 
 ### Pin Constants
