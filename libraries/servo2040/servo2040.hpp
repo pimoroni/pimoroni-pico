@@ -50,7 +50,7 @@ namespace servo {
     const uint NUM_SENSORS = 6;
 
     const uint VOLTAGE_SENSE_ADDR = 0b110;
-    const uint VOLTAGE_SENSE_ADDR = 0b111;
+    const uint CURRENT_SENSE_ADDR = 0b111;
 
     constexpr float SHUNT_RESISTOR = 0.003f;
     constexpr float CURRENT_GAIN = 69;
