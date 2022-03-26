@@ -3,7 +3,7 @@
 - [Servo Examples](#servo-examples)
   - [Single Servo](#single-servo)
   - [Multiple Servos](#multiple-servos)
-  - [Servo Cluster](#servo_cluster)
+  - [Servo Cluster](#servo-cluster)
   - [Simple Easing](#simple-easing)
   - [Servo Wave](#servo-wave)
   - [Calibration](#calibration)
