@@ -19,6 +19,10 @@ namespace pimoroni {
     static const unsigned int I2C_BG_SCL = 5;
     static const unsigned int I2C_BG_INT = 3;
 
+    static const unsigned int I2C_HEADER_SDA = 20;
+    static const unsigned int I2C_HEADER_SCL = 21;
+    static const unsigned int I2C_HEADER_INT = 19;
+
     // SPI
     static const unsigned int SPI_DEFAULT_MOSI = 19;
     static const unsigned int SPI_DEFAULT_MISO = 16;
@@ -38,7 +42,10 @@ namespace pimoroni {
 
     enum BOARD {
       BREAKOUT_GARDEN,
-      PICO_EXPLORER
+      PICO_EXPLORER,
+      PLASMA_2040,
+      INTERSTATE_75,
+      SERVO_2040
     };
 
     enum Polarity {
