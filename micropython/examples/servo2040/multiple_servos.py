@@ -8,7 +8,7 @@ Demonstrates how to create multiple Servo objects and control them together.
 
 # Create a list of servos for pins 0 to 3. Up to 16 servos can be created
 START_PIN = servo2040.SERVO_1
-END_PIN = servo2040.SERVO_3
+END_PIN = servo2040.SERVO_4
 servos = [Servo(i) for i in range(START_PIN, END_PIN + 1)]
 
 # Enable all servos (this puts them at the middle)

@@ -25,9 +25,6 @@ TIME_BETWEEN = 0.001  # The time between each current measurement
 # Free up hardware resources ahead of creating a new ServoCluster
 gc.collect()
 
-# Create the user button
-user_sw = Button(servo2040.USER_SW)
-
 # Create a servo cluster for pins 0 to 7, using PIO 0 and State Machine 0
 START_PIN = servo2040.SERVO_1
 END_PIN = servo2040.SERVO_8
@@ -43,6 +40,9 @@ mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2
 
 # Create the LED bar, using PIO 1 and State Machine 0
 led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
+
+# Create the user button
+user_sw = Button(servo2040.USER_SW)
 
 # Start updating the LED bar
 led_bar.start()

@@ -18,9 +18,6 @@ If you encounter issues, try resetting your board.
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 50          # How many times to update LEDs and Servos per second
 
-# Create the user button
-user_sw = Button(servo2040.USER_SW)
-
 # Set up the shared analog inputs
 sen_adc = Analog(servo2040.SHARED_ADC)
 
@@ -35,6 +32,9 @@ for addr in sensor_addrs:
 
 # Create the LED bar, using PIO 1 and State Machine 0
 led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
+
+# Create the user button
+user_sw = Button(servo2040.USER_SW)
 
 # Start updating the LED bar
 led_bar.start()

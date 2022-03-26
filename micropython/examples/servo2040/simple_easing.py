@@ -17,15 +17,16 @@ UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES
 SERVO_EXTENT = 80       # How far from zero to move the servo
 USE_COSINE = True       # Whether or not to use a cosine path between values
 
-# Create the user button
-user_sw = Button(servo2040.USER_SW)
-
 # Create a servo on pin 0
 s = Servo(servo2040.SERVO_1)
 
 # Get the initial value and create a random end value between the extents
 start_value = s.mid_value()
 end_value = random.uniform(-SERVO_EXTENT, SERVO_EXTENT)
+
+# Create the user button
+user_sw = Button(servo2040.USER_SW)
+
 
 update = 0
 

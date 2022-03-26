@@ -10,9 +10,6 @@ and 2 internal sensors of Servo 2040.
 Press "Boot" to exit the program.
 """
 
-# Create the user button
-user_sw = Button(servo2040.USER_SW)
-
 # Set up the shared analog inputs
 sen_adc = Analog(servo2040.SHARED_ADC)
 vol_adc = Analog(servo2040.SHARED_ADC, servo2040.VOLTAGE_GAIN)
@@ -27,6 +24,9 @@ mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2
 sensor_addrs = list(range(servo2040.SENSOR_1_ADDR, servo2040.SENSOR_6_ADDR + 1))
 for addr in sensor_addrs:
     mux.configure_pull(addr, Pin.PULL_DOWN)
+
+# Create the user button
+user_sw = Button(servo2040.USER_SW)
 
 
 # Read sensors until the user button is pressed
