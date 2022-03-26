@@ -461,6 +461,10 @@ namespace pimoroni {
     *p |= b; // set bit value
   }
 
+  uint8_t* UC8151::get_frame_buffer() {
+	  return frame_buffer;
+  }
+
   void UC8151::invert(bool inv) {
     inverted = inv;
     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval

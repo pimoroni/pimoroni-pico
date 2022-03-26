@@ -69,14 +69,6 @@ namespace pimoroni {
     // TODO: set default image?
   }
 
-  void Badger2040::clear() {
-    for(uint32_t y = 0; y < 128; y++) {
-      for(uint32_t x = 0; x < 296; x++) {
-        pixel(x, y);
-      }
-    }
-  }
-
   void Badger2040::halt() {
     gpio_put(ENABLE_3V3, 0);
 
@@ -112,6 +104,29 @@ namespace pimoroni {
     }
   }
 
+  void Badger2040::clear() {
+    const uint32_t column_len = 128 / 8;
+    const uint32_t buf_len = column_len * 296;
+    uint8_t* buf = uc8151.get_frame_buffer();
+    
+    if (_pen == 0) {
+      memset(buf, 0xff, buf_len);
+    }
+    else if (_pen == 15) {
+      memset(buf, 0, buf_len);
+    }
+    else {
+      for(uint32_t x = 0; x < 296; x++) {
+        uint8_t val = 0;
+        for (uint32_t y = 0; y < 8; y++) {
+          val |= _dither_value(x, y, _pen) << y;
+        }
+        memset(buf, val, column_len);
+        buf += column_len;
+      }
+    }
+  }
+
   void Badger2040::pixel(int32_t x, int32_t y) {
     if(_thickness == 1) {
       uc8151.pixel(x, y, _dither_value(x, y, _pen));
@@ -130,9 +145,28 @@ namespace pimoroni {
     image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
   }
 
-  // Display an image that fills the screen (286*128)
+  // Display an image that fills the screen (296*128)
   void Badger2040::image(const uint8_t* data) {
-    image(data, 296, 0, 0, 296, 128, 0, 0);
+    uint8_t* ptr = uc8151.get_frame_buffer();
+    
+    for (uint32_t x = 0; x < 296; ++x) {
+      // extract bitmask for this pixel
+      uint32_t bm = 0b10000000 >> (x & 0b111);
+      
+      for (uint32_t y = 0; y < 128; y += 8) {
+        uint8_t val = 0;
+        for (uint32_t cy = 0; cy < 8; ++cy) {
+          // work out byte offset in source data
+          uint32_t o = ((y + cy) * (296 >> 3)) + (x >> 3);
+          
+          // Set bit in val if set in source data
+          if (data[o] & bm) {
+            val |= 1 << cy;
+          }
+        }
+        *ptr++ = val;
+      }
+    }
   }
 
   // Display an image smaller than the screen (sw*sh) at dx, dy
@@ -156,9 +190,36 @@ namespace pimoroni {
   }
 
   void Badger2040::rectangle(int32_t x, int32_t y, int32_t w, int32_t h) {
-    for(int cy = y; cy < y + h; cy++) {
+    if (h >= 8 && (_pen == 0 || _pen == 15)) {
+      // Directly write to the frame buffer when clearing a large area
+      uint8_t* buf = uc8151.get_frame_buffer();
+      
       for(int cx = x; cx < x + w; cx++) {
-        pixel(cx, cy);
+        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
+        uint8_t first_val = 0xff >> (y & 7);
+        uint8_t last_val = 0xff >> ((y + h) & 7);
+        
+        if (_pen == 0) {
+          *buf_ptr++ |= first_val;
+          for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
+            *buf_ptr++ = 0xff;
+          }
+          *buf_ptr |= ~last_val;
+        }
+        else {
+          *buf_ptr++ &= ~first_val;
+          for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
+            *buf_ptr++ = 0;
+          }
+          *buf_ptr &= last_val;
+        }
+      }
+    }
+    else {
+      for(int cx = x; cx < x + w; cx++) {
+        for(int cy = y; cy < y + h; cy++) {
+          uc8151.pixel(cx, cy, _dither_value(cx, cy, _pen));
+        }
       }
     }
   }
