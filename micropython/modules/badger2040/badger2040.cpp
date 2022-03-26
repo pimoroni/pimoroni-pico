@@ -4,41 +4,34 @@
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
+extern "C" uint32_t badger_gpio_on_wake;
+
 namespace {
     struct Badger2040_WakeUpInit {
         Badger2040_WakeUpInit()
-            : state(gpio_get_all() & (0x1f << pimoroni::Badger2040::DOWN)) // Record state of front buttons
         {
-          gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
-          gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
-          gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
-
-          gpio_set_function(pimoroni::Badger2040::LED, GPIO_FUNC_SIO);
-          gpio_set_dir(pimoroni::Badger2040::LED, GPIO_OUT);
-          gpio_put(pimoroni::Badger2040::LED, 1);
+            // Only keep the front buttons
+            badger_gpio_on_wake &= 0x1f << pimoroni::Badger2040::DOWN;
         }
 
         bool any() const {
-            return state > 0;
+            return badger_gpio_on_wake > 0;
         }
 
         bool get(uint32_t pin) const {
-            return state & (0b1 << pin);
+            return badger_gpio_on_wake & (0b1 << pin);
         }
 
         bool get_once(uint32_t pin) {
             uint32_t mask = 0b1 << pin;
-            bool value = state & mask;
-            state &= ~mask;
+            bool value = badger_gpio_on_wake & mask;
+            badger_gpio_on_wake &= ~mask;
             return value;
         }
-        void clear() { state = 0; }
-
-    private:
-        uint32_t state;
+        void clear() { badger_gpio_on_wake = 0; }
     };
 
-    Badger2040_WakeUpInit button_wake_state __attribute__ ((init_priority (101)));
+    Badger2040_WakeUpInit button_wake_state;
 };
 
 extern "C" {
