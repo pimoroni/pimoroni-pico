@@ -5,6 +5,7 @@
 
 #include "pico/asm_helper.S"
 
+// This macro tells the pico runtime to call __badger_init very early in boot
 __pre_init __badger_init, 00003
 
 .section .data.badger_init
