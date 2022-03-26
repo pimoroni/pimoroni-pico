@@ -8,19 +8,22 @@
 __pre_init __badger_init, 00003
 
 .section .data.badger_init
-.global badger_gpio_on_wake
+.global badger_buttons_on_wake
 .align 4
-badger_gpio_on_wake:
+badger_buttons_on_wake:
 .word 0x00000000
 
 .section .text
 .thumb_func
 __badger_init:
-   // Read GPIO state and store
+   // Read GPIO state for front buttons and store
    movs r3, 0xd0
    lsls r3, r3, 24
-   ldr r1, [r3, 4]
-   ldr r2, =badger_gpio_on_wake
+   ldr r1, [r3, 4]      // Read all GPIOs
+   movs r2, 0b11111     // Mask the front buttons (pins 15-11)
+   lsls r2, 11
+   ands r1, r1, r2
+   ldr r2, =badger_buttons_on_wake
    str r1, [r2]
 
    // Enable 3v3 pin on the badger

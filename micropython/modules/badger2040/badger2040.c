@@ -16,7 +16,6 @@ MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pen_obj, Badger2040_pen);
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_thickness_obj, Badger2040_thickness);
 
 MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pressed_obj, Badger2040_pressed);
-MP_DEFINE_CONST_FUN_OBJ_2(Badger2040_pressed_to_wake2_obj, Badger2040_pressed_to_wake2);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_clear_obj, Badger2040_clear);
 MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_pixel_obj, Badger2040_pixel);
 MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_line_obj, 4, Badger2040_line);
@@ -34,7 +33,6 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Badger2040_measure_glyph_obj, 2, Badger2040_measure_g
 MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_command_obj, Badger2040_command);
 
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_pressed_to_wake_obj, Badger2040_pressed_to_wake);
-MP_DEFINE_CONST_FUN_OBJ_0(Badger2040_clear_pressed_to_wake_obj, Badger2040_clear_pressed_to_wake);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_halt_obj, Badger2040_halt);
 MP_DEFINE_CONST_FUN_OBJ_0(Badger2040_woken_by_button_obj, Badger2040_woken_by_button);
 
@@ -55,7 +53,6 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_thickness), MP_ROM_PTR(&Badger2040_thickness_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_pressed), MP_ROM_PTR(&Badger2040_pressed_obj) },
-    { MP_ROM_QSTR(MP_QSTR_pressed_to_wake), MP_ROM_PTR(&Badger2040_pressed_to_wake2_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&Badger2040_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&Badger2040_pixel_obj) },
@@ -92,7 +89,6 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_Badger2040), (mp_obj_t)&Badger2040_type },
 
     { MP_ROM_QSTR(MP_QSTR_pressed_to_wake), MP_ROM_PTR(&Badger2040_pressed_to_wake_obj) },
-    { MP_ROM_QSTR(MP_QSTR_clear_pressed_to_wake), MP_ROM_PTR(&Badger2040_clear_pressed_to_wake_obj) },
     { MP_ROM_QSTR(MP_QSTR_woken_by_button), MP_ROM_PTR(&Badger2040_woken_by_button_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_UPDATE_NORMAL), MP_ROM_INT(0) },

@@ -17,7 +17,6 @@ woken_by_button = badger2040.woken_by_button()  # Must be done before we clear_p
 if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
     # Pressing A and C together at start quits app
     exited_to_launcher = badger_os.state_clear_running()
-    badger2040.clear_pressed_to_wake()
 else:
     # Otherwise restore previously running app
     badger_os.state_launch()
