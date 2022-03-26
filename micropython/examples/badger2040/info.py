@@ -12,6 +12,7 @@ display.rectangle(0, 0, WIDTH, 16)
 display.thickness(1)
 display.pen(15)
 display.text("badgerOS", 3, 8, 0.4)
+display.text("info", WIDTH - display.measure_text("help", 0.4) - 4, 8, 0.4)
 
 display.pen(0)
 
@@ -34,4 +35,8 @@ y += LINE_HEIGHT
 display.text("https://pimoroni.com/badger2040", 0, y, TEXT_SIZE)
 
 display.update()
-display.halt()
+
+# Call halt in a loop, on battery this switches off power.
+# On USB, the app will exit when A+C is pressed because the launcher picks that up.
+while True:
+    display.halt()
