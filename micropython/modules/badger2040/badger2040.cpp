@@ -11,15 +11,15 @@ extern "C" {
 
 extern uint32_t badger_buttons_on_wake;
 
-bool Badger2040_wake_state_any() {
+static bool Badger2040_wake_state_any() {
     return badger_buttons_on_wake > 0;
 }
 
-bool Badger2040_wake_state_get(uint32_t pin) {
+static bool Badger2040_wake_state_get(uint32_t pin) {
     return badger_buttons_on_wake & (0b1 << pin);
 }
 
-bool Badger2040_wake_state_get_once(uint32_t pin) {
+static bool Badger2040_wake_state_get_once(uint32_t pin) {
     uint32_t mask = 0b1 << pin;
     bool value = badger_buttons_on_wake & mask;
     badger_buttons_on_wake &= ~mask;
