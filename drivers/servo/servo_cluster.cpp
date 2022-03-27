@@ -59,7 +59,7 @@ namespace servo {
 
         // Update the pwm before setting the new wrap
         uint8_t servo_count = pwms.get_chan_count();
-        for(uint servo = 0; servo < servo_count; servo++) {
+        for(uint8_t servo = 0; servo < servo_count; servo++) {
           pwms.set_chan_level(servo, 0, false);
           pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwm_period), false);
         }
@@ -88,7 +88,7 @@ namespace servo {
     return pwms.get_chan_pin(servo);
   }
 
-  void ServoCluster::enable(uint servo, bool load) {
+  void ServoCluster::enable(uint8_t servo, bool load) {
     assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].enable();
     apply_pulse(servo, new_pulse, load);
@@ -120,7 +120,7 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  void ServoCluster::disable(uint servo, bool load) {
+  void ServoCluster::disable(uint8_t servo, bool load) {
     assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].disable();
     apply_pulse(servo, new_pulse, load);
@@ -152,17 +152,17 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  bool ServoCluster::is_enabled(uint servo) const {
+  bool ServoCluster::is_enabled(uint8_t servo) const {
     assert(servo < pwms.get_chan_count());
     return states[servo].is_enabled();
   }
 
-  float ServoCluster::pulse(uint servo) const {
+  float ServoCluster::pulse(uint8_t servo) const {
     assert(servo < pwms.get_chan_count());
     return states[servo].get_pulse();
   }
 
-  void ServoCluster::pulse(uint servo, float pulse, bool load) {
+  void ServoCluster::pulse(uint8_t servo, float pulse, bool load) {
     assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].set_pulse_with_return(pulse);
     apply_pulse(servo, new_pulse, load);
@@ -194,12 +194,12 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  float ServoCluster::value(uint servo) const {
+  float ServoCluster::value(uint8_t servo) const {
     assert(servo < pwms.get_chan_count());
     return states[servo].get_value();
   }
 
-  void ServoCluster::value(uint servo, float value, bool load) {
+  void ServoCluster::value(uint8_t servo, float value, bool load) {
     assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].set_value_with_return(value);
     apply_pulse(servo, new_pulse, load);
@@ -231,12 +231,12 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  float ServoCluster::phase(uint servo) const {
+  float ServoCluster::phase(uint8_t servo) const {
     assert(servo < pwms.get_chan_count());
     return servo_phases[servo];
   }
 
-  void ServoCluster::phase(uint servo, float phase, bool load) {
+  void ServoCluster::phase(uint8_t servo, float phase, bool load) {
     assert(servo < pwms.get_chan_count());
     servo_phases[servo] = MIN(MAX(phase, 0.0f), 1.0f);
     pwms.set_chan_offset(servo, (uint32_t)(servo_phases[servo] * (float)pwms.get_wrap()), load);
@@ -306,22 +306,22 @@ namespace servo {
     return success;
   }
 
-  float ServoCluster::min_value(uint servo) const {
+  float ServoCluster::min_value(uint8_t servo) const {
     assert(is_assigned(servo));
     return states[servo].get_min_value();
   }
 
-  float ServoCluster::mid_value(uint servo) const {
+  float ServoCluster::mid_value(uint8_t servo) const {
     assert(is_assigned(servo));
     return states[servo].get_mid_value();
   }
 
-  float ServoCluster::max_value(uint servo) const {
+  float ServoCluster::max_value(uint8_t servo) const {
     assert(is_assigned(servo));
     return states[servo].get_max_value();
   }
 
-  void ServoCluster::to_min(uint servo, bool load) {
+  void ServoCluster::to_min(uint8_t servo, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_min_with_return();
     apply_pulse(servo, new_pulse, load);
@@ -353,7 +353,7 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  void ServoCluster::to_mid(uint servo, bool load) {
+  void ServoCluster::to_mid(uint8_t servo, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_mid_with_return();
     apply_pulse(servo, new_pulse, load);
@@ -385,7 +385,7 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  void ServoCluster::to_max(uint servo, bool load) {
+  void ServoCluster::to_max(uint8_t servo, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_max_with_return();
     apply_pulse(servo, new_pulse, load);
@@ -417,7 +417,7 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, bool load) {
+  void ServoCluster::to_percent(uint8_t servo, float in, float in_min, float in_max, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_percent_with_return(in, in_min, in_max);
     apply_pulse(servo, new_pulse, load);
@@ -449,7 +449,7 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  void ServoCluster::to_percent(uint servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
+  void ServoCluster::to_percent(uint8_t servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
     assert(is_assigned(servo));
     float new_pulse = states[servo].to_percent_with_return(in, in_min, in_max, value_min, value_max);
     apply_pulse(servo, new_pulse, load);
@@ -481,12 +481,12 @@ namespace servo {
       pwms.load_pwm();
   }
 
-  Calibration& ServoCluster::calibration(uint servo) {
+  Calibration& ServoCluster::calibration(uint8_t servo) {
     assert(is_assigned(servo));
     return states[servo].calibration();
   }
 
-  const Calibration& ServoCluster::calibration(uint servo) const {
+  const Calibration& ServoCluster::calibration(uint8_t servo) const {
     assert(is_assigned(servo));
     return states[servo].calibration();
   }
@@ -495,7 +495,7 @@ namespace servo {
     pwms.load_pwm();
   }
 
-  void ServoCluster::apply_pulse(uint servo, float pulse, bool load) {
+  void ServoCluster::apply_pulse(uint8_t servo, float pulse, bool load) {
     pwms.set_chan_level(servo, ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
   }
 
