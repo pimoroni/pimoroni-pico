@@ -65,7 +65,7 @@ int main() {
     for(auto i = 0u; i < 360; i++) {
       float value = sin(((float)i * (float)M_PI) / 180.0f) * SWEEP_EXTENT;
       for(auto s = 0u; s < NUM_SERVOS; s++) {
-        servos[s]->set_value(value);
+        servos[s]->value(value);
       }
       sleep_ms(20);
     }

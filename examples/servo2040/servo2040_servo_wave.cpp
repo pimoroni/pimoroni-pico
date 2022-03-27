@@ -60,9 +60,9 @@ int main() {
     }
 
     // Update all the Servos
-    for(auto i = 0u; i < servos.get_count(); i++) {
-        float angle = (((float)i / (float)servos.get_count()) + offset) * (float)M_TWOPI;
-        servos.set_value(i, sin(angle) * SERVO_EXTENT, false);
+    for(auto i = 0u; i < servos.count(); i++) {
+        float angle = (((float)i / (float)servos.count()) + offset) * (float)M_TWOPI;
+        servos.value(i, sin(angle) * SERVO_EXTENT, false);
     }
     // We have now set all the servo values, so load them
     servos.load();

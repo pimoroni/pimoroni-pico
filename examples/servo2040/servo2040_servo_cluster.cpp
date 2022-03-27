@@ -52,7 +52,7 @@ int main() {
   // Do a sine sweep
   for(auto j = 0u; j < SWEEPS; j++) {
     for(auto i = 0u; i < 360; i++) {
-      servos.set_all_values(sin(((float)i * (float)M_PI) / 180.0f) * SWEEP_EXTENT);
+      servos.all_to_value(sin(((float)i * (float)M_PI) / 180.0f) * SWEEP_EXTENT);
       sleep_ms(20);
     }
   }

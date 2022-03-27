@@ -42,8 +42,8 @@ namespace servo {
   public:
     bool init();
 
-    uint8_t get_count() const;
-    uint8_t get_pin(uint8_t servo) const;
+    uint8_t count() const;
+    uint8_t pin(uint8_t servo) const;
 
     void enable(uint servo, bool load = true);
     void enable(const uint8_t *servos, uint8_t length, bool load = true);
@@ -57,31 +57,31 @@ namespace servo {
 
     bool is_enabled(uint servo) const;
 
-    float get_pulse(uint servo) const;
-    void set_pulse(uint servo, float pulse, bool load = true);
-    void set_pulse(const uint8_t *servos, uint8_t length, float pulse, bool load = true);
-    void set_pulse(std::initializer_list<uint8_t> servos, float pulse, bool load = true);
-    void set_all_pulses(float pulse, bool load = true);
+    float pulse(uint servo) const;
+    void pulse(uint servo, float pulse, bool load = true);
+    void pulse(const uint8_t *servos, uint8_t length, float pulse, bool load = true);
+    void pulse(std::initializer_list<uint8_t> servos, float pulse, bool load = true);
+    void all_to_pulse(float pulse, bool load = true);
 
-    float get_value(uint servo) const;
-    void set_value(uint servo, float value, bool load = true);
-    void set_value(const uint8_t *servos, uint8_t length, float value, bool load = true);
-    void set_value(std::initializer_list<uint8_t> servos, float value, bool load = true);
-    void set_all_values(float value, bool load = true);
+    float value(uint servo) const;
+    void value(uint servo, float value, bool load = true);
+    void value(const uint8_t *servos, uint8_t length, float value, bool load = true);
+    void value(std::initializer_list<uint8_t> servos, float value, bool load = true);
+    void all_to_value(float value, bool load = true);
 
-    float get_phase(uint servo) const;
-    void set_phase(uint servo, float phase, bool load = true);
-    void set_phase(const uint8_t *servos, uint8_t length, float phase, bool load = true);
-    void set_phase(std::initializer_list<uint8_t> servos, float phase, bool load = true);
-    void set_all_phases(float phase, bool load = true);
+    float phase(uint servo) const;
+    void phase(uint servo, float phase, bool load = true);
+    void phase(const uint8_t *servos, uint8_t length, float phase, bool load = true);
+    void phase(std::initializer_list<uint8_t> servos, float phase, bool load = true);
+    void all_to_phase(float phase, bool load = true);
 
-    float get_frequency() const;
-    bool set_frequency(float freq);
+    float frequency() const;
+    bool frequency(float freq);
 
     //--------------------------------------------------
-    float get_min_value(uint servo) const;
-    float get_mid_value(uint servo) const;
-    float get_max_value(uint servo) const;
+    float min_value(uint servo) const;
+    float mid_value(uint servo) const;
+    float max_value(uint servo) const;
 
     void to_min(uint servo, bool load = true);
     void to_min(const uint8_t *servos, uint8_t length, bool load = true);

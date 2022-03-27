@@ -16,7 +16,7 @@ namespace servo {
     // Has the servo not had a pulse value set before being enabled?
     if(last_enabled_pulse < MIN_VALID_PULSE) {
       // Set the servo to its middle
-      return to_mid();
+      return to_mid_with_return();
     }
     return _enable();
   }
@@ -39,7 +39,7 @@ namespace servo {
     return last_enabled_pulse;
   }
 
-  float ServoState::set_pulse(float pulse) {
+  float ServoState::set_pulse_with_return(float pulse) {
     if(pulse >= MIN_VALID_PULSE) {
       float value_out, pulse_out;
       if(calib.pulse_to_value(pulse, value_out, pulse_out)) {
@@ -55,7 +55,7 @@ namespace servo {
     return servo_value;
   }
 
-  float ServoState::set_value(float value) {
+  float ServoState::set_value_with_return(float value) {
     float pulse_out, value_out;
     if(calib.value_to_pulse(value, pulse_out, value_out)) {
       last_enabled_pulse = pulse_out;
@@ -91,26 +91,26 @@ namespace servo {
     return value;
   }
 
-  float ServoState::to_min() {
-    return set_value(get_min_value());
+  float ServoState::to_min_with_return() {
+    return set_value_with_return(get_min_value());
   }
 
-  float ServoState::to_mid() {
-    return set_value(get_mid_value());
+  float ServoState::to_mid_with_return() {
+    return set_value_with_return(get_mid_value());
   }
 
-  float ServoState::to_max() {
-    return set_value(get_max_value());
+  float ServoState::to_max_with_return() {
+    return set_value_with_return(get_max_value());
   }
 
-  float ServoState::to_percent(float in, float in_min, float in_max) {
+  float ServoState::to_percent_with_return(float in, float in_min, float in_max) {
     float value = Calibration::map_float(in, in_min, in_max, get_min_value(), get_max_value());
-    return set_value(value);
+    return set_value_with_return(value);
   }
 
-  float ServoState::to_percent(float in, float in_min, float in_max, float value_min, float value_max) {
+  float ServoState::to_percent_with_return(float in, float in_min, float in_max, float value_min, float value_max) {
     float value = Calibration::map_float(in, in_min, in_max, value_min, value_max);
-    return set_value(value);
+    return set_value_with_return(value);
   }
 
   Calibration& ServoState::calibration() {

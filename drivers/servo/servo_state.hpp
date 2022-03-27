@@ -51,21 +51,21 @@ namespace servo {
     float _enable(); // Internal version of enable without convenient initialisation to the middle
   public:
     float get_pulse() const;
-    float set_pulse(float pulse);
+    float set_pulse_with_return(float pulse);
 
     float get_value() const;
-    float set_value(float value);
+    float set_value_with_return(float value);
 
   public:
     float get_min_value() const;
     float get_mid_value() const;
     float get_max_value() const;
 
-    float to_min();
-    float to_mid();
-    float to_max();
-    float to_percent(float in, float in_min = ZERO_PERCENT, float in_max = ONEHUNDRED_PERCENT);
-    float to_percent(float in, float in_min, float in_max, float value_min, float value_max);
+    float to_min_with_return();
+    float to_mid_with_return();
+    float to_max_with_return();
+    float to_percent_with_return(float in, float in_min = ZERO_PERCENT, float in_max = ONEHUNDRED_PERCENT);
+    float to_percent_with_return(float in, float in_min, float in_max, float value_min, float value_max);
 
     Calibration& calibration();
     const Calibration& calibration() const;

@@ -50,7 +50,7 @@ int main() {
   // Do a sine sweep
   for(auto j = 0u; j < SWEEPS; j++) {
     for(auto i = 0u; i < 360; i++) {
-      s.set_value(sin(((float)i * (float)M_PI) / 180.0f) * SWEEP_EXTENT);
+      s.value(sin(((float)i * (float)M_PI) / 180.0f) * SWEEP_EXTENT);
       sleep_ms(20);
     }
   }

@@ -40,7 +40,7 @@ int main() {
   s.init();
 
   // Get the initial value and create a random end value between the extents
-  float start_value = s.get_mid_value();
+  float start_value = s.mid_value();
   float end_value = (((float)rand() / (float)RAND_MAX) * (SERVO_EXTENT * 2.0f)) - SERVO_EXTENT;
 
   uint update = 0;
@@ -61,7 +61,7 @@ int main() {
     }
 
     // Print out the value the servo is now at
-    printf("Value = %f\n", s.get_value());
+    printf("Value = %f\n", s.value());
 
     // Move along in time
     update++;

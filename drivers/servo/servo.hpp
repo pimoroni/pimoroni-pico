@@ -11,7 +11,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    uint pin;
+    uint servo_pin;
     ServoState state;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
@@ -33,25 +33,25 @@ namespace servo {
     bool init();
 
     // For print access in micropython
-    uint get_pin() const;
+    uint pin() const;
 
     void enable();
     void disable();
     bool is_enabled() const;
 
-    float get_pulse() const;
-    void set_pulse(float pulse);
+    float pulse() const;
+    void pulse(float pulse);
 
-    float get_value() const;
-    void set_value(float value);
+    float value() const;
+    void value(float value);
 
-    float get_frequency() const;
-    bool set_frequency(float freq);
+    float frequency() const;
+    bool frequency(float freq);
 
     //--------------------------------------------------
-    float get_min_value() const;
-    float get_mid_value() const;
-    float get_max_value() const;
+    float min_value() const;
+    float mid_value() const;
+    float max_value() const;
 
     void to_min();
     void to_mid();
