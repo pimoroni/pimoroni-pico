@@ -1,6 +1,5 @@
 #include "pwm_cluster.hpp"
-#include <cstdio> // TOREMOVE once done debugging
-#include "hardware/gpio.h" // TOREMOVE once done debugging
+#include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "pwm_cluster.pio.h"
 
@@ -10,12 +9,10 @@
 namespace pimoroni {
 
 #ifdef DEBUG_MULTI_PWM
-    static const uint DEBUG_SIDESET = 17;
+  static const uint IRQ_GPIO = 15;
+  static const uint WRITE_GPIO = 16;
+  static const uint DEBUG_SIDESET = 17;
 #endif
-
-uint irq_gpio = 15;
-uint write_gpio = 16;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STATICS
@@ -216,7 +213,9 @@ void PWMCluster::dma_interrupt_handler() {
 }
 
 void PWMCluster::next_dma_sequence() {
-  gpio_put(irq_gpio, 1); //TOREMOVE Just for debug
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(IRQ_GPIO, true);
+  #endif
 
   // Clear any interrupt request caused by our channel
   dma_channel_acknowledge_irq0(dma_channel);
@@ -236,7 +235,9 @@ void PWMCluster::next_dma_sequence() {
   dma_channel_set_trans_count(dma_channel, seq->size << 1, false);
   dma_channel_set_read_addr(dma_channel, seq->data, true);
 
-  gpio_put(irq_gpio, 0); //TOREMOVE Just for debug
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(IRQ_GPIO, false);
+  #endif
 }
 
 bool PWMCluster::init() {
@@ -255,10 +256,12 @@ bool PWMCluster::init() {
         #endif
       }
 
-      gpio_init(irq_gpio);
-      gpio_set_dir(irq_gpio, GPIO_OUT);
-      gpio_init(write_gpio);
-      gpio_set_dir(write_gpio, GPIO_OUT);
+      #ifdef DEBUG_MULTI_PWM
+        gpio_init(IRQ_GPIO);
+        gpio_init(WRITE_GPIO);
+        gpio_set_dir(IRQ_GPIO, GPIO_OUT);
+        gpio_set_dir(WRITE_GPIO, GPIO_OUT);
+      #endif
 
       // Initialise all the pins this PWM will control
       for(uint channel = 0; channel < channel_count; channel++) {
@@ -272,16 +275,13 @@ bool PWMCluster::init() {
     #ifdef DEBUG_MULTI_PWM
       pio_gpio_init(pio, DEBUG_SIDESET);
       pio_sm_set_consecutive_pindirs(pio, sm, DEBUG_SIDESET, 1, true);
-    #endif
 
-    #ifdef DEBUG_MULTI_PWM
       pio_sm_config c = debug_pwm_cluster_program_get_default_config(pio_program_offset);
+      sm_config_set_out_pins(&c, 0, IRQ_GPIO);
+      sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
     #else
       pio_sm_config c = pwm_cluster_program_get_default_config(pio_program_offset);
-    #endif
-      sm_config_set_out_pins(&c, 0, irq_gpio); //TODO change this to be 32
-    #ifdef DEBUG_MULTI_PWM
-      sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
+      sm_config_set_out_pins(&c, 0, 32);
     #endif
       sm_config_set_out_shift(&c, false, true, 32);
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE); // We actively do not want a joined FIFO even though we are not needing the RX
@@ -394,7 +394,9 @@ void PWMCluster::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
 }
 
 void PWMCluster::load_pwm() {
-  gpio_put(write_gpio, 1);
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(WRITE_GPIO, true);
+  #endif
 
   uint data_size = 0;
   uint looping_data_size = 0;
@@ -466,7 +468,9 @@ void PWMCluster::load_pwm() {
     }
   }
 
-  gpio_put(write_gpio, 0); //TOREMOVE
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(WRITE_GPIO, false);
+  #endif
 
   // Introduce "Loading Zone" transitions to the end of the sequence to
   // prevent the DMA interrupt firing many milliseconds before the sequence ends.
@@ -476,7 +480,9 @@ void PWMCluster::load_pwm() {
     PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(wrap_level - i));
   }
 
-  gpio_put(write_gpio, 1); //TOREMOVE
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(WRITE_GPIO, true);
+  #endif
 
   // Read | Last W = Write
   // 0    | 0      = 1 (or 2)
@@ -501,7 +507,9 @@ void PWMCluster::load_pwm() {
   // Update the last written index so that the next DMA interrupt picks up the new sequence
   last_written_index = write_index;
 
-  gpio_put(write_gpio, 0); //TOREMOVE
+  #ifdef DEBUG_MULTI_PWM
+    gpio_put(WRITE_GPIO, false);
+  #endif
 }
 
 // Derived from the rp2 Micropython implementation: https://github.com/micropython/micropython/blob/master/ports/rp2/machine_pwm.c
