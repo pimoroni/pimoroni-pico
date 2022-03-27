@@ -74,13 +74,27 @@ namespace servo {
     void apply_default_pairs(CalibrationType default_type);
 
     uint size() const;
-    Pair &pair(uint8_t index); // Ensure the pairs are assigned in ascending value order
-    Pair &first();
-    Pair &last();
 
+    Pair &pair(uint8_t index); // Ensure the pairs are assigned in ascending value order
     const Pair &pair(uint8_t index) const; // Ensure the pairs are assigned in ascending value order
+    float pulse(uint8_t index) const;
+    void pulse(uint8_t index, float pulse);
+    float value(uint8_t index) const;
+    void value(uint8_t index, float value);
+
+    Pair &first();
     const Pair &first() const;
+    float first_pulse() const;
+    void first_pulse(float pulse);
+    float first_value() const;
+    void first_value(float value);
+
+    Pair &last();
     const Pair &last() const;
+    float last_pulse() const;
+    void last_pulse(float pulse);
+    float last_value() const;
+    void last_value(float value);
 
     bool has_lower_limit() const;
     bool has_upper_limit() const;

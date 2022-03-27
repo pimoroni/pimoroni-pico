@@ -52,8 +52,8 @@ int main() {
   constexpr float WIDE_ANGLE_RANGE = 270.0f;
 
   // Lets modify the calibration to increase its range
-  acal.first().value = -WIDE_ANGLE_RANGE / 2;
-  acal.last().value = WIDE_ANGLE_RANGE / 2;
+  acal.first_value(-WIDE_ANGLE_RANGE / 2);
+  acal.last_value(WIDE_ANGLE_RANGE / 2);
 
   // As the calibration was a reference, the servo has already
   // been updated, but lets access it again to confirm it worked
@@ -73,7 +73,7 @@ int main() {
 
   // Update the linear servo so its max value matches the real distance travelled
   Calibration &lcal = linear_servo.calibration();
-  lcal.last().value = LINEAR_RANGE;
+  lcal.last_value(LINEAR_RANGE);
 
   // As the calibration was a reference, the servo has already
   // been updated, but lets access it again to confirm it worked
@@ -93,8 +93,8 @@ int main() {
 
   // Update the continuous rotation servo so its value matches its real speed
   Calibration &ccal = continuous_servo.calibration();
-  ccal.first().value = -CONTINUOUS_SPEED;
-  ccal.last().value = CONTINUOUS_SPEED;
+  ccal.first_value(-CONTINUOUS_SPEED);
+  ccal.last_value(CONTINUOUS_SPEED);
 
   // As the calibration was a reference, the servo has already
   // been updated, but lets access it again to confirm it worked

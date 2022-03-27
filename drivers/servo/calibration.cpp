@@ -123,19 +123,30 @@ namespace servo {
     return calibration[index];
   }
 
-  Calibration::Pair &Calibration::first() {
-    assert(calibration_size > 0);
-    return calibration[0];
-  }
-
-  Calibration::Pair &Calibration::last() {
-    assert(calibration_size > 0);
-    return calibration[calibration_size - 1];
-  }
-
   const Calibration::Pair &Calibration::pair(uint8_t index) const {
     assert(index < calibration_size);
     return calibration[index];
+  }
+
+  float Calibration::pulse(uint8_t index) const {
+    return pair(index).pulse;
+  }
+
+  void Calibration::pulse(uint8_t index, float pulse) {
+    pair(index).pulse = pulse;
+  }
+
+  float Calibration::value(uint8_t index) const {
+    return pair(index).value;
+  }
+
+  void Calibration::value(uint8_t index, float value) {
+    pair(index).value = value;
+  }
+
+  Calibration::Pair &Calibration::first() {
+    assert(calibration_size > 0);
+    return calibration[0];
   }
 
   const Calibration::Pair &Calibration::first() const {
@@ -143,9 +154,46 @@ namespace servo {
     return calibration[0];
   }
 
+  float Calibration::first_pulse() const {
+    return first().pulse;
+  }
+
+  void Calibration::first_pulse(float pulse) {
+    first().pulse = pulse;
+  }
+
+  float Calibration::first_value() const {
+    return first().value;
+  }
+
+  void Calibration::first_value(float value) {
+    first().value = value;
+  }
+
+  Calibration::Pair &Calibration::last() {
+    assert(calibration_size > 0);
+    return calibration[calibration_size - 1];
+  }
+
   const Calibration::Pair &Calibration::last() const {
     assert(calibration_size > 0);
     return calibration[calibration_size - 1];
+  }
+
+  float Calibration::last_pulse() const {
+    return last().pulse;
+  }
+
+  void Calibration::last_pulse(float pulse) {
+    last().pulse = pulse;
+  }
+
+  float Calibration::last_value() const {
+    return last().value;
+  }
+
+  void Calibration::last_value(float value) {
+    last().value = value;
   }
 
   bool Calibration::has_lower_limit() const {

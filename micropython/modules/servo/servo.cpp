@@ -338,8 +338,7 @@ mp_obj_t Calibration_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            const Calibration::Pair &pair = self->calibration->pair((uint)index);
-            return mp_obj_new_float(pair.pulse);
+            return mp_obj_new_float(self->calibration->pulse((uint)index));
         }
     }
     else {
@@ -363,8 +362,7 @@ mp_obj_t Calibration_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Pair &pair = self->calibration->pair((uint)index);
-            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            self->calibration->pulse((uint)index, mp_obj_get_float(args[ARG_pulse].u_obj));
         }
     }
 
@@ -392,8 +390,7 @@ mp_obj_t Calibration_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            const Calibration::Pair &pair = self->calibration->pair((uint)index);
-            return mp_obj_new_float(pair.value);
+            return mp_obj_new_float(self->calibration->value((uint)index));
         }
     }
     else {
@@ -417,8 +414,7 @@ mp_obj_t Calibration_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
-            Calibration::Pair &pair = self->calibration->pair((uint)index);
-            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
+            self->calibration->value((uint)index, mp_obj_get_float(args[ARG_value].u_obj));
         }
     }
 
@@ -513,8 +509,7 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const Calibration::Pair &pair = self->calibration->first();
-            return mp_obj_new_float(pair.pulse);
+            return mp_obj_new_float(self->calibration->first_pulse());
         }
     }
     else {
@@ -533,8 +528,7 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            Calibration::Pair &pair = self->calibration->first();
-            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            self->calibration->first_pulse(mp_obj_get_float(args[ARG_pulse].u_obj));
         }
     }
 
@@ -557,8 +551,7 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const Calibration::Pair &pair = self->calibration->first();
-            return mp_obj_new_float(pair.value);
+            return mp_obj_new_float(self->calibration->first_value());
         }
     }
     else {
@@ -577,8 +570,7 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            Calibration::Pair &pair = self->calibration->first();
-            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
+            self->calibration->first_value(mp_obj_get_float(args[ARG_value].u_obj));
         }
     }
 
@@ -673,8 +665,7 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const Calibration::Pair &pair = self->calibration->last();
-            return mp_obj_new_float(pair.pulse);
+            return mp_obj_new_float(self->calibration->last_pulse());
         }
     }
     else {
@@ -693,8 +684,7 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            Calibration::Pair &pair = self->calibration->last();
-            pair.pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
+            self->calibration->last_pulse(mp_obj_get_float(args[ARG_pulse].u_obj));
         }
     }
 
@@ -717,8 +707,7 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            const Calibration::Pair &pair = self->calibration->last();
-            return mp_obj_new_float(pair.value);
+            return mp_obj_new_float(self->calibration->last_value());
         }
     }
     else {
@@ -737,8 +726,7 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
         if(self->calibration->size() == 0)
             mp_raise_ValueError("this calibration does not have any pairs");
         else {
-            Calibration::Pair &pair = self->calibration->last();
-            pair.value = mp_obj_get_float(args[ARG_value].u_obj);
+            self->calibration->last_value(mp_obj_get_float(args[ARG_value].u_obj));
         }
     }
 
