@@ -37,6 +37,17 @@ namespace pimoroni {
     bool inverted = false;
 
   public:
+    enum colour : uint8_t {
+      BLACK = 0,
+      WHITE = 1,
+      GREEN = 2,
+      BLUE = 3,
+      RED = 4,
+      YELLOW = 5,
+      ORANGE = 6,
+      CLEAN = 7
+    };
+
     UC8159(uint16_t width, uint16_t height) :
       width(width), height(height), frame_buffer(new uint8_t[width * height / 2]) {
     }
