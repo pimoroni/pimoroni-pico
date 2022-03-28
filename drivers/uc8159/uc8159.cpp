@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <math.h>
+#include <string.h>
 
 namespace pimoroni {
 
@@ -73,6 +74,8 @@ namespace pimoroni {
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
+
+    memset(frame_buffer, WHITE << 4 | WHITE, width * height / 2);
   };
 
   void UC8159::setup() {
@@ -198,7 +201,7 @@ namespace pimoroni {
     uint8_t *p = &frame_buffer[(x / 2) + (y * width / 2)];
 
     uint8_t  o = (x & 0b1) * 4;         // bit offset within byte
-    uint8_t  m = ~(0b1111 << o);        // bit mask for byte
+    uint8_t  m = ~(0b1111 << !o);       // bit mask for byte
     uint8_t  b = v << o; // bit value shifted to position
 
     *p &= m; // clear bits
