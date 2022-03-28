@@ -4,14 +4,14 @@
 
 #include "drivers/uc8151/uc8151.hpp"
 
-#include "fonts.hpp"
+#include "libraries/hershey_fonts/hershey_fonts.hpp"
 
 namespace pimoroni {
 
   class Badger2040 {
   protected:
     UC8151 uc8151;
-    const hershey_font_t *_font = &futural;
+    const hershey::font_t *_font = &hershey::futural;
     uint8_t _pen = 0;
     uint8_t _thickness = 1;
     uint32_t _button_states = 0;
@@ -62,7 +62,7 @@ namespace pimoroni {
     void image(const uint8_t *data, int stride, int sx, int sy, int dw, int dh, int dx, int dy);
 
     // text (fonts: sans, sans_bold, gothic, cursive_bold, cursive, serif_italic, serif, serif_bold)
-    const hershey_font_glyph_t* glyph_data(unsigned char c);
+    const hershey::font_glyph_t* glyph_data(unsigned char c);
 
     void text(std::string message, int32_t x, int32_t y, float s = 1.0f, float a = 0.0f);
     int32_t glyph(unsigned char c, int32_t x, int32_t y, float s = 1.0f, float a = 0.0f);

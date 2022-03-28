@@ -322,103 +322,34 @@ namespace pimoroni {
     uc8151.update(blocking);
   }
 
-  const hershey_font_glyph_t* Badger2040::glyph_data(unsigned char c) {
-    if(c < 32 || c > 127) {
-      return nullptr;
-    }
-
-    return &_font->chars[c - 32];
-  }
-
-  inline float deg2rad(float degrees) {
-    return (degrees * M_PI) / 180.0f;
+  const hershey::font_glyph_t* Badger2040::glyph_data(unsigned char c) {
+    return hershey::glyph_data(_font, c);
   }
 
   int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s, float a) {
-    const hershey_font_glyph_t *gd = glyph_data(c);
-
-    // if glyph data not found (id too great) then skip
-    if(!gd) {
-      return 0;
-    }
-
-    a = deg2rad(a);
-    float as = sin(a);
-    float ac = cos(a);
-
-    const int8_t *pv = gd->vertices;
-    int8_t cx = (*pv++) * s;
-    int8_t cy = (*pv++) * s;
-    bool pen_down = true;
-
-    for(uint32_t i = 1; i < gd->vertex_count; i++) {
-      if(pv[0] == -128 && pv[1] == -128) {
-        pen_down = false;
-        pv += 2;
-      }else{
-        int8_t nx = (*pv++) * s;
-        int8_t ny = (*pv++) * s;
-
-        int rcx = (cx * ac - cy * as) + 0.5f;
-        int rcy = (cx * as + cy * ac) + 0.5f;
-
-        int rnx = (nx * ac - ny * as) + 0.5f;
-        int rny = (nx * as + ny * ac) + 0.5f;
-
-        if(pen_down) {
-          line(rcx + x, rcy + y, rnx + x, rny + y);
-        }
-
-        cx = nx;
-        cy = ny;
-        pen_down = true;
-      }
-    }
-
-    return gd->width * s;
+    return hershey::glyph(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+      line(x1, y1, x2, y2);
+    }, c, x, y, s, a);
   }
 
   void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a) {
-    int32_t cx = x;
-    int32_t cy = y;
-
-    int32_t ox = 0;
-
-    float as = sin(deg2rad(a));
-    float ac = cos(deg2rad(a));
-
-    for(auto &c : message) {
-      int rcx = (ox * ac) + 0.5f;
-      int rcy = (ox * as) + 0.5f;
-
-      ox += glyph(c, cx + rcx, cy + rcy, s, a);
-    }
+    hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+      line(x1, y1, x2, y2);
+    }, message, x, y, s, a);
   }
 
   int32_t Badger2040::measure_text(std::string message, float s) {
-    int32_t width = 0;
-    for(auto &c : message) {
-      width += measure_glyph(c, s);
-    }
-    return width;
+    return hershey::measure_text(_font, message, s);
   }
 
   int32_t Badger2040::measure_glyph(unsigned char c, float s) {
-    const hershey_font_glyph_t *gd = glyph_data(c);
-
-    // if glyph data not found (id too great) then skip
-    if(!gd) {
-      return 0;
-    }
-
-    return gd->width * s;
+    return hershey::measure_glyph(_font, c, s);
   }
-
 
   void Badger2040::font(std::string name) {
     // check that font exists and assign it
-    if(fonts.find(name) != fonts.end()) {
-      _font = fonts[name];
+    if(hershey::fonts.find(name) != hershey::fonts.end()) {
+      _font = hershey::fonts[name];
     }
   }
 
