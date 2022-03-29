@@ -7,8 +7,8 @@ from badger2040 import WIDTH
 import launchericons
 import badger_os
 
-# Reduce clock speed to 48MHz, that's fast enough!
-machine.freq(48000000)
+# Reduce clock speed to 48MHz if on USB or 12MHz if on battery
+badger2040.system_speed(badger2040.SYSTEM_SLOW)
 
 changed = False
 exited_to_launcher = False
