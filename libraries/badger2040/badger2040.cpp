@@ -360,12 +360,12 @@ namespace pimoroni {
   }
 
   int32_t Badger2040::measure_text(std::string message, float s) {
-    if (_bitmap_font) return 0;
+    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, s);
     return hershey::measure_text(_font, message, s);
   }
 
   int32_t Badger2040::measure_glyph(unsigned char c, float s) {
-    if (_bitmap_font) return 0;
+    if (_bitmap_font) return bitmap::measure_character(_bitmap_font, c, s);
     return hershey::measure_glyph(_font, c, s);
   }
 
