@@ -177,7 +177,7 @@ namespace pimoroni {
           
           // Set bit in val if set in source data
           if (data[o] & bm) {
-            val |= 1 << cy;
+            val |= 0b10000000 >> cy;
           }
         }
         *ptr++ = val;
@@ -187,7 +187,12 @@ namespace pimoroni {
 
   // Display an image smaller than the screen (sw*sh) at dx, dy
   void Badger2040::image(const uint8_t *data, int w, int h, int x, int y) {
-    image(data, w, 0, 0, w, h, x, y);
+    if (x == 0 && y == 0 && w == 296 && h == 128) {
+      image(data);
+    }
+    else {
+      image(data, w, 0, 0, w, h, x, y);
+    }
   }
 
   void Badger2040::image(const uint8_t *data, int stride, int sx, int sy, int dw, int dh, int dx, int dy) {
