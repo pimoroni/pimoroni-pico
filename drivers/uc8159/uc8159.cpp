@@ -200,9 +200,9 @@ namespace pimoroni {
     // pointer to byte in framebuffer that contains this pixel
     uint8_t *p = &frame_buffer[(x / 2) + (y * width / 2)];
 
-    uint8_t  o = (x & 0b1) * 4;         // bit offset within byte
-    uint8_t  m = ~(0b1111 << !o);       // bit mask for byte
-    uint8_t  b = v << o; // bit value shifted to position
+    uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
+    uint8_t  m = ~(0b1111 << o); // bit mask for byte
+    uint8_t  b = v << o;         // bit value shifted to position
 
     *p &= m; // clear bits
     *p |= b; // set value
