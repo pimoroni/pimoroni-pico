@@ -1,7 +1,6 @@
 import gc
 import time
 import math
-import machine
 import badger2040
 from badger2040 import WIDTH
 import launchericons

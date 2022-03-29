@@ -71,7 +71,7 @@ Badger 2040 features five buttons on its front, labelled A, B, C, ↑ (up), ↓ 
 
 The system clock speed of the RP2040 can be controlled, allowing power to be saved if on battery, or faster computations to be performed.  Use `badger2040.system_speed(speed)` where `speed` is one of the following constants:
 
-* `SYSTEM_VERY_SLOW` = `0`  _3 MHz if on battery, 48 MHz if connected to USB_
+* `SYSTEM_VERY_SLOW` = `0`  _4 MHz if on battery, 48 MHz if connected to USB_
 * `SYSTEM_SLOW` = `1`  _12 MHz if on battery, 48 MHz if connected to USB_
 * `SYSTEM_NORMAL` = `2`  _48 MHz_
 * `SYSTEM_FAST` = `3`  _133 MHz_

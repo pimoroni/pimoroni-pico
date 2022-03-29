@@ -551,8 +551,8 @@ mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
         sys_freq = 12 * MHZ;
         break;
 
-    case 0: // VERY_SLOW: 3 MHZ, 1.0V
-        sys_freq = 3 * MHZ;
+    case 0: // VERY_SLOW: 4 MHZ, 1.0V
+        sys_freq = 4 * MHZ;
         break;
     }
 
