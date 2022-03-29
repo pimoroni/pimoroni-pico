@@ -1,0 +1,1 @@
+include(inky2040.cmake)
