@@ -65,4 +65,8 @@ for line in detail_text:
     top += 10
 
 display.update()
-display.halt()
+
+# Call halt in a loop, on battery this switches off power.
+# On USB, the app will exit when A+C is pressed because the launcher picks that up.
+while True:
+    display.halt()
