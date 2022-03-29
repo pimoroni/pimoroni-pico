@@ -1,9 +1,11 @@
+import binascii
+
 import badger2040
 import badger_os
 
-# **** Put your list title and contents here *****
+# **** Put your list title here *****
 list_title = "Checklist"
-list_items = ["Badger", "Badger", "Badger", "Badger", "Badger", "Mushroom", "Mushroom", "Snake"]
+list_file = "checklist.txt"
 
 
 # Global Constants
@@ -24,6 +26,20 @@ LIST_START = 40
 LIST_PADDING = 2
 LIST_WIDTH = WIDTH - LIST_PADDING - LIST_PADDING - ARROW_WIDTH
 LIST_HEIGHT = HEIGHT - LIST_START - LIST_PADDING - ARROW_HEIGHT
+
+
+# Default list items - change the list items by editing checklist.txt
+list_items = ["Badger", "Badger", "Badger", "Badger", "Badger", "Mushroom", "Mushroom", "Snake"]
+try:
+    with open("checklist.txt", "r") as f:
+        # This avoids picking up the " X" that used to be on the end of checked items,
+        # although it doesn't preserve the state.
+        list_items = [item.strip() for item in f.read().replace(" X\n", "\n").strip().split("\n")]
+
+except OSError:
+    with open("checklist.txt", "w") as f:
+        for item in list_items:
+            f.write(item + "\n")
 
 
 # ------------------------------
@@ -127,10 +143,11 @@ state = {
     "current_item": 0,
 }
 badger_os.state_load("list", state)
-if "items" not in state or state["items"] != list_items:
+items_hash = binascii.crc32("\n".join(list_items))
+if "items_hash" not in state or state["items_hash"] != items_hash:
     # Item list changed, or not yet written reset the list
     state["current_item"] = 0
-    state["items"] = list_items
+    state["items_hash"] = items_hash
     state["checked"] = [False] * len(list_items)
     changed = True
 
@@ -147,15 +164,15 @@ else:
 
 # Find out what the longest item is
 longest_item = 0
-for i in range(len(state["items"])):
+for i in range(len(list_items)):
     while True:
-        item = state["items"][i]
+        item = list_items[i]
         item_length = display.measure_text(item, ITEM_TEXT_SIZE)
         if item_length > 0 and item_length > LIST_WIDTH - ITEM_SPACING:
-            state["items"][i] = item[:-1]
+            list_items[i] = item[:-1]
         else:
             break
-    longest_item = max(longest_item, display.measure_text(state["items"][i], ITEM_TEXT_SIZE))
+    longest_item = max(longest_item, display.measure_text(list_items[i], ITEM_TEXT_SIZE))
 
 
 # And use that to calculate the number of columns we can fit onscreen and how many items that would give
@@ -171,7 +188,7 @@ items_per_page = ((LIST_HEIGHT // ITEM_SPACING) + 1) * list_columns
 # ------------------------------
 
 while True:
-    if len(state["items"]) > 0:
+    if len(list_items) > 0:
         if display.pressed(badger2040.BUTTON_A):
             if state["current_item"] > 0:
                 page = state["current_item"] // items_per_page
@@ -183,9 +200,9 @@ while True:
             state["checked"][state["current_item"]] = not state["checked"][state["current_item"]]
             changed = True
         if display.pressed(badger2040.BUTTON_C):
-            if state["current_item"] < len(state["items"]) - 1:
+            if state["current_item"] < len(list_items) - 1:
                 page = state["current_item"] // items_per_page
-                state["current_item"] = min(state["current_item"] + (items_per_page) // list_columns, len(state["items"]) - 1)
+                state["current_item"] = min(state["current_item"] + (items_per_page) // list_columns, len(list_items) - 1)
                 if page != state["current_item"] // items_per_page:
                     display.update_speed(badger2040.UPDATE_FAST)
                 changed = True
@@ -194,7 +211,7 @@ while True:
                 state["current_item"] -= 1
                 changed = True
         if display.pressed(badger2040.BUTTON_DOWN):
-            if state["current_item"] < len(state["items"]) - 1:
+            if state["current_item"] < len(list_items) - 1:
                 state["current_item"] += 1
                 changed = True
 
@@ -218,7 +235,7 @@ while True:
         display.thickness(2)
         display.line(LIST_PADDING, y, WIDTH - LIST_PADDING - ARROW_WIDTH, y)
 
-        if len(state["items"]) > 0:
+        if len(list_items) > 0:
             page_item = 0
             if items_per_page > 0:
                 page_item = (state["current_item"] // items_per_page) * items_per_page
@@ -226,7 +243,7 @@ while True:
             # Draw the list
             display.pen(0)
             display.thickness(2)
-            draw_list(state["items"], state["checked"], page_item, state["current_item"], LIST_PADDING, LIST_START,
+            draw_list(list_items, state["checked"], page_item, state["current_item"], LIST_PADDING, LIST_START,
                       LIST_WIDTH, LIST_HEIGHT, ITEM_SPACING, list_columns)
 
             # Draw the interaction button icons
@@ -239,7 +256,7 @@ while True:
                         ARROW_WIDTH, ARROW_HEIGHT, ARROW_THICKNESS, ARROW_PADDING)
 
             # Next item
-            if state["current_item"] < (len(state["items"]) - 1):
+            if state["current_item"] < (len(list_items) - 1):
                 draw_down(WIDTH - ARROW_WIDTH, ((HEIGHT * 3) // 4) - (ARROW_HEIGHT // 2),
                           ARROW_WIDTH, ARROW_HEIGHT, ARROW_THICKNESS, ARROW_PADDING)
 
@@ -249,7 +266,7 @@ while True:
                           ARROW_WIDTH, ARROW_HEIGHT, ARROW_THICKNESS, ARROW_PADDING)
 
             # Next column
-            if state["current_item"] < (len(state["items"]) - 1):
+            if state["current_item"] < (len(list_items) - 1):
                 draw_right(((WIDTH * 6) // 7) - (ARROW_WIDTH // 2), HEIGHT - ARROW_HEIGHT,
                            ARROW_WIDTH, ARROW_HEIGHT, ARROW_THICKNESS, ARROW_PADDING)
 
