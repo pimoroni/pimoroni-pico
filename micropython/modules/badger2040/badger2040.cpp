@@ -4,47 +4,28 @@
 
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
-namespace {
-    struct Badger2040_WakeUpInit {
-        Badger2040_WakeUpInit()
-            : state(gpio_get_all() & (0x1f << pimoroni::Badger2040::DOWN)) // Record state of front buttons
-        {
-          gpio_set_function(pimoroni::Badger2040::ENABLE_3V3, GPIO_FUNC_SIO);
-          gpio_set_dir(pimoroni::Badger2040::ENABLE_3V3, GPIO_OUT);
-          gpio_put(pimoroni::Badger2040::ENABLE_3V3, 1);
-
-          gpio_set_function(pimoroni::Badger2040::LED, GPIO_FUNC_SIO);
-          gpio_set_dir(pimoroni::Badger2040::LED, GPIO_OUT);
-          gpio_put(pimoroni::Badger2040::LED, 1);
-        }
-
-        bool any() const {
-            return state > 0;
-        }
-
-        bool get(uint32_t pin) const {
-            return state & (0b1 << pin);
-        }
-
-        bool get_once(uint32_t pin) {
-            uint32_t mask = 0b1 << pin;
-            bool value = state & mask;
-            state &= ~mask;
-            return value;
-        }
-        void clear() { state = 0; }
-
-    private:
-        uint32_t state;
-    };
-
-    Badger2040_WakeUpInit button_wake_state __attribute__ ((init_priority (101)));
-};
-
 extern "C" {
 #include "badger2040.h"
 #include "py/builtin.h"
 #include "py/mpthread.h"
+
+extern uint32_t badger_buttons_on_wake;
+
+static bool Badger2040_wake_state_any() {
+    return badger_buttons_on_wake > 0;
+}
+
+static bool Badger2040_wake_state_get(uint32_t pin) {
+    return badger_buttons_on_wake & (0b1 << pin);
+}
+
+static bool Badger2040_wake_state_get_once(uint32_t pin) {
+    uint32_t mask = 0b1 << pin;
+    bool value = badger_buttons_on_wake & mask;
+    badger_buttons_on_wake &= ~mask;
+    return value;
+}
+
 
 std::string mp_obj_to_string_r(const mp_obj_t &obj) {
     if(mp_obj_is_str_or_bytes(obj)) {
@@ -214,7 +195,7 @@ MICROPY_EVENT_POLL_HOOK
 }
 
 mp_obj_t Badger2040_woken_by_button() {
-    return button_wake_state.any() ? mp_const_true : mp_const_false;
+    return Badger2040_wake_state_any() ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_halt(mp_obj_t self_in) {
@@ -269,23 +250,14 @@ mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness) {
 mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->update_button_states();
-    bool wake_state = button_wake_state.get_once(mp_obj_get_int(button));
+    bool wake_state = Badger2040_wake_state_get_once(mp_obj_get_int(button));
     bool state = self->badger2040->pressed(mp_obj_get_int(button));
     return (state || wake_state) ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
-    bool state = button_wake_state.get(mp_obj_get_int(button));
+    bool state = Badger2040_wake_state_get(mp_obj_get_int(button));
     return state ? mp_const_true : mp_const_false;
-}
-
-mp_obj_t Badger2040_pressed_to_wake2(mp_obj_t self_in, mp_obj_t button) {
-    return Badger2040_pressed_to_wake(button);
-}
-
-mp_obj_t Badger2040_clear_pressed_to_wake() {
-    button_wake_state.clear();
-    return mp_const_none;
 }
 
 // pressed
