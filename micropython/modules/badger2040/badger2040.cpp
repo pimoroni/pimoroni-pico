@@ -139,7 +139,7 @@ MICROPY_EVENT_POLL_HOOK
 
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
-    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
+    while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
@@ -515,6 +515,77 @@ mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args, mp_ma
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
     return mp_obj_new_int(self->badger2040->measure_glyph(c, scale));
+}
+
+#include "hardware/vreg.h"
+#include "hardware/clocks.h"
+#include "hardware/pll.h"
+
+mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
+    uint32_t sys_freq;
+    uint32_t selected_speed = mp_obj_get_int(speed);
+
+    if (gpio_get(pimoroni::Badger2040::VBUS_DETECT) && selected_speed < 2) {
+      // If on USB never go slower than normal speed.
+      selected_speed = 2;
+    }
+
+    switch (selected_speed)
+    {
+    case 4: // TURBO: 250 MHZ, 1.2V
+        vreg_set_voltage(VREG_VOLTAGE_1_20);
+        set_sys_clock_khz(250000, true);
+        return mp_const_none;
+    case 3: // FAST: 133 MHZ
+        vreg_set_voltage(VREG_VOLTAGE_1_10);
+        set_sys_clock_khz(133000, true);
+        return mp_const_none;
+
+    default:
+    case 2: // NORMAL: 48 MHZ
+        vreg_set_voltage(VREG_VOLTAGE_1_10);
+        set_sys_clock_48mhz();
+        return mp_const_none;
+
+    case 1: // SLOW: 12 MHZ, 1.0V
+        sys_freq = 12 * MHZ;
+        break;
+
+    case 0: // VERY_SLOW: 3 MHZ, 1.0V
+        sys_freq = 3 * MHZ;
+        break;
+    }
+
+
+    // Set the configured clock speed, by dividing the USB PLL
+    clock_configure(clk_sys,
+                    CLOCKS_CLK_SYS_CTRL_SRC_VALUE_CLKSRC_CLK_SYS_AUX,
+                    CLOCKS_CLK_SYS_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
+                    48 * MHZ,
+                    sys_freq);
+
+    clock_configure(clk_peri,
+                    0,
+                    CLOCKS_CLK_PERI_CTRL_AUXSRC_VALUE_CLK_SYS,
+                    sys_freq,
+                    sys_freq);
+
+    clock_configure(clk_adc,
+                    0,
+                    CLOCKS_CLK_ADC_CTRL_AUXSRC_VALUE_CLKSRC_PLL_USB,
+                    48 * MHZ,
+                    sys_freq);
+
+    // No longer using the SYS PLL so disable it
+    pll_deinit(pll_sys);
+
+    // Not using USB so stop the clock
+    clock_stop(clk_usb);
+
+    // Drop the core voltage
+    vreg_set_voltage(VREG_VOLTAGE_1_00);
+
+    return mp_const_none;
 }
 
 }

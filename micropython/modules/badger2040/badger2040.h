@@ -43,3 +43,5 @@ extern mp_obj_t Badger2040_command(mp_obj_t self_in, mp_obj_t reg, mp_obj_t data
 
 extern mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button);
 extern mp_obj_t Badger2040_woken_by_button();
+
+extern mp_obj_t Badger2040_system_speed(mp_obj_t speed);

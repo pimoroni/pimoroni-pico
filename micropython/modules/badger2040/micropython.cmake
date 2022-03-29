@@ -20,4 +20,7 @@ target_compile_definitions(usermod_${MOD_NAME} INTERFACE
     MODULE_BADGER2040_ENABLED=1
 )
 
-target_link_libraries(usermod INTERFACE usermod_${MOD_NAME})
+target_link_libraries(usermod INTERFACE usermod_${MOD_NAME}
+  hardware_vreg
+  hardware_pll
+  hardware_resets)
