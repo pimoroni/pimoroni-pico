@@ -92,17 +92,36 @@ namespace pimoroni {
       15,  7, 13,  5
     };
 
+    if (p == 0) {
+      return 1;
+    }
+    if (p == 15) {
+      return 0;
+    }
+
     // calculate dither matrix offset
     uint32_t dmo = (x & 0b11) | ((y & 0b11) << 2);
 
-    if(p == 0) {
-      return 1;
-    }else if(p == 15) {
-      return 0;
-    }else{
-      return p <= _odm[dmo] ? 1 : 0;
-    }
+    return p <= _odm[dmo] ? 1 : 0;
   }
+
+  // Return dither values for an entire byte in the column
+  uint8_t _dither_column_value(int32_t x, uint8_t p) {
+    if (p == 0) {
+      return 0xff;
+    }
+    if (p == 15) {
+      return 0;
+    }
+
+    uint8_t val = 0;
+    for (int32_t y = 0; y < 4; ++y) {
+      val |= _dither_value(x, y, p) << (7 - y);
+    }
+    val |= val >> 4;
+    return val;
+  }
+
 
   void Badger2040::clear() {
     const uint32_t column_len = 128 / 8;
@@ -117,10 +136,7 @@ namespace pimoroni {
     }
     else {
       for(uint32_t x = 0; x < 296; x++) {
-        uint8_t val = 0;
-        for (uint32_t y = 0; y < 8; y++) {
-          val |= _dither_value(x, y, _pen) << y;
-        }
+        uint8_t val = _dither_column_value(x, _pen);
         memset(buf, val, column_len);
         buf += column_len;
       }
@@ -190,29 +206,37 @@ namespace pimoroni {
   }
 
   void Badger2040::rectangle(int32_t x, int32_t y, int32_t w, int32_t h) {
-    if (h >= 8 && (_pen == 0 || _pen == 15)) {
+    // Adjust for thickness
+    uint32_t ht = _thickness / 2;
+    x -= ht;
+    if (x < 0) {
+      w += x;
+      x = 0;
+    }
+    y -= ht;
+    if (y < 0) {
+      h += y;
+      y = 0;
+    }
+    w += _thickness - 1;
+    h += _thickness - 1;
+
+    if (h >= 8) {
       // Directly write to the frame buffer when clearing a large area
       uint8_t* buf = uc8151.get_frame_buffer();
       
       for(int cx = x; cx < x + w; cx++) {
         uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
-        uint8_t first_val = 0xff >> (y & 7);
-        uint8_t last_val = 0xff >> ((y + h) & 7);
-        
-        if (_pen == 0) {
-          *buf_ptr++ |= first_val;
-          for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
-            *buf_ptr++ = 0xff;
-          }
-          *buf_ptr |= ~last_val;
+        uint8_t first_mask = 0xff >> (y & 7);
+        uint8_t last_mask = 0xff >> ((y + h) & 7);
+        uint32_t val = _dither_column_value(cx, _pen);
+        *buf_ptr &= ~first_mask;
+        *buf_ptr++ |= (val & first_mask);
+        for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
+          *buf_ptr++ = val;
         }
-        else {
-          *buf_ptr++ &= ~first_val;
-          for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
-            *buf_ptr++ = 0;
-          }
-          *buf_ptr &= last_val;
-        }
+        *buf_ptr &= last_mask;
+        *buf_ptr |= (val & (~last_mask));
       }
     }
     else {
