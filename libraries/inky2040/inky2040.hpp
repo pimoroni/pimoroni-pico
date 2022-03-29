@@ -79,8 +79,6 @@ namespace pimoroni {
       B           = 13,
       C           = 14,
       D           = 15,
-      E           = 11,
-      USER        = 23,
       CS          = 17,
       CLK         = 18,
       MOSI        = 19,
