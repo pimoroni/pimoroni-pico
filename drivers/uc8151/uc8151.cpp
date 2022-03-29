@@ -481,15 +481,15 @@ namespace pimoroni {
   uint32_t UC8151::update_time() {
     switch(_update_speed) {
       case 0:
-        return 5500;
+        return 4500;
       case 1:
-        return 2600;
+        return 2000;
       case 2:
-        return 1000;
+        return 800;
       case 3:
-        return 300;
+        return 250;
       default:
-        return 5500;
+        return 4500;
     }
   }
 
