@@ -5,3 +5,4 @@ add_library(pico_graphics
 
 target_include_directories(pico_graphics INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
+target_link_libraries(pico_graphics bitmap_fonts)

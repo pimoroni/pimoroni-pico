@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <algorithm>
 #include <vector>
-#include "font6_data.hpp"
+#include "libraries/bitmap_fonts/font6_data.hpp"
 
 // a tiny little graphics library for our Pico products
 // supports only 16-bit (565) RGB framebuffers
@@ -52,11 +52,11 @@ namespace pimoroni {
 
     Pen       pen;
 
-    const Font *font;
+    const bitmap::font_t *font;
 
   public:
     PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer);
-    void set_font(const Font *font);
+    void set_font(const bitmap::font_t *font);
     void set_pen(uint8_t r, uint8_t g, uint8_t b);
     void set_pen(Pen p);
 

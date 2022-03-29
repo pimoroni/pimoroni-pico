@@ -327,29 +327,61 @@ namespace pimoroni {
   }
 
   int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s, float a) {
-    return hershey::glyph(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
-      line(x1, y1, x2, y2);
-    }, c, x, y, s, a);
+    if (_bitmap_font) {
+      bitmap::character(_bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        for(auto px = 0; px < w; px++) {
+          for(auto py = 0; py < h; py++) {
+            pixel(x + px, y + py);
+          }
+        }
+      }, c, x, y, int(s));
+      return 0;
+    } else {
+      return hershey::glyph(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(x1, y1, x2, y2);
+      }, c, x, y, s, a);
+    }
   }
 
   void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a) {
-    hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
-      line(x1, y1, x2, y2);
-    }, message, x, y, s, a);
+    if (_bitmap_font) {
+      bitmap::text(_bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        for(auto px = 0; px < w; px++) {
+          for(auto py = 0; py < h; py++) {
+            pixel(x + px, y + py);
+          }
+        }
+      }, message, x, y, 296 - x, int(s));
+    } else {
+      hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(x1, y1, x2, y2);
+      }, message, x, y, s, a);
+    }
   }
 
   int32_t Badger2040::measure_text(std::string message, float s) {
+    if (_bitmap_font) return 0;
     return hershey::measure_text(_font, message, s);
   }
 
   int32_t Badger2040::measure_glyph(unsigned char c, float s) {
+    if (_bitmap_font) return 0;
     return hershey::measure_glyph(_font, c, s);
   }
 
   void Badger2040::font(std::string name) {
-    // check that font exists and assign it
-    if(hershey::fonts.find(name) != hershey::fonts.end()) {
-      _font = hershey::fonts[name];
+    if (name == "bitmap6") {
+      _bitmap_font = &font6;
+      _font = nullptr;
+    } else if (name == "bitmap8") {
+      _bitmap_font = &font8;
+      _font = nullptr;
+    } else {
+      // check that font exists and assign it
+      if(hershey::fonts.find(name) != hershey::fonts.end()) {
+        _bitmap_font = nullptr;
+        _font = hershey::fonts[name];
+      }
     }
   }
 

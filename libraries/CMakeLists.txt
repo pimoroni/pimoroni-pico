@@ -1,4 +1,5 @@
 add_subdirectory(hershey_fonts)
+add_subdirectory(bitmap_fonts)
 add_subdirectory(breakout_dotmatrix)
 add_subdirectory(breakout_encoder)
 add_subdirectory(breakout_ioexpander)

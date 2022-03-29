@@ -5,6 +5,9 @@
 #include "drivers/uc8151/uc8151.hpp"
 
 #include "libraries/hershey_fonts/hershey_fonts.hpp"
+#include "libraries/bitmap_fonts/bitmap_fonts.hpp"
+#include "libraries/bitmap_fonts/font6_data.hpp"
+#include "libraries/bitmap_fonts/font8_data.hpp"
 
 namespace pimoroni {
 
@@ -12,6 +15,7 @@ namespace pimoroni {
   protected:
     UC8151 uc8151;
     const hershey::font_t *_font = &hershey::futural;
+    const bitmap::font_t *_bitmap_font = nullptr;
     uint8_t _pen = 0;
     uint8_t _thickness = 1;
     uint32_t _button_states = 0;

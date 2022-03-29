@@ -38,6 +38,8 @@ include(pico_display_2/micropython)
 include(pico_explorer/micropython)
 include(pico_wireless/micropython)
 
+include(bitmap_fonts/micropython)
+
 include(plasma/micropython)
 include(hub75/micropython)
 include(servo/micropython)
