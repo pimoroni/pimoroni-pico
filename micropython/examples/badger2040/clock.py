@@ -2,6 +2,8 @@ import time
 import machine
 import badger2040
 
+# We're going to keep the badger on, so slow down the system clock if on battery
+badger2040.system_speed(badger2040.SYSTEM_SLOW)
 
 rtc = machine.RTC()
 display = badger2040.Badger2040()
