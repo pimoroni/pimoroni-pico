@@ -376,6 +376,9 @@ namespace pimoroni {
     } else if (name == "bitmap8") {
       _bitmap_font = &font8;
       _font = nullptr;
+    } else if (name == "bitmap14") {
+      _bitmap_font = &font14;
+      _font = nullptr;
     } else {
       // check that font exists and assign it
       if(hershey::fonts.find(name) != hershey::fonts.end()) {

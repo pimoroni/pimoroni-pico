@@ -9,7 +9,7 @@ namespace bitmap {
     const uint8_t height;
     const uint8_t max_width;
     const uint8_t widths[96];
-    const uint8_t data[];
+    const uint16_t data[];
   };
 
   typedef std::function<void(int32_t x, int32_t y, int32_t w, int32_t h)> rect_func;
