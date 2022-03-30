@@ -60,12 +60,9 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
 
 ## Servo 2040
 
-Servo 2040 is a controller board for 3-pin hobby servos, with additional bells and whistles that make it ideal for many robotics projects! Key features include:
-* Drive up to 18 servos - enough for a hexapod walker!
-* 6 analog sensor headers - have your robot sense its environment
-* Current and voltage monitoring - be sure how your servos are performing
-* 6x RGB LEDs - show sensor states or current or voltage levels
-* Reverse polarity projection - protect all your servos
+Servo 2040 is a **standalone servo controller** for making things with lots of moving parts. It has pre-soldered pin headers for plugging in up to 18 servos, with additional bells and whistles like sensor headers, current monitoring, RGB LEDs, and a user button that make it ideal for many robotics projects!
+
+For more information on this board, check out the store page: [pimoroni.com/servo2040](https://pimoroni.com/servo2040).
 
 
 ### Reading the User Button
