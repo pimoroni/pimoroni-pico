@@ -1,0 +1,72 @@
+; --------------------------------------------------
+;              32-Channel PWM using PIO
+;      by Christopher (@ZodiusInfuser) Parrott
+; --------------------------------------------------
+;
+; Outputs PWM signals to up to 32 pins using a single
+; state-machine. This is achieved by representing the
+; problem as a sequence of state changes and time delays.
+;
+; This requires the use of DMA or a very fast loop to
+; provide data at a sufficient rate to prevent stalling.
+;
+; The program pulls in two words:
+; - The first is a 32-bit pin mask of the states to
+;   change the pins to. Only the pins configured for
+;   use by this SM will be affected.
+; - The second is the time delay to wait before
+;   pulling in the next states.
+;
+; Each loop of the program takes 5 cycles, including an
+; initial 5 cycles when new data is loaded in. As such,
+; the time delay should be set to your "intended_delay - 1".
+;
+; To aid in debugging there is a variant program that uses
+; a sideset pin to show when new data is pulled in, as well
+; as when each loop has elapsed.These look like:
+;
+;      New Data                    Loop
+;     ._|‾|_._._                |‾.‾.‾.‾|_
+;      1 2 3 4 5                 1 2 3 4 5
+
+
+; Debounce Constants
+; --------------------------------------------------
+.define public PWM_CLUSTER_CYCLES     5
+
+
+; PWM Program
+; --------------------------------------------------
+.program pwm_cluster
+
+.wrap_target
+    pull                    ; Pull in the new pin states
+    out pins, 32            ; Immediately set the pins to their new state
+    pull                    ; Pull in the delay counter
+    out y, 32               ; Set the counter
+count_check:
+    jmp y-- delay           ; Check if the counter is 0, and if so wrap around.
+                            ; If not decrement the counter and jump to the delay
+.wrap
+
+delay:
+    jmp count_check [3]     ; Wait a few cycles then jump back to the loop
+
+
+; Debug PWM Program
+; --------------------------------------------------
+.program debug_pwm_cluster
+.side_set 1
+
+.wrap_target
+    pull side 0                     ; Pull in the new pin states
+    out pins, 32 side 1             ; Immediately set the pins to their new state
+    pull side 0                     ; Pull in the delay counter
+    out y, 32 side 0                ; Set the counter
+count_check:
+    jmp y-- delay side 0            ; Check if the counter is 0, and if so wrap around.
+                                    ;If not decrement the counter and jump to the delay
+.wrap
+
+delay:
+    jmp count_check [3] side 1      ; Wait a few cycles then jump back to the loop

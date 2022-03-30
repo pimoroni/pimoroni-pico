@@ -2,11 +2,14 @@
 
 namespace pimoroni {
     uint16_t Analog::read_raw() {
+      adc_select_input(pin - 26);
       return adc_read();
     }
 
     float Analog::read_voltage() {
-      return ((float)adc_read() * 3.3f) / (1 << 12) / amplifier_gain;
+      adc_select_input(pin - 26);
+      float voltage = ((((float)adc_read() * 3.3f) / (1 << 12)) + offset) / amplifier_gain;
+      return MAX(voltage, 0.0f);
     }
 
     float Analog::read_current() {

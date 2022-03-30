@@ -9,8 +9,8 @@ namespace pimoroni {
 
   class Analog {
   public:
-    Analog(uint pin, float amplifier_gain = 1.0f, float resistor = 0.0f) :
-    pin(pin), amplifier_gain(amplifier_gain), resistor(resistor) {
+    Analog(uint pin, float amplifier_gain = 1.0f, float resistor = 0.0f, float offset = 0.0f) :
+    pin(pin), amplifier_gain(amplifier_gain), resistor(resistor), offset(offset) {
       adc_init();
 
       //Make sure GPIO is high-impedance, no pullups etc
@@ -26,6 +26,7 @@ namespace pimoroni {
     uint pin;
     float amplifier_gain;
     float resistor;
+    float offset;
   };
 
 }
