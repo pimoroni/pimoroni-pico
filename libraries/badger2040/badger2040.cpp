@@ -334,7 +334,7 @@ namespace pimoroni {
             pixel(x + px, y + py);
           }
         }
-      }, c, x, y, int(s));
+      }, c, x, y, std::max(1.0f, s));
       return 0;
     } else {
       return hershey::glyph(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
@@ -351,7 +351,7 @@ namespace pimoroni {
             pixel(x + px, y + py);
           }
         }
-      }, message, x, y, 296 - x, int(s));
+      }, message, x, y, 296 - x, std::max(1.0f, s));
     } else {
       hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
         line(x1, y1, x2, y2);
@@ -360,12 +360,12 @@ namespace pimoroni {
   }
 
   int32_t Badger2040::measure_text(std::string message, float s) {
-    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, s);
+    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, std::max(1.0f, s));
     return hershey::measure_text(_font, message, s);
   }
 
   int32_t Badger2040::measure_glyph(unsigned char c, float s) {
-    if (_bitmap_font) return bitmap::measure_character(_bitmap_font, c, s);
+    if (_bitmap_font) return bitmap::measure_character(_bitmap_font, c, std::max(1.0f, s));
     return hershey::measure_glyph(_font, c, s);
   }
 
