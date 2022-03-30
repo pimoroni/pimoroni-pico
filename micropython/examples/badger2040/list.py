@@ -30,13 +30,37 @@ LIST_HEIGHT = HEIGHT - LIST_START - LIST_PADDING - ARROW_HEIGHT
 
 # Default list items - change the list items by editing checklist.txt
 list_items = ["Badger", "Badger", "Badger", "Badger", "Badger", "Mushroom", "Mushroom", "Snake"]
+save_checklist = False
+
 try:
     with open("checklist.txt", "r") as f:
-        # This avoids picking up the " X" that used to be on the end of checked items,
-        # although it doesn't preserve the state.
-        list_items = [item.strip() for item in f.read().replace(" X\n", "\n").strip().split("\n")]
+        raw_list_items = f.read()
+
+    if raw_list_items.find(" X\n") != -1:
+        # Have old style checklist, preserve state and note we should resave the list to remove the Xs
+        list_items = []
+        state = {
+            "current_item": 0,
+            "checked": []
+        }
+        for item in raw_list_items.strip().split("\n"):
+            if item.endswith(" X"):
+                state["checked"].append(True)
+                item = item[:-2]
+            else:
+                state["checked"].append(False)
+            list_items.append(item)
+        state["items_hash"] = binascii.crc32("\n".join(list_items))
+
+        badger_os.state_save("list", state)
+        save_checklist = True
+    else:
+        list_items = [item.strip() for item in raw_list_items.strip().split("\n")]
 
 except OSError:
+    save_checklist = True
+
+if save_checklist:
     with open("checklist.txt", "w") as f:
         for item in list_items:
             f.write(item + "\n")
