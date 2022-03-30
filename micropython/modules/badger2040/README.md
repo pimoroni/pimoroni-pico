@@ -67,7 +67,19 @@ Badger 2040 features five buttons on its front, labelled A, B, C, ↑ (up), ↓ 
 * `BUTTON_DOWN` = `11`
 * `BUTTON_USER` = `23`
 
-Note, due to the BOOT/USR button performing both BOOT and USER functions, the output of reading it with `pressed()` will be inverted from the others.
+## System speed
+
+The system clock speed of the RP2040 can be controlled, allowing power to be saved if on battery, or faster computations to be performed.  Use `badger2040.system_speed(speed)` where `speed` is one of the following constants:
+
+* `SYSTEM_VERY_SLOW` = `0`  _4 MHz if on battery, 48 MHz if connected to USB_
+* `SYSTEM_SLOW` = `1`  _12 MHz if on battery, 48 MHz if connected to USB_
+* `SYSTEM_NORMAL` = `2`  _48 MHz_
+* `SYSTEM_FAST` = `3`  _133 MHz_
+* `SYSTEM_TURBO` = `4`  _250 MHz_
+
+On USB, the system will not run slower than 48MHz, as that is the minimum clock speed required to keep the USB connection stable.
+
+Note that `SYSTEM_TURBO` overclocks the RP2040 to 250MHz, and applies a small over voltage to ensure this is stable.  We've found that every RP2040 we've tested is happy to run at this speed without any issues.
 
 ## Other Functions
 
@@ -95,7 +107,6 @@ icon(data, icon_index, sheet_size, icon_size)
 clear()
 update()
 partial_update(x, y, w, h)
-update_speed(speed)
 invert(inverted)
 ```
 

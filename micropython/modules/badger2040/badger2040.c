@@ -35,6 +35,7 @@ MP_DEFINE_CONST_FUN_OBJ_3(Badger2040_command_obj, Badger2040_command);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_pressed_to_wake_obj, Badger2040_pressed_to_wake);
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_halt_obj, Badger2040_halt);
 MP_DEFINE_CONST_FUN_OBJ_0(Badger2040_woken_by_button_obj, Badger2040_woken_by_button);
+MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_system_speed_obj, Badger2040_system_speed);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
@@ -90,12 +91,19 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_pressed_to_wake), MP_ROM_PTR(&Badger2040_pressed_to_wake_obj) },
     { MP_ROM_QSTR(MP_QSTR_woken_by_button), MP_ROM_PTR(&Badger2040_woken_by_button_obj) },
+    { MP_ROM_QSTR(MP_QSTR_system_speed), MP_ROM_PTR(&Badger2040_system_speed_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_UPDATE_NORMAL), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_MEDIUM), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_FAST), MP_ROM_INT(2) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_TURBO), MP_ROM_INT(3) },
     { MP_ROM_QSTR(MP_QSTR_UPDATE_SUPER_EXTRA_TURBO), MP_ROM_INT(3) }, // ho ho placebo!
+
+    { MP_ROM_QSTR(MP_QSTR_SYSTEM_VERY_SLOW), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_SYSTEM_SLOW), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_SYSTEM_NORMAL), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_SYSTEM_FAST), MP_ROM_INT(3) },
+    { MP_ROM_QSTR(MP_QSTR_SYSTEM_TURBO), MP_ROM_INT(4) },
 
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(296) },
     { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(128) },

@@ -6,6 +6,9 @@ import machine
 
 import badger2040
 
+# Overclock the RP2040 to run the sim faster
+badger2040.system_speed(badger2040.SYSTEM_TURBO)
+
 # ------------------------------
 #        Program setup
 # ------------------------------
@@ -16,6 +19,7 @@ INITIAL_DENSITY = 0.3  # Density of cells at start
 
 # Create a new Badger and set it to update TURBO
 screen = badger2040.Badger2040()
+screen.led(128)
 screen.update_speed(badger2040.UPDATE_TURBO)
 
 restart = False  # should sim be restarted

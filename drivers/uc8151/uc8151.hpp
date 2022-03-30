@@ -208,6 +208,7 @@ namespace pimoroni {
     void off();
 
     void pixel(int x, int y, int v);
+    uint8_t* get_frame_buffer();
   };
 
 }

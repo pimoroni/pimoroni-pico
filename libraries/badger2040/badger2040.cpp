@@ -69,14 +69,6 @@ namespace pimoroni {
     // TODO: set default image?
   }
 
-  void Badger2040::clear() {
-    for(uint32_t y = 0; y < 128; y++) {
-      for(uint32_t x = 0; x < 296; x++) {
-        pixel(x, y);
-      }
-    }
-  }
-
   void Badger2040::halt() {
     gpio_put(ENABLE_3V3, 0);
 
@@ -100,15 +92,54 @@ namespace pimoroni {
       15,  7, 13,  5
     };
 
+    if (p == 0) {
+      return 1;
+    }
+    if (p == 15) {
+      return 0;
+    }
+
     // calculate dither matrix offset
     uint32_t dmo = (x & 0b11) | ((y & 0b11) << 2);
 
-    if(p == 0) {
-      return 1;
-    }else if(p == 15) {
+    return p <= _odm[dmo] ? 1 : 0;
+  }
+
+  // Return dither values for an entire byte in the column
+  uint8_t _dither_column_value(int32_t x, uint8_t p) {
+    if (p == 0) {
+      return 0xff;
+    }
+    if (p == 15) {
       return 0;
-    }else{
-      return p <= _odm[dmo] ? 1 : 0;
+    }
+
+    uint8_t val = 0;
+    for (int32_t y = 0; y < 4; ++y) {
+      val |= _dither_value(x, y, p) << (7 - y);
+    }
+    val |= val >> 4;
+    return val;
+  }
+
+
+  void Badger2040::clear() {
+    const uint32_t column_len = 128 / 8;
+    const uint32_t buf_len = column_len * 296;
+    uint8_t* buf = uc8151.get_frame_buffer();
+    
+    if (_pen == 0) {
+      memset(buf, 0xff, buf_len);
+    }
+    else if (_pen == 15) {
+      memset(buf, 0, buf_len);
+    }
+    else {
+      for(uint32_t x = 0; x < 296; x++) {
+        uint8_t val = _dither_column_value(x, _pen);
+        memset(buf, val, column_len);
+        buf += column_len;
+      }
     }
   }
 
@@ -130,14 +161,38 @@ namespace pimoroni {
     image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
   }
 
-  // Display an image that fills the screen (286*128)
+  // Display an image that fills the screen (296*128)
   void Badger2040::image(const uint8_t* data) {
-    image(data, 296, 0, 0, 296, 128, 0, 0);
+    uint8_t* ptr = uc8151.get_frame_buffer();
+    
+    for (uint32_t x = 0; x < 296; ++x) {
+      // extract bitmask for this pixel
+      uint32_t bm = 0b10000000 >> (x & 0b111);
+      
+      for (uint32_t y = 0; y < 128; y += 8) {
+        uint8_t val = 0;
+        for (uint32_t cy = 0; cy < 8; ++cy) {
+          // work out byte offset in source data
+          uint32_t o = ((y + cy) * (296 >> 3)) + (x >> 3);
+          
+          // Set bit in val if set in source data
+          if (data[o] & bm) {
+            val |= 0b10000000 >> cy;
+          }
+        }
+        *ptr++ = val;
+      }
+    }
   }
 
   // Display an image smaller than the screen (sw*sh) at dx, dy
   void Badger2040::image(const uint8_t *data, int w, int h, int x, int y) {
-    image(data, w, 0, 0, w, h, x, y);
+    if (x == 0 && y == 0 && w == 296 && h == 128) {
+      image(data);
+    }
+    else {
+      image(data, w, 0, 0, w, h, x, y);
+    }
   }
 
   void Badger2040::image(const uint8_t *data, int stride, int sx, int sy, int dw, int dh, int dx, int dy) {
@@ -156,9 +211,44 @@ namespace pimoroni {
   }
 
   void Badger2040::rectangle(int32_t x, int32_t y, int32_t w, int32_t h) {
-    for(int cy = y; cy < y + h; cy++) {
+    // Adjust for thickness
+    uint32_t ht = _thickness / 2;
+    x -= ht;
+    if (x < 0) {
+      w += x;
+      x = 0;
+    }
+    y -= ht;
+    if (y < 0) {
+      h += y;
+      y = 0;
+    }
+    w += _thickness - 1;
+    h += _thickness - 1;
+
+    if (h >= 8) {
+      // Directly write to the frame buffer when clearing a large area
+      uint8_t* buf = uc8151.get_frame_buffer();
+      
       for(int cx = x; cx < x + w; cx++) {
-        pixel(cx, cy);
+        uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
+        uint8_t first_mask = 0xff >> (y & 7);
+        uint8_t last_mask = 0xff >> ((y + h) & 7);
+        uint32_t val = _dither_column_value(cx, _pen);
+        *buf_ptr &= ~first_mask;
+        *buf_ptr++ |= (val & first_mask);
+        for (int32_t c = h - (8 - (y & 7)); c >= 8; c -= 8) {
+          *buf_ptr++ = val;
+        }
+        *buf_ptr &= last_mask;
+        *buf_ptr |= (val & (~last_mask));
+      }
+    }
+    else {
+      for(int cx = x; cx < x + w; cx++) {
+        for(int cy = y; cy < y + h; cy++) {
+          uc8151.pixel(cx, cy, _dither_value(cx, cy, _pen));
+        }
       }
     }
   }
