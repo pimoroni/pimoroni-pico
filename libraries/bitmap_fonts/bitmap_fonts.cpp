@@ -17,15 +17,28 @@ namespace bitmap {
   void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale) {
     uint8_t char_index = c - 32;
 
-    const uint16_t *d = &font->data[char_index * font->max_width];
-    for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
-      for(uint8_t cy = 0; cy < font->height; cy++) {
-        if((1U << cy) & *d) {
-          rectangle(x + (cx * scale), y + (cy * scale), scale, scale);
+    if(font->height <= 8){
+      const uint8_t *d = &((uint8_t *)font->data)[char_index * font->max_width];
+      for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
+        for(uint8_t cy = 0; cy < font->height; cy++) {
+          if((1U << cy) & *d) {
+            rectangle(x + (cx * scale), y + (cy * scale), scale, scale);
+          }
         }
-      }
 
-      d++;
+        d++;
+      }
+    } else {
+      const uint16_t *d = &font->data[char_index * font->max_width];
+      for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
+        for(uint8_t cy = 0; cy < font->height; cy++) {
+          if((1U << cy) & *d) {
+            rectangle(x + (cx * scale), y + (cy * scale), scale, scale);
+          }
+        }
+
+        d++;
+      }
     }
   }
 
