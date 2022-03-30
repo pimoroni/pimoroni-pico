@@ -1,8 +1,8 @@
 #pragma once
 
-#include "font.hpp"
+#include "bitmap_fonts.hpp"
 
-const pimoroni::Font font6 {
+const bitmap::font_t font6 {
   .height = 6,
   .max_width = 6,
   .widths = {

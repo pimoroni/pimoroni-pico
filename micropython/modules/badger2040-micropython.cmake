@@ -29,6 +29,9 @@ include(breakout_bmp280/micropython)
 include(breakout_icp10125/micropython)
 include(breakout_scd41/micropython)
 
+include(hershey_fonts/micropython)
+include(bitmap_fonts/micropython)
+
 include(badger2040/micropython)
 include(micropython/examples/badger2040/micropython-builtins)
 include(plasma/micropython)

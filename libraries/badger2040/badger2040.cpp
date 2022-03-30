@@ -322,103 +322,66 @@ namespace pimoroni {
     uc8151.update(blocking);
   }
 
-  const hershey_font_glyph_t* Badger2040::glyph_data(unsigned char c) {
-    if(c < 32 || c > 127) {
-      return nullptr;
-    }
-
-    return &_font->chars[c - 32];
-  }
-
-  inline float deg2rad(float degrees) {
-    return (degrees * M_PI) / 180.0f;
+  const hershey::font_glyph_t* Badger2040::glyph_data(unsigned char c) {
+    return hershey::glyph_data(_font, c);
   }
 
   int32_t Badger2040::glyph(unsigned char c, int32_t x, int32_t y, float s, float a) {
-    const hershey_font_glyph_t *gd = glyph_data(c);
-
-    // if glyph data not found (id too great) then skip
-    if(!gd) {
-      return 0;
-    }
-
-    a = deg2rad(a);
-    float as = sin(a);
-    float ac = cos(a);
-
-    const int8_t *pv = gd->vertices;
-    int8_t cx = (*pv++) * s;
-    int8_t cy = (*pv++) * s;
-    bool pen_down = true;
-
-    for(uint32_t i = 1; i < gd->vertex_count; i++) {
-      if(pv[0] == -128 && pv[1] == -128) {
-        pen_down = false;
-        pv += 2;
-      }else{
-        int8_t nx = (*pv++) * s;
-        int8_t ny = (*pv++) * s;
-
-        int rcx = (cx * ac - cy * as) + 0.5f;
-        int rcy = (cx * as + cy * ac) + 0.5f;
-
-        int rnx = (nx * ac - ny * as) + 0.5f;
-        int rny = (nx * as + ny * ac) + 0.5f;
-
-        if(pen_down) {
-          line(rcx + x, rcy + y, rnx + x, rny + y);
+    if (_bitmap_font) {
+      bitmap::character(_bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        for(auto px = 0; px < w; px++) {
+          for(auto py = 0; py < h; py++) {
+            pixel(x + px, y + py);
+          }
         }
-
-        cx = nx;
-        cy = ny;
-        pen_down = true;
-      }
+      }, c, x, y, std::max(1.0f, s));
+      return 0;
+    } else {
+      return hershey::glyph(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(x1, y1, x2, y2);
+      }, c, x, y, s, a);
     }
-
-    return gd->width * s;
   }
 
   void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a) {
-    int32_t cx = x;
-    int32_t cy = y;
-
-    int32_t ox = 0;
-
-    float as = sin(deg2rad(a));
-    float ac = cos(deg2rad(a));
-
-    for(auto &c : message) {
-      int rcx = (ox * ac) + 0.5f;
-      int rcy = (ox * as) + 0.5f;
-
-      ox += glyph(c, cx + rcx, cy + rcy, s, a);
+    if (_bitmap_font) {
+      bitmap::text(_bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        for(auto px = 0; px < w; px++) {
+          for(auto py = 0; py < h; py++) {
+            pixel(x + px, y + py);
+          }
+        }
+      }, message, x, y, 296 - x, std::max(1.0f, s));
+    } else {
+      hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(x1, y1, x2, y2);
+      }, message, x, y, s, a);
     }
   }
 
   int32_t Badger2040::measure_text(std::string message, float s) {
-    int32_t width = 0;
-    for(auto &c : message) {
-      width += measure_glyph(c, s);
-    }
-    return width;
+    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, std::max(1.0f, s));
+    return hershey::measure_text(_font, message, s);
   }
 
   int32_t Badger2040::measure_glyph(unsigned char c, float s) {
-    const hershey_font_glyph_t *gd = glyph_data(c);
-
-    // if glyph data not found (id too great) then skip
-    if(!gd) {
-      return 0;
-    }
-
-    return gd->width * s;
+    if (_bitmap_font) return bitmap::measure_character(_bitmap_font, c, std::max(1.0f, s));
+    return hershey::measure_glyph(_font, c, s);
   }
 
-
   void Badger2040::font(std::string name) {
-    // check that font exists and assign it
-    if(fonts.find(name) != fonts.end()) {
-      _font = fonts[name];
+    if (name == "bitmap6") {
+      _bitmap_font = &font6;
+      _font = nullptr;
+    } else if (name == "bitmap8") {
+      _bitmap_font = &font8;
+      _font = nullptr;
+    } else {
+      // check that font exists and assign it
+      if(hershey::fonts.find(name) != hershey::fonts.end()) {
+        _bitmap_font = nullptr;
+        _font = hershey::fonts[name];
+      }
     }
   }
 

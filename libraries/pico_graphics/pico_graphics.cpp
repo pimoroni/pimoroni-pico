@@ -6,7 +6,7 @@ namespace pimoroni {
     set_font(&font6);
   };
 
-  void PicoGraphics::set_font(const Font *font){
+  void PicoGraphics::set_font(const bitmap::font_t *font){
     this->font = font;
   }
 
@@ -110,57 +110,15 @@ namespace pimoroni {
   }
 
   void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
-    uint8_t char_index = c - 32;
-    Rect char_bounds(p.x, p.y, font->widths[char_index] * scale, font->height * scale);
-
-    if(!clip.intersects(char_bounds)) return;
-
-    const uint8_t *d = &font->data[char_index * font->max_width];
-    for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
-      for(uint8_t cy = 0; cy < font->height; cy++) {
-        if((1U << cy) & *d) {
-          rectangle(Rect(p.x + (cx * scale), p.y + (cy * scale), scale, scale));
-        }
-      }
-
-      d++;
-    }
+    bitmap::character(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
+      rectangle(Rect(x, y, w, h));
+    }, c, p.x, p.y, scale);
   }
 
   void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
-    uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
-
-    size_t i = 0;
-    while(i < t.length()) {
-      // find length of current word
-      size_t next_space = t.find(' ', i + 1);
-
-      if(next_space == std::string::npos) {
-        next_space = t.length();
-      }
-
-      uint16_t word_width = 0;
-      for(size_t j = i; j < next_space; j++) {
-        word_width += font->widths[t[j] - 32] * scale;
-      }
-
-      // if this word would exceed the wrap limit then
-      // move to the next line
-      if(co != 0 && co + word_width > (uint32_t)wrap) {
-        co = 0;
-        lo += (font->height + 1) * scale;
-      }
-
-      // draw word
-      for(size_t j = i; j < next_space; j++) {
-        character(t[j], Point(p.x + co, p.y + lo), scale);
-        co += font->widths[t[j] - 32] * scale;
-      }
-
-      // move character offset to end of word and add a space
-      co += font->widths[0] * scale;
-      i = next_space + 1;
-    }
+    bitmap::text(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
+      rectangle(Rect(x, y, w, h));
+    }, t, p.x, p.y, wrap, scale);
   }
 
   int32_t orient2d(Point p1, Point p2, Point p3) {
