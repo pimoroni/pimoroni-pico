@@ -520,7 +520,10 @@ mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args, mp_ma
 #include "hardware/vreg.h"
 #include "hardware/clocks.h"
 #include "hardware/pll.h"
-// #include "uart.h"
+
+#if MICROPY_HW_ENABLE_UART_REPL
+#include "uart.h"
+#endif
 
 static void _Badger2040_set_system_speed(uint32_t selected_speed) {
     uint32_t sys_freq;
