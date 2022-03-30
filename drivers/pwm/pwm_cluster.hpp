@@ -53,7 +53,7 @@ namespace pimoroni {
       //--------------------------------------------------
       // Constructors/Destructor
       //--------------------------------------------------
-      Sequence() : size(1), data({Transition()}) {};
+      Sequence() : size(1), data{Transition()} {};
     };
 
     struct TransitionData {
