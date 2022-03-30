@@ -1,32 +1,33 @@
 #include "servo_state.hpp"
 
 namespace servo {
-  ServoState::ServoState() {
+  ServoState::ServoState()
+    : servo_value(0.0f), last_enabled_pulse(0.0f), enabled(false) {
   }
 
   ServoState::ServoState(CalibrationType default_type)
-    : calib(default_type) {
+    : servo_value(0.0f), last_enabled_pulse(0.0f), enabled(false), calib(default_type) {
   }
 
   ServoState::ServoState(const Calibration& calibration) 
-    : calib(calibration) {
+    : servo_value(0.0f), last_enabled_pulse(0.0f), enabled(false), calib(calibration) {
   }
 
-  float ServoState::enable() {
+  float ServoState::enable_with_return() {
     // Has the servo not had a pulse value set before being enabled?
     if(last_enabled_pulse < MIN_VALID_PULSE) {
       // Set the servo to its middle
       return to_mid_with_return();
     }
-    return _enable();
+    return _enable_with_return();
   }
 
-  float ServoState::disable() {
+  float ServoState::disable_with_return() {
     enabled = false;
     return 0.0f; // A zero pulse
   }
 
-  float ServoState::_enable() {
+  float ServoState::_enable_with_return() {
     enabled = true;
     return last_enabled_pulse;
   }
@@ -45,10 +46,10 @@ namespace servo {
       if(calib.pulse_to_value(pulse, value_out, pulse_out)) {
         servo_value = value_out;
         last_enabled_pulse = pulse_out;
-        return _enable();
+        return _enable_with_return();
       }
     }
-    return disable();
+    return disable_with_return();
   }
 
   float ServoState::get_value() const {
@@ -60,9 +61,9 @@ namespace servo {
     if(calib.value_to_pulse(value, pulse_out, value_out)) {
       last_enabled_pulse = pulse_out;
       servo_value = value_out;
-      return _enable();
+      return _enable_with_return();
     }
-    return disable();
+    return disable_with_return();
   }
 
   float ServoState::get_min_value() const {

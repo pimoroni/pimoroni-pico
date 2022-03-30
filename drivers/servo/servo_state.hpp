@@ -25,9 +25,9 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    float servo_value = 0.0f;
-    float last_enabled_pulse = 0.0f;
-    bool enabled = false;
+    float servo_value;
+    float last_enabled_pulse;
+    bool enabled;
     Calibration calib;
 
 
@@ -44,11 +44,11 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    float enable();
-    float disable();
+    float enable_with_return();
+    float disable_with_return();
     bool is_enabled() const;
   private:
-    float _enable(); // Internal version of enable without convenient initialisation to the middle
+    float _enable_with_return(); // Internal version of enable without convenient initialisation to the middle
   public:
     float get_pulse() const;
     float set_pulse_with_return(float pulse);
@@ -56,7 +56,7 @@ namespace servo {
     float get_value() const;
     float set_value_with_return(float value);
 
-  public:
+    //--------------------------------------------------
     float get_min_value() const;
     float get_mid_value() const;
     float get_max_value() const;

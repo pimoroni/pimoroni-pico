@@ -45,11 +45,11 @@ namespace servo {
   }
 
   void Servo::enable() {
-    apply_pulse(state.enable());
+    apply_pulse(state.enable_with_return());
   }
 
   void Servo::disable() {
-    apply_pulse(state.disable());
+    apply_pulse(state.disable_with_return());
   }
 
   bool Servo::is_enabled() const {

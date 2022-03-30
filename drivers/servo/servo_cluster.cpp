@@ -90,7 +90,7 @@ namespace servo {
 
   void ServoCluster::enable(uint8_t servo, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = states[servo].enable();
+    float new_pulse = states[servo].enable_with_return();
     apply_pulse(servo, new_pulse, load);
   }
 
@@ -122,7 +122,7 @@ namespace servo {
 
   void ServoCluster::disable(uint8_t servo, bool load) {
     assert(servo < pwms.get_chan_count());
-    float new_pulse = states[servo].disable();
+    float new_pulse = states[servo].disable_with_return();
     apply_pulse(servo, new_pulse, load);
   }
 
