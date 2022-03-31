@@ -340,12 +340,9 @@ mp_obj_t picowireless_get_current_encryption_type() {
 }
 
 mp_obj_t picowireless_start_scan_networks() {
-    if(wireless != nullptr)
-        return mp_obj_new_int(wireless->start_scan_networks());
-    else
-        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);    
+    // This doesn't actually *do* anything, so might as well save a few instructions!
     
-    return mp_const_none;
+    return mp_const_true;
 }
 
 mp_obj_t picowireless_get_scan_networks() {

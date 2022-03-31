@@ -2,6 +2,7 @@
 
 namespace pimoroni {
 
+
   enum cmd {
     // 0x10 -> 0x1f
     SET_NET                 = 0x10,
@@ -75,6 +76,10 @@ namespace pimoroni {
     SET_ANALOG_WRITE        = 0x52,
     SET_DIGITAL_READ        = 0x53,
     SET_ANALOG_READ         = 0x54,
+
+    SET_WAKE_PIN            = 0x55,
+    SET_LIGHT_SLEEP         = 0x56,
+    SET_DEEP_SLEEP          = 0x57,
   };
 
   bool Esp32Spi::init() {
@@ -84,549 +89,313 @@ namespace pimoroni {
     return true;
   }
 
-  void Esp32Spi::get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out) {
-    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_3] = { {0, ip_out},
+  bool Esp32Spi::get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out) {
+    SpiDrv::outParam params_out[SpiDrv::PARAM_NUMS_3] = { {0, ip_out},
                                                     {0, mask_out},
                                                     {0, gwip_out} };
-    driver.wait_for_esp_select();
 
-    // Send Command
-    driver.send_cmd(GET_IP_ADDR, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    driver.wait_response_params(GET_IP_ADDR, SpiDrv::PARAM_NUMS_3, params);
-    driver.esp_deselect();
+    return driver.send_command(GET_IP_ADDR, params_out, SpiDrv::PARAM_NUMS_3);
   }
 
-  void Esp32Spi::get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out) {
-    SpiDrv::tParam params[SpiDrv::PARAM_NUMS_2] = { {0, ip_out},
+  bool Esp32Spi::get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out) {
+    SpiDrv::outParam params_out[SpiDrv::PARAM_NUMS_2] = { {0, ip_out},
                                                     {0, port_out} };
-    driver.wait_for_esp_select();
 
-    // Send Command
-    driver.send_cmd(GET_REMOTE_DATA, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    //Wait for reply
-    driver.wait_response_params(GET_REMOTE_DATA, SpiDrv::PARAM_NUMS_2, params);
-    driver.esp_deselect();
+    return driver.send_command(GET_REMOTE_DATA, params_out, SpiDrv::PARAM_NUMS_2);
   }
 
   int8_t Esp32Spi::wifi_set_network(const std::string ssid) {
-  	driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ssid)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_NET, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((const uint8_t*)ssid.data(), ssid.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + ssid.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_NET, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_NET\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_NET, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_NET\n");
     }
-    driver.esp_deselect();
-
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
   int8_t Esp32Spi::wifi_set_passphrase(const std::string ssid, const std::string passphrase) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ssid),
+      SpiDrv::build_param(&passphrase)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_PASSPHRASE, SpiDrv::PARAM_NUMS_2);
-    driver.send_param((const uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param((const uint8_t*)passphrase.data(), passphrase.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(6 + ssid.length() + passphrase.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    //Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_PASSPHRASE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_PASSPHRASE\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_PASSPHRASE, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_PASSPHRASE\n");
     }
-    driver.esp_deselect();
-
     return data;
   }
 
   int8_t Esp32Spi::wifi_set_key(const std::string ssid, uint8_t key_idx, const std::string key) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ssid),
+      SpiDrv::build_param(&key_idx),
+      SpiDrv::build_param(&key)
+    };
 
-    //Send Command
-    driver.send_cmd(SET_KEY, SpiDrv::PARAM_NUMS_3);
-    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&key_idx, KEY_IDX_LEN, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)key.data(), key.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(8 + ssid.length() + key.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    //Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_KEY, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_KEY\n");
-      data = WL_FAILURE;
-    }    
-    driver.esp_deselect();
-
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_KEY, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_KEY\n");
+    }
     return data;
   }
 
   void Esp32Spi::config(uint8_t valid_params, uint32_t local_ip, uint32_t gateway, uint32_t subnet) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&valid_params),
+      SpiDrv::build_param(&local_ip),
+      SpiDrv::build_param(&gateway),
+      SpiDrv::build_param(&subnet)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_IP_CONFIG, SpiDrv::PARAM_NUMS_4);
-    driver.send_param((uint8_t*)&valid_params, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&local_ip, 4, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&gateway, 4, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&subnet, 4, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_IP_CONFIG, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_IP_CONFIG\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_IP_CONFIG, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_IP_CONFIG\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::set_dns(uint8_t valid_params, uint32_t dns_server1, uint32_t dns_server2) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&valid_params),
+      SpiDrv::build_param(&dns_server1),
+      SpiDrv::build_param(&dns_server2)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_DNS_CONFIG, SpiDrv::PARAM_NUMS_3);
-    driver.send_param((uint8_t*)&valid_params, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&dns_server1, 4, SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&dns_server2, 4, SpiDrv::LAST_PARAM);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_DNS_CONFIG, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_DNS_CONFIG\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_DNS_CONFIG, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_DNS_CONFIG\n");
     }
-
-    driver.esp_deselect();
   }
 
   void Esp32Spi::set_hostname(const std::string hostname) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&hostname)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_HOSTNAME, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)hostname.data(), hostname.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + hostname.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0 , data_len = 0;
-    if(!driver.wait_response_cmd(SET_HOSTNAME, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_HOSTNAME\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_HOSTNAME, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_HOSTNAME\n");
     }
-    driver.esp_deselect();
   }
 
   int8_t Esp32Spi::disconnect() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(DISCONNECT, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    int8_t result = driver.wait_response_cmd(DISCONNECT, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-    driver.esp_deselect();
-
-    return result;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(DISCONNECT, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:DISCONNECT\n");
+    }
+    return data;
   }
 
   uint8_t Esp32Spi::get_connection_status() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_CONN_STATUS, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = WL_FAILURE, data_len = 0;
-    driver.wait_response_cmd(GET_CONN_STATUS, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-
-    driver.esp_deselect();
-
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(GET_CONN_STATUS, nullptr, 0, &data, &data_len)) {
+      WARN("Error:GET_CONN_STATUS\n");
+    }
     return data;
   }
 
   uint8_t* Esp32Spi::get_mac_address() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(GET_MAC_ADDR, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-    
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_MAC_ADDR, SpiDrv::PARAM_NUMS_1, mac, &data_len);
-
-    driver.esp_deselect();
-
+    uint16_t data_len = 0;
+    driver.send_command(GET_MAC_ADDR, params, PARAM_COUNT(params), (uint8_t *)&mac, &data_len);
     return mac;
   }
 
-  void Esp32Spi::get_ip_address(IPAddress &ip_out) {
-	  get_network_data(local_ip, subnet_mask, gateway_ip);
-	  ip_out = local_ip;
+  bool Esp32Spi::get_ip_address(IPAddress &ip_out) {
+    if (get_network_data(local_ip, subnet_mask, gateway_ip)) {
+      ip_out = local_ip;
+      return true;
+    }
+    return false;
   }
 
-  void Esp32Spi::get_subnet_mask(IPAddress &mask_out) {
-	  get_network_data(local_ip, subnet_mask, gateway_ip);
-	  mask_out = subnet_mask;
+  bool Esp32Spi::get_subnet_mask(IPAddress &mask_out) {
+    if (get_network_data(local_ip, subnet_mask, gateway_ip)) {
+      mask_out = subnet_mask;
+      return true;
+    }
+    return false;
   }
 
-  void Esp32Spi::get_gateway_ip(IPAddress &ip_out) {
-  	get_network_data(local_ip, subnet_mask, gateway_ip);
-    ip_out = gateway_ip;
+  bool Esp32Spi::get_gateway_ip(IPAddress &ip_out) {
+    if (get_network_data(local_ip, subnet_mask, gateway_ip)) {
+      ip_out = gateway_ip;
+      return true;
+    }
+    return false;
   }
 
   std::string Esp32Spi::get_current_ssid() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(GET_CURR_SSID, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
+    uint16_t data_len = 0;
     memset(ssid, 0x00, sizeof(ssid));
-
-    // Wait for reply
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_CURR_SSID, SpiDrv::PARAM_NUMS_1, (uint8_t*)ssid, &data_len);
-    driver.esp_deselect();
-
+    driver.send_command(GET_CURR_SSID, params, PARAM_COUNT(params), (uint8_t *)&ssid, &data_len);
     return ssid;
   }
 
   uint8_t* Esp32Spi::get_current_bssid() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(GET_CURR_BSSID, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_CURR_BSSID, SpiDrv::PARAM_NUMS_1, bssid, &data_len);
-    driver.esp_deselect();
-
+    uint16_t data_len = 0;
+    memset(bssid, 0x00, sizeof(bssid));
+    driver.send_command(GET_CURR_BSSID, params, PARAM_COUNT(params), (uint8_t *)&bssid, &data_len);
     return bssid;
   }
 
   int32_t Esp32Spi::get_current_rssi() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(GET_CURR_RSSI, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
+    uint16_t data_len = 0;
     int32_t rssi = 0;
-    uint8_t data_len = 0;    
-    driver.wait_response_cmd(GET_CURR_RSSI, SpiDrv::PARAM_NUMS_1, (uint8_t*)&rssi, &data_len);
-    driver.esp_deselect();
-
+    driver.send_command(GET_CURR_RSSI, params, PARAM_COUNT(params), (uint8_t *)&rssi, &data_len);
     return rssi;
   }
 
   uint8_t Esp32Spi::get_current_encryption_type() {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      {.type = SpiDrv::PARAM_DUMMY}
+    };
 
-    // Send Command
-    driver.send_cmd(GET_CURR_ENCT, SpiDrv::PARAM_NUMS_1);
-    driver.send_byte_param(SpiDrv::DUMMY_DATA, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t enc_type = 0, data_len = 0;    
-    driver.wait_response_cmd(GET_CURR_ENCT, SpiDrv::PARAM_NUMS_1, &enc_type, &data_len);
-    driver.esp_deselect();
-
+    uint16_t data_len = 0;
+    uint8_t enc_type = 0;
+    driver.send_command(GET_CURR_ENCT, params, PARAM_COUNT(params), &enc_type, &data_len);
     return enc_type;
   }
 
   int8_t Esp32Spi::start_scan_networks() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(START_SCAN_NETWORKS, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(START_SCAN_NETWORKS, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: START_SCAN_NETWORKS\n");
-      data = WL_FAILURE;
-    }
-    driver.esp_deselect();
-
-    return ((int8_t)data == WL_FAILURE) ? data : (int8_t)WL_SUCCESS;
+    /*uint8_t data = 0;
+    uint16_t data_len = 0;
+    driver.send_command(START_SCAN_NETWORKS, &data, &data_len, false);
+    return ((int8_t)data == WL_FAILURE) ? data : (int8_t)WL_SUCCESS;*/
+    // This command is a very misleading no-op, see: https://github.com/adafruit/nina-fw/blob/d73fe315cc7f9148a0918490d3b75430c8444bf7/main/CommandHandler.cpp#L336-L345
+    return WL_SUCCESS;
   }
 
   uint8_t Esp32Spi::get_scan_networks() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(SCAN_NETWORKS, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t ssid_list_num = 0;
-    driver.wait_response(SCAN_NETWORKS, &ssid_list_num, (uint8_t**)network_ssid, WL_NETWORKS_LIST_MAXNUM);
-    driver.esp_deselect();
-
-    return ssid_list_num;
+    uint16_t ssid_list_num = 0;
+    driver.send_command(SCAN_NETWORKS, nullptr, 0, (uint8_t *)network_ssid, &ssid_list_num, SpiDrv::RESPONSE_TYPE_NORMAL);
+    return (uint8_t)ssid_list_num;
   }
 
   const char* Esp32Spi::get_ssid_networks(uint8_t network_item) {
-	  if(network_item >= WL_NETWORKS_LIST_MAXNUM)
-		  return nullptr;
+    if(network_item >= WL_NETWORKS_LIST_MAXNUM) {
+      return nullptr;
+    }
 
-	  return network_ssid[network_item];
+    return network_ssid[network_item];
   }
 
-  uint8_t Esp32Spi::get_enc_type_networks(uint8_t network_item) {
-    if(network_item >= WL_NETWORKS_LIST_MAXNUM)
-		  return ENC_TYPE_UNKNOWN;
+  wl_enc_type Esp32Spi::get_enc_type_networks(uint8_t network_item) {
+    if(network_item >= WL_NETWORKS_LIST_MAXNUM) {
+      return ENC_TYPE_UNKNOWN;
+    }
 
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&network_item)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_IDX_ENCT, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&network_item, 1, SpiDrv::LAST_PARAM);
+    uint8_t enc_type = 255;
+    uint16_t data_len = 0;
+    driver.send_command(GET_IDX_ENCT, params, PARAM_COUNT(params), &enc_type, &data_len);
 
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t enc_type = 0, data_len = 0;    
-    driver.wait_response_cmd(GET_IDX_ENCT, SpiDrv::PARAM_NUMS_1, &enc_type, &data_len);
-    driver.esp_deselect();    
-
-    return enc_type;
+    return (wl_enc_type)enc_type;
   }
 
   uint8_t* Esp32Spi::get_bssid_networks(uint8_t network_item, uint8_t* bssid_out) {
-    if(network_item >= WL_NETWORKS_LIST_MAXNUM)
+    if(network_item >= WL_NETWORKS_LIST_MAXNUM) {
       return nullptr;
+    }
 
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&network_item)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_IDX_BSSID, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&network_item, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_IDX_BSSID, SpiDrv::PARAM_NUMS_1, (uint8_t*)bssid_out, &data_len);
-    driver.esp_deselect();
+    uint16_t data_len = 0;   
+    driver.send_command(GET_IDX_BSSID, params, 1, bssid_out, &data_len);
 
     return bssid_out;  
   }
 
   uint8_t Esp32Spi::get_channel_networks(uint8_t network_item) {
-    if(network_item >= WL_NETWORKS_LIST_MAXNUM)
+    if(network_item >= WL_NETWORKS_LIST_MAXNUM) {
       return 0;
+    }
 
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&network_item)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_IDX_CHANNEL, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&network_item, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t channel = 0, data_len = 0;
-    driver.wait_response_cmd(GET_IDX_CHANNEL, SpiDrv::PARAM_NUMS_1, &channel, &data_len);
-    driver.esp_deselect();
+    uint8_t channel = 0;
+    uint16_t data_len = 0;   
+    driver.send_command(GET_IDX_CHANNEL, params, 1, &channel, &data_len);
 
     return channel;  
   }
 
   int32_t Esp32Spi::get_rssi_networks(uint8_t network_item) {
-    if(network_item >= WL_NETWORKS_LIST_MAXNUM)
-  		return 0;
+    if(network_item >= WL_NETWORKS_LIST_MAXNUM) {
+      return 0;
+    }
 
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&network_item)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_IDX_RSSI, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&network_item, 1, SpiDrv::LAST_PARAM);
+    int32_t  network_rssi = 0;
+    uint16_t data_len = 0; 
+    driver.send_command(GET_IDX_CHANNEL, params, 1, (uint8_t*)&network_rssi, &data_len);
 
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    int32_t	network_rssi = 0;
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(GET_IDX_RSSI, SpiDrv::PARAM_NUMS_1, (uint8_t*)&network_rssi, &data_len);
-    driver.esp_deselect();
-
-	  return network_rssi;
+    return network_rssi;
   }
 
   bool Esp32Spi::req_host_by_name(const std::string hostname) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&hostname)
+    };
 
-    // Send Command
-    driver.send_cmd(REQ_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)hostname.data(), hostname.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + hostname.length());
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    bool result = driver.send_command(REQ_HOST_BY_NAME, params, 1, &data, &data_len);  
 
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    bool result = driver.wait_response_cmd(REQ_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-    driver.esp_deselect();    
-
-    if(result) {
-      result = (data == 1);
-    }
-
-    return result;
+    return result && data == WL_SUCCESS;
   }
 
   bool Esp32Spi::get_host_by_name(IPAddress& ip_out) {
     IPAddress dummy(0xFF,0xFF,0xFF,0xFF);
-    bool result = false;
-
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_HOST_BY_NAME, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
     uint8_t ip_addr[WL_IPV4_LENGTH];
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(GET_HOST_BY_NAME, SpiDrv::PARAM_NUMS_1, ip_addr, &data_len)) {
-      WARN("Response Err: GET_HOST_BY_NAME\n");
-    }
-    else {
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_HOST_BY_NAME, nullptr, 0, (uint8_t *)&ip_addr, &data_len)) {
+      WARN("Error:GET_HOST_BY_NAME\n");
+      return false;
+    } else {
       ip_out = ip_addr;
-      result = (ip_out != dummy);
+      return (ip_out != dummy);
     }
-    driver.esp_deselect();  
-
-    return result;
   }
 
   bool Esp32Spi::get_host_by_name(const std::string hostname, IPAddress& ip_out) {
@@ -639,449 +408,294 @@ namespace pimoroni {
   }
 
   const char* Esp32Spi::get_fw_version() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_FW_VERSION, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();    
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(GET_FW_VERSION, SpiDrv::PARAM_NUMS_1, (uint8_t*)fw_version, &data_len)) {
-      WARN("Response Err: GET_FW_VERSION\n");
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_FW_VERSION, nullptr, 0, (uint8_t*)fw_version, &data_len)){
+      WARN("Error:GET_FW_VERSION\n");
     }
-    driver.esp_deselect();
-
     return fw_version;
   }
 
   uint32_t Esp32Spi::get_time() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_TIME, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
     uint32_t data = 0;
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(GET_TIME, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: GET_TIME\n");
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_TIME, nullptr, 0, (uint8_t*)&data, &data_len)) {
+      WARN("Error:GET_TIME\n");
     }
-    driver.esp_deselect();
-
     return data;
   }
 
   void Esp32Spi::set_power_mode(uint8_t mode) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&mode),
+    };
 
-    // Send Command
-    driver.send_cmd(SET_POWER_MODE, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&mode, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    driver.wait_response_cmd(SET_POWER_MODE, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-    driver.esp_deselect();
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    driver.send_command(SET_POWER_MODE, params, 1, &data, &data_len);
   }
 
   int8_t Esp32Spi::wifi_set_ap_network(const std::string ssid, uint8_t channel) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ssid),
+      SpiDrv::build_param(&channel),
+    };
 
-    // Send Command
-    driver.send_cmd(SET_AP_NET, SpiDrv::PARAM_NUMS_2);
-    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&channel, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(3 + ssid.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_AP_NET, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_AP_NET\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_AP_NET, params, 2, &data, &data_len)) {
+      WARN("Error:SET_AP_NET\n");
       data = WL_FAILURE;
     }
-    driver.esp_deselect();
 
     return (data == WIFI_SPI_ACK) ? WL_SUCCESS : WL_FAILURE;
   }
 
   int8_t Esp32Spi::wifi_set_ap_passphrase(const std::string ssid, const std::string passphrase, uint8_t channel) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ssid),
+      SpiDrv::build_param(&passphrase),
+      SpiDrv::build_param(&channel)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_AP_PASSPHRASE, SpiDrv::PARAM_NUMS_3);
-    driver.send_param((uint8_t*)ssid.data(), ssid.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)passphrase.data(), passphrase.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&channel, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(4 + ssid.length() + passphrase.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_AP_PASSPHRASE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_AP_PASSPHRASE\n");
-      data = WL_FAILURE;
+    int8_t data = WL_FAILURE;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_AP_PASSPHRASE, params, PARAM_COUNT(params), (uint8_t*)&data, &data_len)) {
+      WARN("Error:SET_AP_PASSPHRASE\n");
     }
-    driver.esp_deselect();
-
     return data;
   }
 
   int16_t Esp32Spi::ping(uint32_t ip_address, uint8_t ttl) {
-    driver.wait_for_esp_select();
+    // Ping a remote address.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L919-L935
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ip_address),
+      SpiDrv::build_param(&ttl)
+    };
 
-    // Send Command
-    driver.send_cmd(PING, SpiDrv::PARAM_NUMS_2);
-    driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&ttl, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint16_t data;
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(PING, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: PING\n");
-      data = WL_PING_ERROR;
+    int16_t data = WL_FAILURE;
+    uint16_t data_len = 0;
+    if(!driver.send_command(PING, params, PARAM_COUNT(params), (uint8_t*)&data, &data_len)) {
+      WARN("Error:PING\n");
     }
-    driver.esp_deselect();
-
-    return data;  
+    // Returns response time (presumably in milliseconds?)
+    return data; 
   }
 
   void Esp32Spi::debug(uint8_t on) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&on)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_DEBUG, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&on, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    driver.wait_response_cmd(SET_DEBUG, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-    driver.esp_deselect();
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_DEBUG, params, PARAM_COUNT(params), (uint8_t*)&data, &data_len)) {
+      WARN("Error:SET_DEBUG\n");
+    }
   }
 
   float Esp32Spi::get_temperature() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_TEMPERATURE, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    float data = 0;
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(GET_TEMPERATURE, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: GET_TEMPERATURE\n");
+    // Get the ESP32 die temperature?
+    // This will *not* be ambient.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L239-L249
+    float data = WL_FAILURE;
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_TEMPERATURE, nullptr, 0, (uint8_t *)&data, &data_len)) {
+      WARN("Error:GET_TEMPERATURE\n");
     }
-    driver.esp_deselect();
-
     return data;
   }
 
   void Esp32Spi::pin_mode(uint8_t pin, uint8_t mode) {
-    driver.wait_for_esp_select();
+    // Set the mode of an ESP32 GPIO pin.
+    // Uses the Arduino HAL "pinModes" internally.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L955-L967
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&pin),
+      SpiDrv::build_param(&mode)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_PIN_MODE, SpiDrv::PARAM_NUMS_2);
-    driver.send_param(&pin, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&mode, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_PIN_MODE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_PIN_MODE\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_PIN_MODE, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_PIN_MODE\n");
       data = WL_FAILURE;
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::digital_write(uint8_t pin, uint8_t value) {
-    driver.wait_for_esp_select();
+    // Write a 0 or 1 to an ESP32 GPIO pin.
+    // Uses the Arduino HAL "digitalWrite" internally.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L969-L981
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&pin),
+      SpiDrv::build_param(&value),
+    };
 
-    // Send Command
-    driver.send_cmd(SET_DIGITAL_WRITE, SpiDrv::PARAM_NUMS_2);
-    driver.send_param(&pin, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&value, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_DIGITAL_WRITE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_DIGITAL_WRITE\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_DIGITAL_WRITE, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_DIGITAL_WRITE\n");
+      data = WL_FAILURE; // ???
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::analog_write(uint8_t pin, uint8_t value) {
-	  driver.wait_for_esp_select();
+    // Write a 0 to 255 "analog" value to an ESP32 GPIO pin.
+    // Uses the Arduino HAL "analogWrite" internally.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L983-L995
+    SpiDrv::inParam params[] {
+      SpiDrv::build_param(&pin),
+      SpiDrv::build_param(&value)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_ANALOG_WRITE, SpiDrv::PARAM_NUMS_2);
-    driver.send_param(&pin, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&value, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_ANALOG_WRITE, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_ANALOG_WRITE\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_ANALOG_WRITE, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_ANALOG_WRITE\n");
       data = WL_FAILURE;
     }
-    driver.esp_deselect();
   }
 
   bool Esp32Spi::digital_read(uint8_t pin) {
-    driver.wait_for_esp_select();
+    // Read a 0 (LOW) or 1 (HIGH) from an ESP32 GPIO pin.
+    // Uses the Arduino HAL "digitalRead" internally.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L997-L1008
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&pin)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_DIGITAL_READ, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&pin, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(SET_DIGITAL_READ, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: SET_DIGITAL_READ\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_DIGITAL_READ, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_DIGITAL_READ\n");
     }
-    driver.esp_deselect();
 
-    return (data == 1);
+    return data == WL_SUCCESS;
   }
 
   uint16_t Esp32Spi::analog_read(uint8_t pin, uint8_t atten) {
-    driver.wait_for_esp_select();
+    // Read an analog value from an ESP32 GPIO pin.
+    // Uses the Arduino HAL "analogRead" internally.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L1010-L1023
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&pin),
+      SpiDrv::build_param(&atten)
+    };
 
-    // Send Command
-    driver.send_cmd(SET_ANALOG_READ, SpiDrv::PARAM_NUMS_2);
-    driver.send_param(&pin, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&atten, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
     uint32_t data = 0;
-    uint8_t data_len = 0;
-    if(!driver.wait_response_cmd(SET_ANALOG_READ, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: SET_ANALOG_READ\n");
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_ANALOG_READ, params, PARAM_COUNT(params), (uint8_t*)&data, &data_len)) {
+      WARN("Error:SET_ANALOG_READ\n");
     }
-    driver.esp_deselect();
 
-    return (uint16_t)data; //ESP only has a 12-bit ADC
+    return (uint16_t)data; // ESP only has a 12-bit ADC but returns a uint32
   }
 
   void Esp32Spi::start_server(uint16_t port, uint8_t sock, uint8_t protocol_mode) {
-	  driver.wait_for_esp_select();
-    
-    // Send Command
-    driver.send_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_3);
-    driver.send_param(port, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
+    port =__builtin_bswap16(port);
 
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: START_SERVER_TCP\n");
+    SpiDrv::inParam params[] = {
+        SpiDrv::build_param(&port),
+        SpiDrv::build_param(&sock),
+        SpiDrv::build_param(&protocol_mode),
+    };
+  
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(START_SERVER_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:START_SERVER_TCP\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::start_server(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
-    driver.wait_for_esp_select();
+    port =__builtin_bswap16(port);
 
-    // Send Command
-    driver.send_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_4);
-    driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(port, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
+    SpiDrv::inParam params[] = {
+        SpiDrv::build_param(&ip_address),
+        SpiDrv::build_param(&port),
+        SpiDrv::build_param(&sock),
+        SpiDrv::build_param(&protocol_mode),
+    };
 
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(START_SERVER_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: START_SERVER_TCP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(START_SERVER_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:START_SERVER_TCP\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::start_client(uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
-	  driver.wait_for_esp_select();
+    port = __builtin_bswap16(port); // Don't ask, I'll cry
 
-    // Send Command
-    driver.send_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_4);
-    driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(port, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&ip_address),
+      SpiDrv::build_param(&port),
+      SpiDrv::build_param(&sock),
+      SpiDrv::build_param(&protocol_mode)
+    };
 
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: START_CLIENT_TCP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(START_CLIENT_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:START_CLIENT_TCP\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::start_client(const std::string host, uint32_t ip_address, uint16_t port, uint8_t sock, uint8_t protocol_mode) {
-    driver.wait_for_esp_select();
+    port = __builtin_bswap16(port); // Don't ask, I'll cry
 
-    // Send Command
-    driver.send_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_5);
-    driver.send_param((uint8_t*)host.data(), host.length(), SpiDrv::NO_LAST_PARAM);
-    driver.send_param((uint8_t*)&ip_address, sizeof(ip_address), SpiDrv::NO_LAST_PARAM);
-    driver.send_param(port, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(&protocol_mode, 1, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(17 + host.length());
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&host),
+      SpiDrv::build_param(&ip_address),
+      SpiDrv::build_param(&port),
+      SpiDrv::build_param(&sock),
+      SpiDrv::build_param(&protocol_mode)
+    };
 
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(START_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: START_CLIENT_TCP\n");
-    }
-    driver.esp_deselect();  
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(START_CLIENT_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:START_CLIENT_TCP\n");
+    } 
   }
 
   void Esp32Spi::stop_client(uint8_t sock) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock),
+    };
 
-    // Send Command
-    driver.send_cmd(STOP_CLIENT_TCP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(STOP_CLIENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: STOP_CLIENT_TCP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(STOP_CLIENT_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:STOP_CLIENT_TCP\n");
     }
-    driver.esp_deselect();
   }
 
   uint8_t Esp32Spi::get_server_state(uint8_t sock) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_STATE_TCP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(GET_STATE_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: GET_STATE_TCP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_STATE_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:GET_STATE_TCP\n");
     }
-    driver.esp_deselect();
 
     return data;
   }
 
   uint8_t Esp32Spi::get_client_state(uint8_t sock) {
-	  driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock)
+    };
 
-    // Send Command
-    driver.send_cmd(GET_CLIENT_STATE_TCP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(GET_CLIENT_STATE_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: GET_CLIENT_STATE_TCP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_CLIENT_STATE_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:GET_CLIENT_STATE_TCP\n");
     }
-    driver.esp_deselect();
 
     return data;
   }
@@ -1091,78 +705,48 @@ namespace pimoroni {
       return 0;
     }
 
-	  driver.wait_for_esp_select();
-    
-    // Send Command
-    driver.send_cmd(AVAIL_DATA_TCP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock),
+    };
 
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
+    uint16_t bytes_available = 0;
+    uint16_t data_len = 0;
+    driver.send_command(AVAIL_DATA_TCP, params, PARAM_COUNT(params), (uint8_t *)&bytes_available, &data_len);
 
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint16_t len = 0;
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(AVAIL_DATA_TCP, SpiDrv::PARAM_NUMS_1, (uint8_t*)&len,  &data_len);
-    driver.esp_deselect();
-
-    return len;
+    return bytes_available;
   }
 
-
   uint8_t Esp32Spi::avail_server(uint8_t sock) {
+    // This function has a deliberate narrowing conversion from uint8_t to uint16_t
+    // see: https://github.com/adafruit/nina-fw/blob/d73fe315cc7f9148a0918490d3b75430c8444bf7/main/CommandHandler.cpp#L437-L498
     if(!driver.available()) {
       return 255;
     }
 
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock),
+    };
 
-    // Send Command
-    driver.send_cmd(AVAIL_DATA_TCP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
     uint16_t socket = 0;
-    uint8_t data_len = 0;
-    driver.wait_response_cmd(AVAIL_DATA_TCP, SpiDrv::PARAM_NUMS_1, (uint8_t*)&socket,  &data_len);
-    driver.esp_deselect();
+    uint16_t data_len = 0;
+    driver.send_command(AVAIL_DATA_TCP, params, PARAM_COUNT(params), (uint8_t *)&socket, &data_len);
 
     return socket;
   }
 
-  bool Esp32Spi::get_data(uint8_t sock, uint8_t *data_out, uint8_t peek) {
-	  driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_DATA_TCP, SpiDrv::PARAM_NUMS_2);
-    driver.send_param(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_param(peek, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_data8(GET_DATA_TCP, &data, &data_len)) {
-      WARN("Response Err: GET_DATA_TCP\n");
+  bool Esp32Spi::get_data(uint8_t sock, uint8_t *data_out, bool peek) {
+    // Peek or get a single byte of data
+    // see: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L500-L529
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock),
+      SpiDrv::build_param((uint8_t *)&peek),
+    };
+  
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_DATA_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:GET_DATA_TCP\n");
     }
-    driver.esp_deselect();
     
     if(data_len != 0) {
       *data_out = data;
@@ -1172,24 +756,16 @@ namespace pimoroni {
   }
 
   bool Esp32Spi::get_data_buf(uint8_t sock, uint8_t *data_out, uint16_t *data_len_out) {
-	  driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_DATABUF_TCP, SpiDrv::PARAM_NUMS_2);
-    driver.send_buffer(&sock, 1);
-    driver.send_buffer((uint8_t *)data_len_out, sizeof(*data_len_out), SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    if(!driver.wait_response_data16(GET_DATABUF_TCP, data_out, data_len_out)) {
-      WARN("Response Err: GET_DATABUF_TCP\n");
+    // Get the data buffer for TCP/UDP/TLS clients.
+    // see: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L870-L896
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param_buffer(&sock, 1),
+      SpiDrv::build_param_buffer((uint8_t *)&data_len_out, 2),
+    };
+  
+    if(!driver.send_command(GET_DATABUF_TCP, params, PARAM_COUNT(params), data_out, data_len_out, SpiDrv::RESPONSE_TYPE_DATA16)) {
+      WARN("Error:GET_DATABUF_TCP\n");
     }
-    driver.esp_deselect();
 
     if(*data_len_out != 0) {
       return true;
@@ -1198,23 +774,18 @@ namespace pimoroni {
   }
 
   bool Esp32Spi::insert_data_buf(uint8_t sock, const uint8_t *data_in, uint16_t len) {
-	  driver.wait_for_esp_select();
+    // UDP only. Writes to the socket output buffer.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L898-L917
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param_buffer(&sock, 1),
+      SpiDrv::build_param_buffer(data_in, len),
+    };
 
-    // Send Command
-    driver.send_cmd(INSERT_DATABUF, SpiDrv::PARAM_NUMS_2);
-    driver.send_buffer(&sock, 1, SpiDrv::NO_LAST_PARAM);
-    driver.send_buffer((uint8_t *)data_in, len, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(9 + len);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_data8(INSERT_DATABUF, &data, &data_len)) {
-      WARN("Response Err: INSERT_DATABUF\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(INSERT_DATABUF, params, PARAM_COUNT(params), &data, &data_len, SpiDrv::RESPONSE_TYPE_DATA8)) {
+      WARN("Error:INSERT_DATABUF\n");
     }
-    driver.esp_deselect();
 
     if(data_len != 0) {
       return (data == 1);
@@ -1223,79 +794,54 @@ namespace pimoroni {
   }
 
   bool Esp32Spi::send_udp_data(uint8_t sock) {
-	  driver.wait_for_esp_select();
+    // UDP only. Writes the socket UDP end packet.
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L763-L777
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock)
+    };
 
-    // Send Command
-    driver.send_cmd(SEND_DATA_UDP, SpiDrv::PARAM_NUMS_1);
-    driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-    // Pad to multiple of 4
-    driver.read_byte();
-    driver.read_byte();
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_data8(SEND_DATA_UDP, &data, &data_len)) {
-      WARN("Response Err: SEND_DATA_UDP\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SEND_DATA_UDP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SEND_DATA_UDP\n");
     }
-    driver.esp_deselect();
 
-    if(data_len != 0) {
-      return (data == 1);
-    }
-    return false;
+    // Returns 1 if udps[socket].endPacket() returns true
+    return data_len && data == WL_SUCCESS;
   }
 
   uint16_t Esp32Spi::send_data(uint8_t sock, const uint8_t *data_in, uint16_t len) {
-	  driver.wait_for_esp_select();
+    // Send a data buffer over TCP (server/client) or TLS type sockets
+    // See: https://github.com/adafruit/nina-fw/blob/104c48cb48e2a04c8a8009ef2db1b551414628a5/main/CommandHandler.cpp#L845-L868
+    SpiDrv::inParam params[] = {
+        SpiDrv::build_param_buffer(&sock, 1),
+        SpiDrv::build_param_buffer(data_in, len),
+    };
 
-    // Send Command
-    driver.send_cmd(SEND_DATA_TCP, SpiDrv::PARAM_NUMS_2);
-    driver.send_buffer(&sock, sizeof(sock));
-    driver.send_buffer((uint8_t *)data_in, len, SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(9 + len);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint16_t data = 0;
-    uint8_t data_len = 0;
-    if(!driver.wait_response_data8(SEND_DATA_TCP, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: SEND_DATA_TCP\n");
+    uint16_t bytes_written = 0;
+    uint16_t data_out_len = 0;
+    if(!driver.send_command(SEND_DATA_TCP, params, PARAM_COUNT(params), (uint8_t *)&bytes_written, &data_out_len, SpiDrv::RESPONSE_TYPE_DATA8)) {
+      WARN("Error:SEND_DATA_TCP\n");
     }
-    driver.esp_deselect();
 
-    return data;
+    // Returns the number of bytes written
+    return bytes_written;
   }
 
   uint8_t Esp32Spi::check_data_sent(uint8_t sock) {
     const uint16_t TIMEOUT_DATA_SENT = 25;
 
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&sock)
+    };
+
     uint16_t timeout = 0;
-    uint8_t data = 0, data_len = 0;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
     do {
-      driver.wait_for_esp_select();
-
-      // Send Command
-      driver.send_cmd(DATA_SENT_TCP, SpiDrv::PARAM_NUMS_1);
-      driver.send_param(&sock, 1, SpiDrv::LAST_PARAM);
-
-      // Pad to multiple of 4
-      driver.read_byte();
-      driver.read_byte();
-
-      driver.esp_deselect();
-      driver.wait_for_esp_select();
-
-      // Wait for reply
-      if(!driver.wait_response_cmd(DATA_SENT_TCP, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-        WARN("Response Err: DATA_SENT_TCP/n");
+      if(!driver.send_command(DATA_SENT_TCP, params, PARAM_COUNT(params), &data, &data_len)) {
+        WARN("Error:DATA_SENT_TCP/n");
       }
-      driver.esp_deselect();
 
       if(data)
         timeout = 0;
@@ -1310,96 +856,96 @@ namespace pimoroni {
   }
 
   uint8_t Esp32Spi::get_socket() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(GET_SOCKET, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = -1, data_len = 0;
-    driver.wait_response_cmd(GET_SOCKET, SpiDrv::PARAM_NUMS_1, &data, &data_len);
-    driver.esp_deselect();
-
-    return data;
+    uint8_t socket = -1;
+    uint16_t data_len = 0;
+    if(!driver.send_command(GET_SOCKET, nullptr, 0, &socket, &data_len)) {
+        WARN("Error:GET_SOCKET/n");
+    }
+    return socket;
   }
 
   void Esp32Spi::wifi_set_ent_identity(const std::string identity) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&identity)
+    };
 
-    // Send Command
-    driver.send_cmd(WPA2_ENT_SET_IDENTITY, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)identity.data(), identity.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + identity.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0 , data_len = 0;
-    if(!driver.wait_response_cmd(WPA2_ENT_SET_IDENTITY, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: WPA2_ENT_SET_IDENTITY\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(WPA2_ENT_SET_IDENTITY, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:WPA2_ENT_SET_IDENTITY\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::wifi_set_ent_username(const std::string username) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&username)
+    };
 
-    // Send Command
-    driver.send_cmd(WPA2_ENT_SET_USERNAME, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)username.data(), username.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + username.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0 , data_len = 0;
-    if(!driver.wait_response_cmd(WPA2_ENT_SET_USERNAME, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: WPA2_ENT_SET_USERNAME\n");
-      data = WL_FAILURE;
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(WPA2_ENT_SET_USERNAME, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:WPA2_ENT_SET_USERNAME\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::wifi_set_ent_password(const std::string password) {
-    driver.wait_for_esp_select();
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&password)
+    };
 
-    // Send Command
-    driver.send_cmd(WPA2_ENT_SET_PASSWORD, SpiDrv::PARAM_NUMS_1);
-    driver.send_param((uint8_t*)password.data(), password.length(), SpiDrv::LAST_PARAM);
-    driver.pad_to_multiple_of_4(5 + password.length());
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0 , data_len = 0;
-    if(!driver.wait_response_cmd(WPA2_ENT_SET_PASSWORD, SpiDrv::PARAM_NUMS_1, &data, &data_len)) {
-      WARN("Response Err: WPA2_ENT_SET_PASSWORD\n");
-      data = WL_FAILURE;
+    uint8_t data;
+    uint16_t data_len = 0;
+    if (!driver.send_command(WPA2_ENT_SET_PASSWORD, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:WPA2_ENT_SET_PASSWORD\n");
     }
-    driver.esp_deselect();
   }
 
   void Esp32Spi::wifi_set_ent_enable() {
-    driver.wait_for_esp_select();
-
-    // Send Command
-    driver.send_cmd(WPA2_ENT_ENABLE, SpiDrv::PARAM_NUMS_0);
-
-    driver.esp_deselect();
-    driver.wait_for_esp_select();
-
-    // Wait for reply
-    uint8_t data = 0, data_len = 0;
-    if(!driver.wait_response_cmd(WPA2_ENT_ENABLE, SpiDrv::PARAM_NUMS_1, (uint8_t*)&data, &data_len)) {
-      WARN("Response Err: WPA2_ENT_ENABLE\n");
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(WPA2_ENT_ENABLE, nullptr, 0, &data, &data_len)) {
+      WARN("Error:WPA2_ENT_ENABLE\n");
     }
-    driver.esp_deselect();
   }
+
+  void Esp32Spi::sleep_set_wake_pin(uint8_t wake_pin) {
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&wake_pin)
+    };
+
+    uint8_t data;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_WAKE_PIN, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_WAKE_PIN\n");
+    }
+  }
+
+  void Esp32Spi::sleep_light() {
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if (!driver.send_command(SET_LIGHT_SLEEP, nullptr, 0, &data, &data_len)) {
+      WARN("Error:SET_LIGHT_SLEEP_CMD\n");
+    } else {
+      // Because we still have a very murky separation of concerns between esp32spi and spi_drv
+      // we'll force the sleep state here, rather than have spi_drv understand this commmand
+      driver.sleep_state = SpiDrv::LIGHT_SLEEP;
+    }
+  }
+  
+  void Esp32Spi::sleep_deep(uint8_t time) {
+    SpiDrv::inParam params[] = {
+      SpiDrv::build_param(&time)
+    };
+
+    uint8_t data = 0;
+    uint16_t data_len = 0;
+    if(!driver.send_command(SET_DEEP_SLEEP, params, PARAM_COUNT(params), &data, &data_len)) {
+      WARN("Error:SET_DEEP_SLEEP\n");
+    } else {
+      // Because we still have a very murky separation of concerns between esp32spi and spi_drv
+      // we'll force the sleep state here, rather than have spi_drv understand this commmand
+      driver.sleep_state = SpiDrv::DEEP_SLEEP;
+    }
+  }
+  
 }

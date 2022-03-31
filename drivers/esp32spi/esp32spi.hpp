@@ -6,9 +6,6 @@
 #include "spi_drv.hpp"
 #include "ip_address.hpp"
 
-
-#define WARN(message) {}
-
 #define WL_FW_VER_LENGTH 6
 
 #define WIFI_SPI_ACK        1
@@ -131,8 +128,8 @@ namespace pimoroni {
     //From https://github.com/adafruit/WiFiNINA/blob/master/src/utility/wifi_drv.cpp
     //--------------------------------------------------
 
-    void get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out);
-    void get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out);
+    bool get_network_data(uint8_t *ip_out, uint8_t *mask_out, uint8_t *gwip_out);
+    bool get_remote_data(uint8_t sock, uint8_t *ip_out, uint8_t *port_out);
 
     int8_t wifi_set_network(const std::string ssid);
     int8_t wifi_set_passphrase(const std::string ssid, const std::string passphrase);
@@ -147,9 +144,9 @@ namespace pimoroni {
     uint8_t get_connection_status();
     uint8_t* get_mac_address();
 
-    void get_ip_address(IPAddress &ip_out);
-    void get_subnet_mask(IPAddress &mask_out);
-    void get_gateway_ip(IPAddress &ip_out);
+    bool get_ip_address(IPAddress &ip_out);
+    bool get_subnet_mask(IPAddress &mask_out);
+    bool get_gateway_ip(IPAddress &ip_out);
 
     std::string get_current_ssid();
     uint8_t* get_current_bssid();
@@ -160,7 +157,7 @@ namespace pimoroni {
     uint8_t get_scan_networks();
     const char* get_ssid_networks(uint8_t network_item);
 
-    uint8_t get_enc_type_networks(uint8_t network_item);
+    wl_enc_type get_enc_type_networks(uint8_t network_item);
     uint8_t* get_bssid_networks(uint8_t network_item, uint8_t* bssid_out);
     uint8_t get_channel_networks(uint8_t network_item);
     int32_t get_rssi_networks(uint8_t network_item);
@@ -200,9 +197,11 @@ namespace pimoroni {
     uint8_t get_server_state(uint8_t sock);
     uint8_t get_client_state(uint8_t sock);
     uint16_t avail_data(uint8_t sock);
-    uint8_t avail_server(uint8_t sock);
+    uint8_t avail_server(uint8_t sock); // a weird copy of avail_data that truncates to uint8_t and returns 255 if unavailable...
+    // see: https://github.com/arduino-libraries/WiFiNINA/blob/e74d115d252bac24267e4b1a504c033f399924f2/src/utility/server_drv.cpp#L228-L288
+    // and: https://github.com/adafruit/nina-fw/blob/d73fe315cc7f9148a0918490d3b75430c8444bf7/main/CommandHandler.cpp#L437-L498
 
-    bool get_data(uint8_t sock, uint8_t *data_out, uint8_t peek);
+    bool get_data(uint8_t sock, uint8_t *data_out, bool peek);
     bool get_data_buf(uint8_t sock, uint8_t *data_out, uint16_t *data_len_out);
     bool insert_data_buf(uint8_t sock, const uint8_t *data_in, uint16_t len);
     bool send_udp_data(uint8_t sock);
@@ -217,6 +216,10 @@ namespace pimoroni {
     void wifi_set_ent_username(const std::string username);
     void wifi_set_ent_password(const std::string password);
     void wifi_set_ent_enable();
+
+    void sleep_set_wake_pin(uint8_t wake_pin);
+    void sleep_light();
+    void sleep_deep(uint8_t time);
   };
 
 }
