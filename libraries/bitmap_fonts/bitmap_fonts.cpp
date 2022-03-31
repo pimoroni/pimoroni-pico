@@ -43,7 +43,7 @@ namespace bitmap {
     char_index -= 32;
 
     const uint8_t *d = &font->data[char_index * font->max_width];
-    const uint8_t *a = &font->data[96 * font->max_width + char_accent * font->max_width];
+    const uint8_t *a = &font->data[101 * font->max_width + char_accent * font->max_width];
 
     // Vertical offset of our char within the 32 pixel column canvas
     // At 16 pixels this gives us 8 pixels above and below the char for accents and spacing.

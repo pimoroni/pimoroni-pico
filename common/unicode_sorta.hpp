@@ -99,7 +99,7 @@ static const char char_base[] = {
     'A', // Ã - c3 83 - A + TILDE
     'A', // Ä - c3 84 - A + DIAERESIS
     'A', // Å - c3 85 - A + RING ABOVE
-    ' ', // Æ - c3 86 - AE
+    '\x80', // Æ - c3 86 - AE
     'C', // Ç - c3 87 - C + CEDILLA
     'E', // È - c3 88 - E + GRAVE
     'E', // É - c3 89 - E + ACUTE
@@ -123,15 +123,15 @@ static const char char_base[] = {
     'U', // Û - c3 9b - U + CIRCUMFLEX
     'U', // Ü - c3 9c - U + DIAERESIS
     'Y', // Ý - c3 9d - Y + ACUTE
-    ' ', // Þ - c3 9e - THORN
-    ' ', // ß - c3 9f - SHARP S
+    '\x81', // Þ - c3 9e - THORN
+    '\x82', // ß - c3 9f - SHARP S
     'a', // à - c3 a0 - A + GRAVE
     'a', // á - c3 a1 - A + ACUTE
     'a', // â - c3 a2 - A + CIRCUMFLEX
     'a', // ã - c3 a3 - A + TILDE
     'a', // ä - c3 a4 - A + DIAERESIS
     'a', // å - c3 a5 - A + RING ABOVE
-    ' ', // æ - c3 a6 - AE
+    '\x83', // æ - c3 a6 - AE
     'c', // ç - c3 a7 - C + CEDILLA
     'e', // è - c3 a8 - E + GRAVE
     'e', // é - c3 a9 - E + ACUTE
@@ -155,7 +155,7 @@ static const char char_base[] = {
     'u', // û - c3 bb - U + CIRCUMFLEX
     'u', // ü - c3 bc - U + DIAERESIS
     'y', // ý - c3 bd - Y + ACUTE
-    ' ', // þ - c3 be - THORN
+    '\x84', // þ - c3 be - THORN
     'y', // ÿ - c3 bf - Y + DIAERESIS
 };
 
