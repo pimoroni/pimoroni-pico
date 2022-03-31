@@ -6,6 +6,7 @@ Badger 2040 is an RP2040 powered E Ink badge.
   - [Getting Started](#getting-started)
   - [Update Speed](#update-speed)
   - [Buttons](#buttons)
+  - [System Speed](#system-speed)
   - [Other Functions](#other-functions)
   - [Other Constants](#other-constants)
     - [Screen Size](#screen-size)
@@ -78,6 +79,8 @@ The system clock speed of the RP2040 can be controlled, allowing power to be sav
 * `SYSTEM_TURBO` = `4`  _250 MHz_
 
 On USB, the system will not run slower than 48MHz, as that is the minimum clock speed required to keep the USB connection stable.
+
+It is best to set the clock speed as the first thing in your program, and you must not change it after initializing any drivers for any I2C hardware connected to the qwiic port.  To allow you to set the speed at the top of your program, this method is on the `badger2040` module, rather than the `badger` instance, although we have made sure that it is safe to call it after creating a `badger` instance.
 
 Note that `SYSTEM_TURBO` overclocks the RP2040 to 250MHz, and applies a small over voltage to ensure this is stable.  We've found that every RP2040 we've tested is happy to run at this speed without any issues.
 

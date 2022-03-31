@@ -225,6 +225,12 @@ namespace pimoroni {
     }
     w += _thickness - 1;
     h += _thickness - 1;
+    if (x + w > 296) {
+      w = 296 - x;
+    }
+    if (y + h > 128) {
+      h = 128 - y;
+    }
 
     if (h >= 8) {
       // Directly write to the frame buffer when clearing a large area

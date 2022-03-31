@@ -11,15 +11,15 @@ extern "C" {
 
 extern uint32_t badger_buttons_on_wake;
 
-static bool Badger2040_wake_state_any() {
+static bool _Badger2040_wake_state_any() {
     return badger_buttons_on_wake > 0;
 }
 
-static bool Badger2040_wake_state_get(uint32_t pin) {
+static bool _Badger2040_wake_state_get(uint32_t pin) {
     return badger_buttons_on_wake & (0b1 << pin);
 }
 
-static bool Badger2040_wake_state_get_once(uint32_t pin) {
+static bool _Badger2040_wake_state_get_once(uint32_t pin) {
     uint32_t mask = 0b1 << pin;
     bool value = badger_buttons_on_wake & mask;
     badger_buttons_on_wake &= ~mask;
@@ -195,7 +195,7 @@ MICROPY_EVENT_POLL_HOOK
 }
 
 mp_obj_t Badger2040_woken_by_button() {
-    return Badger2040_wake_state_any() ? mp_const_true : mp_const_false;
+    return _Badger2040_wake_state_any() ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_halt(mp_obj_t self_in) {
@@ -250,13 +250,13 @@ mp_obj_t Badger2040_thickness(mp_obj_t self_in, mp_obj_t thickness) {
 mp_obj_t Badger2040_pressed(mp_obj_t self_in, mp_obj_t button) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     self->badger2040->update_button_states();
-    bool wake_state = Badger2040_wake_state_get_once(mp_obj_get_int(button));
+    bool wake_state = _Badger2040_wake_state_get_once(mp_obj_get_int(button));
     bool state = self->badger2040->pressed(mp_obj_get_int(button));
     return (state || wake_state) ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t Badger2040_pressed_to_wake(mp_obj_t button) {
-    bool state = Badger2040_wake_state_get(mp_obj_get_int(button));
+    bool state = _Badger2040_wake_state_get(mp_obj_get_int(button));
     return state ? mp_const_true : mp_const_false;
 }
 
@@ -521,31 +521,29 @@ mp_obj_t Badger2040_measure_glyph(size_t n_args, const mp_obj_t *pos_args, mp_ma
 #include "hardware/clocks.h"
 #include "hardware/pll.h"
 
-mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
-    uint32_t sys_freq;
-    uint32_t selected_speed = mp_obj_get_int(speed);
+#if MICROPY_HW_ENABLE_UART_REPL
+#include "uart.h"
+#endif
 
-    if (gpio_get(pimoroni::Badger2040::VBUS_DETECT) && selected_speed < 2) {
-      // If on USB never go slower than normal speed.
-      selected_speed = 2;
-    }
+static void _Badger2040_set_system_speed(uint32_t selected_speed) {
+    uint32_t sys_freq;
 
     switch (selected_speed)
     {
     case 4: // TURBO: 250 MHZ, 1.2V
         vreg_set_voltage(VREG_VOLTAGE_1_20);
         set_sys_clock_khz(250000, true);
-        return mp_const_none;
+        return;
     case 3: // FAST: 133 MHZ
         vreg_set_voltage(VREG_VOLTAGE_1_10);
         set_sys_clock_khz(133000, true);
-        return mp_const_none;
+        return;
 
     default:
     case 2: // NORMAL: 48 MHZ
         vreg_set_voltage(VREG_VOLTAGE_1_10);
         set_sys_clock_48mhz();
-        return mp_const_none;
+        return;
 
     case 1: // SLOW: 12 MHZ, 1.0V
         sys_freq = 12 * MHZ;
@@ -555,7 +553,6 @@ mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
         sys_freq = 4 * MHZ;
         break;
     }
-
 
     // Set the configured clock speed, by dividing the USB PLL
     clock_configure(clk_sys,
@@ -584,6 +581,32 @@ mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
 
     // Drop the core voltage
     vreg_set_voltage(VREG_VOLTAGE_1_00);
+}
+
+mp_obj_t Badger2040_system_speed(mp_obj_t speed) {
+    uint32_t selected_speed = mp_obj_get_int(speed);
+
+    if (gpio_get(pimoroni::Badger2040::VBUS_DETECT) && selected_speed < 2) {
+        // If on USB never go slower than normal speed.
+        selected_speed = 2;
+    }
+
+    _Badger2040_set_system_speed(selected_speed);
+
+#if MICROPY_HW_ENABLE_UART_REPL
+    setup_default_uart();
+    mp_uart_init();
+#endif
+
+    if (selected_speed >= 2) {
+        spi_set_baudrate(PIMORONI_SPI_DEFAULT_INSTANCE, 12 * MHZ);
+    }
+    else {
+        // Set the SPI baud rate for communicating with the display to
+        // go as fast as possible (which is now 6 or 2 MHz)
+        spi_get_hw(PIMORONI_SPI_DEFAULT_INSTANCE)->cpsr = 2;
+        hw_write_masked(&spi_get_hw(PIMORONI_SPI_DEFAULT_INSTANCE)->cr0, 0, SPI_SSPCR0_SCR_BITS);
+    }
 
     return mp_const_none;
 }
