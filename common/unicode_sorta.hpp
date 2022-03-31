@@ -9,6 +9,8 @@ It permits rudimentary support for unicode characters by providing a lookup
 table to map anything prefixed with 0xc3 to its non-accented equivilent.
 */
 
+namespace unicode_sorta {
+
 const uint8_t UNICODE_PREFIX = 0xc3;
 
 enum accents : uint8_t {
@@ -156,3 +158,5 @@ static const char char_base[] = {
     ' ', // þ - c3 be - THORN
     'y', // ÿ - c3 bf - Y + DIAERESIS
 };
+
+}

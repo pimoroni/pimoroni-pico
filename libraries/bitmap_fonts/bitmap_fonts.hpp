@@ -8,6 +8,9 @@ namespace bitmap {
   struct font_t {
     const uint8_t height;
     const uint8_t max_width;
+    const uint8_t accent_offset_upper; // Number of pixels to shift accents UP above uppercase letters
+    const uint8_t accent_offset_lower; // Number of pixels to shift accents UP above lowercase letters
+    const uint8_t accent_offset_below; // Number of pixels to shift accents DOWN below lowercase letters (height of the cedilla accent)
     const uint8_t widths[96];
     const uint8_t data[];
   };

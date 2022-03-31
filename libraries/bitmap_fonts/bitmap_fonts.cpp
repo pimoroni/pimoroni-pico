@@ -10,7 +10,7 @@ namespace bitmap {
     uint8_t char_index = c;
 
     if(char_index > 127) {
-      char_index = char_base[c - 128];
+      char_index = unicode_sorta::char_base[c - 128];
     }
 
     char_index -= 32;
@@ -32,22 +32,49 @@ namespace bitmap {
     }
 
     uint8_t char_index = c;
+    unicode_sorta::accents char_accent = unicode_sorta::ACCENT_NONE;
 
     if(char_index > 127) {
-      char_index = char_base[c - 128];
+      char_index = unicode_sorta::char_base[c - 128];
+      char_accent = unicode_sorta::char_accent[c - 128];
     }
 
+    bool upper = char_index < 97; // Only valid for A-Z and a-z
     char_index -= 32;
 
     const uint8_t *d = &font->data[char_index * font->max_width];
+    const uint8_t *a = &font->data[96 * font->max_width + char_accent * font->max_width];
+
+    // Vertical offset of our char within the 32 pixel column canvas
+    // At 16 pixels this gives us 8 pixels above and below the char for accents and spacing.
+    uint8_t offset = (32 - font->height) / 2;
+
     for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
-      for(uint8_t cy = 0; cy < font->height; cy++) {
-        if((1U << cy) & *d) {
-          rectangle(x + (cx * scale), y + (cy * scale), scale, scale);
+      // Our maximum bitmap font height will be 16 pixels
+      // give ourselves a 32 pixel high canvas in which to plot the char and accent.
+      uint32_t data = *d << offset;
+      if(char_accent != unicode_sorta::ACCENT_NONE) {
+        uint32_t accent = *a;
+        accent <<= offset; // Shift the char to the middle of the canvas
+        if(char_accent == unicode_sorta::ACCENT_CEDILLA) {
+          // Special case handling for the Cedilla- that little upside-down question mark that goes beneath characters
+          accent <<= font->accent_offset_below;
+        } else {
+          accent >>= upper ? font->accent_offset_upper : font->accent_offset_lower; // Shift the accent above the char
+        }
+        data |= accent; // Merge the accent data into the canvas
+      }
+      // Offset our y position to account for our column canvas being 32 pixels
+      int y_offset = y - (offset * scale);
+      // Dra the 32 pixel high column
+      for(uint8_t cy = 0; cy < 32; cy++) {
+        if((1U << cy) & data) {
+          rectangle(x + (cx * scale), y_offset + (cy * scale), scale, scale);
         }
       }
 
       d++;
+      a++;
     }
   }
 
