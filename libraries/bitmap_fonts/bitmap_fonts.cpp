@@ -1,8 +1,20 @@
 #include "bitmap_fonts.hpp"
+#include "common/unicode_sorta.hpp"
 
 namespace bitmap {
   int32_t measure_character(const font_t *font, const char c, const uint8_t scale) {
-    uint8_t char_index = c - 32;
+    if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
+      return 0;
+    }
+
+    uint8_t char_index = c;
+
+    if(char_index > 127) {
+      char_index = char_base[c - 128];
+    }
+
+    char_index -= 32;
+
     return font->widths[char_index] * scale;
   }
 
@@ -15,7 +27,17 @@ namespace bitmap {
   }
 
   void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale) {
-    uint8_t char_index = c - 32;
+    if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
+      return;
+    }
+
+    uint8_t char_index = c;
+
+    if(char_index > 127) {
+      char_index = char_base[c - 128];
+    }
+
+    char_index -= 32;
 
     const uint8_t *d = &font->data[char_index * font->max_width];
     for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
@@ -43,7 +65,7 @@ namespace bitmap {
 
       uint16_t word_width = 0;
       for(size_t j = i; j < next_space; j++) {
-        word_width += font->widths[t[j] - 32] * scale;
+        word_width += measure_character(font, t[j], scale);
       }
 
       // if this word would exceed the wrap limit then
@@ -56,7 +78,7 @@ namespace bitmap {
       // draw word
       for(size_t j = i; j < next_space; j++) {
         character(font, rectangle, t[j], x + co, y + lo, scale);
-        co += font->widths[t[j] - 32] * scale;
+        co += measure_character(font, t[j], scale);
       }
 
       // move character offset to end of word and add a space

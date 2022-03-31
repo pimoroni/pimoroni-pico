@@ -1,4 +1,5 @@
 #include "hershey_fonts.hpp"
+#include "common/unicode_sorta.hpp"
 #include <cmath>
 
 namespace hershey {
@@ -18,8 +19,12 @@ namespace hershey {
   }
 
   const font_glyph_t* glyph_data(const font_t* font, unsigned char c) {
-    if(c < 32 || c > 127) {
+    if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
       return nullptr;
+    }
+
+    if(c > 127) {
+      c = char_base[c - 128];
     }
 
     return &font->chars[c - 32];
@@ -45,6 +50,9 @@ namespace hershey {
   }
 
   int32_t glyph(const font_t* font, line_func line, unsigned char c, int32_t x, int32_t y, float s, float a) {
+    if (c == UNICODE_PREFIX) {
+      return 0;
+    }
     const font_glyph_t *gd = glyph_data(font, c);
 
     // if glyph data not found (id too great) then skip
