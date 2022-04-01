@@ -444,7 +444,7 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     enum { ARG_self, ARG_char, ARG_x, ARG_y, ARG_scale, ARG_rotation };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
@@ -455,7 +455,8 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    int c = args[ARG_char].u_int;
+    int c = 0;
+
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     float scale = 1.0f;
@@ -468,7 +469,16 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     }
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
-    self->badger2040->glyph(c, x, y, scale, rotation);
+
+    if (mp_obj_is_int(args[ARG_char].u_obj)) {
+        c = (uint8_t)mp_obj_get_int(args[ARG_char].u_obj);
+        self->badger2040->glyph(c, x, y, scale, rotation);
+    } else if (mp_obj_is_str_or_bytes(args[ARG_char].u_obj)) {
+        std::string message = mp_obj_to_string_r(args[ARG_char].u_obj);
+        self->badger2040->text(message, x, y, scale, rotation);
+    } else {
+        mp_raise_TypeError("glyph: expected char or string.");
+    }
 
     return mp_const_none;
 }

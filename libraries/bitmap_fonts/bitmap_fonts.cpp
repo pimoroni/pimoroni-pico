@@ -1,8 +1,7 @@
 #include "bitmap_fonts.hpp"
-#include "common/unicode_sorta.hpp"
 
 namespace bitmap {
-  int32_t measure_character(const font_t *font, const char c, const uint8_t scale) {
+  int32_t measure_character(const font_t *font, const char c, const uint8_t scale, unicode_sorta::codepage_t codepage) {
     if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
       return 0;
     }
@@ -10,7 +9,11 @@ namespace bitmap {
     uint8_t char_index = c;
 
     if(char_index > 127) {
-      char_index = unicode_sorta::char_base[c - 128];
+      if(codepage == unicode_sorta::PAGE_195) {
+        char_index = unicode_sorta::char_base_195[c - 128];
+      } else {
+        char_index = unicode_sorta::char_base_194[c - 128 - 32];
+      }
     }
 
     char_index -= 32;
@@ -20,13 +23,22 @@ namespace bitmap {
 
   int32_t measure_text(const font_t *font, const std::string &t, const uint8_t scale) {
     int32_t text_width = 0;
+    unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
     for(auto c : t) {
-      text_width += measure_character(font, c, scale);
+      if(c == unicode_sorta::PAGE_194_START) {
+        codepage = unicode_sorta::PAGE_194;
+        continue;
+      } else if (c == unicode_sorta::PAGE_195_START) {
+        continue;
+      }
+      text_width += measure_character(font, c, scale, codepage);
+      text_width += 1 * scale;
+      codepage = unicode_sorta::PAGE_195; // Reset back to default
     }
     return text_width;
   }
 
-  void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale) {
+  void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale, unicode_sorta::codepage_t codepage) {
     if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
       return;
     }
@@ -37,8 +49,13 @@ namespace bitmap {
     // Remap any chars that fall outside of the 7-bit ASCII range
     // using our unicode fudge lookup table.
     if(char_index > 127) {
-      char_index = unicode_sorta::char_base[c - 128];
-      char_accent = unicode_sorta::char_accent[c - 128];
+      if(codepage == unicode_sorta::PAGE_195) {
+        char_index = unicode_sorta::char_base_195[c - 128];
+        char_accent = unicode_sorta::char_accent[c - 128];
+      } else {
+        char_index = unicode_sorta::char_base_194[c - 128 - 32];
+        char_accent = unicode_sorta::ACCENT_NONE;
+      }
     }
 
     // We don't map font data for the first 32 non-printable ASCII chars
@@ -55,7 +72,7 @@ namespace bitmap {
 
     // Accents can be up to 8 pixels tall on both 8bit and 16bit fonts
     // Each accent's data is font->max_width bytes + 2 offset bytes long
-    const uint8_t *a = &font->data[101 * bytes_per_char + char_accent * (font->max_width + 2)];
+    const uint8_t *a = &font->data[(base_chars + extra_chars) * bytes_per_char + char_accent * (font->max_width + 2)];
 
     // Effectively shift off the first two bytes of accent data-
     // these are the lower and uppercase accent offsets
@@ -104,6 +121,7 @@ namespace bitmap {
 
   void text(const font_t *font, rect_func rectangle, const std::string &t, const int32_t x, const int32_t y, const int32_t wrap, const uint8_t scale) {
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
+    unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
 
     size_t i = 0;
     while(i < t.length()) {
@@ -116,7 +134,14 @@ namespace bitmap {
 
       uint16_t word_width = 0;
       for(size_t j = i; j < next_space; j++) {
-        word_width += measure_character(font, t[j], scale);
+        if (t[j] == unicode_sorta::PAGE_194_START) {
+          codepage = unicode_sorta::PAGE_194;
+          continue;
+        } else if (t[j] == unicode_sorta::PAGE_195_START) {
+          continue;
+        }
+        word_width += measure_character(font, t[j], scale, codepage);
+        codepage = unicode_sorta::PAGE_195;
       }
 
       // if this word would exceed the wrap limit then
@@ -128,8 +153,16 @@ namespace bitmap {
 
       // draw word
       for(size_t j = i; j < next_space; j++) {
-        character(font, rectangle, t[j], x + co, y + lo, scale);
-        co += measure_character(font, t[j], scale);
+        if (t[j] == unicode_sorta::PAGE_194_START) {
+          codepage = unicode_sorta::PAGE_194;
+          continue;
+        } else if (t[j] == unicode_sorta::PAGE_195_START) {
+          continue;
+        }
+        character(font, rectangle, t[j], x + co, y + lo, scale, codepage);
+        co += measure_character(font, t[j], scale, codepage);
+        co += 1 * scale;
+        codepage = unicode_sorta::PAGE_195;
       }
 
       // move character offset to end of word and add a space

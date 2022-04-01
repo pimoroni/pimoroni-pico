@@ -24,7 +24,7 @@ namespace hershey {
     }
 
     if(c > 127) {
-      c = unicode_sorta::char_base[c - 128];
+      c = unicode_sorta::char_base_195[c - 128];
     }
 
     return &font->chars[c - 32];
