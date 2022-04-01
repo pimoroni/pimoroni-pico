@@ -2,17 +2,25 @@ import badger2040
 import badger_os
 
 # Global Constants
-FONT_NAMES = ("sans", "gothic", "cursive", "serif", "serif_italic")
+FONT_NAMES = (
+    ("sans", 0.7, 2),
+    ("gothic", 0.7, 2),
+    ("cursive", 0.7, 2),
+    ("serif", 0.7, 2),
+    ("serif_italic", 0.7, 2),
+    ("bitmap6", 3, 1),
+    ("bitmap8", 2, 1),
+    ("bitmap14_outline", 1, 1)
+)
 
 WIDTH = badger2040.WIDTH
 HEIGHT = badger2040.HEIGHT
 
 MENU_TEXT_SIZE = 0.5
-MENU_SPACING = 20
+MENU_SPACING = 16
 MENU_WIDTH = 84
-MENU_PADDING = 2
+MENU_PADDING = 5
 
-TEXT_SIZE = 0.8
 TEXT_INDENT = MENU_WIDTH + 10
 
 ARROW_THICKNESS = 3
@@ -59,27 +67,28 @@ def draw_frame():
 
 # Draw the fonts and menu
 def draw_fonts():
-    display.font("sans")
+    display.font("bitmap8")
     display.thickness(1)
     for i in range(len(FONT_NAMES)):
-        name = FONT_NAMES[i]
+        name, size, thickness = FONT_NAMES[i]
         display.pen(0)
         if i == state["selected_font"]:
             display.rectangle(0, i * MENU_SPACING, MENU_WIDTH, MENU_SPACING)
             display.pen(15)
 
-        display.text(name, MENU_PADDING, (i * MENU_SPACING) + (MENU_SPACING // 2), MENU_TEXT_SIZE)
+        display.text(name, MENU_PADDING, (i * MENU_SPACING) + int((MENU_SPACING - 8) / 2), MENU_TEXT_SIZE)
 
-    display.font(FONT_NAMES[state["selected_font"]])
-    display.thickness(2)
+    name, size, thickness = FONT_NAMES[state["selected_font"]]
+    display.font(name)
+    display.thickness(thickness)
+
+    y = 0 if name.startswith("bitmap") else 10
 
     display.pen(0)
-    display.text("The quick", TEXT_INDENT, 10, TEXT_SIZE)
-    display.text("brown fox", TEXT_INDENT, 32, TEXT_SIZE)
-    display.text("jumped over", TEXT_INDENT, 54, TEXT_SIZE)
-    display.text("the lazy dog.", TEXT_INDENT, 76, TEXT_SIZE)
-    display.text("0123456789", TEXT_INDENT, 98, TEXT_SIZE)
-    display.text("!\"£$%^&*()", TEXT_INDENT, 120, TEXT_SIZE)
+    for line in ("The quick", "brown fox", "jumps over", "the lazy dog.", "0123456789", "!\"£$%^&*()"):
+        display.text(line, TEXT_INDENT, y, size)
+        y += 22
+
     display.thickness(1)
 
     display.update()

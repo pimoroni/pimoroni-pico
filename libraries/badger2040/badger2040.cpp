@@ -349,7 +349,7 @@ namespace pimoroni {
     }
   }
 
-  void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a) {
+  void Badger2040::text(std::string message, int32_t x, int32_t y, float s, float a, uint8_t letter_spacing) {
     if (_bitmap_font) {
       bitmap::text(_bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
         for(auto px = 0; px < w; px++) {
@@ -357,7 +357,7 @@ namespace pimoroni {
             pixel(x + px, y + py);
           }
         }
-      }, message, x, y, 296 - x, std::max(1.0f, s));
+      }, message, x, y, 296 - x, std::max(1.0f, s), letter_spacing);
     } else {
       hershey::text(_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
         line(x1, y1, x2, y2);
@@ -365,8 +365,8 @@ namespace pimoroni {
     }
   }
 
-  int32_t Badger2040::measure_text(std::string message, float s) {
-    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, std::max(1.0f, s));
+  int32_t Badger2040::measure_text(std::string message, float s, uint8_t letter_spacing) {
+    if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, std::max(1.0f, s), letter_spacing);
     return hershey::measure_text(_font, message, s);
   }
 
@@ -381,6 +381,9 @@ namespace pimoroni {
       _font = nullptr;
     } else if (name == "bitmap8") {
       _bitmap_font = &font8;
+      _font = nullptr;
+    } else if (name == "bitmap14_outline") {
+      _bitmap_font = &font14_outline;
       _font = nullptr;
     } else {
       // check that font exists and assign it
