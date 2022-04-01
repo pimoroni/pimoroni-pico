@@ -21,7 +21,7 @@ namespace bitmap {
     return font->widths[char_index] * scale;
   }
 
-  int32_t measure_text(const font_t *font, const std::string &t, const uint8_t scale) {
+  int32_t measure_text(const font_t *font, const std::string &t, const uint8_t scale, const uint8_t letter_spacing) {
     int32_t text_width = 0;
     unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
     for(auto c : t) {
@@ -32,7 +32,7 @@ namespace bitmap {
         continue;
       }
       text_width += measure_character(font, c, scale, codepage);
-      text_width += 1 * scale;
+      text_width += letter_spacing * scale;
       codepage = unicode_sorta::PAGE_195; // Reset back to default
     }
     return text_width;
@@ -119,7 +119,7 @@ namespace bitmap {
     }
   }
 
-  void text(const font_t *font, rect_func rectangle, const std::string &t, const int32_t x, const int32_t y, const int32_t wrap, const uint8_t scale) {
+  void text(const font_t *font, rect_func rectangle, const std::string &t, const int32_t x, const int32_t y, const int32_t wrap, const uint8_t scale, const uint8_t letter_spacing) {
     uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
     unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
 
@@ -161,7 +161,7 @@ namespace bitmap {
         }
         character(font, rectangle, t[j], x + co, y + lo, scale, codepage);
         co += measure_character(font, t[j], scale, codepage);
-        co += 1 * scale;
+        co += letter_spacing * scale;
         codepage = unicode_sorta::PAGE_195;
       }
 
