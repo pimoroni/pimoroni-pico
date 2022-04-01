@@ -34,45 +34,69 @@ namespace bitmap {
     uint8_t char_index = c;
     unicode_sorta::accents char_accent = unicode_sorta::ACCENT_NONE;
 
+    // Remap any chars that fall outside of the 7-bit ASCII range
+    // using our unicode fudge lookup table.
     if(char_index > 127) {
       char_index = unicode_sorta::char_base[c - 128];
       char_accent = unicode_sorta::char_accent[c - 128];
     }
 
-    bool upper = char_index < 97; // Only valid for A-Z and a-z
+    // We don't map font data for the first 32 non-printable ASCII chars
     char_index -= 32;
 
-    const uint8_t *d = &font->data[char_index * font->max_width];
-    const uint8_t *a = &font->data[101 * font->max_width + char_accent * font->max_width];
+    // If our font is taller than 8 pixels it must be two bytes per column
+    bool two_bytes_per_column = font->height > 8;
 
-    // Vertical offset of our char within the 32 pixel column canvas
-    // At 16 pixels this gives us 8 pixels above and below the char for accents and spacing.
-    uint8_t offset = (32 - font->height) / 2;
+    // Figure out how many bytes we need to skip per char to find our data in the array
+    uint8_t bytes_per_char = two_bytes_per_column ? font->max_width * 2 : font->max_width;
 
+    // Get a pointer to the start of the data for this character
+    const uint8_t *d = &font->data[char_index * bytes_per_char];
+
+    // Accents can be up to 8 pixels tall on both 8bit and 16bit fonts
+    // Each accent's data is font->max_width bytes + 2 offset bytes long
+    const uint8_t *a = &font->data[101 * bytes_per_char + char_accent * (font->max_width + 2)];
+
+    // Effectively shift off the first two bytes of accent data-
+    // these are the lower and uppercase accent offsets
+    const uint8_t offset_lower = *a++;
+    const uint8_t offset_upper = *a++;
+
+    // Pick which offset we should use based on the case of the char
+    // This is only valid for A-Z a-z.
+    // Note this magic number is relative to the start of printable ASCII chars.
+    uint8_t accent_offset = char_index < 65 ? offset_upper : offset_lower;
+
+    // Offset our y position to account for our column canvas being 32 pixels
+    int y_offset = y - (8 * scale);
+
+    // Iterate through each horizontal column of font (and accent) data
     for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
       // Our maximum bitmap font height will be 16 pixels
       // give ourselves a 32 pixel high canvas in which to plot the char and accent.
-      uint32_t data = *d << offset;
-      if(char_accent != unicode_sorta::ACCENT_NONE) {
-        uint32_t accent = *a;
-        accent <<= offset; // Shift the char to the middle of the canvas
-        if(char_accent == unicode_sorta::ACCENT_CEDILLA) {
-          // Special case handling for the Cedilla- that little upside-down question mark that goes beneath characters
-          accent <<= font->accent_offset_below;
-        } else {
-          accent >>= upper ? font->accent_offset_upper : font->accent_offset_lower; // Shift the accent above the char
-        }
-        data |= accent; // Merge the accent data into the canvas
+      // We shift the char down 8 pixels to make room for an accent above.
+      uint32_t data = *d << 8;
+
+      // For fonts that are taller than 8 pixels (up to 16) they need two bytes
+      if(two_bytes_per_column) {
+        d++;
+        data <<= 8;      // Move down the first byte
+        data |= *d << 8; // Add the second byte
       }
-      // Offset our y position to account for our column canvas being 32 pixels
-      int y_offset = y - (offset * scale);
-      // Dra the 32 pixel high column
+
+      // If the char has an accent, merge it into the column data at its offset
+      if(char_accent != unicode_sorta::ACCENT_NONE) {
+        data |= *a << accent_offset;
+      }
+
+      // Draw the 32 pixel column
       for(uint8_t cy = 0; cy < 32; cy++) {
         if((1U << cy) & data) {
           rectangle(x + (cx * scale), y_offset + (cy * scale), scale, scale);
         }
       }
 
+      // Move to the next columns of char and accent data
       d++;
       a++;
     }
