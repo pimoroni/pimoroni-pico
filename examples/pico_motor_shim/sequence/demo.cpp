@@ -11,6 +11,7 @@ Press "A" to start and stop the movement sequence
 */
 
 using namespace pimoroni;
+using namespace motor;
 
 static constexpr float TOP_SPEED = 1.0f; //A value between 0 and 1
 static const uint32_t ACCELERATE_TIME_MS = 2000;
@@ -20,8 +21,8 @@ static const uint32_t STOP_TIME_MS = 1000;
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
 
-Motor motor_1(pico_motor_shim::MOTOR_1_POS, pico_motor_shim::MOTOR_1_NEG);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
-Motor motor_2(pico_motor_shim::MOTOR_2_POS, pico_motor_shim::MOTOR_2_NEG);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
+Motor motor_1(pico_motor_shim::MOTOR_1);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
+Motor motor_2(pico_motor_shim::MOTOR_2);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
 
 static bool button_toggle = false;
 

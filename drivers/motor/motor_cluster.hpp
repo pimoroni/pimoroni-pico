@@ -24,15 +24,10 @@ namespace motor {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    MotorCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type = ANGULAR, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-
-    MotorCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, const Calibration& calibration, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, const Calibration& calibration, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
-    MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, const Calibration& calibration, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    MotorCluster(PIO pio, uint sm, uint pin_mask, float speed_scale = MotorState::DEFAULT_SPEED_SCALE, bool inverted = false, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, float speed_scale = MotorState::DEFAULT_SPEED_SCALE, bool inverted = false, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, float speed_scale = MotorState::DEFAULT_SPEED_SCALE, bool inverted = false, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+    MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, float speed_scale = MotorState::DEFAULT_SPEED_SCALE, bool inverted = false, float freq = MotorState::DEFAULT_FREQUENCY, bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
     ~MotorCluster();
 
 
@@ -79,24 +74,17 @@ namespace motor {
     bool frequency(float freq);
 
     //--------------------------------------------------
-    float min_speed(uint8_t motor) const;
-    float mid_speed(uint8_t motor) const;
-    float max_speed(uint8_t motor) const;
+    float speed_scale(uint8_t motor) const;
 
-    void to_min(uint8_t motor, bool load = true);
-    void to_min(const uint8_t *motors, uint8_t length, bool load = true);
-    void to_min(std::initializer_list<uint8_t> motors, bool load = true);
-    void all_to_min(bool load = true);
+    void to_full_negative(uint8_t motor, bool load = true);
+    void to_full_negative(const uint8_t *motors, uint8_t length, bool load = true);
+    void to_full_negative(std::initializer_list<uint8_t> motors, bool load = true);
+    void all_to_full_negative(bool load = true);
 
-    void to_mid(uint8_t motor, bool load = true);
-    void to_mid(const uint8_t *motors, uint8_t length, bool load = true);
-    void to_mid(std::initializer_list<uint8_t> motors, bool load = true);
-    void all_to_mid(bool load = true);
-
-    void to_max(uint8_t motor, bool load = true);
-    void to_max(const uint8_t *motors, uint8_t length, bool load = true);
-    void to_max(std::initializer_list<uint8_t> motors, bool load = true);
-    void all_to_max(bool load = true);
+    void to_full_positive(uint8_t motor, bool load = true);
+    void to_full_positive(const uint8_t *motors, uint8_t length, bool load = true);
+    void to_full_positive(std::initializer_list<uint8_t> motors, bool load = true);
+    void all_to_full_positive(bool load = true);
 
     void to_percent(uint8_t motor, float in, float in_min = MotorState::ZERO_PERCENT, float in_max = MotorState::ONEHUNDRED_PERCENT, bool load = true);
     void to_percent(const uint8_t *motors, uint8_t length, float in, float in_min = MotorState::ZERO_PERCENT, float in_max = MotorState::ONEHUNDRED_PERCENT, bool load = true);
@@ -108,16 +96,12 @@ namespace motor {
     void to_percent(std::initializer_list<uint8_t> motors, float in, float in_min, float in_max, float speed_min, float speed_max, bool load = true);
     void all_to_percent(float in, float in_min, float in_max, float speed_min, float speed_max, bool load = true);
 
-    Calibration& calibration(uint8_t motor);
-    const Calibration& calibration(uint8_t motor) const;
-
     void load();
 
     //--------------------------------------------------
   private:
     void apply_duty(uint8_t motor, float duty, bool load);
-    void create_motor_states(CalibrationType default_type, bool auto_phase);
-    void create_motor_states(const Calibration& calibration, bool auto_phase);
+    void create_motor_states(float speed_scale, bool inverted, bool auto_phase);
   };
 
 }

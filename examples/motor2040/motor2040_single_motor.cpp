@@ -22,7 +22,7 @@ constexpr float SWEEP_EXTENT = 90.0f;
 
 
 // Create a motor on pin 0 and 1
-Motor2 m = Motor2(motor2040::SERVO_1, motor2040::SERVO_2);
+Motor2 m = Motor2(motor2040::MOTOR_1);
 
 
 int main() {
@@ -31,21 +31,21 @@ int main() {
   // Initialise the motor
   m.init();
 
-  // Enable the motor (this puts it at the middle)
+  // Enable the motor
   m.enable();
   sleep_ms(2000);
 
-  // Go to min
-  m.to_min();
+  // Go at full neative
+  m.to_full_negative();
   sleep_ms(2000);
 
-  // Go to max
-  m.to_max();
+  // Go at full positive
+  m.to_full_positive();
   sleep_ms(2000);
 
-  // Go back to mid
-  //m.to_mid();
-  //sleep_ms(2000);
+  // Stop the motor
+  m.stop();
+  sleep_ms(2000);
 
   // Do a sine sweep
   for(auto j = 0u; j < SWEEPS; j++) {

@@ -13,6 +13,7 @@ Press "A" to start and stop the balancer
 */
 
 using namespace pimoroni;
+using namespace motor;
 
 static constexpr float TOP_SPEED = 1.0f; //A value between 0 and 1
 static constexpr float Z_BIAS_CORRECTION = 0.5f; //A magic number that seems to correct the MSA301's Z bias
@@ -22,8 +23,8 @@ static constexpr float PROPORTIONAL = 0.03f;
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
 
-Motor motor_1(pico_motor_shim::MOTOR_1_POS, pico_motor_shim::MOTOR_1_NEG);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
-Motor motor_2(pico_motor_shim::MOTOR_2_POS, pico_motor_shim::MOTOR_2_NEG);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
+Motor motor_1(pico_motor_shim::MOTOR_1);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
+Motor motor_2(pico_motor_shim::MOTOR_2);//, Motor::DEFAULT_PWM_FREQUENCY, Motor::DEFAULT_DECAY_MODE);
 
 I2C i2c(BOARD::BREAKOUT_GARDEN);
 BreakoutMSA301 msa301(&i2c);

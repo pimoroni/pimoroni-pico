@@ -11,6 +11,7 @@ Plug a motor into connector 1, and press "A" to start the song playing (does not
 */
 
 using namespace pimoroni;
+using namespace motor;
 
 // List frequencies (in hz) to play in sequence here. Use zero for when silence or a pause is wanted
 // Song from PicoExplorer noise.py
@@ -39,11 +40,11 @@ static const uint STATIONARY_TOGGLE_US = 2000;
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
 #ifdef USE_FAST_DECAY
-  Motor motor_1(pico_motor_shim::MOTOR_1_POS, pico_motor_shim::MOTOR_1_NEG, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2_POS, pico_motor_shim::MOTOR_2_NEG, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
 #else
-  Motor motor_1(pico_motor_shim::MOTOR_1_POS, pico_motor_shim::MOTOR_1_NEG, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2_POS, pico_motor_shim::MOTOR_2_NEG, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
 #endif
 
 static bool button_toggle = false;

@@ -3,6 +3,7 @@ add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/motor.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/motor_state.cpp
 )
 
 target_include_directories(${DRIVER_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})

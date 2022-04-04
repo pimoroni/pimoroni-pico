@@ -1,29 +1,31 @@
 #include "motor_state.hpp"
+#include "float.h"
 
 namespace motor {
-  MotorState::MotorState() {
+  MotorState::MotorState() 
+    : motor_speed(0.0f), motor_scale(DEFAULT_SPEED_SCALE), inverted(false), last_enabled_duty(0.0f), enabled(false) {
   }
 
-  //MotorState::MotorState(CalibrationType default_type)
-  //  : calib(default_type) {
-  //}
-
-  //MotorState::MotorState(const Calibration& calibration) 
-  //  : calib(calibration) {
-  //}
-
-  float MotorState::enable() {
-    return _enable();
+  MotorState::MotorState(float speed_scale, bool inverted)
+    : motor_speed(0.0f), motor_scale(MAX(speed_scale, FLT_EPSILON)), inverted(inverted), last_enabled_duty(0.0f), enabled(false) {
   }
 
-  float MotorState::disable() {
+  float MotorState::enable_with_return() {
+    enabled = true;
+
+    float duty = 0.0f;
+    if((duty <= 0.0f - deadzone_percent) || (duty >= deadzone_percent)) {
+      if(inverted)
+        duty = 0.0f - last_enabled_duty;
+      else
+        duty = last_enabled_duty;
+    }
+    return duty;
+  }
+
+  float MotorState::disable_with_return() {
     enabled = false;
     return 0.0f; // A zero duty
-  }
-
-  float MotorState::_enable() {
-    enabled = true;
-    return last_enabled_duty;
   }
 
   bool MotorState::is_enabled() const {
@@ -35,14 +37,11 @@ namespace motor {
   }
 
   float MotorState::set_duty_with_return(float duty) {
-    //TODO
-    // float speed_out, duty_out;
-    // if(calib.duty_to_speed(duty, speed_out, duty_out)) {
-    //   motor_speed = speed_out;
-    //   last_enabled_duty = duty_out;
-    //   return _enable();
-    // }
-    return disable();
+    // Clamp the duty between the hard limits
+    last_enabled_duty = MIN(MAX(duty, -1.0f), 1.0f);
+    motor_speed = last_enabled_duty * motor_scale;
+
+    return enable_with_return();
   }
 
   float MotorState::get_speed() const {
@@ -50,58 +49,48 @@ namespace motor {
   }
 
   float MotorState::set_speed_with_return(float speed) {
-    //TODO
-    // float duty_out, speed_out;
-    // if(calib.speed_to_duty(speed, duty_out, speed_out)) {
-    //   last_enabled_duty = duty_out;
-    //   motor_speed = speed_out;
-    //   return _enable();
-    // }
-    return disable();
+    // Clamp the speed between the hard limits
+    motor_speed = MIN(MAX(speed, -motor_scale), motor_scale);
+    last_enabled_duty = motor_speed / motor_scale;
+
+    return enable_with_return();
   }
 
-  float MotorState::get_min_speed() const {
-    float speed = 0.0f;
-    //TODO
-    //if(calib.size() > 0) {
-    //  speed = calib.first().speed;
-    //}
-    return speed;
+  float MotorState::get_speed_scale() const {
+    return motor_scale;
   }
 
-  // float MotorState::get_mid_speed() const {
-  //   float speed = 0.0f;
-  //   if(calib.size() > 0) {
-  //     const Calibration::Pair &first = calib.first();
-  //     const Calibration::Pair &last = calib.last();
-  //     speed = (first.speed + last.speed) / 2.0f;
-  //   }
-  //   return speed;
-  // }
-
-  float MotorState::get_max_speed() const {
-    float speed = 0.0f;
-    //TODO
-    //if(calib.size() > 0) {
-    //  speed = calib.last().speed;
-    //}
-    return speed;
+  void MotorState::set_speed_scale(float speed_scale) {
+    motor_scale = MAX(speed_scale, FLT_EPSILON);
+    motor_speed = last_enabled_duty * motor_scale;
   }
 
-  float MotorState::to_min_with_return() {
-    return set_speed_with_return(get_min_speed());
+  void MotorState::invert_direction(bool invert) {
+    if(invert != inverted) {
+      inverted = invert;
+      motor_speed = 0.0f - motor_speed;
+      last_enabled_duty = 0.0f - last_enabled_duty;
+    }
   }
 
-  // float MotorState::to_mid_with_return() {
-  //   return set_speed_with_return(get_mid_speed());
-  // }
+  bool MotorState::is_inverted() const {
+    return inverted;
+  }
 
-  float MotorState::to_max_with_return() {
-    return set_speed_with_return(get_max_speed());
+  float MotorState::stop_with_return() {
+    return set_duty_with_return(0.0f);
+  }
+
+  float MotorState::to_full_negative_with_return() {
+    return set_duty_with_return(-1.0f);
+  }
+
+  float MotorState::to_full_positive_with_return() {
+    return set_duty_with_return(1.0f);
   }
 
   float MotorState::to_percent_with_return(float in, float in_min, float in_max) {
-    float speed = MotorState::map_float(in, in_min, in_max, get_min_speed(), get_max_speed());
+    float speed = MotorState::map_float(in, in_min, in_max, 0.0f - get_speed_scale(), get_speed_scale());
     return set_speed_with_return(speed);
   }
 
@@ -109,14 +98,6 @@ namespace motor {
     float speed = MotorState::map_float(in, in_min, in_max, speed_min, speed_max);
     return set_speed_with_return(speed);
   }
-
-  // Calibration& MotorState::calibration() {
-  //   return calib;
-  // }
-
-  // const Calibration& MotorState::calibration() const {
-  //   return calib;
-  // }
 
   int32_t MotorState::duty_to_level(float duty, uint32_t resolution) {
     return (int32_t)(duty * (float)resolution);

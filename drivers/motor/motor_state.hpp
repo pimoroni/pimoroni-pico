@@ -1,9 +1,24 @@
 #pragma once
 
 #include "pico/stdlib.h"
-#include "calibration.hpp"
 
 namespace motor {
+
+  struct MotorPins {
+    uint positive;
+    uint negative;
+
+    MotorPins() : positive(0), negative(0) {}
+    MotorPins(uint pos_pin, uint neg_pin) : positive(pos_pin), negative(neg_pin) {}
+  };
+
+  struct EncoderPins {
+    uint a;
+    uint b;
+
+    EncoderPins() : a(0), b(0) {}
+    EncoderPins(uint a_pin, uint b_pin) : a(a_pin), b(b_pin) {}
+  };
 
   class MotorState {
     //--------------------------------------------------
@@ -22,23 +37,24 @@ namespace motor {
   public:
     static constexpr float DEFAULT_FREQUENCY = 25000.0f;      // The standard motor update rate
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;
+    static constexpr float DEFAULT_SPEED_SCALE = 1.0f;      // The standard motor update rate
+
     static constexpr float MIN_FREQUENCY = 10.0f;           // Lowest achievable with hardware PWM with good resolution
     static constexpr float MAX_FREQUENCY = 50000.0f;          // Highest nice speed
     static constexpr float ZERO_PERCENT = 0.0f;
     static constexpr float ONEHUNDRED_PERCENT = 1.0f;
-
-  private:
-    static constexpr float MIN_VALID_DUTY = 1.0f;
 
 
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    float motor_speed = 0.0f;
-    float last_enabled_duty = 0.0f;
-    bool enabled = false;
-    //Calibration calib;
+    float motor_speed;
+    float motor_scale;
+    bool inverted;
+    float last_enabled_duty;
+    bool enabled;
+    float deadzone_percent = 0.0f;
 
 
     //--------------------------------------------------
@@ -46,19 +62,16 @@ namespace motor {
     //--------------------------------------------------
   public:
     MotorState();
-    //MotorState(CalibrationType default_type);
-    //MotorState(const Calibration& calibration);
+    MotorState(float speed_scale, bool inverted);
 
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    float enable();
-    float disable();
+    float enable_with_return();
+    float disable_with_return();
     bool is_enabled() const;
-  private:
-    float _enable(); // Internal version of enable without convenient initialisation to the middle
   public:
     float get_duty() const;
     float set_duty_with_return(float duty);
@@ -66,24 +79,23 @@ namespace motor {
     float get_speed() const;
     float set_speed_with_return(float speed);
 
-  public:
-    float get_min_speed() const;
-    //float get_mid_speed() const;
-    float get_max_speed() const;
+    float get_speed_scale() const;
+    void set_speed_scale(float speed_scale);
 
-    float to_min_with_return();
-    //float to_mid_with_return();
-    float to_max_with_return();
+    void invert_direction(bool invert);
+    bool is_inverted() const;
+
+    //--------------------------------------------------
+
+    float stop_with_return();
+    float to_full_negative_with_return();
+    float to_full_positive_with_return();
     float to_percent_with_return(float in, float in_min = ZERO_PERCENT, float in_max = ONEHUNDRED_PERCENT);
     float to_percent_with_return(float in, float in_min, float in_max, float speed_min, float speed_max);
-
-    //Calibration& calibration();
-    //const Calibration& calibration() const;
 
     //--------------------------------------------------
     static int32_t duty_to_level(float duty, uint32_t resolution);
 
-  private:
     static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
   };
 

@@ -3,44 +3,24 @@
 #include <cstdio>
 
 namespace motor {
-  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_mask, float speed_scale, bool inverted, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_mask, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(default_type, auto_phase);
+    create_motor_states(speed_scale, inverted, auto_phase);
   }
 
-  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, float speed_scale, bool inverted, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_base, pin_count, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(default_type, auto_phase);
+    create_motor_states(speed_scale, inverted, auto_phase);
   }
 
-  MotorCluster::MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+  MotorCluster::MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, float speed_scale, bool inverted, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pins, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(default_type, auto_phase);
+    create_motor_states(speed_scale, inverted, auto_phase);
   }
 
-  MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
+  MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, float speed_scale, bool inverted, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pins, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(default_type, auto_phase);
-  }
-
-  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pin_mask, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(calibration, auto_phase);
-  }
-
-  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_count, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pin_base, pin_count, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(calibration, auto_phase);
-  }
-
-  MotorCluster::MotorCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pins, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(calibration, auto_phase);
-  }
-
-  MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, const Calibration& calibration, float freq, bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pins, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(calibration, auto_phase);
+    create_motor_states(speed_scale, inverted, auto_phase);
   }
 
   MotorCluster::~MotorCluster() {
@@ -90,8 +70,8 @@ namespace motor {
 
   void MotorCluster::enable(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_count());
-    float new_pulse = states[motor].enable();
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].enable_with_return();
+    apply_duty(motor, new_duty, load);
   }
 
   void MotorCluster::enable(const uint8_t *motors, uint8_t length, bool load) {
@@ -122,8 +102,8 @@ namespace motor {
 
   void MotorCluster::disable(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_count());
-    float new_pulse = states[motor].disable();
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].disable_with_return();
+    apply_duty(motor, new_duty, load);
   }
 
   void MotorCluster::disable(const uint8_t *motors, uint8_t length, bool load) {
@@ -157,38 +137,38 @@ namespace motor {
     return states[motor].is_enabled();
   }
 
-  float MotorCluster::pulse(uint8_t motor) const {
+  float MotorCluster::duty(uint8_t motor) const {
     assert(motor < pwms.get_chan_count());
-    return states[motor].get_pulse();
+    return states[motor].get_duty();
   }
 
-  void MotorCluster::pulse(uint8_t motor, float pulse, bool load) {
+  void MotorCluster::duty(uint8_t motor, float duty, bool load) {
     assert(motor < pwms.get_chan_count());
-    float new_pulse = states[motor].set_pulse_with_return(pulse);
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].set_duty_with_return(duty);
+    apply_duty(motor, new_duty, load);
   }
 
-  void MotorCluster::pulse(const uint8_t *motors, uint8_t length, float pulse, bool load) {
+  void MotorCluster::duty(const uint8_t *motors, uint8_t length, float duty, bool load) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
-      this->pulse(motors[i], pulse, false);
+      this->duty(motors[i], duty, false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::pulse(std::initializer_list<uint8_t> motors, float pulse, bool load) {
+  void MotorCluster::duty(std::initializer_list<uint8_t> motors, float duty, bool load) {
     for(auto motor : motors) {
-      this->pulse(motor, pulse, false);
+      this->duty(motor, duty, false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::all_to_pulse(float pulse, bool load) {
+  void MotorCluster::all_to_duty(float duty, bool load) {
     uint8_t motor_count = pwms.get_chan_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
-      this->pulse(motor, pulse, false);
+      this->duty(motor, duty, false);
     }
     if(load)
       pwms.load_pwm();
@@ -201,8 +181,8 @@ namespace motor {
 
   void MotorCluster::speed(uint8_t motor, float speed, bool load) {
     assert(motor < pwms.get_chan_count());
-    float new_pulse = states[motor].set_speed_with_return(speed);
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].set_speed_with_return(speed);
+    apply_duty(motor, new_duty, load);
   }
 
   void MotorCluster::speed(const uint8_t *motors, uint8_t length, float speed, bool load) {
@@ -287,7 +267,7 @@ namespace motor {
         uint8_t motor_count = pwms.get_chan_count();
         for(uint motor = 0; motor < motor_count; motor++) {
           if(states[motor].is_enabled()) {
-            apply_pulse(motor, states[motor].get_pulse(), false);
+            apply_duty(motor, states[motor].get_duty(), false);
           }
           pwms.set_chan_offset(motor, (uint32_t)(motor_phases[motor] * (float)pwm_period), false);
         }
@@ -306,112 +286,70 @@ namespace motor {
     return success;
   }
 
-  float MotorCluster::min_speed(uint8_t motor) const {
+  float MotorCluster::speed_scale(uint8_t motor) const {
     assert(is_assigned(motor));
-    return states[motor].get_min_speed();
+    return states[motor].get_speed_scale();
   }
 
-  float MotorCluster::mid_speed(uint8_t motor) const {
+  void MotorCluster::to_full_negative(uint8_t motor, bool load) {
     assert(is_assigned(motor));
-    return states[motor].get_mid_speed();
+    float new_duty = states[motor].to_full_negative_with_return();
+    apply_duty(motor, new_duty, load);
   }
 
-  float MotorCluster::max_speed(uint8_t motor) const {
-    assert(is_assigned(motor));
-    return states[motor].get_max_speed();
-  }
-
-  void MotorCluster::to_min(uint8_t motor, bool load) {
-    assert(is_assigned(motor));
-    float new_pulse = states[motor].to_min_with_return();
-    apply_pulse(motor, new_pulse, load);
-  }
-
-  void MotorCluster::to_min(const uint8_t *motors, uint8_t length, bool load) {
+  void MotorCluster::to_full_negative(const uint8_t *motors, uint8_t length, bool load) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
-      to_min(motors[i], false);
+      to_full_negative(motors[i], false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::to_min(std::initializer_list<uint8_t> motors, bool load) {
+  void MotorCluster::to_full_negative(std::initializer_list<uint8_t> motors, bool load) {
     for(auto motor : motors) {
-      to_min(motor, false);
+      to_full_negative(motor, false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::all_to_min(bool load) {
+  void MotorCluster::all_to_full_negative(bool load) {
     uint8_t motor_count = pwms.get_chan_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
-      to_min(motor, false);
+      to_full_negative(motor, false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::to_mid(uint8_t motor, bool load) {
+  void MotorCluster::to_full_positive(uint8_t motor, bool load) {
     assert(is_assigned(motor));
-    float new_pulse = states[motor].to_mid_with_return();
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].to_full_positive_with_return();
+    apply_duty(motor, new_duty, load);
   }
 
-  void MotorCluster::to_mid(const uint8_t *motors, uint8_t length, bool load) {
+  void MotorCluster::to_full_positive(const uint8_t *motors, uint8_t length, bool load) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
-      to_mid(motors[i], false);
+      to_full_positive(motors[i], false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::to_mid(std::initializer_list<uint8_t> motors, bool load) {
+  void MotorCluster::to_full_positive(std::initializer_list<uint8_t> motors, bool load) {
     for(auto motor : motors) {
-      to_mid(motor, false);
+      to_full_positive(motor, false);
     }
     if(load)
       pwms.load_pwm();
   }
 
-  void MotorCluster::all_to_mid(bool load) {
+  void MotorCluster::all_to_full_positive(bool load) {
     uint8_t motor_count = pwms.get_chan_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
-      to_mid(motor, false);
-    }
-    if(load)
-      pwms.load_pwm();
-  }
-
-  void MotorCluster::to_max(uint8_t motor, bool load) {
-    assert(is_assigned(motor));
-    float new_pulse = states[motor].to_max_with_return();
-    apply_pulse(motor, new_pulse, load);
-  }
-
-  void MotorCluster::to_max(const uint8_t *motors, uint8_t length, bool load) {
-    assert(motors != nullptr);
-    for(uint8_t i = 0; i < length; i++) {
-      to_max(motors[i], false);
-    }
-    if(load)
-      pwms.load_pwm();
-  }
-
-  void MotorCluster::to_max(std::initializer_list<uint8_t> motors, bool load) {
-    for(auto motor : motors) {
-      to_max(motor, false);
-    }
-    if(load)
-      pwms.load_pwm();
-  }
-
-  void MotorCluster::all_to_max(bool load) {
-    uint8_t motor_count = pwms.get_chan_count();
-    for(uint8_t motor = 0; motor < motor_count; motor++) {
-      to_max(motor, false);
+      to_full_positive(motor, false);
     }
     if(load)
       pwms.load_pwm();
@@ -419,8 +357,8 @@ namespace motor {
 
   void MotorCluster::to_percent(uint8_t motor, float in, float in_min, float in_max, bool load) {
     assert(is_assigned(motor));
-    float new_pulse = states[motor].to_percent_with_return(in, in_min, in_max);
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].to_percent_with_return(in, in_min, in_max);
+    apply_duty(motor, new_duty, load);
   }
 
   void MotorCluster::to_percent(const uint8_t *motors, uint8_t length, float in, float in_min, float in_max, bool load) {
@@ -451,8 +389,8 @@ namespace motor {
 
   void MotorCluster::to_percent(uint8_t motor, float in, float in_min, float in_max, float speed_min, float speed_max, bool load) {
     assert(is_assigned(motor));
-    float new_pulse = states[motor].to_percent_with_return(in, in_min, in_max, speed_min, speed_max);
-    apply_pulse(motor, new_pulse, load);
+    float new_duty = states[motor].to_percent_with_return(in, in_min, in_max, speed_min, speed_max);
+    apply_duty(motor, new_duty, load);
   }
 
   void MotorCluster::to_percent(const uint8_t *motors, uint8_t length, float in, float in_min, float in_max, float speed_min, float speed_max, bool load) {
@@ -481,45 +419,22 @@ namespace motor {
       pwms.load_pwm();
   }
 
-  Calibration& MotorCluster::calibration(uint8_t motor) {
-    assert(is_assigned(motor));
-    return states[motor].calibration();
-  }
-
-  const Calibration& MotorCluster::calibration(uint8_t motor) const {
-    assert(is_assigned(motor));
-    return states[motor].calibration();
-  }
-
   void MotorCluster::load() {
     pwms.load_pwm();
   }
 
-  void MotorCluster::apply_pulse(uint8_t motor, float pulse, bool load) {
-    pwms.set_chan_level(motor, MotorState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
+  void MotorCluster::apply_duty(uint8_t motor, float duty, bool load) {
+    pwms.set_chan_level(motor, MotorState::duty_to_level(duty, pwm_period), load);
   }
 
-  void MotorCluster::create_motor_states(CalibrationType default_type, bool auto_phase) {
+  void MotorCluster::create_motor_states(float speed_scale, bool inverted, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_count();
     if(motor_count > 0) {
       states = new MotorState[motor_count];
       motor_phases = new float[motor_count];
 
       for(uint motor = 0; motor < motor_count; motor++) {
-        states[motor] = MotorState(default_type);
-        motor_phases[motor] = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
-      }
-    }
-  }
-
-  void MotorCluster::create_motor_states(const Calibration& calibration, bool auto_phase) {
-    uint8_t motor_count = pwms.get_chan_count();
-    if(motor_count > 0) {
-      states = new MotorState[motor_count];
-      motor_phases = new float[motor_count];
-
-      for(uint motor = 0; motor < motor_count; motor++) {
-        states[motor] = MotorState(calibration);
+        states[motor] = MotorState(speed_scale, inverted);
         motor_phases[motor] = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
       }
     }

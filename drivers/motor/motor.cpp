@@ -1,14 +1,14 @@
 #include "motor.hpp"
 #include "pwm.hpp"
 
-namespace pimoroni {
-  Motor::Motor(uint pin_pos, uint pin_neg, float freq, DecayMode mode)
-    : pin_pos(pin_pos), pin_neg(pin_neg), pwm_frequency(freq), motor_decay_mode(mode) {
+namespace motor {
+  Motor::Motor(const MotorPins &pins, float freq, DecayMode mode)
+    : pins(pins), pwm_frequency(freq), motor_decay_mode(mode) {
   }
 
   Motor::~Motor() {
-    gpio_set_function(pin_pos, GPIO_FUNC_NULL);
-    gpio_set_function(pin_neg, GPIO_FUNC_NULL);
+    gpio_set_function(pins.positive, GPIO_FUNC_NULL);
+    gpio_set_function(pins.negative, GPIO_FUNC_NULL);
   }
 
   bool Motor::init() {
@@ -26,11 +26,11 @@ namespace pimoroni {
       //Apply the divider
       pwm_config_set_clkdiv(&pwm_cfg, (float)div16 / 16.0f);
 
-      pwm_init(pwm_gpio_to_slice_num(pin_pos), &pwm_cfg, true);
-      gpio_set_function(pin_pos, GPIO_FUNC_PWM);
+      pwm_init(pwm_gpio_to_slice_num(pins.positive), &pwm_cfg, true);
+      gpio_set_function(pins.positive, GPIO_FUNC_PWM);
 
-      pwm_init(pwm_gpio_to_slice_num(pin_neg), &pwm_cfg, true);
-      gpio_set_function(pin_neg, GPIO_FUNC_PWM);
+      pwm_init(pwm_gpio_to_slice_num(pins.negative), &pwm_cfg, true);
+      gpio_set_function(pins.negative, GPIO_FUNC_PWM);
       update_pwm();
 
       success = true;
@@ -66,8 +66,8 @@ namespace pimoroni {
       pwm_period = period;
       pwm_frequency = freq;
 
-      uint pos_num = pwm_gpio_to_slice_num(pin_pos);
-      uint neg_num = pwm_gpio_to_slice_num(pin_neg);
+      uint pos_num = pwm_gpio_to_slice_num(pins.positive);
+      uint neg_num = pwm_gpio_to_slice_num(pins.negative);
 
       //Apply the new divider
       uint8_t div = div16 >> 4;
@@ -112,8 +112,8 @@ namespace pimoroni {
 
   void Motor::disable() {
     motor_speed = 0.0f;
-    pwm_set_gpio_level(pin_pos, 0);
-    pwm_set_gpio_level(pin_neg, 0);
+    pwm_set_gpio_level(pins.positive, 0);
+    pwm_set_gpio_level(pins.negative, 0);
   }
 
   void Motor::update_pwm() {
@@ -122,24 +122,24 @@ namespace pimoroni {
     switch(motor_decay_mode) {
     case SLOW_DECAY: //aka 'Braking'
       if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pin_pos, pwm_period);
-        pwm_set_gpio_level(pin_neg, pwm_period - signed_duty_cycle);
+        pwm_set_gpio_level(pins.positive, pwm_period);
+        pwm_set_gpio_level(pins.negative, pwm_period - signed_duty_cycle);
       }
       else {
-        pwm_set_gpio_level(pin_pos, pwm_period + signed_duty_cycle);
-        pwm_set_gpio_level(pin_neg, pwm_period);
+        pwm_set_gpio_level(pins.positive, pwm_period + signed_duty_cycle);
+        pwm_set_gpio_level(pins.negative, pwm_period);
       }
       break;
 
     case FAST_DECAY: //aka 'Coasting'
     default:
       if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pin_pos, signed_duty_cycle);
-        pwm_set_gpio_level(pin_neg, 0);
+        pwm_set_gpio_level(pins.positive, signed_duty_cycle);
+        pwm_set_gpio_level(pins.negative, 0);
       }
       else {
-        pwm_set_gpio_level(pin_pos, 0);
-        pwm_set_gpio_level(pin_neg, 0 - signed_duty_cycle);
+        pwm_set_gpio_level(pins.positive, 0);
+        pwm_set_gpio_level(pins.negative, 0 - signed_duty_cycle);
       }
       break;
     }

@@ -2,8 +2,9 @@
 
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+#include "motor_state.hpp"
 
-namespace pimoroni {
+namespace motor {
 
   class Motor {
     //--------------------------------------------------
@@ -28,8 +29,7 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    uint pin_pos;
-    uint pin_neg;
+    MotorPins pins;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
     float pwm_frequency = DEFAULT_PWM_FREQUENCY;
@@ -42,7 +42,7 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor(uint pin_pos, uint pin_neg, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
+    Motor(const MotorPins &pins, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
     ~Motor();
 
 
