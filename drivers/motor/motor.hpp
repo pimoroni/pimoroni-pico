@@ -2,7 +2,10 @@
 
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+#include "common/pimoroni_common.hpp"
 #include "motor_state.hpp"
+
+using namespace pimoroni;
 
 namespace motor {
 
@@ -29,7 +32,7 @@ namespace motor {
     // Variables
     //--------------------------------------------------
   private:
-    MotorPins pins;
+    pin_pair pins;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
     float pwm_frequency = DEFAULT_PWM_FREQUENCY;
@@ -42,7 +45,7 @@ namespace motor {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor(const MotorPins &pins, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
+    Motor(const pin_pair &pins, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
     ~Motor();
 
 

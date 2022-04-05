@@ -3,8 +3,9 @@
 #include "pwm.hpp"
 
 namespace motor {
-  Motor2::Motor2(const MotorPins &pins, float speed_scale, float freq, MotorState::DecayMode mode)
-    : motor_pins(pins), state(speed_scale, false), pwm_frequency(freq), motor_decay_mode(mode) {
+  Motor2::Motor2(const pin_pair &pins, MotorState::Direction direction, float speed_scale,
+                 float deadzone_percent, float freq, MotorState::DecayMode mode)
+    : motor_pins(pins), state(direction, speed_scale, deadzone_percent), pwm_frequency(freq), motor_decay_mode(mode) {
   }
 
   Motor2::~Motor2() {
@@ -41,7 +42,7 @@ namespace motor {
     return success;
   }
 
-  MotorPins Motor2::pins() const {
+  pin_pair Motor2::pins() const {
     return motor_pins;
   }
 
@@ -73,22 +74,6 @@ namespace motor {
     apply_duty(state.set_speed_with_return(speed));
   }
 
-  float Motor2::speed_scale() const {
-    return state.get_speed_scale();
-  }
-
-  void Motor2::speed_scale(float speed_scale) {
-    state.set_speed_scale(speed_scale);
-  }
-
-  void Motor2::invert_direction(bool invert) {
-    state.invert_direction(invert);
-  }
-
-  bool Motor2::is_inverted() const {
-    return state.is_inverted();
-  }
-  
   float Motor2::frequency() const {
     return pwm_frequency;
   }
@@ -140,29 +125,21 @@ namespace motor {
     return success;
   }
 
-  MotorState::DecayMode Motor2::decay_mode() {
-    return motor_decay_mode;
-  }
-
-  void Motor2::decay_mode(MotorState::DecayMode mode) {
-    motor_decay_mode = mode;
-    apply_duty(state.get_duty());
-  }
-
   void Motor2::stop() {
-    apply_duty(state.set_speed_with_return(0.0f));
+    apply_duty(state.stop_with_return());
   }
 
   void Motor2::coast() {
+    state.set_duty_with_return(0.0f);
     disable();
   }
 
-  void Motor2::to_full_negative() {
-    apply_duty(state.to_full_negative_with_return());
+  void Motor2::full_negative() {
+    apply_duty(state.full_negative_with_return());
   }
 
-  void Motor2::to_full_positive() {
-    apply_duty(state.to_full_positive_with_return());
+  void Motor2::full_positive() {
+    apply_duty(state.full_positive_with_return());
   }
 
   void Motor2::to_percent(float in, float in_min, float in_max) {
@@ -171,6 +148,39 @@ namespace motor {
 
   void Motor2::to_percent(float in, float in_min, float in_max, float speed_min, float speed_max) {
     apply_duty(state.to_percent_with_return(in, in_min, in_max, speed_min, speed_max));
+  }
+
+  MotorState::Direction Motor2::direction() const {
+    return state.get_direction();
+  }
+
+  void Motor2::direction(MotorState::Direction direction) {
+    state.set_direction(direction);
+  }
+
+  float Motor2::speed_scale() const {
+    return state.get_speed_scale();
+  }
+
+  void Motor2::speed_scale(float speed_scale) {
+    state.set_speed_scale(speed_scale);
+  }
+
+  float Motor2::deadzone_percent() const {
+    return state.get_deadzone_percent();
+  }
+
+  void Motor2::deadzone_percent(float speed_scale) {
+    apply_duty(state.set_deadzone_percent_with_return(speed_scale));
+  }
+
+  MotorState::DecayMode Motor2::decay_mode() {
+    return motor_decay_mode;
+  }
+
+  void Motor2::decay_mode(MotorState::DecayMode mode) {
+    motor_decay_mode = mode;
+    apply_duty(state.get_duty());
   }
 
   void Motor2::apply_duty(float duty) {

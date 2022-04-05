@@ -12,8 +12,8 @@ namespace motor {
     const uint MOTOR_2P = 27;
     const uint MOTOR_2N = 26;
 
-    const MotorPins MOTOR_1(MOTOR_1P, MOTOR_1N);
-    const MotorPins MOTOR_2(MOTOR_2P, MOTOR_2N);
+    const pin_pair MOTOR_1(MOTOR_1P, MOTOR_1N);
+    const pin_pair MOTOR_2(MOTOR_2P, MOTOR_2N);
     const uint NUM_MOTORS = 2;
   }
 }

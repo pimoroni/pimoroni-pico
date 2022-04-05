@@ -4,6 +4,7 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "common/pimoroni_common.hpp"
 #include <initializer_list>
 
 namespace pimoroni {
@@ -137,6 +138,9 @@ namespace pimoroni {
     PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
     PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
     PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
+
+    PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
     ~PWMCluster();
 
   private:
@@ -150,7 +154,10 @@ namespace pimoroni {
     bool init();
 
     uint8_t get_chan_count() const;
+    uint8_t get_chan_pair_count() const;
     uint8_t get_chan_pin(uint8_t channel) const;
+    pin_pair get_chan_pin_pair(uint8_t channel_pair) const;
+    static uint8_t channel_from_pair(uint8_t channel_pair);
 
     uint32_t get_chan_level(uint8_t channel) const;
     void set_chan_level(uint8_t channel, uint32_t level, bool load = true);

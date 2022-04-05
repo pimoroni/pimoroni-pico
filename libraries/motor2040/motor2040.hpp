@@ -16,10 +16,10 @@ namespace motor {
     const uint MOTOR_4P = 10;
     const uint MOTOR_4N = 11;
 
-    const MotorPins MOTOR_1(MOTOR_1P, MOTOR_1N);
-    const MotorPins MOTOR_2(MOTOR_2P, MOTOR_2N);
-    const MotorPins MOTOR_3(MOTOR_3P, MOTOR_3N);
-    const MotorPins MOTOR_4(MOTOR_4P, MOTOR_4N);
+    const pin_pair MOTOR_1(MOTOR_1P, MOTOR_1N);
+    const pin_pair MOTOR_2(MOTOR_2P, MOTOR_2N);
+    const pin_pair MOTOR_3(MOTOR_3P, MOTOR_3N);
+    const pin_pair MOTOR_4(MOTOR_4P, MOTOR_4N);
     const uint NUM_MOTORS = 4;
 
     const uint ENCODER_1A = 0;
@@ -31,10 +31,10 @@ namespace motor {
     const uint ENCODER_4A = 14;
     const uint ENCODER_4B = 15;
 
-    const EncoderPins ENCODER_1(ENCODER_1A, ENCODER_1B);
-    const EncoderPins ENCODER_2(ENCODER_2A, ENCODER_2B);
-    const EncoderPins ENCODER_3(ENCODER_3A, ENCODER_3B);
-    const EncoderPins ENCODER_4(ENCODER_4A, ENCODER_4B);
+    const pin_pair ENCODER_1(ENCODER_1A, ENCODER_1B);
+    const pin_pair ENCODER_2(ENCODER_2A, ENCODER_2B);
+    const pin_pair ENCODER_3(ENCODER_3A, ENCODER_3B);
+    const pin_pair ENCODER_4(ENCODER_4A, ENCODER_4B);
     const uint NUM_ENCODERS = 4;
 
     const uint TX_TRIG = 16;

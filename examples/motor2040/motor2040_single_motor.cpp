@@ -36,11 +36,11 @@ int main() {
   sleep_ms(2000);
 
   // Go at full neative
-  m.to_full_negative();
+  m.full_negative();
   sleep_ms(2000);
 
   // Go at full positive
-  m.to_full_positive();
+  m.full_positive();
   sleep_ms(2000);
 
   // Stop the motor

@@ -2,7 +2,7 @@
 #include "pwm.hpp"
 
 namespace motor {
-  Motor::Motor(const MotorPins &pins, float freq, DecayMode mode)
+  Motor::Motor(const pin_pair &pins, float freq, DecayMode mode)
     : pins(pins), pwm_frequency(freq), motor_decay_mode(mode) {
   }
 
