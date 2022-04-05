@@ -41,7 +41,9 @@ include(pico_wireless/micropython)
 
 include(plasma/micropython)
 include(hub75/micropython)
+include(pwm/micropython)
 include(servo/micropython)
+include(motor/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
 
