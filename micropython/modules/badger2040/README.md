@@ -210,7 +210,7 @@ There are also three bitmap fonts, useful for smaller text and retro goodness. T
 * "bitmap8"
 * "bitmap14_outline"
 
-When working with bitmap fonts, note that `scale` must be an integer >= 1, and text is orientated from its top left corner, instead of the left middle.
+When working with bitmap fonts, note that `scale` must be an integer >= 1, and text is orientated from its top left corner.
 
 ```python
 font(
