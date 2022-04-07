@@ -196,13 +196,21 @@ measure_text(
 
 ### Change Font
 
-There are five fonts to pick from:
+There are five vector fonts to pick from:
 
 * "sans"
 * "gothic"
 * "cursive"
 * "serif"
 * "serif_italic"
+
+There are also three bitmap fonts, useful for smaller text and retro goodness. They should handle characters like £, ° and accented characters more gracefully.
+
+* "bitmap6"
+* "bitmap8"
+* "bitmap14_outline"
+
+When working with bitmap fonts, note that `scale` must be an integer >= 1, and text is orientated from its top left corner, instead of the left middle.
 
 ```python
 font(
