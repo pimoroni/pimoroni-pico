@@ -248,10 +248,10 @@ STATIC const mp_map_elem_t motor_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR_pico_motor_shim), (mp_obj_t)&pico_motor_shim_user_cmodule },
     { MP_OBJ_NEW_QSTR(MP_QSTR_motor2040), (mp_obj_t)&motor2040_user_cmodule },
 
-    // TODO
-    //{ MP_ROM_QSTR(MP_QSTR_ANGULAR), MP_ROM_INT(0x00) },
-    //{ MP_ROM_QSTR(MP_QSTR_LINEAR), MP_ROM_INT(0x01) },
-    //{ MP_ROM_QSTR(MP_QSTR_CONTINUOUS), MP_ROM_INT(0x02) },
+    { MP_ROM_QSTR(MP_QSTR_NORMAL), MP_ROM_INT(0x00) },
+    { MP_ROM_QSTR(MP_QSTR_REVERSED), MP_ROM_INT(0x01) },
+    { MP_ROM_QSTR(MP_QSTR_FAST_DECAY), MP_ROM_INT(0x00) },
+    { MP_ROM_QSTR(MP_QSTR_SLOW_DECAY), MP_ROM_INT(0x01) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_motor_globals, motor_globals_table);
 

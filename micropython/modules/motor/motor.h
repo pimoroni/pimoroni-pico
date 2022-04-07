@@ -1,14 +1,6 @@
 // Include MicroPython API.
 #include "py/runtime.h"
 
-enum {
-    PICO_MOTOR_SHIM_BUTTON_A = 2,
-    PICO_MOTOR_SHIM_MOTOR_1P = 6,
-    PICO_MOTOR_SHIM_MOTOR_1N = 7,
-    PICO_MOTOR_SHIM_MOTOR_2P = 27,
-    PICO_MOTOR_SHIM_MOTOR_2N = 26,
-};
-
 /***** Extern of Class Definition *****/
 extern const mp_obj_type_t Motor_type;
 extern const mp_obj_type_t MotorCluster_type;

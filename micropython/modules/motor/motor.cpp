@@ -28,9 +28,12 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
     _Motor_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Motor_obj_t);
     mp_print_str(print, "Motor(");
 
-    mp_print_str(print, "pins = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->motor->pins().positive), PRINT_REPR);
-    mp_print_str(print, ", enabled = ");
+    mp_print_str(print, "pins = (");
+    pin_pair pins = self->motor->pins();
+    mp_obj_print_helper(print, mp_obj_new_int(pins.positive), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(pins.negative), PRINT_REPR);
+    mp_print_str(print, "), enabled = ");
     mp_obj_print_helper(print, self->motor->is_enabled() ? mp_const_true : mp_const_false, PRINT_REPR);
     mp_print_str(print, ", duty = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->duty()), PRINT_REPR);
@@ -38,6 +41,18 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->speed()), PRINT_REPR);
     mp_print_str(print, ", freq = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->frequency()), PRINT_REPR);
+    if(self->motor->direction() == MotorState::NORMAL)
+        mp_print_str(print, ", direction = NORMAL");
+    else
+        mp_print_str(print, ", direction = REVERSED");
+    mp_print_str(print, ", speed_scale = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->motor->speed_scale()), PRINT_REPR);
+    mp_print_str(print, ", deadzone_percent = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->motor->deadzone_percent()), PRINT_REPR);
+    if(self->motor->decay_mode() == MotorState::SLOW_DECAY)
+        mp_print_str(print, ", decay_mode = SLOW_DECAY");
+    else
+        mp_print_str(print, ", decay_mode = FAST_DECAY");
 
     mp_print_str(print, ")");
 }
@@ -47,9 +62,9 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Motor_obj_t *self = nullptr;
 
-    enum { ARG_pin, ARG_calibration, ARG_freq };
+    enum { ARG_pins, ARG_calibration, ARG_freq };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_calibration, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
@@ -58,7 +73,41 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    int pin = args[ARG_pin].u_int;
+    size_t pin_count = 0;
+    pin_pair pins;
+
+    // Determine what pair of pins this motor will use
+    const mp_obj_t object = args[ARG_pins].u_obj;
+    mp_obj_t *items = nullptr;
+    if(mp_obj_is_type(object, &mp_type_list)) {
+        mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
+        pin_count = list->len;
+        items = list->items;
+    }
+    else if(mp_obj_is_type(object, &mp_type_tuple)) {
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
+        pin_count = tuple->len;
+        items = tuple->items;
+    }
+
+    if(items == nullptr)
+        mp_raise_TypeError("cannot convert object to a list or tuple of pins");
+    else if(pin_count != 2)
+        mp_raise_TypeError("list or tuple must only contain two integers");
+    else {
+        int pos = mp_obj_get_int(items[0]);
+        int neg = mp_obj_get_int(items[1]);
+        if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
+           (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
+            mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
+        }
+        else if(pos == neg) {
+            mp_raise_ValueError("cannot use the same pin for motor positive and negative");
+        }
+
+        pins.positive = (uint8_t)pos;
+        pins.negative = (uint8_t)neg;
+    }
 
     //motor::Calibration *calib = nullptr;
     //motor::CalibrationType calibration_type = motor::CalibrationType::ANGULAR;
@@ -90,7 +139,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     //if(calib != nullptr)
     //    self->motor = new Motor(pin, *calib, freq);
     //else
-        self->motor = new Motor2(pin_pair(pin, pin));//TODO, calibration_type, freq);
+        self->motor = new Motor2(pins);//TODO, calibration_type, freq);
     self->motor->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -233,6 +282,7 @@ extern mp_obj_t Motor_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
+        // TODO confirm frequency range
         if(!self->motor->frequency(freq)) {
             mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz"); //TODO
         }
@@ -494,9 +544,12 @@ void MotorCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 
     uint8_t motor_count = self->cluster->count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
-        mp_print_str(print, "\n\t{pins = ");
-        mp_obj_print_helper(print, mp_obj_new_int(self->cluster->pins(motor).positive), PRINT_REPR);
-        mp_print_str(print, ", enabled = ");
+        mp_print_str(print, "\n\t{pins = (");
+        pin_pair pins = self->cluster->pins(motor);
+        mp_obj_print_helper(print, mp_obj_new_int(pins.positive), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins.negative), PRINT_REPR);
+        mp_print_str(print, "), enabled = ");
         mp_obj_print_helper(print, self->cluster->is_enabled(motor) ? mp_const_true : mp_const_false, PRINT_REPR);
         mp_print_str(print, ", duty = ");
         mp_obj_print_helper(print, mp_obj_new_float(self->cluster->duty(motor)), PRINT_REPR);
@@ -539,47 +592,79 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
     int sm = args[ARG_sm].u_int;
 
-    //uint pin_mask = 0;
-    //bool mask_provided = true;
-    uint32_t pair_count = 0;
-    pin_pair* pins = nullptr;
+    size_t pair_count = 0;
+    pin_pair *pins = nullptr;
 
-    // Determine what pins this cluster will use
+    // Determine what pair of pins this motor will use
     const mp_obj_t object = args[ARG_pins].u_obj;
-    if(mp_obj_is_int(object)) {
-        //pin_mask = (uint)mp_obj_get_int(object);
+    mp_obj_t *items = nullptr;
+    if(mp_obj_is_type(object, &mp_type_list)) {
+        mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
+        pair_count = list->len;
+        items = list->items;
     }
-    else {
-        mp_obj_t *items = nullptr;
-        if(mp_obj_is_type(object, &mp_type_list)) {
-            mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-            pair_count = list->len;
-            items = list->items;
-        }
-        else if(mp_obj_is_type(object, &mp_type_tuple)) {
-            mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-            pair_count = tuple->len;
-            items = tuple->items;
-        }
+    else if(mp_obj_is_type(object, &mp_type_tuple)) {
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
+        pair_count = tuple->len;
+        items = tuple->items;
+    }
 
-        if(items == nullptr)
-            mp_raise_TypeError("cannot convert object to a list or tuple of pins, or a pin mask integer");
-        else if(pair_count == 0)
-            mp_raise_TypeError("list or tuple must contain at least one integer");
+    if(items == nullptr)
+        mp_raise_TypeError("cannot convert object to a list or tuple of pins");
+    else if(pair_count == 0)
+        mp_raise_TypeError("list or tuple must contain at least one pair tuple");
+    else {
+        // Specific check for is a single 2 pin list/tuple was provided
+        if(pair_count == 2 && mp_obj_is_int(items[0]) && mp_obj_is_int(items[1])) {
+            pins = new pin_pair[1];
+            pair_count = 1;
+
+            int pos = mp_obj_get_int(items[0]);
+            int neg = mp_obj_get_int(items[1]);
+            if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
+               (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
+                delete[] pins;
+                mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
+            }
+            else if(pos == neg) {
+                delete[] pins;
+                mp_raise_ValueError("cannot use the same pin for motor positive and negative");
+            }
+
+            pins[0].positive = (uint8_t)pos;
+            pins[0].negative = (uint8_t)neg;
+        }
         else {
             // Create and populate a local array of pins
             pins = new pin_pair[pair_count];
             for(size_t i = 0; i < pair_count; i++) {
-                int pin = mp_obj_get_int(items[i]);
-                if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
+                mp_obj_t obj = items[i];
+                if(!mp_obj_is_type(obj, &mp_type_tuple)) {
                     delete[] pins;
-                    mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
+                    mp_raise_ValueError("cannot convert item to a pair tuple");
                 }
                 else {
-                    pins[i] = pin_pair((uint8_t)pin, (uint8_t)pin); //TODO
+                    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
+                    if(tuple->len != 2) {
+                        delete[] pins;
+                        mp_raise_ValueError("pair tuple must only contain two integers");
+                    }
+                    int pos = mp_obj_get_int(tuple->items[0]);
+                    int neg = mp_obj_get_int(tuple->items[1]);
+                    if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
+                       (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
+                        delete[] pins;
+                        mp_raise_ValueError("a pin in the pair tuple is out of range. Expected 0 to 29");
+                    }
+                    else if(pos == neg) {
+                        delete[] pins;
+                        mp_raise_ValueError("cannot use the same pin for motor positive and negative");
+                    }
+
+                    pins[i].positive = (uint8_t)pos;
+                    pins[i].negative = (uint8_t)neg;
                 }
             }
-            //mask_provided = false;
         }
     }
 
