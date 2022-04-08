@@ -76,6 +76,23 @@ mp_obj_t BreakoutBME68X_read(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     }
 }
 
+mp_obj_t BreakoutBME68X_read_tph(mp_obj_t self_in) {
+    breakout_bme68x_BreakoutBME68X_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_bme68x_BreakoutBME68X_obj_t);
+
+    bme68x_data result;
+    if(self->breakout->read_tph(&result)){
+        mp_obj_t tuple[3];
+        tuple[0] = mp_obj_new_float(result.temperature);
+        tuple[1] = mp_obj_new_float(result.pressure);
+        tuple[2] = mp_obj_new_float(result.humidity);
+        return mp_obj_new_tuple(3, tuple);
+    }
+    else {
+        mp_raise_msg(&mp_type_RuntimeError, "BreakoutBME68X: failed read_tph");
+        return mp_const_none;
+    }
+}
+
 mp_obj_t BreakoutBME68X_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_filter, ARG_standby_time, ARG_os_pressure, ARG_os_temp, ARG_os_humidity };
     static const mp_arg_t allowed_args[] = {

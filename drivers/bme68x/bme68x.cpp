@@ -48,6 +48,32 @@ namespace pimoroni {
         return true;
     }
 
+    bool BME68X::read_tph(bme68x_data *data) {
+        int8_t result = 0;
+        uint8_t n_fields;
+        uint32_t delay_period;
+
+        heatr_conf.enable = BME68X_DISABLE;
+        heatr_conf.heatr_temp = 0;
+        heatr_conf.heatr_dur = 0;
+        result = bme68x_set_heatr_conf(BME68X_FORCED_MODE, &heatr_conf, &device);
+        bme68x_check_rslt("bme68x_set_heatr_conf", result);
+        if(result != BME68X_OK) return false;
+
+        result = bme68x_set_op_mode(BME68X_FORCED_MODE, &device);
+        bme68x_check_rslt("bme68x_set_op_mode", result);
+        if(result != BME68X_OK) return false;
+        delay_period = bme68x_get_meas_dur(BME68X_FORCED_MODE, &conf, &device);
+        // Could probably just call sleep_us here directly, I guess the API uses this internally
+        device.delay_us(delay_period, device.intf_ptr);
+
+        result = bme68x_get_data(BME68X_FORCED_MODE, data, &n_fields, &device);
+        bme68x_check_rslt("bme68x_get_data", result);
+        if(result != BME68X_OK) return false;
+
+        return true;
+    }
+
     bool BME68X::read_forced(bme68x_data *data, uint16_t heater_temp, uint16_t heater_duration) {
         int8_t result = 0;
         uint8_t n_fields;
