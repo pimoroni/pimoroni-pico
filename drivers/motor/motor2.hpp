@@ -19,15 +19,14 @@ namespace motor {
     pwm_config pwm_cfg;
     uint16_t pwm_period;
     float pwm_frequency;
-    MotorState::DecayMode motor_decay_mode;
-
+    DecayMode motor_decay_mode;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor2(const pin_pair &pins, MotorState::Direction direction = MotorState::DEFAULT_DIRECTION, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
-           float deadzone_percent = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, MotorState::DecayMode mode = MotorState::DEFAULT_DECAY_MODE);
+    Motor2(const pin_pair &pins, Direction direction = NORMAL, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
+           float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE);
     ~Motor2();
 
 
@@ -53,10 +52,14 @@ namespace motor {
     float frequency() const;
     bool frequency(float freq);
 
+    DecayMode decay_mode();
+    void decay_mode(DecayMode mode);
+
     //--------------------------------------------------
 
     void stop();
     void coast();
+    void brake(); //TODO
     void full_negative();
     void full_positive();
     void to_percent(float in, float in_min = MotorState::ZERO_PERCENT, float in_max = MotorState::ONEHUNDRED_PERCENT);
@@ -64,21 +67,18 @@ namespace motor {
 
     //--------------------------------------------------
 
-    MotorState::Direction direction() const;
-    void direction(MotorState::Direction direction);
+    Direction direction() const;
+    void direction(Direction direction);
 
     float speed_scale() const;
     void speed_scale(float speed_scale);
 
-    float deadzone_percent() const;
-    void deadzone_percent(float deadzone_percent);
-
-    MotorState::DecayMode decay_mode();
-    void decay_mode(MotorState::DecayMode mode);
+    float deadzone() const;
+    void deadzone(float deadzone);
 
     //--------------------------------------------------
   private:
-    void apply_duty(float duty);
+    void apply_duty(float duty, DecayMode mode);
   };
 
 }

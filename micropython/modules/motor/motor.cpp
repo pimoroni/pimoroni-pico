@@ -47,8 +47,8 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
         mp_print_str(print, ", direction = REVERSED");
     mp_print_str(print, ", speed_scale = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->speed_scale()), PRINT_REPR);
-    mp_print_str(print, ", deadzone_percent = ");
-    mp_obj_print_helper(print, mp_obj_new_float(self->motor->deadzone_percent()), PRINT_REPR);
+    mp_print_str(print, ", deadzone = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->motor->deadzone()), PRINT_REPR);
     if(self->motor->decay_mode() == MotorState::SLOW_DECAY)
         mp_print_str(print, ", decay_mode = SLOW_DECAY");
     else
@@ -465,7 +465,7 @@ extern mp_obj_t Motor_deadzone_percent(size_t n_args, const mp_obj_t *pos_args, 
 
         _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
 
-        return mp_obj_new_float(self->motor->deadzone_percent());
+        return mp_obj_new_float(self->motor->deadzone());
     }
     else {
         enum { ARG_self, ARG_deadzone_percent };
@@ -480,9 +480,9 @@ extern mp_obj_t Motor_deadzone_percent(size_t n_args, const mp_obj_t *pos_args, 
 
         _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
 
-        float deadzone_percent = mp_obj_get_float(args[ARG_deadzone_percent].u_obj);
+        float deadzone = mp_obj_get_float(args[ARG_deadzone_percent].u_obj);
 
-        self->motor->deadzone_percent(deadzone_percent);
+        self->motor->deadzone(deadzone);
         return mp_const_none;
     }
 }
@@ -1605,7 +1605,7 @@ extern mp_obj_t MotorCluster_all_to_full_negative(size_t n_args, const mp_obj_t 
     if(motor_count == 0)
         mp_raise_ValueError("this cluster does not have any motors");
     else {
-        self->cluster->all_to_full_negative(args[ARG_load].u_bool);
+        self->cluster->all_full_negative(args[ARG_load].u_bool);
     }
     return mp_const_none;
 }
@@ -1693,7 +1693,7 @@ extern mp_obj_t MotorCluster_all_to_full_positive(size_t n_args, const mp_obj_t 
     if(motor_count == 0)
         mp_raise_ValueError("this cluster does not have any motors");
     else {
-        self->cluster->all_to_full_positive(args[ARG_load].u_bool);
+        self->cluster->all_full_positive(args[ARG_load].u_bool);
     }
     return mp_const_none;
 }

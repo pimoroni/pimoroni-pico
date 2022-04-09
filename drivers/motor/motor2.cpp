@@ -1,11 +1,11 @@
 #include "motor2.hpp"
 #include "hardware/clocks.h"
 #include "pwm.hpp"
+#include "math.h"
 
 namespace motor {
-  Motor2::Motor2(const pin_pair &pins, MotorState::Direction direction, float speed_scale,
-                 float deadzone_percent, float freq, MotorState::DecayMode mode)
-    : motor_pins(pins), state(direction, speed_scale, deadzone_percent), pwm_frequency(freq), motor_decay_mode(mode) {
+  Motor2::Motor2(const pin_pair &pins, Direction direction, float speed_scale, float deadzone, float freq, DecayMode mode)
+    : motor_pins(pins), state(direction, speed_scale, deadzone), pwm_frequency(freq), motor_decay_mode(mode) {
   }
 
   Motor2::~Motor2() {
@@ -47,11 +47,11 @@ namespace motor {
   }
 
   void Motor2::enable() {
-    apply_duty(state.enable_with_return());
+    apply_duty(state.enable_with_return(), motor_decay_mode);
   }
 
   void Motor2::disable() {
-    apply_duty(state.disable_with_return());
+    apply_duty(state.disable_with_return(), motor_decay_mode);
   }
 
   bool Motor2::is_enabled() const {
@@ -63,7 +63,7 @@ namespace motor {
   }
 
   void Motor2::duty(float duty) {
-    apply_duty(state.set_duty_with_return(duty));
+    apply_duty(state.set_duty_with_return(duty), motor_decay_mode);
   }
 
   float Motor2::speed() const {
@@ -71,7 +71,7 @@ namespace motor {
   }
 
   void Motor2::speed(float speed) {
-    apply_duty(state.set_speed_with_return(speed));
+    apply_duty(state.set_speed_with_return(speed), motor_decay_mode);
   }
 
   float Motor2::frequency() const {
@@ -106,7 +106,7 @@ namespace motor {
 
         // If the the period is larger, update the pwm before setting the new wraps
         if(state.is_enabled() && pre_update_pwm) {
-          apply_duty(state.get_duty());
+          apply_duty(state.get_deadzoned_duty(), motor_decay_mode);
         }
 
         // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
@@ -116,7 +116,7 @@ namespace motor {
 
         // If the the period is smaller, update the pwm after setting the new wraps
         if(state.is_enabled() && !pre_update_pwm) {
-          apply_duty(state.get_duty());
+          apply_duty(state.get_deadzoned_duty(), motor_decay_mode);
         }
 
         success = true;
@@ -125,36 +125,50 @@ namespace motor {
     return success;
   }
 
+  DecayMode Motor2::decay_mode() {
+    return motor_decay_mode;
+  }
+
+  void Motor2::decay_mode(DecayMode mode) {
+    motor_decay_mode = mode;
+    if(state.is_enabled()) {
+      apply_duty(state.get_deadzoned_duty(), motor_decay_mode);
+    }
+  }
+
   void Motor2::stop() {
-    apply_duty(state.stop_with_return());
+    apply_duty(state.stop_with_return(), motor_decay_mode);
   }
 
   void Motor2::coast() {
-    state.set_duty_with_return(0.0f);
-    disable();
+    apply_duty(state.stop_with_return(), FAST_DECAY);
+  }
+
+  void Motor2::brake() {
+    apply_duty(state.stop_with_return(), SLOW_DECAY);
   }
 
   void Motor2::full_negative() {
-    apply_duty(state.full_negative_with_return());
+    apply_duty(state.full_negative_with_return(), motor_decay_mode);
   }
 
   void Motor2::full_positive() {
-    apply_duty(state.full_positive_with_return());
+    apply_duty(state.full_positive_with_return(), motor_decay_mode);
   }
 
   void Motor2::to_percent(float in, float in_min, float in_max) {
-    apply_duty(state.to_percent_with_return(in, in_min, in_max));
+    apply_duty(state.to_percent_with_return(in, in_min, in_max), motor_decay_mode);
   }
 
   void Motor2::to_percent(float in, float in_min, float in_max, float speed_min, float speed_max) {
-    apply_duty(state.to_percent_with_return(in, in_min, in_max, speed_min, speed_max));
+    apply_duty(state.to_percent_with_return(in, in_min, in_max, speed_min, speed_max), motor_decay_mode);
   }
 
-  MotorState::Direction Motor2::direction() const {
+  Direction Motor2::direction() const {
     return state.get_direction();
   }
 
-  void Motor2::direction(MotorState::Direction direction) {
+  void Motor2::direction(Direction direction) {
     state.set_direction(direction);
   }
 
@@ -166,49 +180,46 @@ namespace motor {
     state.set_speed_scale(speed_scale);
   }
 
-  float Motor2::deadzone_percent() const {
-    return state.get_deadzone_percent();
+  float Motor2::deadzone() const {
+    return state.get_deadzone();
   }
 
-  void Motor2::deadzone_percent(float speed_scale) {
-    apply_duty(state.set_deadzone_percent_with_return(speed_scale));
+  void Motor2::deadzone(float deadzone) {
+    apply_duty(state.set_deadzone_with_return(deadzone), motor_decay_mode);
   }
 
-  MotorState::DecayMode Motor2::decay_mode() {
-    return motor_decay_mode;
-  }
+  void Motor2::apply_duty(float duty, DecayMode mode) {
+    if(isfinite(duty)) {
+      int32_t signed_level = MotorState::duty_to_level(duty, pwm_period);
 
-  void Motor2::decay_mode(MotorState::DecayMode mode) {
-    motor_decay_mode = mode;
-    apply_duty(state.get_duty());
-  }
+      switch(mode) {
+      case SLOW_DECAY: //aka 'Braking'
+        if(signed_level >= 0) {
+          pwm_set_gpio_level(motor_pins.positive, pwm_period);
+          pwm_set_gpio_level(motor_pins.negative, pwm_period - signed_level);
+        }
+        else {
+          pwm_set_gpio_level(motor_pins.positive, pwm_period + signed_level);
+          pwm_set_gpio_level(motor_pins.negative, pwm_period);
+        }
+        break;
 
-  void Motor2::apply_duty(float duty) {
-    int32_t signed_level = MotorState::duty_to_level(duty, pwm_period);
-
-    switch(motor_decay_mode) {
-    case MotorState::SLOW_DECAY: //aka 'Braking'
-      if(signed_level >= 0) {
-        pwm_set_gpio_level(motor_pins.positive, pwm_period);
-        pwm_set_gpio_level(motor_pins.negative, pwm_period - signed_level);
+      case FAST_DECAY: //aka 'Coasting'
+      default:
+        if(signed_level >= 0) {
+          pwm_set_gpio_level(motor_pins.positive, signed_level);
+          pwm_set_gpio_level(motor_pins.negative, 0);
+        }
+        else {
+          pwm_set_gpio_level(motor_pins.positive, 0);
+          pwm_set_gpio_level(motor_pins.negative, 0 - signed_level);
+        }
+        break;
       }
-      else {
-        pwm_set_gpio_level(motor_pins.positive, pwm_period + signed_level);
-        pwm_set_gpio_level(motor_pins.negative, pwm_period);
-      }
-      break;
-
-    case MotorState::FAST_DECAY: //aka 'Coasting'
-    default:
-      if(signed_level >= 0) {
-        pwm_set_gpio_level(motor_pins.positive, signed_level);
-        pwm_set_gpio_level(motor_pins.negative, 0);
-      }
-      else {
-        pwm_set_gpio_level(motor_pins.positive, 0);
-        pwm_set_gpio_level(motor_pins.negative, 0 - signed_level);
-      }
-      break;
+    }
+    else {
+      pwm_set_gpio_level(motor_pins.positive, 0);
+      pwm_set_gpio_level(motor_pins.negative, 0);
     }
   }
 };

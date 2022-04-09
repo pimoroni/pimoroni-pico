@@ -1,34 +1,27 @@
 #include "motor_state.hpp"
 #include "common/pimoroni_common.hpp"
 #include "float.h"
+#include "math.h"
 
 namespace motor {
   MotorState::MotorState()
     : motor_speed(0.0f), last_enabled_duty(0.0f), enabled(false),
-    motor_direction(DEFAULT_DIRECTION), motor_scale(DEFAULT_SPEED_SCALE), motor_deadzone(DEFAULT_DEADZONE) {
+    motor_direction(NORMAL), motor_scale(DEFAULT_SPEED_SCALE), motor_deadzone(DEFAULT_DEADZONE){
   }
 
-  MotorState::MotorState(Direction direction, float speed_scale, float deadzone_percent)
+  MotorState::MotorState(Direction direction, float speed_scale, float deadzone)
     : motor_speed(0.0f), last_enabled_duty(0.0f), enabled(false),
-    motor_direction(direction), motor_scale(MAX(speed_scale, FLT_EPSILON)), motor_deadzone(CLAMP(deadzone_percent, 0.0f, 1.0f)) {
+    motor_direction(direction), motor_scale(MAX(speed_scale, FLT_EPSILON)), motor_deadzone(CLAMP(deadzone, 0.0f, 1.0f)) {
   }
 
   float MotorState::enable_with_return() {
     enabled = true;
-
-    float duty = 0.0f;
-    if((last_enabled_duty <= 0.0f - motor_deadzone) || (last_enabled_duty >= motor_deadzone)) {
-      if(motor_direction == NORMAL)
-        duty = last_enabled_duty;
-      else
-        duty = 0.0f - last_enabled_duty;
-    }
-    return duty;
+    return get_deadzoned_duty();
   }
 
   float MotorState::disable_with_return() {
     enabled = false;
-    return 0.0f; // A zero duty
+    return NAN;
   }
 
   bool MotorState::is_enabled() const {
@@ -37,6 +30,14 @@ namespace motor {
 
   float MotorState::get_duty() const {
     return last_enabled_duty;
+  }
+
+  float MotorState::get_deadzoned_duty() const {
+    float duty = 0.0f;
+    if((last_enabled_duty <= 0.0f - motor_deadzone) || (last_enabled_duty >= motor_deadzone)) {
+      duty = last_enabled_duty;
+    }
+    return duty;
   }
 
   float MotorState::set_duty_with_return(float duty) {
@@ -48,10 +49,14 @@ namespace motor {
   }
 
   float MotorState::get_speed() const {
-    return motor_speed;
+    return (motor_direction == NORMAL) ? motor_speed : 0.0f - motor_speed;
   }
 
   float MotorState::set_speed_with_return(float speed) {
+    // Invert provided speed if the motor direction is reversed
+    if(motor_direction == REVERSED)
+      speed = 0.0f - speed;
+
     // Clamp the speed between the hard limits
     motor_speed = CLAMP(speed, -motor_scale, motor_scale);
     last_enabled_duty = motor_speed / motor_scale;
@@ -81,16 +86,12 @@ namespace motor {
     return set_speed_with_return(speed);
   }
 
-  MotorState::Direction MotorState::get_direction() const {
+  Direction MotorState::get_direction() const {
     return motor_direction;
   }
 
   void MotorState::set_direction(Direction direction) {
-    if(direction != motor_direction) {
-      motor_direction = direction;
-      motor_speed = 0.0f - motor_speed;
-      last_enabled_duty = 0.0f - last_enabled_duty;
-    }
+    motor_direction = direction;
   }
 
   float MotorState::get_speed_scale() const {
@@ -103,16 +104,16 @@ namespace motor {
   }
 
 
-  float MotorState::get_deadzone_percent() const {
-    return motor_scale;
+  float MotorState::get_deadzone() const {
+    return motor_deadzone;
   }
 
-  float MotorState::set_deadzone_percent_with_return(float deadzone_percent) {
-    motor_deadzone = CLAMP(deadzone_percent, 0.0f, 1.0f);
+  float MotorState::set_deadzone_with_return(float deadzone) {
+    motor_deadzone = CLAMP(deadzone, 0.0f, 1.0f);
     if(enabled)
-      return enable_with_return();
+      return get_deadzoned_duty();
     else
-      return disable_with_return();
+      return NAN;
   }
 
   int32_t MotorState::duty_to_level(float duty, uint32_t resolution) {

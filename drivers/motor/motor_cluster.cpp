@@ -1,32 +1,34 @@
 #include "motor_cluster.hpp"
 #include "pwm.hpp"
 #include <cstdio>
+#include "math.h"
 
 namespace motor {
-  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_pair_count, MotorState::Direction direction,
-                             float speed_scale, float deadzone_percent, float freq, MotorState::DecayMode mode,
+  MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_pair_count, Direction direction,
+                             float speed_scale, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_base, (pin_pair_count * 2), seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone_percent, mode, auto_phase);
+    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
   }
 
-  MotorCluster::MotorCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, MotorState::Direction direction,
-                             float speed_scale, float deadzone_percent, float freq, MotorState::DecayMode mode,
+  MotorCluster::MotorCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Direction direction,
+                             float speed_scale, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_pairs, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone_percent, mode, auto_phase);
+    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
   }
 
-  MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, MotorState::Direction direction,
-                             float speed_scale, float deadzone_percent, float freq, MotorState::DecayMode mode,
+  MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Direction direction,
+                             float speed_scale, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_pairs, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone_percent, mode, auto_phase);
+    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
   }
 
   MotorCluster::~MotorCluster() {
     delete[] states;
     delete[] motor_phases;
+    delete[] motor_modes;
   }
 
   bool MotorCluster::init() {
@@ -74,7 +76,7 @@ namespace motor {
   void MotorCluster::enable(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].enable_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::enable(const uint8_t *motors, uint8_t length, bool load) {
@@ -106,7 +108,7 @@ namespace motor {
   void MotorCluster::disable(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].disable_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::disable(const uint8_t *motors, uint8_t length, bool load) {
@@ -148,7 +150,7 @@ namespace motor {
   void MotorCluster::duty(uint8_t motor, float duty, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].set_duty_with_return(duty);
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::duty(const uint8_t *motors, uint8_t length, float duty, bool load) {
@@ -185,7 +187,7 @@ namespace motor {
   void MotorCluster::speed(uint8_t motor, float speed, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].set_speed_with_return(speed);
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::speed(const uint8_t *motors, uint8_t length, float speed, bool load) {
@@ -270,7 +272,7 @@ namespace motor {
         uint8_t motor_count = pwms.get_chan_pair_count();
         for(uint motor = 0; motor < motor_count; motor++) {
           if(states[motor].is_enabled()) {
-            apply_duty(motor, states[motor].get_duty(), false);
+            apply_duty(motor, states[motor].get_deadzoned_duty(), motor_modes[motor], false);
           }
           pwms.set_chan_offset(motor_positive(motor), (uint32_t)(motor_phases[motor] * (float)pwm_period), false);
           pwms.set_chan_offset(motor_negative(motor), (uint32_t)(motor_phases[motor] * (float)pwm_period), false);
@@ -293,7 +295,7 @@ namespace motor {
   void MotorCluster::stop(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].stop_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::stop(const uint8_t *motors, uint8_t length, bool load) {
@@ -326,7 +328,7 @@ namespace motor {
     assert(motor < pwms.get_chan_pair_count());
     states[motor].set_duty_with_return(0.0f);
     float new_duty = states[motor].disable_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::coast(const uint8_t *motors, uint8_t length, bool load) {
@@ -358,7 +360,7 @@ namespace motor {
   void MotorCluster::full_negative(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].full_negative_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::full_negative(const uint8_t *motors, uint8_t length, bool load) {
@@ -378,7 +380,7 @@ namespace motor {
       pwms.load_pwm();
   }
 
-  void MotorCluster::all_to_full_negative(bool load) {
+  void MotorCluster::all_full_negative(bool load) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->full_negative(motor, false);
@@ -390,7 +392,7 @@ namespace motor {
   void MotorCluster::full_positive(uint8_t motor, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].full_positive_with_return();
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::full_positive(const uint8_t *motors, uint8_t length, bool load) {
@@ -410,7 +412,7 @@ namespace motor {
       pwms.load_pwm();
   }
 
-  void MotorCluster::all_to_full_positive(bool load) {
+  void MotorCluster::all_full_positive(bool load) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->full_positive(motor, false);
@@ -422,7 +424,7 @@ namespace motor {
   void MotorCluster::to_percent(uint8_t motor, float in, float in_min, float in_max, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].to_percent_with_return(in, in_min, in_max);
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::to_percent(const uint8_t *motors, uint8_t length, float in, float in_min, float in_max, bool load) {
@@ -454,7 +456,7 @@ namespace motor {
   void MotorCluster::to_percent(uint8_t motor, float in, float in_min, float in_max, float speed_min, float speed_max, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     float new_duty = states[motor].to_percent_with_return(in, in_min, in_max, speed_min, speed_max);
-    apply_duty(motor, new_duty, load);
+    apply_duty(motor, new_duty, motor_modes[motor], load);
   }
 
   void MotorCluster::to_percent(const uint8_t *motors, uint8_t length, float in, float in_min, float in_max, float speed_min, float speed_max, bool load) {
@@ -487,30 +489,30 @@ namespace motor {
     pwms.load_pwm();
   }
 
-  MotorState::Direction MotorCluster::direction(uint8_t motor) const {
+  Direction MotorCluster::direction(uint8_t motor) const {
     assert(motor < pwms.get_chan_pair_count());
     return states[motor].get_direction();
   }
 
-  void MotorCluster::direction(uint8_t motor, MotorState::Direction direction) {
+  void MotorCluster::direction(uint8_t motor, Direction direction) {
     assert(motor < pwms.get_chan_pair_count());
     states[motor].set_direction(direction);
   }
 
-  void MotorCluster::direction(const uint8_t *motors, uint8_t length, MotorState::Direction direction) {
+  void MotorCluster::direction(const uint8_t *motors, uint8_t length, Direction direction) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
       this->direction(motors[i], direction);
     }
   }
 
-  void MotorCluster::direction(std::initializer_list<uint8_t> motors, MotorState::Direction direction) {
+  void MotorCluster::direction(std::initializer_list<uint8_t> motors, Direction direction) {
     for(auto motor : motors) {
       this->direction(motor, direction);
     }
   }
 
-  void MotorCluster::all_directions(MotorState::Direction direction) {
+  void MotorCluster::all_directions(Direction direction) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->direction(motor, direction);
@@ -547,60 +549,60 @@ namespace motor {
     }
   }
 
-  float MotorCluster::deadzone_percent(uint8_t motor) const {
+  float MotorCluster::deadzone(uint8_t motor) const {
     assert(motor < pwms.get_chan_pair_count());
-    return states[motor].get_deadzone_percent();
+    return states[motor].get_deadzone();
   }
 
-  void MotorCluster::deadzone_percent(uint8_t motor, float deadzone_percent) {
+  void MotorCluster::deadzone(uint8_t motor, float deadzone) {
     assert(motor < pwms.get_chan_pair_count());
-    states[motor].set_deadzone_percent_with_return(deadzone_percent); //TODO
+    states[motor].set_deadzone_with_return(deadzone); //TODO
   }
 
-  void MotorCluster::deadzone_percent(const uint8_t *motors, uint8_t length, float deadzone_percent) {
+  void MotorCluster::deadzone(const uint8_t *motors, uint8_t length, float deadzone) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
-      this->deadzone_percent(motors[i], deadzone_percent);
+      this->deadzone(motors[i], deadzone);
     }
   }
 
-  void MotorCluster::deadzone_percent(std::initializer_list<uint8_t> motors, float deadzone_percent) {
+  void MotorCluster::deadzone(std::initializer_list<uint8_t> motors, float deadzone) {
     for(auto motor : motors) {
-      this->deadzone_percent(motor, deadzone_percent);
+      this->deadzone(motor, deadzone);
     }
   }
 
-  void MotorCluster::all_deadzone_percents(float deadzone_percent) {
+  void MotorCluster::all_deadzones(float deadzone) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
-      this->deadzone_percent(motor, deadzone_percent);
+      this->deadzone(motor, deadzone);
     }
   }
 
-  MotorState::DecayMode MotorCluster::decay_mode(uint8_t motor) const {
+  DecayMode MotorCluster::decay_mode(uint8_t motor) const {
     assert(motor < pwms.get_chan_pair_count());
-    return MotorState::SLOW_DECAY;//TODO states[motor].get_decay_mode();
+    return SLOW_DECAY;//TODO states[motor].get_decay_mode();
   }
 
-  void MotorCluster::decay_mode(uint8_t motor, MotorState::DecayMode mode) {
+  void MotorCluster::decay_mode(uint8_t motor, DecayMode mode) {
     assert(motor < pwms.get_chan_pair_count());
     //TODO states[motor].set_decay_mode(mode);
   }
 
-  void MotorCluster::decay_mode(const uint8_t *motors, uint8_t length, MotorState::DecayMode mode) {
+  void MotorCluster::decay_mode(const uint8_t *motors, uint8_t length, DecayMode mode) {
     assert(motors != nullptr);
     for(uint8_t i = 0; i < length; i++) {
       this->decay_mode(motors[i], mode);
     }
   }
 
-  void MotorCluster::decay_mode(std::initializer_list<uint8_t> motors, MotorState::DecayMode mode) {
+  void MotorCluster::decay_mode(std::initializer_list<uint8_t> motors, DecayMode mode) {
     for(auto motor : motors) {
       this->decay_mode(motor, mode);
     }
   }
 
-  void MotorCluster::all_decay_modes(MotorState::DecayMode mode) {
+  void MotorCluster::all_to_decay_mode(DecayMode mode) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->decay_mode(motor, mode);
@@ -608,47 +610,53 @@ namespace motor {
   }
 
 
-  void MotorCluster::apply_duty(uint8_t motor, float duty, bool load) {
-    int32_t signed_level = MotorState::duty_to_level(duty, pwm_period);
+  void MotorCluster::apply_duty(uint8_t motor, float duty, DecayMode mode, bool load) {
+    if(isfinite(duty)) {
+      int32_t signed_level = MotorState::duty_to_level(duty, pwm_period);
 
-    //TODO move this into motor state
-    MotorState::DecayMode decay_mode = MotorState::SLOW_DECAY;
-    switch(decay_mode) {
-    case MotorState::SLOW_DECAY: //aka 'Braking'
-      if(signed_level >= 0) {
-        pwms.set_chan_level(motor_positive(motor), pwm_period, false);
-        pwms.set_chan_level(motor_negative(motor), pwm_period - signed_level, load);
-      }
-      else {
-        pwms.set_chan_level(motor_positive(motor), pwm_period + signed_level, false);
-        pwms.set_chan_level(motor_negative(motor), pwm_period, load);
-      }
-      break;
+      switch(mode) {
+      case SLOW_DECAY: //aka 'Braking'
+        if(signed_level >= 0) {
+          pwms.set_chan_level(motor_positive(motor), pwm_period, false);
+          pwms.set_chan_level(motor_negative(motor), pwm_period - signed_level, load);
+        }
+        else {
+          pwms.set_chan_level(motor_positive(motor), pwm_period + signed_level, false);
+          pwms.set_chan_level(motor_negative(motor), pwm_period, load);
+        }
+        break;
 
-    case MotorState::FAST_DECAY: //aka 'Coasting'
-    default:
-      if(signed_level >= 0) {
-        pwms.set_chan_level(motor_positive(motor), signed_level, false);
-        pwms.set_chan_level(motor_negative(motor), 0, load);
+      case FAST_DECAY: //aka 'Coasting'
+      default:
+        if(signed_level >= 0) {
+          pwms.set_chan_level(motor_positive(motor), signed_level, false);
+          pwms.set_chan_level(motor_negative(motor), 0, load);
+        }
+        else {
+          pwms.set_chan_level(motor_positive(motor), 0, false);
+          pwms.set_chan_level(motor_negative(motor), 0 - signed_level, load);
+        }
+        break;
       }
-      else {
-        pwms.set_chan_level(motor_positive(motor), 0, false);
-        pwms.set_chan_level(motor_negative(motor), 0 - signed_level, load);
-      }
-      break;
+    }
+    else {
+      pwms.set_chan_level(motor_positive(motor), 0, false);
+      pwms.set_chan_level(motor_negative(motor), 0, load);
     }
   }
 
-  void MotorCluster::create_motor_states(MotorState::Direction direction, float speed_scale,
-                                         float deadzone_percent, MotorState::DecayMode mode, bool auto_phase) {
+  void MotorCluster::create_motor_states(Direction direction, float speed_scale,
+                                         float deadzone, DecayMode mode, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     if(motor_count > 0) {
       states = new MotorState[motor_count];
       motor_phases = new float[motor_count];
+      motor_modes = new DecayMode[motor_count];
 
       for(uint motor = 0; motor < motor_count; motor++) {
-        states[motor] = MotorState(direction, speed_scale, deadzone_percent);
+        states[motor] = MotorState(direction, speed_scale, deadzone);
         motor_phases[motor] = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
+        motor_modes[motor] = mode;
       }
     }
   }

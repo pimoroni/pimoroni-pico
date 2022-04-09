@@ -4,30 +4,24 @@
 
 namespace motor {
 
+  enum Direction {
+    NORMAL    = 0,
+    REVERSED  = 1,
+  };
+
+  enum DecayMode {
+    FAST_DECAY  = 0, //aka 'Coasting'
+    SLOW_DECAY  = 1, //aka 'Braking'
+  };
+
   class MotorState {
-    //--------------------------------------------------
-    // Enums
-    //--------------------------------------------------
-  public:
-    enum DecayMode {
-      FAST_DECAY  = 0, //aka 'Coasting'
-      SLOW_DECAY  = 1, //aka 'Braking'
-    };
-
-    enum Direction {
-      NORMAL    = 0,
-      REVERSED  = 1,
-    };
-
-
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
   public:
-    static const Direction DEFAULT_DIRECTION = NORMAL;        // The standard motor direction
     static constexpr float DEFAULT_SPEED_SCALE = 1.0f;        // The standard motor speed scale
     static constexpr float DEFAULT_DEADZONE = 0.1f;           // The standard motor deadzone
-    
+
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;   // The standard motor decay behaviour
     static constexpr float DEFAULT_FREQUENCY = 25000.0f;      // The standard motor update rate
     static constexpr float MIN_FREQUENCY = 10.0f;
@@ -56,7 +50,7 @@ namespace motor {
     //--------------------------------------------------
   public:
     MotorState();
-    MotorState(Direction direction, float speed_scale, float deadzone_percent);
+    MotorState(Direction direction, float speed_scale, float deadzone);
 
 
     //--------------------------------------------------
@@ -68,6 +62,7 @@ namespace motor {
     bool is_enabled() const;
 
     float get_duty() const;
+    float get_deadzoned_duty() const;
     float set_duty_with_return(float duty);
 
     float get_speed() const;
@@ -89,8 +84,8 @@ namespace motor {
     float get_speed_scale() const;
     void set_speed_scale(float speed_scale);
 
-    float get_deadzone_percent() const;
-    float set_deadzone_percent_with_return(float deadzone_percent);
+    float get_deadzone() const;
+    float set_deadzone_with_return(float deadzone);
 
     //--------------------------------------------------
     static int32_t duty_to_level(float duty, uint32_t resolution);
