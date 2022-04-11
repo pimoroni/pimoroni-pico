@@ -47,6 +47,8 @@ mp_obj_t scd41_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) 
     _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
 
     sensirion_i2c_hal_init(i2c->i2c);
+    scd4x_stop_periodic_measurement();
+    scd4x_reinit();
     scd41_initialised = true;
 
     return mp_const_none;
