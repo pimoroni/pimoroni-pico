@@ -19,7 +19,7 @@ namespace motor {
     pwm_config pwm_cfg;
     uint16_t pwm_period;
     float pwm_frequency;
-    DecayMode motor_decay_mode;
+    DecayMode motor_mode;
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -52,14 +52,11 @@ namespace motor {
     float frequency() const;
     bool frequency(float freq);
 
-    DecayMode decay_mode();
-    void decay_mode(DecayMode mode);
-
     //--------------------------------------------------
 
     void stop();
     void coast();
-    void brake(); //TODO
+    void brake();
     void full_negative();
     void full_positive();
     void to_percent(float in, float in_min = MotorState::ZERO_PERCENT, float in_max = MotorState::ONEHUNDRED_PERCENT);
@@ -75,6 +72,9 @@ namespace motor {
 
     float deadzone() const;
     void deadzone(float deadzone);
+
+    DecayMode decay_mode();
+    void decay_mode(DecayMode mode);
 
     //--------------------------------------------------
   private:

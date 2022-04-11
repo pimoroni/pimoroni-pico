@@ -10,6 +10,16 @@ namespace motor {
 
   class MotorCluster {
     //--------------------------------------------------
+    // Substructures
+    //--------------------------------------------------
+  private:
+    struct motor_config {
+      float phase;
+      DecayMode mode;
+    };
+
+
+    //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
@@ -17,8 +27,7 @@ namespace motor {
     uint32_t pwm_period;
     float pwm_frequency;
     MotorState* states;
-    float* motor_phases;
-    DecayMode* motor_modes;
+    motor_config* configs;
 
 
     //--------------------------------------------------
@@ -79,12 +88,6 @@ namespace motor {
     float frequency() const;
     bool frequency(float freq);
 
-    DecayMode decay_mode(uint8_t motor) const;
-    void decay_mode(uint8_t motor, DecayMode mode);
-    void decay_mode(const uint8_t *motors, uint8_t length, DecayMode mode);
-    void decay_mode(std::initializer_list<uint8_t> motors, DecayMode mode);
-    void all_to_decay_mode(DecayMode mode);
-
     //--------------------------------------------------
     void stop(uint8_t motor, bool load = true);
     void stop(const uint8_t *motors, uint8_t length, bool load = true);
@@ -95,6 +98,11 @@ namespace motor {
     void coast(const uint8_t *motors, uint8_t length, bool load = true);
     void coast(std::initializer_list<uint8_t> motors, bool load = true);
     void coast_all(bool load = true);
+
+    void brake(uint8_t motor, bool load = true);
+    void brake(const uint8_t *motors, uint8_t length, bool load = true);
+    void brake(std::initializer_list<uint8_t> motors, bool load = true);
+    void brake_all(bool load = true);
 
     void full_negative(uint8_t motor, bool load = true);
     void full_negative(const uint8_t *motors, uint8_t length, bool load = true);
@@ -124,31 +132,30 @@ namespace motor {
     void direction(uint8_t motor, Direction direction);
     void direction(const uint8_t *motors, uint8_t length, Direction direction);
     void direction(std::initializer_list<uint8_t> motors, Direction direction);
-    void all_directions(Direction direction);
+    void all_to_direction(Direction direction);
 
     float speed_scale(uint8_t motor) const;
     void speed_scale(uint8_t motor, float speed_scale);
     void speed_scale(const uint8_t *motors, uint8_t length, float speed_scale);
     void speed_scale(std::initializer_list<uint8_t> motors, float speed_scale);
-    void all_speed_scales(float speed_scale);
+    void all_to_speed_scale(float speed_scale);
 
     float deadzone(uint8_t motor) const;
-    void deadzone(uint8_t motor, float deadzone);
-    void deadzone(const uint8_t *motors, uint8_t length, float deadzone);
-    void deadzone(std::initializer_list<uint8_t> motors, float deadzone);
-    void all_deadzones(float deadzone);
+    void deadzone(uint8_t motor, float deadzone, bool load = true);
+    void deadzone(const uint8_t *motors, uint8_t length, float deadzone, bool load = true);
+    void deadzone(std::initializer_list<uint8_t> motors, float deadzone, bool load = true);
+    void all_to_deadzone(float deadzone, bool load = true);
+
+    DecayMode decay_mode(uint8_t motor) const;
+    void decay_mode(uint8_t motor, DecayMode mode, bool load = true);
+    void decay_mode(const uint8_t *motors, uint8_t length, DecayMode mode, bool load = true);
+    void decay_mode(std::initializer_list<uint8_t> motors, DecayMode mode, bool load = true);
+    void all_to_decay_mode(DecayMode mode, bool load = true);
 
     //--------------------------------------------------
   private:
     void apply_duty(uint8_t motor, float duty, DecayMode mode, bool load);
     void create_motor_states(Direction direction, float speed_scale, float deadzone, DecayMode mode, bool auto_phase);
-
-    static uint8_t motor_positive(uint8_t motor) {
-      return PWMCluster::channel_from_pair(motor);
-    }
-    static uint8_t motor_negative(uint8_t motor) {
-      return PWMCluster::channel_from_pair(motor) + 1;
-    }
   };
 
 }

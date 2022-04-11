@@ -37,7 +37,11 @@ namespace motor {
     if((last_enabled_duty <= 0.0f - motor_deadzone) || (last_enabled_duty >= motor_deadzone)) {
       duty = last_enabled_duty;
     }
-    return duty;
+
+    if(enabled)
+      return duty;
+    else
+      return NAN;
   }
 
   float MotorState::set_duty_with_return(float duty) {
@@ -77,7 +81,7 @@ namespace motor {
   }
 
   float MotorState::to_percent_with_return(float in, float in_min, float in_max) {
-    float speed = MotorState::map_float(in, in_min, in_max, 0.0f - get_speed_scale(), get_speed_scale());
+    float speed = MotorState::map_float(in, in_min, in_max, 0.0f - motor_speed, motor_speed);
     return set_speed_with_return(speed);
   }
 
@@ -110,10 +114,7 @@ namespace motor {
 
   float MotorState::set_deadzone_with_return(float deadzone) {
     motor_deadzone = CLAMP(deadzone, 0.0f, 1.0f);
-    if(enabled)
-      return get_deadzoned_duty();
-    else
-      return NAN;
+    return get_deadzoned_duty();
   }
 
   int32_t MotorState::duty_to_level(float duty, uint32_t resolution) {
