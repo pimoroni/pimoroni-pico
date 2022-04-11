@@ -11,12 +11,13 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Motor_speed_obj, 1, Motor_speed);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_frequency_obj, 1, Motor_frequency);
 MP_DEFINE_CONST_FUN_OBJ_1(Motor_stop_obj, Motor_stop);
 MP_DEFINE_CONST_FUN_OBJ_1(Motor_coast_obj, Motor_coast);
+MP_DEFINE_CONST_FUN_OBJ_1(Motor_brake_obj, Motor_brake);
 MP_DEFINE_CONST_FUN_OBJ_1(Motor_full_negative_obj, Motor_full_negative);
 MP_DEFINE_CONST_FUN_OBJ_1(Motor_full_positive_obj, Motor_full_positive);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_to_percent_obj, 2, Motor_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_direction_obj, 1, Motor_direction);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_speed_scale_obj, 1, Motor_speed_scale);
-MP_DEFINE_CONST_FUN_OBJ_KW(Motor_deadzone_percent_obj, 1, Motor_deadzone_percent);
+MP_DEFINE_CONST_FUN_OBJ_KW(Motor_deadzone_obj, 1, Motor_deadzone);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_decay_mode_obj, 1, Motor_decay_mode);
 
 MP_DEFINE_CONST_FUN_OBJ_1(MotorCluster___del___obj, MotorCluster___del__);
@@ -38,21 +39,23 @@ MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_stop_obj, 2, MotorCluster_stop);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_stop_all_obj, 1, MotorCluster_stop_all);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_coast_obj, 2, MotorCluster_coast);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_coast_all_obj, 1, MotorCluster_coast_all);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_brake_obj, 2, MotorCluster_brake);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_brake_all_obj, 1, MotorCluster_brake_all);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_full_negative_obj, 2, MotorCluster_full_negative);
-MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_full_negative_obj, 1, MotorCluster_all_to_full_negative);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_full_negative_obj, 1, MotorCluster_all_full_negative);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_full_positive_obj, 2, MotorCluster_full_positive);
-MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_full_positive_obj, 1, MotorCluster_all_to_full_positive);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_full_positive_obj, 1, MotorCluster_all_full_positive);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_to_percent_obj, 3, MotorCluster_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_percent_obj, 2, MotorCluster_all_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_1(MotorCluster_load_obj, MotorCluster_load);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_direction_obj, 2, MotorCluster_direction);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_directions_obj, 1, MotorCluster_all_directions);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_speed_scale_obj, 2, MotorCluster_speed_scale);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_speed_scales_obj, 1, MotorCluster_all_speed_scales);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_deadzone_percent_obj, 2, MotorCluster_deadzone_percent);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_deadzone_percents_obj, 1, MotorCluster_all_deadzone_percents);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_decay_mode_obj, 2, MotorCluster_decay_mode);
-//MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_decay_modes_obj, 1, MotorCluster_all_decay_modes);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_direction_obj, 2, MotorCluster_direction);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_direction_obj, 1, MotorCluster_all_to_direction);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_speed_scale_obj, 2, MotorCluster_speed_scale);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_speed_scale_obj, 1, MotorCluster_all_to_speed_scale);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_deadzone_obj, 2, MotorCluster_deadzone);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_deadzone_obj, 1, MotorCluster_all_to_deadzone);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_decay_mode_obj, 2, MotorCluster_decay_mode);
+MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_to_decay_mode_obj, 1, MotorCluster_all_to_decay_mode);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Motor_locals_dict_table[] = {
@@ -66,12 +69,13 @@ STATIC const mp_rom_map_elem_t Motor_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_frequency), MP_ROM_PTR(&Motor_frequency_obj) },
     { MP_ROM_QSTR(MP_QSTR_stop), MP_ROM_PTR(&Motor_stop_obj) },
     { MP_ROM_QSTR(MP_QSTR_coast), MP_ROM_PTR(&Motor_coast_obj) },
+    { MP_ROM_QSTR(MP_QSTR_brake), MP_ROM_PTR(&Motor_brake_obj) },
     { MP_ROM_QSTR(MP_QSTR_full_negative), MP_ROM_PTR(&Motor_full_negative_obj) },
     { MP_ROM_QSTR(MP_QSTR_full_positive), MP_ROM_PTR(&Motor_full_positive_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&Motor_to_percent_obj) },
     { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&Motor_direction_obj) },
     { MP_ROM_QSTR(MP_QSTR_speed_scale), MP_ROM_PTR(&Motor_speed_scale_obj) },
-    { MP_ROM_QSTR(MP_QSTR_deadzone_percent), MP_ROM_PTR(&Motor_deadzone_percent_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deadzone), MP_ROM_PTR(&Motor_deadzone_obj) },
     { MP_ROM_QSTR(MP_QSTR_decay_mode), MP_ROM_PTR(&Motor_decay_mode_obj) },
 };
 
@@ -95,21 +99,23 @@ STATIC const mp_rom_map_elem_t MotorCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_stop_all), MP_ROM_PTR(&MotorCluster_stop_all_obj) },
     { MP_ROM_QSTR(MP_QSTR_coast), MP_ROM_PTR(&MotorCluster_coast_obj) },
     { MP_ROM_QSTR(MP_QSTR_coast_all), MP_ROM_PTR(&MotorCluster_coast_all_obj) },
+    { MP_ROM_QSTR(MP_QSTR_brake), MP_ROM_PTR(&MotorCluster_brake_obj) },
+    { MP_ROM_QSTR(MP_QSTR_brake_all), MP_ROM_PTR(&MotorCluster_brake_all_obj) },
     { MP_ROM_QSTR(MP_QSTR_full_negative), MP_ROM_PTR(&MotorCluster_full_negative_obj) },
-    { MP_ROM_QSTR(MP_QSTR_all_to_full_negative), MP_ROM_PTR(&MotorCluster_all_to_full_negative_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_full_negative), MP_ROM_PTR(&MotorCluster_all_full_negative_obj) },
     { MP_ROM_QSTR(MP_QSTR_full_positive), MP_ROM_PTR(&MotorCluster_full_positive_obj) },
-    { MP_ROM_QSTR(MP_QSTR_all_to_full_positive), MP_ROM_PTR(&MotorCluster_all_to_full_positive_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_full_positive), MP_ROM_PTR(&MotorCluster_all_full_positive_obj) },
     { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&MotorCluster_to_percent_obj) },
     { MP_ROM_QSTR(MP_QSTR_all_to_percent), MP_ROM_PTR(&MotorCluster_all_to_percent_obj) },
     { MP_ROM_QSTR(MP_QSTR_load), MP_ROM_PTR(&MotorCluster_load_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&MotorCluster_direction_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_all_directions), MP_ROM_PTR(&MotorCluster_direction_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_speed_scale), MP_ROM_PTR(&MotorCluster_speed_scale_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_all_speed_scales), MP_ROM_PTR(&MotorCluster_all_speed_scales_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_deadzone_percent), MP_ROM_PTR(&MotorCluster_deadzone_percent_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_all_deadzone_percents), MP_ROM_PTR(&MotorCluster_all_deadzone_percents_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_decay_mode), MP_ROM_PTR(&MotorCluster_decay_mode_obj) },
-    //{ MP_ROM_QSTR(MP_QSTR_all_decay_modes), MP_ROM_PTR(&MotorCluster_all_decay_modes_obj) },
+    { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&MotorCluster_direction_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_direction), MP_ROM_PTR(&MotorCluster_direction_obj) },
+    { MP_ROM_QSTR(MP_QSTR_speed_scale), MP_ROM_PTR(&MotorCluster_speed_scale_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_speed_scale), MP_ROM_PTR(&MotorCluster_all_to_speed_scale_obj) },
+    { MP_ROM_QSTR(MP_QSTR_deadzone), MP_ROM_PTR(&MotorCluster_deadzone_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_deadzone), MP_ROM_PTR(&MotorCluster_all_to_deadzone_obj) },
+    { MP_ROM_QSTR(MP_QSTR_decay_mode), MP_ROM_PTR(&MotorCluster_decay_mode_obj) },
+    { MP_ROM_QSTR(MP_QSTR_all_to_decay_mode), MP_ROM_PTR(&MotorCluster_all_to_decay_mode_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(Motor_locals_dict, Motor_locals_dict_table);
@@ -170,6 +176,7 @@ typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
 } mp_obj_float_t;
+//TODO confirm below numbers are correct
 mp_obj_float_t motor2040_shunt_resistor = {{&mp_type_float}, 0.47f};
 mp_obj_float_t motor2040_voltage_gain = {{&mp_type_float}, 3.9f / 13.9f};
 mp_obj_float_t motor2040_current_offset = {{&mp_type_float}, -0.02f};
