@@ -1,22 +1,21 @@
-# Servos and Servo 2040 <!-- omit in toc -->
+# Motors and Motor 2040 <!-- omit in toc -->
 
-The Servo library lets you drive 3-pin hobby servo motors from a Raspberry Pi Pico or any other RP2040-based board, such as the [Pimoroni Servo 2040](https://pimoroni.com/servo2040).
+The Motor library lets you drive DC motors from a Raspberry Pi Pico or any other RP2040-based board, such as the [Pimoroni Motor 2040](https://pimoroni.com/servo2040).
 
-This library offers two servo implementations:
-* a `Servo` class that uses hardware PWM to drive a single servo, with support for up to 16 servos.
-* a `ServoCluster` class that uses Programmable IO (PIO) hardware to drive up to 30 servos.
-
-There is also a `Calibration` class for performing advanced tweaking of each servo's movement behaviour.
+This library offers two motor implementations:
+* a `Motor` class that uses hardware PWM to drive a single motor, with support for up to 8 motors.
+* a `MotorCluster` class that uses Programmable IO (PIO) hardware to drive up to 15 servos.
 
 
 ## Table of Content
-- [Servo 2040](#servo-2040)
+- [Motor 2040](#motor-2040)
   - [Reading the User Button](#reading-the-user-button)
   - [Reading the Sensors](#reading-the-sensors)
-    - [Configuring Pulls](#configuring-pulls)
-  - [Controlling the LED Bar](#controlling-the-led-bar)
+    - [Fault Sensing and Configuring Pulls](#fault-sensing-and-configuring-pulls)
+  - [Controlling the LED](#controlling-the-led)
   - [Pin Constants](#pin-constants)
-    - [Servo Pins](#servo-pins)
+    - [Motor Pin Tuples](#motor-pin-tuples)
+    - [Encoder Pin Tuples](#encoder-pin-tuples)
     - [LED Pin](#led-pin)
     - [I2C Pins](#i2c-pins)
     - [Button Pin](#button-pin)
@@ -26,62 +25,52 @@ There is also a `Calibration` class for performing advanced tweaking of each ser
     - [Counts](#counts)
     - [Addresses](#addresses)
     - [Sensing](#sensing)
-- [Servo](#servo)
+- [Motor](#motor)
   - [Getting Started](#getting-started)
-  - [Control by Value](#control-by-value)
-    - [Common Values](#common-values)
+  - [Control by Speed](#control-by-speed)
   - [Control by Percent](#control-by-percent)
-  - [Control by Pulse Width](#control-by-pulse-width)
+  - [Control by Duty Cycle](#control-by-duty-cycle)
   - [Frequency Control](#frequency-control)
-  - [Calibration](#calibration)
+  - [Configuration](#configuration)
   - [Function Reference](#function-reference)
   - [PWM Limitations](#pwm-limitations)
-- [ServoCluster](#servocluster)
+- [MotorCluster](#motorcluster)
   - [Getting Started](#getting-started-1)
-  - [Control by Value](#control-by-value-1)
-    - [Common Values](#common-values-1)
+  - [Control by Speed](#control-by-speed-1)
   - [Control by Percent](#control-by-percent-1)
-  - [Control by Pulse Width](#control-by-pulse-width-1)
+  - [Control by Duty Cycle](#control-by-duty-cycle-1)
   - [Frequency Control](#frequency-control-1)
   - [Phase Control](#phase-control)
-  - [Calibration](#calibration-1)
+  - [Configuration](#configuration-1)
   - [Delayed Loading](#delayed-loading)
   - [Function Reference](#function-reference-1)
   - [PIO Limitations](#pio-limitations)
-- [Calibration](#calibration-2)
-  - [Common Types](#common-types)
-  - [Custom Calibration](#custom-calibration)
-  - [Modifying a Calibration](#modifying-a-calibration)
-  - [Movement Limits](#movement-limits)
-  - [Populating a Calibration](#populating-a-calibration)
-  - [Viewing the Mapping](#viewing-the-mapping)
-  - [Function Reference](#function-reference-2)
 
 
-## Servo 2040
+## Motor 2040
 
-Servo 2040 is a **standalone servo controller** for making things with lots of moving parts. It has pre-soldered pin headers for plugging in up to 18 servos, with additional bells and whistles like sensor headers, current monitoring, RGB LEDs, and a user button that make it ideal for many robotics projects!
+Motor 2040 is a **standalone motor controller** for driving DC motors with encoder feedback. It has JST-SH connectors for plugging in up to 4 motors, with additional bells and whistles like sensor headers, current monitoring, an RGB LED, and a user button that make it ideal for many robotics projects!
 
-For more information on this board, check out the store page: [pimoroni.com/servo2040](https://pimoroni.com/servo2040).
+For more information on this board, check out the store page: [pimoroni.com/motor2040](https://pimoroni.com/motor2040).
 
 
 ### Reading the User Button
 
-As is the case for many of Pimoroni's RP2040-based boards, the boot button on Servo 2040 that is used for programming also acts as a user button once a program is running. To simplify the use of this and other buttons, the `pimoroni` module contains a `Button` class that handles button debounce and auto-repeat.
+As is the case for many of Pimoroni's RP2040-based boards, the boot button on Motor 2040 that is used for programming also acts as a user button once a program is running. To simplify the use of this and other buttons, the `pimoroni` module contains a `Button` class that handles button debounce and auto-repeat.
 
 ```python
 Button(button, invert=True, repeat_time=200, hold_time=1000)
 ```
 
-To set up the user button, first import the `Button` class from the `pimoroni` module and the pin constant for the button from `servo`:
+To set up the user button, first import the `Button` class from the `pimoroni` module and the pin constant for the button from `motor`:
 ```python
 from pimoroni import Button
-from servo import servo2040
+from motor import motor2040
 ```
 
 Then create an instance of `Button` for the user button:
 ```python
-user_sw = Button(servo2040.USER_SW)
+user_sw = Button(motor2040.USER_SW)
 ```
 
 To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `repeat_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values:
@@ -98,128 +87,151 @@ state = user_sw.raw()
 
 ### Reading the Sensors
 
-On the right-hand edge of Servo 2040 are six analog inputs, with neighbouring 3.3V and GND. These let you connect up sensors to enable your mechanical creations to sense how they are interacting with the world. For example, a servo driven gripper with analog force sensors in its fingers could report how much pressure it is applying as it grabs an object, or the extra pin of an analog feedback servo could be wired up to report its actual angle.
+On the right-hand edge of Motor 2040 are two analog inputs, with neighbouring 3.3V and GND. These let you connect up sensors to enable your mechanical creations to sense how they are interacting with the world. For example, a pair of analog proximity sensors could be hooked up for wall avoidance or line following, or they could have microswitches wired to report when a motor driven mechanism has reached an end-stop.
 
-Servo 2040 also has two internal sensors:
-* A voltage sensor, letting you measure the supply voltage to the servos.
-* A low-side current sensor, letting you measure how much current a set of servos is drawing.
-Both of these could be used just for monitoring, or as the trigger to turn off servos safely when voltage gets too low or current draw gets too high.
+Motor 2040 also has six internal sensors:
+* A voltage sensor, letting you measure the supply voltage to the motors.
+* Four current sensors, letting you measure how much current each motor is drawing.
+* A fault sensor, letting you know if there is an issue with one of more of your motors
+These could be used just for monitoring, or as the trigger to turn off motors safely when voltage gets too low or current draw gets too high.
 
-To allow for all of these inputs, Servo 2040 has an onboard analog multiplexer that expands a single analog pin into eight, by use of three digital address pins that select a single input at a time. As such, the setup for these sensors is more involved than it would be to just read eight analog pins directly.
+To allow for all of these inputs, Motor 2040 has an onboard analog multiplexer that expands a single analog pin into eight, by use of three digital address pins that select a single input at a time. As such, the setup for these sensors is more involved than it would be to just read eight analog pins directly.
 
 To begin reading these inputs, first import the `Analog` and `AnalogMux` classes from `pimoroni` and the pin, address, and gain constants from `servo`:
 
 ```python
 from pimoroni import Analog
-from servo import servo2040
+from motor import motor2040
 ```
 
-Then set up three instances of `Analog` for the sensor, voltage, and current sensing:
+Then set up three instances of `Analog` for the sensor and fault, voltage, and current sensing:
 
 ```python
-sen_adc = Analog(servo2040.SHARED_ADC)
-vol_adc = Analog(servo2040.SHARED_ADC, servo2040.VOLTAGE_GAIN)
-cur_adc = Analog(servo2040.SHARED_ADC, servo2040.CURRENT_GAIN,
-                 servo2040.SHUNT_RESISTOR, servo2040.CURRENT_OFFSET)
+sen_fault_adc = Analog(motor2040.SHARED_ADC)
+vol_adc = Analog(motor2040.SHARED_ADC, motor2040.VOLTAGE_GAIN)
+cur_adc = Analog(motor2040.SHARED_ADC, motor2040.CURRENT_GAIN,
+                 motor2040.SHUNT_RESISTOR, motor2040.CURRENT_OFFSET)
 ```
 
 You may notice, all three of these use the same `SHARED_ADC` pin. This is intentional as it is just a single pin that is being used for all three different functions, only the gains differ.
 
 The next step is to set up the analog multiplexer, by providing it with the three address pins:
 ```python
-mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2)
+mux = AnalogMux(motor2040.ADC_ADDR_0, motor2040.ADC_ADDR_1, motor2040.ADC_ADDR_2)
 ```
 Note that the `AnalogMux` does not know about any of the `Analog` classes that were created before.
 
 With the multiplexer now configured, reading each sensor is simply a case of 'selecting' the sensor on the multiplexer then reading the value from one of the three `Analog` classes created at the start.
 
-To read the siz sensor headers:
+To read the two sensor headers:
 ```python
-for addr in range(servo2040.NUM_SENSORS):
-    mux.select(addr)
-    print("Sensor", addr + 1, "=", sen_adc.read_voltage())
+for addr in range(motor2040.NUM_SENSORS):
+    mux.select(addr + motor2040.SENSOR_1_ADDR)
+    print("Sensor", addr + 1, "=", sen_fault_adc.read_voltage())
 ```
 
 To read the voltage sense:
 ```python
-mux.select(servo2040.VOLTAGE_SENSE_ADDR)
+mux.select(motor2040.VOLTAGE_SENSE_ADDR)
 print("Voltage =", vol_adc.read_voltage(), "V")
 ```
 
 To read the current draw in amps (A):
 ```python
-mux.select(servo2040.CURRENT_SENSE_ADDR)
-print("Current =", cur_adc.read_current(), "A")
+for addr in range(motor2040.NUM_MOTORS):
+    mux.select(addr + motor2040.CURRENT_SENSE_A_ADDR)
+    print("Current", addr + 1, "=", cur_adc.read_current(), "A")
 ```
 
 
 #### Configuring Pulls
 
-For some sensors you may need to have the input be pulled high or low before taking a reading. To support this there is an optional `muxed_pin` parameter that can be passed into the `AnalogMux` when creating it, which gives the multiplexer access to the pin to control the pulls.
+For some sensors, as well as the internal fault sensor, you may need to have the input be pulled high or low before taking a reading. To support this there is an optional `muxed_pin` parameter that can be passed into the `AnalogMux` when creating it, which gives the multiplexer access to the pin to control the pulls.
 
 ```python
-mux = AnalogMux(servo2040.ADC_ADDR_0, servo2040.ADC_ADDR_1, servo2040.ADC_ADDR_2,
+mux = AnalogMux(motor2040.ADC_ADDR_0, motor2040.ADC_ADDR_1, motor2040.ADC_ADDR_2,
                 muxed_pin=Pin(servo2040.SHARED_ADC))
 ```
 
 From there the pull state of each of the multiplexer's addresses can be configured independently by calling `.configure_pull()`, with the address and the pull state (either `Pin.PULL_UP`, `Pin.PULL_DOWN`, or `None`).
 
-The below example shows how to set all 6 sensor addresses to have pull-downs:
+The below example shows how to set both sensor addresses to have pull-downs:
 ```python
-sensor_addrs = list(range(servo2040.SENSOR_1_ADDR, servo2040.SENSOR_6_ADDR + 1))
+sensor_addrs = list(range(motor2040.SENSOR_1_ADDR, motor2040.SENSOR_2_ADDR + 1))
 for addr in sensor_addrs:
     mux.configure_pull(addr, Pin.PULL_DOWN)
 ```
 
+#### Fault Sensing
 
-#### Controlling the LED Bar
+The drivers on Motor 2040 can detect when there is a fault with their connected motors, such as if a short occurs, and shut themselves off for safety. As part of this they also signal that a fault has occurred, which can be read. The way they signal this is by pulling the line to ground. This means that the line needs to be high, and so the 'AnalogMux' needs to be configured accordingly.
 
-Alongside Servo 2040's six sensor headers are six addressable RGB LEDs. These work using the same chainable 1-wire signalling as WS2812 LED's, commonly known as Neopixels. As such, they can be controlled using the same Plasma Library used by the [Pimoroni Plasma 2040](https://shop.pimoroni.com/products/plasma-2040).
+```python
+adc_as_io = Pin(motor2040.SHARED_ADC)
+mux = AnalogMux(motor2040.ADC_ADDR_0, motor2040.ADC_ADDR_1, motor2040.ADC_ADDR_2,
+                muxed_pin=adc_as_io)
+mux.configure_pull(motor2040.FAULT_SENSE_ADDR, Pin.PULL_UP)
+```
 
-To set up the LED bar, first import the `WS2812` class from the `plasma` module and the pin constants for the LEDs from `servo`:
+Then in your main code:
+```python
+mux.select(motor2040.FAULT_SENSE_ADDR)
+if not adc_as_io.value():
+    print("Fault!")
+else:
+    print("No Fault")
+```
+//TODO make this neater
+
+
+#### Controlling the LED
+
+Between Motor 2040's for motor connectors is a single addressable RGB LEDs. This works using the same chainable 1-wire signalling as WS2812 LED's, commonly known as Neopixels. As such, it can be controlled using the same Plasma Library used by the [Pimoroni Plasma 2040](https://shop.pimoroni.com/products/plasma-2040).
+
+To set up the LED, first import the `WS2812` class from the `plasma` module and the pin constants for the LED from `motor`:
 ```python
 from plasma import WS2812
-from servo import servo2040
+from motor import motor2040
 ```
 
 Then construct a new `WS2812` instance, specifying the number of LEDs, PIO, PIO state-machine and GPIO pin.
 ```python
-led_bar = WS2812(servo2040.NUM_LEDS, 1, 0, servo2040.LED_DATA)
+led = WS2812(motor2040.NUM_LEDS, 1, 0, motor2040.LED_DATA)
 ```
 
-Finally, start the LED bar by calling `start`:
+Finally, start the LED by calling `start`:
 ```python
-led_bar.start()
+led.start()
 ```
 
-For more information on how to control the LEDs on the bar, please refer to the [Plasma Library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
+For more information on how to control the LED, please refer to the [Plasma Library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
 
 
 ### Pin Constants
 
-The `servo` module contains a `servo2040` sub module with constants for the servo, LED, sensor and button pins.
+The `motor` module contains a `motor2040` sub module with constants for the motor, encoder, LED, sensor and button pins.
 
 
-#### Servo Pins
+#### Motor Pin Tuples
 
-* `SERVO_1` = `0`
-* `SERVO_2` = `1`
-* `SERVO_3` = `2`
-* `SERVO_4` = `3`
-* `SERVO_5` = `4`
-* `SERVO_6` = `5`
-* `SERVO_7` = `6`
-* `SERVO_8` = `7`
-* `SERVO_9` = `8`
-* `SERVO_10` = `9`
-* `SERVO_11` = `10`
-* `SERVO_12` = `11`
-* `SERVO_13` = `12`
-* `SERVO_14` = `13`
-* `SERVO_15` = `14`
-* `SERVO_16` = `15`
-* `SERVO_17` = `16`
-* `SERVO_18` = `17`
+* `MOTOR_A` = `(4, 5)`
+* `MOTOR_B` = `(6, 7)`
+* `MOTOR_C` = `(8, 9)`
+* `MOTOR_D` = `(10, 11)`
+
+
+#### Encoder Pin Tuples
+
+* `ENCODER_A` = `(0, 1)`
+* `ENCODER_B` = `(2, 3)`
+* `ENCODER_C` = `(12, 13)`
+* `ENCODER_D` = `(14, 15)`
+
+
+#### UART/ULTRASOUND Pins
+
+* `TX_TRIG` = `16`
+* `RX_ECHO` = `17`
 
 
 #### LED Pin
@@ -256,146 +268,159 @@ The `servo` module contains a `servo2040` sub module with constants for the serv
 
 ### Other Constants
 
-The `servo2040` sub module also contains other constants to help with the control of Servo 2040's various features:
+The `motor2040` sub module also contains other constants to help with the control of Motor 2040's various features:
 
 
 #### Counts
 
-* `NUM_SERVOS` = `18`
-* `NUM_SENSORS` = `6`
-* `NUM_LEDS` = `6`
+* `NUM_MOTORS` = `4`
+* `NUM_ENCODERS` = `4`
+* `NUM_SENSORS` = `2`
+* `NUM_LEDS` = `1`
 
 
 #### Addresses
 
-* `SENSOR_1_ADDR` = `0b000`
-* `SENSOR_2_ADDR` = `0b001`
-* `SENSOR_3_ADDR` = `0b010`
-* `SENSOR_4_ADDR` = `0b011`
-* `SENSOR_5_ADDR` = `0b100`
-* `SENSOR_6_ADDR` = `0b101`
-* `VOLTAGE_SENSE_ADDR` = `0b110`
-* `CURRENT_SENSE_ADDR` = `0b111`
+* `CURRENT_SENSE_A_ADDR` = `0b000`
+* `CURRENT_SENSE_B_ADDR` = `0b001`
+* `CURRENT_SENSE_C_ADDR` = `0b010`
+* `CURRENT_SENSE_D_ADDR` = `0b011`
+* `VOLTAGE_SENSE_ADDR` = `0b100`
+* `FAULT_SENSE_ADDR` = `0b101`
+* `SENSOR_1_ADDR` = `0b110`
+* `SENSOR_2_ADDR` = `0b111`
 
 
 #### Sensing
 
 * `VOLTAGE_GAIN` = `0.28058`
-* `SHUNT_RESISTOR` = `0.003`
-* `CURRENT_GAIN` = `69`
+* `SHUNT_RESISTOR` = `0.47`
+* `CURRENT_GAIN` = `5`
 * `CURRENT_OFFSET` = `-0.02`
 
 
-## Servo
+## Motor
 
 ### Getting Started
 
-To start using servos with your Servo 2040, you will need to first import the `Servo` class.
+To start using motors with your Motor 2040, you will need to first import the `Motor` class.
 ```python
-from servo import Servo, servo2040
+from motor import Motor, motor2040
 ```
-If you are using another RP2040 based board, then `servo2040` can be omitted from the above line
+If you are using another RP2040 based board, then `motor2040` can be omitted from the above line
 
-To create your servo, choose which GPIO pin it will be connected to, and pass that into `Servo`. For this example we will use one of the handy constants of the `servo2040`.
+To create your motor, choose which GPIO pins it will be connected to, and pass that into `Motor`. For this example we will use one of the handy constants of the `motor2040`.
 ```python
-s = Servo(servo2040.SERVO_1)
-```
-
-You now have a `Servo` class called `s` that will control the physical servo connected to `SERVO_1`. To start using this servo, simply enable it using:
-```python
-s.enable()
+m = Motor(motor2040.MOTOR_A)
 ```
 
-This activates the servo and moves it to it's last known position. Since this is the first time enabling the servo, there is no last known position, so instead it will move to the middle of its movement range instead.
-
-Once you have finished with the servo, it can be disabled by calling:
+You now have a `Motor` class called `m` that will control the physical motor connected to `MOTOR_A`. To start using this motor, simply enable it using:
 ```python
-s.disable()
+m.enable()
 ```
 
-From here the servo can be controlled in several ways. These are covered in more detail in the following sections.
+This activates the motor and sets it to its last known speed. Since this is the first time enabling the motor, there is no last known speed, so instead it will be zero.
+
+Once you have finished with the motor, it can be disabled by calling:
+```python
+m.disable()
+```
+
+From here the motor can be controlled in several ways. These are covered in more detail in the following sections.
 
 
-### Control by Value
+### Control by Speed
 
-The most intuitive way of controlling a servo is by value. Value can be any number that has a real-world meaning for that type of servo, for example its angle in degrees if it's a regular angular servo, or its speed as a percentage if it's a continuous rotation servo. See [Calibration](#calibration) for more details.
+The most intuitive way of controlling a motor is by speed. Speed can be any number that has a real-world meaning for that type of motor, for example revolutions per minute, or the linear or angular speed of the mechanism it is driving. By default the speed is a value ranging from `-1.0` to `1.0` but this can be changed by setting a new `speed_scale`. See [Configuration](#configuration) for more details.
 
-The value of a servo can be set by calling `.value(value)`, which takes a float as its `value` input. If the servo is disabled, this will enable it. The resulting pulse width will also be stored.
+The speed of a motor can be set by calling `.speed(speed)`, which takes a float as its `speed` input. If the motor is disabled, this will enable it. The resulting duty cycle will also be stored.
 
-To read back the current value of the servo, call `.value()` without any input. If the servo is disabled, this will be the last value that was provided when enabled.
+To read back the current speed of the motor, call `.speed()` without any input. If the motor is disabled, this will be the last speed that was provided when enabled.
+
+At this time the speed of a motor is the same as `m.duty() * m.speed_scale()`, though there could be the option in the future to add a curve to a motor's speed that make the relationship between speed and duty cycle become non-linear.
 
 
-#### Common Values
+#### Common Speeds
 
-To simplify certain motion patterns, a servo can be commanded to three common values. These are, their minimum, middle, and maximum. These are performed by calling `.to_min()`, `.to_mid()`, and `.to_max()`, respectively. If the servo is disabled, these will enable it.
+To simplify certain motion patterns, a motor can be commanded to three common speeds. These are, full negative, full positive, and stopped. These are performed by calling `.full_negative()`, `.full_positive()`, and `.stop()`, respectively. If the motor is disabled, these will enable it.
 
-It is also possible to read back the values each of those three commands is using internally, using `.min_value()`, `.mid_value()`, and `.max_value()`. These can be useful as inputs to equations that provide numbers directly to `.value(value)`, for example.
+The full negative and full positive speed can be read back using `.speed_scale()`. This can be useful as an input to equations that provide numbers directly to `.speed(speed)`, for example.
 
 
 ### Control by Percent
 
-Sometimes there are projects where a servo needs to move based on the reading from a sensor or another device, but the numbers given out are not easy to convert to values the servo accepts. To overcome this the library lets you move the servo to a percent between its minimum and maximum values, or two values provided, based on that input.
+Sometimes there are projects where a motor needs to drive based on the reading from a sensor or another device, but the numbers given out are not easy to convert to speeds the motor accepts. To overcome this the library lets you drive the motor at a percent between its negative and positive speeds, or two speeds provided, based on that input.
 
-With an input between `-1.0` and `1.0`, a servo can be moved to a percent between its minimum and maximum values using `.to_percent(in)`.
+With an input between `-1.0` and `1.0`, a motor can be driven at a percent between its negative and positive speeds using `.at_percent(in)`.
 
-With an input between a provided min and max, a servo can be moved to a percent between its minimum and maximum values using `.to_percent(in, in_min, in_max)`.
+With an input between a provided min and max, a motor can be driven at a percent between its negative and positive speeds using `.at_percent(in, in_min, in_max)`.
 
-With an input between a provided min and max, a servo can be moved to a percent between two provided values using `.to_percent(in, in_min, value_min, value_max)`.
+With an input between a provided min and max, a motor can be driven at a percent between two provided speeds using `.at_percent(in, in_min, value_min, value_max)`.
 
-If the servo is disabled, these will enable it.
+If the motor is disabled, these will enable it.
 
 
-### Control by Pulse Width
+### Control by Duty Cycle
 
-At a hardware level servos operate by receiving a digital signal with specific pulse widths. Typically pulses are between 500 microseconds and 2500 microseconds in length, and are usually repeated every 20 milliseconds (50Hz). These functions let you interact with pulse widths directly.
+At a hardware level DC motors operate by receiving a voltage across their two terminals, with positive causing a motion in one direction and negative causing a motion in the other. To avoid needing a negative voltage supply, motor drivers employ a H-Bridge arrangement of transistors or mosfets to flip which side of the motor is connected to ground and which is connected to power. By rapidly turing these transistors or mosfets on and off both the speed and direction of the motor can be varied. The common way this is achieved is by using a pair of pulse width modulated signals, where the duty cycle of the active signal controls the speed, and which signal is active controls the direction. Braking can also be controlled (see //TODO)
 
-The pulse width (in microseconds) of a servo can be set by calling `.pulse(pulse)`, which takes a float as its `pulse` input. If the servo is disabled this will enable it, except for the case of `0` where instead the servo will be disabled. This function will also recalculate the related value.
+The duty cycle of a motor can be set by calling `.duty(duty)`, which takes a float from `-1.0` to `1.0` as its `duty` input. If the motor is disabled this will enable it. This function will also recalculate the related speed.
 
-To read back the current pulse width (in microseconds) of the servo, call `.pulse()` without any input. If the servo is disabled, this will be the last pulse that was provided when enabled.
+To read back the current duty cycle of the motor, call `.duty()` without any input. If the motor is disabled, this will be the last duty that was provided when enabled.
+
+At this time the duty cycle of a motor is the same as `m.speed() / m.speed_scale()`, though there could be the option in the future to add a curve to a motor's speed that make the relationship between speed and duty cycle become non-linear.
 
 
 ### Frequency Control
 
-The vast majority of servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz.
+Motors can be driven at a variety of frequencies, with a common values being above the range of human hearing. As such this library uses 25KHz as its default, but this can easily be changed.
 
-The frequency (in Hz) of a servo can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. The supported range of this input is `10` to `350` Hz.
+The frequency (in Hz) of a motor can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. //TODO The supported range of this input is `10` to `350` Hz.
 
-To read back the current frequency (in Hz) of the servo, call `.frequency()` without any input.
+To read back the current frequency (in Hz) of the motor, call `.frequency()` without any input.
 
-Note that changing the frequency does not change the pulse widths sent to the servos, only how frequently they are sent. This is why `350` is the upper limit, as any higher and the maximum pulse would be longer than the time period. If you encounter any servos where this behaviour is not what they expect, please raise it as a Github issue.
+Note that changing the frequency does not change the duty cycle sent to the motors, only how frequently pulses are sent.
 
 
-### Calibration
+### Configuration
 
-There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` being common. To support these different types, each `Servo` class contains a calibration object that stores the specific value to pulse mapping needed for its type. A copy of a servo's calibration can be accessed using `.calibration()`. It is also possible to provide a servo with a new calibration using `.calibration(calibration)`.
+There are several options for configuring a motor. As mentioned in earlier sections, the first is to adjust their speed scale. There is also the option to change their direction, change their decay mode, and add in a dead-zone. This is a percentage of the duty cycle below which the motor will be stopped. This is included to avoid annoying situations where the duty cycle is too low for a motor to move, but enough for it to make an audable sound.
+
+Decay mode is //TODO `.brake()` `.coast()`
 
 
 ### Function Reference
 
-Here is the complete list of functions available on the `Servo` class:
+Here is the complete list of functions available on the `Motor` class:
 ```python
-Servo(pin, calibration=ANGULAR, freq=50)        # calibration can either be an integer or a Calibration class
-pin()
+//TODO
+Motor(pins, calibration=ANGULAR, freq=50)        # calibration can either be an integer or a Calibration class
+pins()
 enable()
 disable()
 is_enabled()
-pulse()
-pulse(pulse)
-value()
-value(value)
+duty()
+duty(duty)
+speed()
+speed(speed)
 frequency()
 frequency(freq)
-min_value()
-mid_value()
-max_value()
-to_min()
-to_mid()
-to_max()
-to_percent(in)
-to_percent(in, in_min, in_max)
-to_percent(in, in_min, in_max, value_min, value_max)
-calibration()
-calibration(calibration)
+stop()
+coast()
+brake()
+full_negative()
+full_positive()
+at_percent(in)
+at_percent(in, in_min, in_max)
+at_percent(in, in_min, in_max, speed_min, speed_max)
+direction()
+direction(direction)
+speed_scale()
+speed_scale(speed_scale)
+deadzone()
+deadzone(deadzone)
+decay_mode()
+decay_mode(mode)
 ```
 
 
@@ -403,7 +428,7 @@ calibration(calibration)
 
 Although the RP2040 is capable of outputting up to 16 PWM signals, there are limitations of which pins can be used together:
 * The PWMs output from pins 0 to 15 are repeated for pins 16 to 29, meaning that those pins share the same signals if PWM is enabled on both. For example if you used pin 3 for PWM and then tried to use pin 19, they would both output the same signal and it would not be possible to control them independently.
-* The 16 PWM channels are grouped into 8 PWM slices, each containing A and B sub channels that are synchronised with each other. This means that parameters such as frequency are shared, which can cause issues if you want one servo to operate at a different frequency to it's pin neighbour or to drive an LED with PWM at a high frequency.
+* The 16 PWM channels are grouped into 8 PWM slices, each containing A and B sub channels that are synchronised with each other. This means that parameters such as frequency are shared, which can cause issues if you want one motor to operate at a different frequency to it's pin neighbour or to drive an LED with PWM at a high frequency.
 
 The official [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf), includes the handy _Table 525_ that details the pwm channel for each GPIO pin. This is shown below for convenience:
 
@@ -416,102 +441,102 @@ The official [RP2040 datasheet](https://datasheets.raspberrypi.com/rp2040/rp2040
 | PWM Channel | 0A | 0B | 1A | 1B | 2A | 2B | 3A | 3B | 4A | 4B | 5A | 5B | 6A | 6B |
 
 
-## ServoCluster
+## MotorCluster
 
 ### Getting Started
 
-An alternative way of controlling servos with your Servo 2040 is to use the `ServoCluster` class. This can be imported as follows:
+An alternative way of controlling motors with your Motor 2040 is to use the `MotorCluster` class. This can be imported as follows:
 
 ```python
-from servo import ServoCluster, servo2040
+from motor import MotorCluster, motor2040
 ```
-(If you are using another RP2040 based board, then `servo2040` can be omitted from the above line)
+(If you are using another RP2040 based board, then `motor2040` can be omitted from the above line)
 
-The next step is to choose which GPIO pins the cluster will be connected to and store them in a `list`. For a consecutive set of pins the easiest way to do this is to use a `range` to create each pin number, and convert that to a `list`. For example, using the handy constants of the `servo2040`, the below line creates the list `[0, 1, 2, 3]`
+The next step is to choose which GPIO pins the cluster will be connected to and store them in a `list`. For example, using the handy constants of the `motor2040`, the below line creates the list `[ (4, 5), (6, 7), (8, 9), (10, 11) ]`
 ```python
-pins = list(range(servo2040.SERVO_1, servo2040.SERVO_4 + 1))
+pins = [ motor2040.MOTOR_A, motor2040.MOTOR_B, motor2040.MOTOR_C, motor2040.MOTOR_D ]
 ```
 
-To create your servo cluster, specify the PIO, PIO state-machine and GPIO pins you chose a moment ago, and pass those into `ServoCluster`.
+To create your motor cluster, specify the PIO, PIO state-machine and GPIO pins you chose a moment ago, and pass those into `MotorCluster`.
 
 ```python
-cluster = ServoCluster(0, 0, pins)
+cluster = MotorCluster(0, 0, pins)
 ```
 
-You now have a `ServoCluster` class called `cluster` that will control the physical servos connected to `SERVO_1`, `SERVO_2`, `SERVO_3`, and `SERVO_4`. To start using these servos, simply enable them using:
+You now have a `MotorCluster` class called `cluster` that will control the physical motors connected to `MOTOR_A`, `MOTOR_B`, `MOTOR_C`, and `MOTOR_D`. To start using these motors, simply enable them using:
 ```python
 cluster.enable_all()
 ```
 or
 ```python
-cluster.enable(servo)
+cluster.enable(motor)
 ```
-where `servo` is the servo's number within the cluster from `0` to `cluster.count() - 1`.
+where `motor` is the motor's number within the cluster from `0` to `cluster.count() - 1`.
 
-These functions activate the servos and move them to their last known positions. Since this is the first time enabling the servos, there are no last known positions, so instead they will move to the middle of their movement ranges instead.
+These functions activate the motors and drives them at their last known speed. Since this is the first time enabling the motors, there are no last known speeds, so instead they will be set to zero instead.
 
-Once you have finished with the servos, they can be disabled by calling:
+Once you have finished with the motors, they can be disabled by calling:
 ```python
 cluster.disable_all()
 ```
 or
 ```python
-cluster.disable(servo)
+cluster.disable(motor)
 ```
-where `servo` is the servo's number within the cluster from `0` to `cluster.count() - 1`.
+where `motor` is the motor's number within the cluster from `0` to `cluster.count() - 1`.
 
-From here the servos can be controlled in several ways. These are covered in more detail in the following sections.
-
-
-### Control by Value
-
-The most intuitive way of controlling the servos is by their value. Value can be any number that has a real-world meaning for that type of servo, for example its angle in degrees if it's a regular angular servo, or its speed as a percentage if it's a continuous rotation servo. See [Calibration](#calibration) for more details.
-
-The value of a servo on a cluster can be set calling `.value(servo, value)` or `.all_to_value(value)`, which take a float as their `value` input. If a servo is disabled, these will enable it. The resulting pulse width will also be stored.
-
-To read back the current value of a servo on the cluster, call `.value(servo)`. If the servo is disabled, this will be the last value that was provided when enabled.
+From here the motors can be controlled in several ways. These are covered in more detail in the following sections.
 
 
-#### Common Values
+### Control by Speed
 
-To simplify certain motion patterns, servos on a cluster can be commanded to three common values. These are, their minimum, middle, and maximum. These are performed by calling `.to_min(servo)`, `.to_mid(servo)`, and `.to_max(servo)`, respectively. If the servo is disabled, these will enable it. There are also `.all_to_min()`, `.all_to_mid()`, and `.all_to_max()` for having all the servos on the cluster move at once.
+The most intuitive way of controlling a motor is by speed. Speed can be any number that has a real-world meaning for that type of motor, for example revolutions per minute, or the linear or angular speed of the mechanism it is driving. By default the speed is a value ranging from `-1.0` to `1.0` but this can be changed by setting a new `speed_scale`. See [Configuration](#configuration-1) for more details.
 
-It is also possible to read back the values each of those three commands is using internally, using `.min_value(servo)`, `.mid_value(servo)`, and `.max_value(servo)`. These can be useful as inputs to equations that provide numbers directly to `.value(servo, value)`, for example.
+The speed of a motor on a cluster can be set calling `.speed(motor, speed)` or `.all_at_speed(speed)`, which take a float as their `speed` input. If a motor is disabled, these will enable it. The resulting duty cycle will also be stored.
+
+To read back the current speed of a motor on the cluster, call `.speed(motor)`. If the motor is disabled, this will be the last speed that was provided when enabled.
+
+
+#### Common Speeds
+
+To simplify certain motion patterns, motors on a cluster can be commanded to three common speeds. These are, full negative, full positive, and stopped. These are performed by calling `.full_negative(motor)`, `.full_positive(motor)`, and `.stop(servo)`, respectively. If the motor is disabled, these will enable it. There are also `.all_full_negative()`, `.all_full_positive()`, and `.stop_all()` for having all the motors on the cluster drive at once.
+
+The full negative and full positive speed of each motor on a cluster can be read back using `.speed_scale(motor)`. This can be useful as an input to equations that provide numbers directly to `.speed(motor, speed)`, for example.
 
 
 ### Control by Percent
 
-Sometimes there are projects where servos need to move based on the readings from sensors or another devices, but the numbers given out are not easy to convert to values the servos accept. To overcome this the library lets you move the servos on a cluster to a percent between their minimum and maximum values, or two values provided, based on that input.
+Sometimes there are projects where motors need to move based on the readings from sensors or another devices, but the numbers given out are not easy to convert to speeds the motors accept. To overcome this the library lets you drive the motors on a cluster at a percent between their negative and positive speeds, or two speeds provided, based on that input.
 
-With an input between `-1.0` and `1.0`, a servo on a cluster can be moved to a percent between its minimum and maximum values using `.to_percent(servo, in)`, or all servos using `.all_to_percent(in)`.
+With an input between `-1.0` and `1.0`, a motor on a cluster can be driven at a percent between its negative and positive speeds using `.at_percent(motor, in)`, or all motors using `.all_at_percent(in)`.
 
-With an input between a provided min and max, a servo on a cluster can be moved to a percent between its minimum and maximum values using `.to_percent(servo, in, in_min, in_max)`, or all servos using `s.all_to_percent(in, in_min, in_max)`.
+With an input between a provided min and max, a motor on a cluster can be driven at a percent between its negative and postive speeds using `.at_percent(motor, in, in_min, in_max)`, or all motors using `.all_at_percent(in, in_min, in_max)`.
 
-With an input between a provided min and max, a servo on a cluster can be moved to a percent between two provided values using `.to_percent(servo, in, in_min, value_min, value_max)`, or all servos using `.all_to_percent(in, in_min, value_min, value_max)`.
+With an input between a provided min and max, a motor on a cluster can be driven at a percent between two provided speeds using `.at_percent(motor, in, in_min, speed_min, speed_max)`, or all motors using `.all_at_percent(in, in_min, speed_min, speed_max)`.
 
-If the servo is disabled, these will enable it.
+If the motor is disabled, these will enable it.
 
 
-### Control by Pulse Width
+### Control by Duty Cycle
 
-At a hardware level servos operate by receiving a digital signal with specific pulse widths. Typically pulses are between 500 microseconds and 2500 microseconds in length, and are usually repeated every 20 milliseconds (50Hz). These functions let you interact with pulse widths directly.
+At a hardware level DC motors operate by receiving a voltage across their two terminals, with positive causing a motion in one direction and negative causing a motion in the other. To avoid needing a negative voltage supply, motor drivers employ a H-Bridge arrangement of transistors or mosfets to flip which side of the motor is connected to ground and which is connected to power. By rapidly turing these transistors or mosfets on and off both the speed and direction of the motor can be varied. The common way this is achieved is by using a pair of pulse width modulated signals, where the duty cycle of the active signal controls the speed, and which signal is active controls the direction. Braking can also be controlled (see //TODO)
 
-The pulse width (in microseconds) of a servo on a cluster can be set by calling `.pulse(servo, pulse)` or `.all_to_pulse(pulse)`, which take a float as their `pulse` input. If a servo is disabled, these will enable it, except for the case of `0` where instead the servo will be disabled. These functions will also recalculate the related value.
+The duty cycle of a motor on a cluster can be set by calling `.duty(motor, duty)` or `.all_at_duty(duty)`, which take a float as their `duty` input. If a motor is disabled, these will enable it. These functions will also recalculate the related speed.
 
-To read back the current pulse width (in microseconds) of a servo on a cluster, call `.pulse(servo)`. If the servo is disabled, this will be the last pulse that was provided when enabled.
+To read back the current duty cycle of a motor on a cluster, call `.duty(motor)`. If the motor is disabled, this will be the last duty that was provided when enabled.
 
 
 ### Frequency Control
 
-The vast majority of servos expect to receive pulses with a frequency of 50Hz, so this library uses that as its default. However, there may be cases where this value needs to be changed, such as when using servos that operate up to frequencies of 333Hz. Un
+Motors can be driven at a variety of frequencies, with a common values being above the range of human hearing. As such this library uses 25KHz as its default, but this can easily be changed.
 
-The frequency (in Hz) of all the servos on a cluster can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. The supported range of this input is `10` to `350` Hz. Due to how `ServoCluster` works, there is no way to set independent frequencies for each servo.
+The frequency (in Hz) of all the motors on a cluster can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. //TODO The supported range of this input is `10` to `350` Hz. Due to how `MotorCluster` works, there is no way to set independent frequencies for each motor.
 
-To read back the current frequency (in Hz) all the servos on a cluster, call `.frequency()` without any input.
+To read back the current frequency (in Hz) of all the motors on a cluster, call `.frequency()` without any input.
 
-Note that changing the frequency does not change the pulse widths sent to the servos, only how frequently they are sent. This is why `350` is the upper limit, as any higher and the maximum pulse would be longer than the time period. If you encounter any servos where this behaviour is not what they expect, please raise it as a Github issue.
+Note that changing the frequency does not change the duty cycle sent to the motors, only how frequently pulses are sent.
 
-Also, be aware that currently the frequency changes immediately, even if part-way through outputting a pulse. It is therefore recommended to disable all servos first before changing the frequency.
+Also, be aware that currently the frequency changes immediately, even if part-way through outputting a pulse. It is therefore recommended to disable all motors first before changing the frequency.
 
 
 ### Phase Control
@@ -532,64 +557,64 @@ There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` 
 
 ### Delayed Loading
 
-To match behaviour with the regular `Servo` class, `ServoCluster` automatically applies each change to its servo's states immediately. However, sometimes this may not be wanted, and instead you want all servos to receive updated pulses at the same time, regardless of how long the code ran that calculated the update.
+To match behaviour with the regular `Motor` class, `MotorCluster` automatically applies each change to its motor's states immediately. However, sometimes this may not be wanted, and instead you want all motors to receive updated duty cycles at the same time, regardless of how long the code ran that calculated the update.
 
-For this purpose, all the functions that modify a servo state on a cluster include an optional parameter `load`, which by default is `True`. To avoid this "loading" include `load=False` in the relevant function calls. Then either the last call can include `load=True`, or a specific call to `.load()` can be made.
+For this purpose, all the functions that modify a motor state on a cluster include an optional parameter `load`, which by default is `True`. To avoid this "loading" include `load=False` in the relevant function calls. Then either the last call can include `load=True`, or a specific call to `.load()` can be made.
 
 
 ### Function Reference
 
-Here is the complete list of functions available on the `ServoCluster` class:
+Here is the complete list of functions available on the `MotorCluster` class:
 
 ```python
-ServoCluster(pio, sm, pins, calibration=ANGULAR, freq=50, auto_phase=True)    # calibration can either be an integer or a Calibration class
+//TODO
+MotorCluster(pio, sm, pins, calibration=ANGULAR, freq=50, auto_phase=True)    # calibration can either be an integer or a Calibration class
 count()
-pin(servo)
-enable(servo, load=True)
+pins(motor)
+enable(motor, load=True)
 enable_all(load=True)
-disable(servo, load=True)
-disable_all(servo, load=True)
-is_enabled(servo)
-pulse(servo)
-pulse(servo, pulse, load=True)
-all_to_pulse(pulse, load=True)
-value(servo)
-value(servo, value, load=True)
-all_to_value(value, load=True)
-phase(servo)
-phase(servo, phase, load=True)
+disable(motor, load=True)
+disable_all(load=True)
+is_enabled(motor)
+duty(motor)
+duty(motor, duty, load=True)
+all_at_duty(motor, load=True)
+speed(motor)
+speed(motor, speed, load=True)
+all_at_speed(speed, load=True)
+phase(motor)
+phase(motor, phase, load=True)
 all_to_phase(phase, load=True)
 frequency()
 frequency(freq)
-min_value(servo)
-mid_value(servo)
-max_value(servo)
-to_min(servo, load=True)
-all_to_min(load=True)
-to_mid(servo, load=True)
-all_to_mid(load=True)
-to_max(servo, load=True)
-all_to_max(load=True)
-to_percent(servo, in, load=True)
-to_percent(servo, in, in_min, in_max, load=True)
-to_percent(servo, in, in_min, in_max, value_min, value_max, load=True)
-all_to_percent(in, load=True)
-all_to_percent(in, in_min, in_max, load=True)
-all_to_percent(in, in_min, in_max, value_min, value_max, load=True)
-calibration(servo)
-calibration(servo, calibration)
+full_negative(motor, load=True)
+all_full_negative(load=True)
+full_positive(motor, load=True)
+all_full_positive(load=True)
+stop(motor, load=True)
+stop_all(load=True)
+coast(motor, load=True)
+coast_all(load=True)
+brake(motor, load=True)
+brake_all(load=True)
+at_percent(motor, in, load=True)
+at_percent(motor, in, in_min, in_max, load=True)
+at_percent(motor, in, in_min, in_max, value_min, value_max, load=True)
+all_at_percent(in, load=True)
+all_at_percent(in, in_min, in_max, load=True)
+all_at_percent(in, in_min, in_max, value_min, value_max, load=True)
 load()
 ```
 
 
 ### PIO Limitations
 
-The RP2040 features two PIOs with four state machines each. This places a hard limit on how many ServoClusters can be created. As this class is capable of driving all 30 GPIO pins, the only time this limit will be of concern is when servos with different frequencies are wanted, as all the outputs a ServoCluster controls share the same frequency. Relating this to the hardware PWM, think of it as a single PWM slice with up to 30 sub channels, A, B, C, D etc.
+The RP2040 features two PIOs with four state machines each. This places a hard limit on how many MotorClusters can be created. As this class is capable of driving all 30 GPIO pins, the only time this limit will be of concern is when motors with different frequencies are wanted, as all the outputs a MotorCluster controls share the same frequency. Relating this to the hardware PWM, think of it as a single PWM slice with up to 30 sub channels, A, B, C, D etc.
 
-When creating a ServoCluster, in most cases you'll use `0` for PIO and `0` for PIO state-machine. You should change these though if you plan on running multiple clusters, or using a cluster alongside something else that uses PIO, such as our [Plasma library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
+When creating a MotorCluster, in most cases you'll use `0` for PIO and `0` for PIO state-machine. You should change these though if you plan on running multiple clusters, or using a cluster alongside something else that uses PIO, such as our [Plasma library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
 
 
-## Calibration
+## Configuration
 
 After using servos for a while, you may notice that some don't quite go to the positions you would expect. Or perhaps you are giving values to a continuous rotation servo in degrees when it would make more sense to use a speed or rpm. To compensate for these cases, each `Servo` class or servo within a `ServoCluster` has an individual `Calibration` class. This class contains a set of pulse-value pairs that are used by the `.value(value)` functions (and those similar) to convert real-world numbers into pulses each servo understand.
 

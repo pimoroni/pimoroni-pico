@@ -480,10 +480,10 @@ extern mp_obj_t Motor_deadzone(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         return mp_obj_new_float(self->motor->deadzone());
     }
     else {
-        enum { ARG_self, ARG_deadzone_percent };
+        enum { ARG_self, ARG_deadzone };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_deadzone_percent, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_deadzone, MP_ARG_REQUIRED | MP_ARG_OBJ },
         };
 
         // Parse args.
@@ -492,7 +492,7 @@ extern mp_obj_t Motor_deadzone(size_t n_args, const mp_obj_t *pos_args, mp_map_t
 
         _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
 
-        float deadzone = mp_obj_get_float(args[ARG_deadzone_percent].u_obj);
+        float deadzone = mp_obj_get_float(args[ARG_deadzone].u_obj);
         if(deadzone < 0.0f || deadzone > 1.0f) {
             mp_raise_ValueError("deadzone out of range. Expected 0.0 to 1.0");
         }
@@ -517,10 +517,10 @@ extern mp_obj_t Motor_decay_mode(size_t n_args, const mp_obj_t *pos_args, mp_map
         return mp_obj_new_int(self->motor->decay_mode());
     }
     else {
-        enum { ARG_self, ARG_decay_mode };
+        enum { ARG_self, ARG_mode };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_decay_mode, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_mode, MP_ARG_REQUIRED | MP_ARG_INT },
         };
 
         // Parse args.
@@ -529,7 +529,7 @@ extern mp_obj_t Motor_decay_mode(size_t n_args, const mp_obj_t *pos_args, mp_map
 
         _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
 
-        int mode = args[ARG_decay_mode].u_int;
+        int mode = args[ARG_mode].u_int;
         if(mode < 0 || mode > 1) {
             mp_raise_ValueError("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)");
         }

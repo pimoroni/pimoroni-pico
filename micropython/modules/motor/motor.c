@@ -147,28 +147,28 @@ const mp_rom_obj_tuple_t pico_motor_shim_motor2_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(27), MP_ROM_INT(26), },
 };
 
-const mp_rom_obj_tuple_t motor2040_motor1_pins = {
+const mp_rom_obj_tuple_t motor2040_motorA_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(4), MP_ROM_INT(5) },
 };
-const mp_rom_obj_tuple_t motor2040_motor2_pins = {
+const mp_rom_obj_tuple_t motor2040_motorB_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(6), MP_ROM_INT(7) },
 };
-const mp_rom_obj_tuple_t motor2040_motor3_pins = {
+const mp_rom_obj_tuple_t motor2040_motorC_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(8), MP_ROM_INT(9) },
 };
-const mp_rom_obj_tuple_t motor2040_motor4_pins = {
+const mp_rom_obj_tuple_t motor2040_motorD_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(10), MP_ROM_INT(11) },
 };
-const mp_rom_obj_tuple_t motor2040_encoder1_pins = {
+const mp_rom_obj_tuple_t motor2040_encoderA_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(0), MP_ROM_INT(1) },
 };
-const mp_rom_obj_tuple_t motor2040_encoder2_pins = {
+const mp_rom_obj_tuple_t motor2040_encoderB_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(2), MP_ROM_INT(3) },
 };
-const mp_rom_obj_tuple_t motor2040_encoder3_pins = {
+const mp_rom_obj_tuple_t motor2040_encoderC_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(12), MP_ROM_INT(13) },
 };
-const mp_rom_obj_tuple_t motor2040_encoder4_pins = {
+const mp_rom_obj_tuple_t motor2040_encoderD_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(14), MP_ROM_INT(15) },
 };
 
@@ -195,20 +195,20 @@ STATIC const mp_rom_map_elem_t pico_motor_shim_globals_table[] = {
 
 STATIC const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_motor2040) },
-    { MP_ROM_QSTR(MP_QSTR_MOTOR_1), MP_ROM_PTR(&motor2040_motor1_pins) },
-    { MP_ROM_QSTR(MP_QSTR_MOTOR_2), MP_ROM_PTR(&motor2040_motor2_pins) },
-    { MP_ROM_QSTR(MP_QSTR_MOTOR_3), MP_ROM_PTR(&motor2040_motor3_pins) },
-    { MP_ROM_QSTR(MP_QSTR_MOTOR_4), MP_ROM_PTR(&motor2040_motor4_pins) },
+    { MP_ROM_QSTR(MP_QSTR_MOTOR_A), MP_ROM_PTR(&motor2040_motorA_pins) },
+    { MP_ROM_QSTR(MP_QSTR_MOTOR_B), MP_ROM_PTR(&motor2040_motorB_pins) },
+    { MP_ROM_QSTR(MP_QSTR_MOTOR_C), MP_ROM_PTR(&motor2040_motorC_pins) },
+    { MP_ROM_QSTR(MP_QSTR_MOTOR_D), MP_ROM_PTR(&motor2040_motorD_pins) },
     { MP_ROM_QSTR(MP_QSTR_NUM_MOTORS), MP_ROM_INT(4) },
-    { MP_ROM_QSTR(MP_QSTR_ENCODER_1), MP_ROM_PTR(&motor2040_encoder1_pins) },
-    { MP_ROM_QSTR(MP_QSTR_ENCODER_2), MP_ROM_PTR(&motor2040_encoder2_pins) },
-    { MP_ROM_QSTR(MP_QSTR_ENCODER_3), MP_ROM_PTR(&motor2040_encoder3_pins) },
-    { MP_ROM_QSTR(MP_QSTR_ENCODER_4), MP_ROM_PTR(&motor2040_encoder4_pins) },
+    { MP_ROM_QSTR(MP_QSTR_ENCODER_A), MP_ROM_PTR(&motor2040_encoderA_pins) },
+    { MP_ROM_QSTR(MP_QSTR_ENCODER_B), MP_ROM_PTR(&motor2040_encoderB_pins) },
+    { MP_ROM_QSTR(MP_QSTR_ENCODER_C), MP_ROM_PTR(&motor2040_encoderC_pins) },
+    { MP_ROM_QSTR(MP_QSTR_ENCODER_D), MP_ROM_PTR(&motor2040_encoderD_pins) },
     { MP_ROM_QSTR(MP_QSTR_NUM_ENCODERS), MP_ROM_INT(4) },
     { MP_ROM_QSTR(MP_QSTR_TX_TRIG), MP_ROM_INT(16) },
     { MP_ROM_QSTR(MP_QSTR_RX_ECHO), MP_ROM_INT(17) },
     { MP_ROM_QSTR(MP_QSTR_LED_DATA), MP_ROM_INT(18) },
-    { MP_ROM_QSTR(MP_QSTR_NUM_LEDS), MP_ROM_INT(6) },
+    { MP_ROM_QSTR(MP_QSTR_NUM_LEDS), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_INT), MP_ROM_INT(19) },
     { MP_ROM_QSTR(MP_QSTR_SDA), MP_ROM_INT(20) },
     { MP_ROM_QSTR(MP_QSTR_SCL), MP_ROM_INT(21) },
@@ -220,10 +220,10 @@ STATIC const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ADC1), MP_ROM_INT(27) },
     { MP_ROM_QSTR(MP_QSTR_ADC2), MP_ROM_INT(28) },
     { MP_ROM_QSTR(MP_QSTR_SHARED_ADC), MP_ROM_INT(29) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_1_ADDR), MP_ROM_INT(0b000) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_2_ADDR), MP_ROM_INT(0b001) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_3_ADDR), MP_ROM_INT(0b010) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_4_ADDR), MP_ROM_INT(0b011) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_A_ADDR), MP_ROM_INT(0b000) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_B_ADDR), MP_ROM_INT(0b001) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_C_ADDR), MP_ROM_INT(0b010) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE_D_ADDR), MP_ROM_INT(0b011) },
     { MP_ROM_QSTR(MP_QSTR_VOLTAGE_SENSE_ADDR), MP_ROM_INT(0b100) },
     { MP_ROM_QSTR(MP_QSTR_FAULT_SENSE_ADDR), MP_ROM_INT(0b101) },
     { MP_ROM_QSTR(MP_QSTR_SENSOR_1_ADDR), MP_ROM_INT(0b110) },

@@ -7,34 +7,34 @@
 
 namespace motor {
   namespace motor2040 {
-    const uint MOTOR_1P = 4;
-    const uint MOTOR_1N = 5;
-    const uint MOTOR_2P = 6;
-    const uint MOTOR_2N = 7;
-    const uint MOTOR_3P = 8;
-    const uint MOTOR_3N = 9;
-    const uint MOTOR_4P = 10;
-    const uint MOTOR_4N = 11;
+    const uint MOTOR_A_P = 4;
+    const uint MOTOR_A_N = 5;
+    const uint MOTOR_B_P = 6;
+    const uint MOTOR_B_N = 7;
+    const uint MOTOR_C_P = 8;
+    const uint MOTOR_C_N = 9;
+    const uint MOTOR_D_P = 10;
+    const uint MOTOR_D_N = 11;
 
-    const pin_pair MOTOR_1(MOTOR_1P, MOTOR_1N);
-    const pin_pair MOTOR_2(MOTOR_2P, MOTOR_2N);
-    const pin_pair MOTOR_3(MOTOR_3P, MOTOR_3N);
-    const pin_pair MOTOR_4(MOTOR_4P, MOTOR_4N);
+    const pin_pair MOTOR_A(MOTOR_A_P, MOTOR_A_N);
+    const pin_pair MOTOR_B(MOTOR_B_P, MOTOR_B_N);
+    const pin_pair MOTOR_C(MOTOR_C_P, MOTOR_C_N);
+    const pin_pair MOTOR_D(MOTOR_D_P, MOTOR_D_N);
     const uint NUM_MOTORS = 4;
 
-    const uint ENCODER_1A = 0;
-    const uint ENCODER_1B = 1;
-    const uint ENCODER_2A = 2;
-    const uint ENCODER_2B = 3;
-    const uint ENCODER_3A = 12;
-    const uint ENCODER_3B = 13;
-    const uint ENCODER_4A = 14;
-    const uint ENCODER_4B = 15;
+    const uint ENCODER_A_A = 0;
+    const uint ENCODER_A_B = 1;
+    const uint ENCODER_B_A = 2;
+    const uint ENCODER_B_B = 3;
+    const uint ENCODER_C_A = 12;
+    const uint ENCODER_C_B = 13;
+    const uint ENCODER_D_A = 14;
+    const uint ENCODER_D_B = 15;
 
-    const pin_pair ENCODER_1(ENCODER_1A, ENCODER_1B);
-    const pin_pair ENCODER_2(ENCODER_2A, ENCODER_2B);
-    const pin_pair ENCODER_3(ENCODER_3A, ENCODER_3B);
-    const pin_pair ENCODER_4(ENCODER_4A, ENCODER_4B);
+    const pin_pair ENCODER_A(ENCODER_A_A, ENCODER_A_B);
+    const pin_pair ENCODER_B(ENCODER_B_A, ENCODER_B_B);
+    const pin_pair ENCODER_C(ENCODER_C_A, ENCODER_C_B);
+    const pin_pair ENCODER_D(ENCODER_D_A, ENCODER_D_B);
     const uint NUM_ENCODERS = 4;
 
     const uint TX_TRIG = 16;
@@ -54,10 +54,10 @@ namespace motor {
     const uint ADC2 = 28;
     const uint SHARED_ADC = 29; // The pin used for the board's sensing features
 
-    const uint CURRENT_SENSE_1_ADDR = 0b000;
-    const uint CURRENT_SENSE_2_ADDR = 0b001;
-    const uint CURRENT_SENSE_3_ADDR = 0b010;
-    const uint CURRENT_SENSE_4_ADDR = 0b011;
+    const uint CURRENT_SENSE_A_ADDR = 0b000;
+    const uint CURRENT_SENSE_B_ADDR = 0b001;
+    const uint CURRENT_SENSE_C_ADDR = 0b010;
+    const uint CURRENT_SENSE_D_ADDR = 0b011;
     const uint VOLTAGE_SENSE_ADDR = 0b100;
     const uint FAULT_SENSE_ADDR = 0b101;
 
