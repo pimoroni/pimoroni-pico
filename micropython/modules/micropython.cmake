@@ -43,6 +43,7 @@ include(bitmap_fonts/micropython)
 include(plasma/micropython)
 include(hub75/micropython)
 include(servo/micropython)
+include(encoder/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
 
