@@ -12,7 +12,7 @@ namespace pimoroni {
   public:
     static constexpr float DEFAULT_COUNTS_PER_REV   = 24;
     static const uint16_t DEFAULT_COUNT_MICROSTEPS  = false;
-    static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;    
+    static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;
     static const uint8_t PIN_UNUSED                 = UINT8_MAX;
 
   private:
@@ -58,7 +58,7 @@ namespace pimoroni {
     const float clocks_per_time         = 0;
 
     //--------------------------------------------------
-    
+
     uint enc_sm         = 0;
     uint enc_offset     = 0;
 
@@ -108,7 +108,7 @@ namespace pimoroni {
     float get_angle_degrees() const;
     float get_angle_radians() const;
 
-    float get_frequency() const;    
+    float get_frequency() const;
     float get_revolutions_per_second() const;
     float get_revolutions_per_minute() const;
     float get_degrees_per_second() const;

@@ -17,7 +17,7 @@ namespace pimoroni {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   void Encoder::pio0_interrupt_callback() {
-    //Go through each of encoders on this PIO to see which triggered this interrupt
+    // Go through each of encoders on this PIO to see which triggered this interrupt
     for(uint8_t sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
       if(pio_encoders[0][sm] != nullptr) { 
         pio_encoders[0][sm]->check_for_transition(); 
@@ -27,7 +27,7 @@ namespace pimoroni {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   void Encoder::pio1_interrupt_callback() {
-    //Go through each of encoders on this PIO to see which triggered this interrupt
+    // Go through each of encoders on this PIO to see which triggered this interrupt
     for(uint8_t sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
       if(pio_encoders[1][sm] != nullptr) { 
         pio_encoders[1][sm]->check_for_transition(); 
@@ -41,7 +41,7 @@ namespace pimoroni {
   // CONSTRUCTORS / DESTRUCTOR
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   Encoder::Encoder(PIO pio, uint8_t pinA, uint8_t pinB, uint8_t pinC,
-                   float counts_per_revolution, bool count_microsteps, 
+                   float counts_per_revolution, bool count_microsteps,
                    uint16_t freq_divider) :
     enc_pio(pio), pinA(pinA), pinB(pinB), pinC(pinC),
     counts_per_revolution(counts_per_revolution), count_microsteps(count_microsteps),
@@ -50,13 +50,13 @@ namespace pimoroni {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   Encoder::~Encoder() {
-    //Clean up our use of the SM associated with this encoder
+    // Clean up our use of the SM associated with this encoder
     encoder_program_release(enc_pio, enc_sm);
     uint index = pio_get_index(enc_pio);
     pio_encoders[index][enc_sm] = nullptr;
     pio_claimed_sms[index] &= ~(1u << enc_sm);
 
-    //If there are no more SMs using the encoder program, then we can remove it from the PIO
+    // If there are no more SMs using the encoder program, then we can remove it from the PIO
     if(pio_claimed_sms[index] == 0) {
       pio_remove_program(enc_pio, &encoder_program, enc_offset);
     }
@@ -70,10 +70,10 @@ namespace pimoroni {
   bool Encoder::init() {
     bool initialised = false;
 
-    //Are the pins we want to use actually valid?
+    // Are the pins we want to use actually valid?
     if((pinA < NUM_BANK0_GPIOS) && (pinB < NUM_BANK0_GPIOS)) {
 
-      //If a Pin C was defined, and valid, set it as a GND to pull the other two pins down
+      // If a Pin C was defined, and valid, set it as a GND to pull the other two pins down
       if((pinC != PIN_UNUSED) && (pinC < NUM_BANK0_GPIOS)) {
         gpio_init(pinC);
         gpio_set_dir(pinC, GPIO_OUT);
@@ -83,9 +83,9 @@ namespace pimoroni {
       enc_sm = pio_claim_unused_sm(enc_pio, true);
       uint pio_idx = pio_get_index(enc_pio);
 
-      //Is this the first time using an encoder on this PIO?      
+      // Is this the first time using an encoder on this PIO?
       if(pio_claimed_sms[pio_idx] == 0) {
-        //Add the program to the PIO memory and enable the appropriate interrupt
+        // Add the program to the PIO memory and enable the appropriate interrupt
         enc_offset = pio_add_program(enc_pio, &encoder_program);
         encoder_program_init(enc_pio, enc_sm, enc_offset, pinA, pinB, freq_divider);
         hw_set_bits(&enc_pio->inte0, PIO_IRQ0_INTE_SM0_RXNEMPTY_BITS << enc_sm);
@@ -99,11 +99,11 @@ namespace pimoroni {
         }
       }
 
-      //Keep a record of this encoder for the interrupt callback
+      // Keep a record of this encoder for the interrupt callback
       pio_encoders[pio_idx][enc_sm] = this;
       pio_claimed_sms[pio_idx] |= 1u << enc_sm;
 
-      //Read the current state of the encoder pins and start the PIO program on the SM
+      // Read the current state of the encoder pins and start the PIO program on the SM
       stateA = gpio_get(pinA);
       stateB = gpio_get(pinB);
       encoder_program_start(enc_pio, enc_sm, stateA, stateB);
@@ -175,18 +175,18 @@ namespace pimoroni {
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   Capture Encoder::perform_capture() {
-    //Capture the current values
-		int32_t captured_count = count;
-		int32_t captured_cumulative_time = cumulative_time;
-		cumulative_time = 0;
+    // Capture the current values
+    int32_t captured_count = count;
+    int32_t captured_cumulative_time = cumulative_time;
+    cumulative_time = 0;
 
-    //Determine the change in counts since the last capture was performed
-		int32_t count_change = captured_count - last_captured_count;
-		last_captured_count = captured_count;
+    // Determine the change in counts since the last capture was performed
+    int32_t count_change = captured_count - last_captured_count;
+    last_captured_count = captured_count;
 
-    //Calculate the average frequency of state transitions    
+    // Calculate the average frequency of state transitions
     float average_frequency = 0.0f;
-		if(count_change != 0 && captured_cumulative_time != INT_MAX) {
+    if(count_change != 0 && captured_cumulative_time != INT_MAX) {
       average_frequency = (clocks_per_time * (float)count_change) / (float)captured_cumulative_time;
     }
 
@@ -233,7 +233,7 @@ namespace pimoroni {
       // For rotary encoders, only every fourth transition is cared about, causing an inaccurate time value
       // To address this we accumulate the times received and zero it when a transition is counted
       if(!count_microsteps) {
-        if(time_received + microstep_time < time_received)  //Check to avoid integer overflow
+        if(time_received + microstep_time < time_received)  // Check to avoid integer overflow
           time_received = INT32_MAX;
         else
           time_received += microstep_time;
@@ -256,7 +256,7 @@ namespace pimoroni {
             // B ____|‾‾‾‾
             case MICROSTEP_3:
               if(count_microsteps)
-                microstep_down(time_received);           
+                microstep_down(time_received);
               break;
           }
           break;
@@ -270,7 +270,7 @@ namespace pimoroni {
               if(count_microsteps || last_travel_dir == CLOCKWISE)
                 microstep_up(time_received);
 
-              last_travel_dir = NO_DIR;  //Finished turning clockwise
+              last_travel_dir = NO_DIR;  // Finished turning clockwise
               break;
 
             // A ‾‾‾‾|____
@@ -291,7 +291,7 @@ namespace pimoroni {
               if(count_microsteps)
                 microstep_up(time_received);
               
-              last_travel_dir = CLOCKWISE;  //Started turning clockwise
+              last_travel_dir = CLOCKWISE;  // Started turning clockwise
               break;
 
             // A ‾‾‾‾‾‾‾‾‾
@@ -300,7 +300,7 @@ namespace pimoroni {
               if(count_microsteps)
                 microstep_down(time_received);
               
-              last_travel_dir = COUNTERCLOCK; //Started turning counter-clockwise
+              last_travel_dir = COUNTERCLOCK; // Started turning counter-clockwise
               break;
           }
           break;
@@ -320,8 +320,8 @@ namespace pimoroni {
             case MICROSTEP_2:
               if(count_microsteps || last_travel_dir == COUNTERCLOCK)
                 microstep_down(time_received);
-              
-              last_travel_dir = NO_DIR;    //Finished turning counter-clockwise
+
+              last_travel_dir = NO_DIR;    // Finished turning counter-clockwise
               break;
           }
           break;

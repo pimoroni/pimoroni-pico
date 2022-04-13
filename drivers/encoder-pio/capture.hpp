@@ -10,7 +10,7 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     const int32_t captured_count        = 0;
-    const int32_t count_change          = 0;      
+    const int32_t count_change          = 0;
     const float average_frequency       = 0.0f;
     const float counts_per_revolution   = 1;
 
@@ -34,7 +34,7 @@ namespace pimoroni {
 
     int32_t get_count_change() const;
 
-    float get_frequency() const;    
+    float get_frequency() const;
     float get_revolutions_per_second() const;
     float get_revolutions_per_minute() const;
     float get_degrees_per_second() const;

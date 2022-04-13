@@ -1,12 +1,17 @@
-add_library(encoder-pio INTERFACE)
+set(DRIVER_NAME encoder-pio)
+add_library(${DRIVER_NAME} INTERFACE)
 
-target_sources(encoder-pio INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/msa301.cpp
+target_sources(${DRIVER_NAME} INTERFACE
+  ${CMAKE_CURRENT_LIST_DIR}/encoder.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/capture.cpp
 )
 
-pico_generate_pio_header(encoder-pio ${CMAKE_CURRENT_LIST_DIR}/encoder.pio)
+pico_generate_pio_header(${DRIVER_NAME} ${CMAKE_CURRENT_LIST_DIR}/encoder.pio)
 
-target_include_directories(encoder-pio INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${DRIVER_NAME} INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 # Pull in pico libraries that we need
-target_link_libraries(encoder-pio INTERFACE pico_stdlib hardware_i2c)
+target_link_libraries(${DRIVER_NAME} INTERFACE
+    pico_stdlib
+    hardware_pio
+    )
