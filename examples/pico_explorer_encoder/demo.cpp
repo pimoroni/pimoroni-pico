@@ -11,10 +11,9 @@ using namespace pimoroni;
 //--------------------------------------------------
 // Constants
 //--------------------------------------------------
-static const uint8_t ENCODER_PIN_A            = 1;
-static const uint8_t ENCODER_PIN_B            = 0;
-static const uint8_t ENCODER_PIN_C            = Encoder::PIN_UNUSED;
-static const uint8_t ENCODER_SWITCH_PIN       = 4;
+static const pin_pair ENCODER_PINS        = {1, 0};
+static const uint ENCODER_PIN_C            = PIN_UNUSED;
+static const uint ENCODER_SWITCH_PIN       = 4;
 
 static constexpr float COUNTS_PER_REVOLUTION  = 24;       // 24 is for rotary encoders. For motor magnetic encoders uses
                                                           // 12 times the gear ratio (e.g. 12 * 20 with a 20:1 ratio motor
@@ -55,7 +54,7 @@ enum DrawState {
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 
-Encoder encoder(pio0, ENCODER_PIN_A, ENCODER_PIN_B, ENCODER_PIN_C, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
+Encoder encoder(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
 volatile bool encA_readings[READINGS_SIZE];
 volatile bool encB_readings[READINGS_SIZE];
@@ -146,13 +145,13 @@ uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE],
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool repeating_timer_callback(struct repeating_timer *t) {
   if(drawing_to_screen && next_scratch_index < SCRATCH_SIZE) {
-    encA_scratch[next_scratch_index] = encoder.get_state_a();
-    encB_scratch[next_scratch_index] = encoder.get_state_b();
+    encA_scratch[next_scratch_index] = encoder.state().a;
+    encB_scratch[next_scratch_index] = encoder.state().b;
     next_scratch_index++;
   }
   else {
-    encA_readings[next_reading_index] = encoder.get_state_a();
-    encB_readings[next_reading_index] = encoder.get_state_b();
+    encA_readings[next_reading_index] = encoder.state().a;
+    encB_readings[next_reading_index] = encoder.state().b;
 
     next_reading_index++;
     if(next_reading_index >= READINGS_SIZE)
@@ -169,7 +168,7 @@ void setup() {
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
-  if(ENCODER_SWITCH_PIN != Encoder::PIN_UNUSED) {
+  if(ENCODER_SWITCH_PIN != PIN_UNUSED) {
     gpio_init(ENCODER_SWITCH_PIN);
     gpio_set_dir(ENCODER_SWITCH_PIN, GPIO_IN);
     gpio_pull_down(ENCODER_SWITCH_PIN);
@@ -182,8 +181,8 @@ void setup() {
 
   encoder.init();
 
-  bool encA = encoder.get_state_a();
-  bool encB = encoder.get_state_b();
+  bool encA = encoder.state().a;
+  bool encB = encoder.state().b;
   for(uint i = 0; i < READINGS_SIZE; i++) {
     encA_readings[i] = encA;
     encB_readings[i] = encB;
@@ -226,7 +225,7 @@ int main() {
       gpio_put(PICO_DEFAULT_LED_PIN, true);    // Show the screen refresh has stated
 
       // If the user has wired up their encoder switch, and it is pressed, set the encoder count to zero
-      if(ENCODER_SWITCH_PIN != Encoder::PIN_UNUSED && gpio_get(ENCODER_SWITCH_PIN)) {
+      if(ENCODER_SWITCH_PIN != PIN_UNUSED && gpio_get(ENCODER_SWITCH_PIN)) {
         encoder.zero_count();
       }
 
@@ -317,21 +316,21 @@ int main() {
 
       {
         std::stringstream sstream;
-        sstream << capture.get_count();
+        sstream << capture.count();
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Count:",      Point(10, 150),  200, 3);
         pico_explorer.set_pen(255, 128, 255);   pico_explorer.text(sstream.str(), Point(110, 150), 200, 3);
       }
 
       {
         std::stringstream sstream;
-        sstream << std::fixed << std::setprecision(1) << capture.get_frequency() << "hz";
+        sstream << std::fixed << std::setprecision(1) << capture.frequency() << "hz";
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Freq: ",      Point(10, 180), 220, 3);
         pico_explorer.set_pen(128, 255, 255);   pico_explorer.text(sstream.str(), Point(90, 180), 220, 3);
       }
 
       {
         std::stringstream sstream;
-        sstream << std::fixed << std::setprecision(1) << capture.get_revolutions_per_minute();
+        sstream << std::fixed << std::setprecision(1) << capture.revolutions_per_minute();
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("RPM: ",       Point(10, 210), 220, 3);
         pico_explorer.set_pen(255, 255, 128);   pico_explorer.text(sstream.str(), Point(80, 210), 220, 3);
       }

@@ -8,8 +8,8 @@ namespace pimoroni {
   // CONSTRUCTORS
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   Capture::Capture(int32_t captured_count, int32_t count_change, float average_frequency, float counts_per_revolution) :
-    captured_count(captured_count), count_change(count_change), average_frequency(average_frequency),
-    counts_per_revolution(std::max(counts_per_revolution, FLT_MIN)) { //Clamp counts_per_rev to avoid potential NaN
+    captured_count(captured_count), capture_count_change(count_change), average_frequency(average_frequency),
+    counts_per_revolution(MAX(counts_per_revolution, FLT_MIN)) { //Clamp counts_per_rev to avoid potential NaN
   }
 
 
@@ -17,53 +17,53 @@ namespace pimoroni {
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   // METHODS
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  int32_t Capture::get_count() const {
+  int32_t Capture::count() const {
     return captured_count;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_revolutions() const {
-    return (float)get_count() / counts_per_revolution;
+  float Capture::revolutions() const {
+    return (float)count() / counts_per_revolution;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_angle_degrees() const {
-    return get_revolutions() * 360.0f;
+  float Capture::angle_degrees() const {
+    return revolutions() * 360.0f;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_angle_radians() const {
-    return get_revolutions() * M_TWOPI;
+  float Capture::angle_radians() const {
+    return revolutions() * M_TWOPI;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////  
-  int32_t Capture::get_count_change() const {
-    return count_change;
+  int32_t Capture::count_change() const {
+    return capture_count_change;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_frequency() const {
+  float Capture::frequency() const {
     return average_frequency;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_revolutions_per_second() const {
-    return get_frequency() / counts_per_revolution;
+  float Capture::revolutions_per_second() const {
+    return frequency() / counts_per_revolution;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_revolutions_per_minute() const {
-    return get_revolutions_per_second() * 60.0f;
+  float Capture::revolutions_per_minute() const {
+    return revolutions_per_second() * 60.0f;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_degrees_per_second() const {
-    return get_revolutions_per_second() * 360.0f;
+  float Capture::degrees_per_second() const {
+    return revolutions_per_second() * 360.0f;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////
-  float Capture::get_radians_per_second() const {
-    return get_revolutions_per_second() * M_TWOPI;
+  float Capture::radians_per_second() const {
+    return revolutions_per_second() * M_TWOPI;
   }
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,9 +1,24 @@
 #pragma once
 
 #include "hardware/pio.h"
+#include "common/pimoroni_common.hpp"
 #include "capture.hpp"
 
 namespace pimoroni {
+
+  struct bool_pair {
+    union {
+      bool first;
+      bool a;
+    };
+    union {
+      bool second;
+      bool b;
+    };
+
+    bool_pair() : first(false), second(false) {}
+    bool_pair(bool first, bool second) : first(first), second(second) {}
+  };
 
   class Encoder {
     //--------------------------------------------------
@@ -13,7 +28,6 @@ namespace pimoroni {
     static constexpr float DEFAULT_COUNTS_PER_REV   = 24;
     static const uint16_t DEFAULT_COUNT_MICROSTEPS  = false;
     static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;
-    static const uint8_t PIN_UNUSED                 = UINT8_MAX;
 
   private:
     static const uint32_t STATE_A_MASK      = 0x80000000;
@@ -41,16 +55,16 @@ namespace pimoroni {
       CLOCKWISE     = 1,
       COUNTERCLOCK  = -1,
     };
-  
-  
+
+
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    const PIO enc_pio   = pio0;
-    const uint8_t pinA  = PIN_UNUSED;
-    const uint8_t pinB  = PIN_UNUSED;
-    const uint8_t pinC  = PIN_UNUSED;
+    PIO pio;
+    uint sm;
+    pin_pair enc_pins;
+    uint pin_c;
 
     const float counts_per_revolution   = DEFAULT_COUNTS_PER_REV;
     const bool count_microsteps         = DEFAULT_COUNT_MICROSTEPS;
@@ -59,12 +73,9 @@ namespace pimoroni {
 
     //--------------------------------------------------
 
-    uint enc_sm         = 0;
-    uint enc_offset     = 0;
-
-    volatile bool stateA                = false;
-    volatile bool stateB                = false;
-    volatile int32_t count              = 0;
+    volatile bool enc_state_a           = false;
+    volatile bool enc_state_b           = false;
+    volatile int32_t enc_count          = 0;
     volatile int32_t time_since         = 0;
     volatile Direction last_travel_dir  = NO_DIR;
     volatile int32_t microstep_time     = 0;
@@ -73,15 +84,18 @@ namespace pimoroni {
     int32_t count_offset                = 0;
     int32_t last_captured_count         = 0;
 
+    bool initialised = false;
+
 
     //--------------------------------------------------
     // Statics
     //--------------------------------------------------
-  public:
-    static Encoder* pio_encoders[NUM_PIOS][NUM_PIO_STATE_MACHINES];
-    static uint8_t pio_claimed_sms[NUM_PIOS];
-    static void pio0_interrupt_callback();
-    static void pio1_interrupt_callback();
+    static Encoder* encoders[NUM_PIOS][NUM_PIO_STATE_MACHINES];
+    static uint8_t claimed_sms[NUM_PIOS];
+    static uint pio_program_offset[NUM_PIOS];
+    static void pio_interrupt_handler(uint pio_idx);
+    static void pio0_interrupt_handler();
+    static void pio1_interrupt_handler();
 
 
     //--------------------------------------------------
@@ -89,7 +103,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     Encoder() {}
-    Encoder(PIO pio, uint8_t pinA, uint8_t pinB, uint8_t pinC = PIN_UNUSED,
+    Encoder(PIO pio, uint sm, const pin_pair &pins, uint pin_c = PIN_UNUSED,
             float counts_per_revolution = DEFAULT_COUNTS_PER_REV, bool count_microsteps = DEFAULT_COUNT_MICROSTEPS,
             uint16_t freq_divider = DEFAULT_FREQ_DIVIDER);
     ~Encoder();
@@ -98,24 +112,26 @@ namespace pimoroni {
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
-  public:    
+  public:
     bool init();
 
-    bool get_state_a() const;
-    bool get_state_b() const;
-    int32_t get_count() const;
-    float get_revolutions() const;
-    float get_angle_degrees() const;
-    float get_angle_radians() const;
+    // For print access in micropython
+    pin_pair pins() const;
 
-    float get_frequency() const;
-    float get_revolutions_per_second() const;
-    float get_revolutions_per_minute() const;
-    float get_degrees_per_second() const;
-    float get_radians_per_second() const;
+    bool_pair state() const;
+    int32_t count() const;
+    float revolutions() const;
+    float angle_degrees() const;
+    float angle_radians() const;
+
+    float frequency() const;
+    float revolutions_per_second() const;
+    float revolutions_per_minute() const;
+    float degrees_per_second() const;
+    float radians_per_second() const;
     
     void zero_count();
-    Capture perform_capture();
+    Capture perform_capture(); //TODO rename capture to snapshot
 
   private:
     void microstep_up(int32_t time_since);

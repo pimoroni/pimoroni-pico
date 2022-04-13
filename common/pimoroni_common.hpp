@@ -74,4 +74,20 @@ namespace pimoroni {
       162, 163, 165, 167, 169, 170, 172, 174, 176, 178, 179, 181, 183, 185, 187, 189,
       191, 193, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220,
       222, 224, 227, 229, 231, 233, 235, 237, 239, 241, 244, 246, 248, 250, 252, 255};
+
+  struct pin_pair {
+    union {
+      uint8_t first;
+      uint8_t a;
+      uint8_t positive;
+    };
+    union {
+      uint8_t second;
+      uint8_t b;
+      uint8_t negative;
+    };
+
+    pin_pair() : first(0), second(0) {}
+    pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
+  };
 }
