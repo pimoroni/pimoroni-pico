@@ -2,7 +2,6 @@
 
 #include "hardware/pio.h"
 #include "common/pimoroni_common.hpp"
-#include "snapshot.hpp"
 
 namespace pimoroni {
 
