@@ -1,6 +1,11 @@
 import time
 import badger2040
 import badger_os
+import os
+
+# Multiple badge text and image files supported. All files to be placed in newly created '\badges' folder.
+# Associated image files to be named the same as the text file with '-image' appended.
+# For each text file e.g. 'badge1.txt', an associated image file e.g. 'badge1-image.bin' will load
 
 # Global Constants
 WIDTH = badger2040.WIDTH
@@ -27,19 +32,31 @@ RP2040
 E ink
 296x128px"""
 
-BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
-
+# Check that the badges directory exists, if not, make it
 try:
-    open("badge-image.bin", "rb").readinto(BADGE_IMAGE)
+    os.mkdir("badges")
 except OSError:
-    try:
-        import badge_image
-        BADGE_IMAGE = bytearray(badge_image.data())
-        del badge_image
-    except ImportError:
-        pass
+    pass
 
+# Check that there is a badges.txt, if not preload
+try:
+    text = open("badges/badge.txt", "r")
+except OSError:
+    with open("badges/badge.txt", "w") as text:
+        text.write(DEFAULT_TEXT)
+        text.flush()
+        text.seek(0)
 
+# Load all available badge Files
+try:
+    BADGES = [f for f in os.listdir("/badges") if f.endswith(".txt")]
+    TOTAL_BADGES = len(BADGES)
+except OSError:
+    pass
+
+state = {
+    "current_badge": 0
+}
 # ------------------------------
 #      Utility functions
 # ------------------------------
@@ -60,7 +77,52 @@ def truncatestring(text, text_size, width):
 # ------------------------------
 
 # Draw the badge, including user text
-def draw_badge():
+def draw_badge(n):
+
+    BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
+
+    # Reset to default badge if state badge removed
+    try:
+        file = BADGES[n]
+    except:
+        n = 0
+        file = BADGES[n]
+        badger_os.state_modify("badges", {"current badge": n})
+
+    imgfile = str(file).split(".")[0] + "-image.bin"
+
+    # Try and import image related to txt file
+    try:
+        with open("badges/" + imgfile, "rb") as f:
+            f.readinto(BADGE_IMAGE)
+    except OSError:
+        try:
+            import badge_image
+            BADGE_IMAGE = bytearray(badge_image.data())
+            del badge_image
+        except ImportError:
+            pass
+
+    with open("badges/{}".format(file), "r") as badge:
+        # Read in the next 6 lines
+        company = badge.readline()        # "mustelid inc"
+        name = badge.readline()           # "H. Badger"
+        detail1_title = badge.readline()  # "RP2040"
+        detail1_text = badge.readline()   # "2MB Flash"
+        detail2_title = badge.readline()  # "E ink"
+        detail2_text = badge.readline()   # "296x128px"
+
+    # Truncate all of the text (except for the name as that is scaled)
+    company = truncatestring(company, COMPANY_TEXT_SIZE, TEXT_WIDTH)
+
+    detail1_title = truncatestring(detail1_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
+    detail1_text = truncatestring(detail1_text, DETAILS_TEXT_SIZE,
+                                TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail1_title, DETAILS_TEXT_SIZE))
+
+    detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
+    detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
+                                TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
+
     display.pen(0)
     display.clear()
 
@@ -125,6 +187,16 @@ def draw_badge():
     display.thickness(2)
     display.text(detail2_text, LEFT_PADDING + name_length + DETAIL_SPACING, HEIGHT - (DETAILS_HEIGHT // 2), DETAILS_TEXT_SIZE)
 
+    # Draw selection indicator to bottom right of image
+    if TOTAL_BADGES > 1:
+        for i in range(TOTAL_BADGES):
+            x = 291
+            y = int((128) - (TOTAL_BADGES * 5) + (i * 5))
+            display.pen(0)
+            display.rectangle(x, y, 4, 4)
+            if state["current_badge"] != i:
+                display.pen(15)
+                display.rectangle(x + 1, y + 1, 2, 2)
 
 # ------------------------------
 #        Program setup
@@ -135,47 +207,37 @@ display = badger2040.Badger2040()
 display.led(128)
 display.update_speed(badger2040.UPDATE_NORMAL)
 
-# Open the badge file
-try:
-    badge = open("badge.txt", "r")
-except OSError:
-    with open("badge.txt", "w") as f:
-        f.write(DEFAULT_TEXT)
-        f.flush()
-    badge = open("badge.txt", "r")
-
-# Read in the next 6 lines
-company = badge.readline()        # "mustelid inc"
-name = badge.readline()           # "H. Badger"
-detail1_title = badge.readline()  # "RP2040"
-detail1_text = badge.readline()   # "2MB Flash"
-detail2_title = badge.readline()  # "E ink"
-detail2_text = badge.readline()   # "296x128px"
-
-# Truncate all of the text (except for the name as that is scaled)
-company = truncatestring(company, COMPANY_TEXT_SIZE, TEXT_WIDTH)
-
-detail1_title = truncatestring(detail1_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
-detail1_text = truncatestring(detail1_text, DETAILS_TEXT_SIZE,
-                              TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail1_title, DETAILS_TEXT_SIZE))
-
-detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
-detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
-                              TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
-
-
 # ------------------------------
 #       Main program
 # ------------------------------
 
-draw_badge()
+badger_os.state_load("badges", state)
+changed = not badger2040.woken_by_button()
 
 while True:
-    if display.pressed(badger2040.BUTTON_A) or display.pressed(badger2040.BUTTON_B) or display.pressed(badger2040.BUTTON_C) or display.pressed(badger2040.BUTTON_UP) or display.pressed(badger2040.BUTTON_DOWN):
-        badger_os.warning(display, "To change the text, connect Badger2040 to a PC, load up Thonny, and modify badge.txt")
-        time.sleep(4)
 
-        draw_badge()
+    if TOTAL_BADGES > 1:
+        if display.pressed(badger2040.BUTTON_UP):
+            if state["current_badge"] > 0:
+                state["current_badge"] -= 1
+                changed = True
+
+        if display.pressed(badger2040.BUTTON_DOWN):
+            if state["current_badge"] < TOTAL_BADGES - 1:
+                state["current_badge"] += 1
+                changed = True
+
+    if display.pressed(badger2040.BUTTON_B):
+        display.pen(15)
+        display.clear()
+        badger_os.warning(display, "To add badges, connect Badger2040 to a PC, load up Thonny, and see badges.py.")
+        time.sleep(4)
+        changed = True
+
+    if changed:
+        draw_badge(state["current_badge"])
+        badger_os.state_save("badges", state)
+        changed = False      
 
     display.update()
 
