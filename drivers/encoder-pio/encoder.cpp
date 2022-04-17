@@ -1,4 +1,5 @@
 #include <math.h>
+#include <cfloat>
 #include <climits>
 #include "hardware/irq.h"
 #include "encoder.hpp"
@@ -17,14 +18,63 @@ uint8_t Encoder::claimed_sms[] = { 0x0, 0x0 };
 uint Encoder::pio_program_offset[] = { 0, 0 };
 
 
-Encoder::Encoder(PIO pio, uint sm, const pin_pair &pins, uint pin_c,
-                  float counts_per_revolution, bool count_microsteps,
-                  uint16_t freq_divider)
+Encoder::Snapshot::Snapshot()
+: count(0), delta(0), frequency(0.0f), counts_per_rev(INT32_MAX) {
+}
+
+Encoder::Snapshot::Snapshot(int32_t count, int32_t delta, float frequency, float counts_per_rev)
+: count(count), delta(delta), frequency(frequency)
+, counts_per_rev(MAX(counts_per_rev, FLT_EPSILON)) { //Clamp counts_per_rev to avoid potential NaN
+}
+
+float Encoder::Snapshot::revolutions() const {
+  return (float)count / counts_per_rev;
+}
+
+float Encoder::Snapshot::degrees() const {
+  return revolutions() * 360.0f;
+}
+
+float Encoder::Snapshot::radians() const {
+  return revolutions() * M_TWOPI;
+}
+
+float Encoder::Snapshot::revolutions_delta() const {
+  return (float)delta / counts_per_rev;
+}
+
+float Encoder::Snapshot::degrees_delta() const {
+  return revolutions_delta() * 360.0f;
+}
+
+float Encoder::Snapshot::radians_delta() const {
+  return revolutions_delta() * M_TWOPI;
+}
+
+float Encoder::Snapshot::revolutions_per_second() const {
+  return frequency / counts_per_rev;
+}
+
+float Encoder::Snapshot::revolutions_per_minute() const {
+  return revolutions_per_second() * 60.0f;
+}
+
+float Encoder::Snapshot::degrees_per_second() const {
+  return revolutions_per_second() * 360.0f;
+}
+
+float Encoder::Snapshot::radians_per_second() const {
+  return revolutions_per_second() * M_TWOPI;
+}
+
+Encoder::Encoder(PIO pio, uint sm, const pin_pair &pins, uint common_pin, Direction direction,
+                  float counts_per_rev, bool count_microsteps, uint16_t freq_divider)
 : pio(pio)
 , sm(sm)
 , enc_pins(pins)
-, pin_c(pin_c)
-, counts_per_revolution(counts_per_revolution)
+, enc_common_pin(common_pin)
+, enc_direction(direction)
+, enc_counts_per_rev(MAX(counts_per_rev, FLT_EPSILON))
 , count_microsteps(count_microsteps)
 , freq_divider(freq_divider)
 , clocks_per_time((float)(clock_get_hz(clk_sys) / (ENC_LOOP_CYCLES * freq_divider))) {
@@ -57,8 +107,8 @@ Encoder::~Encoder() {
     gpio_set_function(enc_pins.a, GPIO_FUNC_NULL);
     gpio_set_function(enc_pins.b, GPIO_FUNC_NULL);
 
-    if(pin_c != PIN_UNUSED) {
-      gpio_set_function(pin_c, GPIO_FUNC_NULL);
+    if(enc_common_pin != PIN_UNUSED) {
+      gpio_set_function(enc_common_pin, GPIO_FUNC_NULL);
     }
   }
 }
@@ -68,7 +118,7 @@ void Encoder::pio_interrupt_handler(uint pio_idx) {
   // and if there's an associated encoder, have it update its state
   for(uint8_t sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
     if(encoders[pio_idx][sm] != nullptr) {
-      encoders[pio_idx][sm]->check_for_transition(); 
+      encoders[pio_idx][sm]->process_steps();
     }
   }
 }
@@ -87,10 +137,10 @@ bool Encoder::init() {
     if((enc_pins.a < NUM_BANK0_GPIOS) && (enc_pins.b < NUM_BANK0_GPIOS)) {
 
       // If a Pin C was defined, and valid, set it as a GND to pull the other two pins down
-      if((pin_c != PIN_UNUSED) && (pin_c < NUM_BANK0_GPIOS)) {
-        gpio_init(pin_c);
-        gpio_set_dir(pin_c, GPIO_OUT);
-        gpio_put(pin_c, false);
+      if((enc_common_pin != PIN_UNUSED) && (enc_common_pin < NUM_BANK0_GPIOS)) {
+        gpio_init(enc_common_pin);
+        gpio_set_dir(enc_common_pin, GPIO_OUT);
+        gpio_put(enc_common_pin, false);
       }
 
       pio_sm_claim(pio, sm);
@@ -119,8 +169,6 @@ bool Encoder::init() {
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
 
       sm_config_set_clkdiv_int_frac(&c, freq_divider, 0);
-      //float div = clock_get_hz(clk_sys) / 500000;
-      //sm_config_set_clkdiv(&c, div);
 
       pio_sm_init(pio, sm, pio_program_offset[pio_idx], &c);
 
@@ -157,92 +205,97 @@ pin_pair Encoder::pins() const {
   return enc_pins;
 }
 
+uint Encoder::common_pin() const {
+  return enc_common_pin;
+}
+
 bool_pair Encoder::state() const {
   return bool_pair(enc_state_a, enc_state_b);
 }
 
 int32_t Encoder::count() const {
-  return enc_count - count_offset;
+  return enc_count;
+}
+
+int32_t Encoder::delta() {
+  int32_t count = enc_count;  // Store a local copy of enc_count to avoid two reads
+
+  // Determine the change in counts since the last time this function was performed
+  int32_t change = count - last_count;
+  last_count = count;
+
+  return change;
+}
+
+void Encoder::zero() {
+  enc_count = 0;
+  enc_cumulative_time = 0;
+  enc_step = 0;
+  enc_turn = 0;
+
+  microstep_time = 0;
+  step_dir = NO_DIR; // may not be wanted?
+
+  last_count = 0;
+  last_snapshot_count = 0;
+}
+
+int16_t Encoder::step() const {
+  return enc_step;
+}
+
+int16_t Encoder::turn() const {
+  return enc_turn;
 }
 
 float Encoder::revolutions() const {
-  return (float)count() / counts_per_revolution;
+  return (float)count() / enc_counts_per_rev;
 }
 
-float Encoder::angle_degrees() const {
+float Encoder::degrees() const {
   return revolutions() * 360.0f;
 }
 
-float Encoder::angle_radians() const {
+float Encoder::radians() const {
   return revolutions() * M_TWOPI;
 }
 
-float Encoder::frequency() const {
-  return clocks_per_time / (float)time_since;
+Direction Encoder::direction() const {
+  return enc_direction;
 }
 
-float Encoder::revolutions_per_second() const {
-  return frequency() / counts_per_revolution;
+void Encoder::direction(Direction direction) {
+  enc_direction = direction;
 }
 
-float Encoder::revolutions_per_minute() const {
-  return revolutions_per_second() * 60.0f;
+float Encoder::counts_per_revolution() const {
+  return enc_counts_per_rev;
 }
 
-float Encoder::degrees_per_second() const {
-  return revolutions_per_second() * 360.0f;
+void Encoder::counts_per_revolution(float counts_per_rev) {
+  enc_counts_per_rev = MAX(counts_per_rev, FLT_EPSILON);
 }
 
-float Encoder::radians_per_second() const {
-  return revolutions_per_second() * M_TWOPI;
-}
+Encoder::Snapshot Encoder::take_snapshot() {
+  // Take a snapshot of the current values
+  int32_t count = enc_count;
+  int32_t cumulative_time = enc_cumulative_time;
+  enc_cumulative_time = 0;
 
-void Encoder::zero_count() {
-  count_offset = enc_count;
-}
-
-Capture Encoder::perform_capture() {
-  // Capture the current values
-  int32_t captured_count = enc_count;
-  int32_t captured_cumulative_time = cumulative_time;
-  cumulative_time = 0;
-
-  // Determine the change in counts since the last capture was performed
-  int32_t count_change = captured_count - last_captured_count;
-  last_captured_count = captured_count;
+  // Determine the change in counts since the last snapshot was taken
+  int32_t change = count - last_snapshot_count;
+  last_snapshot_count = count;
 
   // Calculate the average frequency of state transitions
-  float average_frequency = 0.0f;
-  if(count_change != 0 && captured_cumulative_time != INT_MAX) {
-    average_frequency = (clocks_per_time * (float)count_change) / (float)captured_cumulative_time;
+  float frequency = 0.0f;
+  if(change != 0 && cumulative_time != INT32_MAX) {
+    frequency = (clocks_per_time * (float)change) / (float)cumulative_time;
   }
 
-  return Capture(captured_count, count_change, average_frequency, counts_per_revolution);
+  return Snapshot(count, change, frequency, enc_counts_per_rev);
 }
 
-void Encoder::microstep_up(int32_t time) {
-  enc_count++;
-  time_since = time;
-  microstep_time = 0;
-
-  if(time + cumulative_time < time)  //Check to avoid integer overflow
-    cumulative_time = INT_MAX;
-  else
-    cumulative_time += time;
-}
-
-void Encoder::microstep_down(int32_t time) {
-  enc_count--;
-  time_since = 0 - time;
-  microstep_time = 0;
-
-  if(time + cumulative_time < time)  //Check to avoid integer overflow
-    cumulative_time = INT_MAX;
-  else
-    cumulative_time += time;
-}
-
-void Encoder::check_for_transition() {
+void Encoder::process_steps() {
   while(pio->ints1 & (PIO_IRQ1_INTS_SM0_RXNEMPTY_BITS << sm)) {
     uint32_t received = pio_sm_get(pio, sm);
 
@@ -264,6 +317,8 @@ void Encoder::check_for_transition() {
       microstep_time = time_received;
     }
 
+    bool up = (enc_direction == NORMAL);
+
     // Determine what transition occurred
     switch(LAST_STATE(states)) {
       //--------------------------------------------------
@@ -273,14 +328,14 @@ void Encoder::check_for_transition() {
           // B _________
           case MICROSTEP_1:
             if(count_microsteps)
-              microstep_up(time_received);
+              microstep(time_received, up);
             break;
 
           // A _________
           // B ____|‾‾‾‾
           case MICROSTEP_3:
             if(count_microsteps)
-              microstep_down(time_received);
+              microstep(time_received, !up);
             break;
         }
         break;
@@ -291,21 +346,21 @@ void Encoder::check_for_transition() {
           // A ‾‾‾‾‾‾‾‾‾
           // B ____|‾‾‾‾
           case MICROSTEP_2:
-            if(count_microsteps || last_travel_dir == CLOCKWISE)
-              microstep_up(time_received);
+            if(count_microsteps || step_dir == INCREASING)
+              microstep(time_received, up);
 
-            last_travel_dir = NO_DIR;  // Finished turning clockwise
+            step_dir = NO_DIR;  // Finished increasing
             break;
 
           // A ‾‾‾‾|____
           // B _________
           case MICROSTEP_0:
             if(count_microsteps)
-              microstep_down(time_received);
+              microstep(time_received, !up);
             break;
         }
         break;
-        
+
       //--------------------------------------------------
       case MICROSTEP_2:
         switch(CURR_STATE(states)) {
@@ -313,18 +368,18 @@ void Encoder::check_for_transition() {
           // B ‾‾‾‾‾‾‾‾‾
           case MICROSTEP_3:
             if(count_microsteps)
-              microstep_up(time_received);
-            
-            last_travel_dir = CLOCKWISE;  // Started turning clockwise
+              microstep(time_received, up);
+
+            step_dir = INCREASING;  // Started increasing
             break;
 
           // A ‾‾‾‾‾‾‾‾‾
           // B ‾‾‾‾|____
           case MICROSTEP_1:
             if(count_microsteps)
-              microstep_down(time_received);
-            
-            last_travel_dir = COUNTERCLOCK; // Started turning counter-clockwise
+              microstep(time_received, !up);
+
+            step_dir = DECREASING;  // Started decreasing
             break;
         }
         break;
@@ -336,20 +391,43 @@ void Encoder::check_for_transition() {
           // B ‾‾‾‾|____
           case MICROSTEP_0:
             if(count_microsteps)
-              microstep_up(time_received);
+              microstep(time_received, up);
             break;
 
           // A ____|‾‾‾‾
           // B ‾‾‾‾‾‾‾‾‾
           case MICROSTEP_2:
-            if(count_microsteps || last_travel_dir == COUNTERCLOCK)
-              microstep_down(time_received);
+            if(count_microsteps || step_dir == DECREASING)
+              microstep(time_received, !up);
 
-            last_travel_dir = NO_DIR;    // Finished turning counter-clockwise
+            step_dir = NO_DIR;  // Finished decreasing
             break;
         }
         break;
     }
   }
+}
+
+void Encoder::microstep(int32_t time, bool up) {
+  if(up) {
+    enc_count++;
+    if(++enc_step >= (int16_t)enc_counts_per_rev) {
+      enc_step -= (int16_t)enc_counts_per_rev;
+      enc_turn++;
+    }
+  }
+  else {
+    enc_count--;
+    if(--enc_step < 0) {
+      enc_step += (int16_t)enc_counts_per_rev;
+      enc_turn--;
+    }
+  }
+  microstep_time = 0;
+
+  if(time + enc_cumulative_time < time)  // Check to avoid integer overflow
+    enc_cumulative_time = INT32_MAX;
+  else
+    enc_cumulative_time += time;
 }
 }

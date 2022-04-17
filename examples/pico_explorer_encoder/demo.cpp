@@ -54,7 +54,7 @@ enum DrawState {
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 
-Encoder encoder(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
+Encoder encoder(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, NORMAL, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
 volatile bool encA_readings[READINGS_SIZE];
 volatile bool encB_readings[READINGS_SIZE];
@@ -226,11 +226,11 @@ int main() {
 
       // If the user has wired up their encoder switch, and it is pressed, set the encoder count to zero
       if(ENCODER_SWITCH_PIN != PIN_UNUSED && gpio_get(ENCODER_SWITCH_PIN)) {
-        encoder.zero_count();
+        encoder.zero();
       }
 
-      // Take a capture, or snapshot of the current encoder state
-      Capture capture = encoder.perform_capture();
+      // Take a snapshot of the current encoder state
+      Encoder::Snapshot snapshot = encoder.take_snapshot();
 
       // Spin Motor 1 either clockwise or counterclockwise depending on if B or Y are pressed
       if(pico_explorer.is_pressed(PicoExplorer::B) && !pico_explorer.is_pressed(PicoExplorer::Y)) {
@@ -316,21 +316,21 @@ int main() {
 
       {
         std::stringstream sstream;
-        sstream << capture.count();
+        sstream << snapshot.count;
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Count:",      Point(10, 150),  200, 3);
         pico_explorer.set_pen(255, 128, 255);   pico_explorer.text(sstream.str(), Point(110, 150), 200, 3);
       }
 
       {
         std::stringstream sstream;
-        sstream << std::fixed << std::setprecision(1) << capture.frequency() << "hz";
+        sstream << std::fixed << std::setprecision(1) << snapshot.frequency << "hz";
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Freq: ",      Point(10, 180), 220, 3);
         pico_explorer.set_pen(128, 255, 255);   pico_explorer.text(sstream.str(), Point(90, 180), 220, 3);
       }
 
       {
         std::stringstream sstream;
-        sstream << std::fixed << std::setprecision(1) << capture.revolutions_per_minute();
+        sstream << std::fixed << std::setprecision(1) << snapshot.revolutions_per_minute();
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("RPM: ",       Point(10, 210), 220, 3);
         pico_explorer.set_pen(255, 255, 128);   pico_explorer.text(sstream.str(), Point(80, 210), 220, 3);
       }

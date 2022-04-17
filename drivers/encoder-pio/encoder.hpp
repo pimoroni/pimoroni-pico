@@ -2,9 +2,14 @@
 
 #include "hardware/pio.h"
 #include "common/pimoroni_common.hpp"
-#include "capture.hpp"
+#include "snapshot.hpp"
 
 namespace pimoroni {
+
+  enum Direction {
+    NORMAL    = 0,
+    REVERSED  = 1,
+  };
 
   struct bool_pair {
     union {
@@ -26,7 +31,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static constexpr float DEFAULT_COUNTS_PER_REV   = 24;
-    static const uint16_t DEFAULT_COUNT_MICROSTEPS  = false;
+    static const bool DEFAULT_COUNT_MICROSTEPS      = false;
     static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;
 
   private:
@@ -40,20 +45,65 @@ namespace pimoroni {
 
     static const uint32_t TIME_MASK   = 0x0fffffff;
 
-    static const uint8_t MICROSTEP_0  = 0b00;
-    static const uint8_t MICROSTEP_1  = 0b10;
-    static const uint8_t MICROSTEP_2  = 0b11;
-    static const uint8_t MICROSTEP_3  = 0b01;
-
 
     //--------------------------------------------------
     // Enums
     //--------------------------------------------------
   private:
-    enum Direction {
-      NO_DIR        = 0,
-      CLOCKWISE     = 1,
-      COUNTERCLOCK  = -1,
+    enum StepDir {
+      NO_DIR    = 0,
+      INCREASING = 1,
+      DECREASING = -1,
+    };
+
+    enum MicroStep : uint8_t {
+      MICROSTEP_0 = 0b00,
+      MICROSTEP_1 = 0b10,
+      MICROSTEP_2 = 0b11,
+      MICROSTEP_3 = 0b01,
+    };
+
+
+    //--------------------------------------------------
+    // Substructures
+    //--------------------------------------------------
+  public:
+    class Snapshot {
+        //--------------------------------------------------
+        // Variables
+        //--------------------------------------------------
+      public:
+        const int32_t count;
+        const int32_t delta;
+        const float frequency;
+      private:
+        float counts_per_rev;
+
+
+        //--------------------------------------------------
+        // Constructors
+        //--------------------------------------------------
+      public:
+        Snapshot();
+        Snapshot(int32_t count, int32_t delta, float frequency, float counts_per_rev);
+
+
+        //--------------------------------------------------
+        // Methods
+        //--------------------------------------------------
+      public:
+        float revolutions() const;
+        float degrees() const;
+        float radians() const;
+
+        float revolutions_delta() const;
+        float degrees_delta() const;
+        float radians_delta() const;
+
+        float revolutions_per_second() const;
+        float revolutions_per_minute() const;
+        float degrees_per_second() const;
+        float radians_per_second() const;
     };
 
 
@@ -64,27 +114,30 @@ namespace pimoroni {
     PIO pio;
     uint sm;
     pin_pair enc_pins;
-    uint pin_c;
+    uint enc_common_pin;
+    Direction enc_direction;
+    float enc_counts_per_rev;
 
-    const float counts_per_revolution   = DEFAULT_COUNTS_PER_REV;
-    const bool count_microsteps         = DEFAULT_COUNT_MICROSTEPS;
-    const uint16_t freq_divider         = DEFAULT_FREQ_DIVIDER;
-    const float clocks_per_time         = 0;
+    const bool count_microsteps;
+    const uint16_t freq_divider;
+    const float clocks_per_time;
 
     //--------------------------------------------------
 
-    volatile bool enc_state_a           = false;
-    volatile bool enc_state_b           = false;
-    volatile int32_t enc_count          = 0;
-    volatile int32_t time_since         = 0;
-    volatile Direction last_travel_dir  = NO_DIR;
-    volatile int32_t microstep_time     = 0;
-    volatile int32_t cumulative_time    = 0;
+    volatile bool enc_state_a             = false;
+    volatile bool enc_state_b             = false;
+    volatile int32_t enc_count            = 0;
+    volatile int32_t enc_cumulative_time  = 0;
+    volatile int16_t enc_step             = 0;
+    volatile int16_t enc_turn             = 0;
 
-    int32_t count_offset                = 0;
-    int32_t last_captured_count         = 0;
+    volatile int32_t microstep_time       = 0;
+    volatile StepDir step_dir             = NO_DIR;
 
-    bool initialised = false;
+    int32_t last_count                    = 0;
+    int32_t last_snapshot_count           = 0;
+
+    bool initialised                      = false;
 
 
     //--------------------------------------------------
@@ -102,9 +155,8 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Encoder() {}
-    Encoder(PIO pio, uint sm, const pin_pair &pins, uint pin_c = PIN_UNUSED,
-            float counts_per_revolution = DEFAULT_COUNTS_PER_REV, bool count_microsteps = DEFAULT_COUNT_MICROSTEPS,
+    Encoder(PIO pio, uint sm, const pin_pair &pins, uint common_pin = PIN_UNUSED, Direction direction = NORMAL,
+            float counts_per_rev = DEFAULT_COUNTS_PER_REV, bool count_microsteps = DEFAULT_COUNT_MICROSTEPS,
             uint16_t freq_divider = DEFAULT_FREQ_DIVIDER);
     ~Encoder();
 
@@ -117,26 +169,34 @@ namespace pimoroni {
 
     // For print access in micropython
     pin_pair pins() const;
+    uint common_pin() const;
 
     bool_pair state() const;
     int32_t count() const;
+    int32_t delta();
+    void zero();
+
+    int16_t step() const;
+    int16_t turn() const;
+
     float revolutions() const;
-    float angle_degrees() const;
-    float angle_radians() const;
+    float degrees() const;
+    float radians() const;
 
-    float frequency() const;
-    float revolutions_per_second() const;
-    float revolutions_per_minute() const;
-    float degrees_per_second() const;
-    float radians_per_second() const;
-    
-    void zero_count();
-    Capture perform_capture(); //TODO rename capture to snapshot
+    //--------------------------------------------------
 
+    Direction direction() const;
+    void direction(Direction direction);
+
+    float counts_per_revolution() const;
+    void counts_per_revolution(float counts_per_rev);
+
+    Snapshot take_snapshot();
+
+    //--------------------------------------------------
   private:
-    void microstep_up(int32_t time_since);
-    void microstep_down(int32_t time_since);
-    void check_for_transition();
+    void process_steps();
+    void microstep(int32_t time_since, bool up);
   };
 
 }

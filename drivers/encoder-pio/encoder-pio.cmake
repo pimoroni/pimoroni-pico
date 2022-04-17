@@ -3,7 +3,6 @@ add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/encoder.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/capture.cpp
 )
 
 pico_generate_pio_header(${DRIVER_NAME} ${CMAKE_CURRENT_LIST_DIR}/encoder.pio)
