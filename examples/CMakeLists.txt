@@ -24,6 +24,7 @@ add_subdirectory(breakout_scd41)
 
 add_subdirectory(pico_display)
 add_subdirectory(pico_display_2)
+add_subdirectory(pico_display_2_mandelbrot)
 add_subdirectory(pico_unicorn)
 add_subdirectory(pico_unicorn_plasma)
 add_subdirectory(pico_scroll)
