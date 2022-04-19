@@ -71,11 +71,10 @@ namespace pimoroni {
         //--------------------------------------------------
         // Variables
         //--------------------------------------------------
-      public:
-        const int32_t count;
-        const int32_t delta;
-        const float frequency;
       private:
+        int32_t captured_count;
+        int32_t captured_delta;
+        float captured_frequency;
         float counts_per_rev;
 
 
@@ -91,6 +90,10 @@ namespace pimoroni {
         // Methods
         //--------------------------------------------------
       public:
+        int32_t count() const;
+        int32_t delta() const;
+        float frequency() const;
+
         float revolutions() const;
         float degrees() const;
         float radians() const;

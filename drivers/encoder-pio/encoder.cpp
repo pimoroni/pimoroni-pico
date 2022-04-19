@@ -19,16 +19,28 @@ uint Encoder::pio_program_offset[] = { 0, 0 };
 
 
 Encoder::Snapshot::Snapshot()
-: count(0), delta(0), frequency(0.0f), counts_per_rev(INT32_MAX) {
+: captured_count(0), captured_delta(0), captured_frequency(0.0f), counts_per_rev(INT32_MAX) {
 }
 
 Encoder::Snapshot::Snapshot(int32_t count, int32_t delta, float frequency, float counts_per_rev)
-: count(count), delta(delta), frequency(frequency)
+: captured_count(count), captured_delta(delta), captured_frequency(frequency)
 , counts_per_rev(MAX(counts_per_rev, FLT_EPSILON)) { //Clamp counts_per_rev to avoid potential NaN
 }
 
+int32_t Encoder::Snapshot::count() const {
+  return captured_count;
+}
+
+int32_t Encoder::Snapshot::delta() const {
+  return captured_delta;
+}
+
+float Encoder::Snapshot::frequency() const {
+  return captured_frequency;
+}
+
 float Encoder::Snapshot::revolutions() const {
-  return (float)count / counts_per_rev;
+  return (float)captured_count / counts_per_rev;
 }
 
 float Encoder::Snapshot::degrees() const {
@@ -40,7 +52,7 @@ float Encoder::Snapshot::radians() const {
 }
 
 float Encoder::Snapshot::revolutions_delta() const {
-  return (float)delta / counts_per_rev;
+  return (float)captured_delta / counts_per_rev;
 }
 
 float Encoder::Snapshot::degrees_delta() const {
@@ -52,7 +64,7 @@ float Encoder::Snapshot::radians_delta() const {
 }
 
 float Encoder::Snapshot::revolutions_per_second() const {
-  return frequency / counts_per_rev;
+  return captured_frequency / counts_per_rev;
 }
 
 float Encoder::Snapshot::revolutions_per_minute() const {

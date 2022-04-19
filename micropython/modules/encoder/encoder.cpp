@@ -17,7 +17,7 @@ extern "C" {
 /***** Variables Struct *****/
 typedef struct _Snapshot_obj_t {
     mp_obj_base_t base;
-    Encoder::Snapshot *snapshot;
+    Encoder::Snapshot snapshot;
 } _Snapshot_obj_t;
 
 
@@ -25,13 +25,13 @@ typedef struct _Snapshot_obj_t {
 void Snapshot_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind; //Unused input parameter
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    Encoder::Snapshot* snap = self->snapshot;
+    Encoder::Snapshot& snap = self->snapshot;
     mp_print_str(print, "Snapshot(count = ");
-    mp_obj_print_helper(print, mp_obj_new_int(snap->count), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(snap.count()), PRINT_REPR);
     mp_print_str(print, ", delta = ");
-    mp_obj_print_helper(print, mp_obj_new_int(snap->delta), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(snap.delta()), PRINT_REPR);
     mp_print_str(print, ", freq = ");
-    mp_obj_print_helper(print, mp_obj_new_float(snap->frequency), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_float(snap.frequency()), PRINT_REPR);
     mp_print_str(print, ")");
 }
 
@@ -45,8 +45,6 @@ mp_obj_t Snapshot_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
 /***** Destructor ******/
 mp_obj_t Snapshot___del__(mp_obj_t self_in) {
-    _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    delete self->snapshot;
     return mp_const_none;
 }
 
@@ -54,67 +52,67 @@ mp_obj_t Snapshot___del__(mp_obj_t self_in) {
 /***** Methods *****/
 mp_obj_t Snapshot_count(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->count);
+    return mp_obj_new_int(self->snapshot.count());
 }
 
 mp_obj_t Snapshot_delta(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->delta);
+    return mp_obj_new_int(self->snapshot.delta());
 }
 
 mp_obj_t Snapshot_frequency(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_float(self->snapshot->frequency);
+    return mp_obj_new_float(self->snapshot.frequency());
 }
 
 mp_obj_t Snapshot_revolutions(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->revolutions());
+    return mp_obj_new_int(self->snapshot.revolutions());
 }
 
 mp_obj_t Snapshot_degrees(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->degrees());
+    return mp_obj_new_int(self->snapshot.degrees());
 }
 
 mp_obj_t Snapshot_radians(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->radians());
+    return mp_obj_new_int(self->snapshot.radians());
 }
 
 mp_obj_t Snapshot_revolutions_delta(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->revolutions_delta());
+    return mp_obj_new_int(self->snapshot.revolutions_delta());
 }
 
 mp_obj_t Snapshot_degrees_delta(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->degrees_delta());
+    return mp_obj_new_int(self->snapshot.degrees_delta());
 }
 
 mp_obj_t Snapshot_radians_delta(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_int(self->snapshot->radians_delta());
+    return mp_obj_new_int(self->snapshot.radians_delta());
 }
 
 mp_obj_t Snapshot_revolutions_per_second(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_float(self->snapshot->revolutions_per_second());
+    return mp_obj_new_float(self->snapshot.revolutions_per_second());
 }
 
 mp_obj_t Snapshot_revolutions_per_minute(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_float(self->snapshot->revolutions_per_minute());
+    return mp_obj_new_float(self->snapshot.revolutions_per_minute());
 }
 
 mp_obj_t Snapshot_degrees_per_second(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_float(self->snapshot->degrees_per_second());
+    return mp_obj_new_float(self->snapshot.degrees_per_second());
 }
 
 mp_obj_t Snapshot_radians_per_second(mp_obj_t self_in) {
     _Snapshot_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Snapshot_obj_t);
-    return mp_obj_new_float(self->snapshot->radians_per_second());
+    return mp_obj_new_float(self->snapshot.radians_per_second());
 }
 
 
@@ -388,7 +386,7 @@ extern mp_obj_t Encoder_take_snapshot(mp_obj_t self_in) {
     _Snapshot_obj_t *snap = m_new_obj_with_finaliser(_Snapshot_obj_t);
     snap->base.type = &Snapshot_type;
 
-    snap->snapshot = new Encoder::Snapshot(self->encoder->take_snapshot());
+    snap->snapshot = self->encoder->take_snapshot();
     return MP_OBJ_FROM_PTR(snap);
 }
 }

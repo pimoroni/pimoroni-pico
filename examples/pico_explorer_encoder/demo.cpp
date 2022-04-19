@@ -316,14 +316,14 @@ int main() {
 
       {
         std::stringstream sstream;
-        sstream << snapshot.count;
+        sstream << snapshot.count();
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Count:",      Point(10, 150),  200, 3);
         pico_explorer.set_pen(255, 128, 255);   pico_explorer.text(sstream.str(), Point(110, 150), 200, 3);
       }
 
       {
         std::stringstream sstream;
-        sstream << std::fixed << std::setprecision(1) << snapshot.frequency << "hz";
+        sstream << std::fixed << std::setprecision(1) << snapshot.frequency() << "hz";
         pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Freq: ",      Point(10, 180), 220, 3);
         pico_explorer.set_pen(128, 255, 255);   pico_explorer.text(sstream.str(), Point(90, 180), 220, 3);
       }
