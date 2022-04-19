@@ -5,33 +5,24 @@
 
 #include "common/pimoroni_i2c.hpp"
 
-//using namespace pimoroni;
+using namespace pimoroni;
 
-pimoroni::I2C i2c(4, 5);
-
-VL53L5CX_Configuration configuration {
-    .platform = VL53L5CX_Platform{
-        .address = 0x29,
-        .i2c = i2c0
-    },
-};
+I2C i2c(4, 5);
+VL53L5CX vl53l5cx(&i2c);
 
 int main() {
   stdio_init_all();
 
-  vl53l5cx_init(&configuration);
-  vl53l5cx_set_ranging_mode(&configuration, VL53L5CX_RANGING_MODE_AUTONOMOUS);
-  vl53l5cx_set_resolution(&configuration, VL53L5CX_RESOLUTION_4X4);
-  vl53l5cx_start_ranging(&configuration);
+  vl53l5cx.init();
+  vl53l5cx.set_ranging_mode(VL53L5CX::RANGING_MODE_AUTONOMOUS);
+  vl53l5cx.set_resolution(VL53L5CX::RESOLUTION_4X4);
+  vl53l5cx.start_ranging();
 
   while(true) {
-      uint8_t is_ready;
-    if(vl53l5cx_check_data_ready(&configuration, &is_ready) == VL53L5CX_STATUS_OK) {
-        if(is_ready){
-            VL53L5CX_ResultsData result;
-            if(vl53l5cx_get_ranging_data(&configuration, &result) == VL53L5CX_STATUS_OK) {
-                printf("Distance: %dmm\n", result.distance_mm[0]);
-            }
+    if(vl53l5cx.data_ready()) {
+        VL53L5CX::ResultsData result;
+        if(vl53l5cx.get_data(&result)) {
+            printf("Distance: %dmm\n", result.distance_mm[0]);
         }
     }
     sleep_ms(20);
