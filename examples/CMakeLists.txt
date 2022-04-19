@@ -21,6 +21,7 @@ add_subdirectory(breakout_as7262)
 add_subdirectory(breakout_bh1745)
 add_subdirectory(breakout_icp10125)
 add_subdirectory(breakout_scd41)
+add_subdirectory(breakout_vl53l5cx)
 
 add_subdirectory(pico_display)
 add_subdirectory(pico_display_2)
