@@ -102,6 +102,55 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Se
   constructor_common(seq_buffer, dat_buffer);
 }
 
+PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_count(0)
+, channels(nullptr)
+, wrap_level(0) {
+
+  // Create the pin mask and channel mapping
+  for(uint i = 0; i < length; i++) {
+    pin_pair pair = pin_pairs[i];
+    if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
+      pin_mask |= (1u << pair.first);
+      channel_to_pin_map[channel_count] = pair.first;
+      channel_count++;
+
+      pin_mask |= (1u << pair.second);
+      channel_to_pin_map[channel_count] = pair.second;
+      channel_count++;
+    }
+  }
+
+  constructor_common(seq_buffer, dat_buffer);
+}
+
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer, TransitionData *dat_buffer)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_count(0)
+, channels(nullptr)
+, wrap_level(0) {
+
+  // Create the pin mask and channel mapping
+  for(auto pair : pin_pairs) {
+    if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
+      pin_mask |= (1u << pair.first);
+      channel_to_pin_map[channel_count] = pair.first;
+      channel_count++;
+
+      pin_mask |= (1u << pair.second);
+      channel_to_pin_map[channel_count] = pair.second;
+      channel_count++;
+    }
+  }
+
+  constructor_common(seq_buffer, dat_buffer);
+}
+
 void PWMCluster::constructor_common(Sequence *seq_buffer, TransitionData *dat_buffer) {
   // Initialise all the channels this PWM will control
   if(channel_count > 0) {
@@ -332,9 +381,23 @@ uint8_t PWMCluster::get_chan_count() const {
   return channel_count;
 }
 
+uint8_t PWMCluster::get_chan_pair_count() const {
+  return (channel_count / 2);
+}
+
 uint8_t PWMCluster::get_chan_pin(uint8_t channel) const {
   assert(channel < channel_count);
   return channel_to_pin_map[channel];
+}
+
+pin_pair PWMCluster::get_chan_pin_pair(uint8_t channel_pair) const {
+  assert(channel_pair < get_chan_pair_count());
+  uint8_t channel_base = channel_from_pair(channel_pair);
+  return pin_pair(channel_to_pin_map[channel_base], channel_to_pin_map[channel_base + 1]);
+}
+
+uint8_t PWMCluster::channel_from_pair(uint8_t channel_pair) {
+  return (channel_pair * 2);
 }
 
 uint32_t PWMCluster::get_chan_level(uint8_t channel) const {

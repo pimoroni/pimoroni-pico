@@ -36,14 +36,17 @@ include(pico_unicorn/micropython)
 include(pico_display/micropython)
 include(pico_display_2/micropython)
 include(pico_explorer/micropython)
+include(pico_motor_shim/micropython)
 include(pico_wireless/micropython)
 
 include(bitmap_fonts/micropython)
 
 include(plasma/micropython)
 include(hub75/micropython)
+include(pwm/micropython)
 include(servo/micropython)
 include(encoder/micropython)
+include(motor/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
 

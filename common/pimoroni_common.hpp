@@ -6,6 +6,12 @@
 #define PIMORONI_I2C_DEFAULT_INSTANCE i2c0
 #define PIMORONI_SPI_DEFAULT_INSTANCE spi0
 
+// Macro to return a value clamped between a minimum and maximum
+#ifndef CLAMP
+#define CLAMP(a, mn, mx) ((a)<(mx)?((a)>(mn)?(a):(mn)):(mx))
+#endif
+
+
 namespace pimoroni {
     static const unsigned int PIN_UNUSED = INT_MAX; // Intentionally INT_MAX to avoid overflowing MicroPython's int type
 
