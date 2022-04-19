@@ -97,6 +97,8 @@ STATIC const mp_map_elem_t encoder_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_NORMAL), MP_ROM_INT(0x00) },
     { MP_ROM_QSTR(MP_QSTR_REVERSED), MP_ROM_INT(0x01) },
+    { MP_ROM_QSTR(MP_QSTR_MMME_CPR), MP_ROM_INT(12) },
+    { MP_ROM_QSTR(MP_QSTR_ROTARY_CPR), MP_ROM_INT(24) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_encoder_globals, encoder_globals_table);
 
