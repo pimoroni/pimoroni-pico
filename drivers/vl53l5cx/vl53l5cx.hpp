@@ -52,6 +52,10 @@ namespace pimoroni {
             bool set_power_mode(PowerMode power_mode);
             bool data_ready();
             bool get_data(ResultsData *results);
+
+            VL53L5CX_Configuration* get_configuration() {
+                return configuration;
+            }
         private:
             VL53L5CX_Configuration *configuration;
     };
