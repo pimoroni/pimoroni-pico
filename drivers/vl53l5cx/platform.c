@@ -104,17 +104,64 @@ uint8_t WrMulti(
 		uint8_t *p_values,
 		uint32_t size)
 {
-	uint8_t buf[size + 2];
+	uint8_t buf[2];
 	buf[0] = RegisterAdress >> 8;
 	buf[1] = RegisterAdress & 0xff;
 
-	memcpy(buf + 2, p_values, size);
+	// Send the 16-bit address with no STOP condition
+	int result = i2c_write_blocking(p_platform->i2c, p_platform->address, buf, sizeof(buf), true);
 
-	if(i2c_write_blocking(p_platform->i2c, p_platform->address, buf, size + 2, false) != PICO_ERROR_GENERIC) {
-		return 0;
+	// Handle an error early... it gets dicey from here
+	if(result == PICO_ERROR_GENERIC) return 255;
+
+	// The VL53L5CX does not support "Repeated Start" and the Pico's I2C API doesn't
+	// let us send more bytes without sending another start condition.
+
+	// The horrow below lets us send out "p_values" followed by a STOP condition,
+	// without having to copy everything into a temporary buffer.
+	uint8_t *src = p_values;
+
+	// Send the rest of the data, followed by a STOP condition
+	// This re-implements the relevant portion of i2c_write_blocking_internal which is NOT sent a timeout check function by i2c_write_blocking
+    for (int byte_ctr = 0; byte_ctr < size; ++byte_ctr) {
+        bool last = byte_ctr == size - 1;
+        p_platform->i2c->hw->data_cmd =
+                bool_to_bit(last) << I2C_IC_DATA_CMD_STOP_LSB | *src++;
+
+        // Wait until the transmission of the address/data from the internal
+        // shift register has completed. For this to function correctly, the
+        // TX_EMPTY_CTRL flag in IC_CON must be set. The TX_EMPTY_CTRL flag
+        // was set in i2c_init.
+        do {
+            tight_loop_contents();
+        } while (!(p_platform->i2c->hw->raw_intr_stat & I2C_IC_RAW_INTR_STAT_TX_EMPTY_BITS));
+
+		if (p_platform->i2c->hw->tx_abrt_source) {
+			// Note clearing the abort flag also clears the reason, and
+			// this instance of flag is clear-on-read! Note also the
+			// IC_CLR_TX_ABRT register always reads as 0.
+			p_platform->i2c->hw->clr_tx_abrt;
+
+			// An abort on the LAST byte means things are probably fine
+			if(last) {
+                // TODO Could there be an abort while waiting for the STOP
+                // condition here? If so, additional code would be needed here
+                // to take care of the abort.
+                do {
+                    tight_loop_contents();
+                } while (!(p_platform->i2c->hw->raw_intr_stat & I2C_IC_RAW_INTR_STAT_STOP_DET_BITS));
+			} else {
+				// Ooof, unhandled abort. Fail?
+				return 255;
+			}
+		}
 	}
 
-	return 255;
+	// Not sure it matters where we clear this, but by default a "nostop" style write
+	// will set this flag so the next transaction starts with a "Repeated Start."
+	p_platform->i2c->restart_on_next = false;
+
+	return 0;
 }
 
 uint8_t RdMulti(
