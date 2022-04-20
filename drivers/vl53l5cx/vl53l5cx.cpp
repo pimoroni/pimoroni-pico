@@ -29,7 +29,15 @@ namespace pimoroni {
     bool VL53L5CX::set_resolution(Resolution resolution) {
         /* One of VL53L5CX_RESOLUTION_4X4 or VL53L5CX_RESOLUTION_8X8 */
         uint8_t status = vl53l5cx_set_resolution(configuration, (uint8_t)resolution);
+        if(status == VL53L5CX_STATUS_OK) {
+            this->resolution = resolution;
+        }
         return status == VL53L5CX_STATUS_OK;
+    }
+    VL53L5CX::Resolution VL53L5CX::get_resolution() {
+        //Resolution resolution = RESOLUTION_4X4;
+        //vl53l5cx_get_resolution(configuration, (uint8_t *)&resolution);
+        return this->resolution;
     }
     bool VL53L5CX::set_integration_time_ms(uint32_t integration_time_ms) {
         /* Integration time between 2ms and 1000ms */

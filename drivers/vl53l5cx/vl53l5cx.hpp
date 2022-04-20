@@ -39,13 +39,19 @@ namespace pimoroni {
                     },
                 };
             }
+            ~VL53L5CX() {
+                delete configuration;
+            }
             bool init();
             bool start_ranging();
             bool stop_ranging();
             bool set_i2c_address(uint8_t i2c_address);
             bool set_ranging_mode(RangingMode ranging_mode);
             bool set_ranging_frequency_hz(uint8_t ranging_frequency_hz);
+
             bool set_resolution(Resolution resolution);
+            Resolution get_resolution();
+
             bool set_integration_time_ms(uint32_t integration_time_ms);
             bool set_sharpener_percent(uint8_t sharpener_percent);
             bool set_target_order(TargetOrder target_order);
@@ -58,5 +64,6 @@ namespace pimoroni {
             }
         private:
             VL53L5CX_Configuration *configuration;
+            Resolution resolution = RESOLUTION_8X8;
     };
 }
