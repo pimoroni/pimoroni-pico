@@ -63,13 +63,15 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Motor_obj_t *self = nullptr;
 
-    enum { ARG_pins, ARG_calibration, ARG_freq };
+    enum { ARG_pins, ARG_direction, ARG_speed_scale, ARG_deadzone, ARG_freq, ARG_mode };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_calibration, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL} },
+        { MP_QSTR_speed_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_deadzone, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_mode, MP_ARG_INT, {.u_int = MotorState::DEFAULT_DECAY_MODE} },
     };
-    //TODO ^
 
     // Parse args.
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -111,37 +113,41 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         pins.negative = (uint8_t)neg;
     }
 
-    //motor::Calibration *calib = nullptr;
-    //motor::CalibrationType calibration_type = motor::CalibrationType::ANGULAR;
-    const mp_obj_t calib_object = args[ARG_calibration].u_obj;
-    if(calib_object != mp_const_none) {
-        /*if(mp_obj_is_int(calib_object)) {
-            int type = mp_obj_get_int(calib_object);
-            if(type < 0 || type >= 3) {
-                mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
-            }
-            calibration_type = (motor::CalibrationType)type;
-        }
-        else if(mp_obj_is_type(calib_object, &Calibration_type)) {
-            calib = (MP_OBJ_TO_PTR2(calib_object, _Calibration_obj_t)->calibration);
-        }
-        else {
-            mp_raise_TypeError("cannot convert object to an integer or a Calibration class instance");
-        }*/
+    int direction = args[ARG_direction].u_int;
+    if(direction < 0 || direction > 1) {
+        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
     }
 
-    /*float freq = motor::MotorState::DEFAULT_FREQUENCY;
+    float speed_scale = MotorState::DEFAULT_SPEED_SCALE;
+    if(args[ARG_speed_scale].u_obj != mp_const_none) {
+        speed_scale = mp_obj_get_float(args[ARG_speed_scale].u_obj);
+        if(speed_scale < FLT_EPSILON) {
+            mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
+        }
+    }
+
+    float deadzone = MotorState::DEFAULT_DEADZONE;
+    if(args[ARG_deadzone].u_obj != mp_const_none) {
+        deadzone = mp_obj_get_float(args[ARG_deadzone].u_obj);
+        if(deadzone < 0.0f || deadzone > 1.0f) {
+            mp_raise_ValueError("deadzone out of range. Expected 0.0 to 1.0");
+        }
+    }
+
+    float freq = MotorState::DEFAULT_FREQUENCY;
     if(args[ARG_freq].u_obj != mp_const_none) {
         freq = mp_obj_get_float(args[ARG_freq].u_obj);
-    }*/
+    }
+
+    int mode = args[ARG_mode].u_int;
+    if(mode < 0 || mode > 1) {
+        mp_raise_ValueError("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)");
+    }
 
     self = m_new_obj_with_finaliser(_Motor_obj_t);
     self->base.type = &Motor_type;
 
-    //if(calib != nullptr)
-    //    self->motor = new Motor(pin, *calib, freq);
-    //else
-        self->motor = new Motor2(pins);//TODO, calibration_type, freq);
+    self->motor = new Motor2(pins, (Direction)direction, speed_scale, deadzone, freq, (DecayMode)mode);
     self->motor->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -591,23 +597,33 @@ void MotorCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _MotorCluster_obj_t *self = nullptr;
 
-    enum { ARG_pio, ARG_sm, ARG_pins, ARG_calibration, ARG_freq, ARG_auto_phase };
+    enum { ARG_pio, ARG_sm, ARG_pins, ARG_direction, ARG_speed_scale, ARG_deadzone, ARG_freq, ARG_mode, ARG_auto_phase };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pio, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_calibration, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL} },
+        { MP_QSTR_speed_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_deadzone, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_mode, MP_ARG_INT, {.u_int = MotorState::DEFAULT_DECAY_MODE} },
         { MP_QSTR_auto_phase, MP_ARG_BOOL, {.u_bool = true} },
     };
-    //TODO ^
 
     // Parse args.
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
+    int pio_int = args[ARG_pio].u_int;
+    if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
+        mp_raise_ValueError("pio out of range. Expected 0 to 1");
+    }
+    PIO pio = pio_int ? pio0 : pio1;
+
     int sm = args[ARG_sm].u_int;
+    if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
+        mp_raise_ValueError("sm out of range. Expected 0 to 3");
+    }
 
     size_t pair_count = 0;
     pin_pair *pins = nullptr;
@@ -685,28 +701,35 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         }
     }
 
-    //motor::Calibration *calib = nullptr;
-    //motor::CalibrationType calibration_type = motor::CalibrationType::ANGULAR;
-    const mp_obj_t calib_object = args[ARG_calibration].u_obj;
-    if(calib_object != mp_const_none) {
-        /*if(mp_obj_is_int(calib_object)) {
-            int type = mp_obj_get_int(calib_object);
-            if(type < 0 || type >= 3) {
-                mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
-            }
-            calibration_type = (motor::CalibrationType)mp_obj_get_int(calib_object);
-        }
-        else if(mp_obj_is_type(calib_object, &Calibration_type)) {
-            calib = (MP_OBJ_TO_PTR2(calib_object, _Calibration_obj_t)->calibration);
-        }
-        else {
-            mp_raise_TypeError("cannot convert object to an integer or a Calibration class instance");
-        }*/
+    int direction = args[ARG_direction].u_int;
+    if(direction < 0 || direction > 1) {
+        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
     }
 
-    float freq = motor::MotorState::DEFAULT_FREQUENCY;
+    float speed_scale = MotorState::DEFAULT_SPEED_SCALE;
+    if(args[ARG_speed_scale].u_obj != mp_const_none) {
+        speed_scale = mp_obj_get_float(args[ARG_speed_scale].u_obj);
+        if(speed_scale < FLT_EPSILON) {
+            mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
+        }
+    }
+
+    float deadzone = MotorState::DEFAULT_DEADZONE;
+    if(args[ARG_deadzone].u_obj != mp_const_none) {
+        deadzone = mp_obj_get_float(args[ARG_deadzone].u_obj);
+        if(deadzone < 0.0f || deadzone > 1.0f) {
+            mp_raise_ValueError("deadzone out of range. Expected 0.0 to 1.0");
+        }
+    }
+
+    float freq = MotorState::DEFAULT_FREQUENCY;
     if(args[ARG_freq].u_obj != mp_const_none) {
         freq = mp_obj_get_float(args[ARG_freq].u_obj);
+    }
+
+    int mode = args[ARG_mode].u_int;
+    if(mode < 0 || mode > 1) {
+        mp_raise_ValueError("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)");
     }
 
     bool auto_phase = args[ARG_auto_phase].u_bool;
@@ -714,10 +737,8 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     MotorCluster *cluster;
     PWMCluster::Sequence *seq_buffer = m_new(PWMCluster::Sequence, PWMCluster::NUM_BUFFERS * 2);
     PWMCluster::TransitionData *dat_buffer = m_new(PWMCluster::TransitionData, PWMCluster::BUFFER_SIZE * 2);
-    //if(calib != nullptr)
-        //cluster = new MotorCluster(pio, sm, pins, pair_count, *calib, freq, auto_phase, seq_buffer, dat_buffer);
-    //else
-        cluster = new MotorCluster(pio, sm, pins, pair_count, NORMAL, 1.0f, 0.0f, freq, SLOW_DECAY, auto_phase, seq_buffer, dat_buffer);
+    cluster = new MotorCluster(pio, sm, pins, pair_count, (Direction)direction, speed_scale, deadzone,
+                               freq, (DecayMode)mode, auto_phase, seq_buffer, dat_buffer);
 
     // Cleanup the pins array
     if(pins != nullptr)
