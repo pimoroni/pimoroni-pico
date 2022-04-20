@@ -31,10 +31,13 @@ namespace motor {
     const uint ENCODER_D_A = 14;
     const uint ENCODER_D_B = 15;
 
-    const pin_pair ENCODER_A(ENCODER_A_A, ENCODER_A_B);
-    const pin_pair ENCODER_B(ENCODER_B_A, ENCODER_B_B);
-    const pin_pair ENCODER_C(ENCODER_C_A, ENCODER_C_B);
-    const pin_pair ENCODER_D(ENCODER_D_A, ENCODER_D_B);
+    // Although encoder A and B channels are arbitrary, our MMME Encoders
+    // that accompany Motor2040 count down when the motors are diving in a
+    // positive direction, so these pin pairs are set as B and A instead
+    const pin_pair ENCODER_A(ENCODER_A_B, ENCODER_A_A);
+    const pin_pair ENCODER_B(ENCODER_B_B, ENCODER_B_A);
+    const pin_pair ENCODER_C(ENCODER_C_B, ENCODER_C_A);
+    const pin_pair ENCODER_D(ENCODER_D_B, ENCODER_D_A);
     const uint NUM_ENCODERS = 4;
 
     const uint TX_TRIG = 16;

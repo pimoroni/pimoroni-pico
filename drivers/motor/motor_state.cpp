@@ -62,7 +62,7 @@ namespace motor {
       speed = 0.0f - speed;
 
     // Clamp the speed between the hard limits
-    motor_speed = CLAMP(speed, -motor_scale, motor_scale);
+    motor_speed = CLAMP(speed, 0.0f - motor_scale, motor_scale);
     last_enabled_duty = motor_speed / motor_scale;
 
     return enable_with_return();
@@ -81,7 +81,7 @@ namespace motor {
   }
 
   float MotorState::to_percent_with_return(float in, float in_min, float in_max) {
-    float speed = MotorState::map_float(in, in_min, in_max, 0.0f - motor_speed, motor_speed);
+    float speed = MotorState::map_float(in, in_min, in_max, 0.0f - motor_scale, motor_scale);
     return set_speed_with_return(speed);
   }
 

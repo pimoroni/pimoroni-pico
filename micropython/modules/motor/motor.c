@@ -160,16 +160,16 @@ const mp_rom_obj_tuple_t motor2040_motorD_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(10), MP_ROM_INT(11) },
 };
 const mp_rom_obj_tuple_t motor2040_encoderA_pins = {
-    {&mp_type_tuple}, 2, { MP_ROM_INT(0), MP_ROM_INT(1) },
+    {&mp_type_tuple}, 2, { MP_ROM_INT(1), MP_ROM_INT(0) },
 };
 const mp_rom_obj_tuple_t motor2040_encoderB_pins = {
-    {&mp_type_tuple}, 2, { MP_ROM_INT(2), MP_ROM_INT(3) },
+    {&mp_type_tuple}, 2, { MP_ROM_INT(3), MP_ROM_INT(2) },
 };
 const mp_rom_obj_tuple_t motor2040_encoderC_pins = {
-    {&mp_type_tuple}, 2, { MP_ROM_INT(12), MP_ROM_INT(13) },
+    {&mp_type_tuple}, 2, { MP_ROM_INT(13), MP_ROM_INT(12) },
 };
 const mp_rom_obj_tuple_t motor2040_encoderD_pins = {
-    {&mp_type_tuple}, 2, { MP_ROM_INT(14), MP_ROM_INT(15) },
+    {&mp_type_tuple}, 2, { MP_ROM_INT(15), MP_ROM_INT(14) },
 };
 
 typedef struct _mp_obj_float_t {

@@ -7,35 +7,41 @@ Demonstrates how to create multiple Motor objects and control them together.
 """
 
 # Create a list of motors
-MOTOR_PINS = [ motor2040.MOTOR_1, motor2040.MOTOR_2, motor2040.MOTOR_3, motor2040.MOTOR_4]
+MOTOR_PINS = [motor2040.MOTOR_A, motor2040.MOTOR_B, motor2040.MOTOR_C, motor2040.MOTOR_D]
 motors = [Motor(pins) for pins in MOTOR_PINS]
 
-# Enable all motors (this puts them at the middle)
+# Enable all motors
 for m in motors:
     m.enable()
 time.sleep(2)
 
-# Go to min
+# Drive at full positive
 for m in motors:
     m.full_positive()
 time.sleep(2)
 
-# Go to max
-for m in motors:
-    m.full_negative()
-time.sleep(2)
-
-# Go back to mid
+# Stop moving
 for m in motors:
     m.stop()
 time.sleep(2)
 
-SWEEPS = 3              # How many sweeps of the motor to perform
+# Drive at full negative
+for m in motors:
+    m.full_negative()
+time.sleep(2)
+
+# Coast to a gradual stop
+for m in motors:
+    m.coast()
+time.sleep(2)
+
+
+SWEEPS = 2              # How many speed sweeps of the motor to perform
 STEPS = 10              # The number of discrete sweep steps
 STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
-SPEED_EXTENT = 1.0      # How far from zero to move the motor when sweeping
+SPEED_EXTENT = 1.0      # How far from zero to drive the motors when sweeping
 
-# Do a sine sweep
+# Do a sine speed sweep
 for j in range(SWEEPS):
     for i in range(360):
         speed = math.sin(math.radians(i)) * SPEED_EXTENT
@@ -43,7 +49,7 @@ for j in range(SWEEPS):
             s.speed(speed)
         time.sleep(0.02)
 
-# Do a stepped sweep
+# Do a stepped speed sweep
 for j in range(SWEEPS):
     for i in range(0, STEPS):
         for m in motors:

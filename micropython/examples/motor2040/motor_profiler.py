@@ -2,7 +2,6 @@ import gc
 import time
 from motor import Motor, motor2040
 from encoder import Encoder, MMME_CPR
-from encoder import REVERSED
 
 """
 A program that profiles the speed of a motor across its PWM
@@ -14,6 +13,7 @@ ENCODER_PINS = motor2040.ENCODER_A      # The pins of the encoder attached to th
 GEAR_RATIO = 50                         # The gear ratio of the motor
 COUNTS_PER_REV = MMME_CPR * GEAR_RATIO  # The counts per revolution of the motor's output shaft
 
+DIRECTION = 0                           # The direction to spin the motor in. NORMAL (0), REVERSED (1)
 SPEED_SCALE = 5.4                       # The scaling to apply to the motor's speed
                                         # Set this to the maximum measured speed
 
@@ -25,19 +25,19 @@ CAPTURE_TIME = 0.2                      # How long to capture the motor's speed 
 gc.collect()
 
 # Create a motor and set its speed scale, and give it a zero deadzone
-m = Motor(MOTOR_PINS, speed_scale=SPEED_SCALE, deadzone=0.0)
+m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, deadzone=0.0)
 
 # Create an encoder, using PIO 0 and State Machine 0
-enc = Encoder(0, 0, ENCODER_PINS, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)
-
-# Uncomment the below line (and the top import) to reverse the counting direction
-enc.direction(REVERSED)
+enc = Encoder(0, 0, ENCODER_PINS, direction=DIRECTION, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)
 
 
 # Function that performs a single profiling step
 def profile_at_duty(duty):
     # Set the motor to a new duty cycle and wait for it to settle
-    m.duty(duty)
+    if DIRECTION == 1:
+        m.duty(0.0 - duty)
+    else:
+        m.duty(duty)
     time.sleep(SETTLE_TIME)
 
     # Perform a dummy capture to clear the encoder

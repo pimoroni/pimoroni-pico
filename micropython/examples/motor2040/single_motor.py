@@ -6,43 +6,48 @@ from motor import Motor, motor2040
 Demonstrates how to create a Motor object and control it.
 """
 
-# Create a motor on pins 4 and 5
-m = Motor(motor2040.MOTOR_1)
+# Create a motor
+m = Motor(motor2040.MOTOR_A)
 
-# Enable the motor (this puts it at the middle)
+# Enable the motor
 m.enable()
 time.sleep(2)
 
-# Go to full positive
+# Drive at full positive
 m.full_positive()
-time.sleep(2)
-
-# Go to full negative
-m.full_negative()
 time.sleep(2)
 
 # Stop moving
 m.stop()
 time.sleep(2)
 
+# Drive at full negative
+m.full_negative()
+time.sleep(2)
 
-SWEEPS = 3              # How many sweeps of the motor to perform
+# Coast to a gradual stop
+m.coast()
+time.sleep(2)
+
+
+SWEEPS = 2              # How many speed sweeps of the motor to perform
 STEPS = 10              # The number of discrete sweep steps
 STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
+SPEED_EXTENT = 1.0      # How far from zero to drive the motor when sweeping
 
-# Do a sine sweep
+# Do a sine speed sweep
 for j in range(SWEEPS):
     for i in range(360):
-        m.speed(math.sin(math.radians(i)))
+        m.speed(math.sin(math.radians(i)) * SPEED_EXTENT)
         time.sleep(0.02)
 
-# Do a stepped sweep
+# Do a stepped speed sweep
 for j in range(SWEEPS):
     for i in range(0, STEPS):
-        m.to_percent(i, 0, STEPS)
+        m.to_percent(i, 0, STEPS, 0.0 - SPEED_EXTENT, SPEED_EXTENT)
         time.sleep(STEPS_INTERVAL)
     for i in range(0, STEPS):
-        m.to_percent(i, STEPS, 0)
+        m.to_percent(i, STEPS, 0, 0.0 - SPEED_EXTENT, SPEED_EXTENT)
         time.sleep(STEPS_INTERVAL)
 
 # Disable the motor
