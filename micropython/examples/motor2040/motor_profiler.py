@@ -41,19 +41,19 @@ def profile_at_duty(duty):
     time.sleep(SETTLE_TIME)
 
     # Perform a dummy capture to clear the encoder
-    enc.take_snapshot()
+    enc.capture()
 
     # Wait for the capture time to pass
     time.sleep(CAPTURE_TIME)
 
     # Perform a capture and read the measured speed
-    capture = enc.take_snapshot()
-    measured_speed = capture.revolutions_per_second()
+    capture = enc.capture()
+    measured_speed = capture.revolutions_per_second
 
     # These are some alternate speed measurements from the encoder
-    # measured_speed = capture.revolutions_per_minute()
-    # measured_speed = capture.degrees_per_second()
-    # measured_speed = capture.radians_per_second()
+    # measured_speed = capture.revolutions_per_minute
+    # measured_speed = capture.degrees_per_second
+    # measured_speed = capture.radians_per_second
 
     # Print out the expected and measured speeds, as well as their difference
     print("Duty = ", m.duty(), ", Expected = ", m.speed(), ", Measured = ", measured_speed, ", Diff = ", m.speed() - measured_speed, sep="")

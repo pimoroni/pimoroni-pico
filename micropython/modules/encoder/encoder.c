@@ -32,6 +32,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Encoder_radians_obj, Encoder_radians);
 MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_direction_obj, 1, Encoder_direction);
 MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_counts_per_revolution_obj, 1, Encoder_counts_per_revolution);
 MP_DEFINE_CONST_FUN_OBJ_1(Encoder_take_snapshot_obj, Encoder_take_snapshot);
+MP_DEFINE_CONST_FUN_OBJ_1(Encoder_capture_obj, Encoder_capture);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t Snapshot_locals_dict_table[] = {
@@ -67,6 +68,7 @@ STATIC const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&Encoder_direction_obj) },
     { MP_ROM_QSTR(MP_QSTR_counts_per_revolution), MP_ROM_PTR(&Encoder_counts_per_revolution_obj) },
     { MP_ROM_QSTR(MP_QSTR_take_snapshot), MP_ROM_PTR(&Encoder_take_snapshot_obj) },
+    { MP_ROM_QSTR(MP_QSTR_capture), MP_ROM_PTR(&Encoder_capture_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(Snapshot_locals_dict, Snapshot_locals_dict_table);
