@@ -50,7 +50,7 @@ void VL53L5CX_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t k
 /***** Destructor ******/
 mp_obj_t VL53L5CX___del__(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->stop_ranging();
+    //self->breakout->stop_ranging();  // i2c object might have been deleted already?
     delete self->breakout;
     return mp_const_none;
 }
@@ -94,61 +94,91 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
 mp_obj_t VL53L5CX_start_ranging(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->start_ranging();
+    bool status = self->breakout->start_ranging();
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: start_ranging error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_stop_ranging(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->stop_ranging();
+    bool status = self->breakout->stop_ranging();
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: stop_ranging error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_i2c_address(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_i2c_address(mp_obj_get_int(value));
+    bool status = self->breakout->set_i2c_address(mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_i2c_address error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_ranging_mode(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_ranging_mode((pimoroni::VL53L5CX::RangingMode)mp_obj_get_int(value));
+    bool status = self->breakout->set_ranging_mode((pimoroni::VL53L5CX::RangingMode)mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_ranging_mode error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_ranging_frequency_hz(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_ranging_frequency_hz(mp_obj_get_int(value));
+    bool status = self->breakout->set_ranging_frequency_hz(mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_ranging_frequency_hz error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_resolution(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_resolution((pimoroni::VL53L5CX::Resolution)mp_obj_get_int(value));
+    bool status = self->breakout->set_resolution((pimoroni::VL53L5CX::Resolution)mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_resolution error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_integration_time_ms(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_integration_time_ms(mp_obj_get_int(value));
+    bool status = self->breakout->set_integration_time_ms(mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_integration_time_ms error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_sharpener_percent(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_sharpener_percent(mp_obj_get_int(value));
+    bool status = self->breakout->set_sharpener_percent(mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_sharpener_percent error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_target_order(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_target_order((pimoroni::VL53L5CX::TargetOrder)mp_obj_get_int(value));
+    bool status = self->breakout->set_target_order((pimoroni::VL53L5CX::TargetOrder)mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_target_order error");
+    }
     return mp_const_none;
 }
 
 mp_obj_t VL53L5CX_set_power_mode(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    self->breakout->set_power_mode((pimoroni::VL53L5CX::PowerMode)mp_obj_get_int(value));
+    bool status = self->breakout->set_power_mode((pimoroni::VL53L5CX::PowerMode)mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_power_mode error");
+    }
     return mp_const_none;
 }
 
@@ -160,25 +190,62 @@ mp_obj_t VL53L5CX_data_ready(mp_obj_t self_in) {
 mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     pimoroni::VL53L5CX::ResultsData results;
-    self->breakout->get_data(&results);
-
-    static const int TUPLE_SIZE = VL53L5CX_RESOLUTION_8X8 * VL53L5CX_NB_TARGET_PER_ZONE;
-
-    mp_obj_t tuple_distance_mm[TUPLE_SIZE];
-    mp_obj_t tuple_reflectance[TUPLE_SIZE];
-
-    // Build a tuple of motion data
-    for(int i = 0u; i < TUPLE_SIZE; i++) {
-        tuple_distance_mm[i] = mp_obj_new_int(results.distance_mm[i]);
-        tuple_reflectance[i] = mp_obj_new_int(results.reflectance[i]);
+    bool status = self->breakout->get_data(&results);
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: get_data error");
     }
 
-    mp_obj_t tuple[3];
-    tuple[0] = mp_obj_new_int(results.silicon_temp_degc);
-    tuple[1] = mp_obj_new_tuple(TUPLE_SIZE, tuple_distance_mm);
-    tuple[2] = mp_obj_new_tuple(TUPLE_SIZE, tuple_reflectance);
+    // Get the current resolution so we only look at valid results.
+    // This is so that our average distance works out and doesn't include bogus data.
+    int scale = (uint8_t)self->breakout->get_resolution();
+    int tuple_size = scale * VL53L5CX_NB_TARGET_PER_ZONE;
 
-    return mp_obj_new_tuple(3, tuple);
+    // TODO This doesn't really handle VL53L5CX_NB_TARGET_PER_ZONE > 1 gracefully
+    // the zone data should be split into separate tuples
+
+    mp_obj_t tuple_distance_mm[tuple_size];
+    mp_obj_t tuple_reflectance[tuple_size];
+
+    int32_t average_distance = 0;
+    int32_t average_reflectance = 0;
+
+    // Build a tuple of motion data
+    for(int i = 0u; i < tuple_size; i++) {
+        tuple_distance_mm[i] = mp_obj_new_int(results.distance_mm[i]);
+        tuple_reflectance[i] = mp_obj_new_int(results.reflectance[i]);
+        average_distance += results.distance_mm[i];
+        average_reflectance += results.reflectance[i];
+    }
+
+    average_distance /= tuple_size;
+    average_reflectance /= tuple_size;
+
+    // TODO motion data is all zeros, why?
+
+    /*mp_obj_t tuple_motion_data[32];
+
+    for(int i = 0u; i < 32; i++) {
+        tuple_motion_data[i] = mp_obj_new_int(results.motion_indicator.motion[i]);
+    }
+
+    mp_obj_t tuple_motion[] = {
+        mp_obj_new_int(results.motion_indicator.global_indicator_1),
+        mp_obj_new_int(results.motion_indicator.global_indicator_2),
+        mp_obj_new_tuple(sizeof(tuple_motion_data) / sizeof(mp_obj_t), tuple_motion_data)
+    };*/
+
+    mp_obj_t tuple[] = {
+        mp_obj_new_int(average_distance), // Average distance
+        mp_obj_new_int(average_reflectance), // Average reflectance
+        //mp_obj_new_tuple(sizeof(tuple_motion) / sizeof(mp_obj_t), tuple_motion), // Motion data
+        mp_obj_new_int(tuple_size), // Number of results
+        mp_obj_new_tuple(tuple_size, tuple_distance_mm), // Full distance results
+        mp_obj_new_tuple(tuple_size, tuple_reflectance)  // Full reflectange results
+    };
+
+    STATIC const qstr tuple_fields[] = {MP_QSTR_distance_avg, MP_QSTR_reflectance_avg, MP_QSTR_results, MP_QSTR_distance, MP_QSTR_reflectance};
+
+    return mp_obj_new_attrtuple(tuple_fields, sizeof(tuple) / sizeof(mp_obj_t), tuple);
 }
 
 }
