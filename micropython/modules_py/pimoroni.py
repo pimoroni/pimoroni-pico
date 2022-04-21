@@ -157,7 +157,7 @@ class PID:
     def calculate(self, value, value_change=None):
         error = self.target - value
         self._error_sum += error * self._sample_rate
-        if value_change == None:
+        if value_change is None:
             rate_error = (value - self._last_value) / self._sample_rate
         else:
             rate_error = value_change
