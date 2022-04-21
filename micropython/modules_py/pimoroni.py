@@ -143,74 +143,24 @@ class RGBLED:
         self.led_b.duty_u16(int((b * 65535) / 255))
 
 
-class Motor:
-    FAST_DECAY = 0  # Recirculation current fast decay mode (coasting)
-    SLOW_DECAY = 1  # Recirculation current slow decay mode (braking)
+# A simple class for handling Proportional, Integral & Derivative (PID) control calculations
+class PID:
+    def __init__(self, kp, ki, kd, sample_rate):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.target = 0
+        self._error_sum = 0
+        self._last_value = 0
+        self._sample_rate = sample_rate
 
-    def __init__(self, pos, neg, freq=25000, decay_mode=SLOW_DECAY):
-        self.speed = 0.0
-        self.freq = freq
-        if decay_mode in (self.FAST_DECAY, self.SLOW_DECAY):
-            self.decay_mode = decay_mode
+    def calculate(self, value, value_change=None):
+        error = self.target - value
+        self._error_sum += error * self._sample_rate
+        if value_change == None:
+            rate_error = (value - self._last_value) / self._sample_rate
         else:
-            raise ValueError("Decay mode value must be either Motor.FAST_DECAY or Motor.SLOW_DECAY")
+            rate_error = value_change
+        self._last_value = value
 
-        self.pos_pwm = PWM(Pin(pos))
-        self.pos_pwm.freq(freq)
-        self.neg_pwm = PWM(Pin(neg))
-        self.neg_pwm.freq(freq)
-
-    def get_speed(self):
-        return self.speed
-
-    def set_speed(self, speed):
-        if speed > 1.0 or speed < -1.0:
-            raise ValueError("Speed must be between -1.0 and +1.0")
-        self.speed = speed
-        self._update_pwm()
-
-    def get_frequency(self):
-        return self.freq
-
-    def set_frequency(self, freq):
-        self.pos_pwm.freq(freq)
-        self.neg_pwm.freq(freq)
-        self._update_pwm()
-
-    def get_decay_mode(self):
-        return self.decay_mode
-
-    def set_decay_mode(self, mode):
-        if mode in (self.FAST_DECAY, self.SLOW_DECAY):
-            self.decay_mode = mode
-            self._update_pwm()
-        else:
-            raise ValueError("Decay mode value must be either Motor.FAST_DECAY or Motor.SLOW_DECAY")
-
-    def stop(self):
-        self.speed = 0.0
-        self._update_pwm()
-
-    def disable(self):
-        self.speed = 0.0
-        self.pos_pwm.duty_u16(0)
-        self.neg_pwm.duty_u16(0)
-
-    def _update_pwm(self):
-        signed_duty_cycle = int(self.speed * 0xFFFF)
-
-        if self.decay_mode is self.SLOW_DECAY:  # aka 'Braking'
-            if signed_duty_cycle >= 0:
-                self.pos_pwm.duty_u16(0xFFFF)
-                self.neg_pwm.duty_u16(0xFFFF - signed_duty_cycle)
-            else:
-                self.pos_pwm.duty_u16(0xFFFF + signed_duty_cycle)
-                self.neg_pwm.duty_u16(0xFFFF)
-
-        else:  # aka 'Coasting'
-            if signed_duty_cycle >= 0:
-                self.pos_pwm.duty_u16(signed_duty_cycle)
-                self.neg_pwm.duty_u16(0)
-            else:
-                self.pos_pwm.duty_u16(0)
-                self.neg_pwm.duty_u16(0 - signed_duty_cycle)
+        return (error * self.kp) + (self._error_sum * self.ki) - (rate_error * self.kd)
