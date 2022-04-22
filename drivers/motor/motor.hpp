@@ -11,41 +11,22 @@ namespace motor {
 
   class Motor {
     //--------------------------------------------------
-    // Enums
-    //--------------------------------------------------
-  public:
-    enum DecayMode {
-      FAST_DECAY  = 0, //aka 'Coasting'
-      SLOW_DECAY  = 1, //aka 'Braking'
-    };
-
-    //--------------------------------------------------
-    // Constants
-    //--------------------------------------------------
-  public:
-    static const uint16_t DEFAULT_PWM_FREQUENCY = 25000;      // Chose 25KHz because it is outside of hearing
-                                                              // and divides nicely into the RP2040's 125MHz PWM frequency
-    static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;
-
-
-    //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    pin_pair pins;
+    pin_pair motor_pins;
+    MotorState state;
     pwm_config pwm_cfg;
     uint16_t pwm_period;
-    float pwm_frequency = DEFAULT_PWM_FREQUENCY;
-
-    DecayMode motor_decay_mode = DEFAULT_DECAY_MODE;
-    float motor_speed = 0.0f;
-
+    float pwm_frequency;
+    DecayMode motor_mode;
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor(const pin_pair &pins, float freq = DEFAULT_PWM_FREQUENCY, DecayMode mode = DEFAULT_DECAY_MODE);
+    Motor(const pin_pair &pins, Direction direction = NORMAL, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
+           float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE);
     ~Motor();
 
 
@@ -55,21 +36,49 @@ namespace motor {
   public:
     bool init();
 
-    float get_speed();
-    void set_speed(float speed);
+    // For print access in micropython
+    pin_pair pins() const;
 
-    float get_frequency();
-    bool set_frequency(float freq);
+    void enable();
+    void disable();
+    bool is_enabled() const;
 
-    DecayMode get_decay_mode();
-    void set_decay_mode(DecayMode mode);
+    float duty() const;
+    void duty(float duty);
+
+    float speed() const;
+    void speed(float speed);
+
+    float frequency() const;
+    bool frequency(float freq);
+
+    //--------------------------------------------------
 
     void stop();
-    void disable();
+    void coast();
+    void brake();
+    void full_negative();
+    void full_positive();
+    void to_percent(float in, float in_min = MotorState::ZERO_PERCENT, float in_max = MotorState::ONEHUNDRED_PERCENT);
+    void to_percent(float in, float in_min, float in_max, float speed_min, float speed_max);
+
+    //--------------------------------------------------
+
+    Direction direction() const;
+    void direction(Direction direction);
+
+    float speed_scale() const;
+    void speed_scale(float speed_scale);
+
+    float deadzone() const;
+    void deadzone(float deadzone);
+
+    DecayMode decay_mode();
+    void decay_mode(DecayMode mode);
 
     //--------------------------------------------------
   private:
-    void update_pwm();
+    void apply_duty(float duty, DecayMode mode);
   };
 
 }

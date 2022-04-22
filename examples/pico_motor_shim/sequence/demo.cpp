@@ -65,8 +65,8 @@ bool accelerate_over(float left_speed, float right_speed, uint32_t duration_ms) 
   uint32_t ellapsed = 0;
 
   //Get the current motor speeds
-  float last_left = motor_1.get_speed();
-  float last_right = motor_2.get_speed();
+  float last_left = motor_1.speed();
+  float last_right = motor_2.speed();
 
   //Loops until the duration has elapsed, checking the button state every millisecond, and updating motor speeds
   while(ellapsed <= duration_ms) {
@@ -75,16 +75,16 @@ bool accelerate_over(float left_speed, float right_speed, uint32_t duration_ms) 
 
     //Calculate and set the new motor speeds
     float percentage = (float)ellapsed / (float)duration_ms;
-    motor_1.set_speed(((left_speed - last_left) * percentage) + last_left);
-    motor_2.set_speed(((right_speed - last_right) * percentage) + last_right);
+    motor_1.speed(((left_speed - last_left) * percentage) + last_left);
+    motor_2.speed(((right_speed - last_right) * percentage) + last_right);
 
     sleep_ms(1);
     ellapsed = millis() - start_time;
   }
 
   //Set the final motor speeds as loop may not reach 100%
-  motor_1.set_speed(left_speed);
-  motor_2.set_speed(right_speed);
+  motor_1.speed(left_speed);
+  motor_2.speed(right_speed);
 
   return true;
 }

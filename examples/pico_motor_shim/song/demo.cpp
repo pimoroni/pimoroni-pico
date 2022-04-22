@@ -40,11 +40,11 @@ static const uint STATIONARY_TOGGLE_US = 2000;
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
 #ifdef USE_FAST_DECAY
-  Motor motor_1(pico_motor_shim::MOTOR_1, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, Motor::DEFAULT_PWM_FREQUENCY, Motor::FAST_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
 #else
-  Motor motor_1(pico_motor_shim::MOTOR_1, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, Motor::DEFAULT_PWM_FREQUENCY, Motor::SLOW_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
 #endif
 
 static bool button_toggle = false;
@@ -83,26 +83,26 @@ int main() {
 
       //Play the song
       for(uint i = 0; i < SONG_LENGTH && check_button_toggle(); i++) {
-        if(motor_1.set_frequency(SONG[i]) && motor_2.set_frequency(SONG[i])) {
+        if(motor_1.frequency(SONG[i]) && motor_2.frequency(SONG[i])) {
           #ifdef STATIONARY_PLAYBACK
             //Set the motors to 50% duty cycle to play the note, but alternate
             //the direction so that the motor does not actually spin
             uint t = 0;
             while(t < NOTE_DURATION_MS * 1000) {
-              motor_1.set_speed(0.5f);
-              motor_2.set_speed(0.5f);
+              motor_1.duty(0.5f);
+              motor_2.duty(0.5f);
               sleep_us(STATIONARY_TOGGLE_US);
               t += STATIONARY_TOGGLE_US;
 
-              motor_1.set_speed(-0.5f);
-              motor_2.set_speed(-0.5f);
+              motor_1.duty(-0.5f);
+              motor_2.duty(-0.5f);
               sleep_us(STATIONARY_TOGGLE_US);
               t += STATIONARY_TOGGLE_US;
             }
           #else
             //Set the motors to 50% duty cycle to play the note
-            motor_1.set_speed(0.5f);
-            motor_2.set_speed(0.5f);
+            motor_1.duty(0.5f);
+            motor_2.duty(0.5f);
             sleep_ms(NOTE_DURATION_MS);
           #endif
         }

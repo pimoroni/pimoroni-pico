@@ -103,8 +103,8 @@ int main() {
       printf("Y: %f, Z: %f, AngErr: %f\n", y, z, angle_error);
 
       float output = angle_error * PROPORTIONAL; //No need to clamp this value as set_speed does this internally
-      motor_1.set_speed(output);
-      motor_2.set_speed(-output);
+      motor_1.speed(output);
+      motor_2.speed(-output);
 
       sleep_ms(1);
     }

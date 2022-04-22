@@ -2,7 +2,7 @@
 #include "pico/stdlib.h"
 
 #include "ws2812.hpp"
-#include "motor2.hpp"
+#include "motor.hpp"
 #include "motor_cluster.hpp"
 
 namespace motor {

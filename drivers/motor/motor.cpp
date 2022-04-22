@@ -1,14 +1,16 @@
 #include "motor.hpp"
+#include "hardware/clocks.h"
 #include "pwm.hpp"
+#include "math.h"
 
 namespace motor {
-  Motor::Motor(const pin_pair &pins, float freq, DecayMode mode)
-    : pins(pins), pwm_frequency(freq), motor_decay_mode(mode) {
+  Motor::Motor(const pin_pair &pins, Direction direction, float speed_scale, float deadzone, float freq, DecayMode mode)
+    : motor_pins(pins), state(direction, speed_scale, deadzone), pwm_frequency(freq), motor_mode(mode) {
   }
 
   Motor::~Motor() {
-    gpio_set_function(pins.positive, GPIO_FUNC_NULL);
-    gpio_set_function(pins.negative, GPIO_FUNC_NULL);
+    gpio_set_function(motor_pins.positive, GPIO_FUNC_NULL);
+    gpio_set_function(motor_pins.negative, GPIO_FUNC_NULL);
   }
 
   bool Motor::init() {
@@ -20,128 +22,202 @@ namespace motor {
 
       pwm_cfg = pwm_get_default_config();
 
-      //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwm_config_set_wrap(&pwm_cfg, period - 1);
+      // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+      pwm_config_set_wrap(&pwm_cfg, pwm_period - 1);
 
-      //Apply the divider
-      pwm_config_set_clkdiv(&pwm_cfg, (float)div16 / 16.0f);
+      // Apply the divider
+      pwm_config_set_clkdiv(&pwm_cfg, (float)div16 / 16.0f); // There's no 'pwm_config_set_clkdiv_int_frac' for some reason...
 
-      pwm_init(pwm_gpio_to_slice_num(pins.positive), &pwm_cfg, true);
-      gpio_set_function(pins.positive, GPIO_FUNC_PWM);
+      pwm_init(pwm_gpio_to_slice_num(motor_pins.positive), &pwm_cfg, true);
+      pwm_init(pwm_gpio_to_slice_num(motor_pins.negative), &pwm_cfg, true);
 
-      pwm_init(pwm_gpio_to_slice_num(pins.negative), &pwm_cfg, true);
-      gpio_set_function(pins.negative, GPIO_FUNC_PWM);
-      update_pwm();
+      gpio_set_function(motor_pins.positive, GPIO_FUNC_PWM);
+      gpio_set_function(motor_pins.negative, GPIO_FUNC_PWM);
 
-      success = true;
-    }
-    return success;
-  }
-
-  float Motor::get_speed() {
-    return motor_speed;
-  }
-
-  void Motor::set_speed(float speed) {
-    motor_speed = MIN(MAX(speed, -1.0f), 1.0f);
-    update_pwm();
-  }
-
-  float Motor::get_frequency() {
-    return pwm_frequency;
-  }
-
-  bool Motor::set_frequency(float freq) {
-    bool success = false;
-
-    //Calculate a suitable pwm wrap period for this frequency
-    uint16_t period; uint16_t div16;
-    if(pimoroni::calculate_pwm_factors(freq, period, div16)) {
-
-      //Record if the new period will be larger or smaller.
-      //This is used to apply new pwm values either before or after the wrap is applied,
-      //to avoid momentary blips in PWM output on SLOW_DECAY
-      bool pre_update_pwm = (period > pwm_period);
-
-      pwm_period = period;
-      pwm_frequency = freq;
-
-      uint pos_num = pwm_gpio_to_slice_num(pins.positive);
-      uint neg_num = pwm_gpio_to_slice_num(pins.negative);
-
-      //Apply the new divider
-      uint8_t div = div16 >> 4;
-      uint8_t mod = div16 % 16;
-      pwm_set_clkdiv_int_frac(pos_num, div, mod);
-      if(neg_num != pos_num) {
-        pwm_set_clkdiv_int_frac(neg_num, div, mod);
-      }
-
-      //If the the period is larger, update the pwm before setting the new wraps
-      if(pre_update_pwm)
-        update_pwm();
-
-      //Set the new wrap (should be 1 less than the period to get full 0 to 100%)
-      pwm_set_wrap(pos_num, pwm_period - 1);
-      if(neg_num != pos_num) {
-        pwm_set_wrap(neg_num, pwm_period - 1);
-      }
-
-      //If the the period is smaller, update the pwm after setting the new wraps
-      if(!pre_update_pwm)
-        update_pwm();
+      pwm_set_gpio_level(motor_pins.positive, 0);
+      pwm_set_gpio_level(motor_pins.negative, 0);
 
       success = true;
     }
     return success;
   }
 
-  Motor::DecayMode Motor::get_decay_mode() {
-    return motor_decay_mode;
+  pin_pair Motor::pins() const {
+    return motor_pins;
   }
 
-  void Motor::set_decay_mode(Motor::DecayMode mode) {
-    motor_decay_mode = mode;
-    update_pwm();
-  }
-
-  void Motor::stop() {
-    motor_speed = 0.0f;
-    update_pwm();
+  void Motor::enable() {
+    apply_duty(state.enable_with_return(), motor_mode);
   }
 
   void Motor::disable() {
-    motor_speed = 0.0f;
-    pwm_set_gpio_level(pins.positive, 0);
-    pwm_set_gpio_level(pins.negative, 0);
+    apply_duty(state.disable_with_return(), motor_mode);
   }
 
-  void Motor::update_pwm() {
-    int32_t signed_duty_cycle = (int32_t)(motor_speed * (float)pwm_period);
+  bool Motor::is_enabled() const {
+    return state.is_enabled();
+  }
 
-    switch(motor_decay_mode) {
-    case SLOW_DECAY: //aka 'Braking'
-      if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pins.positive, pwm_period);
-        pwm_set_gpio_level(pins.negative, pwm_period - signed_duty_cycle);
-      }
-      else {
-        pwm_set_gpio_level(pins.positive, pwm_period + signed_duty_cycle);
-        pwm_set_gpio_level(pins.negative, pwm_period);
-      }
-      break;
+  float Motor::duty() const {
+    return state.get_duty();
+  }
 
-    case FAST_DECAY: //aka 'Coasting'
-    default:
-      if(signed_duty_cycle >= 0) {
-        pwm_set_gpio_level(pins.positive, signed_duty_cycle);
-        pwm_set_gpio_level(pins.negative, 0);
+  void Motor::duty(float duty) {
+    apply_duty(state.set_duty_with_return(duty), motor_mode);
+  }
+
+  float Motor::speed() const {
+    return state.get_speed();
+  }
+
+  void Motor::speed(float speed) {
+    apply_duty(state.set_speed_with_return(speed), motor_mode);
+  }
+
+  float Motor::frequency() const {
+    return pwm_frequency;
+  }
+
+  bool Motor::frequency(float freq) {
+    bool success = false;
+
+    if((freq >= MotorState::MIN_FREQUENCY) && (freq <= MotorState::MAX_FREQUENCY)) {
+      // Calculate a suitable pwm wrap period for this frequency
+      uint16_t period; uint16_t div16;
+      if(pimoroni::calculate_pwm_factors(freq, period, div16)) {
+
+        // Record if the new period will be larger or smaller.
+        // This is used to apply new pwm speeds either before or after the wrap is applied,
+        // to avoid momentary blips in PWM output on SLOW_DECAY
+        bool pre_update_pwm = (period > pwm_period);
+
+        pwm_period = period;
+        pwm_frequency = freq;
+
+        uint pos_pin_num = pwm_gpio_to_slice_num(motor_pins.positive);
+        uint neg_pin_num = pwm_gpio_to_slice_num(motor_pins.negative);
+
+        // Apply the new divider
+        uint8_t div = div16 >> 4;
+        uint8_t mod = div16 % 16;
+        pwm_set_clkdiv_int_frac(pos_pin_num, div, mod);
+        if(neg_pin_num != pos_pin_num)
+          pwm_set_clkdiv_int_frac(neg_pin_num, div, mod);
+
+        // If the period is larger, update the pwm before setting the new wraps
+        if(pre_update_pwm) {
+          apply_duty(state.get_deadzoned_duty(), motor_mode);
+        }
+
+        // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+        pwm_set_wrap(pos_pin_num, pwm_period - 1);
+        if(neg_pin_num != pos_pin_num)
+          pwm_set_wrap(neg_pin_num, pwm_period - 1);
+
+        // If the period is smaller, update the pwm after setting the new wraps
+        if(!pre_update_pwm) {
+          apply_duty(state.get_deadzoned_duty(), motor_mode);
+        }
+
+        success = true;
       }
-      else {
-        pwm_set_gpio_level(pins.positive, 0);
-        pwm_set_gpio_level(pins.negative, 0 - signed_duty_cycle);
+    }
+    return success;
+  }
+
+  void Motor::stop() {
+    apply_duty(state.stop_with_return(), motor_mode);
+  }
+
+  void Motor::coast() {
+    apply_duty(state.stop_with_return(), FAST_DECAY);
+  }
+
+  void Motor::brake() {
+    apply_duty(state.stop_with_return(), SLOW_DECAY);
+  }
+
+  void Motor::full_negative() {
+    apply_duty(state.full_negative_with_return(), motor_mode);
+  }
+
+  void Motor::full_positive() {
+    apply_duty(state.full_positive_with_return(), motor_mode);
+  }
+
+  void Motor::to_percent(float in, float in_min, float in_max) {
+    apply_duty(state.to_percent_with_return(in, in_min, in_max), motor_mode);
+  }
+
+  void Motor::to_percent(float in, float in_min, float in_max, float speed_min, float speed_max) {
+    apply_duty(state.to_percent_with_return(in, in_min, in_max, speed_min, speed_max), motor_mode);
+  }
+
+  Direction Motor::direction() const {
+    return state.get_direction();
+  }
+
+  void Motor::direction(Direction direction) {
+    state.set_direction(direction);
+  }
+
+  float Motor::speed_scale() const {
+    return state.get_speed_scale();
+  }
+
+  void Motor::speed_scale(float speed_scale) {
+    state.set_speed_scale(speed_scale);
+  }
+
+  float Motor::deadzone() const {
+    return state.get_deadzone();
+  }
+
+  void Motor::deadzone(float deadzone) {
+    apply_duty(state.set_deadzone_with_return(deadzone), motor_mode);
+  }
+
+  DecayMode Motor::decay_mode() {
+    return motor_mode;
+  }
+
+  void Motor::decay_mode(DecayMode mode) {
+    motor_mode = mode;
+    apply_duty(state.get_deadzoned_duty(), motor_mode);
+  }
+
+  void Motor::apply_duty(float duty, DecayMode mode) {
+    if(isfinite(duty)) {
+      int32_t signed_level = MotorState::duty_to_level(duty, pwm_period);
+
+      switch(mode) {
+      case SLOW_DECAY: //aka 'Braking'
+        if(signed_level >= 0) {
+          pwm_set_gpio_level(motor_pins.positive, pwm_period);
+          pwm_set_gpio_level(motor_pins.negative, pwm_period - signed_level);
+        }
+        else {
+          pwm_set_gpio_level(motor_pins.positive, pwm_period + signed_level);
+          pwm_set_gpio_level(motor_pins.negative, pwm_period);
+        }
+        break;
+
+      case FAST_DECAY: //aka 'Coasting'
+      default:
+        if(signed_level >= 0) {
+          pwm_set_gpio_level(motor_pins.positive, signed_level);
+          pwm_set_gpio_level(motor_pins.negative, 0);
+        }
+        else {
+          pwm_set_gpio_level(motor_pins.positive, 0);
+          pwm_set_gpio_level(motor_pins.negative, 0 - signed_level);
+        }
+        break;
       }
-      break;
+    }
+    else {
+      pwm_set_gpio_level(motor_pins.positive, 0);
+      pwm_set_gpio_level(motor_pins.negative, 0);
     }
   }
 };

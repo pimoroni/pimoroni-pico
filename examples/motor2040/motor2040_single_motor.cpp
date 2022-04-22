@@ -22,7 +22,7 @@ constexpr float SWEEP_EXTENT = 90.0f;
 
 
 // Create a motor on pin 0 and 1
-Motor2 m = Motor2(motor2040::MOTOR_A);
+Motor m = Motor(motor2040::MOTOR_A);
 
 
 int main() {

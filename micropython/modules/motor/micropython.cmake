@@ -7,7 +7,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor2.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor_state.cpp
 )

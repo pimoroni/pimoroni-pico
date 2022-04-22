@@ -1,7 +1,7 @@
 #pragma once
 #include "pico/stdlib.h"
 
-#include "motor2.hpp"
+#include "motor.hpp"
 
 namespace motor {
   namespace pico_motor_shim {

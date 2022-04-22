@@ -1,4 +1,4 @@
-#include "drivers/motor/motor2.hpp"
+#include "drivers/motor/motor.hpp"
 #include "drivers/motor/motor_cluster.hpp"
 #include "common/pimoroni_common.hpp"
 #include <cstdio>
@@ -19,7 +19,7 @@ extern "C" {
 /***** Variables Struct *****/
 typedef struct _Motor_obj_t {
     mp_obj_base_t base;
-    Motor2* motor;
+    Motor* motor;
 } _Motor_obj_t;
 
 
@@ -147,7 +147,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     self = m_new_obj_with_finaliser(_Motor_obj_t);
     self->base.type = &Motor_type;
 
-    self->motor = new Motor2(pins, (Direction)direction, speed_scale, deadzone, freq, (DecayMode)mode);
+    self->motor = new Motor(pins, (Direction)direction, speed_scale, deadzone, freq, (DecayMode)mode);
     self->motor->init();
 
     return MP_OBJ_FROM_PTR(self);
