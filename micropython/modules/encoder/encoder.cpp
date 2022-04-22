@@ -1,4 +1,4 @@
-#include "drivers/encoder-pio/encoder.hpp"
+#include "drivers/encoder/encoder.hpp"
 #include <cstdio>
 #include <cfloat>
 

@@ -1,4 +1,4 @@
-set(DRIVER_NAME encoder-pio)
+set(DRIVER_NAME encoder)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE
