@@ -3,25 +3,13 @@
 #include "hardware/pio.h"
 #include "common/pimoroni_common.hpp"
 
-namespace pimoroni {
+using namespace pimoroni;
+
+namespace encoder {
 
   enum Direction {
     NORMAL    = 0,
     REVERSED  = 1,
-  };
-
-  struct bool_pair {
-    union {
-      bool first;
-      bool a;
-    };
-    union {
-      bool second;
-      bool b;
-    };
-
-    bool_pair() : first(false), second(false) {}
-    bool_pair(bool first, bool second) : first(first), second(second) {}
   };
 
   class Encoder {
@@ -67,7 +55,7 @@ namespace pimoroni {
     // Substructures
     //--------------------------------------------------
   public:
-    class Snapshot {
+    class Capture {
         //--------------------------------------------------
         // Variables
         //--------------------------------------------------
@@ -82,8 +70,8 @@ namespace pimoroni {
         // Constructors
         //--------------------------------------------------
       public:
-        Snapshot();
-        Snapshot(int32_t count, int32_t delta, float frequency, float counts_per_rev);
+        Capture();
+        Capture(int32_t count, int32_t delta, float frequency, float counts_per_rev);
 
 
         //--------------------------------------------------
@@ -137,7 +125,7 @@ namespace pimoroni {
     volatile StepDir step_dir             = NO_DIR;
 
     int32_t last_count                    = 0;
-    int32_t last_snapshot_count           = 0;
+    int32_t last_capture_count           = 0;
 
     bool initialised                      = false;
 
@@ -193,7 +181,7 @@ namespace pimoroni {
     float counts_per_revolution() const;
     void counts_per_revolution(float counts_per_rev);
 
-    Snapshot take_snapshot();
+    Capture capture();
 
     //--------------------------------------------------
   private:

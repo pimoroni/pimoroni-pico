@@ -50,13 +50,13 @@ osr_dec:
 
     ; Read the state of both encoder pins and check
     ; if they are different from the last state
-    jmp pin encA_was_high
+    jmp pin enc_a_was_high
     mov isr, null
-    jmp read_encB
-encA_was_high:
+    jmp read_enc_b
+enc_a_was_high:
     set y, 1
     mov isr, y
-read_encB:
+read_enc_b:
     in pins, 1
     mov y, isr
     jmp x!=y state_changed [1]
@@ -77,7 +77,7 @@ state_changed:
 
     ; Perform a delay to debounce switch inputs
     set y, (ITERATIONS - 1) [SET_CYCLES - 1]
-debounce_loop:    
+debounce_loop:
     jmp y-- debounce_loop [JMP_CYCLES - 1]
 
     ; Initialise the timer, as an inverse, and decrement
@@ -93,8 +93,6 @@ y_dec:
 ; Initialisation Code
 ; --------------------------------------------------
 % c-sdk {
-#include "hardware/clocks.h"
-
 static const uint8_t ENC_LOOP_CYCLES = encoder_wrap - encoder_wrap_target;
 
 // The time that the debounce takes, as the number of wrap loops that the debounce is equivalent to

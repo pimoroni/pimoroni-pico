@@ -2,13 +2,14 @@
 #include <cfloat>
 #include <climits>
 #include "hardware/irq.h"
+#include "hardware/clocks.h"
 #include "encoder.hpp"
 #include "encoder.pio.h"
 
 #define LAST_STATE(state)  ((state) & 0b0011)
 #define CURR_STATE(state)  (((state) & 0b1100) >> 2)
 
-namespace pimoroni {
+namespace encoder {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // STATICS
@@ -18,64 +19,64 @@ uint8_t Encoder::claimed_sms[] = { 0x0, 0x0 };
 uint Encoder::pio_program_offset[] = { 0, 0 };
 
 
-Encoder::Snapshot::Snapshot()
+Encoder::Capture::Capture()
 : captured_count(0), captured_delta(0), captured_frequency(0.0f), counts_per_rev(INT32_MAX) {
 }
 
-Encoder::Snapshot::Snapshot(int32_t count, int32_t delta, float frequency, float counts_per_rev)
+Encoder::Capture::Capture(int32_t count, int32_t delta, float frequency, float counts_per_rev)
 : captured_count(count), captured_delta(delta), captured_frequency(frequency)
 , counts_per_rev(MAX(counts_per_rev, FLT_EPSILON)) { //Clamp counts_per_rev to avoid potential NaN
 }
 
-int32_t Encoder::Snapshot::count() const {
+int32_t Encoder::Capture::count() const {
   return captured_count;
 }
 
-int32_t Encoder::Snapshot::delta() const {
+int32_t Encoder::Capture::delta() const {
   return captured_delta;
 }
 
-float Encoder::Snapshot::frequency() const {
+float Encoder::Capture::frequency() const {
   return captured_frequency;
 }
 
-float Encoder::Snapshot::revolutions() const {
+float Encoder::Capture::revolutions() const {
   return (float)captured_count / counts_per_rev;
 }
 
-float Encoder::Snapshot::degrees() const {
+float Encoder::Capture::degrees() const {
   return revolutions() * 360.0f;
 }
 
-float Encoder::Snapshot::radians() const {
+float Encoder::Capture::radians() const {
   return revolutions() * M_TWOPI;
 }
 
-float Encoder::Snapshot::revolutions_delta() const {
+float Encoder::Capture::revolutions_delta() const {
   return (float)captured_delta / counts_per_rev;
 }
 
-float Encoder::Snapshot::degrees_delta() const {
+float Encoder::Capture::degrees_delta() const {
   return revolutions_delta() * 360.0f;
 }
 
-float Encoder::Snapshot::radians_delta() const {
+float Encoder::Capture::radians_delta() const {
   return revolutions_delta() * M_TWOPI;
 }
 
-float Encoder::Snapshot::revolutions_per_second() const {
+float Encoder::Capture::revolutions_per_second() const {
   return captured_frequency / counts_per_rev;
 }
 
-float Encoder::Snapshot::revolutions_per_minute() const {
+float Encoder::Capture::revolutions_per_minute() const {
   return revolutions_per_second() * 60.0f;
 }
 
-float Encoder::Snapshot::degrees_per_second() const {
+float Encoder::Capture::degrees_per_second() const {
   return revolutions_per_second() * 360.0f;
 }
 
-float Encoder::Snapshot::radians_per_second() const {
+float Encoder::Capture::radians_per_second() const {
   return revolutions_per_second() * M_TWOPI;
 }
 
@@ -249,7 +250,7 @@ void Encoder::zero() {
   step_dir = NO_DIR; // may not be wanted?
 
   last_count = 0;
-  last_snapshot_count = 0;
+  last_capture_count = 0;
 }
 
 int16_t Encoder::step() const {
@@ -288,23 +289,23 @@ void Encoder::counts_per_revolution(float counts_per_rev) {
   enc_counts_per_rev = MAX(counts_per_rev, FLT_EPSILON);
 }
 
-Encoder::Snapshot Encoder::take_snapshot() {
-  // Take a snapshot of the current values
+Encoder::Capture Encoder::capture() {
+  // Take a capture of the current values
   int32_t count = enc_count;
   int32_t cumulative_time = enc_cumulative_time;
   enc_cumulative_time = 0;
 
-  // Determine the change in counts since the last snapshot was taken
-  int32_t change = count - last_snapshot_count;
-  last_snapshot_count = count;
+  // Determine the change in counts since the last capture was taken
+  int32_t change = count - last_capture_count;
+  last_capture_count = count;
 
-  // Calculate the average frequency of state transitions
+  // Calculate the average frequency of steps
   float frequency = 0.0f;
   if(change != 0 && cumulative_time != INT32_MAX) {
     frequency = (clocks_per_time * (float)change) / (float)cumulative_time;
   }
 
-  return Snapshot(count, change, frequency, enc_counts_per_rev);
+  return Capture(count, change, frequency, enc_counts_per_rev);
 }
 
 void Encoder::process_steps() {
@@ -319,8 +320,8 @@ void Encoder::process_steps() {
     // Extract the time (in cycles) it has been since the last received
     int32_t time_received = (received & TIME_MASK) + ENC_DEBOUNCE_TIME;
 
-    // For rotary encoders, only every fourth transition is cared about, causing an inaccurate time value
-    // To address this we accumulate the times received and zero it when a transition is counted
+    // For rotary encoders, only every fourth step is cared about, causing an inaccurate time value
+    // To address this we accumulate the times received and zero it when a step is counted
     if(!count_microsteps) {
       if(time_received + microstep_time < time_received)  // Check to avoid integer overflow
         time_received = INT32_MAX;
@@ -331,7 +332,7 @@ void Encoder::process_steps() {
 
     bool up = (enc_direction == NORMAL);
 
-    // Determine what transition occurred
+    // Determine what step occurred
     switch(LAST_STATE(states)) {
       //--------------------------------------------------
       case MICROSTEP_0:

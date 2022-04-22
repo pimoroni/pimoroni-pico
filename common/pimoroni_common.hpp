@@ -96,4 +96,18 @@ namespace pimoroni {
     pin_pair() : first(0), second(0) {}
     pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
   };
+
+  struct bool_pair {
+    union {
+      bool first;
+      bool a;
+    };
+    union {
+      bool second;
+      bool b;
+    };
+
+    bool_pair() : first(false), second(false) {}
+    bool_pair(bool first, bool second) : first(first), second(second) {}
+  };
 }

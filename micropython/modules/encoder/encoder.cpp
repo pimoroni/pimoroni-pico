@@ -5,7 +5,7 @@
 #define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 using namespace pimoroni;
-//using namespace encoder;
+using namespace encoder;
 
 extern "C" {
 #include "encoder.h"
@@ -304,22 +304,22 @@ extern mp_obj_t Encoder_counts_per_revolution(size_t n_args, const mp_obj_t *pos
 extern mp_obj_t Encoder_capture(mp_obj_t self_in) {
     _Encoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Encoder_obj_t);
 
-    Encoder::Snapshot snapshot = self->encoder->take_snapshot();
+    Encoder::Capture capture = self->encoder->capture();
 
     mp_obj_t tuple[] = {
-        mp_obj_new_int(snapshot.count()),
-        mp_obj_new_int(snapshot.delta()),
-        mp_obj_new_float(snapshot.frequency()),
-        mp_obj_new_float(snapshot.revolutions()),
-        mp_obj_new_float(snapshot.degrees()),
-        mp_obj_new_float(snapshot.radians()),
-        mp_obj_new_float(snapshot.revolutions_delta()),
-        mp_obj_new_float(snapshot.degrees_delta()),
-        mp_obj_new_float(snapshot.radians_delta()),
-        mp_obj_new_float(snapshot.revolutions_per_second()),
-        mp_obj_new_float(snapshot.revolutions_per_minute()),
-        mp_obj_new_float(snapshot.degrees_per_second()),
-        mp_obj_new_float(snapshot.radians_per_second()),
+        mp_obj_new_int(capture.count()),
+        mp_obj_new_int(capture.delta()),
+        mp_obj_new_float(capture.frequency()),
+        mp_obj_new_float(capture.revolutions()),
+        mp_obj_new_float(capture.degrees()),
+        mp_obj_new_float(capture.radians()),
+        mp_obj_new_float(capture.revolutions_delta()),
+        mp_obj_new_float(capture.degrees_delta()),
+        mp_obj_new_float(capture.radians_delta()),
+        mp_obj_new_float(capture.revolutions_per_second()),
+        mp_obj_new_float(capture.revolutions_per_minute()),
+        mp_obj_new_float(capture.degrees_per_second()),
+        mp_obj_new_float(capture.radians_per_second()),
     };
 
     STATIC const qstr tuple_fields[] = {
