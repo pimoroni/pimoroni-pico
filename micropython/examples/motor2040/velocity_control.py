@@ -31,7 +31,7 @@ PRINT_DIVIDER = 4                       # How many of the updates should be prin
 ACC_PRINT_SCALE = 0.05                  # Acceleration multiplier
 
 VELOCITY_EXTENT = 3                     # How far from zero to drive the motor at, in revolutions per second
-INTERP_MODE = 2                         # The interpolating mode between targets. STEP (0), LINEAR (1), COSINE (2)
+INTERP_MODE = 2                         # The interpolating mode between setpoints. STEP (0), LINEAR (1), COSINE (2)
 
 # PID values
 VEL_KP = 30.0                           # Velocity proportional (P) gain
@@ -57,8 +57,8 @@ vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE)
 # Enable the motor to get started
 m.enable()
 
-# Set the initial target velocity
-vel_pid.target = VELOCITY_EXTENT
+# Set the initial setpoint velocity
+vel_pid.setpoint = VELOCITY_EXTENT
 
 
 update = 0
@@ -79,24 +79,24 @@ while user_sw.raw() is not True:
 
     if INTERP_MODE == 0:
         # Move the motor instantly to the end value
-        vel_pid.target = end_value
+        vel_pid.setpoint = end_value
     elif INTERP_MODE == 2:
         # Move the motor between values using cosine
-        vel_pid.target = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
+        vel_pid.setpoint = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
     else:
         # Move the motor linearly between values
-        vel_pid.target = (percent_along * (end_value - start_value)) + start_value
+        vel_pid.setpoint = (percent_along * (end_value - start_value)) + start_value
 
-    # Calculate the acceleration to apply to the motor to move it closer to the velocity target
+    # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
     accel = vel_pid.calculate(capture.revolutions_per_second)
 
     # Accelerate or decelerate the motor
     m.speed(m.speed() + (accel * UPDATE_RATE))
 
-    # Print out the current motor values and their targets, but only on every multiple
+    # Print out the current motor values and their setpoints, but only on every multiple
     if print_count == 0:
         print("Vel =", capture.revolutions_per_second, end=", ")
-        print("Targ Vel =", vel_pid.target, end=", ")
+        print("Vel SP =", vel_pid.setpoint, end=", ")
         print("Accel =", accel * ACC_PRINT_SCALE, end=", ")
         print("Speed =", m.speed())
 

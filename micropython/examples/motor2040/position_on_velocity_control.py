@@ -33,7 +33,7 @@ SPD_PRINT_SCALE = 40                    # Driving Speed multipler
 
 POSITION_EXTENT = 180                   # How far from zero to move the motor, in degrees
 MAX_SPEED = 1.0                         # The maximum speed to move the motor at, in revolutions per second
-INTERP_MODE = 0                         # The interpolating mode between targets. STEP (0), LINEAR (1), COSINE (2)
+INTERP_MODE = 0                         # The interpolating mode between setpoints. STEP (0), LINEAR (1), COSINE (2)
 
 # PID values
 POS_KP = 0.025                          # Position proportional (P) gain
@@ -64,8 +64,8 @@ vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE)
 # Enable the motor to get started
 m.enable()
 
-# Set the initial target position
-pos_pid.target = POSITION_EXTENT
+# Set the initial setpoint position
+pos_pid.setpoint = POSITION_EXTENT
 
 
 update = 0
@@ -86,32 +86,32 @@ while user_sw.raw() is not True:
 
     if INTERP_MODE == 0:
         # Move the motor instantly to the end value
-        pos_pid.target = end_value
+        pos_pid.setpoint = end_value
     elif INTERP_MODE == 2:
         # Move the motor between values using cosine
-        pos_pid.target = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
+        pos_pid.setpoint = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
     else:
         # Move the motor linearly between values
-        pos_pid.target = (percent_along * (end_value - start_value)) + start_value
+        pos_pid.setpoint = (percent_along * (end_value - start_value)) + start_value
 
-    # Calculate the velocity to move the motor closer to the position target
+    # Calculate the velocity to move the motor closer to the position setpoint
     vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
 
-    # Limit the velocity between user defined limits, and set it as the new target of the velocity PID
-    vel_pid.target = max(min(vel, MAX_SPEED), -MAX_SPEED)
+    # Limit the velocity between user defined limits, and set it as the new setpoint of the velocity PID
+    vel_pid.setpoint = max(min(vel, MAX_SPEED), -MAX_SPEED)
 
-    # Calculate the acceleration to apply to the motor to move it closer to the velocity target
+    # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
     accel = vel_pid.calculate(capture.revolutions_per_second)
 
     # Accelerate or decelerate the motor
     m.speed(m.speed() + (accel * UPDATE_RATE))
 
-    # Print out the current motor values and their targets, but only on every multiple
+    # Print out the current motor values and their setpoints, but only on every multiple
     if print_count == 0:
         print("Pos =", capture.degrees, end=", ")
-        print("Targ Pos =", pos_pid.target, end=", ")
+        print("Pos SP =", pos_pid.setpoint, end=", ")
         print("Vel =", capture.revolutions_per_second * SPD_PRINT_SCALE, end=", ")
-        print("Targ Vel =", vel_pid.target * SPD_PRINT_SCALE, end=", ")
+        print("Vel SP =", vel_pid.setpoint * SPD_PRINT_SCALE, end=", ")
         print("Accel =", accel * ACC_PRINT_SCALE, end=", ")
         print("Speed =", m.speed() * SPD_PRINT_SCALE)
 

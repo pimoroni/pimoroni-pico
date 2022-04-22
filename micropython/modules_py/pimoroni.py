@@ -149,13 +149,13 @@ class PID:
         self.kp = kp
         self.ki = ki
         self.kd = kd
-        self.target = 0
+        self.setpoint = 0
         self._error_sum = 0
         self._last_value = 0
         self._sample_rate = sample_rate
 
     def calculate(self, value, value_change=None):
-        error = self.target - value
+        error = self.setpoint - value
         self._error_sum += error * self._sample_rate
         if value_change is None:
             rate_error = (value - self._last_value) / self._sample_rate

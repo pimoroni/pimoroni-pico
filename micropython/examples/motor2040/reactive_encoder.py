@@ -77,9 +77,9 @@ current_detent = 0
 def detent_change(change):
     global current_detent
 
-    # Update the current detent and pid target
+    # Update the current detent and pid setpoint
     current_detent += change
-    pos_pid.target = (current_detent * DETENT_SIZE)     # Update the motor position target
+    pos_pid.setpoint = (current_detent * DETENT_SIZE)     # Update the motor position setpoint
     print("Detent =", current_detent)
 
     # Convert the current detent to a hue and set the onboard led to it
@@ -87,7 +87,7 @@ def detent_change(change):
     led.set_hsv(0, hue, 1.0, BRIGHTNESS)
 
 
-# Call the function once to set the target and print the value
+# Call the function once to set the setpoint and print the value
 detent_change(0)
 
 
@@ -112,7 +112,7 @@ while user_sw.raw() is not True:
         if current_detent > MIN_DETENT:
             detent_change(-1)    # Decrement to the next detent
 
-    # Calculate the velocity to move the motor closer to the position target
+    # Calculate the velocity to move the motor closer to the position setpoint
     vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
 
     # If the current angle is within the detent range, limit the max vel

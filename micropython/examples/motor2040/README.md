@@ -136,16 +136,16 @@ A demonstration of how a motor with an encoder can be used as a programmable rot
 ### Position Tuning
 [position_tuning.py](position_tuning.py)
 
-A program to aid in the discovery and tuning of motor PID values for position control. It does this by commanding the motor to move repeatedly between two target angles and plots the measured response.
+A program to aid in the discovery and tuning of motor PID values for position control. It does this by commanding the motor to move repeatedly between two setpoint angles and plots the measured response.
 
 
 ### Velocity Tuning
 [velocity_tuning.py](velocity_tuning.py)
 
-A program to aid in the discovery and tuning of motor PID values for velocity control. It does this by commanding the motor to drive repeatedly between two target speeds and plots the measured response.
+A program to aid in the discovery and tuning of motor PID values for velocity control. It does this by commanding the motor to drive repeatedly between two setpoint speeds and plots the measured response.
 
 
 ### Position on Velocity Tuning
 [position_on_velocity_tuning.py](position_on_velocity_tuning.py)
 
-A program to aid in the discovery and tuning of motor PID values for position on velocity control. It does this by commanding the motor to move repeatedly between two target angles and plots the measured response.
+A program to aid in the discovery and tuning of motor PID values for position on velocity control. It does this by commanding the motor to move repeatedly between two setpoint angles and plots the measured response.

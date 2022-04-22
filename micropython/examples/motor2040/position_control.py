@@ -31,7 +31,7 @@ PRINT_DIVIDER = 4                       # How many of the updates should be prin
 SPD_PRINT_SCALE = 20                    # Driving Speed multipler
 
 POSITION_EXTENT = 180                   # How far from zero to move the motor, in degrees
-INTERP_MODE = 2                         # The interpolating mode between targets. STEP (0), LINEAR (1), COSINE (2)
+INTERP_MODE = 2                         # The interpolating mode between setpoints. STEP (0), LINEAR (1), COSINE (2)
 
 # PID values
 POS_KP = 0.14                           # Position proportional (P) gain
@@ -76,24 +76,24 @@ while user_sw.raw() is not True:
 
     if INTERP_MODE == 0:
         # Move the motor instantly to the end value
-        pos_pid.target = end_value
+        pos_pid.setpoint = end_value
     elif INTERP_MODE == 2:
         # Move the motor between values using cosine
-        pos_pid.target = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
+        pos_pid.setpoint = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
     else:
         # Move the motor linearly between values
-        pos_pid.target = (percent_along * (end_value - start_value)) + start_value
+        pos_pid.setpoint = (percent_along * (end_value - start_value)) + start_value
 
-    # Calculate the velocity to move the motor closer to the position target
+    # Calculate the velocity to move the motor closer to the position setpoint
     vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
 
     # Set the new motor driving speed
     m.speed(vel)
 
-    # Print out the current motor values and their targets, but only on every multiple
+    # Print out the current motor values and their setpoints, but only on every multiple
     if print_count == 0:
         print("Pos =", capture.degrees, end=", ")
-        print("Targ Pos =", pos_pid.target, end=", ")
+        print("Pos SP =", pos_pid.setpoint, end=", ")
         print("Speed = ", m.speed() * SPD_PRINT_SCALE)
 
     # Increment the print count, and wrap it

@@ -7,7 +7,7 @@ from encoder import Encoder, MMME_CPR
 """
 A program to aid in the discovery and tuning of motor PID
 values for velocity control. It does this by commanding the
-motor to drive repeatedly between two target speeds and
+motor to drive repeatedly between two setpoint speeds and
 plots the measured response.
 
 Press "Boot" to exit the program.
@@ -23,8 +23,8 @@ SPEED_SCALE = 5.4                       # The scaling to apply to the motor's sp
 
 UPDATES = 100                           # How many times to update the motor per second
 UPDATE_RATE = 1 / UPDATES
-PRINT_WINDOW = 1.0                      # The time (in seconds) after a new target, to display print out motor values
-MOVEMENT_WINDOW = 2.0                   # The time (in seconds) between each new target being set
+PRINT_WINDOW = 1.0                      # The time (in seconds) after a new setpoint, to display print out motor values
+MOVEMENT_WINDOW = 2.0                   # The time (in seconds) between each new setpoint being set
 PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
 
 # Multipliers for the different printed values, so they appear nicely on the Thonny plotter
@@ -56,8 +56,8 @@ vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE)
 # Enable the motor to get started
 m.enable()
 
-# Set the initial target velocity
-vel_pid.target = VELOCITY_EXTENT
+# Set the initial setpoint velocity
+vel_pid.setpoint = VELOCITY_EXTENT
 
 
 update = 0
@@ -69,17 +69,17 @@ while user_sw.raw() is not True:
     # Capture the state of the encoder
     capture = enc.capture()
 
-    # Calculate the acceleration to apply to the motor to move it closer to the velocity target
+    # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
     accel = vel_pid.calculate(capture.revolutions_per_second)
 
     # Accelerate or decelerate the motor
     m.speed(m.speed() + (accel * UPDATE_RATE))
 
-    # Print out the current motor values and their targets,
+    # Print out the current motor values and their setpoints,
     # but only for the first few updates and only every multiple
     if update < (PRINT_WINDOW * UPDATES) and print_count == 0:
         print("Vel =", capture.revolutions_per_second, end=", ")
-        print("Targ Vel =", vel_pid.target, end=", ")
+        print("Vel SP =", vel_pid.setpoint, end=", ")
         print("Accel =", accel * ACC_PRINT_SCALE, end=", ")
         print("Speed =", m.speed())
 
@@ -92,8 +92,8 @@ while user_sw.raw() is not True:
     if update >= (MOVEMENT_WINDOW * UPDATES):
         update = 0  # Reset the counter
 
-        # Set the new velocity target to be the inverse of the current target
-        vel_pid.target = 0.0 - vel_pid.target
+        # Set the new velocity setpoint to be the inverse of the current setpoint
+        vel_pid.setpoint = 0.0 - vel_pid.setpoint
 
     time.sleep(UPDATE_RATE)
 
