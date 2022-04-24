@@ -1,4 +1,3 @@
-
 include(${CMAKE_CURRENT_LIST_DIR}/../bitmap_fonts/bitmap_fonts.cmake)
 
 add_library(pico_graphics 
