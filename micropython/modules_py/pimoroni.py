@@ -6,6 +6,10 @@ BREAKOUT_GARDEN_I2C_PINS = {"sda": 4, "scl": 5}
 PICO_EXPLORER_I2C_PINS = {"sda": 20, "scl": 21}
 HEADER_I2C_PINS = {"sda": 20, "scl": 21}
 
+# Motor and encoder directions
+NORMAL_DIR = 0x00
+REVERSED_DIR = 0x01
+
 
 class Analog:
     def __init__(self, pin, amplifier_gain=1, resistor=0, offset=0):

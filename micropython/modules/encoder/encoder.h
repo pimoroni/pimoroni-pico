@@ -20,5 +20,5 @@ extern mp_obj_t Encoder_revolutions(mp_obj_t self_in);
 extern mp_obj_t Encoder_degrees(mp_obj_t self_in);
 extern mp_obj_t Encoder_radians(mp_obj_t self_in);
 extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
-extern mp_obj_t Encoder_counts_per_revolution(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t Encoder_counts_per_rev(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t Encoder_capture(mp_obj_t self_in);

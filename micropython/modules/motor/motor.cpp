@@ -618,7 +618,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
         mp_raise_ValueError("pio out of range. Expected 0 to 1");
     }
-    PIO pio = pio_int ? pio0 : pio1;
+    PIO pio = pio_int == 0 ? pio0 : pio1;
 
     int sm = args[ARG_sm].u_int;
     if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {

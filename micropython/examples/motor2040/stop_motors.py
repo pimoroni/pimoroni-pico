@@ -1,7 +1,7 @@
 from motor import Motor, motor2040
 
 """
-A simple program that turns off the motors.
+A simple program that stops the motors.
 """
 
 # Create four motor objects.

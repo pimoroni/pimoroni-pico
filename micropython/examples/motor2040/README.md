@@ -5,9 +5,9 @@
   - [Multiple Motors](#multiple-motors)
   - [Motor Cluster](#motor-cluster)
   - [Motor Wave](#motor-wave)
-  - [Turn Off Motors](#turn-off-motors)
+  - [Stop Motors](#stop-motors)
 - [Encoder Examples](#encoder-examples)
-  - [Motor Angles](#motor-angles)
+  - [Read Encoders](#read-encoders)
   - [Motor Profiler](#motor-profiler)
 - [Function Examples](#function-examples)
   - [Read Sensors](#read-sensors)
@@ -20,6 +20,7 @@
   - [Velocity Control](#velocity-control)
   - [Position on Velocity Control](#position-on-velocity-control)
   - [Reactive Encoder](#reactive-encoder)
+  - [Quad Position Wave](#quad-position-wave)
 - [Tuning Examples](#tuning-examples)
   - [Position Tuning](#position-tuning)
   - [Velocity Tuning](#velocity-tuning)
@@ -52,16 +53,16 @@ Demonstrates how to create a MotorCluster object to control multiple motors at o
 An example of applying a wave pattern to a group of motors and the LEDs.
 
 
-### Turn Off Motors
-[turn_off_motors.py](turn_off_motors.py)
+### Stop Motors
+[stop_motors.py](stop_motors.py)
 
-A simple program that turns off the motors.
+A simple program that stops the motors.
 
 
 ## Encoder Examples
 
-### Motor Angles
-[motor_angles.py](motor_angles.py)
+### Read Encoders
+[read_encoders.py](read_encoders.py)
 
 Demonstrates how to read the angles of Motor 2040's four encoders.
 
@@ -129,6 +130,12 @@ An example of how to move a motor smoothly between random positions, with veloci
 [reactive_encoder.py](reactive_encoder.py)
 
 A demonstration of how a motor with an encoder can be used as a programmable rotary encoder for user input, with force-feedback for arbitrary detents and end stops.
+
+
+### Quad Position Wave
+[quad_position_wave.py](quad_position_wave.py)
+
+An demonstration of driving all four of Motor 2040's motor outputs between positions, with the help of their attached encoders and PID control.
 
 
 ## Tuning Examples

@@ -125,7 +125,7 @@ namespace encoder {
     volatile StepDir step_dir             = NO_DIR;
 
     int32_t last_count                    = 0;
-    int32_t last_capture_count           = 0;
+    int32_t last_capture_count            = 0;
 
     bool initialised                      = false;
 
@@ -178,8 +178,8 @@ namespace encoder {
     Direction direction() const;
     void direction(Direction direction);
 
-    float counts_per_revolution() const;
-    void counts_per_revolution(float counts_per_rev);
+    float counts_per_rev() const;
+    void counts_per_rev(float counts_per_rev);
 
     Capture capture();
 

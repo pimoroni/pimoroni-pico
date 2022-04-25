@@ -1,9 +1,8 @@
 import gc
 import time
-from pimoroni import Button
 from motor import motor2040
 from encoder import Encoder, MMME_CPR
-# from encoder import REVERSED
+from pimoroni import Button  # , REVERSED_DIR
 
 """
 Demonstrates how to read the angles of Motor 2040's four encoders.
@@ -26,10 +25,10 @@ encoders = [Encoder(0, i, ENCODER_PINS[i], counts_per_rev=COUNTS_PER_REV, count_
 
 # Uncomment the below lines (and the top import) to
 # reverse the counting direction of an encoder
-# encoders[0].direction(REVERSED)
-# encoders[1].direction(REVERSED)
-# encoders[2].direction(REVERSED)
-# encoders[3].direction(REVERSED)
+# encoders[0].direction(REVERSED_DIR)
+# encoders[1].direction(REVERSED_DIR)
+# encoders[2].direction(REVERSED_DIR)
+# encoders[3].direction(REVERSED_DIR)
 
 # Create the user button
 user_sw = Button(motor2040.USER_SW)

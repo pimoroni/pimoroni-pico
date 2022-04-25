@@ -1,8 +1,8 @@
 import gc
 import time
-from pimoroni import Button, PID
 from motor import Motor, motor2040
 from encoder import Encoder, MMME_CPR
+from pimoroni import Button, PID, NORMAL_DIR  # , REVERSED_DIR
 
 """
 A program to aid in the discovery and tuning of motor PID
@@ -18,7 +18,7 @@ ENCODER_PINS = motor2040.ENCODER_A      # The pins of the encoder attached to th
 GEAR_RATIO = 50                         # The gear ratio of the motor
 COUNTS_PER_REV = MMME_CPR * GEAR_RATIO  # The counts per revolution of the motor's output shaft
 
-DIRECTION = 0                           # The direction to spin the motor in. NORMAL (0), REVERSED (1)
+DIRECTION = NORMAL_DIR                  # The direction to spin the motor in. NORMAL_DIR (0), REVERSED_DIR (1)
 SPEED_SCALE = 5.4                       # The scaling to apply to the motor's speed to match its real-world speed
 
 UPDATES = 100                           # How many times to update the motor per second

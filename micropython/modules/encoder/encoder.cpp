@@ -46,7 +46,7 @@ void Encoder_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t ki
         mp_print_str(print, ", direction = REVERSED");
 
     mp_print_str(print, ", counts_per_rev = ");
-    mp_obj_print_helper(print, mp_obj_new_float(self->encoder->counts_per_revolution()), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_float(self->encoder->counts_per_rev()), PRINT_REPR);
     mp_print_str(print, ")");
 }
 
@@ -75,7 +75,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
         mp_raise_ValueError("pio out of range. Expected 0 to 1");
     }
-    PIO pio = pio_int ? pio0 : pio1;
+    PIO pio = pio_int == 0 ? pio0 : pio1;
 
     int sm = args[ARG_sm].u_int;
     if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
@@ -264,7 +264,7 @@ extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_ma
     }
 }
 
-extern mp_obj_t Encoder_counts_per_revolution(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+extern mp_obj_t Encoder_counts_per_rev(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args <= 1) {
         enum { ARG_self };
         static const mp_arg_t allowed_args[] = {
@@ -277,7 +277,7 @@ extern mp_obj_t Encoder_counts_per_revolution(size_t n_args, const mp_obj_t *pos
 
         _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
 
-        return mp_obj_new_float(self->encoder->counts_per_revolution());
+        return mp_obj_new_float(self->encoder->counts_per_rev());
     }
     else {
         enum { ARG_self, ARG_counts_per_rev };
@@ -296,7 +296,7 @@ extern mp_obj_t Encoder_counts_per_revolution(size_t n_args, const mp_obj_t *pos
         if(counts_per_rev < FLT_EPSILON) {
             mp_raise_ValueError("counts_per_rev out of range. Expected greater than 0.0");
         }
-        self->encoder->counts_per_revolution(counts_per_rev);
+        self->encoder->counts_per_rev(counts_per_rev);
         return mp_const_none;
     }
 }

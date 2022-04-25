@@ -281,11 +281,11 @@ void Encoder::direction(Direction direction) {
   enc_direction = direction;
 }
 
-float Encoder::counts_per_revolution() const {
+float Encoder::counts_per_rev() const {
   return enc_counts_per_rev;
 }
 
-void Encoder::counts_per_revolution(float counts_per_rev) {
+void Encoder::counts_per_rev(float counts_per_rev) {
   enc_counts_per_rev = MAX(counts_per_rev, FLT_EPSILON);
 }
 

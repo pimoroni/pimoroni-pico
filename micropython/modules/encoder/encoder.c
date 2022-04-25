@@ -15,7 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Encoder_revolutions_obj, Encoder_revolutions);
 MP_DEFINE_CONST_FUN_OBJ_1(Encoder_degrees_obj, Encoder_degrees);
 MP_DEFINE_CONST_FUN_OBJ_1(Encoder_radians_obj, Encoder_radians);
 MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_direction_obj, 1, Encoder_direction);
-MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_counts_per_revolution_obj, 1, Encoder_counts_per_revolution);
+MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_counts_per_rev_obj, 1, Encoder_counts_per_rev);
 MP_DEFINE_CONST_FUN_OBJ_1(Encoder_capture_obj, Encoder_capture);
 
 /***** Binding of Methods *****/
@@ -33,7 +33,7 @@ STATIC const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_degrees), MP_ROM_PTR(&Encoder_degrees_obj) },
     { MP_ROM_QSTR(MP_QSTR_radians), MP_ROM_PTR(&Encoder_radians_obj) },
     { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&Encoder_direction_obj) },
-    { MP_ROM_QSTR(MP_QSTR_counts_per_revolution), MP_ROM_PTR(&Encoder_counts_per_revolution_obj) },
+    { MP_ROM_QSTR(MP_QSTR_counts_per_rev), MP_ROM_PTR(&Encoder_counts_per_rev_obj) },
     { MP_ROM_QSTR(MP_QSTR_capture), MP_ROM_PTR(&Encoder_capture_obj) },
 };
 
@@ -53,8 +53,6 @@ STATIC const mp_map_elem_t encoder_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_encoder) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Encoder), (mp_obj_t)&Encoder_type },
 
-    { MP_ROM_QSTR(MP_QSTR_NORMAL), MP_ROM_INT(0x00) },
-    { MP_ROM_QSTR(MP_QSTR_REVERSED), MP_ROM_INT(0x01) },
     { MP_ROM_QSTR(MP_QSTR_MMME_CPR), MP_ROM_INT(12) },
     { MP_ROM_QSTR(MP_QSTR_ROTARY_CPR), MP_ROM_INT(24) },
 };
