@@ -25,7 +25,7 @@ CAPTURE_TIME = 0.2                      # How long to capture the motor's speed 
 gc.collect()
 
 # Create a motor and set its speed scale, and give it a zero deadzone
-m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, deadzone=0.0)
+m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, zeropoint=0.0, deadzone=0.0)
 
 # Create an encoder, using PIO 0 and State Machine 0
 enc = Encoder(0, 0, ENCODER_PINS, direction=DIRECTION, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)

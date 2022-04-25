@@ -8,24 +8,24 @@
 
 namespace motor {
   MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_pair_count, Direction direction,
-                             float speed_scale, float deadzone, float freq, DecayMode mode,
+                             float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_base, (pin_pair_count * 2), seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
+    create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 
   MotorCluster::MotorCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Direction direction,
-                             float speed_scale, float deadzone, float freq, DecayMode mode,
+                             float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_pairs, length, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
+    create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 
   MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Direction direction,
-                             float speed_scale, float deadzone, float freq, DecayMode mode,
+                             float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
                              bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
     : pwms(pio, sm, pin_pairs, seq_buffer, dat_buffer), pwm_frequency(freq) {
-    create_motor_states(direction, speed_scale, deadzone, mode, auto_phase);
+    create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 
   MotorCluster::~MotorCluster() {
@@ -581,6 +581,36 @@ namespace motor {
     }
   }
 
+  float MotorCluster::zeropoint(uint8_t motor) const {
+    assert(motor < pwms.get_chan_pair_count());
+    return states[motor].get_zeropoint();
+  }
+
+  void MotorCluster::zeropoint(uint8_t motor, float zeropoint, bool load) {
+    assert(motor < pwms.get_chan_pair_count());
+    states[motor].set_zeropoint(zeropoint);
+  }
+
+  void MotorCluster::zeropoint(const uint8_t *motors, uint8_t length, float zeropoint, bool load) {
+    assert(motors != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      this->zeropoint(motors[i], zeropoint);
+    }
+  }
+
+  void MotorCluster::zeropoint(std::initializer_list<uint8_t> motors, float zeropoint, bool load) {
+    for(auto motor : motors) {
+      this->zeropoint(motor, zeropoint);
+    }
+  }
+
+  void MotorCluster::all_to_zeropoint(float zeropoint, bool load) {
+    uint8_t motor_count = pwms.get_chan_pair_count();
+    for(uint8_t motor = 0; motor < motor_count; motor++) {
+      this->zeropoint(motor, zeropoint);
+    }
+  }
+
   float MotorCluster::deadzone(uint8_t motor) const {
     assert(motor < pwms.get_chan_pair_count());
     return states[motor].get_deadzone();
@@ -679,7 +709,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::create_motor_states(Direction direction, float speed_scale,
+  void MotorCluster::create_motor_states(Direction direction, float speed_scale, float zeropoint,
                                          float deadzone, DecayMode mode, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     if(motor_count > 0) {
@@ -687,10 +717,10 @@ namespace motor {
       configs = new motor_config[motor_count];
 
       for(uint motor = 0; motor < motor_count; motor++) {
-        states[motor] = MotorState(direction, speed_scale, deadzone);
+        states[motor] = MotorState(direction, speed_scale, zeropoint, deadzone);
         configs[motor].phase = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
         configs[motor].mode = mode;
       }
     }
   }
-};
+}

@@ -40,11 +40,11 @@ static const uint STATIONARY_TOGGLE_US = 2000;
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
 #ifdef USE_FAST_DECAY
-  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
 #else
-  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
+  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
+  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
 #endif
 
 static bool button_toggle = false;

@@ -330,7 +330,7 @@ void Encoder::process_steps() {
       microstep_time = time_received;
     }
 
-    bool up = (enc_direction == NORMAL);
+    bool up = (enc_direction == NORMAL_DIR);
 
     // Determine what step occurred
     switch(LAST_STATE(states)) {

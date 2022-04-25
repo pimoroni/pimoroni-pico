@@ -40,10 +40,10 @@ void Encoder_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t ki
         mp_obj_print_helper(print, mp_obj_new_int(self->encoder->common_pin()), PRINT_REPR);
     mp_print_str(print, ")");
 
-    if(self->encoder->direction() == NORMAL)
-        mp_print_str(print, ", direction = NORMAL");
+    if(self->encoder->direction() == NORMAL_DIR)
+        mp_print_str(print, ", direction = NORMAL_DIR");
     else
-        mp_print_str(print, ", direction = REVERSED");
+        mp_print_str(print, ", direction = REVERSED_DIR");
 
     mp_print_str(print, ", counts_per_rev = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->encoder->counts_per_rev()), PRINT_REPR);
@@ -61,7 +61,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_common_pin, MP_ARG_INT, {.u_int = PIN_UNUSED} },
-        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL} },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL_DIR} },
         { MP_QSTR_counts_per_rev, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_count_microsteps, MP_ARG_BOOL, {.u_bool = false} },
         { MP_QSTR_freq_divider, MP_ARG_OBJ, {.u_obj = mp_const_none} },
@@ -120,7 +120,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
     int direction = args[ARG_direction].u_int;
     if(direction < 0 || direction > 1) {
-        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)");
     }
 
     float counts_per_rev = Encoder::DEFAULT_COUNTS_PER_REV;
@@ -257,7 +257,7 @@ extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_ma
 
         int direction = args[ARG_direction].u_int;
         if(direction < 0 || direction > 1) {
-            mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+            mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)");
         }
         self->encoder->direction((Direction)direction);
         return mp_const_none;

@@ -11,22 +11,91 @@ namespace motor {
 
   class Motor {
     //--------------------------------------------------
+    // Subclasses
+    //--------------------------------------------------
+  private:
+    class Driver {
+      //--------------------------------------------------
+      // Variables
+      //--------------------------------------------------
+    protected:
+      pin_pair motor_pins;
+      uint16_t pwm_period;
+
+
+      //--------------------------------------------------
+      // Constructors/Destructor
+      //--------------------------------------------------
+    public:
+      Driver(const pin_pair &pins);
+      virtual ~Driver();
+
+
+      //--------------------------------------------------
+      // Methods
+      //--------------------------------------------------
+    public:
+      const pin_pair& pins() const;
+      virtual void init(pwm_config *pwm_cfg, uint16_t period) = 0;
+      virtual void update_frequency(uint8_t div, uint8_t mod, uint16_t period, float duty, DecayMode mode) = 0;
+      virtual void apply_duty(float duty, DecayMode mode) = 0;
+    };
+
+    class DualPWMDriver : public Driver {
+      //--------------------------------------------------
+      // Constructors/Destructor
+      //--------------------------------------------------
+    public:
+      DualPWMDriver(pin_pair pins) : Driver(pins) {}
+      virtual ~DualPWMDriver() {}
+
+
+      //--------------------------------------------------
+      // Methods
+      //--------------------------------------------------
+    public:
+      virtual void init(pwm_config *pwm_cfg, uint16_t period);
+      virtual void update_frequency(uint8_t div, uint8_t mod, uint16_t period, float duty, DecayMode mode);
+      virtual void apply_duty(float duty, DecayMode mode);
+    };
+
+    class PhEnDriver : public Driver {
+      //--------------------------------------------------
+      // Methods
+      //--------------------------------------------------
+    public:
+      PhEnDriver(pin_pair pins) : Driver(pins) {}
+      virtual ~PhEnDriver() {}
+
+
+      //--------------------------------------------------
+      // Methods
+      //--------------------------------------------------
+    public:
+      virtual void init(pwm_config *pwm_cfg, uint16_t period);
+      virtual void update_frequency(uint8_t div, uint8_t mod, uint16_t period, float duty, DecayMode mode);
+      virtual void apply_duty(float duty, DecayMode mode);
+    };
+
+
+    //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    pin_pair motor_pins;
+    Driver *driver;
     MotorState state;
     pwm_config pwm_cfg;
-    uint16_t pwm_period;
     float pwm_frequency;
     DecayMode motor_mode;
+
 
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Motor(const pin_pair &pins, Direction direction = NORMAL, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
-           float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE);
+    Motor(const pin_pair &pins, Direction direction = NORMAL_DIR, float speed_scale = MotorState::DEFAULT_SPEED_SCALE, float zeropoint = MotorState::DEFAULT_ZEROPOINT,
+          float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE,
+          bool ph_en_driver = false);
     ~Motor();
 
 
@@ -70,15 +139,14 @@ namespace motor {
     float speed_scale() const;
     void speed_scale(float speed_scale);
 
+    float zeropoint() const;
+    void zeropoint(float zeropoint);
+
     float deadzone() const;
     void deadzone(float deadzone);
 
     DecayMode decay_mode();
     void decay_mode(DecayMode mode);
-
-    //--------------------------------------------------
-  private:
-    void apply_duty(float duty, DecayMode mode);
   };
 
 }

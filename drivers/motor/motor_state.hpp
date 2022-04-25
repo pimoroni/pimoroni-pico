@@ -1,13 +1,11 @@
 #pragma once
 
 #include "pico/stdlib.h"
+#include "common/pimoroni_common.hpp"
+
+using namespace pimoroni;
 
 namespace motor {
-
-  enum Direction {
-    NORMAL    = 0,
-    REVERSED  = 1,
-  };
 
   enum DecayMode {
     FAST_DECAY  = 0, //aka 'Coasting'
@@ -20,7 +18,8 @@ namespace motor {
     //--------------------------------------------------
   public:
     static constexpr float DEFAULT_SPEED_SCALE = 1.0f;        // The standard motor speed scale
-    static constexpr float DEFAULT_DEADZONE = 0.1f;           // The standard motor deadzone
+    static constexpr float DEFAULT_ZEROPOINT = 0.0f;          // The standard motor deadzone
+    static constexpr float DEFAULT_DEADZONE = 0.05f;          // The standard motor deadzone
 
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;   // The standard motor decay behaviour
     static constexpr float DEFAULT_FREQUENCY = 25000.0f;      // The standard motor update rate
@@ -42,6 +41,7 @@ namespace motor {
     // Customisation variables
     Direction motor_direction;
     float motor_scale;
+    float motor_zeropoint;
     float motor_deadzone;
 
 
@@ -50,7 +50,7 @@ namespace motor {
     //--------------------------------------------------
   public:
     MotorState();
-    MotorState(Direction direction, float speed_scale, float deadzone);
+    MotorState(Direction direction, float speed_scale, float zeropoint, float deadzone);
 
 
     //--------------------------------------------------
@@ -83,6 +83,9 @@ namespace motor {
 
     float get_speed_scale() const;
     void set_speed_scale(float speed_scale);
+
+    float get_zeropoint() const;
+    void set_zeropoint(float zeropoint);
 
     float get_deadzone() const;
     float set_deadzone_with_return(float deadzone);

@@ -55,7 +55,7 @@ enum DrawState {
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 
-Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, NORMAL, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
+Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, NORMAL_DIR, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
 volatile bool encA_readings[READINGS_SIZE];
 volatile bool encB_readings[READINGS_SIZE];

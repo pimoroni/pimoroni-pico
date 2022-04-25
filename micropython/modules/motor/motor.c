@@ -17,6 +17,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(Motor_full_positive_obj, Motor_full_positive);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_to_percent_obj, 2, Motor_to_percent);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_direction_obj, 1, Motor_direction);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_speed_scale_obj, 1, Motor_speed_scale);
+MP_DEFINE_CONST_FUN_OBJ_KW(Motor_zeropoint_obj, 1, Motor_zeropoint);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_deadzone_obj, 1, Motor_deadzone);
 MP_DEFINE_CONST_FUN_OBJ_KW(Motor_decay_mode_obj, 1, Motor_decay_mode);
 

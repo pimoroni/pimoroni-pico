@@ -7,11 +7,6 @@ using namespace pimoroni;
 
 namespace encoder {
 
-  enum Direction {
-    NORMAL    = 0,
-    REVERSED  = 1,
-  };
-
   class Encoder {
     //--------------------------------------------------
     // Constants
@@ -145,7 +140,7 @@ namespace encoder {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Encoder(PIO pio, uint sm, const pin_pair &pins, uint common_pin = PIN_UNUSED, Direction direction = NORMAL,
+    Encoder(PIO pio, uint sm, const pin_pair &pins, uint common_pin = PIN_UNUSED, Direction direction = NORMAL_DIR,
             float counts_per_rev = DEFAULT_COUNTS_PER_REV, bool count_microsteps = DEFAULT_COUNT_MICROSTEPS,
             uint16_t freq_divider = DEFAULT_FREQ_DIVIDER);
     ~Encoder();

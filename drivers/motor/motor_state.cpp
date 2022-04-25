@@ -6,12 +6,12 @@
 namespace motor {
   MotorState::MotorState()
     : motor_speed(0.0f), last_enabled_duty(0.0f), enabled(false),
-    motor_direction(NORMAL), motor_scale(DEFAULT_SPEED_SCALE), motor_deadzone(DEFAULT_DEADZONE){
+    motor_direction(NORMAL_DIR), motor_scale(DEFAULT_SPEED_SCALE), motor_zeropoint(DEFAULT_ZEROPOINT), motor_deadzone(DEFAULT_DEADZONE){
   }
 
-  MotorState::MotorState(Direction direction, float speed_scale, float deadzone)
+  MotorState::MotorState(Direction direction, float speed_scale, float zeropoint, float deadzone)
     : motor_speed(0.0f), last_enabled_duty(0.0f), enabled(false),
-    motor_direction(direction), motor_scale(MAX(speed_scale, FLT_EPSILON)), motor_deadzone(CLAMP(deadzone, 0.0f, 1.0f)) {
+    motor_direction(direction), motor_scale(MAX(speed_scale, FLT_EPSILON)), motor_zeropoint(CLAMP(zeropoint, 0.0f, 1.0f - FLT_EPSILON)), motor_deadzone(CLAMP(deadzone, 0.0f, 1.0f)) {
   }
 
   float MotorState::enable_with_return() {
@@ -47,23 +47,38 @@ namespace motor {
   float MotorState::set_duty_with_return(float duty) {
     // Clamp the duty between the hard limits
     last_enabled_duty = CLAMP(duty, -1.0f, 1.0f);
-    motor_speed = last_enabled_duty * motor_scale;
+
+    if(last_enabled_duty > motor_zeropoint)
+      motor_speed = map_float(last_enabled_duty, motor_zeropoint, 1.0f, 0.0f, motor_scale);
+    else if(last_enabled_duty < -motor_zeropoint)
+      motor_speed = map_float(last_enabled_duty, -motor_zeropoint, -1.0f, 0.0f, -motor_scale);
+    else
+      motor_speed = 0.0f;
+
+    //motor_speed = last_enabled_duty * motor_scale;
 
     return enable_with_return();
   }
 
   float MotorState::get_speed() const {
-    return (motor_direction == NORMAL) ? motor_speed : 0.0f - motor_speed;
+    return (motor_direction == NORMAL_DIR) ? motor_speed : 0.0f - motor_speed;
   }
 
   float MotorState::set_speed_with_return(float speed) {
     // Invert provided speed if the motor direction is reversed
-    if(motor_direction == REVERSED)
+    if(motor_direction == REVERSED_DIR)
       speed = 0.0f - speed;
 
     // Clamp the speed between the hard limits
     motor_speed = CLAMP(speed, 0.0f - motor_scale, motor_scale);
-    last_enabled_duty = motor_speed / motor_scale;
+
+    if(motor_speed > 0.0f)
+      last_enabled_duty = map_float(motor_speed / motor_scale, 0.0f, 1.0f, motor_zeropoint, 1.0f);
+    else if(motor_speed < 0.0f)
+      last_enabled_duty = map_float(motor_speed / motor_scale, 0.0f, 1.0f, motor_zeropoint, 1.0f);
+    else
+      last_enabled_duty = 0.0f;
+    //last_enabled_duty = motor_speed / motor_scale;
 
     return enable_with_return();
   }
@@ -107,6 +122,20 @@ namespace motor {
     motor_speed = last_enabled_duty * motor_scale;
   }
 
+  float MotorState::get_zeropoint() const {
+    return motor_scale;
+  }
+
+  void MotorState::set_zeropoint(float zeropoint) {
+    motor_zeropoint = CLAMP(zeropoint, 0.0f, 1.0f - FLT_EPSILON);
+
+    if(last_enabled_duty > motor_zeropoint)
+      motor_speed = map_float(last_enabled_duty, motor_zeropoint, 1.0f, 0.0f, motor_scale);
+    else if(last_enabled_duty < -motor_zeropoint)
+      motor_speed = map_float(last_enabled_duty, -motor_zeropoint, -1.0f, 0.0f, -motor_scale);
+    else
+      motor_speed = 0.0f;
+  }
 
   float MotorState::get_deadzone() const {
     return motor_deadzone;

@@ -59,6 +59,11 @@ namespace pimoroni {
       ACTIVE_HIGH = 1
     };
 
+    enum Direction {
+      NORMAL_DIR    = 0,
+      REVERSED_DIR  = 1,
+    };
+
     inline uint32_t millis() {
       return to_ms_since_boot(get_absolute_time());
     }
@@ -86,11 +91,13 @@ namespace pimoroni {
       uint8_t first;
       uint8_t a;
       uint8_t positive;
+      uint8_t phase;
     };
     union {
       uint8_t second;
       uint8_t b;
       uint8_t negative;
+      uint8_t enable;
     };
 
     pin_pair() : first(0), second(0) {}

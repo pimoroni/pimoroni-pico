@@ -42,12 +42,14 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->speed()), PRINT_REPR);
     mp_print_str(print, ", freq = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->frequency()), PRINT_REPR);
-    if(self->motor->direction() == NORMAL)
-        mp_print_str(print, ", direction = NORMAL");
+    if(self->motor->direction() == NORMAL_DIR)
+        mp_print_str(print, ", direction = NORMAL_DIR");
     else
-        mp_print_str(print, ", direction = REVERSED");
+        mp_print_str(print, ", direction = REVERSED_DIR");
     mp_print_str(print, ", speed_scale = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->speed_scale()), PRINT_REPR);
+    mp_print_str(print, ", zeropoint = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->motor->zeropoint()), PRINT_REPR);
     mp_print_str(print, ", deadzone = ");
     mp_obj_print_helper(print, mp_obj_new_float(self->motor->deadzone()), PRINT_REPR);
     if(self->motor->decay_mode() == SLOW_DECAY)
@@ -63,14 +65,16 @@ void Motor_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Motor_obj_t *self = nullptr;
 
-    enum { ARG_pins, ARG_direction, ARG_speed_scale, ARG_deadzone, ARG_freq, ARG_mode };
+    enum { ARG_pins, ARG_direction, ARG_speed_scale, ARG_zeropoint, ARG_deadzone, ARG_freq, ARG_mode, ARG_ph_en_driver };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL} },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL_DIR} },
         { MP_QSTR_speed_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_zeropoint, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_deadzone, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = MotorState::DEFAULT_DECAY_MODE} },
+        { MP_QSTR_ph_en_driver, MP_ARG_BOOL, {.u_bool = false} }
     };
 
     // Parse args.
@@ -115,7 +119,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     int direction = args[ARG_direction].u_int;
     if(direction < 0 || direction > 1) {
-        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+        mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
     }
 
     float speed_scale = MotorState::DEFAULT_SPEED_SCALE;
@@ -123,6 +127,14 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         speed_scale = mp_obj_get_float(args[ARG_speed_scale].u_obj);
         if(speed_scale < FLT_EPSILON) {
             mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
+        }
+    }
+
+    float zeropoint = MotorState::DEFAULT_ZEROPOINT;
+    if(args[ARG_zeropoint].u_obj != mp_const_none) {
+        zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+        if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+            mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
         }
     }
 
@@ -147,7 +159,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     self = m_new_obj_with_finaliser(_Motor_obj_t);
     self->base.type = &Motor_type;
 
-    self->motor = new Motor(pins, (Direction)direction, speed_scale, deadzone, freq, (DecayMode)mode);
+    self->motor = new Motor(pins, (Direction)direction, speed_scale, zeropoint, deadzone, freq, (DecayMode)mode, args[ARG_ph_en_driver].u_bool);
     self->motor->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -426,7 +438,7 @@ extern mp_obj_t Motor_direction(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         int direction = args[ARG_direction].u_int;
         if(direction < 0 || direction > 1) {
-            mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+            mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
         }
         self->motor->direction((Direction)direction);
         return mp_const_none;
@@ -466,6 +478,43 @@ extern mp_obj_t Motor_speed_scale(size_t n_args, const mp_obj_t *pos_args, mp_ma
             mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
         }
         self->motor->speed_scale(speed_scale);
+        return mp_const_none;
+    }
+}
+
+extern mp_obj_t Motor_zeropoint(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(n_args <= 1) {
+        enum { ARG_self };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
+
+        return mp_obj_new_float(self->motor->zeropoint());
+    }
+    else {
+        enum { ARG_self, ARG_zeropoint };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_zeropoint, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _Motor_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Motor_obj_t);
+
+        float zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+        if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+            mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
+        }
+        self->motor->zeropoint(zeropoint);
         return mp_const_none;
     }
 }
@@ -597,13 +646,14 @@ void MotorCluster_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _MotorCluster_obj_t *self = nullptr;
 
-    enum { ARG_pio, ARG_sm, ARG_pins, ARG_direction, ARG_speed_scale, ARG_deadzone, ARG_freq, ARG_mode, ARG_auto_phase };
+    enum { ARG_pio, ARG_sm, ARG_pins, ARG_direction, ARG_speed_scale, ARG_zeropoint, ARG_deadzone, ARG_freq, ARG_mode, ARG_auto_phase };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_pio, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL} },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL_DIR} },
         { MP_QSTR_speed_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_zeropoint, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_deadzone, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = MotorState::DEFAULT_DECAY_MODE} },
@@ -703,7 +753,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     int direction = args[ARG_direction].u_int;
     if(direction < 0 || direction > 1) {
-        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+        mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
     }
 
     float speed_scale = MotorState::DEFAULT_SPEED_SCALE;
@@ -711,6 +761,14 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         speed_scale = mp_obj_get_float(args[ARG_speed_scale].u_obj);
         if(speed_scale < FLT_EPSILON) {
             mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
+        }
+    }
+
+    float zeropoint = MotorState::DEFAULT_ZEROPOINT;
+    if(args[ARG_zeropoint].u_obj != mp_const_none) {
+        zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+        if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+            mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
         }
     }
 
@@ -737,7 +795,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     MotorCluster *cluster;
     PWMCluster::Sequence *seq_buffer = m_new(PWMCluster::Sequence, PWMCluster::NUM_BUFFERS * 2);
     PWMCluster::TransitionData *dat_buffer = m_new(PWMCluster::TransitionData, PWMCluster::BUFFER_SIZE * 2);
-    cluster = new MotorCluster(pio, sm, pins, pair_count, (Direction)direction, speed_scale, deadzone,
+    cluster = new MotorCluster(pio, sm, pins, pair_count, (Direction)direction, speed_scale, zeropoint, deadzone,
                                freq, (DecayMode)mode, auto_phase, seq_buffer, dat_buffer);
 
     // Cleanup the pins array
@@ -2194,7 +2252,7 @@ extern mp_obj_t MotorCluster_direction(size_t n_args, const mp_obj_t *pos_args, 
                 else {
                     int direction = args[ARG_direction].u_int;
                     if(direction < 0 || direction > 1) {
-                        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+                        mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
                     }
                     self->cluster->direction((uint)motor, (Direction)direction);
                 }
@@ -2233,7 +2291,7 @@ extern mp_obj_t MotorCluster_direction(size_t n_args, const mp_obj_t *pos_args, 
                     int direction = args[ARG_direction].u_int;
                     if(direction < 0 || direction > 1) {
                         delete[] motors;
-                        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+                        mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
                     }
                     self->cluster->direction(motors, length, (Direction)direction);
                     delete[] motors;
@@ -2263,7 +2321,7 @@ extern mp_obj_t MotorCluster_all_to_direction(size_t n_args, const mp_obj_t *pos
     else {
         int direction = args[ARG_direction].u_int;
         if(direction < 0 || direction > 1) {
-            mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED (1)");
+            mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
         }
         self->cluster->all_to_direction((Direction)direction);
     }
