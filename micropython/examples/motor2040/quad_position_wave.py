@@ -7,7 +7,7 @@ from encoder import Encoder, MMME_CPR
 from pimoroni import Button, PID, REVERSED_DIR
 
 """
-An demonstration of driving all four of Motor 2040's motor outputs between
+A demonstration of driving all four of Motor 2040's motor outputs between
 positions, with the help of their attached encoders and PID control.
 
 Press "Boot" to exit the program.

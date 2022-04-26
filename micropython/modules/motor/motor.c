@@ -177,10 +177,9 @@ typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
 } mp_obj_float_t;
-//TODO confirm below numbers are correct
 mp_obj_float_t motor2040_shunt_resistor = {{&mp_type_float}, 0.47f};
 mp_obj_float_t motor2040_voltage_gain = {{&mp_type_float}, 3.9f / 13.9f};
-mp_obj_float_t motor2040_current_offset = {{&mp_type_float}, -0.02f};
+mp_obj_float_t motor2040_current_offset = {{&mp_type_float}, -0.005f};
 
 
 /***** Globals Table *****/
@@ -231,7 +230,7 @@ STATIC const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SENSOR_2_ADDR), MP_ROM_INT(0b111) },
     { MP_ROM_QSTR(MP_QSTR_NUM_SENSORS), MP_ROM_INT(2) },
     { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&motor2040_shunt_resistor) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_GAIN), MP_ROM_INT(5) },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_GAIN), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_VOLTAGE_GAIN), MP_ROM_PTR(&motor2040_voltage_gain) },
     { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MP_ROM_PTR(&motor2040_current_offset) },
 };

@@ -6,13 +6,10 @@
   - [Motor Cluster](#motor-cluster)
   - [Motor Wave](#motor-wave)
   - [Stop Motors](#stop-motors)
-- [Encoder Examples](#encoder-examples)
-  - [Read Encoders](#read-encoders)
-  - [Motor Profiler](#motor-profiler)
 - [Function Examples](#function-examples)
   - [Read Sensors](#read-sensors)
-  - [Sensor Feedback](#sensor-feedback)
-  - [Current Meter](#current-meter)
+  - [Read Encoders](#read-encoders)
+  - [Motor Profiler](#motor-profiler)
   - [LED Rainbow](#led-rainbow)
   - [Turn Off LEDs](#turn-off-leds)
 - [Control Examples](#control-examples)
@@ -21,6 +18,7 @@
   - [Position on Velocity Control](#position-on-velocity-control)
   - [Reactive Encoder](#reactive-encoder)
   - [Quad Position Wave](#quad-position-wave)
+  - [Quad Velocity Sequence](#quad-velocity-sequence)
 - [Tuning Examples](#tuning-examples)
   - [Position Tuning](#position-tuning)
   - [Velocity Tuning](#velocity-tuning)
@@ -59,7 +57,13 @@ An example of applying a wave pattern to a group of motors and the LEDs.
 A simple program that stops the motors.
 
 
-## Encoder Examples
+## Function Examples
+
+### Read Sensors
+[read_sensors.py](read_sensors.py)
+
+Shows how to initialise and read the 2 external and 6 internal sensors of Motor 2040.
+
 
 ### Read Encoders
 [read_encoders.py](read_encoders.py)
@@ -72,26 +76,6 @@ Demonstrates how to read the angles of Motor 2040's four encoders.
 
 A program that profiles the speed of a motor across its PWM
 duty cycle range using the attached encoder for feedback.
-
-
-## Function Examples
-
-### Read Sensors
-[read_sensors.py](read_sensors.py)
-TODO
-Shows how to initialise and read the 6 external and 2 internal sensors of Motor 2040.
-
-
-### Sensor Feedback
-[sensor_feedback.py](sensor_feedback.py)
-TODO
-Show how to read the 6 external sensors and display their values on the neighbouring LEDs.
-
-
-### Current Meter
-[current_meter.py](current_meter.py)
-TODO
-An example of how to use Motor 2040's current measuring ability and display the value on the onboard LED bar.
 
 
 ### LED Rainbow
@@ -135,7 +119,12 @@ A demonstration of how a motor with an encoder can be used as a programmable rot
 ### Quad Position Wave
 [quad_position_wave.py](quad_position_wave.py)
 
-An demonstration of driving all four of Motor 2040's motor outputs between positions, with the help of their attached encoders and PID control.
+A demonstration of driving all four of Motor 2040's motor outputs between positions, with the help of their attached encoders and PID control.
+
+### Quad Velocity Sequence
+[quad_velocity_sequence.py](quad_velocity_sequence.py)
+
+A demonstration of driving all four of Motor 2040's motor outputs through a sequence of velocities, with the help of their attached encoders and PID control.
 
 
 ## Tuning Examples

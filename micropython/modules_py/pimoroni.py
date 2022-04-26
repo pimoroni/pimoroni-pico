@@ -79,6 +79,12 @@ class AnalogMux:
         else:
             self.pulls[address] = pull
 
+    def read(self):
+        if self.muxed_pin is not None:
+            return self.muxed_pin.value()
+        else:
+            raise RuntimeError("there is no muxed pin assigned to this mux")
+
 
 class Button:
     def __init__(self, button, invert=True, repeat_time=200, hold_time=1000):
