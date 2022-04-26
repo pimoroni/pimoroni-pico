@@ -77,4 +77,11 @@ namespace pimoroni {
         pull_downs &= ~(1u << address);
     }
   }
+
+  bool AnalogMux::read() {
+    if(muxed_pin != PIN_UNUSED) {
+      return gpio_get(muxed_pin);
+    }
+    return false;
+  }
 }

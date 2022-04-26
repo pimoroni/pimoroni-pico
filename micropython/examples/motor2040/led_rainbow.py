@@ -13,9 +13,9 @@ such may have problems when running code multiple times.
 If you encounter issues, try resetting your board.
 """
 
-SPEED = 5           # The speed that the LEDs will cycle at
-BRIGHTNESS = 0.4    # The brightness of the LEDs
-UPDATES = 50        # How many times the LEDs will be updated per second
+SPEED = 5           # The speed that the LED will cycle at
+BRIGHTNESS = 0.4    # The brightness of the LED
+UPDATES = 50        # How many times the LED will be updated per second
 
 # Create the LED, using PIO 1 and State Machine 0
 led = WS2812(motor2040.NUM_LEDS, 1, 0, motor2040.LED_DATA)

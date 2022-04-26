@@ -36,7 +36,7 @@ for m in motors:
 time.sleep(2)
 
 
-SWEEPS = 2              # How many speed sweeps of the motor to perform
+SWEEPS = 2              # How many speed sweeps of the motors to perform
 STEPS = 10              # The number of discrete sweep steps
 STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
 SPEED_EXTENT = 1.0      # How far from zero to drive the motors when sweeping

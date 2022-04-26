@@ -4,6 +4,7 @@
 #include "ws2812.hpp"
 #include "motor.hpp"
 #include "motor_cluster.hpp"
+#include "encoder.hpp"
 
 namespace motor {
   namespace motor2040 {

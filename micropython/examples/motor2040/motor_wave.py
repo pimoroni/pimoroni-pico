@@ -47,7 +47,7 @@ while user_sw.raw() is not True:
     # Update the LED
     led.set_hsv(0, offset / 2, 1.0, BRIGHTNESS)
 
-    # Update all the MOTORs
+    # Update all the motors
     for i in range(len(motors)):
         angle = ((i / len(motors)) + offset) * math.pi
         motors[i].speed(math.sin(angle) * SPEED_EXTENT)
@@ -58,5 +58,5 @@ while user_sw.raw() is not True:
 for m in motors:
     m.disable()
 
-# Turn off the LED bar
+# Turn off the LED
 led.clear()
