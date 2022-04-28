@@ -120,12 +120,12 @@ int main() {
     // Print out the current motor values and their setpoints,
     // but only for the first few updates and only every multiple
     if(update < (uint)(PRINT_WINDOW * UPDATES) && print_count == 0) {
-        printf("Pos = %f, ", capture.degrees());
-        printf("Pos SP = %f, ", pos_pid.setpoint);
-        printf("Vel = %f, ", capture.revolutions_per_second() * SPD_PRINT_SCALE);
-        printf("Vel SP = %f, ", vel_pid.setpoint * SPD_PRINT_SCALE);
-        printf("Accel = %f, ", accel * ACC_PRINT_SCALE);
-        printf("Speed = %f\n", m.speed());
+      printf("Pos = %f, ", capture.degrees());
+      printf("Pos SP = %f, ", pos_pid.setpoint);
+      printf("Vel = %f, ", capture.revolutions_per_second() * SPD_PRINT_SCALE);
+      printf("Vel SP = %f, ", vel_pid.setpoint * SPD_PRINT_SCALE);
+      printf("Accel = %f, ", accel * ACC_PRINT_SCALE);
+      printf("Speed = %f\n", m.speed());
     }
 
     // Increment the print count, and wrap it
@@ -135,10 +135,10 @@ int main() {
 
     // Have we reached the end of this time window?
     if(update >= (uint)(MOVEMENT_WINDOW * UPDATES)) {
-        update = 0;  // Reset the counter
+      update = 0;  // Reset the counter
 
-        // Set the new position setpoint to be the inverse of the current setpoint
-        pos_pid.setpoint = 0.0 - pos_pid.setpoint;
+      // Set the new position setpoint to be the inverse of the current setpoint
+      pos_pid.setpoint = 0.0 - pos_pid.setpoint;
     }
 
     sleep_ms(UPDATE_RATE * 1000.0f);

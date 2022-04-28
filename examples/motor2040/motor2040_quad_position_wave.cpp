@@ -145,12 +145,12 @@ int main() {
 
     // Have we reached the end of this movement?
     if(update >= UPDATES_PER_MOVE) {
-        update = 0;  // Reset the counter
+      update = 0;  // Reset the counter
 
-        // Swap the start and end values
-        float temp = start_value;
-        start_value = end_value;
-        end_value = temp;
+      // Swap the start and end values
+      float temp = start_value;
+      start_value = end_value;
+      end_value = temp;
     }
 
     sleep_ms(UPDATE_RATE * 1000.0f);

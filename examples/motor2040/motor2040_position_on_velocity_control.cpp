@@ -109,20 +109,20 @@ int main() {
     float percent_along = (float)update / (float)UPDATES_PER_MOVE;
 
     switch(INTERP_MODE) {
-      case 0:
-        // Move the motor instantly to the end value
-        pos_pid.setpoint = end_value;
-        break;
+    case 0:
+      // Move the motor instantly to the end value
+      pos_pid.setpoint = end_value;
+      break;
 
-      case 2:
-        // Move the motor between values using cosine
-        pos_pid.setpoint = (((-cosf(percent_along * (float)M_PI) + 1.0) / 2.0) * (end_value - start_value)) + start_value;
-        break;
+    case 2:
+      // Move the motor between values using cosine
+      pos_pid.setpoint = (((-cosf(percent_along * (float)M_PI) + 1.0) / 2.0) * (end_value - start_value)) + start_value;
+      break;
 
-      case 1:
-      default:
-        // Move the motor linearly between values
-        pos_pid.setpoint = (percent_along * (end_value - start_value)) + start_value;
+    case 1:
+    default:
+      // Move the motor linearly between values
+      pos_pid.setpoint = (percent_along * (end_value - start_value)) + start_value;
     }
 
     // Calculate the velocity to move the motor closer to the position setpoint
@@ -154,11 +154,11 @@ int main() {
 
     // Have we reached the end of this movement?
     if(update >= UPDATES_PER_MOVE) {
-        update = 0;  // Reset the counter
+      update = 0;  // Reset the counter
 
-        // Set the start as the last end and create a new random end value
-        start_value = end_value;
-        end_value = (((float)rand() / (float)RAND_MAX) * (POSITION_EXTENT * 2.0f)) - POSITION_EXTENT;
+      // Set the start as the last end and create a new random end value
+      start_value = end_value;
+      end_value = (((float)rand() / (float)RAND_MAX) * (POSITION_EXTENT * 2.0f)) - POSITION_EXTENT;
     }
 
     sleep_ms(UPDATE_RATE * 1000.0f);

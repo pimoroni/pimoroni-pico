@@ -163,40 +163,40 @@ int main() {
 
     // Have we reached the end of this movement?
     if(update >= UPDATES_PER_MOVE) {
-        update = 0;  // Reset the counter
+      update = 0;  // Reset the counter
 
-        // Move on to the next part of the sequence
-        sequence += 1;
+      // Move on to the next part of the sequence
+      sequence += 1;
 
-        // Loop the sequence back around
-        if(sequence >= 7) {
-          sequence = 0;
-        }
+      // Loop the sequence back around
+      if(sequence >= 7) {
+        sequence = 0;
+      }
     }
 
     // Set the motor speeds, based on the sequence
     switch(sequence) {
-      case 0:
-        drive_forward(DRIVING_SPEED);
-        break;
-      case 1:
-        drive_forward(-DRIVING_SPEED);
-        break;
-      case 2:
-        turn_right(DRIVING_SPEED);
-        break;
-      case 3:
-        turn_right(-DRIVING_SPEED);
-        break;
-      case 4:
-        strafe_right(DRIVING_SPEED);
-        break;
-      case 5:
-        strafe_right(-DRIVING_SPEED);
-        break;
-      default:
-        stop();
-        break;
+    case 0:
+      drive_forward(DRIVING_SPEED);
+      break;
+    case 1:
+      drive_forward(-DRIVING_SPEED);
+      break;
+    case 2:
+      turn_right(DRIVING_SPEED);
+      break;
+    case 3:
+      turn_right(-DRIVING_SPEED);
+      break;
+    case 4:
+      strafe_right(DRIVING_SPEED);
+      break;
+    case 5:
+      strafe_right(-DRIVING_SPEED);
+      break;
+    default:
+      stop();
+      break;
     }
 
     sleep_ms(UPDATE_RATE * 1000.0f);
