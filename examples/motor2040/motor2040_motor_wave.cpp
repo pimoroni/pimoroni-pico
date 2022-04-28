@@ -62,7 +62,7 @@ int main() {
 
     // Update all the motors
       for(auto m = 0u; m < NUM_MOTORS; m++) {
-        float angle = (((float)m / (float)NUM_MOTORS) + offset) * (float)M_TWOPI;
+        float angle = (((float)m / (float)NUM_MOTORS) + offset) * (float)M_PI;
         motors[m]->speed(sin(angle) * SPEED_EXTENT);
     }
 

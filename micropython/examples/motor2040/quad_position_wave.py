@@ -25,7 +25,7 @@ UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES
 PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
 
 # LED constant
-BRIGHTNESS = 0.4      # The brightness of the LEDs
+BRIGHTNESS = 0.4      # The brightness of the RGB LED
 
 # PID values
 POS_KP = 0.14                           # Position proportional (P) gain
@@ -38,7 +38,7 @@ gc.collect()
 
 # Create a list of motors with a given speed scale
 MOTOR_PINS = [motor2040.MOTOR_A, motor2040.MOTOR_B, motor2040.MOTOR_C, motor2040.MOTOR_D]
-motors = [Motor(pins, speed_scale=SPEED_SCALE, deadzone=0.05) for pins in MOTOR_PINS]
+motors = [Motor(pins, speed_scale=SPEED_SCALE) for pins in MOTOR_PINS]
 
 # Create a list of encoders, using PIO 0, with the given counts per revolution
 ENCODER_PINS = [motor2040.ENCODER_A, motor2040.ENCODER_B, motor2040.ENCODER_C, motor2040.ENCODER_D]
@@ -63,7 +63,7 @@ pos_pids = [PID(POS_KP, POS_KI, POS_KD, UPDATE_RATE) for i in range(motor2040.NU
 # Start updating the LED
 led.start()
 
-# Enable the motor to get started
+# Enable all motors
 for m in motors:
     m.enable()
 
@@ -102,7 +102,7 @@ while user_sw.raw() is not True:
 
     # Print out the current motor values and their setpoints, but only on every multiple
     if print_count == 0:
-        for i in range(len(motors)):
+        for i in range(motor2040.NUM_MOTORS):
             print(ENCODER_NAMES[i], "=", captures[i].degrees, end=", ")
         print()
 

@@ -47,7 +47,7 @@ while user_sw.raw() is not True:
     # Read the current sense's of each motor and print the value
     for i in range(motor2040.NUM_MOTORS):
         mux.select(i + motor2040.CURRENT_SENSE_A_ADDR)
-        print("C", i + 1, "=", cur_adc.read_current(), sep="", end=", ")
+        print("C", i + 1, " = ", cur_adc.read_current(), sep="", end=", ")
 
     # Read the fault sense and print the value
     mux.select(motor2040.FAULT_SENSE_ADDR)

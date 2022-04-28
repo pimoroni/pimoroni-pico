@@ -8,6 +8,7 @@ namespace pimoroni {
 
   class PID {
   public:
+    PID();
     PID(float kp, float ki, float kd, float sample_rate);
 
     float calculate(float value);

@@ -23,9 +23,9 @@ SPEED_SCALE = 5.4                       # The scaling to apply to the motor's sp
 
 UPDATES = 100                           # How many times to update the motor per second
 UPDATE_RATE = 1 / UPDATES
-PRINT_WINDOW = 1.0                      # The time (in seconds) after a new setpoint, to display print out motor values
+PRINT_WINDOW = 0.25                     # The time (in seconds) after a new setpoint, to display print out motor values
 MOVEMENT_WINDOW = 2.0                   # The time (in seconds) between each new setpoint being set
-PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
+PRINT_DIVIDER = 1                       # How many of the updates should be printed (i.e. 2 would be every other update)
 
 # Multipliers for the different printed values, so they appear nicely on the Thonny plotter
 ACC_PRINT_SCALE = 0.01                  # Acceleration multiplier
@@ -42,7 +42,7 @@ VEL_KD = 0.4                            # Velocity derivative (D) gain
 gc.collect()
 
 # Create a motor and set its speed scale
-m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, deadzone=0.0)
+m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE)
 
 # Create an encoder, using PIO 0 and State Machine 0
 enc = Encoder(0, 0, ENCODER_PINS, direction=DIRECTION, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)

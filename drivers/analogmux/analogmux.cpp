@@ -27,6 +27,10 @@ namespace pimoroni {
       gpio_init(en_pin);
       gpio_set_dir(en_pin, GPIO_OUT);
     }
+
+    if(muxed_pin != PIN_UNUSED) {
+      gpio_set_input_enabled(muxed_pin, true);
+    }
   }
 
   void AnalogMux::select(uint8_t address) {

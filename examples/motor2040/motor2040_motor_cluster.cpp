@@ -76,4 +76,7 @@ int main() {
 
   // Disable the motors
   motors.disable_all();
+
+  // Sleep a short time so the disable takes effect
+  sleep_ms(100);
 }

@@ -37,12 +37,12 @@ MIN_DETENT = -12                        # The minimum detent that can be counted
 MAX_DETENT = +12                        # The maximum detent that can be counted to
 MAX_DRIVE_PERCENT = 0.5                 # The maximum drive force (as a percent) to apply when crossing detents
 
+BRIGHTNESS = 0.4                        # The brightness of the RGB LED
+
 # PID values
 POS_KP = 0.14                           # Position proportional (P) gain
 POS_KI = 0.0                            # Position integral (I) gain
 POS_KD = 0.0022                         # Position derivative (D) gain
-
-BRIGHTNESS = 0.4                        # The brightness of the LEDs
 
 
 # Free up hardware resources ahead of creating a new Encoder

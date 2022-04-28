@@ -16,6 +16,8 @@ COUNTS_PER_REV = MMME_CPR * GEAR_RATIO  # The counts per revolution of the motor
 
 DIRECTION = NORMAL_DIR                  # The direction to spin the motor in. NORMAL_DIR (0), REVERSED_DIR (1)
 SPEED_SCALE = 5.4                       # The scaling to apply to the motor's speed. Set this to the maximum measured speed
+ZERO_POINT = 0.0                        # The duty cycle that corresponds with zero speed when plotting the motor's speed as a straight line
+DEAD_ZONE = 0.0                         # The duty cycle below which the motor's friction prevents it from moving
 
 DUTY_STEPS = 100                        # How many duty cycle steps to sample the speed of
 SETTLE_TIME = 0.1                       # How long to wait after changing motor duty cycle
@@ -25,7 +27,7 @@ CAPTURE_TIME = 0.2                      # How long to capture the motor's speed 
 gc.collect()
 
 # Create a motor and set its speed scale, and give it a zero deadzone
-m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, zeropoint=0.0, deadzone=0.0)
+m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, zeropoint=ZERO_POINT, deadzone=DEAD_ZONE)
 
 # Create an encoder, using PIO 0 and State Machine 0
 enc = Encoder(0, 0, ENCODER_PINS, direction=DIRECTION, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)

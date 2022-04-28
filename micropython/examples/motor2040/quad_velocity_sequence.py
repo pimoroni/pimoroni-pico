@@ -11,6 +11,12 @@ sequence of velocities, with the help of their attached encoders and PID control
 Press "Boot" to exit the program.
 """
 
+# Wheel friendly names
+FL = 2
+FR = 3
+RL = 1
+RR = 0
+
 GEAR_RATIO = 50                         # The gear ratio of the motors
 COUNTS_PER_REV = MMME_CPR * GEAR_RATIO  # The counts per revolution of each motor's output shaft
 
@@ -21,6 +27,8 @@ UPDATE_RATE = 1 / UPDATES
 TIME_FOR_EACH_MOVE = 2                  # The time to travel between each value
 UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES
 PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
+
+DRIVING_SPEED = 1.0                     # The speed to drive the wheels at
 
 # PID values
 VEL_KP = 30.0                           # Velocity proportional (P) gain
@@ -40,12 +48,6 @@ ENCODER_PINS = [motor2040.ENCODER_A, motor2040.ENCODER_B, motor2040.ENCODER_C, m
 ENCODER_NAMES = ["RR", "RL", "FL", "FR"]
 encoders = [Encoder(0, i, ENCODER_PINS[i], counts_per_rev=COUNTS_PER_REV, count_microsteps=True) for i in range(motor2040.NUM_MOTORS)]
 
-# Wheel friendly names
-FL = 2
-FR = 3
-RL = 1
-RR = 0
-
 # Reverse the direction of the B and D motors and encoders
 motors[FL].direction(REVERSED_DIR)
 motors[RL].direction(REVERSED_DIR)
@@ -57,14 +59,6 @@ user_sw = Button(motor2040.USER_SW)
 
 # Create PID objects for position control
 vel_pids = [PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE) for i in range(motor2040.NUM_MOTORS)]
-
-# Enable the motor to get started
-for m in motors:
-    m.enable()
-
-
-update = 0
-print_count = 0
 
 
 # Helper functions for driving in common directions
@@ -96,6 +90,13 @@ def stop():
     vel_pids[RR].setpoint = 0
 
 
+# Enable the motor to get started
+for m in motors:
+    m.enable()
+
+
+update = 0
+print_count = 0
 sequence = 0
 
 captures = [None] * motor2040.NUM_MOTORS
@@ -107,9 +108,6 @@ while user_sw.raw() is not True:
     for i in range(motor2040.NUM_MOTORS):
         captures[i] = encoders[i].capture()
 
-    # Calculate how far along this movement to be
-    percent_along = min(update / UPDATES_PER_MOVE, 1.0)
-
     for i in range(motor2040.NUM_MOTORS):
         # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
         accel = vel_pids[i].calculate(captures[i].revolutions_per_second)
@@ -119,7 +117,7 @@ while user_sw.raw() is not True:
 
     # Print out the current motor values, but only on every multiple
     if print_count == 0:
-        for i in range(len(motors)):
+        for i in range(motor2040.NUM_MOTORS):
             print(ENCODER_NAMES[i], "=", captures[i].revolutions_per_second, end=", ")
         print()
 
@@ -141,17 +139,17 @@ while user_sw.raw() is not True:
 
     # Set the motor speeds, based on the sequence
     if sequence == 0:
-        drive_forward(1.0)
+        drive_forward(DRIVING_SPEED)
     elif sequence == 1:
-        drive_forward(-1.0)
+        drive_forward(-DRIVING_SPEED)
     elif sequence == 2:
-        turn_right(1.0)
+        turn_right(DRIVING_SPEED)
     elif sequence == 3:
-        turn_right(-1.0)
+        turn_right(-DRIVING_SPEED)
     elif sequence == 4:
-        strafe_right(1.0)
+        strafe_right(DRIVING_SPEED)
     elif sequence == 5:
-        strafe_right(-1.0)
+        strafe_right(-DRIVING_SPEED)
     elif sequence == 6:
         stop()
 

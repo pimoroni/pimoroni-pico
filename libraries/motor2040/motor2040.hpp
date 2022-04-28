@@ -70,8 +70,8 @@ namespace motor {
     const uint NUM_SENSORS = 2;
 
     constexpr float SHUNT_RESISTOR = 0.47f;
-    constexpr float CURRENT_GAIN = 5;
+    constexpr float CURRENT_GAIN = 1;
     constexpr float VOLTAGE_GAIN = 3.9f / 13.9f;
-    constexpr float CURRENT_OFFSET = -0.02f;
+    constexpr float CURRENT_OFFSET = -0.005f;
   }
 }

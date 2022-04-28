@@ -18,7 +18,7 @@ const uint STEPS = 10;
 const uint STEPS_INTERVAL_MS = 500;
 
 // How far from zero to move the motor when sweeping
-constexpr float SPEED_EXTENT = 10.0f;
+constexpr float SPEED_EXTENT = 1.0f;
 
 
 // Create a motor

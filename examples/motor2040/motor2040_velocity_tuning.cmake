@@ -5,6 +5,7 @@ target_link_libraries(${OUTPUT_NAME}
         pico_stdlib
         motor2040
         button
+        pid
         )
 
 # enable usb output

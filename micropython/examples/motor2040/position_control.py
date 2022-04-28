@@ -43,7 +43,7 @@ POS_KD = 0.0022                         # Position derivative (D) gain
 gc.collect()
 
 # Create a motor and set its speed scale
-m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE, deadzone=0.05)
+m = Motor(MOTOR_PINS, direction=DIRECTION, speed_scale=SPEED_SCALE)
 
 # Create an encoder, using PIO 0 and State Machine 0
 enc = Encoder(0, 0, ENCODER_PINS, direction=DIRECTION, counts_per_rev=COUNTS_PER_REV, count_microsteps=True)

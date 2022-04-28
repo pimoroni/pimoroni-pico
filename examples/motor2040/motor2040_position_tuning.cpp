@@ -55,9 +55,9 @@ constexpr float SPD_PRINT_SCALE = 10.0f;    // Driving Speed multipler
 constexpr float POSITION_EXTENT = 90.0f;
 
 // PID values
-constexpr float POS_KP = 0.14;              // Position proportional (P) gain
-constexpr float POS_KI = 0.0;               // Position integral (I) gain
-constexpr float POS_KD = 0.0022;            // Position derivative (D) gain
+constexpr float POS_KP = 0.14f;   // Position proportional (P) gain
+constexpr float POS_KI = 0.0f;    // Position integral (I) gain
+constexpr float POS_KD = 0.002f;  // Position derivative (D) gain
 
 
 // Create a motor and set its direction and speed scale
@@ -104,7 +104,7 @@ int main() {
 
     // Print out the current motor values and their setpoints,
     // but only for the first few updates and only every multiple
-    if(update < (PRINT_WINDOW * UPDATES) && print_count == 0) {
+    if(update < (uint)(PRINT_WINDOW * UPDATES) && print_count == 0) {
         printf("Pos = %f, ", capture.degrees());
         printf("Pos SP = %f, ", pos_pid.setpoint);
         printf("Speed = %f\n", m.speed() * SPD_PRINT_SCALE);
@@ -116,11 +116,11 @@ int main() {
     update++;   // Move along in time
 
     // Have we reached the end of this time window?
-    if(update >= (MOVEMENT_WINDOW * UPDATES)){
+    if(update >= (uint)(MOVEMENT_WINDOW * UPDATES)) {
         update = 0;  // Reset the counter
 
         // Set the new position setpoint to be the inverse of the current setpoint
-        pos_pid.setpoint = 0.0 - pos_pid.setpoint;
+        pos_pid.setpoint = 0.0f - pos_pid.setpoint;
     }
 
     sleep_ms(UPDATE_RATE * 1000.0f);

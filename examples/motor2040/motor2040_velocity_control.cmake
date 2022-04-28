@@ -4,6 +4,8 @@ add_executable(${OUTPUT_NAME} motor2040_velocity_control.cpp)
 target_link_libraries(${OUTPUT_NAME}
         pico_stdlib
         motor2040
+        button
+        pid
         )
 
 # enable usb output

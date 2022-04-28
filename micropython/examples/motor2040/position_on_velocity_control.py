@@ -64,9 +64,6 @@ vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE)
 # Enable the motor to get started
 m.enable()
 
-# Set the initial setpoint position
-pos_pid.setpoint = POSITION_EXTENT
-
 
 update = 0
 print_count = 0
