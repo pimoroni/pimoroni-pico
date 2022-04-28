@@ -302,9 +302,8 @@ extern mp_obj_t Motor_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
-        // TODO confirm frequency range
         if(!self->motor->frequency(freq)) {
-            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz"); //TODO
+            mp_raise_ValueError("freq out of range. Expected 10Hz to 400KHz");
         }
         return mp_const_none;
     }
@@ -1442,7 +1441,7 @@ extern mp_obj_t MotorCluster_frequency(size_t n_args, const mp_obj_t *pos_args, 
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
         if(!self->cluster->frequency(freq))
-            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz");
+            mp_raise_ValueError("freq out of range. Expected 10Hz to 400KHz");
         else
             return mp_const_none;
     }

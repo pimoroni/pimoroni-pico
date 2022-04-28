@@ -15,11 +15,12 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   private:
-    static const uint64_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX; // UINT32_MAX works too, but seems to produce less accurate counters
-    static const uint32_t LOADING_ZONE_SIZE = 3;      // The number of dummy transitions to insert into the data to delay the DMA interrupt (if zero then no zone is used)
-    static const uint32_t LOADING_ZONE_POSITION = 55; // The number of levels before the wrap level to insert the load zone
-                                                      // Smaller values will make the DMA interrupt trigger closer to the time the data is needed,
-                                                      // but risks stalling the PIO if the interrupt takes longer due to other processes
+    static const uint64_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX;  // UINT32_MAX works too, but seems to produce less accurate counters
+    static const uint32_t LOADING_ZONE_SIZE = 3;              // The number of dummy transitions to insert into the data to delay the DMA interrupt (if zero then no zone is used)
+    static const uint32_t LOADING_ZONE_POSITION = 55;         // The number of levels before the wrap level to insert the load zone
+                                                              // Smaller values will make the DMA interrupt trigger closer to the time the data is needed,
+                                                              // but risks stalling the PIO if the interrupt takes longer due to other processes
+    static const bool DEFAULT_USE_LOADING_ZONE = true;        // Whether or not the default behaviour of PWMCluster is to use the loading zone
   public:
     static const uint BUFFER_SIZE = 64;     // Set to 64, the maximum number of single rises and falls for 32 channels within a looping time period
     static const uint NUM_BUFFERS = 3;
@@ -119,6 +120,7 @@ namespace pimoroni {
     volatile uint last_written_index = 0;
 
     bool initialised = false;
+    bool loading_zone = true;
 
 
     //--------------------------------------------------
@@ -134,13 +136,13 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
-    PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
-    PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
-    PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
+    PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
 
-    PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
-    PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr);
+    PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
     ~PWMCluster();
 
   private:

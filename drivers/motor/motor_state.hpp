@@ -24,7 +24,7 @@ namespace motor {
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;   // The standard motor decay behaviour
     static constexpr float DEFAULT_FREQUENCY = 25000.0f;      // The standard motor update rate
     static constexpr float MIN_FREQUENCY = 10.0f;
-    static constexpr float MAX_FREQUENCY = 50000.0f;
+    static constexpr float MAX_FREQUENCY = 400000.0f;
 
     static constexpr float ZERO_PERCENT = 0.0f;
     static constexpr float ONEHUNDRED_PERCENT = 1.0f;
