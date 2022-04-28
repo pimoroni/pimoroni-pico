@@ -110,6 +110,24 @@ mp_obj_t VL53L5CX_stop_ranging(mp_obj_t self_in) {
     return mp_const_none;
 }
 
+mp_obj_t VL53L5CX_enable_motion_indicator(mp_obj_t self_in, mp_obj_t value) {
+    _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
+    bool status = self->breakout->enable_motion_indicator((pimoroni::VL53L5CX::Resolution)mp_obj_get_int(value));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: enable_motion_indicator error");
+    }
+    return mp_const_none;
+}
+
+mp_obj_t VL53L5CX_set_motion_distance(mp_obj_t self_in, mp_obj_t distance_min, mp_obj_t distance_max) {
+    _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
+    bool status = self->breakout->set_motion_distance(mp_obj_get_int(distance_min), mp_obj_get_int(distance_max));
+    if(!status) {
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_motion_distance error");
+    }
+    return mp_const_none;
+}
+
 mp_obj_t VL53L5CX_set_i2c_address(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_i2c_address(mp_obj_get_int(value));
@@ -220,30 +238,30 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
     average_distance /= tuple_size;
     average_reflectance /= tuple_size;
 
-    // TODO motion data is all zeros, why?
-
-    /*mp_obj_t tuple_motion_data[32];
+    mp_obj_t tuple_motion_data[32];
 
     for(int i = 0u; i < 32; i++) {
         tuple_motion_data[i] = mp_obj_new_int(results.motion_indicator.motion[i]);
     }
 
+    STATIC const qstr tuple_motion_fields[] = {MP_QSTR_global_indicator_1, MP_QSTR_global_indicator_2, MP_QSTR_motion};
+
     mp_obj_t tuple_motion[] = {
         mp_obj_new_int(results.motion_indicator.global_indicator_1),
         mp_obj_new_int(results.motion_indicator.global_indicator_2),
         mp_obj_new_tuple(sizeof(tuple_motion_data) / sizeof(mp_obj_t), tuple_motion_data)
-    };*/
+    };
 
     mp_obj_t tuple[] = {
         mp_obj_new_int(average_distance), // Average distance
         mp_obj_new_int(average_reflectance), // Average reflectance
-        //mp_obj_new_tuple(sizeof(tuple_motion) / sizeof(mp_obj_t), tuple_motion), // Motion data
+        mp_obj_new_attrtuple(tuple_motion_fields, sizeof(tuple_motion) / sizeof(mp_obj_t), tuple_motion), // Motion data
         mp_obj_new_int(tuple_size), // Number of results
         mp_obj_new_tuple(tuple_size, tuple_distance_mm), // Full distance results
         mp_obj_new_tuple(tuple_size, tuple_reflectance)  // Full reflectange results
     };
 
-    STATIC const qstr tuple_fields[] = {MP_QSTR_distance_avg, MP_QSTR_reflectance_avg, MP_QSTR_results, MP_QSTR_distance, MP_QSTR_reflectance};
+    STATIC const qstr tuple_fields[] = {MP_QSTR_distance_avg, MP_QSTR_reflectance_avg, MP_QSTR_motion_indicator, MP_QSTR_results, MP_QSTR_distance, MP_QSTR_reflectance};
 
     return mp_obj_new_attrtuple(tuple_fields, sizeof(tuple) / sizeof(mp_obj_t), tuple);
 }

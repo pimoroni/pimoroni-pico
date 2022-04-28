@@ -11,6 +11,9 @@ extern mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size
 extern mp_obj_t VL53L5CX_start_ranging(mp_obj_t self_in);
 extern mp_obj_t VL53L5CX_stop_ranging(mp_obj_t self_in);
 
+extern mp_obj_t VL53L5CX_enable_motion_indicator(mp_obj_t self_in, mp_obj_t value);
+extern mp_obj_t VL53L5CX_set_motion_distance(mp_obj_t self_in, mp_obj_t distance_min, mp_obj_t distance_max);
+
 extern mp_obj_t VL53L5CX_set_i2c_address(mp_obj_t self_in, mp_obj_t value);
 extern mp_obj_t VL53L5CX_set_ranging_mode(mp_obj_t self_in, mp_obj_t value);
 extern mp_obj_t VL53L5CX_set_ranging_frequency_hz(mp_obj_t self_in, mp_obj_t value);

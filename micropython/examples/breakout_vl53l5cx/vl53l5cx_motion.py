@@ -1,6 +1,7 @@
 import pimoroni_i2c
 import breakout_vl53l5cx
 import time
+from ulab import numpy
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
@@ -17,6 +18,10 @@ print("Done in {}ms...".format(t_end - t_sta))
 
 # Make sure to set resolution and other settings *before* you start ranging
 sensor.set_resolution(breakout_vl53l5cx.RESOLUTION_4X4)
+
+sensor.enable_motion_indicator(breakout_vl53l5cx.RESOLUTION_4X4)
+sensor.set_motion_distance(400, 1400)
+
 sensor.start_ranging()
 
 while True:
@@ -24,9 +29,7 @@ while True:
         # "data" is a namedtuple (attrtuple technically)
         # it includes average readings as "distance_avg" and "reflectance_avg"
         # plus a full 4x4 or 8x8 set of readings (as a 1d tuple) for both values.
+        # Motion data is available in "motion_detection.motion"
         data = sensor.get_data()
-        print("{}mm {}% (avg: {}mm {}%)".format(
-            data.distance[0],
-            data.reflectance[0],
-            data.distance_avg,
-            data.reflectance_avg))
+        motion = numpy.array(data.motion_indicator.motion[0:16], dtype=numpy.int16).reshape((4, 4))
+        print(motion)

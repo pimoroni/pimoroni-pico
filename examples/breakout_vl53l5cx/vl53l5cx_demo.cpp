@@ -13,7 +13,10 @@ VL53L5CX vl53l5cx(&i2c);
 int main() {
   stdio_init_all();
 
-  vl53l5cx.init();
+  bool result = vl53l5cx.init();
+  if(!result) {
+      printf("Error initializing...\n");
+  }
   vl53l5cx.set_ranging_mode(VL53L5CX::RANGING_MODE_AUTONOMOUS);
   vl53l5cx.set_resolution(VL53L5CX::RESOLUTION_4X4);
   vl53l5cx.start_ranging();

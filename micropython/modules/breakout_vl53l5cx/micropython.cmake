@@ -6,6 +6,7 @@ target_sources(usermod_vl53l5cx INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/vl53l5cx/vl53l5cx.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/vl53l5cx/platform.c
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/vl53l5cx/src/VL53L5CX_ULD_API/src/vl53l5cx_api.c
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/vl53l5cx/src/VL53L5CX_ULD_API/src/vl53l5cx_plugin_motion_indicator.c
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/vl53l5cx/src/VL53L5CX_ULD_API/src/vl53l5cx_plugin_detection_thresholds.c
 )
 

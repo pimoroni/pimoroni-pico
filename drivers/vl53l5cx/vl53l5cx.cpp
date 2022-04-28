@@ -2,8 +2,16 @@
 
 namespace pimoroni {
     bool VL53L5CX::init() {
+        if(!is_alive()) {
+            return false;
+        }
         uint8_t status = vl53l5cx_init(configuration);
         return status == VL53L5CX_STATUS_OK;
+    }
+    bool VL53L5CX::is_alive() {
+        uint8_t is_alive = 0;
+        uint8_t status = vl53l5cx_is_alive(configuration, &is_alive);
+        return is_alive == 1 && status == VL53L5CX_STATUS_OK;
     }
     bool VL53L5CX::start_ranging() {
         uint8_t status = vl53l5cx_start_ranging(configuration);
@@ -13,9 +21,17 @@ namespace pimoroni {
         uint8_t status = vl53l5cx_stop_ranging(configuration);
         return status == VL53L5CX_STATUS_OK;
     }
+    bool VL53L5CX::enable_motion_indicator(Resolution resolution) {
+        uint8_t status = vl53l5cx_motion_indicator_init(configuration, motion_configuration, resolution);
+        return status == VL53L5CX_STATUS_OK;
+    }
+    bool VL53L5CX::set_motion_distance(uint16_t distance_min, uint16_t distance_max) {
+        uint8_t status = vl53l5cx_motion_indicator_set_distance_motion(configuration, motion_configuration, distance_min, distance_max);
+        return status == VL53L5CX_STATUS_OK;
+    }
     bool VL53L5CX::set_i2c_address(uint8_t i2c_address) {
         /* Must be a 7-bit i2c address */
-        uint8_t status = vl53l5cx_set_i2c_address(configuration, i2c_address << 1);
+        uint8_t status = vl53l5cx_set_i2c_address(configuration, i2c_address);
         return status == VL53L5CX_STATUS_OK;
     }
     bool VL53L5CX::set_ranging_mode(RangingMode ranging_mode) {

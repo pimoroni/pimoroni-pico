@@ -2,10 +2,12 @@
 
 extern "C" {
 #include "drivers/vl53l5cx/src/VL53L5CX_ULD_API/inc/vl53l5cx_api.h"
+#include "drivers/vl53l5cx/src/VL53L5CX_ULD_API/inc/vl53l5cx_plugin_motion_indicator.h"
 }
 
 #include "common/pimoroni_i2c.hpp"
 #include "src/VL53L5CX_ULD_API/inc/vl53l5cx_api.h"
+#include "src/VL53L5CX_ULD_API/inc/vl53l5cx_plugin_motion_indicator.h"
 
 namespace pimoroni {
     class VL53L5CX {
@@ -38,13 +40,20 @@ namespace pimoroni {
                         .i2c = i2c->get_i2c()
                     },
                 };
+                motion_configuration = new VL53L5CX_Motion_Configuration{};
             }
             ~VL53L5CX() {
                 delete configuration;
+                delete motion_configuration;
             }
             bool init();
+            bool is_alive();
             bool start_ranging();
             bool stop_ranging();
+
+            bool enable_motion_indicator(Resolution resolution);
+            bool set_motion_distance(uint16_t distance_min, uint16_t distance_max);
+
             bool set_i2c_address(uint8_t i2c_address);
             bool set_ranging_mode(RangingMode ranging_mode);
             bool set_ranging_frequency_hz(uint8_t ranging_frequency_hz);
@@ -64,6 +73,7 @@ namespace pimoroni {
             }
         private:
             VL53L5CX_Configuration *configuration;
+            VL53L5CX_Motion_Configuration *motion_configuration;
             Resolution resolution = RESOLUTION_8X8;
     };
 }
