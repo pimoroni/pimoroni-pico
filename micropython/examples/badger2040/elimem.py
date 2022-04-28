@@ -142,7 +142,6 @@ def eliminate_square(sq):  # used ONLY to update a square to eliminated during g
             d.icon(squares, 5, 144, 24, columns[2], rows[1])
         d.partial_update(columns[2], 72, 24, 24)
     d.led(0)
-    pass
 
 
 def activate_square(sq):  # used ONLY to show a new square during gameplay
@@ -195,7 +194,6 @@ def activate_square(sq):  # used ONLY to show a new square during gameplay
         else:
             d.icon(squares, 4, 144, 24, columns[2], rows[1])
         d.partial_update(columns[2], 72, 24, 24)
-    pass
 
 
 def countdown():  # Counts down from 3 to WATCH, then triggers whatever function is next to show the pattern
@@ -222,7 +220,6 @@ def countdown():  # Counts down from 3 to WATCH, then triggers whatever function
     d.partial_update(40, 40, 133, 24)  # Update 1 to light, WATCH to dark
     time.sleep(roundtimes[gmround])
     generate_pattern()  # Countdown complete. Time to watch the squares
-    pass
 
 
 def generate_pattern():  # Generates the pattern to be remembered, and activates those blocks on screen as it does so
@@ -263,7 +260,6 @@ def generate_pattern():  # Generates the pattern to be remembered, and activates
     d.text("GO!", 185, 55, 0.7)
     d.partial_update(105, 40, 115, 24)  # Update WATCH to light, GO! to dark
     active = True
-    pass
 
 
 def show_result(result):
@@ -274,7 +270,6 @@ def show_result(result):
     d.pen(0)
     d.text(result, int(WIDTH / 2) - int(d.measure_text(result, 0.5) / 2), int(HEIGHT / 2), 0.5)
     d.update()
-    pass
 
 
 def drawstaticui():
@@ -306,7 +301,6 @@ def drawstaticui():
     d.text("LIVES", 177, 80, 0.5)
     for i in range(1, lives + 1):
         d.image(heartData, 16, 16, 231 - i * 16, 86)
-        pass
 
     # Round Text
     levelmid = int((columns[2] + columns[1]) / 2) + 12
@@ -327,7 +321,6 @@ def drawstaticui():
 
     d.update()
     d.led(0)
-    pass
 
 
 def nextround(wl):  # Just a quick function to set us up for the next round. (or declare a total win)
@@ -358,7 +351,6 @@ def nextround(wl):  # Just a quick function to set us up for the next round. (or
             lives = lives - 1
             time.sleep(3)
     startround = True
-    pass
 
 
 # Main loop
@@ -433,6 +425,5 @@ while True:
                     nextround("win")
             else:  # Neither of the above was true, so you lose the round
                 nextround("lose")
-        pass
+
     time.sleep(0.01)
-    pass
