@@ -2301,7 +2301,7 @@ extern mp_obj_t MotorCluster_direction(size_t n_args, const mp_obj_t *pos_args, 
     return mp_const_none;
 }
 
-extern mp_obj_t MotorCluster_all_to_direction(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+extern mp_obj_t MotorCluster_all_directions(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_direction };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -2322,7 +2322,7 @@ extern mp_obj_t MotorCluster_all_to_direction(size_t n_args, const mp_obj_t *pos
         if(direction < 0 || direction > 1) {
             mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
         }
-        self->cluster->all_to_direction((Direction)direction);
+        self->cluster->all_directions((Direction)direction);
     }
     return mp_const_none;
 }
@@ -2428,7 +2428,7 @@ extern mp_obj_t MotorCluster_speed_scale(size_t n_args, const mp_obj_t *pos_args
     return mp_const_none;
 }
 
-extern mp_obj_t MotorCluster_all_to_speed_scale(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+extern mp_obj_t MotorCluster_all_speed_scales(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_speed_scale };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -2449,7 +2449,134 @@ extern mp_obj_t MotorCluster_all_to_speed_scale(size_t n_args, const mp_obj_t *p
         if(speed_scale < FLT_EPSILON) {
             mp_raise_ValueError("speed_scale out of range. Expected greater than 0.0");
         }
-        self->cluster->all_to_speed_scale(speed_scale);
+        self->cluster->all_speed_scales(speed_scale);
+    }
+    return mp_const_none;
+}
+
+extern mp_obj_t MotorCluster_zeropoint(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    if(n_args <= 2) {
+        enum { ARG_self, ARG_motor };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_motor, MP_ARG_REQUIRED | MP_ARG_INT },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _MotorCluster_obj_t);
+
+        int motor = args[ARG_motor].u_int;
+        int motor_count = (int)self->cluster->count();
+        if(motor_count == 0)
+            mp_raise_ValueError("this cluster does not have any motors");
+        else if(motor < 0 || motor >= motor_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("motor out of range. Expected 0 to %d"), motor_count - 1);
+        else
+            return mp_obj_new_float(self->cluster->zeropoint((uint)motor));
+    }
+    else {
+        enum { ARG_self, ARG_motors, ARG_zeropoint };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_motors, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_zeropoint, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _MotorCluster_obj_t);
+
+        int motor_count = (int)self->cluster->count();
+        if(motor_count == 0)
+            mp_raise_ValueError("this cluster does not have any motors");
+        else {
+            // Determine what motor(s) to modify
+            const mp_obj_t object = args[ARG_motors].u_obj;
+            if(mp_obj_is_int(object)) {
+                int motor = mp_obj_get_int(object);
+                if(motor < 0 || motor >= motor_count)
+                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("motor out of range. Expected 0 to %d"), motor_count - 1);
+                else {
+                    float zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+                    if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+                        mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
+                    }
+                    self->cluster->zeropoint((uint)motor, zeropoint);
+                }
+            }
+            else {
+                size_t length = 0;
+                mp_obj_t *items = nullptr;
+                if(mp_obj_is_type(object, &mp_type_list)) {
+                    mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
+                    length = list->len;
+                    items = list->items;
+                }
+                else if(mp_obj_is_type(object, &mp_type_tuple)) {
+                    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
+                    length = tuple->len;
+                    items = tuple->items;
+                }
+
+                if(items == nullptr)
+                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                else if(length == 0)
+                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                else {
+                    // Create and populate a local array of motor indices
+                    uint8_t *motors = new uint8_t[length];
+                    for(size_t i = 0; i < length; i++) {
+                        int motor = mp_obj_get_int(items[i]);
+                        if(motor < 0 || motor >= motor_count) {
+                            delete[] motors;
+                            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a motor in the list or tuple is out of range. Expected 0 to %d"), motor_count - 1);
+                        }
+                        else {
+                            motors[i] = (uint8_t)motor;
+                        }
+                    }
+                    float zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+                    if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+                        delete[] motors;
+                        mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
+                    }
+
+                    self->cluster->zeropoint(motors, length, zeropoint);
+                    delete[] motors;
+                }
+            }
+        }
+    }
+    return mp_const_none;
+}
+
+extern mp_obj_t MotorCluster_all_zeropoints(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_zeropoint };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_zeropoint, MP_ARG_REQUIRED | MP_ARG_OBJ },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _MotorCluster_obj_t);
+
+    int motor_count = (int)self->cluster->count();
+    if(motor_count == 0)
+        mp_raise_ValueError("this cluster does not have any motors");
+    else {
+        float zeropoint = mp_obj_get_float(args[ARG_zeropoint].u_obj);
+        if(zeropoint < 0.0f || zeropoint > 1.0f - FLT_EPSILON) {
+            mp_raise_ValueError("zeropoint out of range. Expected 0.0 to less than 1.0");
+        }
+        self->cluster->all_zeropoints(zeropoint);
     }
     return mp_const_none;
 }
@@ -2555,7 +2682,7 @@ extern mp_obj_t MotorCluster_deadzone(size_t n_args, const mp_obj_t *pos_args, m
     return mp_const_none;
 }
 
-extern mp_obj_t MotorCluster_all_to_deadzone(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+extern mp_obj_t MotorCluster_all_deadzones(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 enum { ARG_self, ARG_deadzone, ARG_load };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -2577,7 +2704,7 @@ enum { ARG_self, ARG_deadzone, ARG_load };
         if(deadzone < 0.0f || deadzone > 1.0f) {
             mp_raise_ValueError("deadzone out of range. Expected 0.0 to 1.0");
         }
-        self->cluster->all_to_deadzone(deadzone, args[ARG_load].u_bool);
+        self->cluster->all_deadzones(deadzone, args[ARG_load].u_bool);
     }
     return mp_const_none;
 }
@@ -2683,7 +2810,7 @@ extern mp_obj_t MotorCluster_decay_mode(size_t n_args, const mp_obj_t *pos_args,
     return mp_const_none;
 }
 
-extern mp_obj_t MotorCluster_all_to_decay_mode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+extern mp_obj_t MotorCluster_all_decay_modes(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_mode, ARG_load };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -2705,7 +2832,7 @@ extern mp_obj_t MotorCluster_all_to_decay_mode(size_t n_args, const mp_obj_t *po
         if(mode < 0 || mode > 1) {
             mp_raise_ValueError("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)");
         }
-        self->cluster->all_to_decay_mode((DecayMode)mode, args[ARG_load].u_bool);
+        self->cluster->all_decay_modes((DecayMode)mode, args[ARG_load].u_bool);
     }
     return mp_const_none;
 }

@@ -18,7 +18,7 @@ namespace motor {
     //--------------------------------------------------
   public:
     static constexpr float DEFAULT_SPEED_SCALE = 1.0f;        // The standard motor speed scale
-    static constexpr float DEFAULT_ZEROPOINT = 0.0f;          // The standard motor deadzone
+    static constexpr float DEFAULT_ZEROPOINT = 0.0f;          // The standard motor zeropoint
     static constexpr float DEFAULT_DEADZONE = 0.05f;          // The standard motor deadzone
 
     static const DecayMode DEFAULT_DECAY_MODE = SLOW_DECAY;   // The standard motor decay behaviour
@@ -94,6 +94,9 @@ namespace motor {
     static int32_t duty_to_level(float duty, uint32_t resolution);
 
     static float map_float(float in, float in_min, float in_max, float out_min, float out_max);
+  private:
+    static float duty_to_speed(float duty, float zeropoint, float scale);
+    static float speed_to_duty(float speed, float zeropoint, float scale);
   };
 
 }

@@ -132,36 +132,37 @@ namespace motor {
     void direction(uint8_t motor, Direction direction);
     void direction(const uint8_t *motors, uint8_t length, Direction direction);
     void direction(std::initializer_list<uint8_t> motors, Direction direction);
-    void all_to_direction(Direction direction);
+    void all_directions(Direction direction);
 
     float speed_scale(uint8_t motor) const;
     void speed_scale(uint8_t motor, float speed_scale);
     void speed_scale(const uint8_t *motors, uint8_t length, float speed_scale);
     void speed_scale(std::initializer_list<uint8_t> motors, float speed_scale);
-    void all_to_speed_scale(float speed_scale);
+    void all_speed_scales(float speed_scale);
 
     float zeropoint(uint8_t motor) const;
     void zeropoint(uint8_t motor, float zeropoint, bool load = true);
     void zeropoint(const uint8_t *motors, uint8_t length, float zeropoint, bool load = true);
     void zeropoint(std::initializer_list<uint8_t> motors, float zeropoint, bool load = true);
-    void all_to_zeropoint(float zeropoint, bool load = true);
+    void all_zeropoints(float zeropoint, bool load = true);
 
     float deadzone(uint8_t motor) const;
     void deadzone(uint8_t motor, float deadzone, bool load = true);
     void deadzone(const uint8_t *motors, uint8_t length, float deadzone, bool load = true);
     void deadzone(std::initializer_list<uint8_t> motors, float deadzone, bool load = true);
-    void all_to_deadzone(float deadzone, bool load = true);
+    void all_deadzones(float deadzone, bool load = true);
 
     DecayMode decay_mode(uint8_t motor) const;
     void decay_mode(uint8_t motor, DecayMode mode, bool load = true);
     void decay_mode(const uint8_t *motors, uint8_t length, DecayMode mode, bool load = true);
     void decay_mode(std::initializer_list<uint8_t> motors, DecayMode mode, bool load = true);
-    void all_to_decay_mode(DecayMode mode, bool load = true);
+    void all_decay_modes(DecayMode mode, bool load = true);
 
     //--------------------------------------------------
   private:
     void apply_duty(uint8_t motor, float duty, DecayMode mode, bool load);
-    void create_motor_states(Direction direction, float speed_scale, float zeropoint, float deadzone, DecayMode mode, bool auto_phase);
+    void create_motor_states(Direction direction, float speed_scale, float zeropoint,
+                             float deadzone, DecayMode mode, bool auto_phase);
   };
 
 }

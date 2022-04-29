@@ -544,7 +544,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::all_to_direction(Direction direction) {
+  void MotorCluster::all_directions(Direction direction) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->direction(motor, direction);
@@ -574,7 +574,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::all_to_speed_scale(float speed_scale) {
+  void MotorCluster::all_speed_scales(float speed_scale) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->speed_scale(motor, speed_scale);
@@ -604,7 +604,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::all_to_zeropoint(float zeropoint, bool load) {
+  void MotorCluster::all_zeropoints(float zeropoint, bool load) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->zeropoint(motor, zeropoint);
@@ -635,7 +635,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::all_to_deadzone(float deadzone, bool load) {
+  void MotorCluster::all_deadzones(float deadzone, bool load) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->deadzone(motor, deadzone);
@@ -666,7 +666,7 @@ namespace motor {
     }
   }
 
-  void MotorCluster::all_to_decay_mode(DecayMode mode, bool load) {
+  void MotorCluster::all_decay_modes(DecayMode mode, bool load) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
       this->decay_mode(motor, mode);
