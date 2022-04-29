@@ -493,10 +493,10 @@ mp_obj_t BreakoutColourLCD160x80_triangle(size_t n_args, const mp_obj_t *pos_arg
 
     int x1 = args[ARG_x1].u_int;
     int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x1].u_int;
-    int y2 = args[ARG_y1].u_int;
-    int x3 = args[ARG_x1].u_int;
-    int y3 = args[ARG_y1].u_int;
+    int x2 = args[ARG_x2].u_int;
+    int y2 = args[ARG_y2].u_int;
+    int x3 = args[ARG_x3].u_int;
+    int y3 = args[ARG_y3].u_int;
 
     Point p1(x1, y1);
     Point p2(x2, y2);
@@ -523,8 +523,8 @@ mp_obj_t BreakoutColourLCD160x80_line(size_t n_args, const mp_obj_t *pos_args, m
 
     int x1 = args[ARG_x1].u_int;
     int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x1].u_int;
-    int y2 = args[ARG_y1].u_int;
+    int x2 = args[ARG_x2].u_int;
+    int y2 = args[ARG_y2].u_int;
 
     Point p1(x1, y1);
     Point p2(x2, y2);
