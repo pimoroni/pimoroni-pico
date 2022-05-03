@@ -5,35 +5,74 @@
 #include "encoder.hpp"
 #include "quadrature_out.pio.h"
 
+/*
+An interactive demo of how rotary encoders work.
+
+Connect up an encoder (be it rotary or magnetic) as detailed below
+and see the resulting signals and stats on the Pico Explorer's display.
+
+Connections:
+- A to GP0
+- B to GP1
+- C (if present) to GP2
+- Switch (if present) to GP3
+
+Buttons
+- A is 'Zoom Out'
+- X is 'Zoom In'
+- B is 'Motor 1 Forward'
+- Y is 'Motor 1 Reverse'
+- Switch is 'Zero the Count'
+
+If you do not have an encoder and wish to try out
+this example, simulated A and B encoder signals can
+be used by jumping GP0 to GP6 and GP1 to GP7.
+*/
+
 using namespace pimoroni;
 using namespace encoder;
-
 
 //--------------------------------------------------
 // Constants
 //--------------------------------------------------
-static const pin_pair ENCODER_PINS            = {1, 0};
-static const uint ENCODER_PIN_C               = PIN_UNUSED;
-static const uint ENCODER_SWITCH_PIN          = 4;
 
-static constexpr float COUNTS_PER_REVOLUTION  = 24;       // 24 is for rotary encoders. For motor magnetic encoders uses
-                                                          // 12 times the gear ratio (e.g. 12 * 20 with a 20:1 ratio motor
-static const bool COUNT_MICROSTEPS            = false;    // Set to true for motor magnetic encoders
+// The pins used by the encoder
+static const pin_pair ENCODER_PINS = {0, 1};
+static const uint ENCODER_COMMON_PIN = 2;
+static const uint ENCODER_SWITCH_PIN = 3;
 
-static const uint16_t FREQ_DIVIDER            = 1;        // Increase this to deal with switch bounce. 250 Gives a 1ms debounce
+// The counts per revolution of the encoder's output shaft
+static constexpr float COUNTS_PER_REV = encoder::ROTARY_CPR;
 
-static const int32_t TIME_BETWEEN_SAMPLES_US  = 100;      // Time between each sample, in microseconds
-static const int32_t WINDOW_DURATION_US       = 1000000;  // The full time window that will be stored
+// Set to true if using a motor with a magnetic encoder
+static const bool COUNT_MICROSTEPS = false;
 
-static const int32_t READINGS_SIZE            = WINDOW_DURATION_US / TIME_BETWEEN_SAMPLES_US;
-static const int32_t SCRATCH_SIZE             = READINGS_SIZE / 10;   // A smaller value, for temporarily storing readings during screen drawing
+// Increase this to deal with switch bounce. 250 Gives a 1ms debounce
+static const uint16_t FREQ_DIVIDER = 1;
 
-static const bool QUADRATURE_OUT_ENABLED      = true;
-static constexpr float QUADRATURE_OUT_FREQ    = 800;      // The frequency the quadrature output will run at (note that counting microsteps will show 4x this value)
-static const float QUADRATURE_OUT_1ST_PIN     = 6;        // Which first pin to output the quadrature signal to (e.g. pins 6 and 7)
+// Time between each sample, in microseconds
+static const int32_t TIME_BETWEEN_SAMPLES_US = 100;
 
-static const uint64_t MAIN_LOOP_TIME_US       = 50000;    // How long there should be in microseconds between each screen refresh
-static const uint16_t EDGE_ALIGN_ABOVE_ZOOM   = 4;        // The zoom level beyond which edge alignment will be enabled to ma
+// The full time window that will be stored
+static const int32_t WINDOW_DURATION_US = 1000000;
+
+static const int32_t READINGS_SIZE = WINDOW_DURATION_US / TIME_BETWEEN_SAMPLES_US;
+static const int32_t SCRATCH_SIZE = READINGS_SIZE / 10;   // A smaller value, for temporarily storing readings during screen drawing
+
+// Whether to output a synthetic quadrature signal
+static const bool QUADRATURE_OUT_ENABLED = true;
+
+// The frequency the quadrature output will run at (note that counting microsteps will show 4x this value)
+static constexpr float QUADRATURE_OUT_FREQ = 800;
+
+// Which first pin to output the quadrature signal to (e.g. GP6 and GP7)
+static const float QUADRATURE_OUT_1ST_PIN = 6;
+
+// How long there should be in microseconds between each screen refresh
+static const uint64_t MAIN_LOOP_TIME_US = 50000;
+
+// The zoom level beyond which edge alignment will be enabled to make viewing encoder patterns look nice
+static const uint16_t EDGE_ALIGN_ABOVE_ZOOM = 4;
 
 
 
@@ -51,29 +90,28 @@ enum DrawState {
 //--------------------------------------------------
 // Variables
 //--------------------------------------------------
-
 uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
 PicoExplorer pico_explorer(buffer);
 
-Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_PIN_C, NORMAL_DIR, COUNTS_PER_REVOLUTION, COUNT_MICROSTEPS, FREQ_DIVIDER);
+Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_COMMON_PIN, NORMAL_DIR, COUNTS_PER_REV, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
-volatile bool encA_readings[READINGS_SIZE];
-volatile bool encB_readings[READINGS_SIZE];
-volatile bool encA_scratch[SCRATCH_SIZE];
-volatile bool encB_scratch[SCRATCH_SIZE];
-volatile uint32_t next_reading_index  = 0;
-volatile uint32_t next_scratch_index  = 0;
-volatile bool drawing_to_screen       = false;
-uint16_t current_zoom_level           = 1;
+volatile bool enc_a_readings[READINGS_SIZE];
+volatile bool enc_b_readings[READINGS_SIZE];
+volatile bool enc_a_scratch[SCRATCH_SIZE];
+volatile bool enc_b_scratch[SCRATCH_SIZE];
+volatile uint32_t next_reading_index = 0;
+volatile uint32_t next_scratch_index = 0;
+volatile bool drawing_to_screen = false;
+uint16_t current_zoom_level = 1;
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // FUNCTIONS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE], uint32_t readingPos, bool edge_align) {
+uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE], uint32_t reading_pos, bool edge_align) {
   uint32_t reading_window = READINGS_SIZE / current_zoom_level;
-  uint32_t start_index_no_modulus = (readingPos + (READINGS_SIZE - reading_window));
+  uint32_t start_index_no_modulus = (reading_pos + (READINGS_SIZE - reading_window));
   uint32_t start_index = start_index_no_modulus % READINGS_SIZE;
   int32_t screen_window = std::min(p2.x, (int32_t)PicoExplorer::WIDTH) - p1.x;
 
@@ -82,7 +120,7 @@ uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE],
   uint32_t alignment_offset = 0;
   if(edge_align) {
     // Perform edge alignment by first seeing if there is a window of readings available (will be at anything other than x1 zoom)
-    uint32_t align_window = (start_index_no_modulus - readingPos);
+    uint32_t align_window = (start_index_no_modulus - reading_pos);
 
     // Then go backwards through that window
     for(uint32_t i = 1; i < align_window; i++) {
@@ -145,24 +183,26 @@ uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE],
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 bool repeating_timer_callback(struct repeating_timer *t) {
+  bool_pair state = enc.state();
   if(drawing_to_screen && next_scratch_index < SCRATCH_SIZE) {
-    encA_scratch[next_scratch_index] = enc.state().a;
-    encB_scratch[next_scratch_index] = enc.state().b;
+    enc_a_scratch[next_scratch_index] = state.a;
+    enc_b_scratch[next_scratch_index] = state.b;
     next_scratch_index++;
   }
   else {
-    encA_readings[next_reading_index] = enc.state().a;
-    encB_readings[next_reading_index] = enc.state().b;
+    enc_a_readings[next_reading_index] = state.a;
+    enc_b_readings[next_reading_index] = state.b;
 
     next_reading_index++;
-    if(next_reading_index >= READINGS_SIZE)
+    if(next_reading_index >= READINGS_SIZE) {
       next_reading_index = 0;
+    }
   }
 
   return true;
 }
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
   stdio_init_all();
 
@@ -182,11 +222,10 @@ void setup() {
 
   enc.init();
 
-  bool encA = enc.state().a;
-  bool encB = enc.state().b;
+  bool_pair state = enc.state();
   for(uint i = 0; i < READINGS_SIZE; i++) {
-    encA_readings[i] = encA;
-    encB_readings[i] = encB;
+    enc_a_readings[i] = state.a;
+    enc_b_readings[i] = state.b;
   }
 
   if(QUADRATURE_OUT_ENABLED) {
@@ -212,8 +251,8 @@ int main() {
   struct repeating_timer timer;
   add_repeating_timer_us(-TIME_BETWEEN_SAMPLES_US, repeating_timer_callback, NULL, &timer);
 
-  bool aPressedLatch = false;
-  bool xPressedLatch = false;
+  bool button_latch_a = false;
+  bool button_latch_x = false;
   uint64_t last_time = time_us_64();
 
   while(true) {
@@ -246,24 +285,24 @@ int main() {
 
       // If A has been pressed, zoom the view out to a min of x1
       if(pico_explorer.is_pressed(PicoExplorer::A)) {
-        if(!aPressedLatch) {
-          aPressedLatch = true;
+        if(!button_latch_a) {
+          button_latch_a = true;
           current_zoom_level = std::max(current_zoom_level / 2, 1);
         }
       }
       else {
-        aPressedLatch = false;
+        button_latch_a = false;
       }
 
       // If X has been pressed, zoom the view in to the max of x512
       if(pico_explorer.is_pressed(PicoExplorer::X)) {
-        if(!xPressedLatch) {
-          xPressedLatch = true;
+        if(!button_latch_x) {
+          button_latch_x = true;
           current_zoom_level = std::min(current_zoom_level * 2, 512);
         }
       }
       else {
-        xPressedLatch = false;
+        button_latch_x = false;
       }
 
       //--------------------------------------------------            
@@ -275,16 +314,16 @@ int main() {
       drawing_to_screen = true;
 
       pico_explorer.set_pen(255, 255, 0);
-      uint32_t localPos = next_reading_index;
-      uint32_t alignment_offset = draw_plot(Point(0, 10), Point(PicoExplorer::WIDTH, 10 + 50), encA_readings, localPos, current_zoom_level > EDGE_ALIGN_ABOVE_ZOOM);
+      uint32_t local_pos = next_reading_index;
+      uint32_t alignment_offset = draw_plot(Point(0, 10), Point(PicoExplorer::WIDTH, 10 + 50), enc_a_readings, local_pos, current_zoom_level > EDGE_ALIGN_ABOVE_ZOOM);
 
       pico_explorer.set_pen(0, 255, 255);
-      draw_plot(Point(0, 80), Point(PicoExplorer::WIDTH, 80 + 50), encB_readings, (localPos + (READINGS_SIZE - alignment_offset)) % READINGS_SIZE, false);
+      draw_plot(Point(0, 80), Point(PicoExplorer::WIDTH, 80 + 50), enc_b_readings, (local_pos + (READINGS_SIZE - alignment_offset)) % READINGS_SIZE, false);
 
       // Copy values that may have been stored in the scratch buffers, back into the main buffers
       for(uint16_t i = 0; i < next_scratch_index; i++) {
-        encA_readings[next_reading_index] = encA_scratch[i];
-        encB_readings[next_reading_index] = encB_scratch[i];
+        enc_a_readings[next_reading_index] = enc_a_scratch[i];
+        enc_b_readings[next_reading_index] = enc_b_scratch[i];
 
         next_reading_index++;
         if(next_reading_index >= READINGS_SIZE)
