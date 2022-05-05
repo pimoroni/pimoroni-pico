@@ -57,10 +57,11 @@ except OSError:
 state = {
     "current_badge": 0
 }
+
+
 # ------------------------------
 #      Utility functions
 # ------------------------------
-
 # Reduce the size of a string until it fits within a given width
 def truncatestring(text, text_size, width):
     while True:
@@ -117,11 +118,11 @@ def draw_badge(n):
 
     detail1_title = truncatestring(detail1_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
     detail1_text = truncatestring(detail1_text, DETAILS_TEXT_SIZE,
-                                TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail1_title, DETAILS_TEXT_SIZE))
+                                  TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail1_title, DETAILS_TEXT_SIZE))
 
     detail2_title = truncatestring(detail2_title, DETAILS_TEXT_SIZE, TEXT_WIDTH)
     detail2_text = truncatestring(detail2_text, DETAILS_TEXT_SIZE,
-                                TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
+                                  TEXT_WIDTH - DETAIL_SPACING - display.measure_text(detail2_title, DETAILS_TEXT_SIZE))
 
     display.pen(0)
     display.clear()
@@ -198,6 +199,7 @@ def draw_badge(n):
                 display.pen(15)
                 display.rectangle(x + 1, y + 1, 2, 2)
 
+
 # ------------------------------
 #        Program setup
 # ------------------------------
@@ -237,7 +239,7 @@ while True:
     if changed:
         draw_badge(state["current_badge"])
         badger_os.state_save("badges", state)
-        changed = False      
+        changed = False
 
     display.update()
 
