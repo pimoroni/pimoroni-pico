@@ -14,7 +14,7 @@ namespace encoder {
     // Constants
     //--------------------------------------------------
   public:
-    static constexpr float DEFAULT_COUNTS_PER_REV   = 24;
+    static constexpr float DEFAULT_COUNTS_PER_REV   = ROTARY_CPR;
     static const bool DEFAULT_COUNT_MICROSTEPS      = false;
     static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;
 
