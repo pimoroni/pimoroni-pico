@@ -83,9 +83,7 @@ def draw_badge(n):
     BADGE_IMAGE = bytearray(int(IMAGE_WIDTH * HEIGHT / 8))
 
     # Reset to default badge if state badge removed
-    try:
-        file = BADGES[n]
-    except:
+    if len(BADGES) <= n:
         n = 0
         file = BADGES[n]
         badger_os.state_modify("badges", {"current badge": n})
