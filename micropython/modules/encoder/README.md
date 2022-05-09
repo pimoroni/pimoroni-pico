@@ -63,8 +63,6 @@ Be aware that the count is stored as an integer, if it is continually increased 
 
 Often you are not interested in the exact count that the encoder is at, but rather if the count has changed since the last time you checked. This change can be read by calling `.delta()` at regular intervals. The returned value can then be used with a check in code, for the value being non-zero.
 
-The delta can also be read back as either the change in revolutions or angle, by calling `.revolutions_delta()`, `.degrees_delta()`, and `.radians_delta()`, respectively. These use the encoder's counts per revolution, which can either be specified when the object is created, or updated by calling `.counts_per_rev(counts_per_rev)`.
-
 
 ### Step and Turn
 
@@ -96,6 +94,7 @@ revolutions
 degrees
 radians
 revolutions_delta
+degrees_delta
 radians_delta
 revolutions_per_second
 revolutions_per_minute
