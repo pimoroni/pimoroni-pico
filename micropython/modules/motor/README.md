@@ -1,6 +1,7 @@
 # Motors and Motor 2040 <!-- omit in toc -->
 
 The Motor library lets you drive DC motors from a Raspberry Pi Pico or any other RP2040-based board via connected h-bridge drivers.
+
 An easy way to add an h-bridge driver to the Pico is to attach a [Pimoroni Pico Motor Shim](https://pimoroni.com/picomotorshim).
 Alternatively, an RP2040-based board with integrated drivers could be used, such as the [Pimoroni Motor 2040](https://pimoroni.com/motor2040) (coming soon).
 
@@ -17,7 +18,6 @@ This library offers two motor implementations:
     - [I2C Pins](#i2c-pins)
     - [Button Pin](#button-pin)
   - [Other Constants](#other-constants)
-
 - [Motor 2040](#motor-2040)
   - [Reading the User Button](#reading-the-user-button-1)
   - [Reading the Sensors](#reading-the-sensors)
@@ -110,7 +110,7 @@ state = button_a.raw()
 The `motor` module contains a `picomotorshim` sub module with constants for the motor and button pins.
 
 
-#### Motor Pin Tuples
+#### Motor Pins
 
 * `MOTOR_1` = `(6, 7)`
 * `MOTOR_2` = `(27, 26)`
@@ -281,8 +281,6 @@ from encoder import MMME_CPR
 from motor import motor2040
 enc = Encoder(0, 0, motor2040.ENCODER_A, counts_per_rev=MMME_CPR, count_microsteps=True)
 ```
-Motor encoders often have a different number of counts per revolution than a traditional rotary encoder. For our MMME shims the `MMME_CPR` constant is provided. Also, as motor encoders lack the tactile steps of rotary encoders, their counting resolution can be increased by a factor of four by including each microstep.
-
 With the created encoder class, the current position can be read by calling `.revolutions()`, `.degrees()` or `.radians()`.
 
 For full details on encoders, including how to read speeds, please refer to the [Encoder Library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/encoder).
@@ -451,14 +449,14 @@ The value of the full negative and full positive speed can be read back using `.
 
 #### Stopping
 
-The easiest way to stop a motor is by calling `.stop()`. This is equivalent to calling `.speed(0.0)` and stops the motor using the currently assigned decay mode of the `Motor` object. See [Decay Modes](#decay-modes) for more details.
+The easiest way to stop a motor is by calling `.stop()`. This is equivalent to calling `.speed(0.0)` and stops the motor using the currently assigned decay mode of the `Motor` object. See [Decay Mode](#decay-mode) for more details.
 
 It is also possible to explicitly have the motor coast or brake to a stop by calling `.coast()` or `.brake()`.
 
 If the motor is disabled, these will enable it.
 
 
-### Calibration
+#### Calibration
 
 It is very rare for a motor to perfectly drive at the speed we want them to. As such, the `Motor` class offers two parameters for adjusting how the value provided to `.speed(speed)` is converted to the PWM duty cycle that is actually sent to the motor, a speed scale, and a zeropoint.
 
