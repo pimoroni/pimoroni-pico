@@ -57,13 +57,20 @@ This library offers two motor implementations:
 - [MotorCluster](#motorcluster)
   - [Getting Started](#getting-started-1)
   - [Control by Speed](#control-by-speed-1)
+    - [Full Speed](#full-speed-1)
+    - [Stopping](#stopping-1)
+    - [Calibration](#calibration-1)
   - [Control by Percent](#control-by-percent-1)
   - [Control by Duty Cycle](#control-by-duty-cycle-1)
+    - [Duty Deadzone](#duty-deadzone-1)
   - [Frequency Control](#frequency-control-1)
   - [Phase Control](#phase-control)
   - [Configuration](#configuration-1)
+    - [Direction](#direction-1)
+    - [Decay Mode](#decay-mode-1)
   - [Delayed Loading](#delayed-loading)
-  - [Function Reference](#function-reference-1)
+  - [Function Reference](#function-reference)
+  - [Constants Reference](#constants-reference)
   - [PIO Limitations](#pio-limitations)
 
 
@@ -819,6 +826,19 @@ decay_mode(motor)
 decay_mode(motor, mode, load=True)
 all_decay_modes(mode, load=True)
 ```
+
+
+### Constants Reference
+
+Here is the complete list of constants on the `motor` module:
+
+* `FAST_DECAY` = `0`
+* `SLOW_DECAY` = `1`
+
+Here are useful constants from the `pimoroni` module:
+
+* `NORMAL_DIR` = `0`
+* `REVERSED_DIR` = `1`
 
 
 ### PIO Limitations
