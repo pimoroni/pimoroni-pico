@@ -677,7 +677,7 @@ The value of the full negative and full positive speed of each motor on a cluste
 
 #### Stopping
 
-The easiest way to stop a motor on a cluster is by calling `.stop(motor)`. This is equivalent to calling `.speed(motor, 0.0)` and stops the motor using the currently assigned decay mode of the `Motor` object. See [Decay Mode](#decay-mode) for more details. All motors can be stopped at once by calling `.stop_all()`.
+The easiest way to stop a motor on a cluster is by calling `.stop(motor)`. This is equivalent to calling `.speed(motor, 0.0)` and stops the motor using the currently assigned decay mode of the `Motor` object. See [Decay Mode](#decay-mode-1) for more details. All motors can be stopped at once by calling `.stop_all()`.
 
 It is also possible to explicitly have the motors on a cluster coast or brake to a stop by calling `.coast(motor)`, `.coast_all()`, `.brake(motor)`, or `.brake_all()`.
 
