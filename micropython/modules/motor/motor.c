@@ -78,6 +78,7 @@ STATIC const mp_rom_map_elem_t Motor_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_to_percent), MP_ROM_PTR(&Motor_to_percent_obj) },
     { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&Motor_direction_obj) },
     { MP_ROM_QSTR(MP_QSTR_speed_scale), MP_ROM_PTR(&Motor_speed_scale_obj) },
+    { MP_ROM_QSTR(MP_QSTR_zeropoint), MP_ROM_PTR(&Motor_zeropoint_obj) },
     { MP_ROM_QSTR(MP_QSTR_deadzone), MP_ROM_PTR(&Motor_deadzone_obj) },
     { MP_ROM_QSTR(MP_QSTR_decay_mode), MP_ROM_PTR(&Motor_decay_mode_obj) },
 };
