@@ -27,7 +27,7 @@ This library offers two motor implementations:
   - [Controlling the LED](#controlling-the-led)
   - [Pin Constants](#pin-constants-1)
     - [Motor Pins](#motor-pins-1)
-    - [Encoder Pins](#encoder-pins-1)
+    - [Encoder Pins](#encoder-pins)
     - [LED Pin](#led-pin)
     - [I2C Pins](#i2c-pins-1)
     - [Button Pin](#button-pin-1)
@@ -460,7 +460,7 @@ If the motor is disabled, these will enable it.
 
 It is very rare for a motor to perfectly drive at the speed we want them to. As such, the `Motor` class offers two parameters for adjusting how the value provided to `.speed(speed)` is converted to the PWM duty cycle that is actually sent to the motor, a speed scale, and a zeropoint.
 
-Speed scale, as the name implies, is a value that scalues the duty cycle up or down to better reflect the measured speed of the motor when driving at `.full_negative()` or `.full_positive()`. This can be set by calling `.speed_scale(speed_scale)`, which accepts a value greater than `0.0`. The current speed scale can also be read by calling `.speed_scale()`.
+Speed scale, as the name implies, is a value that scales the duty cycle up or down to better reflect the measured speed of the motor when driving at full speed. This can be set by calling `.speed_scale(speed_scale)`, which accepts a value greater than `0.0`. The current speed scale can also be read by calling `.speed_scale()`.
 
 Zeropoint is a value that sets what duty cycle should count as the zero speed of the motor. By default this is `0.0` and usually it is fine to leave it at that, but there are cases at low speeds where the expected speed does not match the measured speed, which small adjustments to the zeropoint will fix. This can be set by calling `.zeropoint(zeropoint)`, which accepts a value from `0.0` to less than `1.0`. The current zeropoint can also be read by calling `.zeropoint()`.
 
@@ -515,6 +515,8 @@ Note that changing the frequency does not change the duty cycle or speed sent to
 ### Direction
 
 The driving direction of a motor can be changed either by providing `direction=REVERSED_DIR` when creating the `Motor` object, or by calling `.direction(REVERSED_DIR)` at any time in code. The `REVERSED_DIR` constant comes from the `pimoroni` module. There is also a `NORMAL_DIR` constant, though this is the default.
+
+The current direction of a motor can be read back by calling `.direction()`.
 
 
 ### Decay Mode
@@ -613,7 +615,7 @@ An alternative way of controlling motors with your Motor 2040 is to use the `Mot
 ```python
 from motor import MotorCluster, motor2040
 ```
-(If you are using another RP2040 based board, then `motor2040` can be omitted from the above line)
+If you are using another RP2040 based board, then `motor2040` can be omitted from the above line.
 
 The next step is to choose which GPIO pins the cluster will be connected to and store them in a `list`. For example, using the handy constants of the `motor2040`, the below line creates the list `[ (4, 5), (6, 7), (8, 9), (10, 11) ]`
 ```python
@@ -621,7 +623,6 @@ pins = [ motor2040.MOTOR_A, motor2040.MOTOR_B, motor2040.MOTOR_C, motor2040.MOTO
 ```
 
 To create your motor cluster, specify the PIO, PIO state-machine and GPIO pins you chose a moment ago, and pass those into `MotorCluster`.
-
 ```python
 cluster = MotorCluster(0, 0, pins)
 ```
@@ -653,69 +654,105 @@ From here the motors can be controlled in several ways. These are covered in mor
 
 ### Control by Speed
 
-The most intuitive way of controlling a motor is by speed. Speed can be any number that has a real-world meaning for that type of motor, for example revolutions per minute, or the linear or angular speed of the mechanism it is driving. By default the speed is a value ranging from `-1.0` to `1.0` but this can be changed by setting a new `speed_scale`. See [Configuration](#configuration-1) for more details.
+The most intuitive way of controlling a motor is by speed. Speed can be any number that has a real-world meaning for that type of motor, for example revolutions per minute, or the linear or angular speed of the mechanism it is driving. By default the speed is a value ranging from `-1.0` to `1.0` but this can be changed by setting a new `speed_scale`. See [Calibration](#calibration-1) for more details.
 
-The speed of a motor on a cluster can be set calling `.speed(motor, speed)` or `.all_at_speed(speed)`, which take a float as their `speed` input. If a motor is disabled, these will enable it. The resulting duty cycle will also be stored.
+The speed of a motor on a cluster can be set calling `.speed(motor, speed)` or `.all_to_speed(speed)`, which take a float as their `speed` input. If a motor on the cluster is disabled, these will enable it. The resulting duty cycle will also be stored.
 
 To read back the current speed of a motor on the cluster, call `.speed(motor)`. If the motor is disabled, this will be the last speed that was provided when enabled.
 
 
-#### Common Speeds
+#### Full Speed
 
-To simplify certain motion patterns, motors on a cluster can be commanded to three common speeds. These are, full negative, full positive, and stopped. These are performed by calling `.full_negative(motor)`, `.full_positive(motor)`, and `.stop(servo)`, respectively. If the motor is disabled, these will enable it. There are also `.all_full_negative()`, `.all_full_positive()`, and `.stop_all()` for having all the motors on the cluster drive at once.
+To simplify certain motion patterns, motors on a cluster can be commanded to their full negative, and full positive speeds. These are performed by calling `.full_negative(motor)`, and `.full_positive(motor)`, respectively. If the motor is disabled, these will enable it. There are also `.all_full_negative()`, and `.all_full_positive()` for having all the motors on the cluster drive at once.
 
-The full negative and full positive speed of each motor on a cluster can be read back using `.speed_scale(motor)`. This can be useful as an input to equations that provide numbers directly to `.speed(motor, speed)`, for example.
+The value of the full negative and full positive speed of each motor on a cluster can be read back using `.speed_scale(motor)`. This can be useful as an input to equations that provide numbers directly to `.speed(motor, speed)`, for example.
+
+
+#### Stopping
+
+The easiest way to stop a motor on a cluster is by calling `.stop(motor)`. This is equivalent to calling `.speed(motor, 0.0)` and stops the motor using the currently assigned decay mode of the `Motor` object. See [Decay Mode](#decay-mode) for more details. All motors can be stopped at once by calling `.stop_all()`.
+
+It is also possible to explicitly have the motors on a cluster coast or brake to a stop by calling `.coast(motor)`, `.coast_all()`, `.brake(motor)`, or `.brake_all()`.
+
+If a motor on the cluster is disabled, these will enable it.
+
+#### Calibration
+
+It is very rare for a motor to perfectly drive at the speed we want them to. As such, the each motor on a cluster offers two parameters for adjusting how the value provided to `.speed(speed)` is converted to the PWM duty cycle that is actually sent to each motor, a speed scale, and a zeropoint.
+
+Speed scale, as the name implies, is a value that scales the duty cycle up or down to better reflect the measured speed of a motor on the cluster when driving at full speed. This can be set for each motor by calling `.speed_scale(motor, speed_scale)` or `.all_speed_scales(speed_scale)`, which both accept a value greater than `0.0`. The current speed scale of a motor can also be read by calling `.speed_scale(motor)`.
+
+Zeropoint is a value that sets what duty cycle should count as the zero speed of a motor on a cluster. By default this is `0.0` and usually it is fine to leave it at that, but there are cases at low speeds where the expected speed does not match the measured speed, which small adjustments to the zeropoint will fix. This can be set by calling `.zeropoint(motor, zeropoint)` or `.all_zeropoints(zeropoint)`, which both accept a value from `0.0` to less than `1.0`. The current zeropoint of a motor can also be read by calling `.zeropoint(motor)`.
+
+Both parameters can also be provided during the creation of a new `MotorCluster` object, though this will apply to all motors.
 
 
 ### Control by Percent
 
 Sometimes there are projects where motors need to move based on the readings from sensors or another devices, but the numbers given out are not easy to convert to speeds the motors accept. To overcome this the library lets you drive the motors on a cluster at a percent between their negative and positive speeds, or two speeds provided, based on that input.
 
-With an input between `-1.0` and `1.0`, a motor on a cluster can be driven at a percent between its negative and positive speeds using `.at_percent(motor, in)`, or all motors using `.all_at_percent(in)`.
+With an input between `-1.0` and `1.0`, a motor on a cluster can be set to a percent between its negative and positive speeds using `.to_percent(motor, in)`, or all motors using `.all_to_percent(in)`.
 
-With an input between a provided min and max, a motor on a cluster can be driven at a percent between its negative and postive speeds using `.at_percent(motor, in, in_min, in_max)`, or all motors using `.all_at_percent(in, in_min, in_max)`.
+With an input between a provided min and max, a motor on a cluster can be set to a percent between its negative and postive speeds using `.at_percent(motor, in, in_min, in_max)`, or all motors using `.all_at_percent(in, in_min, in_max)`.
 
-With an input between a provided min and max, a motor on a cluster can be driven at a percent between two provided speeds using `.at_percent(motor, in, in_min, speed_min, speed_max)`, or all motors using `.all_at_percent(in, in_min, speed_min, speed_max)`.
+With an input between a provided min and max, a motor on a cluster can be set to a percent between two provided speeds using `.at_percent(motor, in, in_min, speed_min, speed_max)`, or all motors using `.all_at_percent(in, in_min, speed_min, speed_max)`.
 
-If the motor is disabled, these will enable it.
+If a motor on the cluster is disabled, these will enable it.
 
 
 ### Control by Duty Cycle
 
-At a hardware level DC motors operate by receiving a voltage across their two terminals, with positive causing a motion in one direction and negative causing a motion in the other. To avoid needing a negative voltage supply, motor drivers employ a H-Bridge arrangement of transistors or mosfets to flip which side of the motor is connected to ground and which is connected to power. By rapidly turing these transistors or mosfets on and off both the speed and direction of the motor can be varied. The common way this is achieved is by using a pair of pulse width modulated signals, where the duty cycle of the active signal controls the speed, and which signal is active controls the direction. Braking can also be controlled (see //TODO)
+Motor drivers accept pulse width modulated (PWM) signals to control the speed and direction of their connected motors. The percentage of time that these signals are active for is know as their duty cycle. This is typically measured as a value between `0.0` and `1.0`, but as motors use two pins for their control signals, here negative values are added to denote the reverse direction.
 
-The duty cycle of a motor on a cluster can be set by calling `.duty(motor, duty)` or `.all_at_duty(duty)`, which take a float as their `duty` input. If a motor is disabled, these will enable it. These functions will also recalculate the related speed.
+The duty cycle of a motor on the cluster can be set by calling `.duty(motor, duty)` or `.all_to_duty(duty)`, which take a float from `-1.0` to `1.0` as their `duty` input. If a motor on the cluster is disabled these will enable it. These functions will also recalculate the related speed.
 
-To read back the current duty cycle of a motor on a cluster, call `.duty(motor)`. If the motor is disabled, this will be the last duty that was provided when enabled.
+To read back the current duty cycle of the motor, call `.duty()` without any input. If the motor is disabled, this will be the last duty that was provided when enabled.
 
 
 ### Frequency Control
 
 Motors can be driven at a variety of frequencies, with a common values being above the range of human hearing. As such this library uses 25KHz as its default, but this can easily be changed.
 
-The frequency (in Hz) of all the motors on a cluster can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. //TODO The supported range of this input is `10` to `350` Hz. Due to how `MotorCluster` works, there is no way to set independent frequencies for each motor.
+The frequency (in Hz) of all the motors on a cluster can be set by calling `.frequency(freq)`, which takes a float as its `freq` input. The supported range of this input is `10` Hz to `400` KHz, though not all motor drivers can handle the very high frequencies. Due to how `MotorCluster` works, there is no way to set independent frequencies for each motor.
 
 To read back the current frequency (in Hz) of all the motors on a cluster, call `.frequency()` without any input.
 
-Note that changing the frequency does not change the duty cycle sent to the motors, only how frequently pulses are sent.
+Note that changing the frequency does not change the duty cycle or speed sent to the motors, only how frequently pulses are sent.
 
 Also, be aware that currently the frequency changes immediately, even if part-way through outputting a pulse. It is therefore recommended to disable all motors first before changing the frequency.
 
 
 ### Phase Control
 
-When dealing with many servos, there can often be large current draw spikes caused by them all responding to pulses at the same time. To minimise this, the ServoCluster class allows for the start time of each servo's pulses to be delayed by a percentage of the available time period. This is called their phase.
+The MotorCluster class allows for the start time of each motor's pulses to be delayed by a percentage of the available time period. This is called their phase.
 
-The phase of a servo on a cluster can be set by calling `.phase(servo, phase)` or `.all_to_phase(phase)`, which take a float between `0.0` and `1.0` as their `phase` input.
+The phase of a motor on a cluster can be set by calling `.phase(motor, phase)` or `.all_to_phase(phase)`, which take a float between `0.0` and `1.0` as their `phase` input.
 
-To read back the current phase of a servo on a cluster, call `.phase(servo)`.
+To read back the current phase of a motor on a cluster, call `.phase(motor)`.
 
-By default all servos on a cluster will start with different phases unless `auto_phase=False` is provided when creating the `ServoCluster`.
+By default all motors on a cluster will start with different phases unless `auto_phase=False` is provided when creating the `MotorCluster`.
 
 
-### Calibration
+### Configuration
 
-There are different types of servos, with `ANGULAR`, `LINEAR`, and `CONTINUOUS` being common. To support these different types, each `ServoCluster` class contains calibration objects for each of its servos that store the specific value to pulse mappings needed for their types. A copy of a servo's calibration on a cluster can be accessed using `.calibration(servo)`. It is also possible to provide a servo on a cluster with a new calibration using `.calibration(servo, calibration)`.
+### Direction
+
+The driving direction of a motor on the cluster can be changed by calling `.direction(motor, REVERSED_DIR)` or `.all_directions(REVERSED_DIR)` at any time in code. The `REVERSED_DIR` constant comes from the `pimoroni` module. There is also a `NORMAL_DIR` constant, though this is the default.
+
+The current direction of a motor on the cluster can be read back by calling `.direction(motor)`.
+
+
+### Decay Mode
+
+If you have ever had a motor directly connected to a power source and turned the power off, or disconnected the wire, you may have noticed that the motor continues to spin for a second or two before it reaches a stop. This is because the magnetic field the power source was generating has decayed away quickly, so the only thing slowing the motor down is friction. This results in the motor coasting to a stop.
+
+By contrast, if you were to wire your circuit up such that instead of disconnecting the power, the off position joined the two ends of the motor together, it would take longer for the magnetic field to decay away. This has the effect of braking the motor, causing it to stop quicker than with friction alone.
+
+These examples describe the two decay modes supported by the `MotorCluster` class, `FAST_DECAY`, and `SLOW_DECAY`, respectively. Generally slow decay offers better motor performance, particularly with low speeds, so this is the default when creating motors on a new `MotorCluster`.
+
+If fast decay is wanted then it can be changed by calling `.decay_mode(motor, FAST_DECAY)` or `.all_decay_modes(FAST_DECAY)`. The current decay mode of a motor on the cluster can also be read with `.decay_mode(motor)`.
+
+For more information about motor decay modes, it's highly recommended that you check out the Adafruit Learn Guide titled [Improve Brushed DC Motor Performance](https://learn.adafruit.com/improve-brushed-dc-motor-performance)
 
 
 ### Delayed Loading
@@ -730,8 +767,7 @@ For this purpose, all the functions that modify a motor state on a cluster inclu
 Here is the complete list of functions available on the `MotorCluster` class:
 
 ```python
-//TODO
-MotorCluster(pio, sm, pins, calibration=ANGULAR, freq=50, auto_phase=True)    # calibration can either be an integer or a Calibration class
+MotorCluster(pio, sm, pins, direction=NORMAL_DIR, speed_scale=1.0, zeropoint=0.0, deadzone=0.05, freq=25000, mode=SLOW_DECAY, auto_phase=True)
 count()
 pins(motor)
 enable(motor, load=True)
@@ -741,32 +777,47 @@ disable_all(load=True)
 is_enabled(motor)
 duty(motor)
 duty(motor, duty, load=True)
-all_at_duty(motor, load=True)
+all_to_duty(motor, load=True)
 speed(motor)
 speed(motor, speed, load=True)
-all_at_speed(speed, load=True)
+all_to_speed(speed, load=True)
 phase(motor)
 phase(motor, phase, load=True)
 all_to_phase(phase, load=True)
 frequency()
 frequency(freq)
-full_negative(motor, load=True)
-all_full_negative(load=True)
-full_positive(motor, load=True)
-all_full_positive(load=True)
 stop(motor, load=True)
 stop_all(load=True)
 coast(motor, load=True)
 coast_all(load=True)
 brake(motor, load=True)
 brake_all(load=True)
-at_percent(motor, in, load=True)
-at_percent(motor, in, in_min, in_max, load=True)
-at_percent(motor, in, in_min, in_max, value_min, value_max, load=True)
-all_at_percent(in, load=True)
-all_at_percent(in, in_min, in_max, load=True)
-all_at_percent(in, in_min, in_max, value_min, value_max, load=True)
+full_negative(motor, load=True)
+all_full_negative(load=True)
+full_positive(motor, load=True)
+all_full_positive(load=True)
+to_percent(motor, in, load=True)
+to_percent(motor, in, in_min, in_max, load=True)
+to_percent(motor, in, in_min, in_max, speed_min, speed_max, load=True)
+all_to_percent(in, load=True)
+all_to_percent(in, in_min, in_max, load=True)
+all_to_percent(in, in_min, in_max, speed_min, speed_max, load=True)
 load()
+direction(motor)
+direction(motor, direction)
+all_directions(direction)
+speed_scale(motor)
+speed_scale(motor, speed_scale)
+all_speed_scales(speed_scale)
+zeropoint(motor)
+zeropoint(motor, zeropoint)
+all_zeropoints(zeropoint)
+deadzone(motor)
+deadzone(motor, deadzone, load=True)
+all_deadzones(deadzone, load=True)
+decay_mode(motor)
+decay_mode(motor, mode, load=True)
+all_decay_modes(mode, load=True)
 ```
 
 
@@ -775,116 +826,3 @@ load()
 The RP2040 features two PIOs with four state machines each. This places a hard limit on how many MotorClusters can be created. As this class is capable of driving all 30 GPIO pins, the only time this limit will be of concern is when motors with different frequencies are wanted, as all the outputs a MotorCluster controls share the same frequency. Relating this to the hardware PWM, think of it as a single PWM slice with up to 30 sub channels, A, B, C, D etc.
 
 When creating a MotorCluster, in most cases you'll use `0` for PIO and `0` for PIO state-machine. You should change these though if you plan on running multiple clusters, or using a cluster alongside something else that uses PIO, such as our [Plasma library](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/plasma).
-
-
-## Configuration
-
-After using servos for a while, you may notice that some don't quite go to the positions you would expect. Or perhaps you are giving values to a continuous rotation servo in degrees when it would make more sense to use a speed or rpm. To compensate for these cases, each `Servo` class or servo within a `ServoCluster` has an individual `Calibration` class. This class contains a set of pulse-value pairs that are used by the `.value(value)` functions (and those similar) to convert real-world numbers into pulses each servo understand.
-
-### Common Types
-
-There are three common `type`s of servo's supported:
-* `ANGULAR` = `0` - A servo with a value that ranges from -90 to +90 degrees.
-* `LINEAR` = `1` - A servo with a value that ranges from 0 to +1.0.
-* `CONTINUOUS` = `2` - A servo with a value that ranges from -1.0 to +1.0.
-
-By default all `Servo` classes or servo within a `ServoCluster` are `ANGULAR`. This can be changed by providing one of the other types as a parameter during their creation, as shown below:
-```python
-angular = Servo(servo2040.SERVO_1)  # ANGULAR is the default so does not need to be specified here
-linear = Servo(servo2040.SERVO_2, LINEAR)
-continuous = Servo(servo2040.SERVO_3, CONTINUOUS)
-```
-
-
-### Custom Calibration
-
-As well as the common types, a custom calibration can also be provided to one or more servos during creation. Below is an example that creates an angular servo that can only travel from -45 degrees to 45 degrees.
-
-```python
-cal = Calibration()
-cal.apply_two_pairs(1000, 2000, -45, 45)
-s = Servo(servo2040.SERVO_1, cal)
-```
-
-This could be useful for example if the servo turning beyond those values would cause damage to whatever mechanism it is driving, since it would not be possible to go to angles beyond these unless limits were disabled (see [Limits](#limits)). Also it lets the exact pulse widths matching the angles be set (the `1000` and `2000` in the example). Discovering these values can take some trial and error, and will offen be different for each servo.
-
-
-
-# Modifying a Calibration
-
-It is also possible to access and modify the calibration of a `Servo` or a servo on a `ServoCluster` after their creation. This is done by first getting a copy of the servo's calibration using `.calibration()` or `.calibration(servo)`, modifying its pulses or values, then applying the modified calibration back onto to the servo.
-
-Below, an angular servo is modified to increase its reported rotation range from 180 degrees to 270 degrees.
-```python
-wide_angle = Servo(servo2040.SERVO_1)
-cal = wide_angle.calibration()
-cal.first_value(-135)
-cal.last_value(+135)
-wide_angle.calibration(cal)
-```
-
-
-### Movement Limits
-
-As well as providing a mapping between pulses and values, the calibration class also limits a servo from going beyond its minimum and maximum values. In some cases this may not be wanted, so the state of the limits can be modified by calling `.limit_to_calibration(lower, upper)` where `lower` and `upper` are booleans. Additionally, the current state of these limits can be queried by calling `.has_lower_limit()` and `.has_upper_limit()`, respectively.
-
-A case where you may want to disable limits is if you want a servo to go to a value (e.g. 90 degrees), but are not physically able to get a pulse measurement for that but can do another value instead (e.g. 60 degrees).
-
-Note, even with limits disables, servos still have hard limits of `400` and `2600` microsecond pulse widths. These are intended to protect servos from receiving pulses that are too far beyond their expected range. These can vary from servo to servo though, with some hitting a physical end-stop before getting to the typical `500` and `2500` associated with -90 and +90 degrees.
-
-
-### Populating a Calibration
-
-To aid in populating a `Calibration` class, there are five helper functions that fill the class with pulse-value pairs:
-* `apply_blank_pairs(size)` - Fills the calibration with the specified number of zero pairs
-* `apply_two_pairs(min_pulse, max_pulse, min_value, max_value)` - Fills the calibration with two pairs using the min and max numbers provided
-* `apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)` - Fills the calibration with three pairs using the min, mid and max numbers provided
-* `apply_uniform_pairs(size, min_pulse, max_pulse, min_value, max_value)` - Fills the calibration with the specified number of pairs, interpolated from the min to max numbers provided
-* `apply_default_pairs(type)` - Fills the calibration with the pairs of one of the common types
-
-Once a `Calibration` class contains pairs (as checked `.size() > 0`), these can then be accessed by calling `.pair(index)` and can then be modified by calling `.pair(index, pair)`. The former function returns a list containing the pulse and value of the pair, and the latter accepts a list or tuple containing the pulse and value. For situations when only a single element of each pair is needed, `.pulse(index)` and `.value(index)` will return the current numbers, and `.pulse(index, pulse)` and `.value(index, value)` will override them.
-
-For further convenience there are functions for accessing and modifying the `.first()` and `.last()` pair/pulse/value of the calibration.
-
-
-### Viewing the Mapping
-
-To aid in visualising a calibration's pulse-value mapping, the pulse for any given value can be queried by calling `.value_to_pulse(value)`. Similarly, the value for any given pulse can be queried by calling `.pulse_to_value(pulse)`. These are the same functions used by `Servo` and `ServoCluster` when controlling their servos.
-
-
-### Function Reference
-
-Here is the complete list of functions available on the `Calibration` class:
-```python
-Calibration()
-Calibration(type)
-apply_blank_pairs(size)
-apply_two_pairs(min_pulse, max_pulse, min_value, max_value)
-apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value)
-apply_uniform_pairs(size, min_pulse, max_pulse, min_value, max_value)
-apply_default_pairs(type)
-size()
-pair(index)
-pair(index, pair)
-pulse(index)
-pulse(index, pulse)
-value(index)
-value(index, value)
-first()
-first(pair)
-first_pulse()
-first_pulse(pulse)
-first_value()
-first_value(value)
-last()
-last(pair)
-last_pulse()
-last_pulse(pulse)
-last_value()
-last_value(value)
-has_lower_limit()
-has_upper_limit()
-limit_to_calibration(lower, upper)
-value_to_pulse(value)
-pulse_to_value(pulse)
-```
