@@ -36,7 +36,6 @@ include(pico_unicorn/micropython)
 include(pico_display/micropython)
 include(pico_display_2/micropython)
 include(pico_explorer/micropython)
-include(pico_motor_shim/micropython)
 include(pico_wireless/micropython)
 
 include(bitmap_fonts/micropython)
