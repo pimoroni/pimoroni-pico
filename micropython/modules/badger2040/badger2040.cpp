@@ -179,7 +179,7 @@ MICROPY_EVENT_POLL_HOOK
     }
 
     absolute_time_t t_end = make_timeout_time_ms(self->badger2040->update_time());
-    self->badger2040->partial_update(x, y, w, h);
+    self->badger2040->partial_update(x, y, w, h, false);
 
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
