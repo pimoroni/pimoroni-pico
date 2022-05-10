@@ -1,14 +1,20 @@
 import time
 import math
-from motor import Motor, motor2040
+from motor import Motor, pico_motor_shim
+# from pimoroni import REVERSED_DIR
 
 """
-Demonstrates how to create multiple Motor objects and control them together.
+Demonstrates how to create two Motor objects and control them together.
 """
 
 # Create a list of motors
-MOTOR_PINS = [motor2040.MOTOR_A, motor2040.MOTOR_B, motor2040.MOTOR_C, motor2040.MOTOR_D]
+MOTOR_PINS = [pico_motor_shim.MOTOR_1, pico_motor_shim.MOTOR_2]
 motors = [Motor(pins) for pins in MOTOR_PINS]
+
+# Uncomment the below lines (and the top import) to
+# reverse the driving direction of a motor
+# motors[0].direction(REVERSED_DIR)
+# motors[1].direction(REVERSED_DIR)
 
 # Enable all motors
 for m in motors:

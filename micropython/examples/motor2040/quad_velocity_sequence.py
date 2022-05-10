@@ -28,7 +28,7 @@ TIME_FOR_EACH_MOVE = 2                  # The time to travel between each value
 UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES
 PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
 
-DRIVING_SPEED = 1.0                     # The speed to drive the wheels at
+DRIVING_SPEED = 1.0                     # The speed to drive the wheels at, from 0.0 to SPEED_SCALE
 
 # PID values
 VEL_KP = 30.0                           # Velocity proportional (P) gain

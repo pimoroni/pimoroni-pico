@@ -39,13 +39,8 @@ static const uint STATIONARY_TOGGLE_US = 2000;
 
 
 Button button_a(pico_motor_shim::BUTTON_A, Polarity::ACTIVE_LOW, 0);
-#ifdef USE_FAST_DECAY
-  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, FAST_DECAY);
-#else
-  Motor motor_1(pico_motor_shim::MOTOR_1, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
-  Motor motor_2(pico_motor_shim::MOTOR_2, NORMAL_DIR, MotorState::DEFAULT_SPEED_SCALE, MotorState::DEFAULT_FREQUENCY, SLOW_DECAY);
-#endif
+Motor motor_1(pico_motor_shim::MOTOR_1);
+Motor motor_2(pico_motor_shim::MOTOR_2);
 
 static bool button_toggle = false;
 
@@ -69,6 +64,11 @@ int main() {
   //Initialise the LED. We use this to indicate that the sequence is running.
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
+  #ifdef USE_FAST_DECAY
+    motor_1.decay_mode(FAST_DECAY);
+    motor_2.decay_mode(FAST_DECAY);
+  #endif
 
   //Initialise the motor
   if(!motor_1.init() || !motor_2.init()) {
