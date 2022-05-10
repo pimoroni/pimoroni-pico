@@ -31,7 +31,7 @@ namespace motor {
   }
 
   float MotorState::get_duty() const {
-    return last_enabled_duty;
+    return (motor_direction == NORMAL_DIR) ? last_enabled_duty : 0.0f - last_enabled_duty;
   }
 
   float MotorState::get_deadzoned_duty() const {
@@ -47,6 +47,10 @@ namespace motor {
   }
 
   float MotorState::set_duty_with_return(float duty) {
+    // Invert provided speed if the motor direction is reversed
+    if(motor_direction == REVERSED_DIR)
+      duty = 0.0f - duty;
+
     // Clamp the duty between the hard limits
     last_enabled_duty = CLAMP(duty, -1.0f, 1.0f);
 
