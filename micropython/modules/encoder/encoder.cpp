@@ -228,34 +228,23 @@ extern mp_obj_t Encoder_radians(mp_obj_t self_in) {
 }
 
 extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_direction };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_direction, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
+
     if(n_args <= 1) {
-        enum { ARG_self };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
-
         return mp_obj_new_int(self->encoder->direction());
     }
     else {
-        enum { ARG_self, ARG_direction };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_direction, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
-
-        int direction = args[ARG_direction].u_int;
+        int direction = mp_obj_get_int(args[ARG_direction].u_obj);
         if(direction < 0 || direction > 1) {
             mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)");
         }
@@ -265,33 +254,22 @@ extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_ma
 }
 
 extern mp_obj_t Encoder_counts_per_rev(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_counts_per_rev };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_counts_per_rev, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
+
     if(n_args <= 1) {
-        enum { ARG_self };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
-
         return mp_obj_new_float(self->encoder->counts_per_rev());
     }
     else {
-        enum { ARG_self, ARG_counts_per_rev };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_counts_per_rev, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _Encoder_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Encoder_obj_t);
-
         float counts_per_rev = mp_obj_get_float(args[ARG_counts_per_rev].u_obj);
         if(counts_per_rev < FLT_EPSILON) {
             mp_raise_ValueError("counts_per_rev out of range. Expected greater than 0.0");
