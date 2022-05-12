@@ -120,7 +120,7 @@ mp_obj_t BreakoutColourLCD240x240_make_new(const mp_obj_type_t *type, size_t n_a
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
         self->breakout = new BreakoutColourLCD240x240((uint16_t *)bufinfo.buf, spi,
-            args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, PIN_UNUSED, args[ARG_bl].u_int);
+            args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, args[ARG_bl].u_int);
     }
 
     self->breakout->init();

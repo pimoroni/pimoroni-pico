@@ -1,16 +1,14 @@
 import time
 import math
-from breakout_roundlcd import BreakoutRoundLCD
+from st7789 import ST7789
 
-width = BreakoutRoundLCD.WIDTH
-height = BreakoutRoundLCD.HEIGHT
+WIDTH, HEIGHT = 240, 240
 
-display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
-display = BreakoutRoundLCD(display_buffer)
+display = ST7789(WIDTH, HEIGHT, round=True)
 
 display.set_backlight(1.0)
 
-RADIUS = width // 2
+RADIUS = WIDTH // 2
 
 
 def hsv_to_rgb(h, s, v):

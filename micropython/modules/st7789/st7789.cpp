@@ -17,6 +17,7 @@ extern "C" {
 typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
     ST7789Generic *st7789;
+    uint16_t *buffer;
 } GenericST7789_obj_t;
 
 /***** Print *****/
@@ -51,10 +52,11 @@ void GenericST7789_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kin
 mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     GenericST7789_obj_t *self = nullptr;
 
-    enum { ARG_width, ARG_height, ARG_rotate180, ARG_slot, ARG_buffer, ARG_spi, ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_bl };
+    enum { ARG_width, ARG_height, ARG_round, ARG_rotate180, ARG_slot, ARG_buffer, ARG_spi, ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_bl };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_round, MP_ARG_OBJ, {.u_obj = mp_const_false} },
         { MP_QSTR_rotate180, MP_ARG_OBJ, {.u_obj = mp_const_false} },
         { MP_QSTR_slot, MP_ARG_INT, {.u_int = -1} },
         { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = mp_const_none} },
@@ -74,24 +76,24 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     self->base.type = &GenericST7789_type;
 
     bool rotate180 = args[ARG_rotate180].u_obj == mp_const_true;
+    bool round = args[ARG_round].u_obj == mp_const_true;
     int width = args[ARG_width].u_int;
     int height = args[ARG_height].u_int;
 
-    uint16_t *buffer;
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        buffer = (uint16_t *)bufinfo.buf;
+        self->buffer = (uint16_t *)bufinfo.buf;
         if(bufinfo.len < (size_t)(width * height * 2)) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        buffer = m_new(uint16_t, width * height);
+        self->buffer = m_new(uint16_t, width * height);
     }
 
     if(args[ARG_slot].u_int != -1) {
         BG_SPI_SLOT slot = (BG_SPI_SLOT)args[ARG_slot].u_int;
-        self->st7789 = new ST7789Generic(width, height, slot, buffer);
+        self->st7789 = new ST7789Generic(width, height, round, self->buffer, slot);
         if (rotate180) {
             self->st7789->configure_display(true);
         }
@@ -119,9 +121,8 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
             mp_raise_ValueError(MP_ERROR_TEXT("bad MOSI pin"));
         }
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
-        self->st7789 = new ST7789Generic(width, height, spi,
-            cs, dc, sck, mosi, PIN_UNUSED, bl,
-            buffer);
+        self->st7789 = new ST7789Generic(width, height, round, self->buffer,
+            spi, cs, dc, sck, mosi, bl);
         if (rotate180) {
             self->st7789->configure_display(true);
         }

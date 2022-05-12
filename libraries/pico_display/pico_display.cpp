@@ -9,12 +9,14 @@
 namespace pimoroni {
 
   PicoDisplay::PicoDisplay(uint16_t *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, BG_SPI_FRONT)  {
+    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, false, buf,
+      PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM)  {
       __fb = buf;
   }
 
   PicoDisplay::PicoDisplay(uint16_t *buf, int width, int height)
-    : PicoGraphics(width, height, buf), screen(width, height, buf, BG_SPI_FRONT)  {
+    : PicoGraphics(width, height, buf), screen(width, height, false, buf,
+      PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM)  {
       __fb = buf;
   }
 
@@ -43,9 +45,6 @@ namespace pimoroni {
     gpio_set_function(B, GPIO_FUNC_SIO); gpio_set_dir(B, GPIO_IN); gpio_pull_up(B);
     gpio_set_function(X, GPIO_FUNC_SIO); gpio_set_dir(X, GPIO_IN); gpio_pull_up(X);
     gpio_set_function(Y, GPIO_FUNC_SIO); gpio_set_dir(Y, GPIO_IN); gpio_pull_up(Y);
-
-    // initialise the screen
-    screen.init();
   }
 
   void PicoDisplay::update() {

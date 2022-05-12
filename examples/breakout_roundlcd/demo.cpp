@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "breakout_roundlcd.hpp"
+#include "generic_st7789.hpp"
 #include "time.h"
 
 // Place a 1.3 Round SPI LCD in the *front* slot of breakout garden.
@@ -11,10 +11,12 @@
 using namespace pimoroni;
 
 
-uint16_t buffer[BreakoutRoundLCD::WIDTH * BreakoutRoundLCD::HEIGHT];
-BreakoutRoundLCD display(buffer, BG_SPI_FRONT);
+const int WIDTH = 240;
+const int HEIGHT = 240;
 
-constexpr float RADIUS = BreakoutRoundLCD::WIDTH / 2;
+ST7789Generic display(WIDTH, HEIGHT, true, nullptr, BG_SPI_FRONT);
+
+constexpr float RADIUS = WIDTH / 2;
 
 Pen from_hsv(float h, float s, float v) {
   uint8_t r = 0, g = 0, b = 0;
@@ -39,7 +41,6 @@ Pen from_hsv(float h, float s, float v) {
 }
 
 int main() {
-    display.init();
     display.set_backlight(255);
 
     uint32_t steps = 70;

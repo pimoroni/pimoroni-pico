@@ -1,12 +1,10 @@
 import time
 import random
-from breakout_colourlcd240x240 import BreakoutColourLCD240x240
+from st7789 import ST7789
 
-width = BreakoutColourLCD240x240.WIDTH
-height = BreakoutColourLCD240x240.HEIGHT
+WIDTH, HEIGHT = 240, 240
 
-display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
-display = BreakoutColourLCD240x240(display_buffer)
+display = ST7789(WIDTH, HEIGHT, round=False)
 
 display.set_backlight(1.0)
 
@@ -27,8 +25,8 @@ for i in range(0, 100):
     r = random.randint(0, 10) + 3
     balls.append(
         Ball(
-            random.randint(r, r + (width - 2 * r)),
-            random.randint(r, r + (height - 2 * r)),
+            random.randint(r, r + (WIDTH - 2 * r)),
+            random.randint(r, r + (HEIGHT - 2 * r)),
             r,
             (14 - r) / 2,
             (14 - r) / 2,
@@ -44,9 +42,9 @@ while True:
         ball.x += ball.dx
         ball.y += ball.dy
 
-        xmax = width - ball.r
+        xmax = WIDTH - ball.r
         xmin = ball.r
-        ymax = height - ball.r
+        ymax = HEIGHT - ball.r
         ymin = ball.r
 
         if ball.x < xmin or ball.x > xmax:

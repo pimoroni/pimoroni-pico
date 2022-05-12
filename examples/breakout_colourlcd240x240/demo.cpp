@@ -1,15 +1,17 @@
 #include <math.h>
 #include <vector>
 
-#include "breakout_colourlcd240x240.hpp"
+#include "generic_st7789.hpp"
 
 using namespace pimoroni;
 
-uint16_t buffer[BreakoutColourLCD240x240::WIDTH * BreakoutColourLCD240x240::HEIGHT];
-BreakoutColourLCD240x240 lcd(buffer);
+const int WIDTH = 240;
+const int HEIGHT = 240;
+
+ST7789Generic lcd(WIDTH, HEIGHT, false, nullptr, BG_SPI_FRONT);
 
 int main() {
-  lcd.init();
+  //lcd.configure_display(false);
   lcd.set_backlight(255);
 
   struct pt {
@@ -24,9 +26,11 @@ int main() {
   std::vector<pt> shapes;
   for(int i = 0; i < 100; i++) {
     pt shape;
-    shape.x = rand() % lcd.bounds.w;
-    shape.y = rand() % lcd.bounds.h;
     shape.r = (rand() % 10) + 3;
+    shape.x = rand() % (lcd.bounds.w - (shape.r * 2));
+    shape.y = rand() % (lcd.bounds.h - (shape.r * 2));
+    shape.x += shape.r;
+    shape.y += shape.r;
     shape.dx = float(rand() % 255) / 64.0f;
     shape.dy = float(rand() % 255) / 64.0f;
     shape.pen = lcd.create_pen(rand() % 255, rand() % 255, rand() % 255);
@@ -40,14 +44,17 @@ int main() {
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
-      if(shape.x < 0) shape.dx *= -1;
-      if(shape.x >= lcd.bounds.w) shape.dx *= -1;
-      if(shape.y < 0) shape.dy *= -1;
-      if(shape.y >= lcd.bounds.h) shape.dy *= -1;
+      if(shape.x < shape.r) shape.dx *= -1;
+      if(shape.x >= lcd.bounds.w - shape.r) shape.dx *= -1;
+      if(shape.y < shape.r) shape.dy *= -1;
+      if(shape.y >= lcd.bounds.h - shape.r) shape.dy *= -1;
 
       lcd.set_pen(shape.pen);
       lcd.circle(Point(shape.x, shape.y), shape.r);
     }
+
+    lcd.set_pen(255, 255, 255);
+    lcd.text("Hello World", Point(0, 0), 240);
 
     // update screen
     lcd.update();
