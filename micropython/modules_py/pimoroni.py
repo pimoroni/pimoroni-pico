@@ -5,6 +5,10 @@ from machine import Pin, PWM, ADC
 BREAKOUT_GARDEN_I2C_PINS = {"sda": 4, "scl": 5}
 PICO_EXPLORER_I2C_PINS = {"sda": 20, "scl": 21}
 
+BREAKOUT_GARDEN_SPI_SLOT_FRONT = 0
+BREAKOUT_GARDEN_SPI_SLOT_BACK = 1
+PICO_EXPLORER_SPI_ONBOARD = 2
+
 
 class Analog:
     def __init__(self, pin, amplifier_gain=1, resistor=0):
