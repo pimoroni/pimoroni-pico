@@ -1,6 +1,6 @@
 import gc
 from encoder import Encoder
-# from encoder import REVERSED
+# from encoder import REVERSED_DIR
 
 """
 A demonstration of a rotary encoder being used to control a value.
@@ -16,13 +16,13 @@ PIN_C = 27    # The common pin
 enc = Encoder(0, 0, (PIN_A, PIN_B), PIN_C)
 
 # Uncomment the below line (and the top import) to reverse the counting direction
-# enc.direction(REVERSED)
+# enc.direction(REVERSED_DIR)
 
 # The min and max value
 MIN_VALUE = 0
-MAX_VALUE = 11
+MAX_VALUE = 100
 
-value = 1
+value = 50
 
 # Print out the initial value
 print("Value =", value)

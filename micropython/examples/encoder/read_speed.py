@@ -1,7 +1,7 @@
 import gc
 import time
 from encoder import Encoder
-# from encoder import REVERSED
+# from encoder import REVERSED_DIR
 
 """
 An example of how to read the speed a mechanical rotary encoder is being turned at.
@@ -17,7 +17,7 @@ PIN_C = 27    # The common pin
 enc = Encoder(0, 0, (PIN_A, PIN_B), PIN_C)
 
 # Uncomment the below line (and the top import) to reverse the counting direction
-# enc.direction(REVERSED)
+# enc.direction(REVERSED_DIR)
 
 
 # Loop forever
