@@ -1,4 +1,4 @@
-# Pico Motor Shim C++ Examples <!-- omit in toc -->
+# Pico Motor Shim MicroPython Examples <!-- omit in toc -->
 
 - [Examples](#examples)
   - [Single Motor](#single-motor)
@@ -8,7 +8,7 @@
   - [Stop Motors](#stop-motors)
 
 
-## Motor Examples
+## Examples
 
 ### Single Motor
 [single_motor.py](single_motor.py)
@@ -35,6 +35,6 @@ A fun example of how to change a motor's frequency to have it play a song.
 
 
 ### Stop Motors
-[stop_motors.py](motorshim_motor_song.py)
+[stop_motors.py](stop_motors.py)
 
 A simple program that stops the motors.

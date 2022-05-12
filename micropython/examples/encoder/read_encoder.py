@@ -4,7 +4,7 @@ from encoder import Encoder
 # from encoder import REVERSED
 
 """
-An example of how to read a mechanical rotary encoder, only when it has turned
+An example of how to read a mechanical rotary encoder.
 """
 
 # Free up hardware resources ahead of creating a new Encoder
@@ -19,14 +19,14 @@ enc = Encoder(0, 0, (PIN_A, PIN_B), PIN_C)
 # Uncomment the below line (and the top import) to reverse the counting direction
 # enc.direction(REVERSED)
 
+
 # Loop forever
 while True:
-    capture = enc.take_snapshot()
 
-    print("Count =", capture.count(), end=", ")
-    print("Angle =", capture.degrees(), end=", ")
-    print("Freq =", capture.frequency(), end=", ")
-    print("Speed =", capture.degrees_per_second())
-        
+    # Print out the count, delta, step, and turn
+    print("Count =", enc.count(), end=", ")
+    print("Delta =", enc.delta(), end=", ")
+    print("Step =", enc.step(), end=", ")
+    print("Turn =", enc.turn())
+
     time.sleep(0.1)
-

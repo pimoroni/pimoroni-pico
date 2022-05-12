@@ -7,7 +7,7 @@
   - [Motor Song](#motor-song)
 
 
-## Motor Examples
+## Examples
 
 ### Single Motor
 [motorshim_single_motor.cpp](motorshim_single_motor.cpp)

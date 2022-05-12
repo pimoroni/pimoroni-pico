@@ -3,7 +3,7 @@ from encoder import Encoder
 # from encoder import REVERSED
 
 """
-An example of how to read a mechanical rotary encoder, only when it has turned
+A demonstration of a rotary encoder being used to control a value.
 """
 
 # Free up hardware resources ahead of creating a new Encoder
@@ -18,15 +18,23 @@ enc = Encoder(0, 0, (PIN_A, PIN_B), PIN_C)
 # Uncomment the below line (and the top import) to reverse the counting direction
 # enc.direction(REVERSED)
 
-# Print out the initial count, step, and turn (they should all be zero)
-print("Count =", enc.count(), end=", ")
-print("Step =", enc.step(), end=", ")
-print("Turn =", enc.turn())
+# The min and max value
+MIN_VALUE = 0
+MAX_VALUE = 11
+
+value = 1
+
+# Print out the initial value
+print("Value =", value)
 
 # Loop forever
 while True:
-    if enc.delta() != 0:
-        # Print out the new count, step, and turn
-        print("Count =", enc.count(), end=", ")
-        print("Step =", enc.step(), end=", ")
-        print("Turn =", enc.turn())
+    delta = enc.delta()
+    if delta != 0:
+        if delta > 0:
+            value = min(value + 1, MAX_VALUE)
+        else:
+            value = max(value - 1, MIN_VALUE)
+
+        # Print out the new value
+        print("Value =", value)
