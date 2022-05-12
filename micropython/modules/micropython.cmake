@@ -29,7 +29,7 @@ include(breakout_bme280/micropython)
 include(breakout_bmp280/micropython)
 include(breakout_icp10125/micropython)
 include(breakout_scd41/micropython)
-include(breakout_vl53l5cx/micropython)
+# include(breakout_vl53l5cx/micropython)
 
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
