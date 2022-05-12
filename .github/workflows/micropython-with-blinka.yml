@@ -9,8 +9,8 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   MICROPYTHON_VERSION: v1.18
-  BLINKA_VERSION: 6.20.1
-  PLATFORMDETECT_VERSION: 3.19.3
+  BLINKA_VERSION: 7.3.0
+  PLATFORMDETECT_VERSION: 3.22.1
   BUILD_TYPE: Release
   BOARD_TYPE: PICO
 
@@ -64,6 +64,7 @@ jobs:
         cp -r pimoroni-pico-${GITHUB_SHA}/micropython/modules_py/* micropython/ports/rp2/modules/
         mkdir -p micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
         cp -r Adafruit_Blinka/src/adafruit_blinka/microcontroller/rp2040 micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
+        cp -r Adafruit_Blinka/src/adafruit_blinka/microcontroller/generic_micropython micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
         mkdir -p micropython/ports/rp2/modules/adafruit_blinka/board/raspberrypi/
         cp Adafruit_Blinka/src/adafruit_blinka/microcontroller/__init__.py micropython/ports/rp2/modules/adafruit_blinka/microcontroller/
         cp Adafruit_Blinka/src/adafruit_blinka/board/__init__.py micropython/ports/rp2/modules/adafruit_blinka/board/

@@ -14,6 +14,7 @@
   - [Image](#image)
   - [QR gen](#qr-gen)
   - [Launcher](#launcher)
+  - [Conway](#conway)
 
 
 ## Function Examples
@@ -56,10 +57,12 @@ python3 convert.py --binary --resize image_file_1.png image_file_2.png image_fil
 
 A checklist application, letting you navigate through items and tick each of them off.
 
+* `checklist.txt` - A text file containing the titles of items for the list.
+
 ### Clock
 [clock.py](clock.py)
 
-A simple clock showing the time and date, that uses the E Ink's fast speed to update every second
+A simple clock showing the time and date, that uses the E Ink's fast speed to update every second.
 
 ### E-Book
 [ebook.py](ebook.py)
@@ -83,10 +86,17 @@ python3 convert.py --binary --resize image_file_1.png image_file_2.png image_fil
 ### QR gen
 [qrgen.py](qrgen.py)
 
-This application looks for a file on your MicroPython drive:
-- `qrcode.txt` - A text file containing 9 lines. The first line should be a URL which will be converted into and displayed as a QR code. Up to 8 more lines of information can be added, which will be shown as plain text to the right of the QR code.
+Displays and lets you cycle through multiple QR codes, with configuration stored in text files within the MicroPython device's `/qrcodes` directory.
+
+- `/qrcodes/qrcode.txt` - A text file containing 9 lines. The first line should be a URL which will be converted into and displayed as a QR code. Up to 8 more lines of information can be added, which will be shown as plain text to the right of the QR code.
+- `/qrcodes/*.txt` - additional text files can be created using the same format. All text files can be cycled through.
 
 ### Launcher
 [launcher.py](launcher.py)
 
-A launcher-style application, that provide a menu of other applications that can be loaded, as well as information such as battery level.
+A launcher-style application, providing a menu of other applications that can be loaded, as well as information such as battery level.
+
+### Conway
+[conway.py](conway.py)
+
+Conway's classic Game of Life, implemented on the Badger. Note: this application is *not* linked from the Launcher by default - it can be run directly using Thonny or your MicroPython editor of choice, or you can modify the Launcher to add it (you'll want to update `launchericons.png` as well)
