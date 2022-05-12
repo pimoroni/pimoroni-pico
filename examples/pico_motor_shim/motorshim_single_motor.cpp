@@ -1,6 +1,7 @@
+#include <math.h>
 #include "pico/stdlib.h"
 
-#include "motor2040.hpp"
+#include "pico_motor_shim.hpp"
 
 /*
 Demonstrates how to create a Motor object and control it.
@@ -22,7 +23,7 @@ constexpr float SPEED_EXTENT = 1.0f;
 
 
 // Create a motor
-Motor m = Motor(motor2040::MOTOR_A);
+Motor m = Motor(pico_motor_shim::MOTOR_1);
 
 
 int main() {

@@ -31,7 +31,7 @@ constexpr float COUNTS_PER_REV = MMME_CPR * GEAR_RATIO;
 const Direction DIRECTION = NORMAL_DIR;
 
 // The scaling to apply to the motor's speed to match its real-world speed
-float SPEED_SCALE = 5.4f;
+constexpr float SPEED_SCALE = 5.4f;
 
 // How many times to update the motor per second
 const uint UPDATES = 100;

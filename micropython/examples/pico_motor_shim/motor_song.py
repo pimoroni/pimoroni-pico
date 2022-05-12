@@ -6,6 +6,8 @@ from pimoroni import Button
 
 """
 A fun example of how to change a motor's frequency to have it play a song.
+
+Press "A" to start or stop the song.
 """
 
 # This handy dictionary converts notes into frequencies
