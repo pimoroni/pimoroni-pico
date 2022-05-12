@@ -17,6 +17,7 @@ namespace pimoroni {
     // screen properties
     uint16_t width;
     uint16_t height;
+    bool round;
     uint16_t row_stride;
     uint32_t dma_channel;
 
@@ -32,6 +33,7 @@ namespace pimoroni {
     // The ST7789 requires 16 ns between SPI rising edges.
     // 16 ns = 62,500,000 Hz
     static const uint32_t SPI_BAUD = 62'500'000;
+
 
   public:
     // frame buffer where pixel data is stored
@@ -74,6 +76,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     void init(bool auto_init_sequence = true, bool round = false, uint32_t spi_baud = SPI_BAUD);
+    void configure_display(bool rotate180);
 
     spi_inst_t* get_spi() const;
     uint get_cs() const;

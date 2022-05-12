@@ -55,6 +55,8 @@ namespace pimoroni {
   };
 
   void ST7789::init(bool auto_init_sequence, bool round, uint32_t spi_baud) {
+    this->round = round;
+
     // configure spi interface and pins
     spi_init(spi, spi_baud);
 
@@ -96,33 +98,29 @@ namespace pimoroni {
 
       sleep_ms(150);
 
+      // Common init
       command(reg::TEON);  // enable frame sync signal if used
       command(reg::COLMOD,    1, "\x05");  // 16 bits per pixel
 
+      command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
+      command(reg::LCMCTRL, 1, "\x2c");
+      command(reg::VDVVRHEN, 1, "\x01");
+      command(reg::VRHS, 1, "\x12");
+      command(reg::VDVS, 1, "\x20");
+      command(reg::PWCTRL1, 2, "\xa4\xa1");
+      command(reg::FRCTRL2, 1, "\x0f");
+
       if(width == 240 && height == 240) {
-        command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
         command(reg::GCTRL, 1, "\x14");
         command(reg::VCOMS, 1, "\x37");
-        command(reg::LCMCTRL, 1, "\x2c");
-        command(reg::VDVVRHEN, 1, "\x01");
-        command(reg::VRHS, 1, "\x12");
-        command(reg::VDVS, 1, "\x20");
-        command(reg::PWCTRL1, 2, "\xa4\xa1");
-        command(reg::FRCTRL2, 1, "\x0f");
         command(reg::GMCTRP1, 14, "\xD0\x04\x0D\x11\x13\x2B\x3F\x54\x4C\x18\x0D\x0B\x1F\x23");
         command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
       }
 
-      if(width == 320 && height == 240) {
-        command(reg::PORCTRL, 5, "\x0c\x0c\x00\x33\x33");
+      if((width == 320 && height == 240)
+      || (width == 240 && height == 320)) {
         command(reg::GCTRL, 1, "\x35");
         command(reg::VCOMS, 1, "\x1f");
-        command(reg::LCMCTRL, 1, "\x2c");
-        command(reg::VDVVRHEN, 1, "\x01");
-        command(reg::VRHS, 1, "\x12");
-        command(reg::VDVS, 1, "\x20");
-        command(reg::FRCTRL2, 1, "\x0f");
-        command(reg::PWCTRL1, 2, "\xa4\xa1");
         command(0xd6, 1, "\xa1"); // ???
         command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
         command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
@@ -134,48 +132,7 @@ namespace pimoroni {
 
       sleep_ms(100);
 
-      // setup correct addressing window
-      if(width == 240 && height == 240) {
-        caset[0] = 0;
-        caset[1] = 239;
-        raset[0] = round ? 40 : 0;
-        raset[1] = round ? 279 : 239;
-        madctl = MADCTL::HORIZ_ORDER;
-      }
-
-      if(width == 240 && height == 135) {
-        caset[0] = 40;   // 240 cols
-        caset[1] = 279;
-        raset[0] = 53;   // 135 rows
-        raset[1] = 187;
-        madctl = MADCTL::COL_ORDER | MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
-      }
-
-      if(width == 135 && height == 240) {
-        caset[0] = 52;   // 135 cols
-        caset[1] = 186;
-        raset[0] = 40;   // 240 rows
-        raset[1] = 279;
-        madctl = 0;
-      }
-
-      if(width == 320 && height == 240) {
-        caset[0] = 0;
-        caset[1] = 319;
-        raset[0] = 0;
-        raset[1] = 239;
-        madctl = 0x70;
-      }
-
-      // Byte swap the 16bit rows/cols values
-      caset[0] = __builtin_bswap16(caset[0]);
-      caset[1] = __builtin_bswap16(caset[1]);
-      raset[0] = __builtin_bswap16(raset[0]);
-      raset[1] = __builtin_bswap16(raset[1]);
-
-      command(reg::CASET,     4, (char *)caset);
-      command(reg::RASET,     4, (char *)raset);
-      command(reg::MADCTL,    1, (char *)&madctl);
+      configure_display(false);
 
       if(bl != PIN_UNUSED) {
         update(); // Send the new buffer to the display to clear any previous content
@@ -203,6 +160,65 @@ namespace pimoroni {
     // channel_config_set_dreq(&config, spi_get_index(spi) ? DREQ_SPI1_TX : DREQ_SPI0_TX);
     // dma_channel_configure(
     //   dma_channel, &config, &spi_get_hw(spi)->dr, frame_buffer, width * height, false);
+  }
+
+  void ST7789::configure_display(bool rotate180) {
+    // setup correct addressing window
+    if(width == 240 && height == 240) {
+      caset[0] = 0;
+      caset[1] = 239;
+      raset[0] = round ? 40 : 0;
+      raset[1] = round ? 279 : 239;
+      madctl = MADCTL::HORIZ_ORDER;
+    }
+
+    // Pico Display
+    if(width == 240 && height == 135) {
+      caset[0] = 40;   // 240 cols
+      caset[1] = 279;
+      raset[0] = 53;   // 135 rows
+      raset[1] = 187;
+      madctl = rotate180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
+      madctl |= MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
+    }
+
+    // Pico Display at 90 degree rotation
+    if(width == 135 && height == 240) {
+      caset[0] = 52;   // 135 cols
+      caset[1] = 186;
+      raset[0] = 40;   // 240 rows
+      raset[1] = 279;
+      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+    }
+
+    // Pico Display 2.0
+    if(width == 320 && height == 240) {
+      caset[0] = 0;
+      caset[1] = 319;
+      raset[0] = 0;
+      raset[1] = 239;
+      madctl = rotate180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
+      madctl |= MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
+    }
+
+    // Pico Display 2.0 at 90 degree rotation
+    if(width == 240 && height == 320) {
+      caset[0] = 0;
+      caset[1] = 239;
+      raset[0] = 0;
+      raset[1] = 319;
+      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+    }
+
+    // Byte swap the 16bit rows/cols values
+    caset[0] = __builtin_bswap16(caset[0]);
+    caset[1] = __builtin_bswap16(caset[1]);
+    raset[0] = __builtin_bswap16(raset[0]);
+    raset[1] = __builtin_bswap16(raset[1]);
+
+    command(reg::CASET,     4, (char *)caset);
+    command(reg::RASET,     4, (char *)raset);
+    command(reg::MADCTL,    1, (char *)&madctl);
   }
 
   spi_inst_t* ST7789::get_spi() const {

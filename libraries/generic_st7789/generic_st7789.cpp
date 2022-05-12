@@ -56,4 +56,8 @@ namespace pimoroni {
   void ST7789Generic::set_backlight(uint8_t brightness) {
     st7789.set_backlight(brightness);
   }
+
+  void ST7789Generic::configure_display(bool rotate180) {
+    st7789.configure_display(rotate180);
+  }
 }

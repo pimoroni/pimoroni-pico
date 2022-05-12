@@ -25,6 +25,7 @@ namespace pimoroni {
     void update();
     void flip();
     void set_backlight(uint8_t brightness);
+    void configure_display(bool rotate180);
   };
 
 }
