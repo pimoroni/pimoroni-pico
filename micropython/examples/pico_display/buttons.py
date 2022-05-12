@@ -1,13 +1,22 @@
 # This example shows you a simple, non-interrupt way of reading Pico Display's buttons with a loop that checks to see if buttons are pressed.
 
-import picodisplay as display  # Comment this line out to use PicoDisplay2
-# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+import st7789
 import utime
+from pimoroni import Button
 
-# Initialise display with a bytearray display buffer
-buf = bytearray(display.get_width() * display.get_height() * 2)
-display.init(buf)
+# Set the display resolution
+# in most cases you can swap WIDTH weith HEIGHT for portrait mode
+WIDTH, HEIGHT = 240, 135    # Pico Display
+# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
+
+display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
 display.set_backlight(0.5)
+
+
+button_a = Button(12)
+button_b = Button(13)
+button_x = Button(14)
+button_y = Button(15)
 
 
 # sets up a handy function we can call to clear the screen
@@ -18,28 +27,28 @@ def clear():
 
 
 while True:
-    if display.is_pressed(display.BUTTON_A):              # if a button press is detected then...
+    if button_a.read():                                   # if a button press is detected then...
         clear()                                           # clear to black
         display.set_pen(255, 255, 255)                    # change the pen colour
         display.text("Button A pressed", 10, 10, 240, 4)  # display some text on the screen
         display.update()                                  # update the display
         utime.sleep(1)                                    # pause for a sec
         clear()                                           # clear to black again
-    elif display.is_pressed(display.BUTTON_B):
+    elif button_b.read():
         clear()
         display.set_pen(0, 255, 255)
         display.text("Button B pressed", 10, 10, 240, 4)
         display.update()
         utime.sleep(1)
         clear()
-    elif display.is_pressed(display.BUTTON_X):
+    elif button_x.read():
         clear()
         display.set_pen(255, 0, 255)
         display.text("Button X pressed", 10, 10, 240, 4)
         display.update()
         utime.sleep(1)
         clear()
-    elif display.is_pressed(display.BUTTON_Y):
+    elif button_y.read():
         clear()
         display.set_pen(255, 255, 0)
         display.text("Button Y pressed", 10, 10, 240, 4)

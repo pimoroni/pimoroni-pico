@@ -1,6 +1,12 @@
-import picodisplay as display  # Comment this line out to use PicoDisplay2
-# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+import st7789
 import qrcode
+
+# Set the display resolution
+# in most cases you can swap WIDTH weith HEIGHT for portrait mode
+WIDTH, HEIGHT = 240, 135    # Pico Display
+# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
+
+display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
 
 
 def measure_qr_code(size, code):
@@ -20,22 +26,17 @@ def draw_qr_code(ox, oy, size, code):
                 display.rectangle(ox + x * module_size, oy + y * module_size, module_size, module_size)
 
 
-width = display.get_width()
-height = display.get_height()
-
 code = qrcode.QRCode()
 code.set_text("shop.pimoroni.com")
-
-display.init(bytearray(width * height * 2))
 
 display.set_pen(128, 128, 128)
 display.clear()
 display.set_pen(0, 0, 0)
 
-size, module_size = measure_qr_code(height, code)
-left = int((width // 2) - (size // 2))
-top = int((height // 2) - (size // 2))
-draw_qr_code(left, top, height, code)
+size, module_size = measure_qr_code(HEIGHT, code)
+left = int((WIDTH // 2) - (size // 2))
+top = int((HEIGHT // 2) - (size // 2))
+draw_qr_code(left, top, HEIGHT, code)
 
 display.update()
 

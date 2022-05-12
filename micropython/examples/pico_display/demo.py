@@ -1,13 +1,12 @@
 import time
 import random
-import picodisplay as display  # Comment this line out to use PicoDisplay2
-# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+import st7789
 
-width = display.get_width()
-height = display.get_height()
+# Set the display resolution, in most cases you can flip these for portrait mode
+WIDTH, HEIGHT = 240, 135    # Pico Display
+# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
 
-display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
-display.init(display_buffer)
+display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
 
 display.set_backlight(1.0)
 
@@ -28,8 +27,8 @@ for i in range(0, 100):
     r = random.randint(0, 10) + 3
     balls.append(
         Ball(
-            random.randint(r, r + (width - 2 * r)),
-            random.randint(r, r + (height - 2 * r)),
+            random.randint(r, r + (WIDTH - 2 * r)),
+            random.randint(r, r + (HEIGHT - 2 * r)),
             r,
             (14 - r) / 2,
             (14 - r) / 2,
@@ -45,9 +44,9 @@ while True:
         ball.x += ball.dx
         ball.y += ball.dy
 
-        xmax = width - ball.r
+        xmax = WIDTH - ball.r
         xmin = ball.r
-        ymax = height - ball.r
+        ymax = HEIGHT - ball.r
         ymin = ball.r
 
         if ball.x < xmin or ball.x > xmax:
