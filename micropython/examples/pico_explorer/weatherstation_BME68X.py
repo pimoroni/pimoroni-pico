@@ -4,6 +4,7 @@ import utime
 
 from breakout_bme68x import BreakoutBME68X
 from pimoroni_i2c import PimoroniI2C
+from pimoroni import PICO_EXPLORER_I2C_PINS
 
 # Pico Explorer boilerplate
 import picoexplorer as display
@@ -12,10 +13,7 @@ height = display.get_height()
 display_buffer = bytearray(width * height * 2)
 display.init(display_buffer)
 
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
-
-i2c = PimoroniI2C(**PINS_PICO_EXPLORER)
+i2c = PimoroniI2C(**PICO_EXPLORER_I2C_PINS)
 bme = BreakoutBME68X(i2c)
 
 # lets set up some pen colours to make drawing easier
