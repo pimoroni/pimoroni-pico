@@ -8,7 +8,7 @@ from pimoroni import Button
 A fun example of how to change a motor's frequency to have it play a song.
 """
 
-# This handy dictonary converts notes into frequencies
+# This handy dictionary converts notes into frequencies
 TONES = {
     "B0": 31,
     "C1": 33,
