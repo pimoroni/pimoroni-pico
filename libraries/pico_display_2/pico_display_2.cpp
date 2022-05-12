@@ -6,10 +6,6 @@
 
 #include "pico_display_2.hpp"
 
-const uint8_t LED_R = 6;
-const uint8_t LED_G = 7;
-const uint8_t LED_B = 8;
-
 namespace pimoroni {
 
   PicoDisplay2::PicoDisplay2(uint16_t *buf)

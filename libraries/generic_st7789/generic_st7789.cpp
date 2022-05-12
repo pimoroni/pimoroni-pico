@@ -12,6 +12,12 @@ namespace pimoroni {
       this->st7789.init(true, false);
   }
 
+  ST7789Generic::ST7789Generic(int width, int height, uint16_t *frame_buffer)
+    : PicoGraphics(width, height, frame_buffer), st7789(width, height, frame_buffer, BG_SPI_FRONT) {
+      this->frame_buffer = st7789.frame_buffer;
+      this->st7789.init(true, false);
+  }
+
   ST7789Generic::ST7789Generic(uint16_t width, uint16_t height, spi_inst_t *spi,
            uint cs, uint dc, uint sck, uint mosi, uint miso, uint bl,
             uint16_t *frame_buffer) :

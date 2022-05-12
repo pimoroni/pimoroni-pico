@@ -11,6 +11,7 @@ namespace pimoroni {
 
   public:
     ST7789Generic(int width, int height, BG_SPI_SLOT slot, uint16_t *frame_buffer = nullptr);
+    ST7789Generic(int width, int height, uint16_t *frame_buffer = nullptr);
     ST7789Generic(uint16_t width, uint16_t height, spi_inst_t *spi,
            uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED,
             uint16_t *frame_buffer = nullptr);
