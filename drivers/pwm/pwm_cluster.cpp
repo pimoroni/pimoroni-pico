@@ -22,13 +22,14 @@ uint8_t PWMCluster::claimed_sms[] = { 0x0, 0x0 };
 uint PWMCluster::pio_program_offset = 0;
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer, TransitionData *dat_buffer)
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
 , channel_count(0)
 , channels(nullptr)
-, wrap_level(0) {
+, wrap_level(0)
+, loading_zone(loading_zone) {
 
   // Create the channel mapping
   for(uint pin = 0; pin < NUM_BANK0_GPIOS; pin++) {
@@ -42,13 +43,14 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer, Tr
 }
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer, TransitionData *dat_buffer)
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
 , channels(nullptr)
-, wrap_level(0) {
+, wrap_level(0)
+, loading_zone(loading_zone) {
 
   // Create the pin mask and channel mapping
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
@@ -61,13 +63,14 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence
   constructor_common(seq_buffer, dat_buffer);
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer)
+PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
 , channels(nullptr)
-, wrap_level(0) {
+, wrap_level(0)
+, loading_zone(loading_zone) {
 
   // Create the pin mask and channel mapping
   for(uint i = 0; i < length; i++) {
@@ -82,19 +85,71 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, S
   constructor_common(seq_buffer, dat_buffer);
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer, TransitionData *dat_buffer)
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
 , channels(nullptr)
-, wrap_level(0) {
+, wrap_level(0)
+, loading_zone(loading_zone) {
 
   // Create the pin mask and channel mapping
   for(auto pin : pins) {
     if(pin < NUM_BANK0_GPIOS) {
       pin_mask |= (1u << pin);
       channel_to_pin_map[channel_count] = pin;
+      channel_count++;
+    }
+  }
+
+  constructor_common(seq_buffer, dat_buffer);
+}
+
+PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_count(0)
+, channels(nullptr)
+, wrap_level(0)
+, loading_zone(loading_zone) {
+
+  // Create the pin mask and channel mapping
+  for(uint i = 0; i < length; i++) {
+    pin_pair pair = pin_pairs[i];
+    if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
+      pin_mask |= (1u << pair.first);
+      channel_to_pin_map[channel_count] = pair.first;
+      channel_count++;
+
+      pin_mask |= (1u << pair.second);
+      channel_to_pin_map[channel_count] = pair.second;
+      channel_count++;
+    }
+  }
+
+  constructor_common(seq_buffer, dat_buffer);
+}
+
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+: pio(pio)
+, sm(sm)
+, pin_mask(0x00000000)
+, channel_count(0)
+, channels(nullptr)
+, wrap_level(0)
+, loading_zone(loading_zone) {
+
+  // Create the pin mask and channel mapping
+  for(auto pair : pin_pairs) {
+    if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
+      pin_mask |= (1u << pair.first);
+      channel_to_pin_map[channel_count] = pair.first;
+      channel_count++;
+
+      pin_mask |= (1u << pair.second);
+      channel_to_pin_map[channel_count] = pair.second;
       channel_count++;
     }
   }
@@ -332,9 +387,23 @@ uint8_t PWMCluster::get_chan_count() const {
   return channel_count;
 }
 
+uint8_t PWMCluster::get_chan_pair_count() const {
+  return (channel_count / 2);
+}
+
 uint8_t PWMCluster::get_chan_pin(uint8_t channel) const {
   assert(channel < channel_count);
   return channel_to_pin_map[channel];
+}
+
+pin_pair PWMCluster::get_chan_pin_pair(uint8_t channel_pair) const {
+  assert(channel_pair < get_chan_pair_count());
+  uint8_t channel_base = channel_from_pair(channel_pair);
+  return pin_pair(channel_to_pin_map[channel_base], channel_to_pin_map[channel_base + 1]);
+}
+
+uint8_t PWMCluster::channel_from_pair(uint8_t channel_pair) {
+  return (channel_pair * 2);
 }
 
 uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
@@ -472,12 +541,14 @@ void PWMCluster::load_pwm() {
     gpio_put(WRITE_GPIO, false);
   #endif
 
-  // Introduce "Loading Zone" transitions to the end of the sequence to
-  // prevent the DMA interrupt firing many milliseconds before the sequence ends.
-  uint32_t zone_inserts = MIN(LOADING_ZONE_SIZE, wrap_level - LOADING_ZONE_POSITION);
-  for(uint32_t i = zone_inserts + LOADING_ZONE_POSITION; i > LOADING_ZONE_POSITION; i--) {
-    PWMCluster::sorted_insert(transitions, data_size, TransitionData(wrap_level - i));
-    PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(wrap_level - i));
+  if(loading_zone) {
+    // Introduce "Loading Zone" transitions to the end of the sequence to
+    // prevent the DMA interrupt firing many milliseconds before the sequence ends.
+    uint32_t zone_inserts = MIN(LOADING_ZONE_SIZE, wrap_level - LOADING_ZONE_POSITION);
+    for(uint32_t i = zone_inserts + LOADING_ZONE_POSITION; i > LOADING_ZONE_POSITION; i--) {
+      PWMCluster::sorted_insert(transitions, data_size, TransitionData(wrap_level - i));
+      PWMCluster::sorted_insert(looping_transitions, looping_data_size, TransitionData(wrap_level - i));
+    }
   }
 
   #ifdef DEBUG_MULTI_PWM

@@ -14,6 +14,7 @@ namespace pimoroni {
     void select(uint8_t address);
     void disable();
     void configure_pulls(uint8_t address, bool pullup, bool pulldown);
+    bool read();
 
   private:
     uint addr0_pin;

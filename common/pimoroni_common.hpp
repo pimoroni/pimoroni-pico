@@ -6,6 +6,12 @@
 #define PIMORONI_I2C_DEFAULT_INSTANCE i2c0
 #define PIMORONI_SPI_DEFAULT_INSTANCE spi0
 
+// Macro to return a value clamped between a minimum and maximum
+#ifndef CLAMP
+#define CLAMP(a, mn, mx) ((a)<(mx)?((a)>(mn)?(a):(mn)):(mx))
+#endif
+
+
 namespace pimoroni {
     static const unsigned int PIN_UNUSED = INT_MAX; // Intentionally INT_MAX to avoid overflowing MicroPython's int type
 
@@ -53,6 +59,11 @@ namespace pimoroni {
       ACTIVE_HIGH = 1
     };
 
+    enum Direction {
+      NORMAL_DIR    = 0,
+      REVERSED_DIR  = 1,
+    };
+
     inline uint32_t millis() {
       return to_ms_since_boot(get_absolute_time());
     }
@@ -74,4 +85,36 @@ namespace pimoroni {
       162, 163, 165, 167, 169, 170, 172, 174, 176, 178, 179, 181, 183, 185, 187, 189,
       191, 193, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220,
       222, 224, 227, 229, 231, 233, 235, 237, 239, 241, 244, 246, 248, 250, 252, 255};
+
+  struct pin_pair {
+    union {
+      uint8_t first;
+      uint8_t a;
+      uint8_t positive;
+      uint8_t phase;
+    };
+    union {
+      uint8_t second;
+      uint8_t b;
+      uint8_t negative;
+      uint8_t enable;
+    };
+
+    pin_pair() : first(0), second(0) {}
+    pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
+  };
+
+  struct bool_pair {
+    union {
+      bool first;
+      bool a;
+    };
+    union {
+      bool second;
+      bool b;
+    };
+
+    bool_pair() : first(false), second(false) {}
+    bool_pair(bool first, bool second) : first(first), second(second) {}
+  };
 }

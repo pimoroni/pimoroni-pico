@@ -6,6 +6,10 @@ BREAKOUT_GARDEN_I2C_PINS = {"sda": 4, "scl": 5}
 PICO_EXPLORER_I2C_PINS = {"sda": 20, "scl": 21}
 HEADER_I2C_PINS = {"sda": 20, "scl": 21}
 
+# Motor and encoder directions
+NORMAL_DIR = 0x00
+REVERSED_DIR = 0x01
+
 
 class Analog:
     def __init__(self, pin, amplifier_gain=1, resistor=0, offset=0):
@@ -75,6 +79,12 @@ class AnalogMux:
         else:
             self.pulls[address] = pull
 
+    def read(self):
+        if self.muxed_pin is not None:
+            return self.muxed_pin.value()
+        else:
+            raise RuntimeError("there is no muxed pin assigned to this mux")
+
 
 class Button:
     def __init__(self, button, invert=True, repeat_time=200, hold_time=1000):
@@ -141,3 +151,26 @@ class RGBLED:
         self.led_r.duty_u16(int((r * 65535) / 255))
         self.led_g.duty_u16(int((g * 65535) / 255))
         self.led_b.duty_u16(int((b * 65535) / 255))
+
+
+# A simple class for handling Proportional, Integral & Derivative (PID) control calculations
+class PID:
+    def __init__(self, kp, ki, kd, sample_rate):
+        self.kp = kp
+        self.ki = ki
+        self.kd = kd
+        self.setpoint = 0
+        self._error_sum = 0
+        self._last_value = 0
+        self._sample_rate = sample_rate
+
+    def calculate(self, value, value_change=None):
+        error = self.setpoint - value
+        self._error_sum += error * self._sample_rate
+        if value_change is None:
+            rate_error = (value - self._last_value) / self._sample_rate
+        else:
+            rate_error = value_change
+        self._last_value = value
+
+        return (error * self.kp) + (self._error_sum * self.ki) - (rate_error * self.kd)

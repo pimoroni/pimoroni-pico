@@ -12,7 +12,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_state.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/calibration.cpp
 )
-pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.pio)
+# pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.pio)
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
@@ -21,6 +21,7 @@ target_include_directories(usermod_${MOD_NAME} INTERFACE
 )
 
 target_compile_definitions(usermod_${MOD_NAME} INTERFACE
+    MODULE_PWM_ENABLED=1
     MODULE_SERVO_ENABLED=1
 )
 

@@ -1,0 +1,100 @@
+; --------------------------------------------------
+;        Quadrature Encoder reader using PIO
+;      by Christopher (@ZodiusInfuser) Parrott
+; --------------------------------------------------
+;
+; Watches any two pins (i.e. do not need to be
+; consecutive) for when their state changes, and
+; pushes that new state along with the old state,
+; and time since the last change.
+;
+; - X is used for storing the last state
+; - Y is used as a general scratch register
+;     and for storing the current state
+; - OSR is used for storing the state-change timer
+;
+; After data is pushed into the system, a long delay
+; takes place as a form of switch debounce to deal
+; with rotary encoder dials. This is currently set
+; to 500 cycles, but can be changed using the debounce
+; constants below, as well as adjusting the frequency
+; the PIO state machine runs at. E.g. a freq_divider
+; of 250 gives a 1ms debounce.
+
+
+; Debounce Constants
+; --------------------------------------------------
+.define SET_CYCLES                  10
+.define ITERATIONS                  30
+.define JMP_CYCLES                  16
+.define public ENC_DEBOUNCE_CYCLES  (SET_CYCLES + (JMP_CYCLES * ITERATIONS))
+
+; Ensure that ENC_DEBOUNCE_CYCLES is a multiple of the
+; number of cycles the wrap takes, which is currently
+; 10 cycles, otherwise timing may be inaccurate
+
+
+; Encoder Program
+; --------------------------------------------------
+.program encoder
+
+.wrap_target
+loop:
+    ; Copy the state-change timer from OSR,
+    ; decrement it, and save it back
+    mov y, osr
+    jmp y-- osr_dec
+osr_dec:
+    mov osr, y
+    ; takes 3 cycles
+
+    ; Read the state of both encoder pins and check
+    ; if they are different from the last state
+    jmp pin enc_a_was_high
+    mov isr, null
+    jmp read_enc_b
+enc_a_was_high:
+    set y, 1
+    mov isr, y
+read_enc_b:
+    in pins, 1
+    mov y, isr
+    jmp x!=y state_changed [1]
+    ; takes 7 cycles on both paths
+.wrap
+
+state_changed:
+    ; Put the last state and the timer value into
+    ; ISR alongside the current state, and push that
+    ; state to the system. Then override the last
+    ; state with the current state
+    in x, 2
+    mov x, ~osr     ; invert the timer value to give
+                    ; a sensible value to the system
+    in x, 28
+    push noblock    ; this also clears isr
+    mov x, y
+
+    ; Perform a delay to debounce switch inputs
+    set y, (ITERATIONS - 1) [SET_CYCLES - 1]
+debounce_loop:
+    jmp y-- debounce_loop [JMP_CYCLES - 1]
+
+    ; Initialise the timer, as an inverse, and decrement
+    ; it to account for the time this setup takes
+    mov y, ~null
+    jmp y-- y_dec
+y_dec:
+    mov osr, y
+    jmp loop [1]
+    ;takes 10 cycles, not counting whatever the debounce adds
+
+
+; Initialisation Code
+; --------------------------------------------------
+% c-sdk {
+static const uint8_t ENC_LOOP_CYCLES = encoder_wrap - encoder_wrap_target;
+
+// The time that the debounce takes, as the number of wrap loops that the debounce is equivalent to
+static const uint8_t ENC_DEBOUNCE_TIME = ENC_DEBOUNCE_CYCLES / ENC_LOOP_CYCLES;
+%}
