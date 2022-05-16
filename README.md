@@ -71,7 +71,8 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Pico Display 2.0 - https://shop.pimoroni.com/products/pico-display-pack-2-0
 
 ## SHIMs
-* Pico LiPo SHIM - https://shop.pimoroni.com/products/pico-lipo-shim
+* LiPo SHIM for Pico - https://shop.pimoroni.com/products/pico-lipo-shim
+* Motor SHIM for Pico - https://shop.pimoroni.com/products/motor-shim-for-pico
 
 ## RP2040 Boards
 
