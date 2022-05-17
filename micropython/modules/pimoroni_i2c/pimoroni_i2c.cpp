@@ -12,6 +12,9 @@ using namespace pimoroni;
 
 extern "C" {
 #include "pimoroni_i2c.h"
+#include "py/mperrno.h"
+#include "extmod/machine_i2c.h"
+#include "hardware/i2c.h"
 
 /***** Variables Struct *****/
 typedef struct _PimoroniI2C_obj_t {
@@ -81,6 +84,49 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     self->i2c = new I2C(sda, scl, baud);
 
     return MP_OBJ_FROM_PTR(self);
+}
+
+// Reimplementation of the RP2 port's machine_i2c_transfer_single in terms of Pimoroni I2C
+// https://github.com/micropython/micropython/blob/1fb01bd6c5dc350f3c617ca8edae8dea9e5516ae/ports/rp2/machine_i2c.c#L123
+int machine_i2c_transfer_single(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
+    _PimoroniI2C_obj_t *self = (_PimoroniI2C_obj_t *)self_in;
+    int ret;
+    bool nostop = !(flags & MP_MACHINE_I2C_FLAG_STOP);
+    if (flags & MP_MACHINE_I2C_FLAG_READ) {
+        ret = i2c_read_blocking(self->i2c->get_i2c(), addr, buf, len, nostop);
+    } else {
+        if (len == 0) {
+            // Workaround issue with hardware I2C not accepting zero-length writes.
+            mp_machine_soft_i2c_obj_t soft_i2c = {
+                .base = { &mp_machine_soft_i2c_type },
+                .us_delay = 500000 / self->i2c->get_baudrate() + 1,
+                .us_timeout = 50000,
+                .scl = self->i2c->get_scl(),
+                .sda = self->i2c->get_sda(),
+            };
+            mp_machine_i2c_buf_t bufs = {
+                .len = len,
+                .buf = buf,
+            };
+            mp_hal_pin_open_drain(self->i2c->get_scl());
+            mp_hal_pin_open_drain(self->i2c->get_sda());
+            ret = mp_machine_soft_i2c_transfer(&soft_i2c.base, addr, 1, &bufs, flags);
+            gpio_set_function(self->i2c->get_scl(), GPIO_FUNC_I2C);
+            gpio_set_function(self->i2c->get_sda(), GPIO_FUNC_I2C);
+            return ret;
+        } else {
+            ret = i2c_write_blocking(self->i2c->get_i2c(), addr, buf, len, nostop);
+        }
+    }
+    if (ret < 0) {
+        if (ret == PICO_ERROR_TIMEOUT) {
+            return -MP_ETIMEDOUT;
+        } else {
+            return -MP_EIO;
+        }
+    } else {
+        return ret;
+    }
 }
 
 }
