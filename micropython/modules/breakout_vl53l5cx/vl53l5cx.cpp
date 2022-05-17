@@ -19,13 +19,6 @@ typedef struct _mp_obj_float_t {
 
 const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
 
-/***** I2C Struct *****/
-typedef struct _PimoroniI2C_obj_t {
-    mp_obj_base_t base;
-    pimoroni::I2C *i2c;
-} _PimoroniI2C_obj_t;
-
-
 /***** Variables Struct *****/
 typedef struct _VL53L5CX_obj_t {
     mp_obj_base_t base;
@@ -77,17 +70,12 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("VL53L5CX: Bad i2C object"));
-        return mp_const_none;
-    }
-
-    _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
     int addr = args[ARG_addr].u_int;
 
     self = m_new_obj_with_finaliser(_VL53L5CX_obj_t);
     self->base.type = &VL53L5CX_type;
-    self->i2c = i2c;
+
+    self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
     mp_buffer_info_t bufinfo;
     const size_t firmware_size = 84 * 1024;
@@ -112,7 +100,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
         mp_raise_ValueError("Firmware must be 84k bytes!");
     }
 
-    self->breakout = new pimoroni::VL53L5CX(i2c->i2c, (uint8_t *)bufinfo.buf, addr);
+    self->breakout = new pimoroni::VL53L5CX((pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: init error");

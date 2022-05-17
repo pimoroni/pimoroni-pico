@@ -16,12 +16,6 @@ extern "C" {
 #include "breakout_scd41.h"
 #include "pimoroni_i2c.h"
 
-/***** I2C Struct *****/
-typedef struct _PimoroniI2C_obj_t {
-    mp_obj_base_t base;
-    I2C *i2c;
-} _PimoroniI2C_obj_t;
-
 #define NOT_INITIALISED_MSG     "SCD41: Not initialised. Call scd41.init(<i2c instance>) first."
 #define READ_FAIL_MSG           "SCD41: Reading failed."
 #define FAIL_MSG                "SCD41: Error."
@@ -38,15 +32,9 @@ mp_obj_t scd41_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    // Perform the I2C type checking incantations
-    if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("SCD41: Bad i2C object"));
-        return mp_const_none;
-    }
+    _PimoroniI2C_obj_t *i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
-
-    sensirion_i2c_hal_init(i2c->i2c);
+    sensirion_i2c_hal_init((pimoroni::I2C*)i2c->i2c);
     scd4x_stop_periodic_measurement();
     scd4x_reinit();
     scd41_initialised = true;

@@ -14,16 +14,11 @@ extern "C" {
 #include "breakout_ioexpander.h"
 #include "pimoroni_i2c.h"
 
-/***** I2C Struct *****/
-typedef struct _PimoroniI2C_obj_t {
-    mp_obj_base_t base;
-    I2C *i2c;
-} _PimoroniI2C_obj_t;
-
 /***** Variables Struct *****/
 typedef struct _breakout_ioexpander_BreakoutIOExpander_obj_t {
     mp_obj_base_t base;
     BreakoutIOExpander *breakout;
+    _PimoroniI2C_obj_t *i2c;
 } breakout_ioexpander_BreakoutIOExpander_obj_t;
 
 /***** Print *****/
@@ -68,18 +63,12 @@ mp_obj_t BreakoutIOExpander_make_new(const mp_obj_type_t *type, size_t n_args, s
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    // Get I2C bus.
-    if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("BreakoutIOExpander: Bad i2C object"));
-        return mp_const_none;
-    }
-
-    _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
-
     self = m_new_obj(breakout_ioexpander_BreakoutIOExpander_obj_t);
     self->base.type = &breakout_ioexpander_BreakoutIOExpander_type;
 
-    self->breakout = new BreakoutIOExpander(i2c->i2c, args[ARG_address].u_int, args[ARG_interrupt].u_int);
+    self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
+
+    self->breakout = new BreakoutIOExpander((pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutIOExpander: breakout not found when initialising");
