@@ -3,6 +3,10 @@ import breakout_vl53l5cx
 import time
 from ulab import numpy
 
+# The VL53L5CX requires a firmware blob to start up.
+# Make sure you upload "vl53l5cx_firmware.bin" via Thonny to the root of your filesystem
+# You can find it here: https://github.com/ST-mirror/VL53L5CX_ULD_driver/blob/no-fw/lite/en/vl53l5cx_firmware.bin
+
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
@@ -12,7 +16,7 @@ i2c = pimoroni_i2c.PimoroniI2C(**PINS_BREAKOUT_GARDEN, baudrate=2_000_000)
 
 print("Starting up sensor...")
 t_sta = time.ticks_ms()
-sensor = breakout_vl53l5cx.VL53L5CX(i2c, firmware=open("vl53l5cx_firmware.bin").read())
+sensor = breakout_vl53l5cx.VL53L5CX(i2c)
 t_end = time.ticks_ms()
 print("Done in {}ms...".format(t_end - t_sta))
 
