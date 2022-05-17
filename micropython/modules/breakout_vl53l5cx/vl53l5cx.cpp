@@ -61,11 +61,13 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
     enum { 
         ARG_i2c,
-        ARG_addr
+        ARG_addr,
+        ARG_firmware,
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_OBJ, {.u_obj = nullptr} },
-        { MP_QSTR_addr, MP_ARG_INT, {.u_int = pimoroni::VL53L5CX::DEFAULT_ADDRESS} }
+        { MP_QSTR_addr, MP_ARG_INT, {.u_int = pimoroni::VL53L5CX::DEFAULT_ADDRESS} },
+        { MP_QSTR_firmware, MP_ARG_OBJ | MP_ARG_REQUIRED }
     };
 
     // Parse args.
@@ -77,13 +79,19 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
         return mp_const_none;
     }
 
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(args[ARG_firmware].u_obj, &bufinfo, MP_BUFFER_READ);
+    if(bufinfo.len != (size_t)(84 * 1024)) {  // firmware blob is always 84K
+        mp_raise_ValueError("Supplied firmware should be 84k bytes!");
+    }
+
     _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
     int addr = args[ARG_addr].u_int;
 
     self = m_new_obj_with_finaliser(_VL53L5CX_obj_t);
     self->base.type = &VL53L5CX_type;
     self->i2c = i2c;
-    self->breakout = new pimoroni::VL53L5CX(i2c->i2c, addr);
+    self->breakout = new pimoroni::VL53L5CX(i2c->i2c, (uint8_t *)bufinfo.buf, addr);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: error initialising");

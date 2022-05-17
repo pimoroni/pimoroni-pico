@@ -12,7 +12,7 @@ i2c = pimoroni_i2c.PimoroniI2C(**PINS_BREAKOUT_GARDEN, baudrate=2_000_000)
 
 print("Starting up sensor...")
 t_sta = time.ticks_ms()
-sensor = breakout_vl53l5cx.VL53L5CX(i2c)
+sensor = breakout_vl53l5cx.VL53L5CX(i2c, firmware=open("vl53l5cx_firmware.bin").read())
 t_end = time.ticks_ms()
 print("Done in {}ms...".format(t_end - t_sta))
 
