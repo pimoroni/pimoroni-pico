@@ -8,6 +8,9 @@
 extern "C" {
 #include "vl53l5cx.h"
 #include "pimoroni_i2c.h"
+#include "py/stream.h"
+#include "py/reader.h"
+#include "extmod/vfs.h"
 
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
@@ -61,11 +64,13 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
     enum { 
         ARG_i2c,
-        ARG_addr
+        ARG_addr,
+        ARG_firmware,
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_OBJ, {.u_obj = nullptr} },
-        { MP_QSTR_addr, MP_ARG_INT, {.u_int = pimoroni::VL53L5CX::DEFAULT_ADDRESS} }
+        { MP_QSTR_addr, MP_ARG_INT, {.u_int = pimoroni::VL53L5CX::DEFAULT_ADDRESS} },
+        { MP_QSTR_firmware, MP_ARG_OBJ, {.u_obj = nullptr} }
     };
 
     // Parse args.
@@ -83,10 +88,38 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     self = m_new_obj_with_finaliser(_VL53L5CX_obj_t);
     self->base.type = &VL53L5CX_type;
     self->i2c = i2c;
-    self->breakout = new pimoroni::VL53L5CX(i2c->i2c, addr);
+
+    mp_buffer_info_t bufinfo;
+    const size_t firmware_size = 84 * 1024;
+
+    if(args[ARG_firmware].u_obj == nullptr) {
+        mp_obj_t args[2] = {
+            mp_obj_new_str("vl53l5cx_firmware.bin", strlen("vl53l5cx_firmware.bin")),
+            MP_OBJ_NEW_QSTR(MP_QSTR_r),
+        };
+        bufinfo.buf = (void *)m_new(uint8_t, firmware_size);
+        mp_obj_t file = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
+        int errcode;
+        bufinfo.len = mp_stream_rw(file, bufinfo.buf, firmware_size, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
+        if (errcode != 0) {
+            mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("OSError reading vl53l5cx_firmware.bin"));
+        }
+    } else {
+        mp_get_buffer_raise(args[ARG_firmware].u_obj, &bufinfo, MP_BUFFER_READ);
+    }
+
+    if(bufinfo.len != (size_t)(firmware_size)) {  // firmware blob is always 84K
+        mp_raise_ValueError("Firmware must be 84k bytes!");
+    }
+
+    self->breakout = new pimoroni::VL53L5CX(i2c->i2c, (uint8_t *)bufinfo.buf, addr);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: error initialising");
+        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: init error");
+    }
+
+    if(args[ARG_firmware].u_obj == nullptr) {
+        m_free(bufinfo.buf);
     }
 
     return MP_OBJ_FROM_PTR(self);

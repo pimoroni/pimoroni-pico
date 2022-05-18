@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
-#include "drivers/vl53l5cx/vl53l5cx.hpp"
+#include "vl53l5cx.hpp"
+#include "src/vl53l5cx_firmware.h"
 
 #include "common/pimoroni_i2c.hpp"
 
 using namespace pimoroni;
 
 I2C i2c(4, 5);
-VL53L5CX vl53l5cx(&i2c);
+VL53L5CX vl53l5cx(&i2c, (uint8_t *)&vl53l5cx_firmware_bin);
 
 int main() {
   stdio_init_all();
