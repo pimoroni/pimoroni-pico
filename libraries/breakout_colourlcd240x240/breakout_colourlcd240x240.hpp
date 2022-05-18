@@ -29,7 +29,7 @@ namespace pimoroni {
   public:
     BreakoutColourLCD240x240(uint16_t *buf);
     BreakoutColourLCD240x240(uint16_t *buf,  spi_inst_t *spi,
-      uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED);
+      uint cs, uint dc, uint sck, uint mosi, uint bl = PIN_UNUSED);
     BreakoutColourLCD240x240(uint16_t *buf,  BG_SPI_SLOT slot);
     
 

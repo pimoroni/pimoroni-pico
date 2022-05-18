@@ -1,6 +1,6 @@
 add_library(usermod_hub75 INTERFACE)
 
-target_sources(usermod_pico_display INTERFACE
+target_sources(usermod_hub75 INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/hub75.c
     ${CMAKE_CURRENT_LIST_DIR}/hub75.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/hub75/hub75.cpp

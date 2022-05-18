@@ -10,6 +10,10 @@ HEADER_I2C_PINS = {"sda": 20, "scl": 21}
 NORMAL_DIR = 0x00
 REVERSED_DIR = 0x01
 
+BREAKOUT_GARDEN_SPI_SLOT_FRONT = 0
+BREAKOUT_GARDEN_SPI_SLOT_BACK = 1
+PICO_EXPLORER_SPI_ONBOARD = 2
+
 
 class Analog:
     def __init__(self, pin, amplifier_gain=1, resistor=0, offset=0):

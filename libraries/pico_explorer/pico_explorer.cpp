@@ -15,8 +15,9 @@ const uint8_t MOTOR2P = 11;
 namespace pimoroni {
 
   PicoExplorer::PicoExplorer(uint16_t *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, PICO_EXPLORER_ONBOARD)  {
-    __fb = buf;
+    : PicoGraphics(WIDTH, HEIGHT, buf), 
+      screen(WIDTH, HEIGHT, false, buf, PIMORONI_SPI_DEFAULT_INSTANCE, screen.get_slot_cs(PICO_EXPLORER_ONBOARD), SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, screen.get_slot_bl(PICO_EXPLORER_ONBOARD)) {
+        __fb = buf;
   }
 
   void PicoExplorer::init() {
@@ -48,9 +49,6 @@ namespace pimoroni {
 
     pwm_init(pwm_gpio_to_slice_num(MOTOR2P), &motor_pwm_cfg, true);
     gpio_set_function(MOTOR2P, GPIO_FUNC_PWM);
-
-    // initialise the screen
-    screen.init();
   }
 
   void PicoExplorer::update() {

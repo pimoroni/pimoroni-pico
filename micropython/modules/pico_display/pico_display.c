@@ -1,14 +1,5 @@
 #include "pico_display.h"
 
-/***** Constants *****/
-enum buttons
-{
-    BUTTON_A = 0,
-    BUTTON_B,
-    BUTTON_X,
-    BUTTON_Y,
-};
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // picodisplay Module
@@ -61,10 +52,13 @@ STATIC const mp_map_elem_t picodisplay_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&picodisplay_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_character), MP_ROM_PTR(&picodisplay_character_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&picodisplay_text_obj) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(13) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(14) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(15) },
+    { MP_ROM_QSTR(MP_QSTR_LED_R), MP_ROM_INT(6) },
+    { MP_ROM_QSTR(MP_QSTR_LED_G), MP_ROM_INT(7) },
+    { MP_ROM_QSTR(MP_QSTR_LED_B), MP_ROM_INT(8) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_picodisplay_globals, picodisplay_globals_table);
 

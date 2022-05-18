@@ -96,36 +96,11 @@ mp_obj_t picodisplay2_set_led(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) {
 }
 
 mp_obj_t picodisplay2_is_pressed(mp_obj_t button_obj) {
-    bool buttonPressed = false;
-    
     if(display2 != nullptr) {
-        int buttonID = mp_obj_get_int(button_obj);
-        switch(buttonID) {
-        case 0:
-            buttonPressed = display2->is_pressed(PicoDisplay2::A);
-            break;
-
-        case 1:
-            buttonPressed = display2->is_pressed(PicoDisplay2::B);
-            break;
-
-        case 2:
-            buttonPressed = display2->is_pressed(PicoDisplay2::X);
-            break;
-
-        case 3:
-            buttonPressed = display2->is_pressed(PicoDisplay2::Y);
-            break;
-
-        default:
-            mp_raise_ValueError("button not valid. Expected 0 to 3");
-            break;
-        }
+        return display2->is_pressed(mp_obj_get_int(button_obj)) ? mp_const_true : mp_const_false;
     }
-    else
-        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
-
-    return buttonPressed ? mp_const_true : mp_const_false;
+    mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+    return mp_const_none;
 }
 
 mp_obj_t picodisplay2_set_pen(mp_uint_t n_args, const mp_obj_t *args) {

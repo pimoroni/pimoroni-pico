@@ -3,17 +3,21 @@
 
 import machine
 import utime
-import gc
 
-# Pico Display boilerplate
-import picodisplay as display  # Comment this line out to use PicoDisplay2
-# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+import st7789
+from pimoroni import RGBLED
 
-width = display.get_width()
-height = display.get_height()
-gc.collect()
-display_buffer = bytearray(width * height * 2)
-display.init(display_buffer)
+# Set the display resolution
+# in most cases you can swap WIDTH weith HEIGHT for portrait mode
+WIDTH, HEIGHT = 135, 240    # Pico Display
+# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
+
+display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
+
+# Set the display backlight to 50%
+display.set_backlight(0.5)
+
+led = RGBLED(6, 7, 8)
 
 # reads from Pico's temp sensor and converts it into a more manageable number
 sensor_temp = machine.ADC(4)
@@ -21,9 +25,6 @@ conversion_factor = 3.3 / (65535)
 temp_min = 10
 temp_max = 30
 bar_width = 5
-
-# Set the display backlight to 50%
-display.set_backlight(0.5)
 
 temperatures = []
 
@@ -62,7 +63,7 @@ while True:
     temperatures.append(temperature)
 
     # shifts the temperatures history to the left by one sample
-    if len(temperatures) > width // bar_width:
+    if len(temperatures) > WIDTH // bar_width:
         temperatures.pop(0)
 
     i = 0
@@ -71,14 +72,14 @@ while True:
         display.set_pen(*temperature_to_color(t))
 
         # draws the reading as a tall, thin rectangle
-        display.rectangle(i, height - (round(t) * 4), bar_width, height)
+        display.rectangle(i, HEIGHT - (round(t) * 4), bar_width, HEIGHT)
 
         # the next tall thin rectangle needs to be drawn
         # "bar_width" (default: 5) pixels to the right of the last one
         i += bar_width
 
     # heck lets also set the LED to match
-    display.set_led(*temperature_to_color(temperature))
+    led.set_rgb(*temperature_to_color(temperature))
 
     # draws a white background for the text
     display.set_pen(255, 255, 255)

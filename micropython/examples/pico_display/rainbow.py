@@ -1,13 +1,18 @@
 # This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Display's screen and RGB LED . If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
 
 import utime
-import picodisplay as display  # Comment this line out to use PicoDisplay2
-# import picodisplay2 as display  # Uncomment this line to use PicoDisplay2
+import st7789
+from pimoroni import RGBLED
 
-# Set up and initialise Pico Display
-buf = bytearray(display.get_width() * display.get_height() * 2)
-display.init(buf)
+# Set the display resolution
+# in most cases you can swap WIDTH weith HEIGHT for portrait mode
+WIDTH, HEIGHT = 240, 135    # Pico Display
+# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
+
+display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
 display.set_backlight(0.8)
+
+led = RGBLED(6, 7, 8)
 
 
 # From CPython Lib/colorsys.py
@@ -39,7 +44,7 @@ h = 0
 while True:
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
-    display.set_led(r, g, b)  # Set LED to a converted HSV value
+    led.set_rgb(r, g, b)      # Set LED to a converted HSV value
     display.set_pen(r, g, b)  # Set pen to a converted HSV value
     display.clear()           # Fill the screen with the colour
     display.set_pen(0, 0, 0)  # Set pen to black
