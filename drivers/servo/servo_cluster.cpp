@@ -307,22 +307,22 @@ namespace servo {
   }
 
   float ServoCluster::min_value(uint8_t servo) const {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     return states[servo].get_min_value();
   }
 
   float ServoCluster::mid_value(uint8_t servo) const {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     return states[servo].get_mid_value();
   }
 
   float ServoCluster::max_value(uint8_t servo) const {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     return states[servo].get_max_value();
   }
 
   void ServoCluster::to_min(uint8_t servo, bool load) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].to_min_with_return();
     apply_pulse(servo, new_pulse, load);
   }
@@ -354,7 +354,7 @@ namespace servo {
   }
 
   void ServoCluster::to_mid(uint8_t servo, bool load) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].to_mid_with_return();
     apply_pulse(servo, new_pulse, load);
   }
@@ -386,7 +386,7 @@ namespace servo {
   }
 
   void ServoCluster::to_max(uint8_t servo, bool load) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].to_max_with_return();
     apply_pulse(servo, new_pulse, load);
   }
@@ -418,7 +418,7 @@ namespace servo {
   }
 
   void ServoCluster::to_percent(uint8_t servo, float in, float in_min, float in_max, bool load) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].to_percent_with_return(in, in_min, in_max);
     apply_pulse(servo, new_pulse, load);
   }
@@ -450,7 +450,7 @@ namespace servo {
   }
 
   void ServoCluster::to_percent(uint8_t servo, float in, float in_min, float in_max, float value_min, float value_max, bool load) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     float new_pulse = states[servo].to_percent_with_return(in, in_min, in_max, value_min, value_max);
     apply_pulse(servo, new_pulse, load);
   }
@@ -482,12 +482,12 @@ namespace servo {
   }
 
   Calibration& ServoCluster::calibration(uint8_t servo) {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     return states[servo].calibration();
   }
 
   const Calibration& ServoCluster::calibration(uint8_t servo) const {
-    assert(is_assigned(servo));
+    assert(servo < pwms.get_chan_count());
     return states[servo].calibration();
   }
 
