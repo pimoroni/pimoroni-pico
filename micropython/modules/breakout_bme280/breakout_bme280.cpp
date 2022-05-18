@@ -13,16 +13,11 @@ extern "C" {
 #include "breakout_bme280.h"
 #include "pimoroni_i2c.h"
 
-/***** I2C Struct *****/
-typedef struct _PimoroniI2C_obj_t {
-    mp_obj_base_t base;
-    I2C *i2c;
-} _PimoroniI2C_obj_t;
-
 /***** Variables Struct *****/
 typedef struct _breakout_bme280_BreakoutBME280_obj_t {
     mp_obj_base_t base;
     BME280 *breakout;
+    _PimoroniI2C_obj_t *i2c;
 } breakout_bme280_BreakoutBME280_obj_t;
 
 /***** Print *****/
@@ -62,18 +57,12 @@ mp_obj_t BreakoutBME280_make_new(const mp_obj_type_t *type, size_t n_args, size_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-
-    if(!MP_OBJ_IS_TYPE(args[ARG_i2c].u_obj, &PimoroniI2C_type)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("BreakoutBME280: Bad i2C object"));
-        return mp_const_none;
-    }
-
-    _PimoroniI2C_obj_t *i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(args[ARG_i2c].u_obj);
-
     self = m_new_obj(breakout_bme280_BreakoutBME280_obj_t);
     self->base.type = &breakout_bme280_BreakoutBME280_type;
 
-    self->breakout = new BME280(i2c->i2c, args[ARG_address].u_int, args[ARG_int].u_int);
+    self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
+
+    self->breakout = new BME280((pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int, args[ARG_int].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutBME280: breakout not found when initialising");

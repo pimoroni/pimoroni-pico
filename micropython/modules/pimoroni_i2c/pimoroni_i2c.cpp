@@ -12,19 +12,30 @@ using namespace pimoroni;
 
 extern "C" {
 #include "pimoroni_i2c.h"
-
-/***** Variables Struct *****/
-typedef struct _PimoroniI2C_obj_t {
-    mp_obj_base_t base;
-    I2C *i2c;
-} _PimoroniI2C_obj_t;
+#include "py/mperrno.h"
+#include "extmod/machine_i2c.h"
 
 
-/***** Print *****/
+_PimoroniI2C_obj_t*  PimoroniI2C_from_machine_i2c_or_native(mp_obj_t i2c_obj) {
+    if(MP_OBJ_IS_TYPE(i2c_obj, &PimoroniI2C_type)) {
+        return (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(i2c_obj);
+    } else if(MP_OBJ_IS_TYPE(i2c_obj, &machine_hw_i2c_type)) {
+        _PimoroniI2C_obj_t *pimoroni_i2c = m_new_obj(_PimoroniI2C_obj_t);
+        machine_i2c_obj_t *machine_i2c = (machine_i2c_obj_t *)MP_OBJ_TO_PTR(i2c_obj);
+        pimoroni_i2c = m_new_obj(_PimoroniI2C_obj_t);
+        pimoroni_i2c->base.type = &PimoroniI2C_type;
+        pimoroni_i2c->i2c = new I2C(machine_i2c->sda, machine_i2c->scl, machine_i2c->freq);
+        return pimoroni_i2c;
+    } else {
+        mp_raise_ValueError(MP_ERROR_TEXT("Bad I2C object"));
+        return nullptr;
+    }
+}
+
 void PimoroniI2C_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind; //Unused input parameter
     _PimoroniI2C_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniI2C_obj_t);
-    I2C* i2c = self->i2c;
+    I2C* i2c = (I2C*)self->i2c;
     mp_print_str(print, "PimoroniI2C(");
 
     mp_print_str(print, "i2c = ");
@@ -39,14 +50,6 @@ void PimoroniI2C_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     mp_print_str(print, ")");
 }
 
-/***** Destructor ******/
-mp_obj_t PimoroniI2C___del__(mp_obj_t self_in) {
-    _PimoroniI2C_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniI2C_obj_t);
-    delete self->i2c;
-    return mp_const_none;
-}
-
-/***** Constructor *****/
 mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PimoroniI2C_obj_t *self = nullptr;
 
@@ -75,12 +78,56 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
     }
 
-    self = m_new_obj_with_finaliser(_PimoroniI2C_obj_t);
+    self = m_new_obj(_PimoroniI2C_obj_t);
     self->base.type = &PimoroniI2C_type;
 
     self->i2c = new I2C(sda, scl, baud);
 
     return MP_OBJ_FROM_PTR(self);
+}
+
+// Reimplementation of the RP2 port's machine_i2c_transfer_single in terms of Pimoroni I2C
+// https://github.com/micropython/micropython/blob/1fb01bd6c5dc350f3c617ca8edae8dea9e5516ae/ports/rp2/machine_i2c.c#L123
+int machine_i2c_transfer_single(mp_obj_base_t *self_in, uint16_t addr, size_t len, uint8_t *buf, unsigned int flags) {
+    _PimoroniI2C_obj_t *self = (_PimoroniI2C_obj_t *)self_in;
+    I2C *i2c = (I2C*)self->i2c;
+    int ret;
+    bool nostop = !(flags & MP_MACHINE_I2C_FLAG_STOP);
+    if (flags & MP_MACHINE_I2C_FLAG_READ) {
+        ret = i2c_read_blocking(i2c->get_i2c(), addr, buf, len, nostop);
+    } else {
+        if (len == 0) {
+            // Workaround issue with hardware I2C not accepting zero-length writes.
+            mp_machine_soft_i2c_obj_t soft_i2c = {
+                .base = { &mp_machine_soft_i2c_type },
+                .us_delay = 500000 / i2c->get_baudrate() + 1,
+                .us_timeout = 50000,
+                .scl = i2c->get_scl(),
+                .sda = i2c->get_sda(),
+            };
+            mp_machine_i2c_buf_t bufs = {
+                .len = len,
+                .buf = buf,
+            };
+            mp_hal_pin_open_drain(i2c->get_scl());
+            mp_hal_pin_open_drain(i2c->get_sda());
+            ret = mp_machine_soft_i2c_transfer(&soft_i2c.base, addr, 1, &bufs, flags);
+            gpio_set_function(i2c->get_scl(), GPIO_FUNC_I2C);
+            gpio_set_function(i2c->get_sda(), GPIO_FUNC_I2C);
+            return ret;
+        } else {
+            ret = i2c_write_blocking(i2c->get_i2c(), addr, buf, len, nostop);
+        }
+    }
+    if (ret < 0) {
+        if (ret == PICO_ERROR_TIMEOUT) {
+            return -MP_ETIMEDOUT;
+        } else {
+            return -MP_EIO;
+        }
+    } else {
+        return ret;
+    }
 }
 
 }
