@@ -2,7 +2,7 @@
 #include "hub75.hpp"
 #include "pico/multicore.h"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
+#include "micropython/modules/util.hpp"
 
 
 extern "C" {
@@ -65,7 +65,7 @@ void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
 mp_obj_t Hub75___del__(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     self->hub75->stop(dma_complete);
-    delete self->hub75;
+    m_del_class(Hub75, self->hub75);
     return mp_const_none;
 }
 
@@ -111,7 +111,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     hub75_obj = m_new_obj_with_finaliser(_Hub75_obj_t);
     hub75_obj->base.type = &Hub75_type;
     hub75_obj->buf = buffer;
-    hub75_obj->hub75 = new Hub75(width, height, buffer, paneltype, stb_invert);
+    hub75_obj->hub75 = m_new_class(Hub75, width, height, buffer, paneltype, stb_invert);
 
     return MP_OBJ_FROM_PTR(hub75_obj);
 }

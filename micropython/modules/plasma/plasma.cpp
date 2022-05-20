@@ -1,12 +1,7 @@
 #include "drivers/plasma/ws2812.hpp"
 #include "drivers/plasma/apa102.hpp"
+#include "micropython/modules/util.hpp"
 #include <cstdio>
-
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
-
-// SDA/SCL on even/odd pins, I2C0/I2C1 on even/odd pairs of pins.
-#define IS_VALID_SCL(i2c, pin) (((pin) & 1) == 1 && (((pin) & 2) >> 1) == (i2c))
-#define IS_VALID_SDA(i2c, pin) (((pin) & 1) == 0 && (((pin) & 2) >> 1) == (i2c))
 
 
 using namespace plasma;
@@ -47,7 +42,7 @@ void PlasmaWS2812_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 /***** Destructor ******/
 mp_obj_t PlasmaWS2812___del__(mp_obj_t self_in) {
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
-    delete self->ws2812;
+    m_del_class(WS2812, self->ws2812);
     return mp_const_none;
 }
 
@@ -103,7 +98,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->base.type = &PlasmaWS2812_type;
     self->buf = buffer;
 
-    self->ws2812 = new WS2812(num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
+    self->ws2812 = m_new_class(WS2812, num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -252,7 +247,7 @@ void PlasmaAPA102_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 /***** Destructor ******/
 mp_obj_t PlasmaAPA102___del__(mp_obj_t self_in) {
     _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
-    delete self->apa102;
+    m_del_class(APA102, self->apa102);
     return mp_const_none;
 }
 
@@ -312,7 +307,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->base.type = &PlasmaAPA102_type;
     self->buf = buffer;
 
-    self->apa102 = new APA102(num_leds, pio, sm, dat, clk, freq, buffer);
+    self->apa102 = m_new_class(APA102, num_leds, pio, sm, dat, clk, freq, buffer);
 
     return MP_OBJ_FROM_PTR(self);
 }

@@ -1,9 +1,9 @@
 #include "drivers/motor/motor.hpp"
 #include "drivers/motor/motor_cluster.hpp"
 #include "common/pimoroni_common.hpp"
+#include "micropython/modules/util.hpp"
 #include <cstdio>
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 using namespace pimoroni;
 using namespace motor;
@@ -192,7 +192,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     self = m_new_obj_with_finaliser(_Motor_obj_t);
     self->base.type = &Motor_type;
 
-    self->motor = new Motor(pins, (Direction)direction, speed_scale, zeropoint, deadzone, freq, (DecayMode)mode, args[ARG_ph_en_driver].u_bool);
+    self->motor = m_new_class(Motor, pins, (Direction)direction, speed_scale, zeropoint, deadzone, freq, (DecayMode)mode, args[ARG_ph_en_driver].u_bool);
     self->motor->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -202,7 +202,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 /***** Destructor ******/
 mp_obj_t Motor___del__(mp_obj_t self_in) {
     _Motor_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Motor_obj_t);
-    delete self->motor;
+    m_del_class(Motor, self->motor);
     return mp_const_none;
 }
 
@@ -539,8 +539,6 @@ extern mp_obj_t Motor_decay_mode(size_t n_args, const mp_obj_t *pos_args, mp_map
 typedef struct _MotorCluster_obj_t {
     mp_obj_base_t base;
     MotorCluster* cluster;
-    PWMCluster::Sequence *seq_buf;
-    PWMCluster::TransitionData *dat_buf;
 } _MotorCluster_obj_t;
 
 
@@ -731,28 +729,21 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     bool auto_phase = args[ARG_auto_phase].u_bool;
 
-    MotorCluster *cluster;
-    PWMCluster::Sequence *seq_buffer = m_new(PWMCluster::Sequence, PWMCluster::NUM_BUFFERS * 2);
-    PWMCluster::TransitionData *dat_buffer = m_new(PWMCluster::TransitionData, PWMCluster::BUFFER_SIZE * 2);
-    cluster = new MotorCluster(pio, sm, pins, pair_count, (Direction)direction, speed_scale, zeropoint, deadzone,
-                               freq, (DecayMode)mode, auto_phase, seq_buffer, dat_buffer);
+    MotorCluster *cluster = m_new_class(MotorCluster, pio, sm, pins, pair_count, (Direction)direction, speed_scale, zeropoint, deadzone,
+                               freq, (DecayMode)mode, auto_phase);
 
     // Cleanup the pins array
     if(pins != nullptr)
         delete[] pins;
 
     if(!cluster->init()) {
-        delete cluster;
-        m_del(PWMCluster::Sequence, seq_buffer, PWMCluster::NUM_BUFFERS * 2);
-        m_del(PWMCluster::TransitionData, dat_buffer, PWMCluster::BUFFER_SIZE * 2);
+        m_del_class(MotorCluster, cluster);
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this MotorCluster. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
     self = m_new_obj_with_finaliser(_MotorCluster_obj_t);
     self->base.type = &MotorCluster_type;
     self->cluster = cluster;
-    self->seq_buf = seq_buffer;
-    self->dat_buf = dat_buffer;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -761,7 +752,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 /***** Destructor ******/
 mp_obj_t MotorCluster___del__(mp_obj_t self_in) {
     _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _MotorCluster_obj_t);
-    delete self->cluster;
+    m_del_class(MotorCluster, self->cluster);
     return mp_const_none;
 }
 

@@ -1,12 +1,7 @@
-#include "../../../libraries/breakout_rtc/breakout_rtc.hpp"
+#include "libraries/breakout_rtc/breakout_rtc.hpp"
+#include "micropython/modules/util.hpp"
 #include <string>
 #include <cstring>
-
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
-
-// SDA/SCL on even/odd pins, I2C0/I2C1 on even/odd pairs of pins.
-#define IS_VALID_SCL(i2c, pin) (((pin) & 1) == 1 && (((pin) & 2) >> 1) == (i2c))
-#define IS_VALID_SDA(i2c, pin) (((pin) & 1) == 0 && (((pin) & 2) >> 1) == (i2c))
 
 
 using namespace pimoroni;
@@ -64,7 +59,7 @@ mp_obj_t BreakoutRTC_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    self->breakout = new BreakoutRTC((pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
+    self->breakout = m_new_class(BreakoutRTC, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutRTC: breakout not found when initialising");

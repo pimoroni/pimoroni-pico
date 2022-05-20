@@ -1,11 +1,7 @@
 #include "libraries/breakout_colourlcd240x240/breakout_colourlcd240x240.hpp"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
+#include "micropython/modules/util.hpp"
 
-#define IS_VALID_PERIPH(spi, pin)   ((((pin) & 8) >> 3) == (spi))
-#define IS_VALID_SCK(spi, pin)      (((pin) & 3) == 2 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MOSI(spi, pin)     (((pin) & 3) == 3 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MISO(spi, pin)     (((pin) & 3) == 0 && IS_VALID_PERIPH(spi, pin))
 
 
 using namespace pimoroni;

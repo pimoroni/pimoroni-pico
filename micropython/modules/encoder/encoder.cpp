@@ -1,8 +1,8 @@
 #include "drivers/encoder/encoder.hpp"
+#include "micropython/modules/util.hpp"
 #include <cstdio>
 #include <cfloat>
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 using namespace pimoroni;
 using namespace encoder;
@@ -138,9 +138,9 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         freq_divider = mp_obj_get_float(args[ARG_freq_divider].u_obj);
     }
 
-    Encoder *encoder = new Encoder(pio, sm, pins, args[ARG_common_pin].u_int, (Direction)direction, counts_per_rev, count_microsteps, freq_divider);
+    Encoder *encoder = m_new_class(Encoder, pio, sm, pins, args[ARG_common_pin].u_int, (Direction)direction, counts_per_rev, count_microsteps, freq_divider);
     if(!encoder->init()) {
-        delete encoder;
+        m_del_class(Encoder, encoder);
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this Encoder. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
@@ -155,7 +155,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 /***** Destructor ******/
 mp_obj_t Encoder___del__(mp_obj_t self_in) {
     _Encoder_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Encoder_obj_t);
-    delete self->encoder;
+    m_del_class(Encoder, self->encoder);
     return mp_const_none;
 }
 

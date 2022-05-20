@@ -2,7 +2,7 @@
 #include "hardware/watchdog.h"
 #include "badger2040.hpp"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
+#include "micropython/modules/util.hpp"
 
 extern "C" {
 #include "badger2040.h"

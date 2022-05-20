@@ -108,13 +108,11 @@ namespace pimoroni {
     uint8_t channel_to_pin_map[NUM_BANK0_GPIOS];
     uint wrap_level;
 
-    Sequence *sequences;
-    Sequence *loop_sequences;
-    bool managed_seq_buffer = false;
+    Sequence sequences[NUM_BUFFERS];
+    Sequence loop_sequences[NUM_BUFFERS];
 
-    TransitionData *transitions;
-    TransitionData *looping_transitions;
-    bool managed_dat_buffer = false;
+    TransitionData transitions[BUFFER_SIZE];
+    TransitionData looping_transitions[BUFFER_SIZE];
 
     volatile uint read_index = 0;
     volatile uint last_written_index = 0;
@@ -136,17 +134,17 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
-    PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
-    PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
-    PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, uint pin_mask, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
 
-    PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
-    PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer = nullptr, TransitionData *dat_buffer = nullptr, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
+    PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
     ~PWMCluster();
 
   private:
-    void constructor_common(Sequence *seq_buffer, TransitionData *dat_buffer);
+    void constructor_common();
 
 
     //--------------------------------------------------
