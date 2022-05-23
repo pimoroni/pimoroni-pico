@@ -144,13 +144,13 @@ namespace pimoroni {
       // gamma correct the provided 0-255 brightness value onto a
       // 0-65535 range for the pwm counter
       float r_gamma = 2.8f;
-      r_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
+      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
 
       float g_gamma = 2.8f;
-      g_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
+      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
 
       float b_gamma = 2.8f;
-      b_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
+      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
     }
 
     // initialise the bcd timing values and row selects in the bitstream
