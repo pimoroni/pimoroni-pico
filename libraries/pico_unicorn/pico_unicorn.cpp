@@ -51,13 +51,13 @@ constexpr uint32_t BCD_FRAMES = 15; // includes fet discharge frame
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
 
 // must be aligned for 32bit dma transfer
-alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+alignas(4) static uint8_t bitstream[BITSTREAM_LENGTH] = {0};
 
-uint16_t r_gamma_lut[256] = {0};
-uint16_t g_gamma_lut[256] = {0};
-uint16_t b_gamma_lut[256] = {0};
+static uint16_t r_gamma_lut[256] = {0};
+static uint16_t g_gamma_lut[256] = {0};
+static uint16_t b_gamma_lut[256] = {0};
 
-uint32_t dma_channel;
+static uint32_t dma_channel;
 
 static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   pio_gpio_init(pio, pin::LED_DATA);
