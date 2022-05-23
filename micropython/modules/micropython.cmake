@@ -45,6 +45,7 @@ include(encoder/micropython)
 include(motor/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
+include(adcfft/micropython)
 
 include(st7789/micropython)
 
