@@ -177,7 +177,7 @@ namespace pimoroni {
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
 
-          uint16_t bcd_ticks = pow(2, frame);
+          uint16_t bcd_ticks = 1 << frame;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
         }
