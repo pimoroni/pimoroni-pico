@@ -51,13 +51,13 @@ constexpr uint32_t BCD_FRAMES = 15; // includes fet discharge frame
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
 
 // must be aligned for 32bit dma transfer
-alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+alignas(4) static uint8_t bitstream[BITSTREAM_LENGTH] = {0};
 
-uint16_t r_gamma_lut[256] = {0};
-uint16_t g_gamma_lut[256] = {0};
-uint16_t b_gamma_lut[256] = {0};
+static uint16_t r_gamma_lut[256] = {0};
+static uint16_t g_gamma_lut[256] = {0};
+static uint16_t b_gamma_lut[256] = {0};
 
-uint32_t dma_channel;
+static uint32_t dma_channel;
 
 static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   pio_gpio_init(pio, pin::LED_DATA);
@@ -144,13 +144,13 @@ namespace pimoroni {
       // gamma correct the provided 0-255 brightness value onto a
       // 0-65535 range for the pwm counter
       float r_gamma = 2.8f;
-      r_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
+      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
 
       float g_gamma = 2.8f;
-      g_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
+      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
 
       float b_gamma = 2.8f;
-      b_gamma_lut[v] = (uint16_t)(pow((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
+      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
     }
 
     // initialise the bcd timing values and row selects in the bitstream
@@ -177,7 +177,7 @@ namespace pimoroni {
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
 
-          uint16_t bcd_ticks = pow(2, frame);
+          uint16_t bcd_ticks = 1 << frame;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
         }
