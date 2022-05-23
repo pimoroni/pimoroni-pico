@@ -1,11 +1,6 @@
 #include "common/pimoroni_i2c.hpp"
+#include "micropython/modules/util.hpp"
 #include <cstdio>
-
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
-
-// SDA/SCL on even/odd pins, I2C0/I2C1 on even/odd pairs of pins.
-#define IS_VALID_SCL(i2c, pin) (((pin) & 1) == 1 && (((pin) & 2) >> 1) == (i2c))
-#define IS_VALID_SDA(i2c, pin) (((pin) & 1) == 0 && (((pin) & 2) >> 1) == (i2c))
 
 
 using namespace pimoroni;
@@ -24,7 +19,8 @@ _PimoroniI2C_obj_t*  PimoroniI2C_from_machine_i2c_or_native(mp_obj_t i2c_obj) {
         machine_i2c_obj_t *machine_i2c = (machine_i2c_obj_t *)MP_OBJ_TO_PTR(i2c_obj);
         pimoroni_i2c = m_new_obj(_PimoroniI2C_obj_t);
         pimoroni_i2c->base.type = &PimoroniI2C_type;
-        pimoroni_i2c->i2c = new I2C(machine_i2c->sda, machine_i2c->scl, machine_i2c->freq);
+
+        pimoroni_i2c->i2c = m_new_class(I2C, machine_i2c->sda, machine_i2c->scl, machine_i2c->freq);
         return pimoroni_i2c;
     } else {
         mp_raise_ValueError(MP_ERROR_TEXT("Bad I2C object"));
@@ -81,7 +77,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     self = m_new_obj(_PimoroniI2C_obj_t);
     self->base.type = &PimoroniI2C_type;
 
-    self->i2c = new I2C(sda, scl, baud);
+    self->i2c = m_new_class(I2C, sda, scl, baud);
 
     return MP_OBJ_FROM_PTR(self);
 }

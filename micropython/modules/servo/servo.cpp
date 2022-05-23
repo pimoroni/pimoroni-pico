@@ -1,8 +1,8 @@
 #include "drivers/servo/servo.hpp"
 #include "drivers/servo/servo_cluster.hpp"
+#include "micropython/modules/util.hpp"
 #include <cstdio>
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 using namespace pimoroni;
 using namespace servo;
@@ -75,7 +75,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
             self = m_new_obj_with_finaliser(_Calibtration_obj_t);
             self->base.type = &Calibration_type;
-            self->calibration = new Calibration(calibration_type);
+            self->calibration = m_new_class(Calibration, calibration_type);
         }
         else {
             mp_raise_TypeError("cannot convert object to an integer");
@@ -84,7 +84,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     else {
         self = m_new_obj_with_finaliser(_Calibtration_obj_t);
         self->base.type = &Calibration_type;
-        self->calibration = new Calibration();
+        self->calibration = m_new_class(Calibration);
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -94,7 +94,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 /***** Destructor ******/
 mp_obj_t Calibration___del__(mp_obj_t self_in) {
     _Calibtration_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Calibtration_obj_t);
-    delete self->calibration;
+    m_del_class(Calibration, self->calibration);
     return mp_const_none;
 }
 
@@ -895,10 +895,13 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     self = m_new_obj_with_finaliser(_Servo_obj_t);
     self->base.type = &Servo_type;
 
+    void *servo_target = m_new(Servo, 1);
+
     if(calib != nullptr)
-        self->servo = new Servo(pin, *calib, freq);
+        self->servo = new(servo_target) Servo(pin, *calib, freq);
     else
-        self->servo = new Servo(pin, calibration_type, freq);
+        self->servo = new(servo_target) Servo(pin, calibration_type, freq);
+
     self->servo->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -908,7 +911,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 /***** Destructor ******/
 mp_obj_t Servo___del__(mp_obj_t self_in) {
     _Servo_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Servo_obj_t);
-    delete self->servo;
+    m_del_class(Servo, self->servo);
     return mp_const_none;
 }
 
@@ -1161,7 +1164,7 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
         _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
         calib->base.type = &Calibration_type;
 
-        calib->calibration = new Calibration(self->servo->calibration());
+        calib->calibration = m_new_class(Calibration, self->servo->calibration());
         return MP_OBJ_FROM_PTR(calib);
     }
     else {
@@ -1199,8 +1202,6 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
 typedef struct _ServoCluster_obj_t {
     mp_obj_base_t base;
     ServoCluster* cluster;
-    PWMCluster::Sequence *seq_buf;
-    PWMCluster::TransitionData *dat_buf;
 } _ServoCluster_obj_t;
 
 
@@ -1330,19 +1331,19 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     bool auto_phase = args[ARG_auto_phase].u_bool;
 
     ServoCluster *cluster;
-    PWMCluster::Sequence *seq_buffer = m_new(PWMCluster::Sequence, PWMCluster::NUM_BUFFERS * 2);
-    PWMCluster::TransitionData *dat_buffer = m_new(PWMCluster::TransitionData, PWMCluster::BUFFER_SIZE * 2);
+    void *cluster_target = m_new(ServoCluster, 1);
+
     if(mask_provided) {
         if(calib != nullptr)
-            cluster = new ServoCluster(pio, sm, pin_mask, *calib, freq, auto_phase, seq_buffer, dat_buffer);
+            cluster = new(cluster_target) ServoCluster(pio, sm, pin_mask, *calib, freq, auto_phase);
         else
-            cluster = new ServoCluster(pio, sm, pin_mask, calibration_type, freq, auto_phase, seq_buffer, dat_buffer);
+            cluster = new(cluster_target)  ServoCluster(pio, sm, pin_mask, calibration_type, freq, auto_phase);
     }
     else {
         if(calib != nullptr)
-            cluster = new ServoCluster(pio, sm, pins, pin_count, *calib, freq, auto_phase, seq_buffer, dat_buffer);
+            cluster = new(cluster_target)  ServoCluster(pio, sm, pins, pin_count, *calib, freq, auto_phase);
         else
-            cluster = new ServoCluster(pio, sm, pins, pin_count, calibration_type, freq, auto_phase, seq_buffer, dat_buffer);
+            cluster = new(cluster_target)  ServoCluster(pio, sm, pins, pin_count, calibration_type, freq, auto_phase);
     }
 
     // Cleanup the pins array
@@ -1350,17 +1351,13 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         delete[] pins;
 
     if(!cluster->init()) {
-        delete cluster;
-        m_del(PWMCluster::Sequence, seq_buffer, PWMCluster::NUM_BUFFERS * 2);
-        m_del(PWMCluster::TransitionData, dat_buffer, PWMCluster::BUFFER_SIZE * 2);
+        m_del_class(ServoCluster, cluster);
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
     self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
     self->base.type = &ServoCluster_type;
     self->cluster = cluster;
-    self->seq_buf = seq_buffer;
-    self->dat_buf = dat_buffer;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -1369,7 +1366,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 /***** Destructor ******/
 mp_obj_t ServoCluster___del__(mp_obj_t self_in) {
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
-    delete self->cluster;
+    m_del_class(ServoCluster, self->cluster);
     return mp_const_none;
 }
 
@@ -2661,7 +2658,7 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
             _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
             calib->base.type = &Calibration_type;
 
-            calib->calibration = new Calibration(self->cluster->calibration((uint)servo));
+            calib->calibration = m_new_class(Calibration, self->cluster->calibration((uint)servo));
             return MP_OBJ_FROM_PTR(calib);
         }
     }

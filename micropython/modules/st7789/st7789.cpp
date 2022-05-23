@@ -1,11 +1,7 @@
 #include "libraries/generic_st7789/generic_st7789.hpp"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
+#include "micropython/modules/util.hpp"
 
-#define IS_VALID_PERIPH(spi, pin)   ((((pin) & 8) >> 3) == (spi))
-#define IS_VALID_SCK(spi, pin)      (((pin) & 3) == 2 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MOSI(spi, pin)     (((pin) & 3) == 3 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MISO(spi, pin)     (((pin) & 3) == 0 && IS_VALID_PERIPH(spi, pin))
 
 
 using namespace pimoroni;
@@ -93,7 +89,7 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 
     if(args[ARG_slot].u_int != -1) {
         BG_SPI_SLOT slot = (BG_SPI_SLOT)args[ARG_slot].u_int;
-        self->st7789 = new ST7789Generic(width, height, round, self->buffer, slot);
+        self->st7789 = m_new_class(ST7789Generic, width, height, round, self->buffer, slot);
         if (rotate180) {
             self->st7789->configure_display(true);
         }
@@ -121,7 +117,7 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
             mp_raise_ValueError(MP_ERROR_TEXT("bad MOSI pin"));
         }
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
-        self->st7789 = new ST7789Generic(width, height, round, self->buffer,
+        self->st7789 = m_new_class(ST7789Generic, width, height, round, self->buffer,
             spi, cs, dc, sck, mosi, bl);
         if (rotate180) {
             self->st7789->configure_display(true);

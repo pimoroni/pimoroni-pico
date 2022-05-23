@@ -36,13 +36,13 @@ namespace motor {
   public:
     MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_pair_count, Direction direction = NORMAL_DIR, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
                  float zeropoint = MotorState::DEFAULT_ZEROPOINT, float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE,
-                 bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+                 bool auto_phase = true);
     MotorCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Direction direction = NORMAL_DIR, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
                  float zeropoint = MotorState::DEFAULT_ZEROPOINT, float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE,
-                 bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+                 bool auto_phase = true);
     MotorCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Direction direction = NORMAL_DIR, float speed_scale = MotorState::DEFAULT_SPEED_SCALE,
                  float zeropoint = MotorState::DEFAULT_ZEROPOINT, float deadzone = MotorState::DEFAULT_DEADZONE, float freq = MotorState::DEFAULT_FREQUENCY, DecayMode mode = MotorState::DEFAULT_DECAY_MODE,
-                 bool auto_phase = true, PWMCluster::Sequence *seq_buffer = nullptr, PWMCluster::TransitionData *dat_buffer = nullptr);
+                 bool auto_phase = true);
     ~MotorCluster();
 
 

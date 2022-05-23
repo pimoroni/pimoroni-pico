@@ -22,7 +22,7 @@ uint8_t PWMCluster::claimed_sms[] = { 0x0, 0x0 };
 uint PWMCluster::pio_program_offset = 0;
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
@@ -39,11 +39,11 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, Sequence *seq_buffer, Tr
     }
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
@@ -60,10 +60,10 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, Sequence
     channel_count++;
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
@@ -82,10 +82,10 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, S
     }
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
@@ -103,10 +103,10 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, Se
     }
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
@@ -129,10 +129,10 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t len
     }
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
-PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Sequence *seq_buffer, TransitionData *dat_buffer, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, bool loading_zone)
 : pio(pio)
 , sm(sm)
 , pin_mask(0x00000000)
@@ -154,47 +154,20 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pai
     }
   }
 
-  constructor_common(seq_buffer, dat_buffer);
+  constructor_common();
 }
 
-void PWMCluster::constructor_common(Sequence *seq_buffer, TransitionData *dat_buffer) {
+void PWMCluster::constructor_common() {
   // Initialise all the channels this PWM will control
   if(channel_count > 0) {
     channels = new ChannelState[channel_count];
   }
 
-  if(seq_buffer == nullptr) {
-    sequences = new Sequence[NUM_BUFFERS];
-    loop_sequences = new Sequence[NUM_BUFFERS];
-    managed_seq_buffer = true;
-  }
-  else {
-    sequences = seq_buffer;
-    loop_sequences = seq_buffer + NUM_BUFFERS;
-    managed_seq_buffer = false;
-  }
-
-  if(dat_buffer == nullptr) {
-    transitions = new TransitionData[BUFFER_SIZE];
-    looping_transitions = new TransitionData[BUFFER_SIZE];
-    managed_dat_buffer = true;
-  }
-  else {
-    transitions = dat_buffer;
-    looping_transitions = dat_buffer + BUFFER_SIZE;
-    managed_dat_buffer = false;
-  }
-
   // Set up the transition buffers
   for(uint i = 0; i < NUM_BUFFERS; i++) {
-    Sequence& seq = sequences[i];
-    Sequence& looping_seq = loop_sequences[i];
-    seq = Sequence();
-    looping_seq = Sequence();
-
     // Need to set a delay otherwise a lockup occurs when first changing frequency
-    seq.data[0].delay = 10;
-    looping_seq.data[0].delay = 10;
+    sequences[i].data[0].delay = 10;
+    loop_sequences[i].data[0].delay = 10;
   }
 }
 
@@ -242,16 +215,6 @@ PWMCluster::~PWMCluster() {
     for(uint channel = 0; channel < channel_count; channel++) {
       gpio_set_function(channel_to_pin_map[channel], GPIO_FUNC_NULL);
     }
-  }
-
-  if(managed_seq_buffer) {
-    delete[] sequences;
-    delete[] loop_sequences;
-  }
-
-  if(managed_dat_buffer) {
-    delete[] transitions;
-    delete[] looping_transitions;
   }
 
   delete[] channels;

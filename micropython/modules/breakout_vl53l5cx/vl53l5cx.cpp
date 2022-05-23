@@ -1,8 +1,8 @@
 #include <cstdio>
 #include "vl53l5cx.hpp"
 #include "pico/multicore.h"
+#include "micropython/modules/util.hpp"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 
 extern "C" {
@@ -47,7 +47,8 @@ void VL53L5CX_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t k
 mp_obj_t VL53L5CX___del__(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     //self->breakout->stop_ranging();  // i2c object might have been deleted already?
-    delete self->breakout;
+    // TODO: Since we're now holding a pointer to the I2C object it *should* still be available here?
+    m_del_class(VL53L5CX, self->breakout);
     return mp_const_none;
 }
 
@@ -100,7 +101,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
         mp_raise_ValueError("Firmware must be 84k bytes!");
     }
 
-    self->breakout = new pimoroni::VL53L5CX((pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr);
+    self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: init error");

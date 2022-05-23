@@ -9,22 +9,22 @@
 namespace motor {
   MotorCluster::MotorCluster(PIO pio, uint sm, uint pin_base, uint pin_pair_count, Direction direction,
                              float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
-                             bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pin_base, (pin_pair_count * 2), seq_buffer, dat_buffer, false), pwm_frequency(freq) {
+                             bool auto_phase)
+    : pwms(pio, sm, pin_base, (pin_pair_count * 2), false), pwm_frequency(freq) {
     create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 
   MotorCluster::MotorCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, Direction direction,
                              float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
-                             bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pin_pairs, length, seq_buffer, dat_buffer, false), pwm_frequency(freq) {
+                             bool auto_phase)
+    : pwms(pio, sm, pin_pairs, length, false), pwm_frequency(freq) {
     create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 
   MotorCluster::MotorCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, Direction direction,
                              float speed_scale, float zeropoint, float deadzone, float freq, DecayMode mode,
-                             bool auto_phase, PWMCluster::Sequence *seq_buffer, PWMCluster::TransitionData *dat_buffer)
-    : pwms(pio, sm, pin_pairs, seq_buffer, dat_buffer, false), pwm_frequency(freq) {
+                             bool auto_phase)
+    : pwms(pio, sm, pin_pairs, false), pwm_frequency(freq) {
     create_motor_states(direction, speed_scale, zeropoint, deadzone, mode, auto_phase);
   }
 

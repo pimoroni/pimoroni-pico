@@ -1,11 +1,5 @@
 #include "libraries/breakout_colourlcd160x80/breakout_colourlcd160x80.hpp"
-
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
-
-#define IS_VALID_PERIPH(spi, pin)   ((((pin) & 8) >> 3) == (spi))
-#define IS_VALID_SCK(spi, pin)      (((pin) & 3) == 2 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MOSI(spi, pin)     (((pin) & 3) == 3 && IS_VALID_PERIPH(spi, pin))
-#define IS_VALID_MISO(spi, pin)     (((pin) & 3) == 0 && IS_VALID_PERIPH(spi, pin))
+#include "micropython/modules/util.hpp"
 
 
 using namespace pimoroni;
@@ -70,7 +64,7 @@ mp_obj_t BreakoutColourLCD160x80_make_new(const mp_obj_type_t *type, size_t n_ar
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
-            self->breakout = new BreakoutColourLCD160x80((uint16_t *)bufinfo.buf, (BG_SPI_SLOT)slot);
+            self->breakout = m_new_class(BreakoutColourLCD160x80, (uint16_t *)bufinfo.buf, (BG_SPI_SLOT)slot);
         }
         else {
             mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
@@ -119,7 +113,7 @@ mp_obj_t BreakoutColourLCD160x80_make_new(const mp_obj_type_t *type, size_t n_ar
         self->base.type = &breakout_colourlcd160x80_BreakoutColourLCD160x80_type;
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
-        self->breakout = new BreakoutColourLCD160x80((uint16_t *)bufinfo.buf, spi,
+        self->breakout = m_new_class(BreakoutColourLCD160x80, (uint16_t *)bufinfo.buf, spi,
             args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, PIN_UNUSED, args[ARG_bl].u_int);
     }
 

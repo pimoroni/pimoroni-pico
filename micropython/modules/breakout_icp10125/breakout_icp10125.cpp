@@ -1,6 +1,6 @@
 #include "drivers/icp10125/icp10125.hpp"
+#include "micropython/modules/util.hpp"
 
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
 
 using namespace pimoroni;
 
@@ -43,7 +43,7 @@ mp_obj_t BreakoutICP10125_make_new(const mp_obj_type_t *type, size_t n_args, siz
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    self->breakout = new ICP10125((pimoroni::I2C *)(self->i2c->i2c));
+    self->breakout = m_new_class(ICP10125, (pimoroni::I2C *)(self->i2c->i2c));
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutICP10125: breakout not found when initialising");
