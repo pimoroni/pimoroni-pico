@@ -249,8 +249,8 @@ mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *pos_args, mp_map_
     enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
     };
@@ -289,8 +289,8 @@ mp_obj_t GenericST7789_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     enum { ARG_self, ARG_x, ARG_y };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -311,8 +311,8 @@ mp_obj_t GenericST7789_pixel_span(size_t n_args, const mp_obj_t *pos_args, mp_ma
     enum { ARG_self, ARG_x, ARG_y, ARG_l };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_l, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
@@ -335,8 +335,8 @@ mp_obj_t GenericST7789_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map
     enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
     };
@@ -361,8 +361,8 @@ mp_obj_t GenericST7789_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     enum { ARG_self, ARG_x, ARG_y, ARG_r };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
     };
 
@@ -386,8 +386,8 @@ mp_obj_t GenericST7789_character(size_t n_args, const mp_obj_t *pos_args, mp_map
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
     };
 
@@ -517,10 +517,10 @@ mp_obj_t GenericST7789_triangle(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
     int x1 = args[ARG_x1].u_int;
     int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x1].u_int;
-    int y2 = args[ARG_y1].u_int;
-    int x3 = args[ARG_x1].u_int;
-    int y3 = args[ARG_y1].u_int;
+    int x2 = args[ARG_x2].u_int;
+    int y2 = args[ARG_y2].u_int;
+    int x3 = args[ARG_x3].u_int;
+    int y3 = args[ARG_y3].u_int;
 
     Point p1(x1, y1);
     Point p2(x2, y2);
@@ -547,8 +547,8 @@ mp_obj_t GenericST7789_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 
     int x1 = args[ARG_x1].u_int;
     int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x1].u_int;
-    int y2 = args[ARG_y1].u_int;
+    int x2 = args[ARG_x2].u_int;
+    int y2 = args[ARG_y2].u_int;
 
     Point p1(x1, y1);
     Point p2(x2, y2);
