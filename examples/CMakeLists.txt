@@ -44,6 +44,7 @@ add_subdirectory(pico_wireless)
 
 add_subdirectory(plasma2040)
 add_subdirectory(badger2040)
+add_subdirectory(tufty2040)
 add_subdirectory(interstate75)
 add_subdirectory(servo2040)
 add_subdirectory(motor2040)
