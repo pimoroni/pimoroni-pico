@@ -23,8 +23,9 @@ namespace pimoroni {
     // interface pins with our standard defaults where appropriate
     uint cs;
     uint dc;
-    uint sck;
-    uint mosi;
+    uint wr_sck;
+    uint rd_sck = PIN_UNUSED;
+    uint d0;
     uint bl;
     uint vsync  = PIN_UNUSED; // only available on some products
 
@@ -37,46 +38,58 @@ namespace pimoroni {
     // frame buffer where pixel data is stored
     uint16_t *frame_buffer;
 
+    // Parallel init
+    ST7789(uint16_t width, uint16_t height, uint16_t *frame_buffer,
+           uint cs, uint dc, uint wr_sck, uint rd_sck, uint d0, uint bl = PIN_UNUSED) :
+      spi(nullptr),
+      width(width), height(height), round(false),
+      cs(cs), dc(dc), wr_sck(wr_sck), rd_sck(rd_sck), d0(d0), bl(bl), frame_buffer(frame_buffer) {
+  
+      gpio_set_function(cs, GPIO_FUNC_SIO);
+      gpio_set_dir(cs, GPIO_OUT);
+
+      gpio_set_function(dc, GPIO_FUNC_SIO);
+      gpio_set_dir(dc, GPIO_OUT);
+
+      gpio_set_function(wr_sck, GPIO_FUNC_SIO);
+      gpio_set_dir(wr_sck, GPIO_OUT);
+
+      gpio_set_function(rd_sck,  GPIO_FUNC_SIO);
+      gpio_set_dir(rd_sck, GPIO_OUT);
+
+      for(auto i = 0u; i < 8; i++) {
+        gpio_set_function(d0 + i, GPIO_FUNC_SIO);
+        gpio_set_dir(d0 + i, GPIO_OUT);
+      }
+  
+      gpio_put(rd_sck, 1);
+
+      common_init();
+    }
+
+    // Serial init
     ST7789(uint16_t width, uint16_t height, bool round, uint16_t *frame_buffer,
            spi_inst_t *spi,
            uint cs, uint dc, uint sck, uint mosi, uint bl = PIN_UNUSED) :
       spi(spi),
       width(width), height(height), round(round),
-      cs(cs), dc(dc), sck(sck), mosi(mosi), bl(bl), frame_buffer(frame_buffer) {
+      cs(cs), dc(dc), wr_sck(sck), d0(mosi), bl(bl), frame_buffer(frame_buffer) {
 
-        if(!this->frame_buffer) {
-          this->frame_buffer = new uint16_t[width * height];
-        }
+      // configure spi interface and pins
+      spi_init(spi, SPI_BAUD);
 
-        // configure spi interface and pins
-        spi_init(spi, SPI_BAUD);
+      gpio_set_function(dc, GPIO_FUNC_SIO);
+      gpio_set_dir(dc, GPIO_OUT);
 
-        gpio_set_function(dc, GPIO_FUNC_SIO);
-        gpio_set_dir(dc, GPIO_OUT);
+      gpio_set_function(cs, GPIO_FUNC_SIO);
+      gpio_set_dir(cs, GPIO_OUT);
 
-        gpio_set_function(cs, GPIO_FUNC_SIO);
-        gpio_set_dir(cs, GPIO_OUT);
+      gpio_set_function(wr_sck, GPIO_FUNC_SPI);
+      gpio_set_function(d0, GPIO_FUNC_SPI);
 
-        gpio_set_function(sck,  GPIO_FUNC_SPI);
-        gpio_set_function(mosi, GPIO_FUNC_SPI);
+      common_init();
+    }
 
-        // if a backlight pin is provided then set it up for
-        // pwm control
-        if(bl != PIN_UNUSED) {
-          pwm_config cfg = pwm_get_default_config();
-          pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
-          pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
-          gpio_set_function(bl, GPIO_FUNC_PWM);
-          set_backlight(0); // Turn backlight off initially to avoid nasty surprises
-        }
-
-      }
-
-
-    //--------------------------------------------------
-    // Methods
-    //--------------------------------------------------
-  public:
     void init();
     void configure_display(bool rotate180);
 
@@ -115,6 +128,24 @@ namespace pimoroni {
       }
       return PIN_UNUSED;
     };
+
+  private:
+    void write_blocking_parallel(const uint8_t *src, size_t len);
+    void common_init() {
+        if(!this->frame_buffer) {
+          this->frame_buffer = new uint16_t[width * height];
+        }
+
+        // if a backlight pin is provided then set it up for
+        // pwm control
+        if(bl != PIN_UNUSED) {
+          pwm_config cfg = pwm_get_default_config();
+          pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
+          pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
+          gpio_set_function(bl, GPIO_FUNC_PWM);
+          set_backlight(0); // Turn backlight off initially to avoid nasty surprises
+        }
+    }
   };
 
 }
