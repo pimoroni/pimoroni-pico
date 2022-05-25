@@ -14,7 +14,7 @@ typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
     ST7789Generic *st7789;
     bool parallel;
-    uint16_t *buffer;
+    uint8_t *buffer;
 } GenericST7789_obj_t;
 
 /***** Print *****/
@@ -85,12 +85,12 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = (uint16_t *)bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height * 2)) {
+        self->buffer = (uint8_t *)bufinfo.buf;
+        if(bufinfo.len < (size_t)(width * height)) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        self->buffer = m_new(uint16_t, width * height);
+        self->buffer = m_new(uint8_t, width * height);
     }
 
     if(args[ARG_slot].u_int != -1) {
@@ -166,12 +166,12 @@ mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = (uint16_t *)bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height * 2)) {
+        self->buffer = (uint8_t *)bufinfo.buf;
+        if(bufinfo.len < (size_t)(width * height)) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        self->buffer = m_new(uint16_t, width * height);
+        self->buffer = m_new(uint8_t, width * height);
     }
 
     int cs = args[ARG_cs].u_int;
@@ -186,6 +186,8 @@ mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args
     if (rotate180) {
         self->st7789->configure_display(true);
     }
+
+    mp_printf(&mp_plat_print, "ST7789Generic - %lu\n", sizeof(ST7789Generic));
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -223,10 +225,11 @@ mp_obj_t GenericST7789_set_backlight(size_t n_args, const mp_obj_t *pos_args, mp
 mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
     if(n_args <= 2) {
-        enum { ARG_self, ARG_pen };
+        enum { ARG_self, ARG_pen, ARG_raw };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_pen, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_raw, MP_ARG_OBJ, { .u_obj = mp_const_false } },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -236,10 +239,19 @@ mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t
 
         int pen = args[ARG_pen].u_int;
 
-        if(pen < 0 || pen > 0xffff)
-            mp_raise_ValueError("p is not a valid pen.");
-        else
-            self->st7789->set_pen(pen);
+        if (args[ARG_raw].u_obj == mp_const_false) {
+            if(pen < 0 || pen > 0xff) {
+                mp_raise_ValueError("p is not a valid pen.");
+            } else {
+                self->st7789->set_pen(pen);
+            }
+        } else {
+            if(pen < 0 || pen > 0xffff) {
+                mp_raise_ValueError("p is not a valid pen.");
+            } else {
+                self->st7789->set_pen_raw(pen);
+            }
+        }
     }
     else {
         enum { ARG_self, ARG_r, ARG_g, ARG_b };

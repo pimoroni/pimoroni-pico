@@ -10,7 +10,7 @@
 // supports only 16-bit (565) RGB framebuffers
 namespace pimoroni {
 
-  typedef uint16_t Pen;
+  typedef uint8_t Pen;
 
   struct Rect;
 
@@ -45,7 +45,7 @@ namespace pimoroni {
 
   class PicoGraphics {
   public:
-    uint16_t *frame_buffer;
+    Pen *frame_buffer;
 
     Rect      bounds;
     Rect      clip;
@@ -54,18 +54,32 @@ namespace pimoroni {
 
     const bitmap::font_t *font;
 
+    uint16_t palette[256];
+    uint16_t palette_ptr = 0;
+
   public:
-    PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer);
+    PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer);
     void set_font(const bitmap::font_t *font);
     void set_pen(uint8_t r, uint8_t g, uint8_t b);
     void set_pen(Pen p);
+    void set_pen_raw(uint16_t p);
 
     constexpr Pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
       uint16_t p = ((r & 0b11111000) << 8) |
                   ((g & 0b11111100) << 3) |
                   ((b & 0b11111000) >> 3);
 
-      return __builtin_bswap16(p);
+      p = __builtin_bswap16(p);
+
+      for(auto i=0u; i < palette_ptr; i++) {
+        if(palette[i] == p) return i;
+      }
+
+      if(palette_ptr < 256) {
+        palette[palette_ptr] = p;
+        palette_ptr += 1;
+      }
+      return palette_ptr - 1;
     };
 
     void set_clip(const Rect &r);

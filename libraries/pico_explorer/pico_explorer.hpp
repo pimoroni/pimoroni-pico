@@ -34,13 +34,13 @@ namespace pimoroni {
     static const uint GP6 = 6;
     static const uint GP7 = 7;
 
-    uint16_t *__fb;
+    uint8_t *__fb;
   private:
     ST7789 screen;
     int8_t audio_pin = -1;
 
   public:
-    PicoExplorer(uint16_t *buf);
+    PicoExplorer(uint8_t *buf);
 
     void init();
     void update();

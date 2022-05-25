@@ -1,8 +1,8 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
-  PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer)
-  : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
+  PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
+  : frame_buffer((Pen *)frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
     set_font(&font6);
   };
 
@@ -16,6 +16,21 @@ namespace pimoroni {
 
   void PicoGraphics::set_pen(Pen p) {
     pen = p;
+  }
+
+  void PicoGraphics::set_pen_raw(uint16_t p) {
+    for(auto i=0u; i < palette_ptr; i++) {
+      if(palette[i] == p) {
+        pen = i;
+        return;
+      };
+    }
+
+    if(palette_ptr < 256) {
+      palette[palette_ptr] = p;
+      pen = palette_ptr;
+      palette_ptr += 1;
+    }
   }
 
   void PicoGraphics::set_clip(const Rect &r) {

@@ -10,34 +10,34 @@ namespace pimoroni {
     ST7789 st7789;
 
   public:
-    ST7789Generic(uint16_t width, uint16_t height, bool round=false, uint16_t *frame_buffer=nullptr) :
+    ST7789Generic(uint16_t width, uint16_t height, bool round=false, uint8_t *frame_buffer=nullptr) :
       PicoGraphics(width, height, frame_buffer),
       st7789(width, height, round, frame_buffer, PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM) {
-            this->frame_buffer = st7789.frame_buffer;
+            this->frame_buffer = (Pen *)st7789.frame_buffer;
             this->st7789.init();
            };
 
-    ST7789Generic(uint16_t width, uint16_t height, bool round, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
+    ST7789Generic(uint16_t width, uint16_t height, bool round, uint8_t *frame_buffer, BG_SPI_SLOT slot) :
       PicoGraphics(width, height, frame_buffer),
       st7789(width, height, round, frame_buffer, PIMORONI_SPI_DEFAULT_INSTANCE, st7789.get_slot_cs(slot), SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, st7789.get_slot_bl(slot)) {
-            this->frame_buffer = st7789.frame_buffer;
+            this->frame_buffer = (Pen *)st7789.frame_buffer;
             this->st7789.init();
            };
 
-    ST7789Generic(uint16_t width, uint16_t height, bool round, uint16_t *frame_buffer,
+    ST7789Generic(uint16_t width, uint16_t height, bool round, uint8_t *frame_buffer,
            spi_inst_t *spi,
            uint cs, uint dc, uint sck, uint mosi, uint bl = PIN_UNUSED) :
       PicoGraphics(width, height, frame_buffer),
       st7789(width, height, round, frame_buffer, spi, cs, dc, sck, mosi, bl) {
-            this->frame_buffer = st7789.frame_buffer;
+            this->frame_buffer = (Pen *)st7789.frame_buffer;
             this->st7789.init();
            };
 
-    ST7789Generic(uint16_t width, uint16_t height, uint16_t *frame_buffer,
+    ST7789Generic(uint16_t width, uint16_t height, uint8_t *frame_buffer,
            uint cs, uint dc, uint wr_sck, uint rd_sck, uint d0, uint bl = PIN_UNUSED) :
       PicoGraphics(width, height, frame_buffer),
       st7789(width, height, frame_buffer, cs, dc, wr_sck, rd_sck, d0, bl) {
-            this->frame_buffer = st7789.frame_buffer;
+            this->frame_buffer = (Pen *)st7789.frame_buffer;
             this->st7789.init();
            };
 
