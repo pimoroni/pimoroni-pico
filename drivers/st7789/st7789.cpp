@@ -173,26 +173,47 @@ namespace pimoroni {
   }
 
   uint ST7789::get_sck() const {
-    return sck;
+    return wr_sck;
   }
 
   uint ST7789::get_mosi() const {
-    return mosi;
+    return d0;
   }
 
   uint ST7789::get_bl() const {
     return bl;
   }
 
-  void ST7789::command(uint8_t command, size_t len, const char *data) {
-    gpio_put(cs, 0);
+  void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
+    uint32_t mask = 0xff << d0;
+    while(len--) {
+      gpio_put(wr_sck, false);     
+      uint8_t v = *src++;
+      gpio_put_masked(mask, v << d0);
+      asm("nop;");
+      gpio_put(wr_sck, true);
+      asm("nop;");
+    }
+  }
 
+  void ST7789::command(uint8_t command, size_t len, const char *data) {
     gpio_put(dc, 0); // command mode
-    spi_write_blocking(spi, &command, 1);
+
+    gpio_put(cs, 0);
+    
+    if(spi) {
+      spi_write_blocking(spi, &command, 1);
+    } else {
+      write_blocking_parallel(&command, 1);
+    }
 
     if(data) {
       gpio_put(dc, 1); // data mode
-      spi_write_blocking(spi, (const uint8_t*)data, len);
+      if(spi) {
+        spi_write_blocking(spi, (const uint8_t*)data, len);
+      } else {
+        write_blocking_parallel((const uint8_t*)data, len);
+      }
     }
 
     gpio_put(cs, 1);
