@@ -46,10 +46,19 @@ const mp_obj_type_t GenericST7789_type = {
     .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
 };
 
+const mp_obj_type_t GenericST7789Parallel_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_st7789,
+    .print = GenericST7789_print,
+    .make_new = GenericST7789Parallel_make_new,
+    .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
+};
+
 /***** Module Globals *****/
 STATIC const mp_map_elem_t st7789_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_st7789) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_ST7789), (mp_obj_t)&GenericST7789_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_ST7789Parallel), (mp_obj_t)&GenericST7789Parallel_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_st7789_globals, st7789_globals_table);
 
