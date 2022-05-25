@@ -39,9 +39,10 @@ include(encoder/micropython)
 include(motor/micropython)
 include(qrcode/micropython/micropython)
 include(adcfft/micropython)
+include(pcf85063a/micropython)
 
 include(st7789/micropython)
-include(pcf85063a/micropython)
+include(jpegdec/micropython)
 
 include(modules_py/modules_py)
 
