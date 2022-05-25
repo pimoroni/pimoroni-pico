@@ -13,6 +13,7 @@ extern "C" {
 typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
     ST7789Generic *st7789;
+    bool parallel;
     uint16_t *buffer;
 } GenericST7789_obj_t;
 
@@ -21,27 +22,31 @@ void GenericST7789_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kin
     (void)kind; //Unused input parameter
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    mp_print_str(print, "ST7789(");
+    if(self->parallel) {
+        mp_print_str(print, "ST7789Parallel()");
+    } else {
+        mp_print_str(print, "ST7789(");
 
-    mp_print_str(print, "spi = ");
-    mp_obj_print_helper(print, mp_obj_new_int((self->st7789->get_spi() == spi0) ? 0 : 1), PRINT_REPR);
+        mp_print_str(print, "spi = ");
+        mp_obj_print_helper(print, mp_obj_new_int((self->st7789->get_spi() == spi0) ? 0 : 1), PRINT_REPR);
 
-    mp_print_str(print, ", cs = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_cs()), PRINT_REPR);
+        mp_print_str(print, ", cs = ");
+        mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_cs()), PRINT_REPR);
 
-    mp_print_str(print, ", dc = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_dc()), PRINT_REPR);
+        mp_print_str(print, ", dc = ");
+        mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_dc()), PRINT_REPR);
 
-    mp_print_str(print, ", sck = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_sck()), PRINT_REPR);
+        mp_print_str(print, ", sck = ");
+        mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_sck()), PRINT_REPR);
 
-    mp_print_str(print, ", mosi = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_mosi()), PRINT_REPR);
+        mp_print_str(print, ", mosi = ");
+        mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_mosi()), PRINT_REPR);
 
-    mp_print_str(print, ", bl = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_bl()), PRINT_REPR);
+        mp_print_str(print, ", bl = ");
+        mp_obj_print_helper(print, mp_obj_new_int(self->st7789->get_bl()), PRINT_REPR);
 
-    mp_print_str(print, ")");
+        mp_print_str(print, ")");
+    }
 }
 
 /***** Constructor *****/
@@ -70,6 +75,7 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 
     self = m_new_obj(GenericST7789_obj_t);
     self->base.type = &GenericST7789_type;
+    self->parallel = false;
 
     bool rotate180 = args[ARG_rotate180].u_obj == mp_const_true;
     bool round = args[ARG_round].u_obj == mp_const_true;
@@ -122,6 +128,63 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         if (rotate180) {
             self->st7789->configure_display(true);
         }
+    }
+
+    return MP_OBJ_FROM_PTR(self);
+}
+
+mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    GenericST7789_obj_t *self = nullptr;
+
+    enum { ARG_width, ARG_height, ARG_cs, ARG_dc, ARG_wr_sck, ARG_rd_sck, ARG_d0, ARG_bl, ARG_rotate180, ARG_buffer };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_cs, MP_ARG_INT, {.u_int = 10} },
+        { MP_QSTR_dc, MP_ARG_INT, {.u_int = 11} },
+        { MP_QSTR_wr_sck, MP_ARG_INT, {.u_int = 12} },
+        { MP_QSTR_rd_sck, MP_ARG_INT, {.u_int = 13} },
+        { MP_QSTR_d0, MP_ARG_INT, {.u_int = 14} },
+
+        { MP_QSTR_bl, MP_ARG_INT, {.u_int = 2} },
+        { MP_QSTR_rotate180, MP_ARG_OBJ, {.u_obj = mp_const_false} },
+        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    self = m_new_obj(GenericST7789_obj_t);
+    self->base.type = &GenericST7789_type;
+    self->parallel = true;
+
+    bool rotate180 = args[ARG_rotate180].u_obj == mp_const_true;
+    int width = args[ARG_width].u_int;
+    int height = args[ARG_height].u_int;
+
+    if (args[ARG_buffer].u_obj != mp_const_none) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
+        self->buffer = (uint16_t *)bufinfo.buf;
+        if(bufinfo.len < (size_t)(width * height * 2)) {
+            mp_raise_ValueError("Supplied buffer is too small!");
+        }
+    } else {
+        self->buffer = m_new(uint16_t, width * height);
+    }
+
+    int cs = args[ARG_cs].u_int;
+    int dc = args[ARG_dc].u_int;
+    int wr_sck = args[ARG_wr_sck].u_int;
+    int rd_sck = args[ARG_rd_sck].u_int;
+    int d0 = args[ARG_d0].u_int;
+    int bl = args[ARG_bl].u_int;
+
+    self->st7789 = m_new_class(ST7789Generic, width, height, self->buffer,
+        cs, dc, wr_sck, rd_sck, d0, bl);
+    if (rotate180) {
+        self->st7789->configure_display(true);
     }
 
     return MP_OBJ_FROM_PTR(self);
