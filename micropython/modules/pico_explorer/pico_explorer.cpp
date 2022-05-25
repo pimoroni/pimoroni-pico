@@ -27,7 +27,7 @@ mp_obj_t picoexplorer_init(mp_obj_t buf_obj) {
     }
 
     // Create a new display pointing to the newly provided buffer
-    explorer = new PicoExplorer((uint16_t *)bufinfo.buf);
+    explorer = new PicoExplorer((uint8_t *)bufinfo.buf);
     explorer->init();
 
     return mp_const_none;

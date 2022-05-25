@@ -88,7 +88,7 @@ namespace pimoroni {
     configure_display(false);
 
     if(bl != PIN_UNUSED) {
-      update(); // Send the new buffer to the display to clear any previous content
+      //update(); // Send the new buffer to the display to clear any previous content
       sleep_ms(50); // Wait for the update to apply
       set_backlight(255); // Turn backlight on now surprises have passed
     }
@@ -219,8 +219,24 @@ namespace pimoroni {
     gpio_put(cs, 1);
   }
 
-  void ST7789::update() {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+  void ST7789::update(uint16_t *palette) {
+    //command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+    command(reg::RAMWR);
+    uint16_t row[width];
+    gpio_put(dc, 1); // data mode
+    gpio_put(cs, 0);
+    for(auto y = 0u; y < height; y++) {
+      for(auto x = 0u; x < width; x++) {
+        auto i = y * width + x;
+        row[x] = palette[frame_buffer[i]];
+      }
+      if(spi) {
+        spi_write_blocking(spi, (const uint8_t*)row, width * sizeof(uint16_t));
+      } else {
+        write_blocking_parallel((const uint8_t*)row, width * sizeof(uint16_t));
+      }
+    }
+    gpio_put(cs, 1);
   }
 
   void ST7789::set_backlight(uint8_t brightness) {

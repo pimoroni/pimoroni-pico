@@ -30,7 +30,7 @@ namespace pimoroni {
   }
 
   void ST7789Generic::update() {
-    st7789.update();
+    st7789.update(palette);
   }
 
   void ST7789Generic::flip() {
