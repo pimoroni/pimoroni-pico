@@ -11,8 +11,8 @@ namespace pimoroni {
     this->font = font;
   }
 
-  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    pen = put_palette(create_pen_rgb332(r, g, b));
+  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b, bool truncate) {
+    pen = put_palette(truncate ? create_pen_rgb332(r, g, b) : create_pen_rgb565(r, g, b));
   }
 
   void PicoGraphics::set_pen(Pen p) {

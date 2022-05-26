@@ -259,12 +259,13 @@ mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         }
     }
     else {
-        enum { ARG_self, ARG_r, ARG_g, ARG_b };
+        enum { ARG_self, ARG_r, ARG_g, ARG_b, ARG_truncate };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
             { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
             { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
+            { MP_QSTR_truncate, MP_ARG_OBJ, { .u_obj = mp_const_true } },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -275,6 +276,7 @@ mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         int r = args[ARG_r].u_int;
         int g = args[ARG_g].u_int;
         int b = args[ARG_b].u_int;
+        bool t = args[ARG_truncate].u_obj == mp_const_true;
 
         if(r < 0 || r > 255)
             mp_raise_ValueError("r out of range. Expected 0 to 255");
@@ -283,21 +285,20 @@ mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         else if(b < 0 || b > 255)
             mp_raise_ValueError("b out of range. Expected 0 to 255");
         else
-            self->st7789->set_pen(r, g, b);
+            self->st7789->set_pen(r, g, b, t);
     }
 
     return mp_const_none;
 }
 
 mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    int pen = 0;
-
-    enum { ARG_self, ARG_r, ARG_g, ARG_b };
+    enum { ARG_self, ARG_r, ARG_g, ARG_b, ARG_truncate };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_truncate, MP_ARG_OBJ, { .u_obj = mp_const_true } },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -308,6 +309,7 @@ mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_ma
     int r = args[ARG_r].u_int;
     int g = args[ARG_g].u_int;
     int b = args[ARG_b].u_int;
+    bool t = args[ARG_truncate].u_obj == mp_const_true;
 
     if(r < 0 || r > 255)
         mp_raise_ValueError("r out of range. Expected 0 to 255");
@@ -316,9 +318,9 @@ mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_ma
     else if(b < 0 || b > 255)
         mp_raise_ValueError("b out of range. Expected 0 to 255");
     else
-        pen = self->st7789->create_pen(r, g, b);
+        return mp_obj_new_int(self->st7789->create_pen(r, g, b, t));
 
-    return mp_obj_new_int(pen);
+    return mp_const_none;
 }
 
 mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
