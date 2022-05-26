@@ -4,6 +4,7 @@ namespace pimoroni {
   PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
   : frame_buffer((Pen *)frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
     set_font(&font6);
+    default_palette();
   };
 
   void PicoGraphics::set_font(const bitmap::font_t *font){
@@ -11,27 +12,35 @@ namespace pimoroni {
   }
 
   void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    pen = create_pen(r, g, b);
+    pen = put_palette(create_pen_rgb332(r, g, b));
   }
 
   void PicoGraphics::set_pen(Pen p) {
     pen = p;
   }
 
-  void PicoGraphics::set_pen_raw(uint16_t p) {
-    for(auto i=0u; i < palette_ptr; i++) {
-      if(palette[i] == p) {
-        pen = i;
-        return;
-      };
-    }
+  uint16_t PicoGraphics::get_palette(uint8_t i) {
+    return palette[i];
+  }
 
-    if(palette_ptr < 256) {
-      palette[palette_ptr] = p;
-      pen = palette_ptr;
-      palette_ptr += 1;
+  void PicoGraphics::put_palette(uint16_t p, uint8_t i) {
+    palette[i] = p;
+    if (i > palette_entries) {
+      palette_entries = i;
     }
   }
+
+  uint8_t PicoGraphics::put_palette(uint16_t p) {
+    for(auto i=0u; i < palette_entries; i++) {
+      if(palette[i] == p) return i;
+    }
+
+    if(palette_entries < 256) {
+      palette[palette_entries] = p;
+      palette_entries += 1;
+    }
+    return palette_entries - 1;
+  };
 
   void PicoGraphics::set_clip(const Rect &r) {
     clip = bounds.intersection(r);
@@ -134,6 +143,10 @@ namespace pimoroni {
     bitmap::text(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
       rectangle(Rect(x, y, w, h));
     }, t, p.x, p.y, wrap, scale);
+  }
+
+  void PicoGraphics::measure_text(const std::string &t, uint8_t scale) {
+    bitmap::measure_text(font, t, scale);
   }
 
   int32_t orient2d(Point p1, Point p2, Point p3) {

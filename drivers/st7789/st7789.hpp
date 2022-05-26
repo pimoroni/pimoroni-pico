@@ -36,10 +36,10 @@ namespace pimoroni {
 
   public:
     // frame buffer where pixel data is stored
-    uint8_t *frame_buffer;
+    void *frame_buffer;
 
     // Parallel init
-    ST7789(uint16_t width, uint16_t height, uint8_t *frame_buffer,
+    ST7789(uint16_t width, uint16_t height, void *frame_buffer,
            uint cs, uint dc, uint wr_sck, uint rd_sck, uint d0, uint bl = PIN_UNUSED) :
       spi(nullptr),
       width(width), height(height), round(false),
@@ -68,7 +68,7 @@ namespace pimoroni {
     }
 
     // Serial init
-    ST7789(uint16_t width, uint16_t height, bool round, uint8_t *frame_buffer,
+    ST7789(uint16_t width, uint16_t height, bool round, void *frame_buffer,
            spi_inst_t *spi,
            uint cs, uint dc, uint sck, uint mosi, uint bl = PIN_UNUSED) :
       spi(spi),
@@ -101,6 +101,7 @@ namespace pimoroni {
     uint get_bl() const;
 
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
+    void update();
     void update(uint16_t *palette);
     void set_backlight(uint8_t brightness);
     void flip();

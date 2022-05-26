@@ -55,32 +55,48 @@ namespace pimoroni {
     const bitmap::font_t *font;
 
     uint16_t palette[256];
-    uint16_t palette_ptr = 0;
+    uint16_t palette_entries = 0;
 
   public:
     PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer);
     void set_font(const bitmap::font_t *font);
     void set_pen(uint8_t r, uint8_t g, uint8_t b);
     void set_pen(Pen p);
-    void set_pen_raw(uint16_t p);
 
-    constexpr Pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
+    constexpr uint16_t create_pen_rgb565(uint8_t r, uint8_t g, uint8_t b) {
       uint16_t p = ((r & 0b11111000) << 8) |
-                  ((g & 0b11111100) << 3) |
-                  ((b & 0b11111000) >> 3);
+                   ((g & 0b11111100) << 3) |
+                   ((b & 0b11111000) >> 3);
 
-      p = __builtin_bswap16(p);
+      return __builtin_bswap16(p);
+    }
+  
+    constexpr uint16_t create_pen_rgb332(uint8_t r, uint8_t g, uint8_t b) {
+      uint16_t p = ((r & 0b11100000) << 8) |
+                   ((g & 0b11100000) << 3) |
+                   ((b & 0b11000000) >> 3);
 
-      for(auto i=0u; i < palette_ptr; i++) {
-        if(palette[i] == p) return i;
+      return __builtin_bswap16(p);
+    }
+
+    Pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
+      return put_palette(create_pen_rgb332(r, g, b));
+    }
+
+    void flush_palette() {
+      palette_entries = 0;
+    }
+
+    void default_palette() {
+      for (auto i = 0u; i < 255; i++) {
+        palette[i] = i;
       }
+      palette_entries = 255;
+    }
 
-      if(palette_ptr < 256) {
-        palette[palette_ptr] = p;
-        palette_ptr += 1;
-      }
-      return palette_ptr - 1;
-    };
+    uint8_t put_palette(uint16_t p);
+    uint16_t get_palette(uint8_t i);
+    void put_palette(uint16_t p, uint8_t i);
 
     void set_clip(const Rect &r);
     void remove_clip();
@@ -96,6 +112,7 @@ namespace pimoroni {
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, uint8_t scale = 2);
     void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
+    void measure_text(const std::string &t, uint8_t scale = 2);
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);

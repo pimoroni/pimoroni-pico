@@ -14,7 +14,7 @@ typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
     ST7789Generic *st7789;
     bool parallel;
-    uint8_t *buffer;
+    void *buffer;
 } GenericST7789_obj_t;
 
 /***** Print *****/
@@ -85,12 +85,12 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = (uint8_t *)bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height)) {
+        self->buffer = bufinfo.buf;
+        if(bufinfo.len < (size_t)(width * height * sizeof(Pen))) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        self->buffer = m_new(uint8_t, width * height);
+        self->buffer = m_new(uint8_t, width * height * sizeof(Pen));
     }
 
     if(args[ARG_slot].u_int != -1) {
@@ -200,6 +200,20 @@ mp_obj_t GenericST7789_update(mp_obj_t self_in) {
     return mp_const_none;
 }
 
+mp_obj_t GenericST7789_flush_palette(mp_obj_t self_in) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+    self->st7789->flush_palette();
+
+    return mp_const_none;
+}
+
+mp_obj_t GenericST7789_default_palette(mp_obj_t self_in) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+    self->st7789->default_palette();
+
+    return mp_const_none;
+}
+
 mp_obj_t GenericST7789_set_backlight(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_brightness };
     static const mp_arg_t allowed_args[] = {
@@ -225,11 +239,10 @@ mp_obj_t GenericST7789_set_backlight(size_t n_args, const mp_obj_t *pos_args, mp
 mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
     if(n_args <= 2) {
-        enum { ARG_self, ARG_pen, ARG_raw };
+        enum { ARG_self, ARG_pen };
         static const mp_arg_t allowed_args[] = {
             { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
             { MP_QSTR_pen, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_raw, MP_ARG_OBJ, { .u_obj = mp_const_false } },
         };
 
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -239,18 +252,10 @@ mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t
 
         int pen = args[ARG_pen].u_int;
 
-        if (args[ARG_raw].u_obj == mp_const_false) {
-            if(pen < 0 || pen > 0xff) {
-                mp_raise_ValueError("p is not a valid pen.");
-            } else {
-                self->st7789->set_pen(pen);
-            }
+        if(pen < 0 || pen > 0xff) {
+            mp_raise_ValueError("p is not a valid pen.");
         } else {
-            if(pen < 0 || pen > 0xffff) {
-                mp_raise_ValueError("p is not a valid pen.");
-            } else {
-                self->st7789->set_pen_raw(pen);
-            }
+            self->st7789->set_pen(pen);
         }
     }
     else {

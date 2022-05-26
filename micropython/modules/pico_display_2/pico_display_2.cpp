@@ -27,7 +27,7 @@ mp_obj_t picodisplay2_init(mp_obj_t buf_obj) {
     }
 
     // Create a new display pointing to the newly provided buffer
-    display2 = new PicoDisplay2((uint16_t *)bufinfo.buf);
+    display2 = new PicoDisplay2(bufinfo.buf);
     display2->init();
 
     return mp_const_none;
