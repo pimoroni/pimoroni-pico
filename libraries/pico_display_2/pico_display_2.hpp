@@ -19,13 +19,13 @@ namespace pimoroni {
     static const uint8_t LED_G = 7;
     static const uint8_t LED_B = 8;
 
-    uint16_t *__fb;
+    void *__fb;
   private:
     ST7789 screen;
 
   public:
-    PicoDisplay2(uint16_t *buf);
-    PicoDisplay2(uint16_t *buf, int width, int height);
+    PicoDisplay2(void *buf);
+    PicoDisplay2(void *buf, int width, int height);
 
     void init();
     void update();

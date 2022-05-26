@@ -8,13 +8,13 @@
 
 namespace pimoroni {
 
-  PicoDisplay::PicoDisplay(uint16_t *buf)
+  PicoDisplay::PicoDisplay(void *buf)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, false, buf,
       PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM)  {
       __fb = buf;
   }
 
-  PicoDisplay::PicoDisplay(uint16_t *buf, int width, int height)
+  PicoDisplay::PicoDisplay(void *buf, int width, int height)
     : PicoGraphics(width, height, buf), screen(width, height, false, buf,
       PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM)  {
       __fb = buf;

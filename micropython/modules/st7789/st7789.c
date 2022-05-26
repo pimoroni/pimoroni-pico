@@ -1,6 +1,8 @@
 #include "st7789.h"
 
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_update_obj, GenericST7789_update);
+MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_flush_palette_obj, GenericST7789_flush_palette);
+MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_default_palette_obj, GenericST7789_default_palette);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_backlight_obj, 1, GenericST7789_set_backlight);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_pen_obj, 1, GenericST7789_set_pen);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_create_pen_obj, 1, GenericST7789_create_pen);
@@ -19,13 +21,15 @@ MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_line_obj, 1, GenericST7789_line);
 
 STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&GenericST7789_update_obj) },
-    { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&GenericST7789_set_backlight_obj) },
+    { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&GenericST7789_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&GenericST7789_set_pen_obj) },
+    { MP_ROM_QSTR(MP_QSTR_flush_palette), MP_ROM_PTR(&GenericST7789_flush_palette_obj) },
+    { MP_ROM_QSTR(MP_QSTR_default_palette), MP_ROM_PTR(&GenericST7789_default_palette_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&GenericST7789_set_backlight_obj) },
     { MP_ROM_QSTR(MP_QSTR_create_pen), MP_ROM_PTR(&GenericST7789_create_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_clip), MP_ROM_PTR(&GenericST7789_set_clip_obj) },
     { MP_ROM_QSTR(MP_QSTR_remove_clip), MP_ROM_PTR(&GenericST7789_remove_clip_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&GenericST7789_clear_obj) },
-    { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&GenericST7789_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel_span), MP_ROM_PTR(&GenericST7789_pixel_span_obj) },
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&GenericST7789_rectangle_obj) },
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&GenericST7789_circle_obj) },
