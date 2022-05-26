@@ -15,6 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_rectangle_obj, 1, GenericST7789_rectang
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_circle_obj, 1, GenericST7789_circle);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_character_obj, 1, GenericST7789_character);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_text_obj, 1, GenericST7789_text);
+MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_measure_text_obj, 1, GenericST7789_measure_text);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_polygon_obj, 2, GenericST7789_polygon);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_triangle_obj, 1, GenericST7789_triangle);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_line_obj, 1, GenericST7789_line);
@@ -35,6 +36,7 @@ STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&GenericST7789_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_character), MP_ROM_PTR(&GenericST7789_character_obj) },
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&GenericST7789_text_obj) },
+    { MP_ROM_QSTR(MP_QSTR_measure_text), MP_ROM_PTR(&GenericST7789_measure_text_obj) },
     { MP_ROM_QSTR(MP_QSTR_polygon), MP_ROM_PTR(&GenericST7789_polygon_obj) },
     { MP_ROM_QSTR(MP_QSTR_triangle), MP_ROM_PTR(&GenericST7789_triangle_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&GenericST7789_line_obj) },

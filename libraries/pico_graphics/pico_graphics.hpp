@@ -89,7 +89,8 @@ namespace pimoroni {
 
     void default_palette() {
       for (auto i = 0u; i < 255; i++) {
-        palette[i] = i;
+        palette[i] = ((i & 0b11100000) << 8) | ((i & 0b00011100) << 6) | ((i & 0b00000011) << 3);
+        palette[i] = __builtin_bswap16(palette[i]);
       }
       palette_entries = 255;
     }
@@ -112,7 +113,7 @@ namespace pimoroni {
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, uint8_t scale = 2);
     void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
-    void measure_text(const std::string &t, uint8_t scale = 2);
+    int32_t measure_text(const std::string &t, uint8_t scale = 2);
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
