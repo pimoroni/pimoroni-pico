@@ -60,7 +60,7 @@ namespace pimoroni {
   public:
     PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer);
     void set_font(const bitmap::font_t *font);
-    void set_pen(uint8_t r, uint8_t g, uint8_t b);
+    void set_pen(uint8_t r, uint8_t g, uint8_t b, bool truncate=true);
     void set_pen(Pen p);
 
     constexpr uint16_t create_pen_rgb565(uint8_t r, uint8_t g, uint8_t b) {
@@ -79,8 +79,8 @@ namespace pimoroni {
       return __builtin_bswap16(p);
     }
 
-    Pen create_pen(uint8_t r, uint8_t g, uint8_t b) {
-      return put_palette(create_pen_rgb332(r, g, b));
+    Pen create_pen(uint8_t r, uint8_t g, uint8_t b, bool truncate=true) {
+      return put_palette(truncate ? create_pen_rgb332(r, g, b) : create_pen_rgb565(r, g, b));
     }
 
     void flush_palette() {
