@@ -187,8 +187,6 @@ mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args
         self->st7789->configure_display(true);
     }
 
-    mp_printf(&mp_plat_print, "ST7789Generic - %lu\n", sizeof(ST7789Generic));
-
     return MP_OBJ_FROM_PTR(self);
 }
 
