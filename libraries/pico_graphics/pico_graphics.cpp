@@ -145,8 +145,8 @@ namespace pimoroni {
     }, t, p.x, p.y, wrap, scale);
   }
 
-  void PicoGraphics::measure_text(const std::string &t, uint8_t scale) {
-    bitmap::measure_text(font, t, scale);
+  int32_t PicoGraphics::measure_text(const std::string &t, uint8_t scale) {
+    return bitmap::measure_text(font, t, scale);
   }
 
   int32_t orient2d(Point p1, Point p2, Point p3) {

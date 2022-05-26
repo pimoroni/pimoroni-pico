@@ -511,17 +511,40 @@ mp_obj_t GenericST7789_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
 
         self->st7789->text(t, Point(x, y), wrap, scale);
     }
-    else if(mp_obj_is_float(text_obj)) {
-        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+    else {
+        mp_raise_TypeError("text: string required");
     }
-    else if(mp_obj_is_int(text_obj)) {
-        mp_raise_TypeError("can't convert 'int' object to str implicitly");
-    }
-    else if(mp_obj_is_bool(text_obj)) {
-        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+
+    return mp_const_none;
+}
+
+mp_obj_t GenericST7789_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_text, ARG_scale };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+
+    mp_obj_t text_obj = args[ARG_text].u_obj;
+    if(mp_obj_is_str_or_bytes(text_obj)) {
+        GET_STR_DATA_LEN(text_obj, str, str_len);
+
+        std::string t((const char*)str);
+
+        int scale = args[ARG_scale].u_int;
+
+        int width = self->st7789->measure_text(t, scale);
+
+        return mp_obj_new_int(width);
     }
     else {
-        mp_raise_TypeError("can't convert object to str implicitly");
+        mp_raise_TypeError("text: string required");
     }
 
     return mp_const_none;
