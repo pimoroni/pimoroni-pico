@@ -12,10 +12,8 @@ using namespace pimoroni;
 
 const bool ROTATE_180 = false;
 
-uint16_t buffer[PicoDisplay2::WIDTH * PicoDisplay2::HEIGHT];
-
 // Swap WIDTH and HEIGHT to rotate 90 degrees
-ST7789Generic pico_display(PicoDisplay2::WIDTH, PicoDisplay2::HEIGHT, buffer);
+ST7789Generic pico_display(240, 240);
 
 RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
 
