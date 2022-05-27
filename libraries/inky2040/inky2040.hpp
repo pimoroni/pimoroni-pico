@@ -74,21 +74,21 @@ namespace pimoroni {
     int32_t measure_glyph(unsigned char c, float s = 1.0f);
 
   public:
-    enum pin {
-      A           = 12,
-      B           = 13,
-      C           = 14,
-      D           = 15,
+    enum pin : uint {
+      A           = PIN_UNUSED,
+      B           = PIN_UNUSED,
+      C           = PIN_UNUSED,
+      D           = PIN_UNUSED,
       CS          = 17,
       CLK         = 18,
       MOSI        = 19,
-      DC          = 27,
-      RESET       = 25,
-      BUSY        = 26,
-      VBUS_DETECT = 24,
-      LED         = 25,
-      BATTERY     = 29,
-      ENABLE_3V3  = 10
+      DC          = 28,
+      RESET       = 27,
+      BUSY        = PIN_UNUSED,
+      VBUS_DETECT = PIN_UNUSED,
+      LED         = PIN_UNUSED,
+      BATTERY     = PIN_UNUSED,
+      ENABLE_3V3  = PIN_UNUSED
     };
 
   };

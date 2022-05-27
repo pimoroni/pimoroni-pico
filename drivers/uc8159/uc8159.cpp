@@ -38,13 +38,21 @@ namespace pimoroni {
   };
 
   bool UC8159::is_busy() {
-    return !gpio_get(BUSY);
+    if (BUSY == PIN_UNUSED) {
+      return absolute_time_diff_us(get_absolute_time(), wait_until) > 0;
+    } else {
+      return !gpio_get(BUSY);
+    }
   }
 
   void UC8159::busy_wait() {
     while(is_busy()) {
       tight_loop_contents();
     }
+  }
+
+  void UC8159::soft_wait(uint32_t ms) {
+    wait_until = make_timeout_time_ms(ms);
   }
 
   void UC8159::reset() {
@@ -68,18 +76,23 @@ namespace pimoroni {
     gpio_set_dir(RESET, GPIO_OUT);
     gpio_put(RESET, 1);
 
-    gpio_set_function(BUSY, GPIO_FUNC_SIO);
-    gpio_set_dir(BUSY, GPIO_IN);
-    gpio_set_pulls(BUSY, true, false);
+    if(BUSY != PIN_UNUSED) {
+      gpio_set_function(BUSY, GPIO_FUNC_SIO);
+      gpio_set_dir(BUSY, GPIO_IN);
+      gpio_set_pulls(BUSY, true, false);
+    }
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
 
     memset(frame_buffer, WHITE << 4 | WHITE, width * height / 2);
+
+    soft_wait(0);
   };
 
   void UC8159::setup() {
     reset();
+    soft_wait(1000);
     busy_wait();
 
     /*
@@ -216,13 +229,15 @@ namespace pimoroni {
     setup();
 
     command(DTM1, (width * height) / 2, frame_buffer); // transmit framebuffer
+    soft_wait(200);
     busy_wait();
 
     command(PON); // turn on
+    soft_wait(200);
     busy_wait();
 
     command(DRF); // start display refresh
-    busy_wait();
+    soft_wait(32 * 1000); // wait 32s if there's no BUSY pin configured
 
     if(blocking) {
       busy_wait();

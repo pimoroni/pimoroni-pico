@@ -28,13 +28,15 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     uint CS     = SPI_BG_FRONT_CS;
-    uint DC     = 27;
+    uint DC     = 28;
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
-    uint BUSY   = 26;
-    uint RESET  = 25;
+    uint BUSY   = PIN_UNUSED;
+    uint RESET  = 27;
 
     bool inverted = false;
+
+    absolute_time_t wait_until;
 
   public:
     enum colour : uint8_t {
@@ -81,6 +83,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     void init();
+    void soft_wait(uint32_t ms);
     void busy_wait();
     bool is_busy();
     void reset();

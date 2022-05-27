@@ -104,14 +104,20 @@ mp_obj_t Inky2040_is_busy(mp_obj_t self_in) {
 mp_obj_t Inky2040_update(mp_obj_t self_in) {
     _Inky2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Inky2040_obj_t);
 
+    mp_printf(&mp_plat_print, "Update()");
+
     while(self->inky2040->is_busy()) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
     }
 
+    mp_printf(&mp_plat_print, "Initial busy wait done...");
+
     //absolute_time_t t_end = make_timeout_time_ms(26 * 100);
     self->inky2040->update(false);
+
+    mp_printf(&mp_plat_print, "Update done...");
 
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
@@ -120,6 +126,8 @@ MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
     }
+
+    mp_printf(&mp_plat_print, "Post busy wait done...");
 
     self->inky2040->power_off();
 
