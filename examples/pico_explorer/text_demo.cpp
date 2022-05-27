@@ -21,12 +21,15 @@ int main() {
   pico_explorer.set_font(&font8);
   msa301.init();
 
+  Pen BG = pico_explorer.create_pen(120, 40, 60);
+  Pen WHITE = pico_explorer.create_pen(255, 255, 255);
+
   uint32_t i = 0;
   while(true) {
-    pico_explorer.set_pen(120, 40, 60);
+    pico_explorer.set_pen(BG);
     pico_explorer.clear();
 
-    pico_explorer.set_pen(255, 255, 255);
+    pico_explorer.set_pen(WHITE);
     pico_explorer.set_font(&font6);
     pico_explorer.text("6x6: The quick, brown fox jumps over the lazy dog! UPPER. lower.", Point(10, 10), 220);
     pico_explorer.text("0123456789 !$%^&*()", Point(10, 70), 220);

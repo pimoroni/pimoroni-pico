@@ -43,17 +43,23 @@ Pen from_hsv(float h, float s, float v) {
 int main() {
     display.set_backlight(255);
 
+    // Delete the default palette and allow us to create up to 256 of our own RGB565 colours
+    // display.set_palette_mode(ST7789Generic::PaletteModeUSER);
+
     uint32_t steps = 70;
     float angle_step = 0.5f;
+
+    Pen BLACK = display.create_pen(0, 0, 0);
+    Pen WHITE = display.create_pen(255, 255, 255);
 
     while(1) {
         absolute_time_t at = get_absolute_time();
         uint64_t t = to_us_since_boot(at) / 100000;
         float angle = (t % 360) * M_PI / 180.0f;
 
-        display.set_pen(0, 0, 0);
+        display.set_pen(BLACK);
         display.clear();
-        display.set_pen(255, 255, 255);
+        display.set_pen(WHITE);
 
         for(auto step = 0u; step < steps; step++) {
           auto distance = RADIUS / steps * step;

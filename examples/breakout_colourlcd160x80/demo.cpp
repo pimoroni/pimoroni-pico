@@ -5,12 +5,15 @@
 
 using namespace pimoroni;
 
-uint16_t buffer[BreakoutColourLCD160x80::WIDTH * BreakoutColourLCD160x80::HEIGHT];
-BreakoutColourLCD160x80 lcd(buffer);
+uint8_t buffer[BreakoutColourLCD160x80::WIDTH * BreakoutColourLCD160x80::HEIGHT];
+BreakoutColourLCD160x80 lcd((void *)buffer);
 
 int main() {
   lcd.init();
   lcd.set_backlight(255);
+
+  // Delete the default palette and allow us to create up to 256 of our own RGB565 colours
+  lcd.set_palette_mode(BreakoutColourLCD160x80::PaletteModeUSER);
 
   struct pt {
     float      x;
@@ -18,7 +21,7 @@ int main() {
     uint8_t    r;
     float     dx;
     float     dy;
-    uint16_t pen;
+    Pen      pen;
   };
 
   std::vector<pt> shapes;
@@ -33,8 +36,10 @@ int main() {
     shapes.push_back(shape);
   }
 
+  uint8_t bg = lcd.create_pen(120, 40, 60);
+
   while(true) {
-    lcd.set_pen(120, 40, 60);
+    lcd.set_pen(bg);
     lcd.clear();
 
     for(auto &shape : shapes) {

@@ -195,8 +195,26 @@ namespace pimoroni {
     gpio_put(cs, 1);
   }
 
-  void ST7735::update(bool dont_block) {
-    ST7735::command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+  // Native 16-bit framebuffer update
+  void ST7735::update() {
+    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+  }
+
+  // 8-bit framebuffer with palette conversion update
+  void ST7735::update(uint16_t *palette) {
+    command(reg::RAMWR);
+    uint16_t row[width];
+    gpio_put(dc, 1); // data mode
+    gpio_put(cs, 0);
+    for(auto y = 0u; y < height; y++) {
+      for(auto x = 0u; x < width; x++) {
+        auto i = y * width + x;
+        row[x] = palette[((uint8_t *)frame_buffer)[i]];
+      }
+      // TODO: Add DMA->SPI / PIO while we prep the next row
+      spi_write_blocking(spi, (const uint8_t*)row, width * sizeof(uint16_t));
+    }
+    gpio_put(cs, 1);
   }
 
   void ST7735::set_backlight(uint8_t brightness) {

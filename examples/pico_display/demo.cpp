@@ -43,8 +43,13 @@ int main() {
   }
 
   uint32_t i = 0;
+  Pen BG = pico_display.create_pen(120, 40, 60);
+  Pen YELLOW = pico_display.create_pen(255, 255, 0);
+  Pen TEAL = pico_display.create_pen(0, 255, 255);
+  Pen WHITE = pico_display.create_pen(255, 255, 255);
+
   while(true) {
-    pico_display.set_pen(120, 40, 60);
+    pico_display.set_pen(BG);
     pico_display.clear();
 
     for(auto &shape : shapes) {
@@ -72,14 +77,14 @@ int main() {
     poly.push_back(Point(50, 85));
     poly.push_back(Point(30, 45));
 
-    pico_display.set_pen(255, 255, 0);
+    pico_display.set_pen(YELLOW);
     //pico_display.pixel(Point(0, 0));
     pico_display.polygon(poly);
 
-    pico_display.set_pen(0, 255, 255);
+    pico_display.set_pen(TEAL);
     pico_display.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
 
-    pico_display.set_pen(255, 255, 255);
+    pico_display.set_pen(WHITE);
     pico_display.line(Point(50, 50), Point(120, 80));
     pico_display.line(Point(20, 20), Point(120, 20));
     pico_display.line(Point(20, 20), Point(20, 120));

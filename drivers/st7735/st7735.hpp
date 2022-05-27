@@ -32,7 +32,7 @@ namespace pimoroni {
 
   public:
     // frame buffer where pixel data is stored
-    uint16_t *frame_buffer;
+    void *frame_buffer;
 
   private:
     spi_inst_t *spi = spi0;
@@ -58,7 +58,7 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ST7735(uint16_t width, uint16_t height, uint16_t *frame_buffer, BG_SPI_SLOT slot) :
+    ST7735(uint16_t width, uint16_t height, void *frame_buffer, BG_SPI_SLOT slot) :
       width(width), height(height), frame_buffer(frame_buffer) {
       switch(slot) {
         case PICO_EXPLORER_ONBOARD: // Don't read too much into this, the case is just here to avoid a compile error
@@ -76,10 +76,10 @@ namespace pimoroni {
       }
     }
 
-    ST7735(uint16_t width, uint16_t height, uint16_t *frame_buffer) :
+    ST7735(uint16_t width, uint16_t height, void *frame_buffer) :
       width(width), height(height), frame_buffer(frame_buffer) {}
 
-    ST7735(uint16_t width, uint16_t height, uint16_t *frame_buffer,
+    ST7735(uint16_t width, uint16_t height, void *frame_buffer,
            spi_inst_t *spi,
            uint8_t cs, uint8_t dc, uint8_t sck, uint8_t mosi, uint8_t miso = -1, uint8_t bl = -1) :
       width(width), height(height), frame_buffer(frame_buffer),
@@ -100,7 +100,8 @@ namespace pimoroni {
     int get_bl() const;
     
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
-    void update(bool dont_block = false);
+    void update();
+    void update(uint16_t *palette);
     void set_backlight(uint8_t brightness);
   };
 

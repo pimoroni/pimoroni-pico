@@ -1,15 +1,27 @@
 #include "st7789.h"
 
+// Module functions
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_module_RGB332_obj, GenericST7789_module_RGB332);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_module_RGB565_obj, GenericST7789_module_RGB565);
+
+// Class Methods
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_update_obj, GenericST7789_update);
-MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_flush_palette_obj, GenericST7789_flush_palette);
-MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_default_palette_obj, GenericST7789_default_palette);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_backlight_obj, 1, GenericST7789_set_backlight);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_pen_obj, 1, GenericST7789_set_pen);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_create_pen_obj, 1, GenericST7789_create_pen);
+MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_backlight_obj, GenericST7789_set_backlight);
+MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_framebuffer_obj, GenericST7789_set_framebuffer);
+
+// Palette management
+MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_palette_mode_obj, GenericST7789_set_palette_mode);
+MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_set_palette_obj, GenericST7789_set_palette);
+
+// Pen
+MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_pen_obj, GenericST7789_set_pen);
+MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_create_pen_obj, 3, GenericST7789_create_pen);
+
+// Primitives
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_clip_obj, 1, GenericST7789_set_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_remove_clip_obj, GenericST7789_remove_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_clear_obj, GenericST7789_clear);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_pixel_obj, 1, GenericST7789_pixel);
+MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_pixel_obj, GenericST7789_pixel);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_pixel_span_obj, 1, GenericST7789_pixel_span);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_rectangle_obj, 1, GenericST7789_rectangle);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_circle_obj, 1, GenericST7789_circle);
@@ -21,11 +33,13 @@ MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_triangle_obj, 1, GenericST7789_triangle
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_line_obj, 1, GenericST7789_line);
 
 STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&GenericST7789_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&GenericST7789_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&GenericST7789_set_pen_obj) },
-    { MP_ROM_QSTR(MP_QSTR_flush_palette), MP_ROM_PTR(&GenericST7789_flush_palette_obj) },
-    { MP_ROM_QSTR(MP_QSTR_default_palette), MP_ROM_PTR(&GenericST7789_default_palette_obj) },
+    { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&GenericST7789_update_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_set_palette_mode), MP_ROM_PTR(&GenericST7789_set_palette_mode_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_palette), MP_ROM_PTR(&GenericST7789_set_palette_obj) },
+
     { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&GenericST7789_set_backlight_obj) },
     { MP_ROM_QSTR(MP_QSTR_create_pen), MP_ROM_PTR(&GenericST7789_create_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_clip), MP_ROM_PTR(&GenericST7789_set_clip_obj) },
@@ -40,6 +54,8 @@ STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_polygon), MP_ROM_PTR(&GenericST7789_polygon_obj) },
     { MP_ROM_QSTR(MP_QSTR_triangle), MP_ROM_PTR(&GenericST7789_triangle_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&GenericST7789_line_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_set_framebuffer), MP_ROM_PTR(&GenericST7789_set_framebuffer_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(GenericST7789_locals_dict, GenericST7789_locals_dict_table);
 
@@ -62,9 +78,15 @@ const mp_obj_type_t GenericST7789Parallel_type = {
 
 /***** Module Globals *****/
 STATIC const mp_map_elem_t st7789_globals_table[] = {
-    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_st7789) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ST7789), (mp_obj_t)&GenericST7789_type },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_ST7789Parallel), (mp_obj_t)&GenericST7789Parallel_type },
+    { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_st7789) },
+    { MP_ROM_QSTR(MP_QSTR_ST7789), (mp_obj_t)&GenericST7789_type },
+    { MP_ROM_QSTR(MP_QSTR_ST7789Parallel), (mp_obj_t)&GenericST7789Parallel_type },
+
+    { MP_ROM_QSTR(MP_QSTR_RGB332), MP_ROM_PTR(&GenericST7789_module_RGB332_obj) },
+    { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_PTR(&GenericST7789_module_RGB565_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_PALETTE_RGB332), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_PALETTE_USER), MP_ROM_INT(1) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_st7789_globals, st7789_globals_table);
 

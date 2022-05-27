@@ -64,7 +64,7 @@ mp_obj_t BreakoutColourLCD160x80_make_new(const mp_obj_type_t *type, size_t n_ar
             mp_buffer_info_t bufinfo;
             mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
 
-            self->breakout = m_new_class(BreakoutColourLCD160x80, (uint16_t *)bufinfo.buf, (BG_SPI_SLOT)slot);
+            self->breakout = m_new_class(BreakoutColourLCD160x80, bufinfo.buf, (BG_SPI_SLOT)slot);
         }
         else {
             mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
@@ -113,7 +113,7 @@ mp_obj_t BreakoutColourLCD160x80_make_new(const mp_obj_type_t *type, size_t n_ar
         self->base.type = &breakout_colourlcd160x80_BreakoutColourLCD160x80_type;
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
-        self->breakout = m_new_class(BreakoutColourLCD160x80, (uint16_t *)bufinfo.buf, spi,
+        self->breakout = m_new_class(BreakoutColourLCD160x80, bufinfo.buf, spi,
             args[ARG_cs].u_int, args[ARG_dc].u_int, sck, mosi, PIN_UNUSED, args[ARG_bl].u_int);
     }
 
@@ -154,52 +154,23 @@ mp_obj_t BreakoutColourLCD160x80_set_backlight(size_t n_args, const mp_obj_t *po
 
 mp_obj_t BreakoutColourLCD160x80_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
-    if(n_args <= 2) {
-        enum { ARG_self, ARG_pen };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_pen, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
+    enum { ARG_self, ARG_pen };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_pen, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
 
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
+    breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
 
-        int pen = args[ARG_pen].u_int;
+    int pen = args[ARG_pen].u_int;
 
-        if(pen < 0 || pen > 0xffff)
-            mp_raise_ValueError("p is not a valid pen.");
-        else
-            self->breakout->set_pen(pen);
-    }
-    else {
-        enum { ARG_self, ARG_r, ARG_g, ARG_b };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
-
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_colourlcd160x80_BreakoutColourLCD160x80_obj_t);
-
-        int r = args[ARG_r].u_int;
-        int g = args[ARG_g].u_int;
-        int b = args[ARG_b].u_int;
-
-        if(r < 0 || r > 255)
-            mp_raise_ValueError("r out of range. Expected 0 to 255");
-        else if(g < 0 || g > 255)
-            mp_raise_ValueError("g out of range. Expected 0 to 255");
-        else if(b < 0 || b > 255)
-            mp_raise_ValueError("b out of range. Expected 0 to 255");
-        else
-            self->breakout->set_pen(r, g, b);
-    }
+    if(pen < 0 || pen > 0xffff)
+        mp_raise_ValueError("p is not a valid pen.");
+    else
+        self->breakout->set_pen(pen);
 
     return mp_const_none;
 }
