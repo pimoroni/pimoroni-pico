@@ -2,18 +2,18 @@
 
 namespace pimoroni {
 
-  BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf)
+  BreakoutColourLCD160x80::BreakoutColourLCD160x80(void *buf)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf) {
     __fb = buf;
   }
 
-  BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf, spi_inst_t *spi,
+  BreakoutColourLCD160x80::BreakoutColourLCD160x80(void *buf, spi_inst_t *spi,
       uint cs, uint dc, uint sck, uint mosi, uint miso, uint bl)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, spi, cs, dc, sck, mosi, miso, bl) {
     __fb = buf;
   }
 
-  BreakoutColourLCD160x80::BreakoutColourLCD160x80(uint16_t *buf, BG_SPI_SLOT slot)
+  BreakoutColourLCD160x80::BreakoutColourLCD160x80(void *buf, BG_SPI_SLOT slot)
     : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, buf, slot) {
     __fb = buf;
   }
@@ -48,7 +48,7 @@ namespace pimoroni {
   }
 
   void BreakoutColourLCD160x80::update() {
-    screen.update();
+    screen.update(palette);
   }
 
   void BreakoutColourLCD160x80::set_backlight(uint8_t brightness) {

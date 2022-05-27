@@ -26,7 +26,6 @@ include(breakout_vl53l5cx/micropython)
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
 include(pico_unicorn/micropython)
-include(pico_explorer/micropython)
 include(pico_wireless/micropython)
 
 include(bitmap_fonts/micropython)

@@ -18,7 +18,7 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   public:
-    uint16_t *__fb;
+    void *__fb;
   private:
     ST7735 screen;
 
@@ -27,10 +27,10 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    BreakoutColourLCD160x80(uint16_t *buf);
-    BreakoutColourLCD160x80(uint16_t *buf, spi_inst_t *spi,
+    BreakoutColourLCD160x80(void *buf);
+    BreakoutColourLCD160x80(void *buf, spi_inst_t *spi,
       uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED);
-    BreakoutColourLCD160x80(uint16_t *buf, BG_SPI_SLOT slot);
+    BreakoutColourLCD160x80(void *buf, BG_SPI_SLOT slot);
 
 
     //--------------------------------------------------

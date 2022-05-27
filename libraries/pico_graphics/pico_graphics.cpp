@@ -4,43 +4,74 @@ namespace pimoroni {
   PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
   : frame_buffer((Pen *)frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
     set_font(&font6);
-    default_palette();
+    set_palette_mode(PaletteModeRGB332);
   };
 
   void PicoGraphics::set_font(const bitmap::font_t *font){
     this->font = font;
   }
 
-  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b, bool truncate) {
-    pen = put_palette(truncate ? create_pen_rgb332(r, g, b) : create_pen_rgb565(r, g, b));
-  }
-
   void PicoGraphics::set_pen(Pen p) {
     pen = p;
   }
 
-  uint16_t PicoGraphics::get_palette(uint8_t i) {
-    return palette[i];
-  }
-
-  void PicoGraphics::put_palette(uint16_t p, uint8_t i) {
-    palette[i] = p;
-    if (i > palette_entries) {
-      palette_entries = i;
+  void PicoGraphics::set_palette_mode(PaletteMode mode) {
+    palette_mode = mode;
+    if(mode == PaletteModeRGB332) {
+      rgb332_palette();
+    } else {
+      empty_palette();
     }
   }
 
-  uint8_t PicoGraphics::put_palette(uint16_t p) {
-    for(auto i=0u; i < palette_entries; i++) {
-      if(palette[i] == p) return i;
-    }
+  int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {
+    RGB565 c = palette_mode == PaletteModeRGB332 ? create_pen_rgb332(r, g, b) : create_pen_rgb565(r, g, b);
+    int result = search_palette(c);
 
-    if(palette_entries < 256) {
-      palette[palette_entries] = p;
-      palette_entries += 1;
+    if (result == -1 && palette_mode == PaletteModeUSER) {
+      result = put_palette(create_pen_rgb565(r, g, b));
     }
-    return palette_entries - 1;
-  };
+  
+    return result;
+  }
+
+  int PicoGraphics::search_palette(RGB565 c) {
+    for(auto i = 0u; i < 256; i++) {
+      if(palette_status[i] && palette[i] == c) return i;
+    }
+    return -1;
+  }
+
+  int PicoGraphics::put_palette(RGB565 c) {
+    for(auto i = 0u; i < 256; i++) {
+      if(!palette_status[i]) {
+        palette[i] = c;
+        palette_status[i] = true;
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  void PicoGraphics::set_palette(uint8_t i, uint16_t c) {
+    palette[i] = c;
+    palette_status[i] = true;
+  }
+
+  void PicoGraphics::empty_palette() { 
+    for (auto i = 0u; i < 255; i++) {
+      palette[i] = 0;
+      palette_status[i] = false;
+    }
+  }
+
+  void PicoGraphics::rgb332_palette() {
+    for (auto i = 0u; i < 255; i++) {
+      palette[i] = ((i & 0b11100000) << 8) | ((i & 0b00011100) << 6) | ((i & 0b00000011) << 3);
+      palette[i] = __builtin_bswap16(palette[i]);
+      palette_status[i] = true;
+    }
+  }
 
   void PicoGraphics::set_clip(const Rect &r) {
     clip = bounds.intersection(r);

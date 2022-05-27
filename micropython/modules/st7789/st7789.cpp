@@ -166,7 +166,7 @@ mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = (uint8_t *)bufinfo.buf;
+        self->buffer = bufinfo.buf;
         if(bufinfo.len < (size_t)(width * height)) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
@@ -191,6 +191,23 @@ mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args
 }
 
 /***** Methods *****/
+mp_obj_t GenericST7789_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+
+    if (framebuffer == mp_const_none) {
+        m_del(uint8_t, self->buffer, self->st7789->bounds.w * self->st7789->bounds.h);
+        self->buffer = nullptr;
+        self->st7789->set_framebuffer(nullptr);
+    } else {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(framebuffer, &bufinfo, MP_BUFFER_RW);
+        self->buffer = bufinfo.buf;
+        self->st7789->set_framebuffer(self->buffer);
+    }
+
+    return mp_const_none;
+}
+
 mp_obj_t GenericST7789_update(mp_obj_t self_in) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
     self->st7789->update();
@@ -198,105 +215,69 @@ mp_obj_t GenericST7789_update(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_flush_palette(mp_obj_t self_in) {
+mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
-    self->st7789->flush_palette();
 
-    return mp_const_none;
-}
+    float b = mp_obj_get_float(brightness);
 
-mp_obj_t GenericST7789_default_palette(mp_obj_t self_in) {
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
-    self->st7789->default_palette();
-
-    return mp_const_none;
-}
-
-mp_obj_t GenericST7789_set_backlight(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_brightness };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_brightness, MP_ARG_REQUIRED | MP_ARG_OBJ },
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
-
-    if(brightness < 0 || brightness > 1.0f)
+    if(b < 0 || b > 1.0f)
         mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
     else
-        self->st7789->set_backlight((uint8_t)(brightness * 255.0f));
+        self->st7789->set_backlight((uint8_t)(b * 255.0f));
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_set_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
+    return mp_obj_new_int(ST7789Generic::create_pen_rgb332(
+        mp_obj_get_int(r),
+        mp_obj_get_int(g),
+        mp_obj_get_int(b)
+    ));
+}
 
-    if(n_args <= 2) {
-        enum { ARG_self, ARG_pen };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_pen, MP_ARG_REQUIRED | MP_ARG_INT },
-        };
+mp_obj_t GenericST7789_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
+    return mp_obj_new_int(ST7789Generic::create_pen_rgb565(
+        mp_obj_get_int(r),
+        mp_obj_get_int(g),
+        mp_obj_get_int(b)
+    ));
+}
 
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+mp_obj_t GenericST7789_set_pen(mp_obj_t self_in, mp_obj_t pen) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-        GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+    self->st7789->set_pen(mp_obj_get_int(pen) & 0xff);
 
-        int pen = args[ARG_pen].u_int;
+    return mp_const_none;
+}
 
-        if(pen < 0 || pen > 0xff) {
-            mp_raise_ValueError("p is not a valid pen.");
-        } else {
-            self->st7789->set_pen(pen);
-        }
-    }
-    else {
-        enum { ARG_self, ARG_r, ARG_g, ARG_b, ARG_truncate };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_truncate, MP_ARG_OBJ, { .u_obj = mp_const_true } },
-        };
+mp_obj_t GenericST7789_set_palette_mode(mp_obj_t self_in, mp_obj_t mode) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    self->st7789->set_palette_mode((ST7789Generic::PaletteMode)mp_obj_get_int(mode));
 
-        GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+    return mp_const_none;
+}
 
-        int r = args[ARG_r].u_int;
-        int g = args[ARG_g].u_int;
-        int b = args[ARG_b].u_int;
-        bool t = args[ARG_truncate].u_obj == mp_const_true;
+mp_obj_t GenericST7789_set_palette(mp_obj_t self_in, mp_obj_t index, mp_obj_t colour) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-        if(r < 0 || r > 255)
-            mp_raise_ValueError("r out of range. Expected 0 to 255");
-        else if(g < 0 || g > 255)
-            mp_raise_ValueError("g out of range. Expected 0 to 255");
-        else if(b < 0 || b > 255)
-            mp_raise_ValueError("b out of range. Expected 0 to 255");
-        else
-            self->st7789->set_pen(r, g, b, t);
-    }
+    self->st7789->set_palette(
+        mp_obj_get_int(index) & 0xff,
+        mp_obj_get_int(colour) & 0xffff
+    );
 
     return mp_const_none;
 }
 
 mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_r, ARG_g, ARG_b, ARG_truncate };
+    enum { ARG_self, ARG_r, ARG_g, ARG_b };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_truncate, MP_ARG_OBJ, { .u_obj = mp_const_true } },
+        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -304,21 +285,17 @@ mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_ma
 
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
 
-    int r = args[ARG_r].u_int;
-    int g = args[ARG_g].u_int;
-    int b = args[ARG_b].u_int;
-    bool t = args[ARG_truncate].u_obj == mp_const_true;
+    int result = self->st7789->create_pen(
+        args[ARG_r].u_int & 0xff,
+        args[ARG_g].u_int & 0xff,
+        args[ARG_b].u_int & 0xff
+    );
 
-    if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
-    else if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
-    else if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
-    else
-        return mp_obj_new_int(self->st7789->create_pen(r, g, b, t));
+    if (result == -1) {
+        mp_raise_ValueError("create_pen failed. No space in palette!");
+    }
 
-    return mp_const_none;
+    return mp_obj_new_int(result);
 }
 
 mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -361,24 +338,13 @@ mp_obj_t GenericST7789_clear(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
+mp_obj_t GenericST7789_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y) {
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-
-    Point p(x, y);
-    self->st7789->pixel(p);
+    self->st7789->pixel(Point(
+        mp_obj_get_int(x),
+        mp_obj_get_int(y)
+    ));
 
     return mp_const_none;
 }
@@ -499,21 +465,19 @@ mp_obj_t GenericST7789_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
-    if(mp_obj_is_str_or_bytes(text_obj)) {
-        GET_STR_DATA_LEN(text_obj, str, str_len);
 
-        std::string t((const char*)str);
+    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError("text: string required");
 
-        int x = args[ARG_x].u_int;
-        int y = args[ARG_y].u_int;
-        int wrap = args[ARG_wrap].u_int;
-        int scale = args[ARG_scale].u_int;
+    GET_STR_DATA_LEN(text_obj, str, str_len);
 
-        self->st7789->text(t, Point(x, y), wrap, scale);
-    }
-    else {
-        mp_raise_TypeError("text: string required");
-    }
+    std::string t((const char*)str);
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    int wrap = args[ARG_wrap].u_int;
+    int scale = args[ARG_scale].u_int;
+
+    self->st7789->text(t, Point(x, y), wrap, scale);
 
     return mp_const_none;
 }
@@ -532,20 +496,18 @@ mp_obj_t GenericST7789_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
-    if(mp_obj_is_str_or_bytes(text_obj)) {
-        GET_STR_DATA_LEN(text_obj, str, str_len);
 
-        std::string t((const char*)str);
+    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError("text: string required");
 
-        int scale = args[ARG_scale].u_int;
+    GET_STR_DATA_LEN(text_obj, str, str_len);
 
-        int width = self->st7789->measure_text(t, scale);
+    std::string t((const char*)str);
 
-        return mp_obj_new_int(width);
-    }
-    else {
-        mp_raise_TypeError("text: string required");
-    }
+    int scale = args[ARG_scale].u_int;
+
+    int width = self->st7789->measure_text(t, scale);
+
+    return mp_obj_new_int(width);
 
     return mp_const_none;
 }

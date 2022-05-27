@@ -14,13 +14,16 @@ int main() {
   //lcd.configure_display(false);
   lcd.set_backlight(255);
 
+  // Delete the default palette and allow us to create up to 256 of our own RGB565 colours
+  lcd.set_palette_mode(ST7789Generic::PaletteModeUSER);
+
   struct pt {
     float      x;
     float      y;
     uint8_t    r;
     float     dx;
     float     dy;
-    uint16_t pen;
+    Pen      pen;
   };
 
   std::vector<pt> shapes;
@@ -37,8 +40,11 @@ int main() {
     shapes.push_back(shape);
   }
 
+  Pen BG = lcd.create_pen(120, 40, 60);
+  Pen WHITE = lcd.create_pen(255, 255, 255);
+
   while(true) {
-    lcd.set_pen(120, 40, 60);
+    lcd.set_pen(BG);
     lcd.clear();
 
     for(auto &shape : shapes) {
@@ -53,7 +59,7 @@ int main() {
       lcd.circle(Point(shape.x, shape.y), shape.r);
     }
 
-    lcd.set_pen(255, 255, 255);
+    lcd.set_pen(WHITE);
     lcd.text("Hello World", Point(0, 0), 240);
 
     // update screen

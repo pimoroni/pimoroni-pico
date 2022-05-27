@@ -69,6 +69,9 @@ int main() {
 
   Point text_location(0, 0);
 
+  Pen BG = pico_display.create_pen(120, 40, 60);
+  Pen WHITE = pico_display.create_pen(255, 255, 255);
+
   while(true) {
     if(button_a.raw()) text_location.x -= 1;
     if(button_b.raw()) text_location.x += 1;
@@ -76,7 +79,7 @@ int main() {
     if(button_x.raw()) text_location.y -= 1;
     if(button_y.raw()) text_location.y += 1;
   
-    pico_display.set_pen(120, 40, 60);
+    pico_display.set_pen(BG);
     pico_display.clear();
 
     for(auto &shape : shapes) {
@@ -112,7 +115,7 @@ int main() {
     led.set_rgb(r, g, b);
 
 
-    pico_display.set_pen(255, 255, 255);
+    pico_display.set_pen(WHITE);
     pico_display.text("Hello World", text_location, 320);
 
     // update screen
