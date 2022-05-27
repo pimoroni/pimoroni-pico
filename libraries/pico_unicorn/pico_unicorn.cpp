@@ -64,6 +64,7 @@ static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
   pio_gpio_init(pio, pin::LED_CLOCK);
   pio_gpio_init(pio, pin::LED_LATCH);
   pio_gpio_init(pio, pin::LED_BLANK);
+
   pio_gpio_init(pio, pin::ROW_0);
   pio_gpio_init(pio, pin::ROW_1);
   pio_gpio_init(pio, pin::ROW_2);
@@ -126,6 +127,14 @@ namespace pimoroni {
     static bool already_init = false;
 
     // setup pins
+
+    gpio_init_mask(0b1111 << pin::LED_DATA);
+    gpio_set_dir_masked(0b1111 << pin::LED_DATA, 0b1111 << pin::LED_DATA);
+
+    gpio_init_mask(0b1111111 << pin::LED_DATA);
+    gpio_set_dir_masked(0b1111111 << pin::ROW_6, 0b1111111 << pin::ROW_6);
+
+    /*
     gpio_init(pin::LED_DATA); gpio_set_dir(pin::LED_DATA, GPIO_OUT);
     gpio_init(pin::LED_CLOCK); gpio_set_dir(pin::LED_CLOCK, GPIO_OUT);
     gpio_init(pin::LED_LATCH); gpio_set_dir(pin::LED_LATCH, GPIO_OUT);
@@ -138,6 +147,7 @@ namespace pimoroni {
     gpio_init(pin::ROW_4); gpio_set_dir(pin::ROW_4, GPIO_OUT);
     gpio_init(pin::ROW_5); gpio_set_dir(pin::ROW_5, GPIO_OUT);
     gpio_init(pin::ROW_6); gpio_set_dir(pin::ROW_6, GPIO_OUT);
+    */
 
     // create 14-bit gamma luts
     for(uint16_t v = 0; v < 256; v++) {
