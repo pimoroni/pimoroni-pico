@@ -1,8 +1,5 @@
 #include "libraries/adcfft/adcfft.hpp"
-#include <new>
-
-#define MP_OBJ_TO_PTR2(o, t) ((t *)(uintptr_t)(o))
-
+#include "micropython/modules/util.hpp"
 
 extern "C" {
 #include "adcfft.h"
