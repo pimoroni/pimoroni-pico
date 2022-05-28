@@ -15,8 +15,8 @@ const uint8_t MOTOR2P = 11;
 namespace pimoroni {
 
   PicoExplorer::PicoExplorer(void *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), 
-      screen(WIDTH, HEIGHT, false, buf, PIMORONI_SPI_DEFAULT_INSTANCE, screen.get_slot_cs(PICO_EXPLORER_ONBOARD), SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, screen.get_slot_bl(PICO_EXPLORER_ONBOARD)) {
+    : PicoGraphics(WIDTH, HEIGHT, buf),  
+      screen(WIDTH, HEIGHT, ROTATE_0, false, buf, get_spi_pins(PICO_EXPLORER_ONBOARD)) {
         __fb = buf;
   }
 
@@ -55,10 +55,12 @@ namespace pimoroni {
     screen.update(palette);
   }
 
+  [[deprecated("Use Button(uint pin).")]]
   bool PicoExplorer::is_pressed(uint8_t button) {
     return !gpio_get(button);
   }
 
+  [[deprecated("Use Analog(uint pin).")]]
   float PicoExplorer::get_adc(uint8_t channel) {
     adc_select_input(channel);
     // scale raw 12-bit adc value to 0 .. 1 float
@@ -68,6 +70,7 @@ namespace pimoroni {
     return result;
   }
 
+  [[deprecated("Use Motor(pin_pair pins).")]]
   void PicoExplorer::set_motor(uint8_t channel, uint8_t action, float speed) {
     uint8_t p = channel == MOTOR1 ? MOTOR1P : MOTOR2P;
     uint8_t n = channel == MOTOR1 ? MOTOR1N : MOTOR2N;
@@ -93,6 +96,7 @@ namespace pimoroni {
     }
   }
 
+  [[deprecated("Use Buzzer(uint pin).")]]
   void PicoExplorer::set_audio_pin(uint pin) {
     pwm_config tone_pwm_cfg = pwm_get_default_config();
 
@@ -105,6 +109,7 @@ namespace pimoroni {
     audio_pin = pin;
   }
 
+  [[deprecated("Use Buzzer(uint pin).set_tone().")]]
   void PicoExplorer::set_tone(uint16_t frequency, float duty) {
     // output a square wave, so 50% duty cycle
     if(audio_pin != -1) {

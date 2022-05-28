@@ -8,7 +8,7 @@ using namespace pimoroni;
 const int WIDTH = 240;
 const int HEIGHT = 240;
 
-ST7789Generic lcd(WIDTH, HEIGHT, false, nullptr, BG_SPI_FRONT);
+ST7789Generic display(WIDTH, HEIGHT, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
 
 int main() {
   //lcd.configure_display(false);

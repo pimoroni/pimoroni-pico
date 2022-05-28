@@ -10,10 +10,7 @@
 
 using namespace pimoroni;
 
-const bool ROTATE_180 = false;
-
-// Swap WIDTH and HEIGHT to rotate 90 degrees
-ST7789Generic pico_display(240, 240);
+ST7789Generic pico_display(240, 240, ROTATE_0);
 
 RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
 
@@ -43,7 +40,6 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
-  pico_display.configure_display(ROTATE_180);
   pico_display.set_backlight(255);
 
   struct pt {

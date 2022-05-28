@@ -19,6 +19,11 @@ It supports drawing text, primitive and individual pixels and includes basic typ
     - [set_pen](#set_pen)
     - [create_pen](#create_pen)
     - [set_clip & remove_clip](#set_clip--remove_clip)
+  - [Palette](#palette)
+    - [set_palette_mode](#set_palette_mode)
+    - [reserve_palette](#reserve_palette)
+    - [set_palette](#set_palette)
+    - [RGB565 and RGB332](#rgb565-and-rgb332)
   - [Pixels](#pixels)
     - [pixel](#pixel)
     - [pixel_span](#pixel_span)
@@ -123,9 +128,10 @@ Would deflate our `box` to start at `11,11` and be 8x8 pixels in size.
 Since `rectangle` *always* draws a filled rectangle, this can be useful to add an outline of your desired thickness:
 
 ```c++
+WHITE = screen.create_pen(255, 255, 255);
 rect box(10, 10, 100, 100);
 box.inflate(1); // Inflate our box by 1px on all sides
-screen.set_pen(255, 255, 255); // White outline
+screen.set_pen(WHITE); // White outline
 screen.rectangle(box);
 box.deflate(1); // Return to our original box size
 screen.set_pen(0, 0, 0); /// Black fill
@@ -157,26 +163,24 @@ TODO
 
 #### set_pen
 
-In order to draw anything with Pico Graphics you must first set the pen to your desired colour, there are two ways to do this:
+In order to draw anything with Pico Graphics you must first set the pen to your desired palette colour:
 
 ```c++
-void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b);
-void PicoGraphics::set_pen(uint16_t p);
+void PicoGraphics::set_pen(uint8_t p);
 ```
 
-The former uses 8-bit R, G and B values which are clipped to 5, 6 and 5 bits respectively to form a 16-bit colour. Internally it uses `create_pen`.
+This value represents an index into the internal colour palette, which has 256 entries and defaults to RGB332 giving an approximation of all RGB888 colours.
 
-The latter takes a 16-bit colour directly and is a great way to save a few cycles if you're working with a constant palette of colours.
 
 #### create_pen
 
 ```c++
-uint16_t PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b);
+int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b);
 ```
 
-Create pen takes R, G and B values, clamps them to 5, 6 and 5 bits respectively and joins them into a `uint16_t` pen that represents a single 16-bit colour.
+By default create pen takes R, G and B values, clamps them to 3, 3 and 2 bits respectively and returns an index in the RGB332 palette.
 
-Creating your pens up front and storing them as `uint16_t` can speed up switching colours.
+You must create pens before using them with `set_pen()` which accepts only a palette index.
 
 #### set_clip & remove_clip
 
@@ -188,6 +192,59 @@ void PicoGraphics::remove_clip();
 `set_clip` applies a clipping rectangle to the drawing surface. Any pixels outside of this rectangle will not be drawn. By default drawing operations are clipped to `bounds` since it's impossible to draw outside of the buffer.
 
 `remove_clip` sets the surface clipping rectangle back to the surface `bounds`.
+
+### Palette
+
+By default Pico Graphics uses an `RGB332` palette and clamps all pens to their `RGB332` values so it can give you an approximate colour for every `RGB888` value you request. If you don't want to think about colours and palettes you can leave it as is.
+
+Alternatively `set_palette_mode()` lets you switch into an RGB565 `USER` palette which gives you up to 256 16-bit colours of your choice.
+
+#### set_palette_mode
+
+```c++
+void PicoGraphics::set_palette_mode(PALETTE_USER);
+```
+
+Clears the default `RGB332` palette and switches into `USER` mode.
+
+Pens created with `create_pen()` will use 16-bit `RGB565` resolution and you have up to 256 palette entries to use.
+
+```c++
+void PicoGraphics::set_palette_mode(PALETTE_RGB332);
+```
+
+Clears any `USER` assigned palettes and returns to `RGB332` mode.
+
+#### reserve_palette
+
+```c++
+int PicoGraphics::reserve_palette();
+```
+
+Marks the first empty palette entry as reserved and return its index.
+
+
+#### set_palette
+
+```c++
+void PicoGraphics::set_palette(uint8_t index, RGB565 color);
+```
+
+#### RGB565 and RGB332
+
+```c++
+int RGB565(uint8_t r, uint8_t g, uint8_t b);
+```
+
+Creates and returns an RGB565 colour, using the five/six/five most significant bits of each channel in turn.
+
+```c++
+int RGB332(uint8_t, uint8_t g, uint8_t b);
+```
+
+Creates and returns an RGB565 colour, using the three/three/two most significant bits of each channel in turn.
+
+IE: This clips the colour to RGB332.
 
 ### Pixels
 

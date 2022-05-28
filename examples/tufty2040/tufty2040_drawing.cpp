@@ -15,22 +15,17 @@ using namespace pimoroni;
 
 Tufty2040 tufty;
 
-uint16_t buffer[Tufty2040::WIDTH * Tufty2040::HEIGHT];
-
-    static const uint8_t LCD_CS = 10;
-    static const uint8_t LCD_DC = 11;
-    static const uint8_t LCD_WR = 12;
-    static const uint8_t LCD_RD = 13;
-    static const uint8_t LCD_D0 = 14;
-
-
-
 // Swap WIDTH and HEIGHT to rotate 90 degrees
 ST7789Generic pico_display(
-  Tufty2040::WIDTH, Tufty2040::HEIGHT,
-  buffer,
-  Tufty2040::LCD_CS, Tufty2040::LCD_DC, Tufty2040::LCD_WR, Tufty2040::LCD_RD, Tufty2040::LCD_D0, 
-  Tufty2040::BACKLIGHT
+  Tufty2040::WIDTH, Tufty2040::HEIGHT, ROTATE_0, nullptr,
+  ParallelPins{
+    Tufty2040::LCD_CS,
+    Tufty2040::LCD_DC,
+    Tufty2040::LCD_WR,
+    Tufty2040::LCD_RD,
+    Tufty2040::LCD_D0, 
+    Tufty2040::BACKLIGHT
+  }
 );
 
 Button button_a(Tufty2040::A);
