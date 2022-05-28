@@ -1,51 +1,66 @@
 # This example shows you a simple, non-interrupt way of reading Pico Explorer's buttons with a loop that checks to see if buttons are pressed.
 
-import picoexplorer as display
 import utime
+import st7789
+import picoexplorer
+from pimoroni import Button
 
-# Initialise display with a bytearray display buffer
-buf = bytearray(display.get_width() * display.get_height() * 2)
-display.init(buf)
 
+display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
+display.set_palette_mode(st7789.PALETTE_USER)
+display.set_backlight(1.0)
 
-# sets up a handy function we can call to clear the screen
-def clear():
-    display.set_pen(0, 0, 0)
-    display.clear()
-    display.update()
+button_a = Button(picoexplorer.BUTTON_A)
+button_b = Button(picoexplorer.BUTTON_B)
+button_x = Button(picoexplorer.BUTTON_X)
+button_y = Button(picoexplorer.BUTTON_Y)
+
+WHITE = display.create_pen(255, 255, 255)
+BLACK = display.create_pen(0, 0, 0)
+TEAL = display.create_pen(0, 255, 255)
+MAGENTA = display.create_pen(255, 0, 255)
+YELLOW = display.create_pen(255, 255, 0)
+RED = display.create_pen(255, 0, 0)
 
 
 while True:
-    if display.is_pressed(display.BUTTON_A):              # if a button press is detected then...
-        clear()                                           # clear to black
-        display.set_pen(255, 255, 255)                    # change the pen colour
+    if button_a.is_pressed:                               # if a button press is detected then...
+        display.set_pen(BLACK)                            # set pen to black
+        display.clear()                                   # clear display to the pen colour
+        display.set_pen(WHITE)                            # change the pen colour
         display.text("Button A pressed", 10, 10, 240, 4)  # display some text on the screen
         display.update()                                  # update the display
         utime.sleep(1)                                    # pause for a sec
-        clear()                                           # clear to black again
-    elif display.is_pressed(display.BUTTON_B):
-        clear()
-        display.set_pen(0, 255, 255)
+
+    elif button_b.is_pressed:
+        display.set_pen(BLACK)
+        display.clear()
+        display.set_pen(TEAL)
         display.text("Button B pressed", 10, 10, 240, 4)
         display.update()
         utime.sleep(1)
-        clear()
-    elif display.is_pressed(display.BUTTON_X):
-        clear()
-        display.set_pen(255, 0, 255)
+
+    elif button_x.is_pressed:
+        display.set_pen(BLACK)
+        display.clear()
+        display.set_pen(MAGENTA)
         display.text("Button X pressed", 10, 10, 240, 4)
         display.update()
         utime.sleep(1)
-        clear()
-    elif display.is_pressed(display.BUTTON_Y):
-        clear()
-        display.set_pen(255, 255, 0)
+
+    elif button_y.is_pressed:
+        display.set_pen(BLACK)
+        display.clear()
+        display.set_pen(YELLOW)
         display.text("Button Y pressed", 10, 10, 240, 4)
         display.update()
         utime.sleep(1)
-        clear()
+
     else:
-        display.set_pen(255, 0, 0)
+        display.set_pen(BLACK)
+        display.clear()
+        display.set_pen(RED)
         display.text("Press any button!", 10, 10, 240, 4)
         display.update()
+
     utime.sleep(0.1)  # this number is how frequently the Pico checks for button presses
