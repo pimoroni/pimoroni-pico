@@ -2,11 +2,9 @@ import time
 import random
 import st7789
 
-# Set the display resolution, in most cases you can flip these for portrait mode
-WIDTH, HEIGHT = 240, 135    # Pico Display
-# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
+display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
 
-display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
+WIDTH, HEIGHT = display.get_bounds()
 
 display.set_backlight(1.0)
 
