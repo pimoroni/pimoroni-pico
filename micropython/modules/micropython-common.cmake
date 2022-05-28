@@ -1,4 +1,5 @@
 include(pimoroni_i2c/micropython)
+include(pimoroni_bus/micropython)
 
 include(breakout_dotmatrix/micropython)
 include(breakout_encoder/micropython)
@@ -27,6 +28,7 @@ include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
 include(pico_unicorn/micropython)
 include(pico_wireless/micropython)
+include(pico_explorer/micropython)
 
 include(bitmap_fonts/micropython)
 
