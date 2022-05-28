@@ -87,6 +87,13 @@ namespace pimoroni {
       return __builtin_bswap16(p);
     }
 
+    void set_dimensions(int width, int height) {
+      bounds.w = width;
+      bounds.h = height;
+      clip.w = width;
+      clip.h = height;
+    }
+
     int create_pen(uint8_t r, uint8_t g, uint8_t b);
 
     void empty_palette();
