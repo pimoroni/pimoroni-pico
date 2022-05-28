@@ -14,7 +14,7 @@ using namespace pimoroni;
 const int WIDTH = 240;
 const int HEIGHT = 240;
 
-ST7789Generic display(WIDTH, HEIGHT, true, nullptr, BG_SPI_FRONT);
+ST7789Generic display(WIDTH, HEIGHT, ROTATE_0, true, nullptr, get_spi_pins(BG_SPI_FRONT));
 
 constexpr float RADIUS = WIDTH / 2;
 

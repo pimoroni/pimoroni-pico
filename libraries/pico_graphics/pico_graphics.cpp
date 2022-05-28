@@ -35,6 +35,11 @@ namespace pimoroni {
     return result;
   }
 
+  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
+    int result = create_pen(r, g, b);
+    (void)result;
+  }
+
   int PicoGraphics::search_palette(RGB565 c) {
     for(auto i = 0u; i < 256; i++) {
       if((palette_status[i] & PaletteStatusUsed) && palette[i] == c) return i;
@@ -53,7 +58,7 @@ namespace pimoroni {
     return -1;
   }
 
-  void PicoGraphics::set_palette(uint8_t i, uint16_t c) {
+  void PicoGraphics::set_palette(uint8_t i, RGB565 c) {
     palette[i] = c;
     palette_status[i] |= PaletteStatusUsed;
   }

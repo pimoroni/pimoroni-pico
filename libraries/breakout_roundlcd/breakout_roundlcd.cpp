@@ -3,20 +3,21 @@
 namespace pimoroni {
 
   BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, true, buf,
-        PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, SPI_BG_FRONT_PWM)  {
+    : PicoGraphics(WIDTH, HEIGHT, buf),
+      screen(WIDTH, HEIGHT, ROTATE_0, true, buf, get_spi_pins(BG_SPI_FRONT)) {
     __fb = buf;
   }
 
   BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  spi_inst_t *spi,
       uint cs, uint dc, uint sck, uint mosi, uint bl)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, true, buf, spi, cs, dc, sck, mosi, bl)  {
+    : PicoGraphics(WIDTH, HEIGHT, buf),
+      screen(WIDTH, HEIGHT, ROTATE_0, true, buf, SPIPins{spi, cs sck, mosi, dc, bl})  {
     __fb = buf;
   }
 
   BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  BG_SPI_SLOT slot)
-    : PicoGraphics(WIDTH, HEIGHT, buf), screen(WIDTH, HEIGHT, true, buf,
-        PIMORONI_SPI_DEFAULT_INSTANCE, screen.get_slot_cs(slot), SPI_DEFAULT_MISO, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, screen.get_slot_bl(slot)) {
+    : PicoGraphics(WIDTH, HEIGHT, buf),
+      screen(WIDTH, HEIGHT, ROTATE_0, true, buf, get_spi_pins(slot)) { {
     __fb = buf;
   }
 

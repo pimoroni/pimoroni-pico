@@ -22,12 +22,8 @@ The following example sets up Pico Display, displays some basic demo text and gr
 
 using namespace pimoroni;
 
-const bool ROTATE_180 = false;
-
-uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
-
 // Swap WIDTH and HEIGHT to rotate 90 degrees
-ST7789Generic pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, buffer);
+ST7789Generic pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
 
 // RGB LED controller
 RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
@@ -39,12 +35,17 @@ Button button_x(PicoDisplay::X);
 Button button_y(PicoDisplay::Y);
 
 int main() {
-    pico_display.configure_display(ROTATE_180);
-
     // set the backlight to a value between 0 and 255
     // the backlight is driven via PWM and is gamma corrected by our
     // library to give a gorgeous linear brightness range.
     pico_display.set_backlight(100);
+    
+    // Create pens for the colours we want to use
+    // parameters are red, green, blue all between 0 and 255
+    // By default these are crushed to RGB332 so only the upper bits of each are used!
+    int BG_COLOR = pico_display.create_pen(30, 40, 50);
+    int BOX_COLOR = pico_display.create_pen(10, 20, 30);
+    int TEXT_COLOR = pico_display.create_pen(110, 120, 130);
 
     while(true) {
         // detect if the A button is pressed (could be A, B, X, or Y)
@@ -56,21 +57,20 @@ int main() {
         }
 
         // set the colour of the pen
-        // parameters are red, green, blue all between 0 and 255
-        pico_display.set_pen(30, 40, 50);
+        pico_display.set_pen(BG_COLOR);
 
         // fill the screen with the current pen colour
         pico_display.clear();
 
         // draw a box to put some text in
-        pico_display.set_pen(10, 20, 30);
+        pico_display.set_pen(BOX_COLOR);
         Rect text_rect(10, 10, 150, 150);
         pico_display.rectangle(text_rect);
 
         // write some text inside the box with 10 pixels of margin
         // automatically word wrapping
         text_rect.deflate(10);
-        pico_display.set_pen(110, 120, 130);
+        pico_display.set_pen(TEXT_COLOR);
         pico_display.text("This is a message", Point(text_rect.x, text_rect.y), text_rect.w);
 
         // now we've done our drawing let's update the screen
