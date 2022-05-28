@@ -55,12 +55,17 @@ namespace pimoroni {
 
     const bitmap::font_t *font;
 
-    uint16_t palette[256];
-    bool palette_status[256];
+    RGB565 palette[256];
+    uint8_t palette_status[256];
 
     enum PaletteMode {
       PaletteModeRGB332 = 0,
       PaletteModeUSER = 1
+    };
+
+    enum PaletteStatus : uint8_t {
+      PaletteStatusReserved = 1,
+      PaletteStatusUsed = 2
     };
 
     PaletteMode palette_mode = PaletteModeRGB332;
@@ -96,6 +101,7 @@ namespace pimoroni {
 
     int create_pen(uint8_t r, uint8_t g, uint8_t b);
 
+    int reserve_palette();
     void empty_palette();
     void rgb332_palette();
 
