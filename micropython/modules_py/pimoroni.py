@@ -136,6 +136,10 @@ class Button:
         else:
             return self.pin.value()
 
+    @property
+    def is_pressed(self):
+        return self.raw()
+
 
 class RGBLED:
     def __init__(self, r, g, b, invert=True):
@@ -178,3 +182,17 @@ class PID:
         self._last_value = value
 
         return (error * self.kp) + (self._error_sum * self.ki) - (rate_error * self.kd)
+
+
+class Buzzer:
+    def __init__(self, pin):
+        self.pwm = PWM(Pin(pin))
+
+    def set_tone(self, hz):
+        if hz is None or hz <= 8:  # None or <=8 to stop
+            self.pwm.duty_u16(0)
+            return False
+
+        self.pwm.freq(hz)
+        self.pwm.duty_u16(1 << 15)
+        return True
