@@ -187,12 +187,12 @@ class PID:
 class Buzzer:
     def __init__(self, pin):
         self.pwm = PWM(Pin(pin))
-
-    def set_tone(self, hz):
-        if hz is None or hz <= 8:  # None or <=8 to stop
+    
+    def set_tone(self, freq, duty=0.5):
+        if freq < 50.0:  # uh... https://github.com/micropython/micropython/blob/af64c2ddbd758ab6bac0fcca94c66d89046663be/ports/rp2/machine_pwm.c#L105-L119
             self.pwm.duty_u16(0)
             return False
 
-        self.pwm.freq(hz)
-        self.pwm.duty_u16(1 << 15)
+        self.pwm.freq(freq)
+        self.pwm.duty_u16(int(65535 * duty))
         return True
