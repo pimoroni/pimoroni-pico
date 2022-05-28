@@ -37,16 +37,16 @@ namespace pimoroni {
 
   int PicoGraphics::search_palette(RGB565 c) {
     for(auto i = 0u; i < 256; i++) {
-      if(palette_status[i] && palette[i] == c) return i;
+      if((palette_status[i] & PaletteStatusUsed) && palette[i] == c) return i;
     }
     return -1;
   }
 
   int PicoGraphics::put_palette(RGB565 c) {
     for(auto i = 0u; i < 256; i++) {
-      if(!palette_status[i]) {
+      if(!(palette_status[i] & (PaletteStatusUsed | PaletteStatusReserved))) {
         palette[i] = c;
-        palette_status[i] = true;
+        palette_status[i] = PaletteStatusUsed;
         return i;
       }
     }
@@ -55,21 +55,33 @@ namespace pimoroni {
 
   void PicoGraphics::set_palette(uint8_t i, uint16_t c) {
     palette[i] = c;
-    palette_status[i] = true;
+    palette_status[i] |= PaletteStatusUsed;
   }
 
-  void PicoGraphics::empty_palette() { 
-    for (auto i = 0u; i < 255; i++) {
+  int PicoGraphics::reserve_palette() {
+    for (auto i = 0u; i < 256; i++) {
+      if (!palette_status[i]) {
+        palette_status[i] = PaletteStatusReserved;
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  void PicoGraphics::empty_palette() {
+    for (auto i = 0u; i < 256; i++) {
       palette[i] = 0;
-      palette_status[i] = false;
+      palette_status[i] = 0;
     }
   }
 
   void PicoGraphics::rgb332_palette() {
-    for (auto i = 0u; i < 255; i++) {
+    for (auto i = 0u; i < 256; i++) {
+      // Convert the implicit RGB332 (i) into RGB565
+      // 0b11100 000 0b00011100 0b00000011
       palette[i] = ((i & 0b11100000) << 8) | ((i & 0b00011100) << 6) | ((i & 0b00000011) << 3);
       palette[i] = __builtin_bswap16(palette[i]);
-      palette_status[i] = true;
+      palette_status[i] = PaletteStatusUsed;
     }
   }
 

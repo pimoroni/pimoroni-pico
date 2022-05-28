@@ -12,6 +12,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_framebuffer_obj, GenericST7789_set_f
 // Palette management
 MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_palette_mode_obj, GenericST7789_set_palette_mode);
 MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_set_palette_obj, GenericST7789_set_palette);
+MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_reserve_palette_obj, GenericST7789_reserve_palette);
 
 // Pen
 MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_pen_obj, GenericST7789_set_pen);
@@ -42,6 +43,7 @@ STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_set_palette_mode), MP_ROM_PTR(&GenericST7789_set_palette_mode_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_palette), MP_ROM_PTR(&GenericST7789_set_palette_obj) },
+    { MP_ROM_QSTR(MP_QSTR_reserve_palette), MP_ROM_PTR(&GenericST7789_reserve_palette_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&GenericST7789_set_backlight_obj) },
     { MP_ROM_QSTR(MP_QSTR_create_pen), MP_ROM_PTR(&GenericST7789_create_pen_obj) },
