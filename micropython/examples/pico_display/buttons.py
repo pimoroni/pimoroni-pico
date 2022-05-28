@@ -4,14 +4,11 @@ import st7789
 import utime
 from pimoroni import Button
 
-# Set the display resolution
-# in most cases you can swap WIDTH weith HEIGHT for portrait mode
-WIDTH, HEIGHT = 240, 135    # Pico Display
-# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
 
-display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
+display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
 display.set_backlight(0.5)
 
+WIDTH, HEIGHT = display.get_bounds()
 
 button_a = Button(12)
 button_b = Button(13)

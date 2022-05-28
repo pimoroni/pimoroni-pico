@@ -1,10 +1,10 @@
 import time
 import random
-from st7789 import ST7789, PALETTE_USER
+from st7789 import ST7789, PALETTE_USER, DISPLAY_LCD_240X240
 
-WIDTH, HEIGHT = 240, 240
+display = ST7789(DISPLAY_LCD_240X240, rotate=0)
 
-display = ST7789(WIDTH, HEIGHT, round=False)
+WIDTH, HEIGHT = display.get_bounds()
 
 # We're creating 100 balls with their own individual colour and 1 BG colour
 # for a total of 101 colours, which will all fit in the 256 entry palette!
@@ -37,7 +37,7 @@ for i in range(0, 100):
             display.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)),
         )
     )
-    
+
 BG = display.create_pen(40, 40, 40)
 
 while True:
@@ -64,4 +64,3 @@ while True:
 
     display.update()
     time.sleep(0.01)
-
