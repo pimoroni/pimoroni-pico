@@ -3,22 +3,28 @@
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
-#include "../../common/pimoroni_common.hpp"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_bus.hpp"
+
+#include <algorithm>
 
 
 namespace pimoroni {
 
   class ST7789 {
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
+  
+  public:
+    // screen properties
+    uint16_t width;
+    uint16_t height;
+    Rotation rotation;
+    bool round;
 
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    // screen properties
-    uint16_t width;
-    uint16_t height;
-    bool round;
 
     // interface pins with our standard defaults where appropriate
     uint cs;
@@ -35,22 +41,16 @@ namespace pimoroni {
 
 
   public:
+  
     // frame buffer where pixel data is stored
     void *frame_buffer;
 
     // Parallel init
-    ST7789(uint16_t width, uint16_t height, void *frame_buffer,
-           uint cs, uint dc, uint wr_sck, uint rd_sck, uint d0, uint bl = PIN_UNUSED) :
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, void *frame_buffer, ParallelPins pins) :
       spi(nullptr),
-      width(width), height(height), round(false),
-      cs(cs), dc(dc), wr_sck(wr_sck), rd_sck(rd_sck), d0(d0), bl(bl), frame_buffer(frame_buffer) {
+      width(width), height(height), rotation(rotation), round(false),
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl), frame_buffer(frame_buffer) {
   
-      gpio_set_function(cs, GPIO_FUNC_SIO);
-      gpio_set_dir(cs, GPIO_OUT);
-
-      gpio_set_function(dc, GPIO_FUNC_SIO);
-      gpio_set_dir(dc, GPIO_OUT);
-
       gpio_set_function(wr_sck, GPIO_FUNC_SIO);
       gpio_set_dir(wr_sck, GPIO_OUT);
 
@@ -68,21 +68,13 @@ namespace pimoroni {
     }
 
     // Serial init
-    ST7789(uint16_t width, uint16_t height, bool round, void *frame_buffer,
-           spi_inst_t *spi,
-           uint cs, uint dc, uint sck, uint mosi, uint bl = PIN_UNUSED) :
-      spi(spi),
-      width(width), height(height), round(round),
-      cs(cs), dc(dc), wr_sck(sck), d0(mosi), bl(bl), frame_buffer(frame_buffer) {
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins pins) :
+      spi(pins.spi),
+      width(width), height(height), rotation(rotation), round(round),
+      cs(pins.cs), dc(pins.miso), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), frame_buffer(frame_buffer) {
 
       // configure spi interface and pins
       spi_init(spi, SPI_BAUD);
-
-      gpio_set_function(dc, GPIO_FUNC_SIO);
-      gpio_set_dir(dc, GPIO_OUT);
-
-      gpio_set_function(cs, GPIO_FUNC_SIO);
-      gpio_set_dir(cs, GPIO_OUT);
 
       gpio_set_function(wr_sck, GPIO_FUNC_SPI);
       gpio_set_function(d0, GPIO_FUNC_SPI);
@@ -91,51 +83,25 @@ namespace pimoroni {
     }
 
     void init();
-    void configure_display(bool rotate180);
-
-    spi_inst_t* get_spi() const;
-    uint get_cs() const;
-    uint get_dc() const;
-    uint get_sck() const;
-    uint get_mosi() const;
-    uint get_bl() const;
-
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
+    void set_backlight(uint8_t brightness);
+
     void update();
     void update(uint16_t *palette);
-    void set_backlight(uint8_t brightness);
-    void flip();
-
-    static uint get_slot_cs(BG_SPI_SLOT slot) {
-      switch(slot) {
-        case PICO_EXPLORER_ONBOARD:
-          return SPI_BG_FRONT_CS;
-        case BG_SPI_FRONT:
-          return SPI_BG_FRONT_CS;
-        case BG_SPI_BACK:
-          return SPI_BG_BACK_CS;
-      }
-      return PIN_UNUSED;
-    };
-
-    static uint get_slot_bl(BG_SPI_SLOT slot) {
-      switch(slot) {
-        case PICO_EXPLORER_ONBOARD:
-          return PIN_UNUSED;
-        case BG_SPI_FRONT:
-          return SPI_BG_FRONT_PWM;
-        case BG_SPI_BACK:
-          return SPI_BG_BACK_PWM;
-      }
-      return PIN_UNUSED;
-    };
 
   private:
+    void configure_display(Rotation rotate);
     void write_blocking_parallel(const uint8_t *src, size_t len);
     void common_init() {
         if(!this->frame_buffer) {
           this->frame_buffer = new uint8_t[width * height];
         }
+
+        gpio_set_function(dc, GPIO_FUNC_SIO);
+        gpio_set_dir(dc, GPIO_OUT);
+
+        gpio_set_function(cs, GPIO_FUNC_SIO);
+        gpio_set_dir(cs, GPIO_OUT);
 
         // if a backlight pin is provided then set it up for
         // pwm control

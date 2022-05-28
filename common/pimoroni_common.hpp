@@ -53,6 +53,13 @@ namespace pimoroni {
       INTERSTATE_75,
       SERVO_2040
     };
+  
+    enum Rotation {
+      ROTATE_0 = 0,
+      ROTATE_90 = 90,
+      ROTATE_180 = 180,
+      ROTATE_270 = 270
+    };
 
     enum Polarity {
       ACTIVE_LOW = 0,

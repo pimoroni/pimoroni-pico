@@ -32,6 +32,9 @@ MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_polygon_obj, 2, GenericST7789_polygon);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_triangle_obj, 1, GenericST7789_triangle);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_line_obj, 1, GenericST7789_line);
 
+// Utility
+MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_get_bounds_obj, GenericST7789_get_bounds);
+
 STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&GenericST7789_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&GenericST7789_set_pen_obj) },
@@ -55,6 +58,7 @@ STATIC const mp_rom_map_elem_t GenericST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_triangle), MP_ROM_PTR(&GenericST7789_triangle_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&GenericST7789_line_obj) },
 
+    { MP_ROM_QSTR(MP_QSTR_get_bounds), MP_ROM_PTR(&GenericST7789_get_bounds_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_framebuffer), MP_ROM_PTR(&GenericST7789_set_framebuffer_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(GenericST7789_locals_dict, GenericST7789_locals_dict_table);
@@ -63,7 +67,6 @@ STATIC MP_DEFINE_CONST_DICT(GenericST7789_locals_dict, GenericST7789_locals_dict
 const mp_obj_type_t GenericST7789_type = {
     { &mp_type_type },
     .name = MP_QSTR_st7789,
-    .print = GenericST7789_print,
     .make_new = GenericST7789_make_new,
     .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
 };
@@ -71,8 +74,14 @@ const mp_obj_type_t GenericST7789_type = {
 const mp_obj_type_t GenericST7789Parallel_type = {
     { &mp_type_type },
     .name = MP_QSTR_st7789,
-    .print = GenericST7789_print,
     .make_new = GenericST7789Parallel_make_new,
+    .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
+};
+
+const mp_obj_type_t GenericST7789SPI_type = {
+    { &mp_type_type },
+    .name = MP_QSTR_st7789,
+    .make_new = GenericST7789SPI_make_new,
     .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
 };
 
@@ -81,12 +90,21 @@ STATIC const mp_map_elem_t st7789_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_st7789) },
     { MP_ROM_QSTR(MP_QSTR_ST7789), (mp_obj_t)&GenericST7789_type },
     { MP_ROM_QSTR(MP_QSTR_ST7789Parallel), (mp_obj_t)&GenericST7789Parallel_type },
+    { MP_ROM_QSTR(MP_QSTR_ST7789SPI), (mp_obj_t)&GenericST7789Parallel_type },
 
     { MP_ROM_QSTR(MP_QSTR_RGB332), MP_ROM_PTR(&GenericST7789_module_RGB332_obj) },
     { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_PTR(&GenericST7789_module_RGB565_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_PALETTE_RGB332), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_PALETTE_USER), MP_ROM_INT(1) },
+
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_LCD_240X240), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_ROUND_LCD_240X240), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_PICO_DISPLAY), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_PICO_DISPLAY_2), MP_ROM_INT(3) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_PICO_EXPLORER), MP_ROM_INT(4) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_TUFTY_2040), MP_ROM_INT(5) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_ENVIRO_PLUS), MP_ROM_INT(6) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_st7789_globals, st7789_globals_table);
 

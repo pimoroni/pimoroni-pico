@@ -70,8 +70,7 @@ namespace pimoroni {
       command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
     }
 
-    if((width == 320 && height == 240)
-    || (width == 240 && height == 320)) {
+    if(width == 320 && height == 240) {
       command(reg::GCTRL, 1, "\x35");
       command(reg::VCOMS, 1, "\x1f");
       command(0xd6, 1, "\xa1"); // ???
@@ -85,7 +84,7 @@ namespace pimoroni {
 
     sleep_ms(100);
 
-    configure_display(false);
+    configure_display(rotation);
 
     if(bl != PIN_UNUSED) {
       //update(); // Send the new buffer to the display to clear any previous content
@@ -94,9 +93,15 @@ namespace pimoroni {
     }
   }
 
-  void ST7789::configure_display(bool rotate180) {
+  void ST7789::configure_display(Rotation rotate) {
+
+    bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
+
+    if(rotate == ROTATE_90 || rotate == ROTATE_270) {
+      std::swap(width, height);
+    }
+
     // 240x240 Square and Round LCD Breakouts
-    // TODO: How can we support 90 degree rotations here?
     if(width == 240 && height == 240) {
       caset[0] = 0;
       caset[1] = 239;
@@ -108,6 +113,7 @@ namespace pimoroni {
         raset[1] = rotate180 ? 329 : 239;
       }
       madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+      if (rotate == ROTATE_90) madctl |= MADCTL::SWAP_XY;
       madctl |= MADCTL::HORIZ_ORDER;
     }
 
@@ -160,30 +166,6 @@ namespace pimoroni {
     command(reg::MADCTL, 1, (char *)&madctl);
   }
 
-  spi_inst_t* ST7789::get_spi() const {
-    return spi;
-  }
-
-  uint ST7789::get_cs() const {
-    return cs;
-  }
-
-  uint ST7789::get_dc() const {
-    return dc;
-  }
-
-  uint ST7789::get_sck() const {
-    return wr_sck;
-  }
-
-  uint ST7789::get_mosi() const {
-    return d0;
-  }
-
-  uint ST7789::get_bl() const {
-    return bl;
-  }
-
   void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
     uint32_t mask = 0xff << d0;
     while(len--) {
@@ -226,10 +208,21 @@ namespace pimoroni {
 
   // 8-bit framebuffer with palette conversion update
   void ST7789::update(uint16_t *palette) {
-    command(reg::RAMWR);
+    uint8_t command = reg::RAMWR;
     uint16_t row[width];
-    gpio_put(dc, 1); // data mode
+
+    gpio_put(dc, 0); // command mode
+
     gpio_put(cs, 0);
+
+    if(spi) {
+      spi_write_blocking(spi, &command, 1);
+    } else {
+      write_blocking_parallel(&command, 1);
+    }
+  
+    gpio_put(dc, 1); // data mode
+
     for(auto y = 0u; y < height; y++) {
       for(auto x = 0u; x < width; x++) {
         auto i = y * width + x;
@@ -242,6 +235,7 @@ namespace pimoroni {
         write_blocking_parallel((const uint8_t*)row, width * sizeof(uint16_t));
       }
     }
+
     gpio_put(cs, 1);
   }
 
@@ -251,9 +245,5 @@ namespace pimoroni {
     float gamma = 2.8;
     uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
-  }
-
-  void ST7789::flip(){
-    configure_display(true);
   }
 }

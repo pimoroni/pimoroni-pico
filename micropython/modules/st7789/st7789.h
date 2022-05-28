@@ -9,10 +9,9 @@ extern mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b);
 extern mp_obj_t GenericST7789_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b);
 
 // Class methods
-extern void GenericST7789_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
+extern mp_obj_t GenericST7789SPI_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
-extern mp_obj_t GenericST7789_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);
 
 extern mp_obj_t GenericST7789_update(mp_obj_t self_in);
 extern mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness);
@@ -39,3 +38,7 @@ extern mp_obj_t GenericST7789_measure_text(size_t n_args, const mp_obj_t *pos_ar
 extern mp_obj_t GenericST7789_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t GenericST7789_triangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t GenericST7789_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+
+// Utility
+extern mp_obj_t GenericST7789_get_bounds(mp_obj_t self_in);
+extern mp_obj_t GenericST7789_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);
