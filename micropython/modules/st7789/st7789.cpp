@@ -10,6 +10,7 @@ using namespace pimoroni;
 
 extern "C" {
 #include "st7789.h"
+#include "micropython/modules/pimoroni_bus/pimoroni_bus.h"
 
 enum ST7789Display {
     DISPLAY_LCD_240X240=0,
@@ -30,11 +31,11 @@ typedef struct _GenericST7789_obj_t {
 mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     GenericST7789_obj_t *self = nullptr;
 
-    enum { ARG_display, ARG_rotate, ARG_slot, ARG_buffer };
+    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = Rotation::ROTATE_0 } },
-        { MP_QSTR_slot, MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_bus, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_buffer, MP_ARG_OBJ, { .u_obj = mp_const_none } },
     };
 
@@ -86,140 +87,25 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
         self->buffer = m_new(uint8_t, width * height * sizeof(Pen));
     }
 
-
     if (display == DISPLAY_TUFTY_2040) {
-        self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
-    } else {
-        BG_SPI_SLOT slot = (BG_SPI_SLOT)args[ARG_slot].u_int;
-        self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, get_spi_pins(slot));
-    }
-
-    return MP_OBJ_FROM_PTR(self);
-}
-
-mp_obj_t GenericST7789SPI_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    GenericST7789_obj_t *self = nullptr;
-
-    enum { ARG_width, ARG_height, ARG_rotate, ARG_round, ARG_buffer, ARG_spi, ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_bl };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_rotate, MP_ARG_INT, {.u_int = Rotation::ROTATE_0} },
-        { MP_QSTR_round, MP_ARG_OBJ, {.u_obj = mp_const_false} },
-        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_spi, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_cs, MP_ARG_INT, {.u_int = pimoroni::SPI_BG_FRONT_CS} },
-        { MP_QSTR_dc, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_MISO} },
-        { MP_QSTR_sck, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_SCK} },
-        { MP_QSTR_mosi, MP_ARG_INT, {.u_int = pimoroni::SPI_DEFAULT_MOSI} },
-        { MP_QSTR_bl, MP_ARG_INT, {.u_int = pimoroni::SPI_BG_FRONT_PWM} },
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    self = m_new_obj(GenericST7789_obj_t);
-    self->base.type = &GenericST7789_type;
-
-    bool round = args[ARG_round].u_obj == mp_const_true;
-    Rotation rotate = (Rotation)args[ARG_rotate].u_int;
-    int width = args[ARG_width].u_int;
-    int height = args[ARG_height].u_int;
-
-    if (args[ARG_buffer].u_obj != mp_const_none) {
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height * sizeof(Pen))) {
-            mp_raise_ValueError("Supplied buffer is too small!");
+        if (args[ARG_bus].u_obj == mp_const_none) {
+            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
+        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
+            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
+            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, *(ParallelPins *)(bus->pins));
+        } else {
+            mp_raise_ValueError("ParallelBus expected!");
         }
     } else {
-        self->buffer = m_new(uint8_t, width * height * sizeof(Pen));
-    }
-
-    int spi_id = args[ARG_spi].u_int;
-
-    // Get SPI bus.
-    SPIPins bus_pins = {
-        nullptr,
-        (uint)args[ARG_cs].u_int,
-        (uint)args[ARG_sck].u_int,
-        (uint)args[ARG_mosi].u_int,
-        (uint)args[ARG_dc].u_int,
-        args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int
-    };
-
-    if(spi_id == -1) {
-        spi_id = (bus_pins.sck >> 3) & 0b1;  // If no spi specified, choose the one for the given SCK pin
-    }
-    if(spi_id < 0 || spi_id > 1) {
-        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("SPI(%d) doesn't exist"), spi_id);
-    }
-
-    if(!IS_VALID_SCK(spi_id, (int)bus_pins.sck)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad SCK pin"));
-    }
-
-    if(!IS_VALID_MOSI(spi_id, (int)bus_pins.mosi)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("bad MOSI pin"));
-    }
-
-    bus_pins.spi = (spi_id == 0) ? spi0 : spi1;
-
-    self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, bus_pins);
-
-    return MP_OBJ_FROM_PTR(self);
-}
-
-mp_obj_t GenericST7789Parallel_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    enum { ARG_width, ARG_height, ARG_cs, ARG_dc, ARG_wr_sck, ARG_rd_sck, ARG_d0, ARG_bl, ARG_rotate, ARG_buffer };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_cs, MP_ARG_INT, {.u_int = 10} },
-        { MP_QSTR_dc, MP_ARG_INT, {.u_int = 11} },
-        { MP_QSTR_wr_sck, MP_ARG_INT, {.u_int = 12} },
-        { MP_QSTR_rd_sck, MP_ARG_INT, {.u_int = 13} },
-        { MP_QSTR_d0, MP_ARG_INT, {.u_int = 14} },
-
-        { MP_QSTR_bl, MP_ARG_INT, {.u_int = 2} },
-        { MP_QSTR_rotate, MP_ARG_INT, {.u_int = Rotation::ROTATE_0} },
-        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    GenericST7789_obj_t *self = m_new_obj(GenericST7789_obj_t);
-    self->base.type = &GenericST7789_type;
-
-    Rotation rotate = (Rotation)args[ARG_rotate].u_int;
-    int width = args[ARG_width].u_int;
-    int height = args[ARG_height].u_int;
-
-    if (args[ARG_buffer].u_obj != mp_const_none) {
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height)) {
-            mp_raise_ValueError("Supplied buffer is too small!");
+        if (args[ARG_bus].u_obj == mp_const_none) {
+            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, get_spi_pins(BG_SPI_FRONT));
+        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
+            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
+            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, *(SPIPins *)(bus->pins));
+        } else {
+            mp_raise_ValueError("SPIBus expected!");
         }
-    } else {
-        self->buffer = m_new(uint8_t, width * height);
     }
-
-    ParallelPins bus_pins = {
-        (uint)args[ARG_cs].u_int,
-        (uint)args[ARG_dc].u_int,
-        (uint)args[ARG_wr_sck].u_int,
-        (uint)args[ARG_rd_sck].u_int,
-        (uint)args[ARG_d0].u_int,
-        args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int
-    };
-
-    self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, bus_pins);
 
     return MP_OBJ_FROM_PTR(self);
 }

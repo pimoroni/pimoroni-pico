@@ -71,7 +71,7 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins pins) :
       spi(pins.spi),
       width(width), height(height), rotation(rotation), round(round),
-      cs(pins.cs), dc(pins.miso), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), frame_buffer(frame_buffer) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), frame_buffer(frame_buffer) {
 
       // configure spi interface and pins
       spi_init(spi, SPI_BAUD);

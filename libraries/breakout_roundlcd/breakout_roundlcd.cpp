@@ -11,7 +11,7 @@ namespace pimoroni {
   BreakoutRoundLCD::BreakoutRoundLCD(uint16_t *buf,  spi_inst_t *spi,
       uint cs, uint dc, uint sck, uint mosi, uint bl)
     : PicoGraphics(WIDTH, HEIGHT, buf),
-      screen(WIDTH, HEIGHT, ROTATE_0, true, buf, SPIPins{spi, cs sck, mosi, dc, bl})  {
+      screen(WIDTH, HEIGHT, ROTATE_0, true, buf, SPIPins{spi, cs sck, mosi, PIN_UNUSED, dc, bl})  {
     __fb = buf;
   }
 

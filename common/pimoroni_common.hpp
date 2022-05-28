@@ -32,6 +32,7 @@ namespace pimoroni {
     // SPI
     static const unsigned int SPI_DEFAULT_MOSI = 19;
     static const unsigned int SPI_DEFAULT_MISO = 16;
+    static const unsigned int SPI_DEFAULT_DC = 16;
     static const unsigned int SPI_DEFAULT_SCK = 18;
 
     static const unsigned int SPI_BG_FRONT_PWM = 20;
