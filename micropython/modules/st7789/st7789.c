@@ -73,26 +73,10 @@ const mp_obj_type_t GenericST7789_type = {
     .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
 };
 
-const mp_obj_type_t GenericST7789Parallel_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_st7789,
-    .make_new = GenericST7789Parallel_make_new,
-    .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
-};
-
-const mp_obj_type_t GenericST7789SPI_type = {
-    { &mp_type_type },
-    .name = MP_QSTR_st7789,
-    .make_new = GenericST7789SPI_make_new,
-    .locals_dict = (mp_obj_dict_t*)&GenericST7789_locals_dict,
-};
-
 /***** Module Globals *****/
 STATIC const mp_map_elem_t st7789_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_st7789) },
     { MP_ROM_QSTR(MP_QSTR_ST7789), (mp_obj_t)&GenericST7789_type },
-    { MP_ROM_QSTR(MP_QSTR_ST7789Parallel), (mp_obj_t)&GenericST7789Parallel_type },
-    { MP_ROM_QSTR(MP_QSTR_ST7789SPI), (mp_obj_t)&GenericST7789Parallel_type },
 
     { MP_ROM_QSTR(MP_QSTR_RGB332), MP_ROM_PTR(&GenericST7789_module_RGB332_obj) },
     { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_PTR(&GenericST7789_module_RGB565_obj) },

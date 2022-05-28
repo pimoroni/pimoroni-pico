@@ -10,6 +10,7 @@ namespace pimoroni {
         uint sck;
         uint mosi;
         uint miso;
+        uint dc;
         uint bl;
     };
 
