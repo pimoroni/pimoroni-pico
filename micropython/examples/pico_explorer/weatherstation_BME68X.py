@@ -7,68 +7,68 @@ from pimoroni_i2c import PimoroniI2C
 from pimoroni import PICO_EXPLORER_I2C_PINS
 
 # Pico Explorer boilerplate
-import picoexplorer as display
-width = display.get_width()
-height = display.get_height()
-display_buffer = bytearray(width * height * 2)
-display.init(display_buffer)
+import st7789
+display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
+display.set_palette_mode(st7789.PALETTE_USER)
+display.set_backlight(1.0)
 
 i2c = PimoroniI2C(**PICO_EXPLORER_I2C_PINS)
 bme = BreakoutBME68X(i2c)
 
 # lets set up some pen colours to make drawing easier
-tempcolour = display.create_pen(255, 255, 255)  # this colour will get changed in a bit
-white = display.create_pen(255, 255, 255)
-black = display.create_pen(0, 0, 0)
-red = display.create_pen(255, 0, 0)
+TEMPCOLOUR = display.reserve_palette()  # this colour will get changed in a bit
+WHITE = display.create_pen(255, 255, 255)
+BLACK = display.create_pen(0, 0, 0)
+RED = display.create_pen(255, 0, 0)
+GREY = display.create_pen(125, 125, 125)
 
 
 # converts the temperature into a barometer-type description and pen colour
 def describe_temperature(temperature):
-    global tempcolour
+    global TEMPCOLOUR
     if temperature < 10:
         description = "very cold"
-        tempcolour = display.create_pen(0, 255, 255)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 255))
     elif 10 <= temperature < 20:
         description = "cold"
-        tempcolour = display.create_pen(0, 0, 255)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 255))
     elif 20 <= temperature < 25:
         description = "temperate"
-        tempcolour = display.create_pen(0, 255, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 0))
     elif 25 <= temperature < 30:
         description = "warm"
-        tempcolour = display.create_pen(255, 255, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 255, 0))
     elif temperature >= 30:
         description = "very warm"
-        tempcolour = display.create_pen(255, 0, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 0, 0))
     else:
         description = ""
-        tempcolour = display.create_pen(0, 0, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 0))
     return description
 
 
 # comment out the function above and uncomment this one for yorkshire mode
 """
 def describe_temperature(temperature):
-    global tempcolour
+    global TEMPCOLOUR
     if temperature < 10:
         description = "frozzed"
-        tempcolour = display.create_pen(0, 255, 255)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 255))
     elif 10 <= temperature < 20:
         description = "nithering"
-        tempcolour = display.create_pen(0, 0, 255)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 255))
     elif 20 <= temperature < 25:
         description = "fair t' middlin"
-        tempcolour = display.create_pen(0, 255, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 0))
     elif 25 <= temperature < 30:
         description = "chuffing warm"
-        tempcolour = display.create_pen(255, 255, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 255, 0))
     elif temperature >= 30:
         description = "crackin t' flags"
-        tempcolour = display.create_pen(255, 0, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 0, 0))
     else:
         description = ""
-        tempcolour = display.create_pen(0, 0, 0)
+        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 0))
     return description
 """
 
@@ -100,6 +100,9 @@ def describe_humidity(humidity):
 
 
 while True:
+    display.set_pen(BLACK)
+    display.clear()
+
     # read the sensors
     temperature, pressure, humidity, gas_resistance, status, gas_index, meas_index = bme.read()
 
@@ -107,12 +110,12 @@ while True:
     pressurehpa = pressure / 100
 
     # draw a thermometer/barometer thingy
-    display.set_pen(125, 125, 125)
+    display.set_pen(GREY)
     display.circle(190, 190, 40)
     display.rectangle(180, 45, 20, 140)
 
     # switch to red to draw the 'mercury'
-    display.set_pen(red)
+    display.set_pen(RED)
     display.circle(190, 190, 30)
     thermometerheight = int(120 / 30 * temperature)
     if thermometerheight > 120:
@@ -122,11 +125,11 @@ while True:
     display.rectangle(186, 50 + 120 - thermometerheight, 10, thermometerheight)
 
     # drawing the temperature text
-    display.set_pen(white)
+    display.set_pen(WHITE)
     display.text("temperature:", 10, 10, 240, 3)
-    display.set_pen(tempcolour)
+    display.set_pen(TEMPCOLOUR)
     display.text('{:.1f}'.format(temperature) + 'C', 10, 30, 240, 5)
-    display.set_pen(white)
+    display.set_pen(WHITE)
     display.text(describe_temperature(temperature), 10, 60, 240, 3)
 
     # and the pressure text
@@ -142,7 +145,5 @@ while True:
     # time to update the display
     display.update()
 
-    # waits for 1 second and clears to black
+    # waits for 1 second and clears to BLACK
     utime.sleep(1)
-    display.set_pen(black)
-    display.clear()

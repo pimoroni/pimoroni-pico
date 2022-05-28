@@ -3,14 +3,20 @@
 # You'll need to connect a jumper wire between GPO and AUDIO on the Explorer Base to hear noise.
 
 import utime
-import picoexplorer as explorer
+import st7789
+from pimoroni import Buzzer
 
-# Set up and initialise Pico Explorer
-buf = bytearray(explorer.get_width() * explorer.get_height() * 2)
-explorer.init(buf)
 
-# tells Pico Explorer which pin you'll be using for noise
-explorer.set_audio_pin(0)
+display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
+display.set_palette_mode(st7789.PALETTE_USER)
+display.set_backlight(1.0)
+
+# tCreate a buzzer on pin 0
+# Don't forget t write GP0 to AUDIO!
+BUZZER = Buzzer(0)
+
+BLACK = display.create_pen(0, 0, 0)
+GREEN = display.create_pen(0, 255, 0)
 
 # this handy list converts notes into frequencies, which you can use with the explorer.set_tone function
 tones = {
@@ -110,17 +116,17 @@ song = ["F6", "F6", "E6", "F6", "F5", "P", "F5", "P", "C6", "AS5", "A5", "C6", "
 
 
 def clear():                        # this function clears Pico Explorer's screen to black
-    explorer.set_pen(0, 0, 0)
-    explorer.clear()
-    explorer.update()
+    display.set_pen(BLACK)
+    display.clear()
+    display.update()
 
 
 def playtone(frequency):            # this function tells your program how to make noise
-    explorer.set_tone(frequency)
+    BUZZER.set_tone(frequency)
 
 
 def bequiet():                      # this function tells your program how not to make noise
-    explorer.set_tone(-1)
+    BUZZER.set_tone(-1)
 
 
 def playsong(song):                 # this function plays your song
@@ -130,13 +136,13 @@ def playsong(song):                 # this function plays your song
             bequiet()
         else:
             playtone(tones[song[i]])
-            explorer.set_pen(0, 255, 0)  # switch to green pen
-            explorer.rectangle(a, 240 - (int((tones[song[i]]) / 21)), 5, 240)  # draw a green bar corresponding to the frequency of the note
+            display.set_pen(GREEN)  # switch to green pen
+            display.rectangle(a, 240 - (int((tones[song[i]]) / 21)), 5, 240)  # draw a green bar corresponding to the frequency of the note
             a += 7
         if a >= 240:  # clears the screen if the green bars reach the right hand edge
             clear()
             a = 0
-        explorer.update()
+        display.update()
         utime.sleep(0.15)  # change this number if you want to alter how long the notes play for
     bequiet()
 

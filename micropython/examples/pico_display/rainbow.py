@@ -47,7 +47,7 @@ while True:
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
     led.set_rgb(r, g, b)      # Set LED to a converted HSV value
-    display.set_palette(RAINBOW, st7789.RGB565(r, g, b)) # Create pen with converted HSV value
+    display.set_palette(RAINBOW, st7789.RGB565(r, g, b))  # Create pen with converted HSV value
     display.set_pen(RAINBOW)  # Set pen
     display.clear()           # Fill the screen with the colour
     display.set_pen(BLACK)    # Set pen to black
