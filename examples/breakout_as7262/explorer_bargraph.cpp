@@ -4,14 +4,16 @@
 #include "breakout_as7262.hpp"
 #include "pico_explorer.hpp"
 
+#include "picographics_st7789.hpp"
+
 using namespace pimoroni;
 
 constexpr float INTEGRATION_TIME = 10.0f;
 
 I2C i2c(BOARD::PICO_EXPLORER);
 BreakoutAS7262 as7262(&i2c);
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_explorer(buffer);
+
+PicoGraphicsST7789 display(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
 
 uint8_t bar_width = PicoExplorer::WIDTH / 6;
 uint8_t bar_height = PicoExplorer::HEIGHT;
@@ -20,13 +22,12 @@ void draw_bar(float scale, uint16_t channel) {
   int16_t bar_top = bar_height - (bar_height * scale);
   bar_top = std::max((int16_t)0, bar_top);
   int16_t current_bar_height = bar_height - bar_top;
-  pico_explorer.rectangle(Rect(channel * bar_width, bar_top, bar_width, current_bar_height - 1));
+  display.rectangle(Rect(channel * bar_width, bar_top, bar_width, current_bar_height - 1));
 }
 
 int main() {
   stdio_init_all();
 
-  pico_explorer.init();
   as7262.init();
 
   uint8_t dev_type = as7262.device_type();
@@ -43,9 +44,17 @@ int main() {
   as7262.set_indicator_current(AS7262::indicator_current::ma4);
   as7262.set_leds(true, true);
 
+  Pen BLACK = display.create_pen(0, 0, 0);
+  Pen RED = display.create_pen(255, 0, 0);
+  Pen ORANGE = display.create_pen(255, 128, 0);
+  Pen YELLOW = display.create_pen(255, 255, 0);
+  Pen GREEN = display.create_pen(0, 255, 0);
+  Pen BLUE = display.create_pen(0, 0, 255);
+  Pen VIOLET = display.create_pen(255, 0, 255);
+
   while(true) {
-    pico_explorer.set_pen(0, 0, 0);
-    pico_explorer.clear();
+    display.set_pen(BLACK);
+    display.clear();
 
     AS7262::reading reading = as7262.read();
     printf("R: %f O: %f Y: %f G: %f B: %f V: %f \n",
@@ -64,34 +73,34 @@ int main() {
     if(reading.blue > m) m = reading.blue;
     if(reading.violet > m) m = reading.violet;
 
-    pico_explorer.set_pen(0, 0, 0);
-    pico_explorer.clear();
+    display.set_pen(BLACK);
+    display.clear();
 
     // Red
-    pico_explorer.set_pen(255, 0, 0);
+    display.set_pen(RED);
     draw_bar(reading.red / m, 0);
     
     // Orange
-    pico_explorer.set_pen(255, 128, 0);
+    display.set_pen(ORANGE);
     draw_bar(reading.orange / m, 1);
 
     // Yellow
-    pico_explorer.set_pen(255, 255, 0);
+    display.set_pen(YELLOW);
     draw_bar(reading.yellow / m, 2);
 
     // Green
-    pico_explorer.set_pen(0, 255, 0);
+    display.set_pen(GREEN);
     draw_bar(reading.green / m, 3);
 
     // Blue
-    pico_explorer.set_pen(0, 0, 255);
+    display.set_pen(BLUE);
     draw_bar(reading.blue / m, 4);
 
     // Violet
-    pico_explorer.set_pen(255, 0, 255);
+    display.set_pen(VIOLET);
     draw_bar(reading.violet / m, 5);
 
-    pico_explorer.update();
+    display.update();
 
     sleep_ms(INTEGRATION_TIME);
   }

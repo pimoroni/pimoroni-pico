@@ -7,7 +7,7 @@
 #include "pico/platform.h"
 
 #include "common/pimoroni_common.hpp"
-#include "generic_st7789.hpp"
+#include "picographics_st7789.hpp"
 #include "tufty2040.hpp"
 #include "button.hpp"
 
@@ -15,8 +15,7 @@ using namespace pimoroni;
 
 Tufty2040 tufty;
 
-// Swap WIDTH and HEIGHT to rotate 90 degrees
-ST7789Generic pico_display(
+PicoGraphicsST7789 display(
   Tufty2040::WIDTH, Tufty2040::HEIGHT, ROTATE_0, nullptr,
   ParallelPins{
     Tufty2040::LCD_CS,
@@ -60,8 +59,10 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
-  pico_display.set_backlight(255);
-  pico_display.configure_display(true); // Rotate 180
+  display.set_backlight(255);
+
+  Pen WHITE = display.create_pen(255, 255, 255);
+  Pen BG = display.create_pen(120, 40, 60);
 
   struct pt {
     float      x;
@@ -75,12 +76,12 @@ int main() {
   std::vector<pt> shapes;
   for(int i = 0; i < 100; i++) {
     pt shape;
-    shape.x = rand() % pico_display.bounds.w;
-    shape.y = rand() % pico_display.bounds.h;
+    shape.x = rand() % display.bounds.w;
+    shape.y = rand() % display.bounds.h;
     shape.r = (rand() % 10) + 3;
     shape.dx = float(rand() % 255) / 64.0f;
     shape.dy = float(rand() % 255) / 64.0f;
-    shape.pen = pico_display.create_pen(rand() % 255, rand() % 255, rand() % 255);
+    shape.pen = display.create_pen(rand() % 255, rand() % 255, rand() % 255);
     shapes.push_back(shape);
   }
 
@@ -89,8 +90,8 @@ int main() {
 
   while(true) {
     
-    pico_display.set_pen(120, 40, 60);
-    pico_display.clear();
+    display.set_pen(BG);
+    display.clear();
 
     for(auto &shape : shapes) {
       shape.x += shape.dx;
@@ -99,30 +100,30 @@ int main() {
         shape.dx *= -1;
         shape.x = shape.r;
       }
-      if((shape.x + shape.r) >= pico_display.bounds.w) {
+      if((shape.x + shape.r) >= display.bounds.w) {
         shape.dx *= -1;
-        shape.x = pico_display.bounds.w - shape.r;
+        shape.x = display.bounds.w - shape.r;
       }
       if((shape.y - shape.r) < 0) {
         shape.dy *= -1;
         shape.y = shape.r;
       }
-      if((shape.y + shape.r) >= pico_display.bounds.h) {
+      if((shape.y + shape.r) >= display.bounds.h) {
         shape.dy *= -1;
-        shape.y = pico_display.bounds.h - shape.r;
+        shape.y = display.bounds.h - shape.r;
       }
 
-      pico_display.set_pen(shape.pen);
-      pico_display.circle(Point(shape.x, shape.y), shape.r);
+      display.set_pen(shape.pen);
+      display.circle(Point(shape.x, shape.y), shape.r);
 
     }
 
 
-    pico_display.set_pen(255, 255, 255);
-    pico_display.text("Hello World", text_location, 320);
+    display.set_pen(WHITE);
+    display.text("Hello World", text_location, 320);
 
     // update screen
-    pico_display.update();
+    display.update();
 
     i+=10;
     tufty.led(i);

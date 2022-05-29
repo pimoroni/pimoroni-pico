@@ -1,4 +1,4 @@
-#include "libraries/generic_st7789/generic_st7789.hpp"
+#include "libraries/picographics_st7789/picographics_st7789.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
 
@@ -24,7 +24,7 @@ enum ST7789Display {
 
 typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
-    ST7789Generic *st7789;
+    PicoGraphicsST7789 *st7789;
     void *buffer;
 } GenericST7789_obj_t;
 
@@ -89,19 +89,19 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 
     if (display == DISPLAY_TUFTY_2040) {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
+            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, self->buffer, *(ParallelPins *)(bus->pins));
+            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, self->buffer, *(ParallelPins *)(bus->pins));
         } else {
             mp_raise_ValueError("ParallelBus expected!");
         }
     } else {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, get_spi_pins(BG_SPI_FRONT));
+            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, round, self->buffer, get_spi_pins(BG_SPI_FRONT));
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->st7789 = m_new_class(ST7789Generic, width, height, rotate, round, self->buffer, *(SPIPins *)(bus->pins));
+            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, round, self->buffer, *(SPIPins *)(bus->pins));
         } else {
             mp_raise_ValueError("SPIBus expected!");
         }
@@ -157,7 +157,7 @@ mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
 }
 
 mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(ST7789Generic::create_pen_rgb332(
+    return mp_obj_new_int(PicoGraphicsST7789::create_pen_rgb332(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
@@ -165,7 +165,7 @@ mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
 }
 
 mp_obj_t GenericST7789_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(ST7789Generic::create_pen_rgb565(
+    return mp_obj_new_int(PicoGraphicsST7789::create_pen_rgb565(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
@@ -183,7 +183,7 @@ mp_obj_t GenericST7789_set_pen(mp_obj_t self_in, mp_obj_t pen) {
 mp_obj_t GenericST7789_set_palette_mode(mp_obj_t self_in, mp_obj_t mode) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    self->st7789->set_palette_mode((ST7789Generic::PaletteMode)mp_obj_get_int(mode));
+    self->st7789->set_palette_mode((PicoGraphicsST7789::PaletteMode)mp_obj_get_int(mode));
 
     return mp_const_none;
 }

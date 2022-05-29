@@ -108,8 +108,8 @@ namespace pimoroni {
       uint8_t enable;
     };
 
-    pin_pair() : first(0), second(0) {}
-    pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
+    constexpr pin_pair() : first(0), second(0) {}
+    constexpr pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
   };
 
   struct bool_pair {

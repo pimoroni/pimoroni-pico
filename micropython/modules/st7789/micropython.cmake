@@ -5,7 +5,7 @@ add_library(usermod_${MOD_NAME} INTERFACE)
 target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/generic_st7789/generic_st7789.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/picographics_st7789/picographics_st7789.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/st7789/st7789.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/types.cpp

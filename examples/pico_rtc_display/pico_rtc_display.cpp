@@ -17,7 +17,7 @@
 // To use PicoExplorer rather than PicoDisplay, uncomment the following line
 // #define USE_PICO_EXPLORER 1
 // This:
-// - Includes pico_explorer.hpp rather than pico_display.hpp
+// - Includes pico_explorer.hpp rather than display.hpp
 // - Replaces all PicoDisplay references with PicoExplorer
 // - Leaves out the .set_led() calls in flash_led()
 #ifdef USE_PICO_EXPLORER
@@ -26,6 +26,10 @@
 #include "pico_display.hpp"
 #endif
 #include "breakout_rtc.hpp"
+
+#include "picographics_st7789.hpp"
+#include "drivers/button/button.hpp"
+#include "drivers/rgbled/rgbled.hpp"
 
 #define MODE_DISP_CLOCK 0
 #define MODE_DISP_TIMER 1
@@ -36,16 +40,27 @@
 using namespace pimoroni;
 
 #ifdef USE_PICO_EXPLORER
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_display(buffer);
 uint16_t screen_width = PicoExplorer::WIDTH;
 uint16_t screen_height = PicoExplorer::HEIGHT;
+
+Button button_a(PicoExplorer::A);
+Button button_b(PicoExplorer::B);
+Button button_x(PicoExplorer::X);
+Button button_y(PicoExplorer::Y);
+
 #else
-uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
-PicoDisplay pico_display(buffer);
 uint16_t screen_width = PicoDisplay::WIDTH;
 uint16_t screen_height = PicoDisplay::HEIGHT;
+
+Button button_a(PicoDisplay::A);
+Button button_b(PicoDisplay::B);
+Button button_x(PicoDisplay::X);
+Button button_y(PicoDisplay::Y);
+
+RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
 #endif
+
+PicoGraphicsST7789 display(screen_width, screen_height, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
 
 BreakoutRTC rtc;
 
@@ -69,17 +84,20 @@ void flash_led(uint32_t curr_count) {
 #ifndef USE_PICO_EXPLORER
   if((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
     // value less than half modded number - LED off
-    pico_display.set_led(0, 0, 0);
+    led.set_rgb(0, 0, 0);
   }
   else {
     // value more than half modded number - LED on
-    pico_display.set_led(128, 128, 128);
+    led.set_rgb(128, 128, 128);
   }
 #endif
 }
 
 int main() {
-  pico_display.init();
+  Pen WHITE = display.create_pen(255, 255, 255);
+  Pen BG = display.create_pen(55, 65, 75);
+  Pen RED = display.create_pen(255, 0, 0);
+  Pen GREEN = display.create_pen(0, 255, 0);
 
   rtc.init();
   // rtc.setup(false);
@@ -112,7 +130,7 @@ int main() {
 
   while(true) {
 
-    if(a_pressed == 0 && pico_display.is_pressed(pico_display.A)) {
+    if(a_pressed == 0 && button_a.read()) {
       a_pressed = 1;
       if(display_mode == MODE_DISP_CLOCK) {
         // We were displaying clock = set up timer
@@ -134,11 +152,11 @@ int main() {
         display_mode = MODE_SET_TIMER;
       }
     }
-    else if(a_pressed >= 1 && !pico_display.is_pressed(pico_display.A)) {
+    else if(a_pressed >= 1 && !button_a.read()) {
       a_pressed = 0;
     }
 
-    if(b_pressed == 0 && pico_display.is_pressed(pico_display.B)) {
+    if(b_pressed == 0 && button_b.read()) {
       b_pressed = 1;
       if((display_mode == MODE_DISP_TIMER)
           || (display_mode == MODE_SET_TIMER)) {
@@ -150,117 +168,117 @@ int main() {
         timer_count = DEFAULT_TIMER_COUNT;
       }
     }
-    else if(b_pressed >= 1 && !pico_display.is_pressed(pico_display.B)) {
+    else if(b_pressed >= 1 && !button_b.read()) {
       b_pressed = 0;
     }
 
-    if(x_pressed == 0 && pico_display.is_pressed(pico_display.X)) {
+    if(x_pressed == 0 && button_x.read()) {
       x_pressed = 1;
       if(display_mode == MODE_SET_TIMER) {
         // Setting timer - Increment count
         timer_count++;
       }
     }
-    else if(x_pressed >= 1 && pico_display.is_pressed(pico_display.X)) {
+    else if(x_pressed >= 1 && button_x.read()) {
       // Button still pressed - check if has reached repeat count
       if(repeat_count_reached(x_pressed++)) {
         timer_count++;
       }
     }
-    else if(x_pressed >= 1 && !pico_display.is_pressed(pico_display.X)) {
+    else if(x_pressed >= 1 && !button_x.read()) {
       x_pressed = 0;
     }
 
-    if(y_pressed == 0 && pico_display.is_pressed(pico_display.Y)) {
+    if(y_pressed == 0 && button_y.read()) {
       y_pressed = 1;
       if(display_mode == MODE_SET_TIMER) {
         // Setting timer - Decrement count
         if (timer_count >= 1) timer_count--;
       }
     }
-    else if(y_pressed >= 1 && pico_display.is_pressed(pico_display.Y)) {
+    else if(y_pressed >= 1 && button_y.read()) {
       // Button still pressed - check if has reached repeat count
       if(repeat_count_reached(y_pressed++)) {
         if(timer_count >= 1)
           timer_count--;
       }
     }
-    else if(y_pressed >= 1 && !pico_display.is_pressed(pico_display.Y)) {
+    else if(y_pressed >= 1 && !button_y.read()) {
       y_pressed = 0;
     }
 
     Rect text_box(5, 5, screen_width-10, screen_height-10);
-    pico_display.set_pen(55, 65, 75);
-    pico_display.rectangle(text_box);
+    display.set_pen(BG);
+    display.rectangle(text_box);
     // text_box.deflate(10);
-    pico_display.set_clip(text_box);
-    pico_display.set_pen(255, 255, 255);
+    display.set_clip(text_box);
+    display.set_pen(WHITE);
     switch(display_mode) {
       case MODE_DISP_CLOCK:
         // Show the clock face
         flash_led(0);
         if(rtc.update_time()) {
-          pico_display.text("Set Timer",
+          display.text("Set Timer",
               Point(text_box.x, text_box.y+2), 230, 1);
-          pico_display.set_pen(0, 255, 0);
-          pico_display.text(rtc.string_date(),
+          display.set_pen(GREEN);
+          display.text(rtc.string_date(),
               Point(text_box.x, text_box.y+20), 230, 4);
-          pico_display.set_pen(255, 0, 0);
-          pico_display.text(rtc.string_time(),
+          display.set_pen(RED);
+          display.text(rtc.string_time(),
               Point(text_box.x, text_box.y+60), 230, 6);
-          pico_display.set_pen(255, 255, 255);
-          pico_display.text("Clock",
+          display.set_pen(WHITE);
+          display.text("Clock",
               Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         }
         else {
           sprintf(buf, "Time: rtc.updateTime() ret err");
-          pico_display.text(buf,
+          display.text(buf,
               Point(text_box.x, text_box.y), 30, 2);
         }
         break;
 
       case MODE_DISP_TIMER:
-        pico_display.text("Set Timer",
+        display.text("Set Timer",
             Point(text_box.x, text_box.y+2), 230, 1);
         if(rtc.read_timer_interrupt_flag()) {
           // Go periodic time interupt - say loop ended
-          pico_display.set_pen(255, 0, 0);
+          display.set_pen(RED);
           sprintf(buf, "%s", "Timer complete");
-          pico_display.text(buf,
+          display.text(buf,
               Point(text_box.x, text_box.y+30), 230, 4);
-          pico_display.set_pen(255, 255, 255);
+          display.set_pen(WHITE);
           flash_led(i);
         }
         else {
           sprintf(buf, "%s %d", "Timer running", rtc.get_timer_count());
-          pico_display.text(buf,
+          display.text(buf,
               Point(text_box.x, text_box.y+30), 230, 3);
         }
-        pico_display.text("Clock",
+        display.text("Clock",
             Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         break;
 
       case MODE_SET_TIMER:
         flash_led(0);
-        pico_display.text("Run Timer",
+        display.text("Run Timer",
             Point(text_box.x, text_box.y+2), 230, 1);
-        pico_display.text("+ Time",
+        display.text("+ Time",
             Point(text_box.x+screen_width-42, text_box.y+2), 230, 1);
         sprintf(buf, "Time %d secs", timer_count);
-        pico_display.text(buf,
+        display.text(buf,
             Point(text_box.x, text_box.y+30), 230, 3);
-        pico_display.text("Clock",
+        display.text("Clock",
             Point(text_box.x, text_box.y+screen_height-20), 230, 1);
-        pico_display.text("- Time",
+        display.text("- Time",
             Point(text_box.x+screen_width-42,
               text_box.y+screen_height-20), 230, 1);
         break;
     }
 
-    pico_display.remove_clip();
+    display.remove_clip();
 
     // update screen
-    pico_display.update();
+    display.update();
 
     i++;
   }

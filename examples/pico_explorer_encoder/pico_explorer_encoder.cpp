@@ -4,6 +4,8 @@
 #include "pico/stdlib.h"
 #include "encoder.hpp"
 #include "quadrature_out.pio.h"
+#include "picographics_st7789.hpp"
+#include "button.hpp"
 
 /*
 An interactive demo of how rotary encoders work.
@@ -31,6 +33,7 @@ be used by jumping GP0 to GP6 and GP1 to GP7.
 
 using namespace pimoroni;
 using namespace encoder;
+using namespace motor;
 
 //--------------------------------------------------
 // Constants
@@ -90,8 +93,22 @@ enum DrawState {
 //--------------------------------------------------
 // Variables
 //--------------------------------------------------
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_explorer(buffer);
+PicoGraphicsST7789 display(
+  PicoExplorer::WIDTH,
+  PicoExplorer::HEIGHT,
+  ROTATE_0,  // Rotation
+  false,     // Is it round!?
+  nullptr,   // Buffer
+  get_spi_pins(BG_SPI_FRONT)
+);
+
+Button button_a(PicoExplorer::A);
+Button button_b(PicoExplorer::B);
+Button button_x(PicoExplorer::X);
+Button button_y(PicoExplorer::Y);
+
+Motor motor1(PicoExplorer::MOTOR1_PINS);
+Motor motor2(PicoExplorer::MOTOR2_PINS);
 
 Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_COMMON_PIN, NORMAL_DIR, COUNTS_PER_REV, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
@@ -166,13 +183,13 @@ uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE],
     switch(draw_state) {
       case DRAW_TRANSITION:
         for(uint8_t y = p1.y; y < p2.y; y++)
-          pico_explorer.pixel(Point(x + p1.x, y));
+          display.pixel(Point(x + p1.x, y));
         break;
       case DRAW_HIGH:
-        pico_explorer.pixel(Point(x + p1.x, p1.y));
+        display.pixel(Point(x + p1.x, p1.y));
         break;
       case DRAW_LOW:
-        pico_explorer.pixel(Point(x + p1.x, p2.y - 1));
+        display.pixel(Point(x + p1.x, p2.y - 1));
         break;
     }
   }
@@ -215,11 +232,6 @@ void setup() {
     gpio_pull_down(ENCODER_SWITCH_PIN);
   }
 
-  pico_explorer.init();
-  pico_explorer.set_pen(0);
-  pico_explorer.clear();
-  pico_explorer.update();
-
   enc.init();
 
   bool_pair state = enc.state();
@@ -243,6 +255,7 @@ void setup() {
 // MAIN
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 int main() {
+  Pen WHITE = display.create_pen(255, 255, 255);
 
   // Perform the main setup for the demo
   setup();
@@ -273,18 +286,21 @@ int main() {
       Encoder::Capture capture = enc.capture();
 
       // Spin Motor 1 either clockwise or counterclockwise depending on if B or Y are pressed
-      if(pico_explorer.is_pressed(PicoExplorer::B) && !pico_explorer.is_pressed(PicoExplorer::Y)) {
-        pico_explorer.set_motor(PicoExplorer::MOTOR1, PicoExplorer::FORWARD, 1.0f);
+      if(button_b.read() && !button_y.read()) {
+        // TODO Fix motors
+        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::FORWARD, 1.0f);
       }
-      else if(pico_explorer.is_pressed(PicoExplorer::Y) && !pico_explorer.is_pressed(PicoExplorer::B)) {
-        pico_explorer.set_motor(PicoExplorer::MOTOR1, PicoExplorer::REVERSE, 0.2f);
+      else if(button_y.read() && !button_b.read()) {
+        // TODO Fix motors
+        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::REVERSE, 0.2f);
       }
       else {
-        pico_explorer.set_motor(PicoExplorer::MOTOR1, PicoExplorer::STOP);
+        // TODO Fix motors
+        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::STOP);
       }
 
       // If A has been pressed, zoom the view out to a min of x1
-      if(pico_explorer.is_pressed(PicoExplorer::A)) {
+      if(button_a.read()) {
         if(!button_latch_a) {
           button_latch_a = true;
           current_zoom_level = std::max(current_zoom_level / 2, 1);
@@ -295,7 +311,7 @@ int main() {
       }
 
       // If X has been pressed, zoom the view in to the max of x512
-      if(pico_explorer.is_pressed(PicoExplorer::X)) {
+      if(button_x.read()) {
         if(!button_latch_x) {
           button_latch_x = true;
           current_zoom_level = std::min(current_zoom_level * 2, 512);
@@ -308,16 +324,16 @@ int main() {
       //--------------------------------------------------            
       // Draw the encoder readings to the screen as a signal plot
 
-      pico_explorer.set_pen(0, 0, 0);
-      pico_explorer.clear();
+      display.set_pen(display.create_pen(0, 0, 0));
+      display.clear();
 
       drawing_to_screen = true;
 
-      pico_explorer.set_pen(255, 255, 0);
+      display.set_pen(display.create_pen(255, 255, 0));
       uint32_t local_pos = next_reading_index;
       uint32_t alignment_offset = draw_plot(Point(0, 10), Point(PicoExplorer::WIDTH, 10 + 50), enc_a_readings, local_pos, current_zoom_level > EDGE_ALIGN_ABOVE_ZOOM);
 
-      pico_explorer.set_pen(0, 255, 255);
+      display.set_pen(display.create_pen(0, 255, 255));
       draw_plot(Point(0, 80), Point(PicoExplorer::WIDTH, 80 + 50), enc_b_readings, (local_pos + (READINGS_SIZE - alignment_offset)) % READINGS_SIZE, false);
 
       // Copy values that may have been stored in the scratch buffers, back into the main buffers
@@ -333,49 +349,49 @@ int main() {
       drawing_to_screen = false;
       next_scratch_index = 0;
 
-      pico_explorer.set_pen(255, 255, 255);
-      pico_explorer.character('A', Point(5, 10 + 15), 3);
-      pico_explorer.character('B', Point(5, 80 + 15), 3);
+      display.set_pen(WHITE);
+      display.character('A', Point(5, 10 + 15), 3);
+      display.character('B', Point(5, 80 + 15), 3);
 
       if(current_zoom_level < 10)
-        pico_explorer.text("x" + std::to_string(current_zoom_level), Point(220, 62), 200, 2);
+        display.text("x" + std::to_string(current_zoom_level), Point(220, 62), 200, 2);
       else if(current_zoom_level < 100)
-        pico_explorer.text("x" + std::to_string(current_zoom_level), Point(210, 62), 200, 2);
+        display.text("x" + std::to_string(current_zoom_level), Point(210, 62), 200, 2);
       else
-        pico_explorer.text("x" + std::to_string(current_zoom_level), Point(200, 62), 200, 2);
+        display.text("x" + std::to_string(current_zoom_level), Point(200, 62), 200, 2);
 
 
       //--------------------------------------------------            
       // Write out the count, frequency and rpm of the encoder
 
-      pico_explorer.set_pen(8, 8, 8);
-      pico_explorer.rectangle(Rect(0, 140, PicoExplorer::WIDTH, PicoExplorer::HEIGHT - 140));
+      display.set_pen(display.create_pen(8, 8, 8));
+      display.rectangle(Rect(0, 140, PicoExplorer::WIDTH, PicoExplorer::HEIGHT - 140));
 
-      pico_explorer.set_pen(64, 64, 64);
-      pico_explorer.rectangle(Rect(0, 140, PicoExplorer::WIDTH, 2));
+      display.set_pen(display.create_pen(64, 64, 64));
+      display.rectangle(Rect(0, 140, PicoExplorer::WIDTH, 2));
 
       {
         std::stringstream sstream;
         sstream << capture.count();
-        pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Count:",      Point(10, 150),  200, 3);
-        pico_explorer.set_pen(255, 128, 255);   pico_explorer.text(sstream.str(), Point(110, 150), 200, 3);
+        display.set_pen(WHITE);                               display.text("Count:",      Point(10, 150),  200, 3);
+        display.set_pen(display.create_pen(255, 128, 255));   display.text(sstream.str(), Point(110, 150), 200, 3);
       }
 
       {
         std::stringstream sstream;
         sstream << std::fixed << std::setprecision(1) << capture.frequency() << "hz";
-        pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("Freq: ",      Point(10, 180), 220, 3);
-        pico_explorer.set_pen(128, 255, 255);   pico_explorer.text(sstream.str(), Point(90, 180), 220, 3);
+        display.set_pen(WHITE);                               display.text("Freq: ",      Point(10, 180), 220, 3);
+        display.set_pen(display.create_pen(128, 255, 255));   display.text(sstream.str(), Point(90, 180), 220, 3);
       }
 
       {
         std::stringstream sstream;
         sstream << std::fixed << std::setprecision(1) << capture.revolutions_per_minute();
-        pico_explorer.set_pen(255, 255, 255);   pico_explorer.text("RPM: ",       Point(10, 210), 220, 3);
-        pico_explorer.set_pen(255, 255, 128);   pico_explorer.text(sstream.str(), Point(80, 210), 220, 3);
+        display.set_pen(WHITE);                               display.text("RPM: ",       Point(10, 210), 220, 3);
+        display.set_pen(display.create_pen(255, 255, 128));   display.text(sstream.str(), Point(80, 210), 220, 3);
       }
 
-      pico_explorer.update();                 // Refresh the screen
+      display.update();                 // Refresh the screen
       gpio_put(PICO_DEFAULT_LED_PIN, false);  // Show the screen refresh has ended
     }
   }

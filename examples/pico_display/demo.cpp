@@ -4,12 +4,12 @@
 #include <cstdlib>
 
 #include "pico_display.hpp"
-#include "generic_st7789.hpp"
+#include "picographics_st7789.hpp"
 #include "rgbled.hpp"
 
 using namespace pimoroni;
 
-ST7789Generic pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
+PicoGraphicsST7789 pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
 
 RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
 

@@ -7,11 +7,23 @@
 #include "common/pimoroni_i2c.hpp"
 #include "pico_explorer.hpp"
 #include "breakout_potentiometer.hpp"
+#include "picographics_st7789.hpp"
 
 using namespace pimoroni;
 
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_explorer(buffer);
+PicoGraphicsST7789 display(
+  PicoExplorer::WIDTH,
+  PicoExplorer::HEIGHT,
+  ROTATE_0,  // Rotation
+  false,     // Is it round!?
+  nullptr,   // Buffer
+  get_spi_pins(BG_SPI_FRONT)
+);
+
+Pen BLACK = display.create_pen(0, 0, 0);
+Pen RED = display.create_pen(255, 0, 0);
+Pen GREEN = display.create_pen(0, 255, 0);
+Pen BLUE = display.create_pen(0, 0, 255);
 
 I2C i2c(PICO_EXPLORER);
 BreakoutPotentiometer pot(&i2c);
@@ -43,9 +55,6 @@ int main() {
 
   stdio_init_all();
 
-  pico_explorer.init();
-  pico_explorer.update();
-
   printf("Starting...\n");
 
   if(pot.init()) {
@@ -62,47 +71,49 @@ int main() {
       from_hsv(percent, 1.0f, 1.0f, r, g, b);
       pot.set_led(r, g, b);
 
-      pico_explorer.set_pen(0, 0, 0);
-      pico_explorer.clear();
+      display.set_pen(BLACK);
+      display.clear();
 
       {
-        pico_explorer.set_pen(255, 0, 0);
+        display.set_pen(RED);
         std::ostringstream ss;
         ss << "R = ";
         ss << (int)r;
         std::string s(ss.str());
-        pico_explorer.text(s, Point(10, 10), 220, 6);
+        display.text(s, Point(10, 10), 220, 6);
       }
 
       {
-        pico_explorer.set_pen(0, 255, 0);
+        display.set_pen(GREEN);
         std::ostringstream ss;
         ss << "G = ";
         ss << (int)g;
         std::string s(ss.str());
-        pico_explorer.text(s, Point(10, 70), 220, 6);
+        display.text(s, Point(10, 70), 220, 6);
       }
 
       {
-        pico_explorer.set_pen(0, 0, 255);
+        display.set_pen(BLUE);
         std::ostringstream ss;
         ss << "B = ";
         ss << (int)b;
         std::string s(ss.str());
-        pico_explorer.text(s, Point(10, 130), 220, 6);
+        display.text(s, Point(10, 130), 220, 6);
       }
 
       {
-        pico_explorer.set_pen(r, g, b);
+        // Shouldn't really use create_pen in-line.
+        // In default (RGB332) palette mode this will lookup the nearest 8-bit colour
+        display.set_pen(display.create_pen(r, g, b));
         std::ostringstream ss;
         ss << "#";
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)r;
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)g;
         ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)b;
         std::string s(ss.str());
-        pico_explorer.text(s, Point(10, 190), 220, 5);
+        display.text(s, Point(10, 190), 220, 5);
       }
-      pico_explorer.update();
+      display.update();
     }
   }
   else {
