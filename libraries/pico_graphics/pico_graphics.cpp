@@ -25,14 +25,18 @@ namespace pimoroni {
   }
 
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-    RGB565 c = palette_mode == PaletteModeRGB332 ? create_pen_rgb332(r, g, b) : create_pen_rgb565(r, g, b);
-    int result = search_palette(c);
+    if (palette_mode == PaletteModeRGB332) {
+      return rgb_to_rgb332_index(r, g, b); // Fast pack RGB into palette index
+    } else {
+      RGB565 c = create_pen_rgb565(r, g, b);
+      int result = search_palette(c);
 
-    if (result == -1 && palette_mode == PaletteModeUSER) {
-      result = put_palette(create_pen_rgb565(r, g, b));
+      if (result == -1) {
+        result = put_palette(create_pen_rgb565(r, g, b));
+      }
+
+      return result;
     }
-  
-    return result;
   }
 
   void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
@@ -48,6 +52,8 @@ namespace pimoroni {
   }
 
   int PicoGraphics::put_palette(RGB565 c) {
+    if(palette_mode != PaletteModeUSER) return -1;
+
     for(auto i = 0u; i < 256; i++) {
       if(!(palette_status[i] & (PaletteStatusUsed | PaletteStatusReserved))) {
         palette[i] = c;
@@ -59,11 +65,15 @@ namespace pimoroni {
   }
 
   void PicoGraphics::set_palette(uint8_t i, RGB565 c) {
+    if(palette_mode != PaletteModeUSER) return;
+
     palette[i] = c;
     palette_status[i] |= PaletteStatusUsed;
   }
 
   int PicoGraphics::reserve_palette() {
+    if(palette_mode != PaletteModeUSER) return - 1;
+
     for (auto i = 0u; i < 256; i++) {
       if (!palette_status[i]) {
         palette_status[i] = PaletteStatusReserved;

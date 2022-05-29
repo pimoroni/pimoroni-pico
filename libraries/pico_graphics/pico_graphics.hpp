@@ -79,6 +79,10 @@ namespace pimoroni {
     [[deprecated("Use uint8_t create_pen(uint8_t, uint8_t, uint8_t).")]]
     void set_pen(uint8_t r, uint8_t g, uint8_t b);
 
+    static constexpr Pen rgb_to_rgb332_index(uint8_t r, uint8_t g, uint8_t b) {
+      return (r & 0b11100000) | ((g & 0b11100000) >> 3) | ((b & 0b11000000) >> 6);
+    }
+
     static constexpr RGB565 create_pen_rgb565(uint8_t r, uint8_t g, uint8_t b) {
       uint16_t p = ((r & 0b11111000) << 8) |
                    ((g & 0b11111100) << 3) |
