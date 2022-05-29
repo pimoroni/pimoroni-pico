@@ -18,3 +18,9 @@ target_compile_definitions(usermod_${MOD_NAME} INTERFACE
 )
 
 target_link_libraries(usermod INTERFACE usermod_${MOD_NAME})
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-discarded-qualifiers"
+)
