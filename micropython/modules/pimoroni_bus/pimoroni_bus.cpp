@@ -11,9 +11,37 @@ extern "C" {
 void PimoroniBus_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     _PimoroniBus_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniBus_obj_t);
     if(self->base.type == &SPIPins_type) {
-        mp_print_str(print, "SPIBus()");
+        SPIPins *pins = (SPIPins *)self->pins;
+        mp_print_str(print, "SPIBus(");
+        mp_obj_print_helper(print, mp_obj_new_int((pins->spi == spi0) ? 0 : 1), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->cs), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->sck), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->mosi), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->miso == PIN_UNUSED ? -1 : pins->miso), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->dc == PIN_UNUSED ? -1 : pins->dc), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->bl == PIN_UNUSED ? -1 : pins->bl), PRINT_REPR);
+        mp_print_str(print, ")");
     } else {
-        mp_print_str(print, "ParallelBus()");
+        ParallelPins *pins = (ParallelPins *)self->pins;
+        mp_print_str(print, "ParallelBus(");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->cs), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->dc), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->wr_sck), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->rd_sck), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->d0), PRINT_REPR);
+        mp_print_str(print, ", ");
+        mp_obj_print_helper(print, mp_obj_new_int(pins->bl == PIN_UNUSED ? -1 : pins->bl), PRINT_REPR);
+        mp_print_str(print, ")");
     }
     (void)kind;
 }
@@ -34,50 +62,32 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
     _PimoroniBus_obj_t *self = m_new_obj(_PimoroniBus_obj_t);
     self->base.type = &SPIPins_type;
-    self->pins = m_new(SPIPins, 1);
-
-    SPIPins *pins = (SPIPins *)self->pins;
-    
-    pins->spi = ((args[ARG_sck].u_int >> 3) & 0b1) == 0 ? spi0 : spi1;
-    pins->cs = (uint)args[ARG_cs].u_int;
-    pins->sck = (uint)args[ARG_sck].u_int;
-    pins->mosi = (uint)args[ARG_mosi].u_int;
-    pins->miso = PIN_UNUSED;
-    pins->dc = (uint)args[ARG_dc].u_int;
-    pins->bl = args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int;
+    self->pins = new(m_new(SPIPins, 1)) SPIPins{
+        ((args[ARG_sck].u_int >> 3) & 0b1) == 0 ? spi0 : spi1,
+        (uint)args[ARG_cs].u_int,
+        (uint)args[ARG_sck].u_int,
+        (uint)args[ARG_mosi].u_int,
+        PIN_UNUSED,
+        (uint)args[ARG_dc].u_int,
+        args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int
+    };
 
     return MP_OBJ_FROM_PTR(self);
 }
 
-mp_obj_t SPISlot_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    enum { ARG_slot };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_slot, MP_ARG_INT | MP_ARG_REQUIRED },
-    };
+// Factory function.
+// Returns an "SPIBus" instance for the given SPI slot.
+mp_obj_t SPISlot(mp_obj_t slot_in) {
+    int slot = mp_obj_get_int(slot_in);
 
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    _PimoroniBus_obj_t *obj = m_new_obj(_PimoroniBus_obj_t);
+    obj->base.type = &SPIPins_type;
 
-    _PimoroniBus_obj_t *self = m_new_obj(_PimoroniBus_obj_t);
-    self->base.type = &SPIPins_type;
-    //self->pins = m_new(SPIPins, 1);
-
-    //SPIPins *pins = (SPIPins *)self->pins;
-
-    SPIPins slot_pins = get_spi_pins((BG_SPI_SLOT)args[ARG_slot].u_int);
+    SPIPins slot_pins = get_spi_pins((BG_SPI_SLOT)slot);
     
-    self->pins = new(m_new(SPIPins, 1)) SPIPins(slot_pins);
+    obj->pins = new(m_new(SPIPins, 1)) SPIPins(slot_pins);
 
-   /* pins->spi = slot_pins.spi;
-    pins->cs = slot_pins.cs;
-    pins->sck = slot_pins.sck;
-    pins->mosi = slot_pins.mosi;
-    pins->miso = slot_pins.miso;
-    pins->dc = slot_pins.dc;
-    pins->bl = slot_pins.bl;*/
-
-    return MP_OBJ_FROM_PTR(self);
+    return MP_OBJ_FROM_PTR(obj);
 }
 
 mp_obj_t ParallelPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
@@ -97,16 +107,14 @@ mp_obj_t ParallelPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     _PimoroniBus_obj_t *self = m_new_obj(_PimoroniBus_obj_t);
     self->base.type = &ParallelPins_type;
-    self->pins = m_new(ParallelPins, 1);
-
-    ParallelPins *pins = (ParallelPins *)self->pins;
-    
-    pins->cs = (uint)args[ARG_cs].u_int;
-    pins->dc = (uint)args[ARG_dc].u_int;
-    pins->wr_sck = (uint)args[ARG_wr_sck].u_int;
-    pins->rd_sck = (uint)args[ARG_rd_sck].u_int;
-    pins->d0 = (uint)args[ARG_d0].u_int;
-    pins->bl = args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int;
+    self->pins = new(m_new(ParallelPins, 1)) ParallelPins{
+        (uint)args[ARG_cs].u_int,
+        (uint)args[ARG_dc].u_int,
+        (uint)args[ARG_wr_sck].u_int,
+        (uint)args[ARG_rd_sck].u_int,
+        (uint)args[ARG_d0].u_int,
+        args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int
+    };
 
     return MP_OBJ_FROM_PTR(self);
 }
