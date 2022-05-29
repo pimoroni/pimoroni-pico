@@ -1,4 +1,4 @@
-# Genereic ST7789 - Pico Display Pack & Pico Display Pack 2.0" and 240x240 Square & Round LCD Breakouts <!-- omit in toc -->
+# Pico Graphics ST7789 - Pico Display Pack & Pico Display Pack 2.0" and 240x240 Square & Round LCD Breakouts <!-- omit in toc -->
 
 Our Pico Display Packs offers a vibrant 1.14" (240x135) or 2.0" (320x240) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
 
@@ -16,14 +16,14 @@ The following example sets up Pico Display, displays some basic demo text and gr
 
 ```c++
 #include "pico_display.hpp"
-#include "generic_st7789.hpp"
+#include "picographics_st7789.hpp"
 #include "rgbled.hpp"
 #include "button.hpp"
 
 using namespace pimoroni;
 
 // Swap WIDTH and HEIGHT to rotate 90 degrees
-ST7789Generic pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
+PicoGraphicsST7789 pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
 
 // RGB LED controller
 RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
@@ -83,7 +83,7 @@ int main() {
 
 ### PicoGraphics
 
-The generic ST7789 driver uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
+The Pico Graphics ST7789 driver uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
 
 You will also need to use the RGBLED library to drive the RGB LED, and the Button library for the four buttons.
 

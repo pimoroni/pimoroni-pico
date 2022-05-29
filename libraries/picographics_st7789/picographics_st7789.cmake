@@ -1,4 +1,4 @@
-set(LIB_NAME generic_st7789)
+set(LIB_NAME picographics_st7789)
 add_library(${LIB_NAME} INTERFACE)
 
 target_sources(${LIB_NAME} INTERFACE

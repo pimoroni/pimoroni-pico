@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "generic_st7789.hpp"
+#include "picographics_st7789.hpp"
 #include "time.h"
 
 // Place a 1.3 Round SPI LCD in the *front* slot of breakout garden.
@@ -14,7 +14,7 @@ using namespace pimoroni;
 const int WIDTH = 240;
 const int HEIGHT = 240;
 
-ST7789Generic display(WIDTH, HEIGHT, ROTATE_0, true, nullptr, get_spi_pins(BG_SPI_FRONT));
+PicoGraphicsST7789 display(WIDTH, HEIGHT, ROTATE_0, true, nullptr, get_spi_pins(BG_SPI_FRONT));
 
 constexpr float RADIUS = WIDTH / 2;
 
@@ -44,7 +44,7 @@ int main() {
     display.set_backlight(255);
 
     // Delete the default palette and allow us to create up to 256 of our own RGB565 colours
-    // display.set_palette_mode(ST7789Generic::PaletteModeUSER);
+    // display.set_palette_mode(PicoGraphicsST7789::PaletteModeUSER);
 
     uint32_t steps = 70;
     float angle_step = 0.5f;

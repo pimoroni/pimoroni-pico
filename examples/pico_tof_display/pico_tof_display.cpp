@@ -24,62 +24,27 @@
 #include "pico_display.hpp"
 #endif
 #include "vl53l1x.hpp"
+#include "drivers/button/button.hpp"
+
+#include "picographics_st7789.hpp"
 
 using namespace pimoroni;
 
-class AutoRepeat {
-  public:
-    AutoRepeat(uint32_t repeat_time=200, uint32_t hold_time=1000) {
-      this->repeat_time = repeat_time;
-      this->hold_time = hold_time;
-    }
-    bool next(uint32_t time, bool state) {
-      bool changed = state != last_state;
-      last_state = state;
-
-      if(changed) {
-        if(state) {
-          pressed_time = time;
-          pressed = true;
-          last_time = time;
-          return true;
-        }
-        else {
-          pressed_time = 0;
-          pressed = false;
-          last_time = 0;
-        }
-      }
-      // Shortcut for no auto-repeat
-      if(repeat_time == 0) return false;
-
-      if(pressed) {
-        uint32_t repeat_rate = repeat_time;
-        if(hold_time > 0 && time - pressed_time > hold_time) {
-          repeat_rate /= 3;
-        }
-        if(time - last_time > repeat_rate) {
-          last_time = time;
-          return true;
-        }
-      }
-
-      return false;
-    }
-  private:
-    uint32_t repeat_time;
-    uint32_t hold_time;
-    bool pressed = false;
-    bool last_state = false;
-    uint32_t pressed_time = 0;
-    uint32_t last_time = 0;
-};
-
 #ifdef USE_PICO_EXPLORER
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_display(buffer);
-uint16_t screen_width = PicoExplorer::WIDTH;
-uint16_t screen_height = PicoExplorer::HEIGHT;
+PicoGraphicsST7789 pico_display(
+  PicoExplorer::WIDTH,
+  PicoExplorer::HEIGHT,
+  ROTATE_0,  // Rotation
+  false,     // Is it round!?
+  nullptr,   // Buffer
+  get_spi_pins(BG_SPI_FRONT)
+);
+
+Button button_a(PicoExplorer::A);
+Button button_b(PicoExplorer::B);
+Button button_x(PicoExplorer::X);
+Button button_y(PicoExplorer::Y);
+
 uint16_t disptext_reminder_size = 2;
 uint16_t disptext_b_reminder_xoff = 5;
 uint16_t disptext_b_reminder_yoff = 210;
@@ -94,10 +59,20 @@ uint16_t disptext_dist_xoff = 10;
 uint16_t disptext_dist_yoff = 90;
 uint16_t disptext_dist_size = 6;
 #else
-uint16_t buffer[PicoDisplay::WIDTH * PicoDisplay::HEIGHT];
-PicoDisplay pico_display(buffer);
-uint16_t screen_width = PicoDisplay::WIDTH;
-uint16_t screen_height = PicoDisplay::HEIGHT;
+PicoGraphicsST7789 pico_display(
+  PicoDisplay::WIDTH,
+  PicoDisplay::HEIGHT,
+  ROTATE_0,  // Rotation
+  false,     // Is it round!?
+  nullptr,   // Buffer
+  get_spi_pins(BG_SPI_FRONT)
+);
+
+Button button_a(PicoDisplay::A);
+Button button_b(PicoDisplay::B);
+Button button_x(PicoDisplay::X);
+Button button_y(PicoDisplay::Y);
+
 uint16_t disptext_reminder_size = 2;
 uint16_t disptext_b_reminder_xoff = 2;
 uint16_t disptext_b_reminder_yoff = 110;
@@ -113,6 +88,10 @@ uint16_t disptext_dist_yoff = 45;
 uint16_t disptext_dist_size = 4;
 #endif
 
+
+uint16_t screen_width = pico_display.bounds.w;
+uint16_t screen_height = pico_display.bounds.h;
+
 #define MM_TO_INCH 25.4
 
 VL53L1X vl53l1x;
@@ -123,11 +102,6 @@ const char mode_to_text[4][7] = {
   "Medium",
   "Long"
 };
-
-AutoRepeat ar_button_a;
-AutoRepeat ar_button_b;
-AutoRepeat ar_button_x;
-AutoRepeat ar_button_y;
 
 #define FLASH_MOD 20
 void flash_led(uint32_t curr_count) {
@@ -148,8 +122,6 @@ int main() {
   bool vl53_present = false;
   uint16_t vl53_mode = 1;
 
-  pico_display.init();
-
   vl53_present = vl53l1x.init();
 
   uint32_t i = 0;
@@ -169,11 +141,15 @@ int main() {
   // Whether the display is being held
   bool dist_held = false;
 
+  Pen WHITE = pico_display.create_pen(255, 255, 255);
+  Pen REDDISH = pico_display.create_pen(255, 64, 64);
+  Pen BG = pico_display.create_pen(55, 65, 75);
+
   while(true) {
-    // bool a_pressed = ar_button_a.next(i, pico_display.is_pressed(pico_display.A));
-    bool b_pressed = ar_button_b.next(i, pico_display.is_pressed(pico_display.B));
-    bool x_pressed = ar_button_x.next(i, pico_display.is_pressed(pico_display.X));
-    bool y_pressed = ar_button_y.next(i, pico_display.is_pressed(pico_display.Y));
+    // bool a_pressed = button_a.read();
+    bool b_pressed = button_b.read();
+    bool x_pressed = button_x.read();
+    bool y_pressed = button_y.read();
 
     if (b_pressed) {
       dist_held = !dist_held;
@@ -192,11 +168,11 @@ int main() {
     }
 
     Rect text_box(5, 5, screen_width-10, screen_height-10);
-    pico_display.set_pen(55, 65, 75);
+    pico_display.set_pen(BG);
     pico_display.rectangle(text_box);
     // text_box.deflate(10);
     pico_display.set_clip(text_box);
-    pico_display.set_pen(255, 255, 255);
+    pico_display.set_pen(WHITE);
     // Show the current distance
     flash_led(0);
     if (vl53_present) {
@@ -207,12 +183,12 @@ int main() {
           Point(text_box.x+disptext_y_reminder_xoff,
             text_box.y+disptext_y_reminder_yoff), 230, disptext_reminder_size);
       if(dist_held) {
-        pico_display.set_pen(255, 64, 64);
+        pico_display.set_pen(REDDISH);
       }
       pico_display.text("Hold",
           Point(text_box.x+disptext_b_reminder_xoff,
             text_box.y+disptext_b_reminder_yoff), 230, disptext_reminder_size);
-      pico_display.set_pen(255, 255, 255);
+      pico_display.set_pen(WHITE);
 
       sprintf(buf, "Mode: %s", mode_to_text[vl53_mode]);
       pico_display.text(buf,

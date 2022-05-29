@@ -2,6 +2,7 @@
 
 #include "drivers/st7789/st7789.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
+#include "drivers/motor/motor.hpp"
 
 namespace pimoroni {
 
@@ -17,6 +18,13 @@ namespace pimoroni {
     static const uint8_t ADC0 = 0;
     static const uint8_t ADC1 = 1;
     static const uint8_t ADC2 = 2;
+
+    static const uint ADC0_PIN = 26;
+    static const uint ADC1_PIN = 27;
+    static const uint ADC2_PIN = 28;
+
+    static constexpr pin_pair MOTOR1_PINS{9, 8};
+    static constexpr pin_pair MOTOR2_PINS{11, 10};
 
     static const uint8_t MOTOR1 = 0;
     static const uint8_t MOTOR2 = 1;
