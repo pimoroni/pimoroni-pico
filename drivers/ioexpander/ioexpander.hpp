@@ -164,10 +164,6 @@ namespace pimoroni {
     IOExpander(uint8_t address, uint32_t timeout = 1, bool debug = false) :
         IOExpander(new I2C(), address, PIN_UNUSED, timeout, debug) {};
 
-    IOExpander(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false) :
-        IOExpander(new I2C(sda, scl), address, interrupt, timeout, debug) {};
-
-    // TODO remove MicroPython-binding compatibility constructors
     IOExpander(I2C *i2c, uint8_t address=DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
 
 

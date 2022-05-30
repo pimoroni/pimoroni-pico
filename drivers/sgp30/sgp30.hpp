@@ -50,9 +50,6 @@ namespace pimoroni {
 
     SGP30(I2C *i2c) : i2c(i2c) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    SGP30(i2c_inst_t *i2c_inst, uint sda, uint scl) : i2c(new I2C(sda, scl)) { }
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------

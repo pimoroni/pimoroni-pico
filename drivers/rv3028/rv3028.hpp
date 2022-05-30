@@ -224,9 +224,6 @@ namespace pimoroni {
     RV3028(I2C *i2c, uint interrupt = DEFAULT_INT_PIN) :
       i2c(i2c), interrupt(interrupt) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    RV3028(i2c_inst_t *i2c, uint sda, uint scl, uint interrupt = DEFAULT_INT_PIN) : RV3028(new I2C(sda, scl), interrupt) {}
-
 
     //--------------------------------------------------
     // Methods

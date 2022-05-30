@@ -57,9 +57,6 @@ namespace pimoroni {
     BreakoutMICS6814(I2C *i2c, uint8_t address = DEFAULT_I2C_ADDRESS, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT, bool debug = false) :
       ioe(i2c, address, interrupt, timeout, debug) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    BreakoutMICS6814(uint8_t address, uint sda, uint scl, uint interrupt = PIN_UNUSED, uint32_t timeout = DEFAULT_TIMEOUT) : BreakoutMICS6814(new I2C(sda, scl), address, interrupt, timeout) {};
-
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
