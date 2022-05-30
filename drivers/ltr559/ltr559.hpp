@@ -148,8 +148,6 @@ namespace pimoroni {
 
     LTR559(I2C *i2c, uint interrupt = PIN_UNUSED) : i2c(i2c), interrupt(interrupt) {}
 
-    // TODO remove MicroPython-binding compatibility constructors
-    LTR559(uint sda, uint scl, uint interrupt = PIN_UNUSED) : LTR559(new I2C(), interrupt) {}
 
     //--------------------------------------------------
     // Methods
