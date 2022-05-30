@@ -14,7 +14,13 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const uint DEFAULT_I2C_ADDRESS      = 0x51;
+    static const int PARAM_UNUSED              = -1;
 
+
+    //--------------------------------------------------
+    // Enums
+    //--------------------------------------------------
+  public:
     enum ClockOut : uint8_t {
       CLOCK_OUT_32768HZ = 0,
       CLOCK_OUT_16384HZ = 1,
@@ -34,26 +40,17 @@ namespace pimoroni {
       THURSDAY  =  4,
       FRIDAY    =  5,
       SATURDAY  =  6,
-      NONE      = -1
+      NONE      = PARAM_UNUSED
     };
 
     enum TimerTickPeriod : int8_t {
-      TIMER_TICK_4096HZ       = 0b00 << 3,
-      TIMER_TICK_64HZ         = 0b01 << 3,
-      TIMER_TICK_1HZ          = 0b10 << 3,
-      TIMER_TICK_1_OVER_60HZ  = 0b11 << 3
+      TIMER_TICK_4096HZ       = 0b00,
+      TIMER_TICK_64HZ         = 0b01,
+      TIMER_TICK_1HZ          = 0b10,
+      TIMER_TICK_1_OVER_60HZ  = 0b11
     };
 
-    //--------------------------------------------------
-    // Variables
-    //--------------------------------------------------
   private:
-    I2C *i2c;
-
-    // interface pins with our standard defaults where appropriate
-    uint address        = DEFAULT_I2C_ADDRESS;
-    uint interrupt      = PIN_UNUSED;
-
     enum Registers : uint8_t {
       CONTROL_1         = 0x00,
       CONTROL_2         = 0x01,
@@ -76,6 +73,18 @@ namespace pimoroni {
       TIMER_MODE        = 0x11
     };
 
+
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
+  private:
+    I2C *i2c;
+
+    // Interface pins with our standard defaults where appropriate
+    uint address        = DEFAULT_I2C_ADDRESS;
+    uint interrupt      = PIN_UNUSED;
+
+
     //--------------------------------------------------
     // Constructors/Destructor
     //--------------------------------------------------
@@ -92,38 +101,38 @@ namespace pimoroni {
     void init();
     void reset();
 
-    // set and get the date and time
-    // uses datetime_t from pico sdk (hardware/rtc) for compatibility
-    void set_datetime(datetime_t *t);
-    datetime_t get_datetime();
-
-    // alarm manipulation methods
-    void enable_alarm_interrupt(bool enable);
-    void clear_alarm_flag();
-    bool read_alarm_flag();
-    void unset_alarm();
-    void set_alarm(int second = -1, int minute = -1, int hour = -1, int day = -1);
-    void set_weekday_alarm(int second = -1, int minute = -1, int hour = -1,
-      DayOfWeek dotw = DayOfWeek::NONE);
-
-    // timer manipulation methods
-    void enable_timer_interrupt(bool enable, bool flag_only = false);
-    void unset_timer();
-    void set_timer(uint8_t ticks,
-      TimerTickPeriod ttp = TimerTickPeriod::TIMER_TICK_1HZ);
-    bool read_timer_flag();
-    void clear_timer_flag();
-
-    // clock output
-    void set_clock_output(ClockOut co);
-
-    // i2c instance details access methods
+    // I2C instance details access methods
     i2c_inst_t* get_i2c() const;
     int get_address() const;
     int get_sda() const;
     int get_scl() const;
     int get_int() const;
 
+    // Set and get the date and time
+    // Uses datetime_t from pico sdk (hardware/rtc) for compatibility
+    datetime_t get_datetime();
+    void set_datetime(datetime_t *t);
+
+    // Alarm manipulation methods
+    void set_alarm(int second = PARAM_UNUSED, int minute = PARAM_UNUSED,
+      int hour = PARAM_UNUSED, int day = PARAM_UNUSED);
+    void set_weekday_alarm(int second = PARAM_UNUSED, int minute = PARAM_UNUSED,
+      int hour = PARAM_UNUSED, DayOfWeek dotw = DayOfWeek::NONE);
+    void enable_alarm_interrupt(bool enable);
+    bool read_alarm_flag();
+    void clear_alarm_flag();
+    void unset_alarm();
+
+    // Timer manipulation methods
+    void set_timer(uint8_t ticks,
+      TimerTickPeriod ttp = TimerTickPeriod::TIMER_TICK_1HZ);
+    void enable_timer_interrupt(bool enable, bool flag_only = false);
+    bool read_timer_flag();
+    void clear_timer_flag();
+    void unset_timer();
+
+    // Clock output
+    void set_clock_output(ClockOut co);
   };
 
 }

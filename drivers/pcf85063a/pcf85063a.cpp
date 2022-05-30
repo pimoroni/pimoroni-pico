@@ -34,26 +34,25 @@ namespace pimoroni {
     }
   }
 
-  // set the speed of (or turn off) the clock output
-  void PCF85063A::set_clock_output(ClockOut co) {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
-    bits = (bits & ~0x07) | uint8_t(co);
-    i2c->reg_write_uint8(
-      address, Registers::CONTROL_2, bits);
+  // i2c helper methods
+  i2c_inst_t* PCF85063A::get_i2c() const {
+    return i2c->get_i2c();
   }
 
-  void PCF85063A::set_datetime(datetime_t *t) {
-    static uint8_t data[7] = {
-      bcd_encode((uint)t->sec),
-      bcd_encode((uint)t->min),
-      bcd_encode((uint)t->hour),
-      bcd_encode((uint)t->day),
-      bcd_encode((uint)t->dotw),
-      bcd_encode((uint)t->month),
-      bcd_encode((uint)t->year - 2000) // offset year
-    };
+  int PCF85063A::get_address() const {
+    return address;
+  }
 
-    i2c->write_bytes(address, Registers::SECONDS, data, 7);
+  int PCF85063A::get_sda() const {
+    return i2c->get_sda();
+  }
+
+  int PCF85063A::get_scl() const {
+    return i2c->get_scl();
+  }
+
+  int PCF85063A::get_int() const {
+    return interrupt;
   }
 
   datetime_t PCF85063A::get_datetime() {
@@ -74,30 +73,26 @@ namespace pimoroni {
     return dt;
   }
 
-  void PCF85063A::enable_alarm_interrupt(bool enable) {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
-    bits = enable ? (bits | 0x80) : (bits & ~0x80);
-    bits |= 0x40; // ensure alarm flag isn't reset
-    i2c->reg_write_uint8(address, Registers::CONTROL_2, bits);
-  }
+  void PCF85063A::set_datetime(datetime_t *t) {
+    static uint8_t data[7] = {
+      bcd_encode((uint)t->sec),
+      bcd_encode((uint)t->min),
+      bcd_encode((uint)t->hour),
+      bcd_encode((uint)t->day),
+      bcd_encode((uint)t->dotw),
+      bcd_encode((uint)t->month),
+      bcd_encode((uint)t->year - 2000) // offset year
+    };
 
-  void PCF85063A::clear_alarm_flag() {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
-    bits &= ~0x40;
-    i2c->reg_write_uint8(address, Registers::CONTROL_2, bits);
-  }
-
-  bool PCF85063A::read_alarm_flag() {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
-    return bits & 0x40;
+    i2c->write_bytes(address, Registers::SECONDS, data, 7);
   }
 
   void PCF85063A::set_alarm(int second, int minute, int hour, int day) {
     uint8_t alarm[5] = {
-      uint8_t(second != -1 ? bcd_encode(second) : 0x80),
-      uint8_t(minute != -1 ? bcd_encode(minute) : 0x80),
-      uint8_t(hour   != -1 ? bcd_encode(  hour) : 0x80),
-      uint8_t(day    != -1 ? bcd_encode(   day) : 0x80),
+      uint8_t(second != PARAM_UNUSED ? bcd_encode(second) : 0x80),
+      uint8_t(minute != PARAM_UNUSED ? bcd_encode(minute) : 0x80),
+      uint8_t(hour   != PARAM_UNUSED ? bcd_encode(  hour) : 0x80),
+      uint8_t(day    != PARAM_UNUSED ? bcd_encode(   day) : 0x80),
       uint8_t(0x80)
     };
 
@@ -108,9 +103,9 @@ namespace pimoroni {
     int second, int minute, int hour, DayOfWeek dotw) {
 
     uint8_t alarm[5] = {
-      uint8_t(second != -1 ? bcd_encode(second) : 0x80),
-      uint8_t(minute != -1 ? bcd_encode(minute) : 0x80),
-      uint8_t(hour   != -1 ? bcd_encode(  hour) : 0x80),
+      uint8_t(second != PARAM_UNUSED ? bcd_encode(second) : 0x80),
+      uint8_t(minute != PARAM_UNUSED ? bcd_encode(minute) : 0x80),
+      uint8_t(hour   != PARAM_UNUSED ? bcd_encode(  hour) : 0x80),
       uint8_t(0x80),
       uint8_t(dotw   != DayOfWeek::NONE ? bcd_encode(  dotw) : 0x80)
     };
@@ -118,21 +113,27 @@ namespace pimoroni {
     i2c->write_bytes(address, Registers::SECOND_ALARM, alarm, 5);
   }
 
+  void PCF85063A::enable_alarm_interrupt(bool enable) {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
+    bits = enable ? (bits | 0x80) : (bits & ~0x80);
+    bits |= 0x40; // ensure alarm flag isn't reset
+    i2c->reg_write_uint8(address, Registers::CONTROL_2, bits);
+  }
+
+  bool PCF85063A::read_alarm_flag() {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
+    return bits & 0x40;
+  }
+
+  void PCF85063A::clear_alarm_flag() {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
+    bits &= ~0x40;
+    i2c->reg_write_uint8(address, Registers::CONTROL_2, bits);
+  }
+
   void PCF85063A::unset_alarm() {
     uint8_t dummy[5] = {0};
     i2c->write_bytes(address, Registers::SECOND_ALARM, dummy, 5);
-  }
-
-  void PCF85063A::enable_timer_interrupt(bool enable, bool flag_only) {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::TIMER_MODE);
-    bits = (bits & ~0x03) | (enable ? 0x02 : 0x00) | (flag_only ? 0x01 : 0x00);
-    i2c->reg_write_uint8(address, Registers::TIMER_MODE, bits);
-  }
-
-  void PCF85063A::unset_timer() {
-    uint8_t bits = i2c->reg_read_uint8(address, Registers::TIMER_MODE);
-    bits &= ~0x04;
-    i2c->reg_write_uint8(address, Registers::TIMER_MODE, bits);
   }
 
   void PCF85063A::set_timer(uint8_t ticks, TimerTickPeriod ttp) {
@@ -140,10 +141,16 @@ namespace pimoroni {
 
     uint8_t timer[2] = {
       ticks,
-      uint8_t((bits & ~0x18) | ttp | 0x04) // mask out current ttp and set new + enable
+      uint8_t((bits & ~0x18) | (ttp << 3) | 0x04) // mask out current ttp and set new + enable
     };
 
     i2c->write_bytes(address, Registers::TIMER_VALUE, timer, 2);
+  }
+
+  void PCF85063A::enable_timer_interrupt(bool enable, bool flag_only) {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::TIMER_MODE);
+    bits = (bits & ~0x03) | (enable ? 0x02 : 0x00) | (flag_only ? 0x01 : 0x00);
+    i2c->reg_write_uint8(address, Registers::TIMER_MODE, bits);
   }
 
   bool PCF85063A::read_timer_flag() {
@@ -157,25 +164,18 @@ namespace pimoroni {
     i2c->reg_write_uint8(address, Registers::CONTROL_2, bits);
   }
 
-  // i2c helper methods
-  i2c_inst_t* PCF85063A::get_i2c() const {
-    return i2c->get_i2c();
+  void PCF85063A::unset_timer() {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::TIMER_MODE);
+    bits &= ~0x04;
+    i2c->reg_write_uint8(address, Registers::TIMER_MODE, bits);
   }
 
-  int PCF85063A::get_address() const {
-    return address;
-  }
-
-  int PCF85063A::get_sda() const {
-    return i2c->get_sda();
-  }
-
-  int PCF85063A::get_scl() const {
-    return i2c->get_sda();
-  }
-
-  int PCF85063A::get_int() const {
-    return interrupt;
+  // set the speed of (or turn off) the clock output
+  void PCF85063A::set_clock_output(ClockOut co) {
+    uint8_t bits = i2c->reg_read_uint8(address, Registers::CONTROL_2);
+    bits = (bits & ~0x07) | uint8_t(co);
+    i2c->reg_write_uint8(
+      address, Registers::CONTROL_2, bits);
   }
 
 }
