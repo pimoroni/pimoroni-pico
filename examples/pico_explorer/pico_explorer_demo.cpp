@@ -81,6 +81,8 @@ void sprite(uint8_t *p, int x, int y, bool flip, uint16_t c) {
 
 int main() {
   msa301.init();
+  motor1.init();
+  motor2.init();
 
   struct pt {
     float      x;
@@ -143,9 +145,8 @@ int main() {
     display.set_pen(display.create_pen(0, 0, bv * 255));
     display.circle(Point(bv * 140 + 50, 210), 15);
 
-    // TODO Find the correct way to translate these in terms of motor
-    // display.set_motor(display.MOTOR1, display.FORWARD, bv);
-    // display.set_motor(display.MOTOR2, display.FORWARD, rv);
+    motor1.speed(bv);
+    motor2.speed(rv);
 
     // TODO make this work
     // display.set_tone(440, 0.5);
