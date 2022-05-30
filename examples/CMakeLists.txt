@@ -48,3 +48,5 @@ add_subdirectory(interstate75)
 add_subdirectory(servo2040)
 add_subdirectory(motor2040)
 add_subdirectory(encoder)
+add_subdirectory(inky_frame)
+
