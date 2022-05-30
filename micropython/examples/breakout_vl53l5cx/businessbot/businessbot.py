@@ -111,21 +111,18 @@ while True:
             x /= scalar
             x /= 3.5
             x -= 1.0
-            
+
             print("Object detected at x: {:.2f}, y: {:.2f}".format(x, y))
-     
+
             # Our robot will try and keep the object a goal distance in front of it.
             # If the object gets closer it will reverse, if the object gets further away it will drive forward.
             scale = (target_distance - GOAL_DISTANCE) / SPEED_RANGE
             spd = max(min(scale, 1.0), -1.0) * DRIVING_SPEED
-            
+
             print("Distance is {:.1f} mm. Speed is {:.2f}".format(target_distance, spd))
-            
+
             left.speed(spd - (x * TURNING_SPEED))
-            right.speed(spd + (x * TURNING_SPEED))            
+            right.speed(spd + (x * TURNING_SPEED))
         else:
             left.coast()
-            right.coast() 
-                    
-                
-
+            right.coast()
