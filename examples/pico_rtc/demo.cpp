@@ -93,8 +93,8 @@ int main() {
   printf("check timer function\n");
   printf("\n");
 
-  printf("- setting timer for in 3 seconds\n");
-  rtc.set_timer(3);
+  printf("- setting timer for in 5 seconds\n");
+  rtc.set_timer(5);
 
   printf("\n");
   printf("- waiting for timer flag\n");

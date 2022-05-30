@@ -137,11 +137,13 @@ namespace pimoroni {
 
   void PCF85063A::set_timer(uint8_t ticks, TimerTickPeriod ttp) {
     uint8_t bits = i2c->reg_read_uint8(address, Registers::TIMER_MODE);
-    // mask out timer tick period value and set new value
-    bits = (bits & ~0x18) | ttp;
-    // enable timer
-    bits |= 0x04;
-    i2c->reg_write_uint8(address, Registers::TIMER_MODE, bits);
+
+    uint8_t timer[2] = {
+      ticks,
+      uint8_t((bits & ~0x18) | ttp | 0x04) // mask out current ttp and set new + enable
+    };
+
+    i2c->write_bytes(address, Registers::TIMER_VALUE, timer, 2);
   }
 
   bool PCF85063A::read_timer_flag() {

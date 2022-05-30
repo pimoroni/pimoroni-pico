@@ -38,10 +38,10 @@ namespace pimoroni {
     };
 
     enum TimerTickPeriod : int8_t {
-      TIMER_TICK_4096HZ       = 0,
-      TIMER_TICK_64HZ         = 1,
-      TIMER_TICK_1HZ          = 2,
-      TIMER_TICK_1_OVER_60HZ  = 3
+      TIMER_TICK_4096HZ       = 0b00 << 3,
+      TIMER_TICK_64HZ         = 0b01 << 3,
+      TIMER_TICK_1HZ          = 0b10 << 3,
+      TIMER_TICK_1_OVER_60HZ  = 0b11 << 3
     };
 
     //--------------------------------------------------
