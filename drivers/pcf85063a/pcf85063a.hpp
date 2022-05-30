@@ -1,7 +1,10 @@
 #pragma once
 
 #include "hardware/i2c.h"
-#include "../../common/pimoroni_common.hpp"
+#include "hardware/rtc.h"
+
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 namespace pimoroni {
 
@@ -10,51 +13,68 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   public:
-    static const uint DEFAULT_SDA_PIN          = 4;
-    static const uint DEFAULT_SCL_PIN          = 5;
-    static const uint8_t I2C_ADDRESS           = 0x51;
+    static const uint DEFAULT_I2C_ADDRESS      = 0x51;
 
-    static const uint8_t COMMAND_RESET         = 0b01011000;
+    enum ClockOut : uint8_t {
+      CLOCK_OUT_32768HZ = 0,
+      CLOCK_OUT_16384HZ = 1,
+      CLOCK_OUT_8192HZ  = 2,
+      CLOCK_OUT_4096HZ  = 3,
+      CLOCK_OUT_2048HZ  = 4,
+      CLOCK_OUT_1024HZ  = 5,
+      CLOCK_OUT_1HZ     = 6,
+      CLOCK_OUT_OFF     = 7
+    };
 
-    static const uint8_t ALARM_INTERRUPT       = 0b10000000;
-    static const uint8_t CLEAR_ALARM_FLAG      = 0b01000000;
-    static const uint8_t MINUTE_INTERRUPT      = 0b00100000;
-    static const uint8_t HALF_MINUTE_INTERRUPT = 0b00010000;
-    static const uint8_t TIMER_FLAG            = 0b00001000;
+    enum DayOfWeek : int8_t {
+      SUNDAY    =  0,
+      MONDAY    =  1,
+      TUESDAY   =  2,
+      WEDNESDAY =  3,
+      THURSDAY  =  4,
+      FRIDAY    =  5,
+      SATURDAY  =  6,
+      NONE      = -1
+    };
 
-    static const uint8_t CLOCK_OUT_32768HZ     = 0b00000000;
-    static const uint8_t CLOCK_OUT_16384HZ     = 0b00000001;
-    static const uint8_t CLOCK_OUT_8192HZ      = 0b00000010;
-    static const uint8_t CLOCK_OUT_4096HZ      = 0b00000011;
-    static const uint8_t CLOCK_OUT_2048HZ      = 0b00000100;
-    static const uint8_t CLOCK_OUT_1024HZ      = 0b00000101;
-    static const uint8_t CLOCK_OUT_1HZ         = 0b00000110;
-    static const uint8_t CLOCK_OUT_OFF         = 0b00000111;
-
-    static const uint8_t RTC_STOP              = 0b00100000;
-    static const uint8_t MODE_12_HOUR          = 0b00000010;
-    static const uint8_t MODE_24_HOUR          = 0b00000000;
-    static const uint8_t CAP_7PF               = 0b00000000;
-    static const uint8_t CAP_12_5PF            = 0b00000001;
+    enum TimerTickPeriod : int8_t {
+      TIMER_TICK_4096HZ       = 0,
+      TIMER_TICK_64HZ         = 1,
+      TIMER_TICK_1HZ          = 2,
+      TIMER_TICK_1_OVER_60HZ  = 3
+    };
 
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    // ????
-
-  public:
-    // ????
-
-  private:
-    i2c_inst_t *i2c     = i2c0;
+    I2C *i2c;
 
     // interface pins with our standard defaults where appropriate
-    uint sda            = DEFAULT_SDA_PIN;
-    uint scl            = DEFAULT_SCL_PIN;
+    uint address        = DEFAULT_I2C_ADDRESS;
     uint interrupt      = PIN_UNUSED;
 
-    uint32_t i2c_baud    = 400000;
+    enum Registers : uint8_t {
+      CONTROL_1         = 0x00,
+      CONTROL_2         = 0x01,
+      OFFSET            = 0x02,
+      RAM_BYTE          = 0x03,
+      OSCILLATOR_STATUS = 0x04, // flag embedded in seconds register (see below)
+      SECONDS           = 0x04, // contains oscillator status flag   (see above)
+      MINUTES           = 0x05,
+      HOURS             = 0x06,
+      DAYS              = 0x07,
+      WEEKDAYS          = 0x08,
+      MONTHS            = 0x09,
+      YEARS             = 0x0A,
+      SECOND_ALARM      = 0x0B,
+      MINUTE_ALARM      = 0x0C,
+      HOUR_ALARM        = 0x0D,
+      DAY_ALARM         = 0x0E,
+      WEEKDAY_ALARM     = 0x0F,
+      TIMER_VALUE       = 0x10,
+      TIMER_MODE        = 0x11
+    };
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -62,8 +82,8 @@ namespace pimoroni {
   public:
     PCF85063A() {}
 
-    PCF85063A(i2c_inst_t *i2c, uint sda, uint scl, uint interrupt = PIN_UNUSED) : 
-        i2c(i2c), sda(sda), scl(scl), interrupt(interrupt) {}
+    PCF85063A(I2C *i2c, uint interrupt = PIN_UNUSED) :
+        i2c(i2c), interrupt(interrupt) {}
 
     //--------------------------------------------------
     // Methods
@@ -72,19 +92,38 @@ namespace pimoroni {
     void init();
     void reset();
 
-    bool set_datetime(datetime_t *t);
+    // set and get the date and time
+    // uses datetime_t from pico sdk (hardware/rtc) for compatibility
+    void set_datetime(datetime_t *t);
     datetime_t get_datetime();
 
-    void set_second_alarm(uint sec);
-    void configure(uint8_t flags);
+    // alarm manipulation methods
+    void enable_alarm_interrupt(bool enable);
+    void clear_alarm_flag();
+    bool read_alarm_flag();
+    void unset_alarm();
+    void set_alarm(int second = -1, int minute = -1, int hour = -1, int day = -1);
+    void set_weekday_alarm(int second = -1, int minute = -1, int hour = -1,
+      DayOfWeek dotw = DayOfWeek::NONE);
 
-    void reset_timer();
-    void set_seconds_timer(uint8_t sec);
+    // timer manipulation methods
+    void enable_timer_interrupt(bool enable, bool flag_only = false);
+    void unset_timer();
+    void set_timer(uint8_t ticks,
+      TimerTickPeriod ttp = TimerTickPeriod::TIMER_TICK_1HZ);
+    bool read_timer_flag();
+    void clear_timer_flag();
 
+    // clock output
+    void set_clock_output(ClockOut co);
+
+    // i2c instance details access methods
     i2c_inst_t* get_i2c() const;
+    int get_address() const;
     int get_sda() const;
     int get_scl() const;
-    int get_interrupt() const;    
+    int get_int() const;
+
   };
 
 }
