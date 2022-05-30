@@ -108,7 +108,6 @@ Button button_x(PicoExplorer::X);
 Button button_y(PicoExplorer::Y);
 
 Motor motor1(PicoExplorer::MOTOR1_PINS);
-Motor motor2(PicoExplorer::MOTOR2_PINS);
 
 Encoder enc(pio0, 0, ENCODER_PINS, ENCODER_COMMON_PIN, NORMAL_DIR, COUNTS_PER_REV, COUNT_MICROSTEPS, FREQ_DIVIDER);
 
@@ -232,6 +231,7 @@ void setup() {
     gpio_pull_down(ENCODER_SWITCH_PIN);
   }
 
+  motor1.init();
   enc.init();
 
   bool_pair state = enc.state();
@@ -287,16 +287,13 @@ int main() {
 
       // Spin Motor 1 either clockwise or counterclockwise depending on if B or Y are pressed
       if(button_b.read() && !button_y.read()) {
-        // TODO Fix motors
-        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::FORWARD, 1.0f);
+        motor1.speed(1.0f); // Full forward
       }
       else if(button_y.read() && !button_b.read()) {
-        // TODO Fix motors
-        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::REVERSE, 0.2f);
+        motor1.speed(-0.2f); // Reverse
       }
       else {
-        // TODO Fix motors
-        //display.set_motor(PicoExplorer::MOTOR1, PicoExplorer::STOP);
+        motor1.speed(0.0f); // Stop
       }
 
       // If A has been pressed, zoom the view out to a min of x1
