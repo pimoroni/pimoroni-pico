@@ -92,12 +92,26 @@ namespace pimoroni {
     reset();
     busy_wait();
 
-    /*
-    Resolution Setting
-    10bit horizontal followed by a 10bit vertical resolution
-    we'll let struct.pack do the work here and send 16bit values
-    life is too short for manual bit wrangling
-    */
+    command(0x00, {0xE3, 0x08});
+    command(0x01, {0x37, 0x00, 0x23, 0x23});
+    command(0x03, {0x00});
+    command(0x06, {0xC7, 0xC7, 0x1D});
+    command(0x30, {0x3C});
+    command(0x40, {0x00});
+    command(0x50, {0x37});
+    command(0x60, {0x22});
+    command(0x61, {0x02, 0x58, 0x01, 0xC0});
+    command(0xE3, {0xAA});
+
+    sleep_ms(100);
+
+    command(0x50, {0x37});
+
+/*
+    // Resolution Setting
+    // 10bit horizontal followed by a 10bit vertical resolution
+    // we'll let struct.pack do the work here and send 16bit values
+    // life is too short for manual bit wrangling
     uint16_t resolution[2] = {
       __builtin_bswap16(width),
       __builtin_bswap16(height)
@@ -107,19 +121,17 @@ namespace pimoroni {
       (uint8_t *)resolution
     });
 
-    /*
-    Panel Setting
-    0b11000000 = Resolution select, 0b00 = 640x480, our panel is 0b11 = 600x448
-    0b00100000 = LUT selection, 0 = ext flash, 1 = registers, we use ext flash
-    0b00010000 = Ignore
-    0b00001000 = Gate scan direction, 0 = down, 1 = up (default)
-    0b00000100 = Source shift direction, 0 = left, 1 = right (default)
-    0b00000010 = DC-DC converter, 0 = off, 1 = on
-    0b00000001 = Soft reset, 0 = Reset, 1 = Normal (Default)
-    0b11 = 600x448
-    0b10 = 640x400
-    */
 
+    // Panel Setting
+    // 0b11000000 = Resolution select, 0b00 = 640x480, our panel is 0b11 = 600x448
+    // 0b00100000 = LUT selection, 0 = ext flash, 1 = registers, we use ext flash
+    // 0b00010000 = Ignore
+    // 0b00001000 = Gate scan direction, 0 = down, 1 = up (default)
+    // 0b00000100 = Source shift direction, 0 = left, 1 = right (default)
+    // 0b00000010 = DC-DC converter, 0 = off, 1 = on
+    // 0b00000001 = Soft reset, 0 = Reset, 1 = Normal (Default)
+    // 0b11 = 600x448
+    // 0b10 = 640x400
    uint8_t orientation = rotate_180 ? 0b00000000 : 0b00001100;
 
     command(PSR, {
@@ -137,33 +149,28 @@ namespace pimoroni {
       0x23           // UC8159_7C
     });
 
-    /*
-    Set the PLL clock frequency to 50Hz
-    0b11000000 = Ignore
-    0b00111000 = M
-    0b00000111 = N
-    PLL = 2MHz * (M / N)
-    PLL = 2MHz * (7 / 4)
-    PLL = 2,800,000 ???
-    */
-    //command(PLL, 0x3C);
+
+    // Set the PLL clock frequency to 50Hz
+    // 0b11000000 = Ignore
+    // 0b00111000 = M
+    // 0b00000111 = N
+    // PLL = 2MHz * (M / N)
+    // PLL = 2MHz * (7 / 4)
+    // PLL = 2,800,000 ???
     command(PLL, 0x3C);
 
     command(TSE, 0x00);
 
-    /*
-    VCOM and Data Interval setting
-    0b11100000 = Vborder control (0b001 = LUTB voltage)
-    0b00010000 = Data polarity
-    0b00001111 = Vcom and data interval (0b0111 = 10, default)
-    */
+
+    // VCOM and Data Interval setting
+    // 0b11100000 = Vborder control (0b001 = LUTB voltage)
+    // 0b00010000 = Data polarity
+    // 0b00001111 = Vcom and data interval (0b0111 = 10, default)
     command(CDI, (0b001 << 5) | 0x17);
 
-    /*
-    Gate/Source non-overlap period
-    0b11110000 = Source to Gate (0b0010 = 12nS, default)
-    0b00001111 = Gate to Source
-    */
+    // Gate/Source non-overlap period
+    // 0b11110000 = Source to Gate (0b0010 = 12nS, default)
+    // 0b00001111 = Gate to Source
     command(TCON, 0x22);
 
     // Disable externalflash
@@ -173,7 +180,7 @@ namespace pimoroni {
 
     command(PFS, 0x00);
 
-    //power_off();
+    //power_off();*/
   }
 
   void UC8159::power_off() {

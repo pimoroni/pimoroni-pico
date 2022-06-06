@@ -34,18 +34,9 @@ struct RGB {
   RGB() : r(0), g(0), b(0) {}
   RGB(int r, int g, int b) : r(r), g(g), b(b) {}
 
-  RGB operator+(const RGB& c) const {
-    return RGB(r + c.r, g + c.g, b + c.b);
-  }
-
-  RGB& operator+=(const RGB& c) {
-    r += c.r; g += c.g; b += c.b;
-    return *this;
-  }
-
-  RGB operator-(const RGB& c) const {
-    return RGB(r - c.r, g - c.g, b - c.b);
-  }
+  RGB  operator+(const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
+  RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
+  RGB  operator-(const RGB& c) const {return RGB(r - c.r, g - c.g, b - c.b);}
 };
 
 
@@ -54,7 +45,8 @@ struct RGB {
 // taken by photographing the screen in day light with solid colour bars
 // then applying a strong gaussian blue to the image and eye dropping each
 // colour from it.
-RGB palette[8] = {
+
+/*RGB palette[8] = {
   { 49,  40,  68}, // black
   {185, 179, 183}, // white
   { 95, 127, 104}, // green
@@ -64,20 +56,35 @@ RGB palette[8] = {
   {200, 128,  41}, // orange
   {175, 140, 134}  // clean / taupe?!
 };
+*/
+
+RGB palette[8] = {
+  {  0,   0,   0}, // black
+  {255, 255, 255}, // white
+  {  0, 255,   0}, // green
+  {  0,   0, 255}, // blue
+  {255,   0,   0}, // red
+  {255, 255,   0}, // yellow
+  {255, 128,   0}, // orange
+  {220, 180, 200}  // clean / taupe?!
+};
 
 // a relatively low cost approximation of how "different" two colours are
 // perceived which avoids expensive colour space conversions.
 // described in detail at https://www.compuphase.com/cmetric.htm
 int distance(const RGB &col1, const RGB &col2) {
-  uint rm = (col1.r + col2.r) / 2;
-  uint r = col1.r - col2.r, g = col1.g - col2.g, b = col1.b - col2.b;
-  return abs((long)((512 + rm) * r * r) >> 8) + 4 * g * g + (((767 - rm) * b * b) >> 8);
+  int rmean = (col1.r + col2.r) / 2;
+  int r = col1.r - col2.r, g = col1.g - col2.g, b = col1.b - col2.b;
+  return abs((int)(
+    (((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8)
+  ));
 }
 
 // a rough approximation of how bright a colour is used to compare the
 // relative brightness of two colours
 int luminance(const RGB &col) {
-  return col.r + col.g + col.b;
+  // weights based on https://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
+  return col.r * 21 + col.g * 72 + col.b * 7;
 }
 
 // returns the index of the closest match colour in the palette
@@ -100,7 +107,7 @@ int find_colour_dithered(RGB colour, int x, int y) {
   // match and then compounding the error before selecting the next candidate
   // this is repeated until we have enough candidates for all elements in our
   // dither pattern
-  std::array<int, 16> candidates;
+  static std::array<int, 16> candidates;
   RGB error;
   for(size_t i = 0; i < std::size(candidates); i++) {
     candidates[i] = closest(colour + error);
@@ -172,6 +179,7 @@ int JPEGDraw(JPEGDRAW *pDraw) {
 
       if(x + xo > 0 && x + xo < 600 && y + yo > 0 && y + yo < 448) {
         inky.fast_pixel(x + xo, y + yo, find_colour_dithered(c, x + xo, y + yo));
+        //inky.fast_pixel(x + xo, y + yo, closest(c));
       }
 
       p++;
@@ -281,7 +289,12 @@ int main() {
 
 
     jpeg.open(filename.c_str(), myOpen, myClose, myRead, mySeek, JPEGDraw);
+
+    printf("- starting jpeg decode..");
+    int start = time();
     jpeg.decode(0, 0, 0);
+    printf("done in %d ms!\n", int(time() - start));
+
     jpeg.close();
     inky.update();
     inky.led(InkyFrame::LED_A, 0);
@@ -289,7 +302,7 @@ int main() {
     inky.led(InkyFrame::LED_C, 0);
     inky.led(InkyFrame::LED_D, 0);
     inky.led(InkyFrame::LED_E, 0);
-    printf("done!\n");
+
 
 
 
