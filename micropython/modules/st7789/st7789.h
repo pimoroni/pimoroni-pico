@@ -27,9 +27,8 @@ extern mp_obj_t GenericST7789_update(mp_obj_t self_in);
 extern mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness);
 
 // Palette management
-extern mp_obj_t GenericST7789_set_palette_mode(mp_obj_t self_in, mp_obj_t mode);
-extern mp_obj_t GenericST7789_set_palette(mp_obj_t self_in, mp_obj_t index, mp_obj_t colour);
-extern mp_obj_t GenericST7789_reserve_palette(mp_obj_t self_in);
+extern mp_obj_t GenericST7789_update_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t GenericST7789_reset_pen(mp_obj_t self_in, mp_obj_t pen);
 
 // Pen
 extern mp_obj_t GenericST7789_set_pen(mp_obj_t self_in, mp_obj_t pen);

@@ -4,7 +4,9 @@
 
 #include "micropython/modules/util.hpp"
 
-
+#ifndef PICO_GRAPHICS_PEN_TYPE
+#define PICO_GRAPHICS_PEN_TYPE PenP4
+#endif
 
 using namespace pimoroni;
 
@@ -14,7 +16,7 @@ extern "C" {
 
 typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
-    PicoGraphicsST7789 *st7789;
+    PicoGraphicsST7789<PICO_GRAPHICS_PEN_TYPE> *st7789;
     void *buffer;
 } GenericST7789_obj_t;
 
@@ -66,32 +68,34 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
             break;
     }
 
+    size_t required_size = PICO_GRAPHICS_PEN_TYPE::buffer_size(width, height);
+
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
         self->buffer = bufinfo.buf;
-        if(bufinfo.len < (size_t)(width * height * sizeof(Pen))) {
+        if(bufinfo.len < (size_t)(required_size)) {
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        self->buffer = m_new(uint8_t, width * height * sizeof(Pen));
+        self->buffer = m_new(uint8_t, required_size);
     }
 
     if (display == DISPLAY_TUFTY_2040) {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
+            self->st7789 = m_new_class(PicoGraphicsST7789<PICO_GRAPHICS_PEN_TYPE>, width, height, rotate, self->buffer, {10, 11, 12, 13, 14, 2});
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, self->buffer, *(ParallelPins *)(bus->pins));
+            self->st7789 = m_new_class(PicoGraphicsST7789<PICO_GRAPHICS_PEN_TYPE>, width, height, rotate, self->buffer, *(ParallelPins *)(bus->pins));
         } else {
             mp_raise_ValueError("ParallelBus expected!");
         }
     } else {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, round, self->buffer, get_spi_pins(BG_SPI_FRONT));
+            self->st7789 = m_new_class(PicoGraphicsST7789<PICO_GRAPHICS_PEN_TYPE>, width, height, rotate, round, self->buffer, get_spi_pins(BG_SPI_FRONT));
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->st7789 = m_new_class(PicoGraphicsST7789, width, height, rotate, round, self->buffer, *(SPIPins *)(bus->pins));
+            self->st7789 = m_new_class(PicoGraphicsST7789<PICO_GRAPHICS_PEN_TYPE>, width, height, rotate, round, self->buffer, *(SPIPins *)(bus->pins));
         } else {
             mp_raise_ValueError("SPIBus expected!");
         }
@@ -146,7 +150,7 @@ mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
 }
 
 mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(PicoGraphicsST7789::create_pen_rgb332(
+    return mp_obj_new_int(PicoGraphicsPenType::rgb_to_rgb332(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
@@ -154,7 +158,7 @@ mp_obj_t GenericST7789_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
 }
 
 mp_obj_t GenericST7789_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(PicoGraphicsST7789::create_pen_rgb565(
+    return mp_obj_new_int(PicoGraphicsPenType::rgb_to_rgb565(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
@@ -164,38 +168,42 @@ mp_obj_t GenericST7789_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
 mp_obj_t GenericST7789_set_pen(mp_obj_t self_in, mp_obj_t pen) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    self->st7789->set_pen(mp_obj_get_int(pen) & 0xff);
+    self->st7789->set_pen(mp_obj_get_int(pen));
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_set_palette_mode(mp_obj_t self_in, mp_obj_t mode) {
+mp_obj_t GenericST7789_reset_pen(mp_obj_t self_in, mp_obj_t pen) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    self->st7789->set_palette_mode((PicoGraphicsST7789::PaletteMode)mp_obj_get_int(mode));
+    self->st7789->reset_pen(mp_obj_get_int(pen));
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_set_palette(mp_obj_t self_in, mp_obj_t index, mp_obj_t colour) {
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+mp_obj_t GenericST7789_update_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_i, ARG_r, ARG_g, ARG_b };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_i, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
+    };
 
-    self->st7789->set_palette(
-        mp_obj_get_int(index) & 0xff,
-        mp_obj_get_int(colour) & 0xffff
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+
+    self->st7789->update_pen(
+        args[ARG_i].u_int & 0xff,
+        args[ARG_r].u_int & 0xff,
+        args[ARG_g].u_int & 0xff,
+        args[ARG_b].u_int & 0xff
     );
 
     return mp_const_none;
-}
-
-mp_obj_t GenericST7789_reserve_palette(mp_obj_t self_in) {
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
-
-    int result = self->st7789->reserve_palette();
-
-    if (result == -1) mp_raise_ValueError("reserve_palette failed. No space in palette!");
-
-    return mp_obj_new_int(result);
 }
 
 mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {

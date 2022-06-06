@@ -5,6 +5,7 @@
 #include "hardware/pwm.h"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 #include <algorithm>
 
@@ -41,15 +42,11 @@ namespace pimoroni {
 
 
   public:
-  
-    // frame buffer where pixel data is stored
-    void *frame_buffer;
-
     // Parallel init
     ST7789(uint16_t width, uint16_t height, Rotation rotation, void *frame_buffer, ParallelPins pins) :
       spi(nullptr),
       width(width), height(height), rotation(rotation), round(false),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl), frame_buffer(frame_buffer) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl) {
   
       gpio_set_function(wr_sck, GPIO_FUNC_SIO);
       gpio_set_dir(wr_sck, GPIO_OUT);
@@ -71,7 +68,7 @@ namespace pimoroni {
     ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins pins) :
       spi(pins.spi),
       width(width), height(height), rotation(rotation), round(round),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), frame_buffer(frame_buffer) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl) {
 
       // configure spi interface and pins
       spi_init(spi, SPI_BAUD);
@@ -86,17 +83,15 @@ namespace pimoroni {
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
     void set_backlight(uint8_t brightness);
 
-    void update();
-    void update(uint16_t *palette);
+    void update(PicoGraphics<PenRGB565> *graphics);
+    void update(PicoGraphics<PenRGB332> *graphics);
+    void update(PicoGraphics<PenP8> *graphics);
+    void update(PicoGraphics<PenP4> *graphics);
 
   private:
     void configure_display(Rotation rotate);
     void write_blocking_parallel(const uint8_t *src, size_t len);
     void common_init() {
-        if(!this->frame_buffer) {
-          this->frame_buffer = new uint8_t[width * height];
-        }
-
         gpio_set_function(dc, GPIO_FUNC_SIO);
         gpio_set_dir(dc, GPIO_OUT);
 
