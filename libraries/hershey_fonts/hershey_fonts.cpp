@@ -1,6 +1,7 @@
 #include "hershey_fonts.hpp"
 #include "common/unicode_sorta.hpp"
 #include <cmath>
+#include <climits>
 
 namespace hershey {
   std::map<std::string, const font_t*> fonts = {
@@ -13,6 +14,21 @@ namespace hershey {
     { "serif",        &timesr  },
     //{ "serif_bold",   &timesrb }
   };
+
+  int get_baseline(const font_t* font, float s) {
+    const font_glyph_t *p = glyph_data(font, 'a');
+    const int8_t *pv = p->vertices; pv++; // pointer to first "y" coordinate
+    int vc = p->vertex_count;
+    int miny = INT_MAX;
+    while(vc--) {
+      if(*pv != -128) {
+        int sv = *pv * s;
+        miny = sv < miny ? sv : miny;
+      }
+      pv += 2;
+    }
+    return miny;
+  }
 
   inline float deg2rad(float degrees) {
     return (degrees * M_PI) / 180.0f;
@@ -49,7 +65,7 @@ namespace hershey {
     return width;
   }
 
-  int32_t glyph(const font_t* font, line_func line, unsigned char c, int32_t x, int32_t y, float s, float a) {
+  int32_t glyph(const font_t* font, line_func line, unsigned char c, int32_t x, int32_t y, float sx, float sy, float a, float k) {
     const font_glyph_t *gd = glyph_data(font, c);
 
     // if glyph data not found (id too great) then skip
@@ -62,8 +78,8 @@ namespace hershey {
     float ac = cos(a);
 
     const int8_t *pv = gd->vertices;
-    int8_t cx = (*pv++) * s;
-    int8_t cy = (*pv++) * s;
+    int8_t cx = (*pv++) * sx;
+    int8_t cy = (*pv++) * sy;
     bool pen_down = true;
 
     for(uint32_t i = 1; i < gd->vertex_count; i++) {
@@ -71,8 +87,8 @@ namespace hershey {
         pen_down = false;
         pv += 2;
       }else{
-        int8_t nx = (*pv++) * s;
-        int8_t ny = (*pv++) * s;
+        int8_t nx = (*pv++) * sx;
+        int8_t ny = (*pv++) * sy;
 
         int rcx = (cx * ac - cy * as) + 0.5f;
         int rcy = (cx * as + cy * ac) + 0.5f;
@@ -90,10 +106,14 @@ namespace hershey {
       }
     }
 
-    return gd->width * s;
+    return gd->width * sx * k;
   }
 
-  void text(const font_t* font, line_func line, std::string message, int32_t x, int32_t y, float s, float a) {
+  int32_t glyph(const font_t* font, line_func line, unsigned char c, int32_t x, int32_t y, float s, float a) {
+    return glyph(font, line, c, x, y, s, s, a, 1.0f);
+  }
+
+  void text(const font_t* font, line_func line, std::string message, int32_t x, int32_t y, float sx, float sy, float a, float k) {
     int32_t cx = x;
     int32_t cy = y;
 
@@ -106,7 +126,12 @@ namespace hershey {
       int rcx = (ox * ac) + 0.5f;
       int rcy = (ox * as) + 0.5f;
 
-      ox += glyph(font, line, c, cx + rcx, cy + rcy, s, a);
+      ox += glyph(font, line, c, cx + rcx, cy + rcy, sx, sy, a, k);
     }
   }
+
+  void text(const font_t* font, line_func line, std::string message, int32_t x, int32_t y, float s, float a) {
+    text(font, line, message, x, y, s, s, a, 1.0f);
+  }
+
 }

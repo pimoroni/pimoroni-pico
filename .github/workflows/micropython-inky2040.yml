@@ -1,0 +1,142 @@
+name: MicroPython for Inky 2040
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+env:
+  MICROPYTHON_VERSION: v1.18
+  BOARD_TYPE: PICO   
+  # MicroPython version will be contained in github.event.release.tag_name for releases
+  RELEASE_FILE: pimoroni-inky2040-${{github.event.release.tag_name || github.sha}}-micropython.uf2
+
+jobs:
+  deps:
+    runs-on: ubuntu-20.04
+    name: Dependencies
+    steps:
+    - name: Workspace Cache
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        restore-keys: |
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+
+    # Check out MicroPython
+    - name: Checkout MicroPython
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2
+      with:
+        repository: micropython/micropython
+        ref: ${{env.MICROPYTHON_VERSION}}
+        submodules: false  # MicroPython submodules are hideously broken
+        path: micropython
+
+    - name: Fetch base MicroPython submodules
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython
+      run: git submodule update --init
+
+    - name: Fetch Pico SDK submodules
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython/lib/pico-sdk
+      run: git submodule update --init
+
+    - name: Build mpy-cross
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython/mpy-cross
+      run: make
+
+  build:
+    needs: deps
+    name: Build Inky 2040
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Compiler Cache
+      uses: actions/cache@v2
+      with:
+        path: /home/runner/.ccache
+        key: ccache-micropython-inky2040-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          ccache-micropython-inky2040-${{github.ref}}
+          ccache-micropython-inky2040-
+  
+    - name: Workspace Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        restore-keys: |
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        path: pimoroni-pico-${{ github.sha }}
+
+    # Copy Python module files
+    - name: HACK - Copy board config fixup
+      if: env.BOARD_TYPE == 'PICO'
+      run: |
+        cp pimoroni-pico-${GITHUB_SHA}/micropython/inky2040-mpconfigboard.h micropython/ports/rp2/boards/PICO/mpconfigboard.h
+
+    # Linux deps
+    - name: Install Compiler & CCache
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ccache
+        python3 -m pip install pillow
+
+    - name: Install ARM Toolchain
+      if: runner.os == 'Linux'
+      working-directory: ${{runner.workspace}}
+      run: |
+        wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
+        tar xf gcc-*.tar.bz2
+        cd gcc*/bin
+        pwd >> $GITHUB_PATH
+
+    - name: Configure MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        cmake -S . -B build-${{env.BOARD_TYPE}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/inky2040-micropython.cmake -DMICROPY_BOARD=${{env.BOARD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Build MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        ccache --zero-stats || true
+        cmake --build build-${{env.BOARD_TYPE}} -j 2
+        ccache --show-stats || true
+
+    - name: Rename .uf2 for artifact
+      shell: bash
+      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}
+      run: |
+        cp firmware.uf2 ${{env.RELEASE_FILE}}
+
+    - name: Store .uf2 as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.RELEASE_FILE}}
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}
+
+    - name: Upload .uf2
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/firmware.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: ${{env.RELEASE_FILE}}
+        asset_content_type: application/octet-stream

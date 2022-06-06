@@ -40,7 +40,6 @@ add_subdirectory(pico_tof_display)
 add_subdirectory(pico_trackball_display)
 add_subdirectory(pico_audio)
 add_subdirectory(pico_wireless)
-
 add_subdirectory(plasma2040)
 add_subdirectory(badger2040)
 add_subdirectory(tufty2040)
@@ -49,4 +48,3 @@ add_subdirectory(servo2040)
 add_subdirectory(motor2040)
 add_subdirectory(encoder)
 add_subdirectory(inky_frame)
-

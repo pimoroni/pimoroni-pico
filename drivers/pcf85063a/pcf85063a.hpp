@@ -110,7 +110,8 @@ namespace pimoroni {
     void enable_timer_interrupt(bool enable, bool flag_only = false);
     void unset_timer();
     void set_timer(uint8_t ticks,
-      TimerTickPeriod ttp = TimerTickPeriod::TIMER_TICK_1HZ);
+      TimerTickPeriod ttp = TimerTickPeriod::TIMER_TICK_1HZ,
+      bool clear_flag = true);
     bool read_timer_flag();
     void clear_timer_flag();
 

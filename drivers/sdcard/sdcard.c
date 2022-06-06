@@ -97,7 +97,7 @@ static void FCLK_SLOW(void)
 static void FCLK_FAST(void)
 {
 #ifndef SDCARD_PIO
-    spi_set_baudrate(SDCARD_SPI_BUS, CLK_FAST);
+    spi_set_baudrate(SDCARD_SPI_BUS, 16000000);
 #endif
 }
 
