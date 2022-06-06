@@ -6,42 +6,46 @@
 
 namespace pimoroni {
 
-  class PicoGraphicsST7789 : public PicoGraphics {
+  template <class T=PicoGraphicsPenType>
+  class PicoGraphicsST7789 : public PicoGraphics<T> {
   private:
     ST7789 st7789;
 
   public:
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, bool round=false, void *frame_buffer=nullptr) :
-      PicoGraphics(width, height, frame_buffer),
+      PicoGraphics<T>(width, height, frame_buffer),
       st7789(width, height, rotation, round, frame_buffer, get_spi_pins(BG_SPI_FRONT)) {
               common_init();
            };
 
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins bus_pins) :
-      PicoGraphics(width, height, frame_buffer),
+      PicoGraphics<T>(width, height, frame_buffer),
       st7789(width, height, rotation, round, frame_buffer, bus_pins) {
               common_init();
            };
 
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, void *frame_buffer, ParallelPins bus_pins) :
-      PicoGraphics(width, height, frame_buffer),
+      PicoGraphics<T>(width, height, frame_buffer),
       st7789(width, height, rotation, frame_buffer, bus_pins) {
               common_init();
            };
 
     void common_init() {
-      this->frame_buffer = (Pen *)st7789.frame_buffer;
-      this->st7789.init();
-      this->set_dimensions(this->st7789.width, this->st7789.height);
-      this->st7789.update(palette);
+      st7789.init();
+      this->set_dimensions(st7789.width, st7789.height);
+      st7789.update(this);
     }
 
-    void update();
-    void set_backlight(uint8_t brightness);
-    void configure_display(bool rotate180);
+    void update() {
+      st7789.update(this);
+    }
+
+    void set_backlight(uint8_t brightness) {
+      st7789.set_backlight(brightness);
+    }
+
     void set_framebuffer(void* frame_buffer) {
-      this->frame_buffer = (Pen *)frame_buffer;
-      st7789.frame_buffer = frame_buffer;
+      this->frame_buffer = frame_buffer;
     }
   };
 

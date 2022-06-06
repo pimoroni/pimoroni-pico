@@ -1,135 +1,40 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
-  PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
-  : frame_buffer((Pen *)frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
-    set_font(&font6);
-    set_palette_mode(PaletteModeRGB332);
-  };
 
-  void PicoGraphics::set_font(const bitmap::font_t *font){
+  template<class T>
+  void PicoGraphics<T>::set_font(const bitmap::font_t *font){
     this->font = font;
   }
 
-  void PicoGraphics::set_pen(Pen p) {
-    pen = p;
+  template<class T>
+  void PicoGraphics<T>::set_pen(uint16_t p) {
+    pen.set_color(p);
   }
 
-  void PicoGraphics::set_palette_mode(PaletteMode mode) {
-    palette_mode = mode;
-    if(mode == PaletteModeRGB332) {
-      rgb332_palette();
-    } else {
-      empty_palette();
-    }
-  }
-
-  int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-    if (palette_mode == PaletteModeRGB332) {
-      return rgb_to_rgb332_index(r, g, b); // Fast pack RGB into palette index
-    } else {
-      RGB565 c = create_pen_rgb565(r, g, b);
-      int result = search_palette(c);
-
-      if (result == -1) {
-        result = put_palette(create_pen_rgb565(r, g, b));
-      }
-
-      return result;
-    }
-  }
-
-  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    int result = create_pen(r, g, b);
-    (void)result;
-  }
-
-  int PicoGraphics::search_palette(RGB565 c) {
-    for(auto i = 0u; i < 256; i++) {
-      if((palette_status[i] & PaletteStatusUsed) && palette[i] == c) return i;
-    }
-    return -1;
-  }
-
-  int PicoGraphics::put_palette(RGB565 c) {
-    if(palette_mode != PaletteModeUSER) return -1;
-
-    for(auto i = 0u; i < 256; i++) {
-      if(!(palette_status[i] & (PaletteStatusUsed | PaletteStatusReserved))) {
-        palette[i] = c;
-        palette_status[i] = PaletteStatusUsed;
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  void PicoGraphics::set_palette(uint8_t i, RGB565 c) {
-    if(palette_mode != PaletteModeUSER) return;
-
-    palette[i] = c;
-    palette_status[i] |= PaletteStatusUsed;
-  }
-
-  int PicoGraphics::reserve_palette() {
-    if(palette_mode != PaletteModeUSER) return - 1;
-
-    for (auto i = 0u; i < 256; i++) {
-      if (!palette_status[i]) {
-        palette_status[i] = PaletteStatusReserved;
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  void PicoGraphics::empty_palette() {
-    for (auto i = 0u; i < 256; i++) {
-      palette[i] = 0;
-      palette_status[i] = 0;
-    }
-  }
-
-  void PicoGraphics::rgb332_palette() {
-    for (auto i = 0u; i < 256; i++) {
-      // Convert the implicit RGB332 (i) into RGB565
-      // 0b11100 000 0b00011100 0b00000011
-      palette[i] = ((i & 0b11100000) << 8) | ((i & 0b00011100) << 6) | ((i & 0b00000011) << 3);
-      palette[i] = __builtin_bswap16(palette[i]);
-      palette_status[i] = PaletteStatusUsed;
-    }
-  }
-
-  void PicoGraphics::set_clip(const Rect &r) {
+  template<class T>
+  void PicoGraphics<T>::set_clip(const Rect &r) {
     clip = bounds.intersection(r);
   }
 
-  void PicoGraphics::remove_clip() {
+  template<class T>
+  void PicoGraphics<T>::remove_clip() {
     clip = bounds;
   }
 
-  Pen* PicoGraphics::ptr(const Rect &r) {
-    return frame_buffer + r.x + r.y * bounds.w;
-  }
-
-  Pen* PicoGraphics::ptr(const Point &p) {
-    return frame_buffer + p.x + p.y * bounds.w;
-  }
-
-  Pen* PicoGraphics::ptr(int32_t x, int32_t y) {
-    return frame_buffer + x + y * bounds.w;
-  }
-
-  void PicoGraphics::clear() {
+  template<class T>
+  void PicoGraphics<T>::clear() {
     rectangle(clip);
   }
 
-  void PicoGraphics::pixel(const Point &p) {
+  template<class T>
+  void PicoGraphics<T>::pixel(const Point &p) {
     if(!clip.contains(p)) return;
-    *ptr(p) = pen;
+    pen.set_pixel(frame_buffer, p.x, p.y, bounds.w);
   }
 
-  void PicoGraphics::pixel_span(const Point &p, int32_t l) {
+  template<class T>
+  void PicoGraphics<T>::pixel_span(const Point &p, int32_t l) {
     // check if span in bounds
     if( p.x + l < clip.x || p.x >= clip.x + clip.w ||
         p.y     < clip.y || p.y >= clip.y + clip.h) return;
@@ -139,31 +44,36 @@ namespace pimoroni {
     if(clipped.x     <  clip.x)           {l += clipped.x - clip.x; clipped.x = clip.x;}
     if(clipped.x + l >= clip.x + clip.w)  {l  = clip.x + clip.w - clipped.x;}
 
-    Pen *dest = ptr(clipped);
+    Point dest(clipped.x, clipped.y);
     while(l--) {
-      *dest++ = pen;
+        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+        dest.x++;
     }
   }
 
-  void PicoGraphics::rectangle(const Rect &r) {
+  template<class T>
+  void PicoGraphics<T>::rectangle(const Rect &r) {
     // clip and/or discard depending on rectangle visibility
     Rect clipped = r.intersection(clip);
 
     if(clipped.empty()) return;
 
-    Pen *dest = ptr(clipped);
+    Point dest(clipped.x, clipped.y);
     while(clipped.h--) {
       // draw span of pixels for this row
-      for(int32_t i = 0; i < clipped.w; i++) {
-        *dest++ = pen;
-      }
+      pixel_span(dest, clipped.w);
+      /*for(int32_t i = 0; i < clipped.w; i++) {
+        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+        dest.x++;
+      }*/
 
       // move to next scanline
-      dest += bounds.w - clipped.w;
+      dest.y++;
     }
   }
 
-  void PicoGraphics::circle(const Point &p, int32_t radius) {
+  template<class T>
+  void PicoGraphics<T>::circle(const Point &p, int32_t radius) {
     // circle in screen bounds?
     Rect bounds = Rect(p.x - radius, p.y - radius, radius * 2, radius * 2);
     if(!bounds.intersects(clip)) return;
@@ -191,19 +101,22 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
+  template<class T>
+  void PicoGraphics<T>::character(const char c, const Point &p, uint8_t scale) {
     bitmap::character(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
       rectangle(Rect(x, y, w, h));
     }, c, p.x, p.y, scale);
   }
 
-  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
+  template<class T>
+  void PicoGraphics<T>::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
     bitmap::text(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
       rectangle(Rect(x, y, w, h));
     }, t, p.x, p.y, wrap, scale);
   }
 
-  int32_t PicoGraphics::measure_text(const std::string &t, uint8_t scale) {
+  template<class T>
+  int32_t PicoGraphics<T>::measure_text(const std::string &t, uint8_t scale) {
     return bitmap::measure_text(font, t, scale);
   }
 
@@ -215,7 +128,8 @@ namespace pimoroni {
     return (p1.y == p2.y && p1.x > p2.x) || (p1.y < p2.y);
   }
 
-  void PicoGraphics::triangle(Point p1, Point p2, Point p3) {
+  template<class T>
+  void PicoGraphics<T>::triangle(Point p1, Point p2, Point p3) {
     Rect triangle_bounds(
       Point(std::min(p1.x, std::min(p2.x, p3.x)), std::min(p1.y, std::min(p2.y, p3.y))),
       Point(std::max(p1.x, std::max(p2.x, p3.x)), std::max(p1.y, std::max(p2.y, p3.y))));
@@ -257,13 +171,13 @@ namespace pimoroni {
       int32_t w1 = w1row;
       int32_t w2 = w2row;
 
-      Pen *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
+      Point dest = Point(triangle_bounds.x, triangle_bounds.y + y);
       for (int32_t x = 0; x < triangle_bounds.w; x++) {
         if ((w0 | w1 | w2) >= 0) {
-          *dest = pen;
+          pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
         }
 
-        dest++;
+        dest.x++;
 
         w0 += a12;
         w1 += a20;
@@ -276,7 +190,8 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::polygon(const std::vector<Point> &points) {
+  template<class T>
+  void PicoGraphics<T>::polygon(const std::vector<Point> &points) {
     static int32_t nodes[64]; // maximum allowed number of nodes per scanline for polygon rendering
 
     int32_t miny = points[0].y, maxy = points[0].y;
@@ -322,7 +237,8 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::line(Point p1, Point p2) {
+  template<class T>
+  void PicoGraphics<T>::line(Point p1, Point p2) {
     // fast horizontal line
     if(p1.y == p2.y) {
       int32_t start = std::max(clip.x, std::min(p1.x, p2.x));
@@ -335,10 +251,10 @@ namespace pimoroni {
     if(p1.x == p2.x) {
       int32_t start  = std::max(clip.y, std::min(p1.y, p2.y));
       int32_t length = std::min(clip.y + clip.h, std::max(p1.y, p2.y)) - start;
-      Pen *dest = ptr(p1.x, start);
+      Point dest(p1.x, start);
       while(length--) {
-        *dest = pen;
-        dest += bounds.w;
+        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+        dest.y++;
       }
       return;
     }
@@ -357,7 +273,7 @@ namespace pimoroni {
       int32_t x = p1.x;
       int32_t y = p1.y << 16;
       while(s--) {
-        pixel(Point(x, y >> 16));
+        pen.set_pixel(frame_buffer, x, y >> 16, bounds.w);
         y += sy;
         x += sx;
       }
@@ -369,7 +285,7 @@ namespace pimoroni {
       int32_t y = p1.y;
       int32_t x = p1.x << 16;
       while(s--) {
-        pixel(Point(x >> 16, y));
+        pen.set_pixel(frame_buffer, x >> 16, y, bounds.w);
         y += sy;
         x += sx;
       }
