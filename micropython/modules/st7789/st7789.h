@@ -1,6 +1,16 @@
 #include "py/runtime.h"
 #include "py/objstr.h"
 
+enum ST7789Display {
+    DISPLAY_LCD_240X240=0,
+    DISPLAY_ROUND_LCD_240X240,
+    DISPLAY_PICO_DISPLAY,
+    DISPLAY_PICO_DISPLAY_2,
+    DISPLAY_PICO_EXPLORER,
+    DISPLAY_TUFTY_2040,
+    DISPLAY_ENVIRO_PLUS
+};
+
 // Type
 extern const mp_obj_type_t GenericST7789_type;
 

@@ -12,16 +12,6 @@ extern "C" {
 #include "st7789.h"
 #include "micropython/modules/pimoroni_bus/pimoroni_bus.h"
 
-enum ST7789Display {
-    DISPLAY_LCD_240X240=0,
-    DISPLAY_ROUND_LCD_240X240,
-    DISPLAY_PICO_DISPLAY,
-    DISPLAY_PICO_DISPLAY_2,
-    DISPLAY_PICO_EXPLORER,
-    DISPLAY_TUFTY_2040,
-    DISPLAY_ENVIRO_PLUS
-};
-
 typedef struct _GenericST7789_obj_t {
     mp_obj_base_t base;
     PicoGraphicsST7789 *st7789;
@@ -110,7 +100,6 @@ mp_obj_t GenericST7789_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     return MP_OBJ_FROM_PTR(self);
 }
 
-/***** Methods *****/
 mp_obj_t GenericST7789_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
@@ -130,9 +119,10 @@ mp_obj_t GenericST7789_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
 
 mp_obj_t GenericST7789_get_bounds(mp_obj_t self_in) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
-    mp_obj_t tuple[2];
-    tuple[0] = mp_obj_new_int(self->st7789->bounds.w);
-    tuple[1] = mp_obj_new_int(self->st7789->bounds.h);
+    mp_obj_t tuple[2] = {
+        mp_obj_new_int(self->st7789->bounds.w),
+        mp_obj_new_int(self->st7789->bounds.h)
+    };
     return mp_obj_new_tuple(2, tuple);
 }
 
@@ -148,10 +138,9 @@ mp_obj_t GenericST7789_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
 
     float b = mp_obj_get_float(brightness);
 
-    if(b < 0 || b > 1.0f)
-        mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
-    else
-        self->st7789->set_backlight((uint8_t)(b * 255.0f));
+    if(b < 0 || b > 1.0f) mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
+
+    self->st7789->set_backlight((uint8_t)(b * 255.0f));
 
     return mp_const_none;
 }
@@ -204,9 +193,7 @@ mp_obj_t GenericST7789_reserve_palette(mp_obj_t self_in) {
 
     int result = self->st7789->reserve_palette();
 
-    if (result == -1) {
-        mp_raise_ValueError("reserve_palette failed. No space in palette!");
-    }
+    if (result == -1) mp_raise_ValueError("reserve_palette failed. No space in palette!");
 
     return mp_obj_new_int(result);
 }
@@ -231,9 +218,7 @@ mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_ma
         args[ARG_b].u_int & 0xff
     );
 
-    if (result == -1) {
-        mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
-    }
+    if (result == -1) mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
 
     return mp_obj_new_int(result);
 }
@@ -258,8 +243,7 @@ mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *pos_args, mp_map_
     int w = args[ARG_w].u_int;
     int h = args[ARG_h].u_int;
 
-    Rect r(x, y, w, h);
-    self->st7789->set_clip(r);
+    self->st7789->set_clip({x, y, w, h});
 
     return mp_const_none;
 }
@@ -281,10 +265,10 @@ mp_obj_t GenericST7789_clear(mp_obj_t self_in) {
 mp_obj_t GenericST7789_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
 
-    self->st7789->pixel(Point(
+    self->st7789->pixel({
         mp_obj_get_int(x),
         mp_obj_get_int(y)
-    ));
+    });
 
     return mp_const_none;
 }
@@ -307,8 +291,7 @@ mp_obj_t GenericST7789_pixel_span(size_t n_args, const mp_obj_t *pos_args, mp_ma
     int y = args[ARG_y].u_int;
     int l = args[ARG_l].u_int;
 
-    Point p(x, y);
-    self->st7789->pixel_span(p, l);
+    self->st7789->pixel_span({x, y}, l);
 
     return mp_const_none;
 }
@@ -333,8 +316,7 @@ mp_obj_t GenericST7789_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map
     int w = args[ARG_w].u_int;
     int h = args[ARG_h].u_int;
 
-    Rect r(x, y, w, h);
-    self->st7789->rectangle(r);
+    self->st7789->rectangle({x, y, w, h});
 
     return mp_const_none;
 }
@@ -357,8 +339,7 @@ mp_obj_t GenericST7789_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     int y = args[ARG_y].u_int;
     int r = args[ARG_r].u_int;
 
-    Point p(x, y);
-    self->st7789->circle(p, r);
+    self->st7789->circle({x, y}, r);
 
     return mp_const_none;
 }
@@ -448,8 +429,6 @@ mp_obj_t GenericST7789_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_
     int width = self->st7789->measure_text(t, scale);
 
     return mp_obj_new_int(width);
-
-    return mp_const_none;
 }
 
 mp_obj_t GenericST7789_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -462,13 +441,11 @@ mp_obj_t GenericST7789_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t
     if(n_args == 2) {
         if(mp_obj_is_type(pos_args[1], &mp_type_list)) {
             mp_obj_list_t *points = MP_OBJ_TO_PTR2(pos_args[1], mp_obj_list_t);
-            if(points->len > 0) {
-                num_tuples = points->len;
-                tuples = points->items;
-            }
-            else {
-                mp_raise_ValueError("poly(): cannot provide an empty list");
-            }
+
+            if(points->len <= 0) mp_raise_ValueError("poly(): cannot provide an empty list");
+
+            num_tuples = points->len;
+            tuples = points->items;
         }
         else {
             mp_raise_TypeError("poly(): can't convert object to list");
@@ -479,19 +456,16 @@ mp_obj_t GenericST7789_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t
         std::vector<Point> points;
         for(size_t i = 0; i < num_tuples; i++) {
             mp_obj_t obj = tuples[i];
-            if(!mp_obj_is_type(obj, &mp_type_tuple)) {
-                mp_raise_ValueError("poly(): can't convert object to tuple");
-            }
-            else {
-                mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
-                if(tuple->len != 2) {
-                    mp_raise_ValueError("poly(): tuple must only contain two numbers");
-                }
-                points.push_back(Point(
-                    mp_obj_get_int(tuple->items[0]),
-                    mp_obj_get_int(tuple->items[1]))
-                );
-            }
+            if(!mp_obj_is_type(obj, &mp_type_tuple)) mp_raise_ValueError("poly(): can't convert object to tuple");
+
+            mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
+
+            if(tuple->len != 2) mp_raise_ValueError("poly(): tuple must only contain two numbers");
+
+            points.push_back({
+                mp_obj_get_int(tuple->items[0]),
+                mp_obj_get_int(tuple->items[1])
+            });
         }
         self->st7789->polygon(points);
     }
@@ -523,10 +497,7 @@ mp_obj_t GenericST7789_triangle(size_t n_args, const mp_obj_t *pos_args, mp_map_
     int x3 = args[ARG_x3].u_int;
     int y3 = args[ARG_y3].u_int;
 
-    Point p1(x1, y1);
-    Point p2(x2, y2);
-    Point p3(x3, y3);
-    self->st7789->triangle(p1, p2, p3);
+    self->st7789->triangle({x1, y1}, {x2, y2}, {x3, y3});
 
     return mp_const_none;
 }
@@ -551,9 +522,7 @@ mp_obj_t GenericST7789_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *k
     int x2 = args[ARG_x2].u_int;
     int y2 = args[ARG_y2].u_int;
 
-    Point p1(x1, y1);
-    Point p2(x2, y2);
-    self->st7789->line(p1, p2);
+    self->st7789->line({x1, y1}, {x2, y2});
 
     return mp_const_none;
 }
