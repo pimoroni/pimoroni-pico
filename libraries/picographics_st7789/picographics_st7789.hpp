@@ -14,19 +14,19 @@ namespace pimoroni {
   public:
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, bool round=false, void *frame_buffer=nullptr) :
       PicoGraphics<T>(width, height, frame_buffer),
-      st7789(width, height, rotation, round, frame_buffer, get_spi_pins(BG_SPI_FRONT)) {
+      st7789(width, height, rotation, round, get_spi_pins(BG_SPI_FRONT)) {
               common_init();
            };
 
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins bus_pins) :
       PicoGraphics<T>(width, height, frame_buffer),
-      st7789(width, height, rotation, round, frame_buffer, bus_pins) {
+      st7789(width, height, rotation, round, bus_pins) {
               common_init();
            };
 
     PicoGraphicsST7789(uint16_t width, uint16_t height, Rotation rotation, void *frame_buffer, ParallelPins bus_pins) :
       PicoGraphics<T>(width, height, frame_buffer),
-      st7789(width, height, rotation, frame_buffer, bus_pins) {
+      st7789(width, height, rotation, bus_pins) {
               common_init();
            };
 

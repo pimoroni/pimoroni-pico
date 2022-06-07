@@ -43,7 +43,7 @@ namespace pimoroni {
 
   public:
     // Parallel init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, void *frame_buffer, ParallelPins pins) :
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, ParallelPins pins) :
       spi(nullptr),
       width(width), height(height), rotation(rotation), round(false),
       cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl) {
@@ -65,7 +65,7 @@ namespace pimoroni {
     }
 
     // Serial init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, void *frame_buffer, SPIPins pins) :
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins) :
       spi(pins.spi),
       width(width), height(height), rotation(rotation), round(round),
       cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl) {
