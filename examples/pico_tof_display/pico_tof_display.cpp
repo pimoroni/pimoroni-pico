@@ -25,6 +25,7 @@
 #endif
 #include "vl53l1x.hpp"
 #include "drivers/button/button.hpp"
+#include "drivers/rgbled/rgbled.hpp"
 
 #include "drivers/st7789/st7789.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
@@ -54,6 +55,8 @@ uint16_t disptext_dist_yoff = 90;
 uint16_t disptext_dist_size = 6;
 #else
 ST7789 st7789(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+
+RGBLED rgbled(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
 
 Button button_a(PicoDisplay::A);
 Button button_b(PicoDisplay::B);
@@ -98,10 +101,10 @@ void flash_led(uint32_t curr_count) {
 #ifndef USE_PICO_EXPLORER
   if ((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
     // value less than half modded number - LED off
-    //pico_display.set_led(0, 0, 0); // TODO use RGBLED
+    rgbled.set_rgb(0, 0, 0);
   } else {
     // value more than half modded number - LED on
-    //pico_display.set_led(128, 128, 128); // TODO use RGBLED
+    rgbled.set_rgb(128, 128, 128);
   }
 #endif
 }
