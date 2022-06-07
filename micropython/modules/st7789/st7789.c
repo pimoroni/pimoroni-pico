@@ -10,27 +10,27 @@ MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_backlight_obj, GenericST7789_set_bac
 MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_framebuffer_obj, GenericST7789_set_framebuffer);
 
 // Palette management
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_update_pen_obj, 4, GenericST7789_update_pen);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_update_pen_obj, 5, 5, GenericST7789_update_pen);
 MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_reset_pen_obj, GenericST7789_reset_pen);
 
 // Pen
 MP_DEFINE_CONST_FUN_OBJ_2(GenericST7789_set_pen_obj, GenericST7789_set_pen);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_create_pen_obj, 3, GenericST7789_create_pen);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_create_pen_obj, 4, 4, GenericST7789_create_pen);
 
 // Primitives
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_set_clip_obj, 1, GenericST7789_set_clip);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_set_clip_obj, 5, 5, GenericST7789_set_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_remove_clip_obj, GenericST7789_remove_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_clear_obj, GenericST7789_clear);
 MP_DEFINE_CONST_FUN_OBJ_3(GenericST7789_pixel_obj, GenericST7789_pixel);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_pixel_span_obj, 1, GenericST7789_pixel_span);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_rectangle_obj, 1, GenericST7789_rectangle);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_circle_obj, 1, GenericST7789_circle);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_pixel_span_obj, 4, 4, GenericST7789_pixel_span);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_rectangle_obj, 5, 5, GenericST7789_rectangle);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_circle_obj, 4, 4, GenericST7789_circle);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_character_obj, 1, GenericST7789_character);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_text_obj, 1, GenericST7789_text);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_measure_text_obj, 1, GenericST7789_measure_text);
 MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_polygon_obj, 2, GenericST7789_polygon);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_triangle_obj, 1, GenericST7789_triangle);
-MP_DEFINE_CONST_FUN_OBJ_KW(GenericST7789_line_obj, 1, GenericST7789_line);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_triangle_obj, 7, 7, GenericST7789_triangle);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(GenericST7789_line_obj, 5, 5, GenericST7789_line);
 
 // Utility
 MP_DEFINE_CONST_FUN_OBJ_1(GenericST7789_get_bounds_obj, GenericST7789_get_bounds);
