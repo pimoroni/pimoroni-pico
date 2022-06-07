@@ -4,18 +4,20 @@
 #include <cstdlib>
 
 #include "pico_display.hpp"
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "rgbled.hpp"
 
 using namespace pimoroni;
 
-PicoGraphicsST7789 pico_display(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0);
+ST7789 st7789(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
 
 
 int main() {
-  pico_display.set_backlight(100);
+  st7789.set_backlight(100);
 
   struct pt {
     float      x;
@@ -34,30 +36,30 @@ int main() {
     shape.r = (rand() % 10) + 3;
     shape.dx = float(rand() % 255) / 128.0f;
     shape.dy = float(rand() % 255) / 128.0f;
-    shape.pen = pico_display.create_pen(rand() % 255, rand() % 255, rand() % 255);
+    shape.pen = graphics.create_pen(rand() % 255, rand() % 255, rand() % 255);
     shapes.push_back(shape);
   }
 
   uint32_t i = 0;
-  Pen BG = pico_display.create_pen(120, 40, 60);
-  Pen YELLOW = pico_display.create_pen(255, 255, 0);
-  Pen TEAL = pico_display.create_pen(0, 255, 255);
-  Pen WHITE = pico_display.create_pen(255, 255, 255);
+  Pen BG = graphics.create_pen(120, 40, 60);
+  Pen YELLOW = graphics.create_pen(255, 255, 0);
+  Pen TEAL = graphics.create_pen(0, 255, 255);
+  Pen WHITE = graphics.create_pen(255, 255, 255);
 
   while(true) {
-    pico_display.set_pen(BG);
-    pico_display.clear();
+    graphics.set_pen(BG);
+    graphics.clear();
 
     for(auto &shape : shapes) {
       shape.x += shape.dx;
       shape.y += shape.dy;
       if(shape.x < 0) shape.dx *= -1;
-      if(shape.x >= pico_display.bounds.w) shape.dx *= -1;
+      if(shape.x >= graphics.bounds.w) shape.dx *= -1;
       if(shape.y < 0) shape.dy *= -1;
-      if(shape.y >= pico_display.bounds.h) shape.dy *= -1;
+      if(shape.y >= graphics.bounds.h) shape.dy *= -1;
 
-      pico_display.set_pen(shape.pen);
-      pico_display.circle(Point(shape.x, shape.y), shape.r);
+      graphics.set_pen(shape.pen);
+      graphics.circle(Point(shape.x, shape.y), shape.r);
     }
 
     float led_step = fmod(i / 20.0f, M_PI * 2.0f);
@@ -73,17 +75,17 @@ int main() {
     poly.push_back(Point(50, 85));
     poly.push_back(Point(30, 45));
 
-    pico_display.set_pen(YELLOW);
+    graphics.set_pen(YELLOW);
     //pico_display.pixel(Point(0, 0));
-    pico_display.polygon(poly);
+    graphics.polygon(poly);
 
-    pico_display.set_pen(TEAL);
-    pico_display.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
+    graphics.set_pen(TEAL);
+    graphics.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
 
-    pico_display.set_pen(WHITE);
-    pico_display.line(Point(50, 50), Point(120, 80));
-    pico_display.line(Point(20, 20), Point(120, 20));
-    pico_display.line(Point(20, 20), Point(20, 120));
+    graphics.set_pen(WHITE);
+    graphics.line(Point(50, 50), Point(120, 80));
+    graphics.line(Point(20, 20), Point(120, 20));
+    graphics.line(Point(20, 20), Point(20, 120));
 
     for(int r = 0; r < 30; r++) {
       for(int j = 0; j < 10; j++) {
@@ -92,12 +94,12 @@ int main() {
         rads += (float(j) / 100.0f);
         float cx = sin(rads) * 300.0f;
         float cy = cos(rads) * 300.0f;
-        pico_display.line(Point(120, 67), Point(cx + 120, cy + 67));
+        graphics.line(Point(120, 67), Point(cx + 120, cy + 67));
       }
     }
 
     // update screen
-    pico_display.update();
+    st7789.update(&graphics);
     sleep_ms(1000 / 60);
     i++;
   }

@@ -4,7 +4,8 @@
 #include "pico/stdlib.h"
 #include "encoder.hpp"
 #include "quadrature_out.pio.h"
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "button.hpp"
 
 /*
@@ -93,14 +94,8 @@ enum DrawState {
 //--------------------------------------------------
 // Variables
 //--------------------------------------------------
-PicoGraphicsST7789 display(
-  PicoExplorer::WIDTH,
-  PicoExplorer::HEIGHT,
-  ROTATE_0,  // Rotation
-  false,     // Is it round!?
-  nullptr,   // Buffer
-  get_spi_pins(BG_SPI_FRONT)
-);
+ST7789 st7789(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 Button button_a(PicoExplorer::A);
 Button button_b(PicoExplorer::B);
@@ -182,13 +177,13 @@ uint32_t draw_plot(Point p1, Point p2, volatile bool (&readings)[READINGS_SIZE],
     switch(draw_state) {
       case DRAW_TRANSITION:
         for(uint8_t y = p1.y; y < p2.y; y++)
-          display.pixel(Point(x + p1.x, y));
+          graphics.pixel(Point(x + p1.x, y));
         break;
       case DRAW_HIGH:
-        display.pixel(Point(x + p1.x, p1.y));
+        graphics.pixel(Point(x + p1.x, p1.y));
         break;
       case DRAW_LOW:
-        display.pixel(Point(x + p1.x, p2.y - 1));
+        graphics.pixel(Point(x + p1.x, p2.y - 1));
         break;
     }
   }
@@ -255,7 +250,7 @@ void setup() {
 // MAIN
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 int main() {
-  Pen WHITE = display.create_pen(255, 255, 255);
+  Pen WHITE = graphics.create_pen(255, 255, 255);
 
   // Perform the main setup for the demo
   setup();
@@ -321,16 +316,16 @@ int main() {
       //--------------------------------------------------            
       // Draw the encoder readings to the screen as a signal plot
 
-      display.set_pen(display.create_pen(0, 0, 0));
-      display.clear();
+      graphics.set_pen(graphics.create_pen(0, 0, 0));
+      graphics.clear();
 
       drawing_to_screen = true;
 
-      display.set_pen(display.create_pen(255, 255, 0));
+      graphics.set_pen(graphics.create_pen(255, 255, 0));
       uint32_t local_pos = next_reading_index;
       uint32_t alignment_offset = draw_plot(Point(0, 10), Point(PicoExplorer::WIDTH, 10 + 50), enc_a_readings, local_pos, current_zoom_level > EDGE_ALIGN_ABOVE_ZOOM);
 
-      display.set_pen(display.create_pen(0, 255, 255));
+      graphics.set_pen(graphics.create_pen(0, 255, 255));
       draw_plot(Point(0, 80), Point(PicoExplorer::WIDTH, 80 + 50), enc_b_readings, (local_pos + (READINGS_SIZE - alignment_offset)) % READINGS_SIZE, false);
 
       // Copy values that may have been stored in the scratch buffers, back into the main buffers
@@ -346,49 +341,49 @@ int main() {
       drawing_to_screen = false;
       next_scratch_index = 0;
 
-      display.set_pen(WHITE);
-      display.character('A', Point(5, 10 + 15), 3);
-      display.character('B', Point(5, 80 + 15), 3);
+      graphics.set_pen(WHITE);
+      graphics.character('A', Point(5, 10 + 15), 3);
+      graphics.character('B', Point(5, 80 + 15), 3);
 
       if(current_zoom_level < 10)
-        display.text("x" + std::to_string(current_zoom_level), Point(220, 62), 200, 2);
+        graphics.text("x" + std::to_string(current_zoom_level), Point(220, 62), 200, 2);
       else if(current_zoom_level < 100)
-        display.text("x" + std::to_string(current_zoom_level), Point(210, 62), 200, 2);
+        graphics.text("x" + std::to_string(current_zoom_level), Point(210, 62), 200, 2);
       else
-        display.text("x" + std::to_string(current_zoom_level), Point(200, 62), 200, 2);
+        graphics.text("x" + std::to_string(current_zoom_level), Point(200, 62), 200, 2);
 
 
       //--------------------------------------------------            
       // Write out the count, frequency and rpm of the encoder
 
-      display.set_pen(display.create_pen(8, 8, 8));
-      display.rectangle(Rect(0, 140, PicoExplorer::WIDTH, PicoExplorer::HEIGHT - 140));
+      graphics.set_pen(graphics.create_pen(8, 8, 8));
+      graphics.rectangle(Rect(0, 140, PicoExplorer::WIDTH, PicoExplorer::HEIGHT - 140));
 
-      display.set_pen(display.create_pen(64, 64, 64));
-      display.rectangle(Rect(0, 140, PicoExplorer::WIDTH, 2));
+      graphics.set_pen(graphics.create_pen(64, 64, 64));
+      graphics.rectangle(Rect(0, 140, PicoExplorer::WIDTH, 2));
 
       {
         std::stringstream sstream;
         sstream << capture.count();
-        display.set_pen(WHITE);                               display.text("Count:",      Point(10, 150),  200, 3);
-        display.set_pen(display.create_pen(255, 128, 255));   display.text(sstream.str(), Point(110, 150), 200, 3);
+        graphics.set_pen(WHITE);                               graphics.text("Count:",      Point(10, 150),  200, 3);
+        graphics.set_pen(graphics.create_pen(255, 128, 255));  graphics.text(sstream.str(), Point(110, 150), 200, 3);
       }
 
       {
         std::stringstream sstream;
         sstream << std::fixed << std::setprecision(1) << capture.frequency() << "hz";
-        display.set_pen(WHITE);                               display.text("Freq: ",      Point(10, 180), 220, 3);
-        display.set_pen(display.create_pen(128, 255, 255));   display.text(sstream.str(), Point(90, 180), 220, 3);
+        graphics.set_pen(WHITE);                               graphics.text("Freq: ",      Point(10, 180), 220, 3);
+        graphics.set_pen(graphics.create_pen(128, 255, 255));  graphics.text(sstream.str(), Point(90, 180), 220, 3);
       }
 
       {
         std::stringstream sstream;
         sstream << std::fixed << std::setprecision(1) << capture.revolutions_per_minute();
-        display.set_pen(WHITE);                               display.text("RPM: ",       Point(10, 210), 220, 3);
-        display.set_pen(display.create_pen(255, 255, 128));   display.text(sstream.str(), Point(80, 210), 220, 3);
+        graphics.set_pen(WHITE);                               graphics.text("RPM: ",       Point(10, 210), 220, 3);
+        graphics.set_pen(graphics.create_pen(255, 255, 128));  graphics.text(sstream.str(), Point(80, 210), 220, 3);
       }
 
-      display.update();                 // Refresh the screen
+      st7789.update(&graphics);                 // Refresh the screen
       gpio_put(PICO_DEFAULT_LED_PIN, false);  // Show the screen refresh has ended
     }
   }

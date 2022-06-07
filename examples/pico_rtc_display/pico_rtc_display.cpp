@@ -27,7 +27,8 @@
 #endif
 #include "breakout_rtc.hpp"
 
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/button/button.hpp"
 #include "drivers/rgbled/rgbled.hpp"
 
@@ -60,7 +61,8 @@ Button button_y(PicoDisplay::Y);
 RGBLED led(PicoDisplay::LED_R, PicoDisplay::LED_G, PicoDisplay::LED_B);
 #endif
 
-PicoGraphicsST7789 display(screen_width, screen_height, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
+ST7789 st7789(screen_width, screen_height, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 BreakoutRTC rtc;
 
@@ -94,10 +96,10 @@ void flash_led(uint32_t curr_count) {
 }
 
 int main() {
-  Pen WHITE = display.create_pen(255, 255, 255);
-  Pen BG = display.create_pen(55, 65, 75);
-  Pen RED = display.create_pen(255, 0, 0);
-  Pen GREEN = display.create_pen(0, 255, 0);
+  Pen WHITE = graphics.create_pen(255, 255, 255);
+  Pen BG = graphics.create_pen(55, 65, 75);
+  Pen RED = graphics.create_pen(255, 0, 0);
+  Pen GREEN = graphics.create_pen(0, 255, 0);
 
   rtc.init();
   // rtc.setup(false);
@@ -208,77 +210,77 @@ int main() {
     }
 
     Rect text_box(5, 5, screen_width-10, screen_height-10);
-    display.set_pen(BG);
-    display.rectangle(text_box);
+    graphics.set_pen(BG);
+    graphics.rectangle(text_box);
     // text_box.deflate(10);
-    display.set_clip(text_box);
-    display.set_pen(WHITE);
+    graphics.set_clip(text_box);
+    graphics.set_pen(WHITE);
     switch(display_mode) {
       case MODE_DISP_CLOCK:
         // Show the clock face
         flash_led(0);
         if(rtc.update_time()) {
-          display.text("Set Timer",
+          graphics.text("Set Timer",
               Point(text_box.x, text_box.y+2), 230, 1);
-          display.set_pen(GREEN);
-          display.text(rtc.string_date(),
+          graphics.set_pen(GREEN);
+          graphics.text(rtc.string_date(),
               Point(text_box.x, text_box.y+20), 230, 4);
-          display.set_pen(RED);
-          display.text(rtc.string_time(),
+          graphics.set_pen(RED);
+          graphics.text(rtc.string_time(),
               Point(text_box.x, text_box.y+60), 230, 6);
-          display.set_pen(WHITE);
-          display.text("Clock",
+          graphics.set_pen(WHITE);
+          graphics.text("Clock",
               Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         }
         else {
           sprintf(buf, "Time: rtc.updateTime() ret err");
-          display.text(buf,
+          graphics.text(buf,
               Point(text_box.x, text_box.y), 30, 2);
         }
         break;
 
       case MODE_DISP_TIMER:
-        display.text("Set Timer",
+        graphics.text("Set Timer",
             Point(text_box.x, text_box.y+2), 230, 1);
         if(rtc.read_timer_interrupt_flag()) {
           // Go periodic time interupt - say loop ended
-          display.set_pen(RED);
+          graphics.set_pen(RED);
           sprintf(buf, "%s", "Timer complete");
-          display.text(buf,
+          graphics.text(buf,
               Point(text_box.x, text_box.y+30), 230, 4);
-          display.set_pen(WHITE);
+          graphics.set_pen(WHITE);
           flash_led(i);
         }
         else {
           sprintf(buf, "%s %d", "Timer running", rtc.get_timer_count());
-          display.text(buf,
+          graphics.text(buf,
               Point(text_box.x, text_box.y+30), 230, 3);
         }
-        display.text("Clock",
+        graphics.text("Clock",
             Point(text_box.x, text_box.y+screen_height-20), 230, 1);
         break;
 
       case MODE_SET_TIMER:
         flash_led(0);
-        display.text("Run Timer",
+        graphics.text("Run Timer",
             Point(text_box.x, text_box.y+2), 230, 1);
-        display.text("+ Time",
+        graphics.text("+ Time",
             Point(text_box.x+screen_width-42, text_box.y+2), 230, 1);
         sprintf(buf, "Time %d secs", timer_count);
-        display.text(buf,
+        graphics.text(buf,
             Point(text_box.x, text_box.y+30), 230, 3);
-        display.text("Clock",
+        graphics.text("Clock",
             Point(text_box.x, text_box.y+screen_height-20), 230, 1);
-        display.text("- Time",
+        graphics.text("- Time",
             Point(text_box.x+screen_width-42,
               text_box.y+screen_height-20), 230, 1);
         break;
     }
 
-    display.remove_clip();
+    graphics.remove_clip();
 
     // update screen
-    display.update();
+    st7789.update(&graphics);
 
     i++;
   }

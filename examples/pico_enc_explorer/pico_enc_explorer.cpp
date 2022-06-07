@@ -6,23 +6,18 @@
 
 #include "pico_explorer.hpp"
 #include "breakout_encoder.hpp"
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
-PicoGraphicsST7789 display(
-  PicoExplorer::WIDTH,
-  PicoExplorer::HEIGHT,
-  ROTATE_0,  // Rotation
-  false,     // Is it round!?
-  nullptr,   // Buffer
-  get_spi_pins(BG_SPI_FRONT)
-);
+ST7789 st7789(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
-Pen BLACK = display.create_pen(0, 0, 0);
-Pen RED = display.create_pen(255, 0, 0);
-Pen GREEN = display.create_pen(0, 255, 0);
-Pen BLUE = display.create_pen(0, 0, 255);
+Pen BLACK = graphics.create_pen(0, 0, 0);
+Pen RED = graphics.create_pen(255, 0, 0);
+Pen GREEN = graphics.create_pen(0, 255, 0);
+Pen BLUE = graphics.create_pen(0, 0, 255);
 
 static const uint8_t STEPS_PER_REV = 24;
 
@@ -56,49 +51,49 @@ void count_changed(int16_t count) {
   from_hsv(h, 1.0f, 1.0f, r, g, b);
   enc.set_led(r, g, b);
 
-  display.set_pen(BLACK);
-  display.clear();
+  graphics.set_pen(BLACK);
+  graphics.clear();
 
   {
-    display.set_pen(RED);
+    graphics.set_pen(RED);
     std::ostringstream ss;
     ss << "R = ";
     ss << (int)r;
     std::string s(ss.str());
-    display.text(s, Point(10, 10), 220, 6);
+    graphics.text(s, Point(10, 10), 220, 6);
   }
 
   {
-    display.set_pen(GREEN);
+    graphics.set_pen(GREEN);
     std::ostringstream ss;
     ss << "G = ";
     ss << (int)g;
     std::string s(ss.str());
-    display.text(s, Point(10, 70), 220, 6);
+    graphics.text(s, Point(10, 70), 220, 6);
   }
 
   {
-    display.set_pen(BLUE);
+    graphics.set_pen(BLUE);
     std::ostringstream ss;
     ss << "B = ";
     ss << (int)b;
     std::string s(ss.str());
-    display.text(s, Point(10, 130), 220, 6);
+    graphics.text(s, Point(10, 130), 220, 6);
   }
 
   {
     // Shouldn't really use create_pen in-line.
     // In default (RGB332) palette mode this will lookup the nearest 8-bit colour
-    display.set_pen(display.create_pen(r, g, b));
+    graphics.set_pen(graphics.create_pen(r, g, b));
     std::ostringstream ss;
     ss << "#";
     ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)r;
     ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)g;
     ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2) << (int)b;
     std::string s(ss.str());
-    display.text(s, Point(10, 190), 220, 5);
+    graphics.text(s, Point(10, 190), 220, 5);
   }
-  display.update();
+  st7789.update(&graphics);
 }
 
 int main() {

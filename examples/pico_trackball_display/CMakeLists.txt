@@ -6,7 +6,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(${OUTPUT_NAME} pico_stdlib pico_explorer pico_display breakout_trackball picographics_st7789)
+target_link_libraries(${OUTPUT_NAME} pico_stdlib pico_explorer pico_display breakout_trackball pico_graphics st7789)
 
 pico_enable_stdio_uart(${OUTPUT_NAME} 1)
 

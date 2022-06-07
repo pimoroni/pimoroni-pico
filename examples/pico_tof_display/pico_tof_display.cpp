@@ -26,19 +26,13 @@
 #include "vl53l1x.hpp"
 #include "drivers/button/button.hpp"
 
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
 #ifdef USE_PICO_EXPLORER
-PicoGraphicsST7789 pico_display(
-  PicoExplorer::WIDTH,
-  PicoExplorer::HEIGHT,
-  ROTATE_0,  // Rotation
-  false,     // Is it round!?
-  nullptr,   // Buffer
-  get_spi_pins(BG_SPI_FRONT)
-);
+ST7789 st7789(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
 
 Button button_a(PicoExplorer::A);
 Button button_b(PicoExplorer::B);
@@ -59,14 +53,7 @@ uint16_t disptext_dist_xoff = 10;
 uint16_t disptext_dist_yoff = 90;
 uint16_t disptext_dist_size = 6;
 #else
-PicoGraphicsST7789 pico_display(
-  PicoDisplay::WIDTH,
-  PicoDisplay::HEIGHT,
-  ROTATE_0,  // Rotation
-  false,     // Is it round!?
-  nullptr,   // Buffer
-  get_spi_pins(BG_SPI_FRONT)
-);
+ST7789 st7789(PicoDisplay::WIDTH, PicoDisplay::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
 
 Button button_a(PicoDisplay::A);
 Button button_b(PicoDisplay::B);
@@ -88,9 +75,10 @@ uint16_t disptext_dist_yoff = 45;
 uint16_t disptext_dist_size = 4;
 #endif
 
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
-uint16_t screen_width = pico_display.bounds.w;
-uint16_t screen_height = pico_display.bounds.h;
+uint16_t screen_width = graphics.bounds.w;
+uint16_t screen_height = graphics.bounds.h;
 
 #define MM_TO_INCH 25.4
 
@@ -110,10 +98,10 @@ void flash_led(uint32_t curr_count) {
 #ifndef USE_PICO_EXPLORER
   if ((curr_count % FLASH_MOD) < (FLASH_MOD / 2)) {
     // value less than half modded number - LED off
-    pico_display.set_led(0, 0, 0);
+    //pico_display.set_led(0, 0, 0); // TODO use RGBLED
   } else {
     // value more than half modded number - LED on
-    pico_display.set_led(128, 128, 128);
+    //pico_display.set_led(128, 128, 128); // TODO use RGBLED
   }
 #endif
 }
@@ -141,9 +129,9 @@ int main() {
   // Whether the display is being held
   bool dist_held = false;
 
-  Pen WHITE = pico_display.create_pen(255, 255, 255);
-  Pen REDDISH = pico_display.create_pen(255, 64, 64);
-  Pen BG = pico_display.create_pen(55, 65, 75);
+  Pen WHITE = graphics.create_pen(255, 255, 255);
+  Pen REDDISH = graphics.create_pen(255, 64, 64);
+  Pen BG = graphics.create_pen(55, 65, 75);
 
   while(true) {
     // bool a_pressed = button_a.read();
@@ -168,30 +156,30 @@ int main() {
     }
 
     Rect text_box(5, 5, screen_width-10, screen_height-10);
-    pico_display.set_pen(BG);
-    pico_display.rectangle(text_box);
+    graphics.set_pen(BG);
+    graphics.rectangle(text_box);
     // text_box.deflate(10);
-    pico_display.set_clip(text_box);
-    pico_display.set_pen(WHITE);
+    graphics.set_clip(text_box);
+    graphics.set_pen(WHITE);
     // Show the current distance
     flash_led(0);
     if (vl53_present) {
-      pico_display.text("Units",
+      graphics.text("Units",
           Point(text_box.x+disptext_x_reminder_xoff,
             text_box.y+disptext_x_reminder_yoff), 230, disptext_reminder_size);
-      pico_display.text("+Mode",
+      graphics.text("+Mode",
           Point(text_box.x+disptext_y_reminder_xoff,
             text_box.y+disptext_y_reminder_yoff), 230, disptext_reminder_size);
       if(dist_held) {
-        pico_display.set_pen(REDDISH);
+        graphics.set_pen(REDDISH);
       }
-      pico_display.text("Hold",
+      graphics.text("Hold",
           Point(text_box.x+disptext_b_reminder_xoff,
             text_box.y+disptext_b_reminder_yoff), 230, disptext_reminder_size);
-      pico_display.set_pen(WHITE);
+      graphics.set_pen(WHITE);
 
       sprintf(buf, "Mode: %s", mode_to_text[vl53_mode]);
-      pico_display.text(buf,
+      graphics.text(buf,
           Point(text_box.x+disptext_mode_xoff,
             text_box.y+disptext_mode_yoff), 230, disptext_mode_size);
 
@@ -204,19 +192,19 @@ int main() {
         sprintf(buf, "%dft %.1fin", ft,
             ((float)dist/MM_TO_INCH)-ft*12.0);
       }
-      pico_display.text(buf,
+      graphics.text(buf,
           Point(text_box.x+disptext_dist_xoff,
             text_box.y+disptext_dist_yoff), 120, disptext_dist_size);
     } else {
-      pico_display.text("VL53L1X Missing",
+      graphics.text("VL53L1X Missing",
           Point(text_box.x+disptext_dist_xoff,
             text_box.y+disptext_dist_yoff), 230, disptext_dist_size);
     }
 
-    pico_display.remove_clip();
+    graphics.remove_clip();
 
     // update screen
-    pico_display.update();
+    st7789.update(&graphics);
 
     i++;
   }

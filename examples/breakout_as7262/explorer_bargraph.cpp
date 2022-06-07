@@ -4,7 +4,8 @@
 #include "breakout_as7262.hpp"
 #include "pico_explorer.hpp"
 
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
@@ -13,16 +14,18 @@ constexpr float INTEGRATION_TIME = 10.0f;
 I2C i2c(BOARD::PICO_EXPLORER);
 BreakoutAS7262 as7262(&i2c);
 
-PicoGraphicsST7789 display(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
+ST7789 st7789(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
-uint8_t bar_width = PicoExplorer::WIDTH / 6;
-uint8_t bar_height = PicoExplorer::HEIGHT;
 
 void draw_bar(float scale, uint16_t channel) {
+  static uint8_t bar_width = st7789.width / 6;
+  static uint8_t bar_height = st7789.height;
+
   int16_t bar_top = bar_height - (bar_height * scale);
   bar_top = std::max((int16_t)0, bar_top);
   int16_t current_bar_height = bar_height - bar_top;
-  display.rectangle(Rect(channel * bar_width, bar_top, bar_width, current_bar_height - 1));
+  graphics.rectangle(Rect(channel * bar_width, bar_top, bar_width, current_bar_height - 1));
 }
 
 int main() {
@@ -44,17 +47,17 @@ int main() {
   as7262.set_indicator_current(AS7262::indicator_current::ma4);
   as7262.set_leds(true, true);
 
-  Pen BLACK = display.create_pen(0, 0, 0);
-  Pen RED = display.create_pen(255, 0, 0);
-  Pen ORANGE = display.create_pen(255, 128, 0);
-  Pen YELLOW = display.create_pen(255, 255, 0);
-  Pen GREEN = display.create_pen(0, 255, 0);
-  Pen BLUE = display.create_pen(0, 0, 255);
-  Pen VIOLET = display.create_pen(255, 0, 255);
+  Pen BLACK = graphics.create_pen(0, 0, 0);
+  Pen RED = graphics.create_pen(255, 0, 0);
+  Pen ORANGE = graphics.create_pen(255, 128, 0);
+  Pen YELLOW = graphics.create_pen(255, 255, 0);
+  Pen GREEN = graphics.create_pen(0, 255, 0);
+  Pen BLUE = graphics.create_pen(0, 0, 255);
+  Pen VIOLET = graphics.create_pen(255, 0, 255);
 
   while(true) {
-    display.set_pen(BLACK);
-    display.clear();
+    graphics.set_pen(BLACK);
+    graphics.clear();
 
     AS7262::reading reading = as7262.read();
     printf("R: %f O: %f Y: %f G: %f B: %f V: %f \n",
@@ -73,34 +76,34 @@ int main() {
     if(reading.blue > m) m = reading.blue;
     if(reading.violet > m) m = reading.violet;
 
-    display.set_pen(BLACK);
-    display.clear();
+    graphics.set_pen(BLACK);
+    graphics.clear();
 
     // Red
-    display.set_pen(RED);
+    graphics.set_pen(RED);
     draw_bar(reading.red / m, 0);
     
     // Orange
-    display.set_pen(ORANGE);
+    graphics.set_pen(ORANGE);
     draw_bar(reading.orange / m, 1);
 
     // Yellow
-    display.set_pen(YELLOW);
+    graphics.set_pen(YELLOW);
     draw_bar(reading.yellow / m, 2);
 
     // Green
-    display.set_pen(GREEN);
+    graphics.set_pen(GREEN);
     draw_bar(reading.green / m, 3);
 
     // Blue
-    display.set_pen(BLUE);
+    graphics.set_pen(BLUE);
     draw_bar(reading.blue / m, 4);
 
     // Violet
-    display.set_pen(VIOLET);
+    graphics.set_pen(VIOLET);
     draw_bar(reading.violet / m, 5);
 
-    display.update();
+    st7789.update(&graphics);
 
     sleep_ms(INTEGRATION_TIME);
   }

@@ -1,12 +1,10 @@
 #pragma once
 
-#include "drivers/st7789/st7789.hpp"
-#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/motor/motor.hpp"
 
 namespace pimoroni {
 
-  class PicoExplorer : public PicoGraphics {
+  class PicoExplorer {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 240;
@@ -41,25 +39,6 @@ namespace pimoroni {
     static const uint GP5 = 5;
     static const uint GP6 = 6;
     static const uint GP7 = 7;
-
-    void *__fb;
-  private:
-    ST7789 screen;
-    int8_t audio_pin = -1;
-
-  public:
-    PicoExplorer(void *buf);
-
-    void init();
-    void update();
-    bool is_pressed(uint8_t button);
-
-    float get_adc(uint8_t channel);
-
-    void set_motor(uint8_t channel, uint8_t action, float speed = 0.0f);
-
-    void set_audio_pin(uint pin);
-    void set_tone(uint16_t frequency, float duty = 0.2f);
   };
 
 }

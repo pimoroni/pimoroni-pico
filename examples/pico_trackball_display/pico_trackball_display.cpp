@@ -21,11 +21,12 @@
 #ifdef USE_PICO_EXPLORER
 #include "pico_explorer.hpp"
 #else
-#include "display.hpp"
+#include "pico_display.hpp"
 #endif
 #include "breakout_trackball.hpp"
 
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
@@ -44,7 +45,8 @@ const uint16_t screen_width = PicoDisplay::WIDTH;
 const uint16_t screen_height = PicoDisplay::HEIGHT;
 #endif
 
-PicoGraphicsST7789 display(screen_width, screen_height, ROTATE_0, false, nullptr, get_spi_pins(BG_SPI_FRONT));
+ST7789 st7789(screen_width, screen_height, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 const Point screen_centre(screen_width / 2, screen_height / 2);
 const uint16_t circle_radius = std::min(screen_centre.x, screen_centre.y) / 4;
@@ -84,10 +86,10 @@ int main() {
     positions[i] = pos;
   }
 
-  Pen WHITE = display.create_pen(255, 255, 255);
-  Pen BLACK = display.create_pen(0, 0, 0);
-  Pen LIGHT_GREY = display.create_pen(212, 212, 212);
-  Pen MID_GREY = display.create_pen(128, 128, 128);
+  Pen WHITE = graphics.create_pen(255, 255, 255);
+  Pen BLACK = graphics.create_pen(0, 0, 0);
+  Pen LIGHT_GREY = graphics.create_pen(212, 212, 212);
+  Pen MID_GREY = graphics.create_pen(128, 128, 128);
 
   while(true) {
     Trackball::State state = trackball.read();
@@ -95,46 +97,46 @@ int main() {
     y = std::min(std::max(y - state.up + state.down, 0), (int)screen_height);
     Point cursor_pos(x, y);
 
-    display.set_pen(BLACK);
-    display.clear();
+    graphics.set_pen(BLACK);
+    graphics.clear();
 
     //Draw a set of circles in a ring around the screen centre
     for(uint8_t i = 0; i < NUM_CIRCLES; i++) {
       TrackballColour col = colour_circles[i];
 
       if(circle_states[i]) {
-        display.set_pen(display.create_pen(col.r, col.g, col.b));
-        display.circle(positions[i], circle_radius + circle_border);
-        display.set_pen(display.create_pen(col.r >> 1, col.g >> 1, col.b >> 1));
-        display.circle(positions[i], circle_radius);
+        graphics.set_pen(graphics.create_pen(col.r, col.g, col.b));
+        graphics.circle(positions[i], circle_radius + circle_border);
+        graphics.set_pen(graphics.create_pen(col.r >> 1, col.g >> 1, col.b >> 1));
+        graphics.circle(positions[i], circle_radius);
       }
       else {
-        display.set_pen(display.create_pen(col.r >> 1, col.g >> 1, col.b >> 1));
-        display.circle(positions[i], circle_radius + circle_border);
-        display.set_pen(display.create_pen(col.r, col.g, col.b));
-        display.circle(positions[i], circle_radius);
+        graphics.set_pen(graphics.create_pen(col.r >> 1, col.g >> 1, col.b >> 1));
+        graphics.circle(positions[i], circle_radius + circle_border);
+        graphics.set_pen(graphics.create_pen(col.r, col.g, col.b));
+        graphics.circle(positions[i], circle_radius);
       }
     }
 
     //Draw a centre circle
     if(centre_circle_state) {
-      display.set_pen(WHITE);
-      display.circle(screen_centre, circle_radius + circle_border);
-      display.set_pen(MID_GREY);
-      display.circle(screen_centre, circle_radius);
+      graphics.set_pen(WHITE);
+      graphics.circle(screen_centre, circle_radius + circle_border);
+      graphics.set_pen(MID_GREY);
+      graphics.circle(screen_centre, circle_radius);
     }
     else {
-      display.set_pen(MID_GREY);
-      display.circle(screen_centre, circle_radius + circle_border);
-      display.set_pen(WHITE);
-      display.circle(screen_centre, circle_radius);
+      graphics.set_pen(MID_GREY);
+      graphics.circle(screen_centre, circle_radius + circle_border);
+      graphics.set_pen(WHITE);
+      graphics.circle(screen_centre, circle_radius);
     }
 
     //Draw the cursor
-    display.set_pen(BLACK);
-    display.circle(cursor_pos, cursor_radius + cursor_border);
-    display.set_pen(LIGHT_GREY);
-    display.circle(cursor_pos, cursor_radius);
+    graphics.set_pen(BLACK);
+    graphics.circle(cursor_pos, cursor_radius + cursor_border);
+    graphics.set_pen(LIGHT_GREY);
+    graphics.circle(cursor_pos, cursor_radius);
 
     int16_t x_diff = cursor_pos.x - screen_centre.x;
     int16_t y_diff = cursor_pos.y - screen_centre.y;
@@ -166,7 +168,7 @@ int main() {
     }
 
     // update screen
-    display.update();
+    st7789.update(&graphics);
   }
 
   return 0;

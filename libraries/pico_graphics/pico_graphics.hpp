@@ -320,8 +320,8 @@ namespace pimoroni {
       DisplayDriver(uint16_t width, uint16_t height, Rotation rotation)
        : width(width), height(height), rotation(rotation) {};
 
-      virtual void update(PicoGraphics *display);
-      virtual void set_backlight(uint8_t brightness);
+      virtual void update(PicoGraphics *display) {};
+      virtual void set_backlight(uint8_t brightness) {};
   };
 
 }

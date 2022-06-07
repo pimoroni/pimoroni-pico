@@ -3,7 +3,8 @@
 #include <vector>
 #include <cstdlib>
 
-#include "picographics_st7789.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "time.h"
 
 // Place a 1.3 Round SPI LCD in the *front* slot of breakout garden.
@@ -14,7 +15,8 @@ using namespace pimoroni;
 const int WIDTH = 240;
 const int HEIGHT = 240;
 
-PicoGraphicsST7789 display(WIDTH, HEIGHT, ROTATE_0, true, nullptr, get_spi_pins(BG_SPI_FRONT));
+ST7789 st7789(WIDTH, HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 constexpr float RADIUS = WIDTH / 2;
 
@@ -37,29 +39,26 @@ Pen from_hsv(float h, float s, float v) {
     case 5: r = v; g = p; b = q; break;
   }
 
-  return display.create_pen(r, g, b);
+  return graphics.create_pen(r, g, b);
 }
 
 int main() {
-    display.set_backlight(255);
-
-    // Delete the default palette and allow us to create up to 256 of our own RGB565 colours
-    // display.set_palette_mode(PicoGraphicsST7789::PaletteModeUSER);
+    st7789.set_backlight(255);
 
     uint32_t steps = 70;
     float angle_step = 0.5f;
 
-    Pen BLACK = display.create_pen(0, 0, 0);
-    Pen WHITE = display.create_pen(255, 255, 255);
+    Pen BLACK = graphics.create_pen(0, 0, 0);
+    Pen WHITE = graphics.create_pen(255, 255, 255);
 
     while(1) {
         absolute_time_t at = get_absolute_time();
         uint64_t t = to_us_since_boot(at) / 100000;
         float angle = (t % 360) * M_PI / 180.0f;
 
-        display.set_pen(BLACK);
-        display.clear();
-        display.set_pen(WHITE);
+        graphics.set_pen(BLACK);
+        graphics.clear();
+        graphics.set_pen(WHITE);
 
         for(auto step = 0u; step < steps; step++) {
           auto distance = RADIUS / steps * step;
@@ -74,11 +73,11 @@ int main() {
 
           auto p = from_hsv((t / 10.0f) + distance / 120.0f, 1.0, 1.0);
 
-          display.set_pen(p);
-          display.circle(Point(x, y), l);
+          graphics.set_pen(p);
+          graphics.circle(Point(x, y), l);
         }
 
-        display.update();
+        st7789.update(&graphics);
         sleep_ms(10);
     }
 }
