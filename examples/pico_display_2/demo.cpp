@@ -3,14 +3,16 @@
 #include <vector>
 #include <cstdlib>
 
-#include "pico_display_2.hpp"
-#include "picographics_st7789.hpp"
+#include "graphics_2.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics->hpp"
 #include "rgbled.hpp"
 #include "button.hpp"
 
 using namespace pimoroni;
 
-PicoGraphicsST7789 pico_display(240, 240, ROTATE_0);
+ST7789 st7789(320, 240, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics graphics;
 
 RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
 
@@ -40,7 +42,13 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
-  pico_display.set_backlight(255);
+  st7789.set_backlight(255);
+
+  // 150k RAM, 65K colours
+  // graphics = new PicoGraphics_PenRGB565(st7789.width, st7789.height, nullptr);
+
+  // 75k RAM, 256 colours
+  graphics = new PicoGraphics_PenRGB332(st7789.width, st7789.height, nullptr);
 
   struct pt {
     float      x;
@@ -54,19 +62,19 @@ int main() {
   std::vector<pt> shapes;
   for(int i = 0; i < 100; i++) {
     pt shape;
-    shape.x = rand() % pico_display.bounds.w;
-    shape.y = rand() % pico_display.bounds.h;
+    shape.x = rand() % graphics->bounds.w;
+    shape.y = rand() % graphics->bounds.h;
     shape.r = (rand() % 10) + 3;
     shape.dx = float(rand() % 255) / 64.0f;
     shape.dy = float(rand() % 255) / 64.0f;
-    shape.pen = pico_display.create_pen(rand() % 255, rand() % 255, rand() % 255);
+    shape.pen = graphics->create_pen(rand() % 255, rand() % 255, rand() % 255);
     shapes.push_back(shape);
   }
 
   Point text_location(0, 0);
 
-  Pen BG = pico_display.create_pen(120, 40, 60);
-  Pen WHITE = pico_display.create_pen(255, 255, 255);
+  Pen BG = graphics->create_pen(120, 40, 60);
+  Pen WHITE = graphics->create_pen(255, 255, 255);
 
   while(true) {
     if(button_a.raw()) text_location.x -= 1;
@@ -75,8 +83,8 @@ int main() {
     if(button_x.raw()) text_location.y -= 1;
     if(button_y.raw()) text_location.y += 1;
   
-    pico_display.set_pen(BG);
-    pico_display.clear();
+    graphics->set_pen(BG);
+    graphics->clear();
 
     for(auto &shape : shapes) {
       shape.x += shape.dx;
@@ -85,21 +93,21 @@ int main() {
         shape.dx *= -1;
         shape.x = shape.r;
       }
-      if((shape.x + shape.r) >= pico_display.bounds.w) {
+      if((shape.x + shape.r) >= graphics->bounds.w) {
         shape.dx *= -1;
-        shape.x = pico_display.bounds.w - shape.r;
+        shape.x = graphics->bounds.w - shape.r;
       }
       if((shape.y - shape.r) < 0) {
         shape.dy *= -1;
         shape.y = shape.r;
       }
-      if((shape.y + shape.r) >= pico_display.bounds.h) {
+      if((shape.y + shape.r) >= graphics->bounds.h) {
         shape.dy *= -1;
-        shape.y = pico_display.bounds.h - shape.r;
+        shape.y = graphics->bounds.h - shape.r;
       }
 
-      pico_display.set_pen(shape.pen);
-      pico_display.circle(Point(shape.x, shape.y), shape.r);
+      graphics->set_pen(shape.pen);
+      graphics->circle(Point(shape.x, shape.y), shape.r);
 
     }
 
@@ -111,11 +119,11 @@ int main() {
     led.set_rgb(r, g, b);
 
 
-    pico_display.set_pen(WHITE);
-    pico_display.text("Hello World", text_location, 320);
+    graphics->set_pen(WHITE);
+    graphics->text("Hello World", text_location, 320);
 
     // update screen
-    pico_display.update();
+    st7789.update(graphics);
   }
 
     return 0;

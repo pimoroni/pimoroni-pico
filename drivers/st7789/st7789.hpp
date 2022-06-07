@@ -12,14 +12,10 @@
 
 namespace pimoroni {
 
-  class ST7789 {
+  class ST7789 : public DisplayDriver {
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
   
   public:
-    // screen properties
-    uint16_t width;
-    uint16_t height;
-    Rotation rotation;
     bool round;
 
     //--------------------------------------------------
@@ -44,8 +40,8 @@ namespace pimoroni {
   public:
     // Parallel init
     ST7789(uint16_t width, uint16_t height, Rotation rotation, ParallelPins pins) :
-      spi(nullptr),
-      width(width), height(height), rotation(rotation), round(false),
+      DisplayDriver(width, height, rotation),
+      spi(nullptr), round(false),
       cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl) {
   
       gpio_set_function(wr_sck, GPIO_FUNC_SIO);
@@ -66,8 +62,8 @@ namespace pimoroni {
 
     // Serial init
     ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins) :
-      spi(pins.spi),
-      width(width), height(height), rotation(rotation), round(round),
+      DisplayDriver(width, height, rotation),
+      spi(pins.spi), round(round),
       cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl) {
 
       // configure spi interface and pins
@@ -79,35 +75,15 @@ namespace pimoroni {
       common_init();
     }
 
-    void init();
-    void command(uint8_t command, size_t len = 0, const char *data = NULL);
-    void set_backlight(uint8_t brightness);
 
-    void update(PicoGraphics<PenRGB565> *graphics);
-    void update(PicoGraphics<PenRGB332> *graphics);
-    void update(PicoGraphics<PenP8> *graphics);
-    void update(PicoGraphics<PenP4> *graphics);
+    void update(PicoGraphics *graphics) override;
+    void set_backlight(uint8_t brightness) override;
 
   private:
+    void common_init();
     void configure_display(Rotation rotate);
     void write_blocking_parallel(const uint8_t *src, size_t len);
-    void common_init() {
-        gpio_set_function(dc, GPIO_FUNC_SIO);
-        gpio_set_dir(dc, GPIO_OUT);
-
-        gpio_set_function(cs, GPIO_FUNC_SIO);
-        gpio_set_dir(cs, GPIO_OUT);
-
-        // if a backlight pin is provided then set it up for
-        // pwm control
-        if(bl != PIN_UNUSED) {
-          pwm_config cfg = pwm_get_default_config();
-          pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
-          pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
-          gpio_set_function(bl, GPIO_FUNC_PWM);
-          set_backlight(0); // Turn backlight off initially to avoid nasty surprises
-        }
-    }
+    void command(uint8_t command, size_t len = 0, const char *data = NULL);
   };
 
 }

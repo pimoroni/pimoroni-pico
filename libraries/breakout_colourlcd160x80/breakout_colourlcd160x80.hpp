@@ -7,7 +7,7 @@
 
 namespace pimoroni {
 
-  class BreakoutColourLCD160x80 : public PicoGraphics<PenRGB565> {
+  class BreakoutColourLCD160x80 : public PicoGraphics_PenRGB565 {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -32,7 +32,7 @@ namespace pimoroni {
     }
 
     BreakoutColourLCD160x80(void *frame_buffer, SPIPins bus_pins)
-      : PicoGraphics<PenRGB565>(WIDTH, HEIGHT, frame_buffer), screen(WIDTH, HEIGHT, bus_pins){
+      : PicoGraphics_PenRGB565(WIDTH, HEIGHT, frame_buffer), screen(WIDTH, HEIGHT, bus_pins){
     }
 
     void update() {

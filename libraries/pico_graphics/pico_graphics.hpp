@@ -5,9 +5,14 @@
 #include <algorithm>
 #include <vector>
 #include "libraries/bitmap_fonts/font6_data.hpp"
+#include "common/pimoroni_common.hpp"
 
-// a tiny little graphics library for our Pico products
-// supports only 16-bit (565) RGB framebuffers
+// A tiny graphics library for our Pico products
+// supports:
+//   - 16-bit (565) RGB
+//   - 8-bit (332) RGB
+//   - 8-bit with 16-bit 256 entry palette
+//   - 4-bit with 16-bit 8 entry palette
 namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
@@ -44,48 +49,95 @@ namespace pimoroni {
     void deflate(int32_t v);
   };
 
-  class PicoGraphicsPenType {
-      public:
+  class PicoGraphics {
+  public:
+    struct PaletteEntry {
+      RGB565 color;
+      bool used;
+    };
 
-        struct PaletteEntry {
-          RGB565 color;
-          bool used;
-        };
+    enum PenType {
+      PEN_P2 = 0,
+      PEN_P4,
+      PEN_P8,
+      PEN_RGB332,
+      PEN_RGB565
+    };
 
-        static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
-          return (r & 0b11100000) | ((g & 0b11100000) >> 3) | ((b & 0b11000000) >> 6);
-        }
+    void *frame_buffer;
 
-        static constexpr RGB565 rgb332_to_rgb565(RGB332 c) {
-          uint16_t p = ((c & 0b11100000) << 8) |
-                       ((c & 0b00011100) << 6) |
-                       ((c & 0b00000011) << 3);
-          return __builtin_bswap16(p);
-        }
+    PenType pen_type;
+    Rect bounds;
+    Rect clip;
 
-        static constexpr RGB565 rgb_to_rgb565(uint8_t r, uint8_t g, uint8_t b) {
-          uint16_t p = ((r & 0b11111000) << 8) |
-                       ((g & 0b11111100) << 3) |
-                       ((b & 0b11111000) >> 3);
+    const bitmap::font_t *font;
 
-          return __builtin_bswap16(p);
-        }
+    static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
+      return (r & 0b11100000) | ((g & 0b11100000) >> 3) | ((b & 0b11000000) >> 6);
+    }
 
-        virtual void set_pixel(void *frame_buffer, uint x, uint y, uint stride);
-        virtual int create(uint8_t r, uint8_t g, uint8_t b);
-        virtual void set_color(uint c);
-        virtual void set_color(uint8_t r, uint8_t g, uint8_t b);
-        virtual void update_color(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+    static constexpr RGB565 rgb332_to_rgb565(RGB332 c) {
+      uint16_t p = ((c & 0b11100000) << 8) |
+                    ((c & 0b00011100) << 6) |
+                    ((c & 0b00000011) << 3);
+      return __builtin_bswap16(p);
+    }
 
-        virtual void palette_lookup(void *frame_buffer, void *result, uint offset, uint length);
-        static size_t buffer_size(uint w, uint h); // Must be static, since user must know required size to alloc framebuffer
+    static constexpr RGB565 rgb_to_rgb565(uint8_t r, uint8_t g, uint8_t b) {
+      uint16_t p = ((r & 0b11111000) << 8) |
+                    ((g & 0b11111100) << 3) |
+                    ((b & 0b11111000) >> 3);
+
+      return __builtin_bswap16(p);
+    }
+
+    PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
+    : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
+      set_font(&font6);
+    };
+
+    virtual void set_pen(uint c);
+    virtual void set_pen(uint8_t r, uint8_t g, uint8_t b);
+    virtual void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+    virtual void reset_pen(uint8_t i);
+    virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
+    virtual void set_pixel(void *frame_buffer, uint x, uint y, uint stride);
+    virtual void palette_lookup(void *frame_buffer, void *result, uint offset, uint length);
+
+    void set_font(const bitmap::font_t *font);
+
+    void set_dimensions(int width, int height);
+
+    void *get_data();
+    void get_data(uint y, void *row_buf);
+
+    void set_clip(const Rect &r);
+    void remove_clip();
+
+    void clear();
+    void pixel(const Point &p);
+    void pixel_span(const Point &p, int32_t l);
+    void rectangle(const Rect &r);
+    void circle(const Point &p, int32_t r);
+    void character(const char c, const Point &p, uint8_t scale = 2);
+    void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
+    int32_t measure_text(const std::string &t, uint8_t scale = 2);
+    void polygon(const std::vector<Point> &points);
+    void triangle(Point p1, Point p2, Point p3);
+    void line(Point p1, Point p2);
   };
 
-  class PenP4 : public PicoGraphicsPenType {
+
+  class PicoGraphics_PenP4 : public PicoGraphics {
     public:
       uint8_t color;
       PaletteEntry palette[8];
-      PenP4() {
+      PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer)
+      : PicoGraphics(width, height, frame_buffer) {
+        this->pen_type = PEN_P4;
+        if(this->frame_buffer == nullptr) {
+          this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+        }
         palette[0].color = rgb_to_rgb565(57, 48, 57);     // Black
         palette[1].color = rgb_to_rgb565(255, 255, 255);  // White
         palette[2].color = rgb_to_rgb565(58, 91, 70);     // Green
@@ -95,16 +147,11 @@ namespace pimoroni {
         palette[6].color = rgb_to_rgb565(177, 106, 73);   // Orange
         palette[7].color = rgb_to_rgb565(255, 255, 255);  // Clear
       }
-      void set_color(uint c) {
+      void set_pen(uint c) {
         color = c & 0xf;
       }
-      void set_color(uint8_t r, uint8_t g, uint8_t b) override {
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // TODO look up closest palette colour, or just NOOP?
-      }
-      void update_color(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {}
-      void reset_color(uint8_t i) {}
-      int create(uint8_t r, uint8_t g, uint8_t b) override {
-        return -1; // Can never create new colours, fixed palette!
       }
       void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
         // pointer to byte in framebuffer that contains this pixel
@@ -133,30 +180,35 @@ namespace pimoroni {
       }
   };
 
-  class PenP8 : public PicoGraphicsPenType {
+  class PicoGraphics_PenP8 : public PicoGraphics {
     public:
       uint8_t color;
       PaletteEntry palette[256];
-      PenP8() {
+      PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer)
+      : PicoGraphics(width, height, frame_buffer) {
+        this->pen_type = PEN_P8;
+        if(this->frame_buffer == nullptr) {
+          this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+        }
         for(auto i = 0u; i < 256; i++) {
-          reset_color(i);
+          reset_pen(i);
         }
       }
-      void set_color(uint c) override {
+      void set_pen(uint c) override {
         color = c;
       }
-      void set_color(uint8_t r, uint8_t g, uint8_t b) override {
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // TODO look up closest palette colour, or just NOOP?
       }
-      void update_color(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
+      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
         palette[i].color = rgb_to_rgb565(r, g, b);
         palette[i].used = true;
       }
-      void reset_color(uint8_t i) {
+      void reset_pen(uint8_t i) override {
         palette[i].color = 0;
         palette[i].used = false;
       }
-      int create(uint8_t r, uint8_t g, uint8_t b) override {
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // Create a colour and place it in the palette if there's space
         RGB565 c = rgb_to_rgb565(r, g, b);
         for(auto i = 0u; i < 256u; i++) {
@@ -184,30 +236,35 @@ namespace pimoroni {
       }
   };
 
-  class PenRGB332 : public PicoGraphicsPenType {
+  class PicoGraphics_PenRGB332 : public PicoGraphics {
     public:
       RGB332 color;
       PaletteEntry palette[256];
-      PenRGB332() {
+      PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer)
+      : PicoGraphics(width, height, frame_buffer) {
+        this->pen_type = PEN_RGB332;
+        if(this->frame_buffer == nullptr) {
+          this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+        }
         for(auto i = 0u; i < 256; i++) {
-          reset_color(i);
+          reset_pen(i);
         }
       }
-      void set_color(uint c) {
+      void set_pen(uint c) override {
         color = c;
       }
-      void set_color(uint8_t r, uint8_t g, uint8_t b) override {
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         color = rgb_to_rgb332(r, g, b);
       }
-      void update_color(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
+      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
         palette[i].color = rgb_to_rgb565(r, g, b);
         palette[i].used = true;
       }
-      void reset_color(uint8_t i) {
+      void reset_pen(uint8_t i) override {
         palette[i].color = rgb332_to_rgb565(i);
         palette[i].used = true;
       }
-      int create(uint8_t r, uint8_t g, uint8_t b) override {
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         return rgb_to_rgb332(r, g, b);
       }
       void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
@@ -226,109 +283,45 @@ namespace pimoroni {
       }
   };
 
-  class PenRGB565 : public PicoGraphicsPenType {
+  class PicoGraphics_PenRGB565 : public PicoGraphics {
     public:
-      uint16_t color;
-      void set_color(uint c) override {
+      RGB565 color;
+      PicoGraphics_PenRGB565(uint16_t width, uint16_t height, void *frame_buffer)
+      : PicoGraphics(width, height, frame_buffer) {
+        this->pen_type = PEN_RGB565;
+        if(this->frame_buffer == nullptr) {
+          this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+        }
+      }
+      void set_pen(uint c) override {
         color = c;
       }
-      void update_color(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
-        // Palette only. Does nothing.
-      }
-      void reset_color(uint8_t i) {
-        // Palette only. Does nothing.
-      }
-      void set_color(uint8_t r, uint8_t g, uint8_t b) override {
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         color = rgb_to_rgb565(r, g, b);
       }
-      int create(uint8_t r, uint8_t g, uint8_t b) override {
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         return rgb_to_rgb565(r, g, b);
       }
       void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
         uint16_t *buf = (uint16_t *)frame_buffer;
         buf[y * stride + x] = color;
       }
-      void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
-      }
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
   };
 
-  template <class T=PicoGraphicsPenType>
-  class PicoGraphics {
-  public:
-    void *frame_buffer;
+  class DisplayDriver {
+    public:
+      uint16_t width;
+      uint16_t height;
+      Rotation rotation;
 
-    Rect bounds;
-    Rect clip;
+      DisplayDriver(uint16_t width, uint16_t height, Rotation rotation)
+       : width(width), height(height), rotation(rotation) {};
 
-    const bitmap::font_t *font;
-
-    T pen;
-
-  public:
-    PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
-    : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
-      set_font(&font6);
-      if(this->frame_buffer == nullptr) {
-        this->frame_buffer = (void *)(new uint8_t[pen.buffer_size(width, height)]);
-      }
-    };
-
-    void set_font(const bitmap::font_t *font);
-    void set_pen(uint16_t p);
-
-    int create_pen(uint8_t r, uint8_t g, uint8_t b) {
-      return pen.create(r, g, b);
-    }
-
-    void set_pen(uint8_t r, uint8_t g, uint8_t b) {
-      pen.set_color(r, g, b);
-    }
-
-    void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
-      pen.update_color(i, r, g, b);
-    }
-
-    void reset_pen(uint8_t i) {
-      pen.reset_color(i);
-    }
-
-    void set_dimensions(int width, int height) {
-      bounds.w = width;
-      bounds.h = height;
-      clip.w = width;
-      clip.h = height;
-    }
-
-    void set_clip(const Rect &r);
-    void remove_clip();
-
-    void *get_data() {
-      return frame_buffer;
-    }
-
-    void get_data(uint y, void *row_buf) {
-      pen.palette_lookup(frame_buffer, row_buf, y * bounds.w, bounds.w);
-    }
-
-    void clear();
-    void pixel(const Point &p);
-    void pixel_span(const Point &p, int32_t l);
-    void rectangle(const Rect &r);
-    void circle(const Point &p, int32_t r);
-    void character(const char c, const Point &p, uint8_t scale = 2);
-    void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
-    int32_t measure_text(const std::string &t, uint8_t scale = 2);
-    void polygon(const std::vector<Point> &points);
-    void triangle(Point p1, Point p2, Point p3);
-    void line(Point p1, Point p2);
+      virtual void update(PicoGraphics *display);
+      virtual void set_backlight(uint8_t brightness);
   };
-
-  template class PicoGraphics<PenP4>;
-  template class PicoGraphics<PenP8>;
-  template class PicoGraphics<PenRGB332>;
-  template class PicoGraphics<PenRGB565>;
 
 }
