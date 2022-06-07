@@ -67,7 +67,6 @@ namespace pimoroni {
   };
 
   void ST7735::init(bool auto_init_sequence) {
-    // configure spi interface and pins
     spi_init(spi, spi_baud);
 
     gpio_set_function(dc, GPIO_FUNC_SIO);
@@ -76,20 +75,8 @@ namespace pimoroni {
     gpio_set_function(cs, GPIO_FUNC_SIO);
     gpio_set_dir(cs, GPIO_OUT);
 
-    gpio_set_function(sck,  GPIO_FUNC_SPI);
+    gpio_set_function(sck, GPIO_FUNC_SPI);
     gpio_set_function(mosi, GPIO_FUNC_SPI);
-
-    if(miso != PIN_UNUSED) {
-      gpio_set_function(miso, GPIO_FUNC_SPI);
-    }
-
-    // if supported by the display then the vsync pin is
-    // toggled high during vertical blanking period
-    if(vsync != PIN_UNUSED) {
-      gpio_set_function(vsync, GPIO_FUNC_SIO);
-      gpio_set_dir(vsync, GPIO_IN);
-      gpio_set_pulls(vsync, false, true);
-    }
 
     // if a backlight pin is provided then set it up for
     // pwm control
@@ -98,6 +85,7 @@ namespace pimoroni {
       pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
       pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
       gpio_set_function(bl, GPIO_FUNC_PWM);
+      set_backlight(0); // Turn backlight off initially to avoid nasty surprises
     }
 
     // if auto_init_sequence then send initialisation sequence
@@ -155,30 +143,10 @@ namespace pimoroni {
       command(reg::DISPON);
       sleep_ms(100);
     }
-  }
 
-  spi_inst_t* ST7735::get_spi() const {
-    return spi;
-  }
-
-  int ST7735::get_cs() const {
-    return cs;
-  }
-
-  int ST7735::get_dc() const {
-    return dc;
-  }
-
-  int ST7735::get_sck() const {
-    return sck;
-  }
-
-  int ST7735::get_mosi() const {
-    return mosi;
-  }
-
-  int ST7735::get_bl() const {
-    return bl;
+    if(bl != PIN_UNUSED) {
+      set_backlight(255); // Turn backlight on now surprises have passed
+    }
   }
 
   void ST7735::command(uint8_t command, size_t len, const char *data) {
@@ -196,23 +164,21 @@ namespace pimoroni {
   }
 
   // Native 16-bit framebuffer update
-  void ST7735::update() {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+  void ST7735::update(PicoGraphics<PenRGB565> *graphics) {
+    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
   }
 
   // 8-bit framebuffer with palette conversion update
-  void ST7735::update(uint16_t *palette) {
+  void ST7735::update(PicoGraphics<PenRGB332> *graphics) {
     command(reg::RAMWR);
-    uint16_t row[width];
     gpio_put(dc, 1); // data mode
     gpio_put(cs, 0);
+
+    uint16_t row_buf[width];
     for(auto y = 0u; y < height; y++) {
-      for(auto x = 0u; x < width; x++) {
-        auto i = y * width + x;
-        row[x] = palette[((uint8_t *)frame_buffer)[i]];
-      }
+      graphics->get_data(y, &row_buf);
       // TODO: Add DMA->SPI / PIO while we prep the next row
-      spi_write_blocking(spi, (const uint8_t*)row, width * sizeof(uint16_t));
+      spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
     }
     gpio_put(cs, 1);
   }

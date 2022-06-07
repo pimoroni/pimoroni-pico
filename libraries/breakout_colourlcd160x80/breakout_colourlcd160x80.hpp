@@ -3,10 +3,11 @@
 #include "drivers/st7735/st7735.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
+#include "common/pimoroni_bus.hpp"
 
 namespace pimoroni {
 
-  class BreakoutColourLCD160x80 : public PicoGraphics {
+  class BreakoutColourLCD160x80 : public PicoGraphics<PenRGB565> {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -17,8 +18,6 @@ namespace pimoroni {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
-  public:
-    void *__fb;
   private:
     ST7735 screen;
 
@@ -27,27 +26,22 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    BreakoutColourLCD160x80(void *buf);
-    BreakoutColourLCD160x80(void *buf, spi_inst_t *spi,
-      uint cs, uint dc, uint sck, uint mosi, uint miso = PIN_UNUSED, uint bl = PIN_UNUSED);
-    BreakoutColourLCD160x80(void *buf, BG_SPI_SLOT slot);
 
+    BreakoutColourLCD160x80(void *frame_buffer)
+      : BreakoutColourLCD160x80(frame_buffer, get_spi_pins(BG_SPI_FRONT)) {
+    }
 
-    //--------------------------------------------------
-    // Methods
-    //--------------------------------------------------
-  public:
-    void init();
+    BreakoutColourLCD160x80(void *frame_buffer, SPIPins bus_pins)
+      : PicoGraphics<PenRGB565>(WIDTH, HEIGHT, frame_buffer), screen(WIDTH, HEIGHT, bus_pins){
+    }
 
-    spi_inst_t* get_spi() const;
-    int get_cs() const;
-    int get_dc() const;
-    int get_sck() const;
-    int get_mosi() const;
-    int get_bl() const;
+    void update() {
+      screen.update(this);
+    }
 
-    void update();
-    void set_backlight(uint8_t brightness);
+    void set_backlight(uint8_t brightness) {
+      screen.set_backlight(brightness);
+    }
   };
 
 }

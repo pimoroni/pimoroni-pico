@@ -260,8 +260,8 @@ namespace pimoroni {
   public:
     void *frame_buffer;
 
-    Rect      bounds;
-    Rect      clip;
+    Rect bounds;
+    Rect clip;
 
     const bitmap::font_t *font;
 
@@ -271,8 +271,8 @@ namespace pimoroni {
     PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
     : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
       set_font(&font6);
-      if(frame_buffer == nullptr) {
-        frame_buffer = (void *)(new uint8_t[pen.buffer_size(width, height)]);
+      if(this->frame_buffer == nullptr) {
+        this->frame_buffer = (void *)(new uint8_t[pen.buffer_size(width, height)]);
       }
     };
 
@@ -305,7 +305,7 @@ namespace pimoroni {
     void set_clip(const Rect &r);
     void remove_clip();
 
-    void* get_data() {
+    void *get_data() {
       return frame_buffer;
     }
 
