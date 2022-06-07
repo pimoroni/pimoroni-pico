@@ -5,7 +5,7 @@
 #include "micropython/modules/util.hpp"
 
 #ifndef PICO_GRAPHICS_PEN_TYPE
-#define PICO_GRAPHICS_PEN_TYPE PenP4
+#define PICO_GRAPHICS_PEN_TYPE PenRGB332
 #endif
 
 using namespace pimoroni;
@@ -181,49 +181,30 @@ mp_obj_t GenericST7789_reset_pen(mp_obj_t self_in, mp_obj_t pen) {
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_update_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_update_pen(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_i, ARG_r, ARG_g, ARG_b };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_i, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
     self->st7789->update_pen(
-        args[ARG_i].u_int & 0xff,
-        args[ARG_r].u_int & 0xff,
-        args[ARG_g].u_int & 0xff,
-        args[ARG_b].u_int & 0xff
+        mp_obj_get_int(args[ARG_i]) & 0xff,
+        mp_obj_get_int(args[ARG_r]) & 0xff,
+        mp_obj_get_int(args[ARG_g]) & 0xff,
+        mp_obj_get_int(args[ARG_b]) & 0xff
     );
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_r, ARG_g, ARG_b };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
     int result = self->st7789->create_pen(
-        args[ARG_r].u_int & 0xff,
-        args[ARG_g].u_int & 0xff,
-        args[ARG_b].u_int & 0xff
+        mp_obj_get_int(args[ARG_r]) & 0xff,
+        mp_obj_get_int(args[ARG_g]) & 0xff,
+        mp_obj_get_int(args[ARG_b]) & 0xff
     );
 
     if (result == -1) mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
@@ -231,33 +212,24 @@ mp_obj_t GenericST7789_create_pen(size_t n_args, const mp_obj_t *pos_args, mp_ma
     return mp_obj_new_int(result);
 }
 
-mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_set_clip(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int w = args[ARG_w].u_int;
-    int h = args[ARG_h].u_int;
-
-    self->st7789->set_clip({x, y, w, h});
+    self->st7789->set_clip({
+        mp_obj_get_int(args[ARG_x]),
+        mp_obj_get_int(args[ARG_y]),
+        mp_obj_get_int(args[ARG_w]),
+        mp_obj_get_int(args[ARG_h])
+    });
 
     return mp_const_none;
 }
 
 mp_obj_t GenericST7789_remove_clip(mp_obj_t self_in) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+
     self->st7789->remove_clip();
 
     return mp_const_none;
@@ -265,6 +237,7 @@ mp_obj_t GenericST7789_remove_clip(mp_obj_t self_in) {
 
 mp_obj_t GenericST7789_clear(mp_obj_t self_in) {
     GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(self_in, GenericST7789_obj_t);
+
     self->st7789->clear();
 
     return mp_const_none;
@@ -281,73 +254,43 @@ mp_obj_t GenericST7789_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y) {
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_pixel_span(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_pixel_span(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x, ARG_y, ARG_l };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_l, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int l = args[ARG_l].u_int;
-
-    self->st7789->pixel_span({x, y}, l);
+    self->st7789->pixel_span({
+        mp_obj_get_int(args[ARG_x]),
+        mp_obj_get_int(args[ARG_y])
+    },  mp_obj_get_int(args[ARG_l]));
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_rectangle(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int w = args[ARG_w].u_int;
-    int h = args[ARG_h].u_int;
-
-    self->st7789->rectangle({x, y, w, h});
+    self->st7789->rectangle({
+        mp_obj_get_int(args[ARG_x]),
+        mp_obj_get_int(args[ARG_y]),
+        mp_obj_get_int(args[ARG_w]),
+        mp_obj_get_int(args[ARG_h])
+    });
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_circle(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x, ARG_y, ARG_r };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int r = args[ARG_r].u_int;
-
-    self->st7789->circle({x, y}, r);
+    self->st7789->circle({
+        mp_obj_get_int(args[ARG_x]),
+        mp_obj_get_int(args[ARG_y])
+    },  mp_obj_get_int(args[ARG_r]));
 
     return mp_const_none;
 }
@@ -481,56 +424,34 @@ mp_obj_t GenericST7789_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_triangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_triangle(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x1, ARG_y1, ARG_x2, ARG_y2, ARG_x3, ARG_y3 };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_x2, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y2, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_x3, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y3, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x1 = args[ARG_x1].u_int;
-    int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x2].u_int;
-    int y2 = args[ARG_y2].u_int;
-    int x3 = args[ARG_x3].u_int;
-    int y3 = args[ARG_y3].u_int;
-
-    self->st7789->triangle({x1, y1}, {x2, y2}, {x3, y3});
+    self->st7789->triangle(
+        {mp_obj_get_int(args[ARG_x1]),
+         mp_obj_get_int(args[ARG_y1])},
+        {mp_obj_get_int(args[ARG_x2]),
+         mp_obj_get_int(args[ARG_y2])},
+        {mp_obj_get_int(args[ARG_x3]),
+         mp_obj_get_int(args[ARG_y3])}
+    );
 
     return mp_const_none;
 }
 
-mp_obj_t GenericST7789_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t GenericST7789_line(size_t n_args, const mp_obj_t *args) {
     enum { ARG_self, ARG_x1, ARG_y1, ARG_x2, ARG_y2 };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_x2, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y2, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], GenericST7789_obj_t);
 
-    GenericST7789_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, GenericST7789_obj_t);
-
-    int x1 = args[ARG_x1].u_int;
-    int y1 = args[ARG_y1].u_int;
-    int x2 = args[ARG_x2].u_int;
-    int y2 = args[ARG_y2].u_int;
-
-    self->st7789->line({x1, y1}, {x2, y2});
+    self->st7789->line(
+        {mp_obj_get_int(args[ARG_x1]),
+         mp_obj_get_int(args[ARG_y1])},
+        {mp_obj_get_int(args[ARG_x2]),
+         mp_obj_get_int(args[ARG_y2])}
+    );
 
     return mp_const_none;
 }
