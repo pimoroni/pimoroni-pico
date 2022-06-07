@@ -12,6 +12,14 @@ extern "C" {
 #include "picographics.h"
 #include "micropython/modules/pimoroni_bus/pimoroni_bus.h"
 
+std::string mp_obj_to_string_r(const mp_obj_t &obj) {
+    if(mp_obj_is_str_or_bytes(obj)) {
+        GET_STR_DATA_LEN(obj, str, str_len);
+        return (const char*)str;
+    }
+    mp_raise_TypeError("can't convert object to str implicitly");
+}
+
 typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
     PicoGraphics *graphics;
@@ -166,6 +174,12 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     return MP_OBJ_FROM_PTR(self);
 }
 
+mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    self->graphics->set_font(mp_obj_to_string_r(font));
+    return mp_const_none;
+}
+
 mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
     (void)self_in;
     (void)framebuffer;
@@ -275,6 +289,46 @@ mp_obj_t ModPicoGraphics_create_pen(size_t n_args, const mp_obj_t *args) {
     if (result == -1) mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
 
     return mp_obj_new_int(result);
+}
+
+mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    size_t num_tuples = n_args - 1;
+    const mp_obj_t *tuples = pos_args + 1;
+
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], ModPicoGraphics_obj_t);
+
+    // Check if there is only one argument, which might be a list
+    if(n_args == 2) {
+        if(mp_obj_is_type(pos_args[1], &mp_type_list)) {
+            mp_obj_list_t *points = MP_OBJ_TO_PTR2(pos_args[1], mp_obj_list_t);
+
+            if(points->len <= 0) mp_raise_ValueError("set_palette(): cannot provide an empty list");
+
+            num_tuples = points->len;
+            tuples = points->items;
+        }
+        else {
+            mp_raise_TypeError("set_palette(): can't convert object to list");
+        }
+    }
+
+    for(size_t i = 0; i < num_tuples; i++) {
+        mp_obj_t obj = tuples[i];
+        if(!mp_obj_is_type(obj, &mp_type_tuple)) mp_raise_ValueError("set_palette(): can't convert object to tuple");
+
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
+
+        if(tuple->len != 3) mp_raise_ValueError("set_palette(): tuple must contain R, G, B values");
+
+        self->graphics->update_pen(
+            i,
+            mp_obj_get_int(tuple->items[0]),
+            mp_obj_get_int(tuple->items[1]),
+            mp_obj_get_int(tuple->items[2])
+        );
+    }
+
+    return mp_const_none;
 }
 
 mp_obj_t ModPicoGraphics_set_clip(size_t n_args, const mp_obj_t *args) {

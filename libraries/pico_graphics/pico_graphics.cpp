@@ -29,6 +29,16 @@ namespace pimoroni {
     this->font = font;
   }
 
+  void PicoGraphics::set_font(std::string font){
+    if (font == "bitmap6") {
+      this->font = &font6;
+    } else if (font == "bitmap8") {
+      this->font = &font8;
+    } else if (font == "bitmap14_outline") {
+      this->font = &font14_outline;
+    }
+  }
+
   void PicoGraphics::set_clip(const Rect &r) {
     clip = bounds.intersection(r);
   }

@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <vector>
 #include "libraries/bitmap_fonts/font6_data.hpp"
+#include "libraries/bitmap_fonts/font8_data.hpp"
+#include "libraries/bitmap_fonts/font14_outline_data.hpp"
 #include "common/pimoroni_common.hpp"
 
 // A tiny graphics library for our Pico products
@@ -105,6 +107,7 @@ namespace pimoroni {
     virtual void palette_lookup(void *frame_buffer, void *result, uint offset, uint length);
 
     void set_font(const bitmap::font_t *font);
+    void set_font(std::string font);
 
     void set_dimensions(int width, int height);
 
@@ -132,26 +135,41 @@ namespace pimoroni {
     public:
       uint8_t color;
       PaletteEntry palette[8];
+      const RGB565 default_palette[8] = {
+        rgb_to_rgb565(57, 48, 57),     // Black
+        rgb_to_rgb565(255, 255, 255),  // White
+        rgb_to_rgb565(58, 91, 70),     // Green
+        rgb_to_rgb565(61, 59, 94),     // Blue
+        rgb_to_rgb565(156, 72, 75),    // Red
+        rgb_to_rgb565(208, 190, 71),   // Yellow
+        rgb_to_rgb565(177, 106, 73),   // Orange
+        rgb_to_rgb565(255, 255, 255)   // Clear
+      };
       PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer)
       : PicoGraphics(width, height, frame_buffer) {
         this->pen_type = PEN_P4;
         if(this->frame_buffer == nullptr) {
           this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
         }
-        palette[0].color = rgb_to_rgb565(57, 48, 57);     // Black
-        palette[1].color = rgb_to_rgb565(255, 255, 255);  // White
-        palette[2].color = rgb_to_rgb565(58, 91, 70);     // Green
-        palette[3].color = rgb_to_rgb565(61, 59, 94);     // Blue
-        palette[4].color = rgb_to_rgb565(156, 72, 75);    // Red
-        palette[5].color = rgb_to_rgb565(208, 190, 71);   // Yellow
-        palette[6].color = rgb_to_rgb565(177, 106, 73);   // Orange
-        palette[7].color = rgb_to_rgb565(255, 255, 255);  // Clear
+        for(auto i = 0u; i < 8; i++) {
+          palette[i].color = default_palette[i];
+          palette[i].used = true;
+        }
       }
       void set_pen(uint c) {
         color = c & 0xf;
       }
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // TODO look up closest palette colour, or just NOOP?
+      }
+      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
+        i &= 0xf;
+        palette[i].color = rgb_to_rgb565(r, g, b);
+        palette[i].used = true;
+      }
+      void reset_pen(uint8_t i) override {
+        i &= 0xf;
+        palette[i].color = default_palette[i];
       }
       void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
         // pointer to byte in framebuffer that contains this pixel
@@ -201,10 +219,12 @@ namespace pimoroni {
         // TODO look up closest palette colour, or just NOOP?
       }
       void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
+        i &= 0xff;
         palette[i].color = rgb_to_rgb565(r, g, b);
         palette[i].used = true;
       }
       void reset_pen(uint8_t i) override {
+        i &= 0xff;
         palette[i].color = 0;
         palette[i].used = false;
       }
@@ -247,7 +267,8 @@ namespace pimoroni {
           this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
         }
         for(auto i = 0u; i < 256; i++) {
-          reset_pen(i);
+          palette[i].color = rgb332_to_rgb565(i);
+          palette[i].used = true;
         }
       }
       void set_pen(uint c) override {
@@ -255,14 +276,6 @@ namespace pimoroni {
       }
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         color = rgb_to_rgb332(r, g, b);
-      }
-      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
-        palette[i].color = rgb_to_rgb565(r, g, b);
-        palette[i].used = true;
-      }
-      void reset_pen(uint8_t i) override {
-        palette[i].color = rgb332_to_rgb565(i);
-        palette[i].used = true;
       }
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         return rgb_to_rgb332(r, g, b);

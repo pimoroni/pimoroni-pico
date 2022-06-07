@@ -36,6 +36,7 @@ extern mp_obj_t ModPicoGraphics_set_backlight(mp_obj_t self_in, mp_obj_t brightn
 // Palette management
 extern mp_obj_t ModPicoGraphics_update_pen(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_reset_pen(mp_obj_t self_in, mp_obj_t pen);
+extern mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
 // Pen
 extern mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen);
@@ -57,5 +58,6 @@ extern mp_obj_t ModPicoGraphics_triangle(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 
 // Utility
+extern mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font);
 extern mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);
