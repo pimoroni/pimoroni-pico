@@ -8,7 +8,7 @@
 
 namespace pimoroni {
 
-  class ST7735 {
+  class ST7735 : public DisplayDriver {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -20,9 +20,6 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-    // screen properties
-    uint16_t width;
-    uint16_t height;
 
     spi_inst_t *spi = spi0;
 
@@ -45,7 +42,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     ST7735(uint16_t width, uint16_t height, SPIPins pins) :
-      width(width), height(height),
+      DisplayDriver(width, height, ROTATE_0),
       spi(pins.spi), cs(pins.cs), dc(pins.dc), sck(pins.sck), mosi(pins.mosi), bl(pins.bl) {
         init();
       }
@@ -55,10 +52,8 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    // Update functions for supported Pen types
-    void update(PicoGraphics<PenRGB565> *graphics);
-    void update(PicoGraphics<PenRGB332> *graphics);
-    void set_backlight(uint8_t brightness);
+    void update(PicoGraphics *graphics) override;
+    void set_backlight(uint8_t brightness) override;
 
   private:
     void init(bool auto_init_sequence = true);

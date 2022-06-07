@@ -46,7 +46,23 @@ namespace pimoroni {
     PWMFRSEL  = 0xCC
   };
 
-  void ST7789::init() {
+  void ST7789::common_init() {
+    gpio_set_function(dc, GPIO_FUNC_SIO);
+    gpio_set_dir(dc, GPIO_OUT);
+
+    gpio_set_function(cs, GPIO_FUNC_SIO);
+    gpio_set_dir(cs, GPIO_OUT);
+
+    // if a backlight pin is provided then set it up for
+    // pwm control
+    if(bl != PIN_UNUSED) {
+      pwm_config cfg = pwm_get_default_config();
+      pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
+      pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
+      gpio_set_function(bl, GPIO_FUNC_PWM);
+      set_backlight(0); // Turn backlight off initially to avoid nasty surprises
+    }
+
     command(reg::SWRESET);
 
     sleep_ms(150);
@@ -201,139 +217,39 @@ namespace pimoroni {
     gpio_put(cs, 1);
   }
   
-  void ST7789::update(PicoGraphics<PenRGB565> *graphics) {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
-  }
-
-  void ST7789::update(PicoGraphics<PenRGB332> *graphics) {
-    uint8_t command = reg::RAMWR;
-
-    gpio_put(dc, 0); // command mode
-
-    gpio_put(cs, 0);
-
-    if(spi) {
-      spi_write_blocking(spi, &command, 1);
+  void ST7789::update(PicoGraphics *graphics) {
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
+      command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
     } else {
-      write_blocking_parallel(&command, 1);
-    }
+      uint8_t command = reg::RAMWR;
 
-    gpio_put(dc, 1); // data mode
+      gpio_put(dc, 0); // command mode
 
-    uint16_t row_buf[width];
+      gpio_put(cs, 0);
 
-    for(auto y = 0u; y < height; y++) {
-      graphics->get_data(y, &row_buf);
-      // TODO: Add DMA->SPI / PIO while we prep the next row
       if(spi) {
-        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
+        spi_write_blocking(spi, &command, 1);
       } else {
-        write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
+        write_blocking_parallel(&command, 1);
       }
-    }
 
-    gpio_put(cs, 1);
-  }
+      gpio_put(dc, 1); // data mode
 
-  void ST7789::update(PicoGraphics<PenP8> *graphics) {
-    uint8_t command = reg::RAMWR;
+      uint16_t row_buf[width];
 
-    gpio_put(dc, 0); // command mode
-
-    gpio_put(cs, 0);
-
-    if(spi) {
-      spi_write_blocking(spi, &command, 1);
-    } else {
-      write_blocking_parallel(&command, 1);
-    }
-  
-    gpio_put(dc, 1); // data mode
-
-    uint16_t row_buf[width];
-
-    for(auto y = 0u; y < height; y++) {
-      graphics->get_data(y, &row_buf);
-      // TODO: Add DMA->SPI / PIO while we prep the next row
-      if(spi) {
-        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
-      } else {
-        write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
+      for(auto y = 0u; y < height; y++) {
+        graphics->get_data(y, &row_buf);
+        // TODO: Add DMA->SPI / PIO while we prep the next row
+        if(spi) {
+          spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
+        } else {
+          write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
+        }
       }
-    }
 
-    gpio_put(cs, 1);
+      gpio_put(cs, 1);
+    }
   }
-
-  void ST7789::update(PicoGraphics<PenP4> *graphics) {
-    uint8_t command = reg::RAMWR;
-
-    gpio_put(dc, 0); // command mode
-
-    gpio_put(cs, 0);
-
-    if(spi) {
-      spi_write_blocking(spi, &command, 1);
-    } else {
-      write_blocking_parallel(&command, 1);
-    }
-
-    gpio_put(dc, 1); // data mode
-
-    uint16_t row_buf[width];
-
-    for(auto y = 0u; y < height; y++) {
-      graphics->get_data(y, &row_buf);
-      // TODO: Add DMA->SPI / PIO while we prep the next row
-      if(spi) {
-        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
-      } else {
-        write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
-      }
-    }
-
-    gpio_put(cs, 1);
-  }
-
-/*
-  // Native 16-bit framebuffer update
-  void ST7789::update() {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
-  }
-
-  // 8-bit framebuffer with palette conversion update
-  void ST7789::update(uint16_t *palette) {
-    uint8_t command = reg::RAMWR;
-    uint16_t row[width];
-
-    gpio_put(dc, 0); // command mode
-
-    gpio_put(cs, 0);
-
-    if(spi) {
-      spi_write_blocking(spi, &command, 1);
-    } else {
-      write_blocking_parallel(&command, 1);
-    }
-  
-    gpio_put(dc, 1); // data mode
-
-    for(auto y = 0u; y < height; y++) {
-      for(auto x = 0u; x < width; x++) {
-        auto i = y * width + x;
-        row[x] = palette[((uint8_t *)frame_buffer)[i]];
-      }
-      // TODO: Add DMA->SPI / PIO while we prep the next row
-      if(spi) {
-        spi_write_blocking(spi, (const uint8_t*)row, width * sizeof(uint16_t));
-      } else {
-        write_blocking_parallel((const uint8_t*)row, width * sizeof(uint16_t));
-      }
-    }
-
-    gpio_put(cs, 1);
-  }
-  */
 
   void ST7789::set_backlight(uint8_t brightness) {
     // gamma correct the provided 0-255 brightness value onto a

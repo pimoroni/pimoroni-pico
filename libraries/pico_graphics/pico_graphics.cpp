@@ -2,39 +2,51 @@
 
 namespace pimoroni {
 
-  template<class T>
-  void PicoGraphics<T>::set_font(const bitmap::font_t *font){
+  void PicoGraphics::set_pen(uint c) {};
+  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {};
+  void PicoGraphics::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {};
+  void PicoGraphics::reset_pen(uint8_t i) {};
+  int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
+  void PicoGraphics::set_pixel(void *frame_buffer, uint x, uint y, uint stride) {};
+  void PicoGraphics::palette_lookup(void *frame_buffer, void *result, uint offset, uint length) {};
+
+  void PicoGraphics::set_dimensions(int width, int height) {
+    bounds.w = width;
+    bounds.h = height;
+    clip.w = width;
+    clip.h = height;
+  }
+
+  void *PicoGraphics::get_data() {
+    return frame_buffer;
+  }
+
+  void PicoGraphics::get_data(uint y, void *row_buf) {
+    palette_lookup(frame_buffer, row_buf, y * bounds.w, bounds.w);
+  }
+
+  void PicoGraphics::set_font(const bitmap::font_t *font){
     this->font = font;
   }
 
-  template<class T>
-  void PicoGraphics<T>::set_pen(uint16_t p) {
-    pen.set_color(p);
-  }
-
-  template<class T>
-  void PicoGraphics<T>::set_clip(const Rect &r) {
+  void PicoGraphics::set_clip(const Rect &r) {
     clip = bounds.intersection(r);
   }
 
-  template<class T>
-  void PicoGraphics<T>::remove_clip() {
+  void PicoGraphics::remove_clip() {
     clip = bounds;
   }
 
-  template<class T>
-  void PicoGraphics<T>::clear() {
+  void PicoGraphics::clear() {
     rectangle(clip);
   }
 
-  template<class T>
-  void PicoGraphics<T>::pixel(const Point &p) {
+  void PicoGraphics::pixel(const Point &p) {
     if(!clip.contains(p)) return;
-    pen.set_pixel(frame_buffer, p.x, p.y, bounds.w);
+    set_pixel(frame_buffer, p.x, p.y, bounds.w);
   }
 
-  template<class T>
-  void PicoGraphics<T>::pixel_span(const Point &p, int32_t l) {
+  void PicoGraphics::pixel_span(const Point &p, int32_t l) {
     // check if span in bounds
     if( p.x + l < clip.x || p.x >= clip.x + clip.w ||
         p.y     < clip.y || p.y >= clip.y + clip.h) return;
@@ -46,13 +58,12 @@ namespace pimoroni {
 
     Point dest(clipped.x, clipped.y);
     while(l--) {
-        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+        set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
         dest.x++;
     }
   }
 
-  template<class T>
-  void PicoGraphics<T>::rectangle(const Rect &r) {
+  void PicoGraphics::rectangle(const Rect &r) {
     // clip and/or discard depending on rectangle visibility
     Rect clipped = r.intersection(clip);
 
@@ -62,18 +73,12 @@ namespace pimoroni {
     while(clipped.h--) {
       // draw span of pixels for this row
       pixel_span(dest, clipped.w);
-      /*for(int32_t i = 0; i < clipped.w; i++) {
-        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
-        dest.x++;
-      }*/
-
       // move to next scanline
       dest.y++;
     }
   }
 
-  template<class T>
-  void PicoGraphics<T>::circle(const Point &p, int32_t radius) {
+  void PicoGraphics::circle(const Point &p, int32_t radius) {
     // circle in screen bounds?
     Rect bounds = Rect(p.x - radius, p.y - radius, radius * 2, radius * 2);
     if(!bounds.intersects(clip)) return;
@@ -101,22 +106,19 @@ namespace pimoroni {
     }
   }
 
-  template<class T>
-  void PicoGraphics<T>::character(const char c, const Point &p, uint8_t scale) {
+  void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
     bitmap::character(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
       rectangle(Rect(x, y, w, h));
     }, c, p.x, p.y, scale);
   }
 
-  template<class T>
-  void PicoGraphics<T>::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
+  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
     bitmap::text(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
       rectangle(Rect(x, y, w, h));
     }, t, p.x, p.y, wrap, scale);
   }
 
-  template<class T>
-  int32_t PicoGraphics<T>::measure_text(const std::string &t, uint8_t scale) {
+  int32_t PicoGraphics::measure_text(const std::string &t, uint8_t scale) {
     return bitmap::measure_text(font, t, scale);
   }
 
@@ -128,8 +130,7 @@ namespace pimoroni {
     return (p1.y == p2.y && p1.x > p2.x) || (p1.y < p2.y);
   }
 
-  template<class T>
-  void PicoGraphics<T>::triangle(Point p1, Point p2, Point p3) {
+  void PicoGraphics::triangle(Point p1, Point p2, Point p3) {
     Rect triangle_bounds(
       Point(std::min(p1.x, std::min(p2.x, p3.x)), std::min(p1.y, std::min(p2.y, p3.y))),
       Point(std::max(p1.x, std::max(p2.x, p3.x)), std::max(p1.y, std::max(p2.y, p3.y))));
@@ -174,7 +175,7 @@ namespace pimoroni {
       Point dest = Point(triangle_bounds.x, triangle_bounds.y + y);
       for (int32_t x = 0; x < triangle_bounds.w; x++) {
         if ((w0 | w1 | w2) >= 0) {
-          pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+          set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
         }
 
         dest.x++;
@@ -190,8 +191,7 @@ namespace pimoroni {
     }
   }
 
-  template<class T>
-  void PicoGraphics<T>::polygon(const std::vector<Point> &points) {
+  void PicoGraphics::polygon(const std::vector<Point> &points) {
     static int32_t nodes[64]; // maximum allowed number of nodes per scanline for polygon rendering
 
     int32_t miny = points[0].y, maxy = points[0].y;
@@ -237,8 +237,7 @@ namespace pimoroni {
     }
   }
 
-  template<class T>
-  void PicoGraphics<T>::line(Point p1, Point p2) {
+  void PicoGraphics::line(Point p1, Point p2) {
     // fast horizontal line
     if(p1.y == p2.y) {
       int32_t start = std::max(clip.x, std::min(p1.x, p2.x));
@@ -253,7 +252,7 @@ namespace pimoroni {
       int32_t length = std::min(clip.y + clip.h, std::max(p1.y, p2.y)) - start;
       Point dest(p1.x, start);
       while(length--) {
-        pen.set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
+        set_pixel(frame_buffer, dest.x, dest.y, bounds.w);
         dest.y++;
       }
       return;
@@ -273,7 +272,7 @@ namespace pimoroni {
       int32_t x = p1.x;
       int32_t y = p1.y << 16;
       while(s--) {
-        pen.set_pixel(frame_buffer, x, y >> 16, bounds.w);
+        set_pixel(frame_buffer, x, y >> 16, bounds.w);
         y += sy;
         x += sx;
       }
@@ -285,7 +284,7 @@ namespace pimoroni {
       int32_t y = p1.y;
       int32_t x = p1.x << 16;
       while(s--) {
-        pen.set_pixel(frame_buffer, x >> 16, y, bounds.w);
+        set_pixel(frame_buffer, x >> 16, y, bounds.w);
         y += sy;
         x += sx;
       }

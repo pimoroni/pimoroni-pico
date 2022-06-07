@@ -164,23 +164,22 @@ namespace pimoroni {
   }
 
   // Native 16-bit framebuffer update
-  void ST7735::update(PicoGraphics<PenRGB565> *graphics) {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
-  }
+  void ST7735::update(PicoGraphics *graphics) {
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
+      command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
+    } else {
+      command(reg::RAMWR);
+      gpio_put(dc, 1); // data mode
+      gpio_put(cs, 0);
 
-  // 8-bit framebuffer with palette conversion update
-  void ST7735::update(PicoGraphics<PenRGB332> *graphics) {
-    command(reg::RAMWR);
-    gpio_put(dc, 1); // data mode
-    gpio_put(cs, 0);
-
-    uint16_t row_buf[width];
-    for(auto y = 0u; y < height; y++) {
-      graphics->get_data(y, &row_buf);
-      // TODO: Add DMA->SPI / PIO while we prep the next row
-      spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
+      uint16_t row_buf[width];
+      for(auto y = 0u; y < height; y++) {
+        graphics->get_data(y, &row_buf);
+        // TODO: Add DMA->SPI / PIO while we prep the next row
+        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
+      }
+      gpio_put(cs, 1);
     }
-    gpio_put(cs, 1);
   }
 
   void ST7735::set_backlight(uint8_t brightness) {
