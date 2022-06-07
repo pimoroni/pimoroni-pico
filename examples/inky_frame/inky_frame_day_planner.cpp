@@ -18,23 +18,32 @@ uint32_t time() {
   return to_ms_since_boot(t);
 }
 
-void center_text(std::string message, int y, float scale = 1.0f) {
-  int32_t tw = inky.measure_text(message, scale);
-  inky.text(message, (600 / 2) - (tw / 2), y, scale);
+
+std::string day_suffix(datetime_t &dt) {
+  std::string result;
+       if(result.back() == '1') {result = "st"; }
+  else if(result.back() == '2') {result = "nd";}
+  else if(result.back() == '3') {result = "rd";}
+  else                          {result = "th";}
+  return result;
 }
 
-void center_text(std::string message, int x, int y, int w, float scale = 1.0f) {
-  int32_t tw = inky.measure_text(message, scale);
-  inky.text(message, (w / 2) - (tw / 2) + x, y, scale);
+
+int day_of_week(datetime_t &dt) {
+  // based on implementation found at
+  // https://www.tondering.dk/claus/cal/chrweek.php#calcdow
+  uint a = (14 - dt.month) / 12;
+  uint y = dt.year - a;
+  uint m = dt.month + (12 * a) - 2;
+  return (dt.day + y + (y / 4) - (y / 100) + (y / 400) + ((31 * m) / 12)) % 7;
 }
+
 
 std::string day_name(datetime_t &dt) {
-  std::string result = std::to_string(dt.day);
-       if(result.back() == '1') {result += "st"; }
-  else if(result.back() == '2') {result += "nd";}
-  else if(result.back() == '3') {result += "rd";}
-  else                          {result += "th";}
-  return result;
+  static std::array<std::string, 7> day_names = {
+    "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+  };
+  return day_names[day_of_week(dt)];
 }
 
 std::string month_name(datetime_t &dt) {
@@ -45,12 +54,11 @@ std::string month_name(datetime_t &dt) {
   return month_names[dt.month - 1];
 }
 
-std::string short_day_name(int dotw) {
+std::string short_day_name(datetime_t &dt) {
   static std::array<std::string, 7> day_names = {
     "Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"
   };
-
-  return day_names[dotw];
+  return day_names[day_of_week(dt)];
 }
 
 std::string year_name(datetime_t &dt) {
@@ -68,58 +76,49 @@ int days_in_month(datetime_t &dt)
           dt.month == 12) ? 31 : 30;
 }
 
-int day_of_week(datetime_t &dt) {
-  // based on implementation found at
-  // https://www.tondering.dk/claus/cal/chrweek.php#calcdow
-  uint a = (14 - dt.month) / 12;
-  uint y = dt.year - a;
-  uint m = dt.month + (12 * a) - 2;
-  return (dt.day + y + (y / 4) - (y / 100) + (y / 400) + ((31 * m) / 12)) % 7;
+
+void center_text(std::string message, int y, float scale = 1.0f) {
+  int32_t tw = inky.measure_text(message, scale);
+  inky.text(message, (600 / 2) - (tw / 2), y, scale);
 }
 
-void draw_flipper(int x, int y, int w, int h, std::string t) {
-  inky.text_tracking(0.95f);
-  inky.text_aspect(1.1f);
-
-  inky.pen(InkyFrame::BLACK);
-  inky.thickness(6);
-  inky.rectangle(x + 3 + 5, y + 3 + 5, w - 6, h - 6);
-
-  inky.pen(InkyFrame::WHITE);
-  inky.thickness(6);
-  inky.rectangle(x + 3, y + 3, w - 6, h - 6);
-
-  inky.pen(InkyFrame::TAUPE);
-  inky.rectangle(x + 3, y + (h / 2) + 3, w - 6, (h / 2) - 6);
-
-  inky.pen(InkyFrame::BLACK);
-  inky.thickness(h / 8);
-  center_text(t, x, y + (h / 2), w, h / 38.0f);
+void center_text(std::string message, int x, int y, int w, float scale = 1.0f) {
+  int32_t tw = inky.measure_text(message, scale);
+  inky.text(message, (w / 2) - (tw / 2) + x, y, scale);
 }
 
 void render_calendar_view() {
   int width = 240;
 
-  inky.text_tracking(0.95f);
+
   inky.text_aspect(1.1f);
 
   inky.pen(InkyFrame::RED);
   inky.rectangle(0, 0, width, 448);
 
-  draw_flipper(20, 20, 90, 120, "2");
-  draw_flipper(130, 20, 90, 120, "1");
+  inky.pen(InkyFrame::WHITE);
 
+  // draw the day of the week
+  inky.thickness(2);
+  inky.text_tracking(0.9f);
+  center_text(day_name(now), 0, 40, width, 1.4f);
 
-  draw_flipper(20, 160, 200, 36, "FEBRUARY");
+  // draw the day of the month number
+  inky.thickness(15);
+  inky.text_tracking(0.95f);
+  center_text(std::to_string(now.day), 0, 120, width, 3.0f);
+
+  // draw the month and year
+  inky.thickness(1);
+  inky.text_tracking(0.9f);
+  center_text(month_name(now) + " " + year_name(now), 0, 180, width, 0.9f);
+
+  inky.line(0, 220, width, 220);
+
 /*
 
 
 
-  inky.pen(InkyFrame::WHITE);
-  center_text(day_name(now), 0, 60, width, 2.6f);
-
-  inky.thickness(1);
-  center_text(month_name(now) + " " + year_name(now), 0, 110, width, 0.75f);
 */
 /*
   inky.pen(InkyFrame::WHITE);
@@ -135,22 +134,17 @@ void render_calendar_view() {
 
   // draw a calendar
   int xoff = 20;
-  int yoff = 240;
+  int yoff = 255;
   int day_width = (width - xoff - xoff) / 7;
   int row_height = day_width;
   int dotw = first_dotw;
 
-  inky.thickness(6);
-  inky.pen(InkyFrame::BLACK);
-  inky.rectangle(xoff + 5, yoff + 3 - 16 + 5, width - xoff - xoff - 3, (row_height + 5) * 6 - 6);
-
-  inky.pen(InkyFrame::WHITE);
-  inky.rectangle(xoff, yoff + 3 - 16, width - xoff - xoff - 6, (row_height + 5) * 6 - 6);
-
   inky.thickness(2);
-  inky.pen(InkyFrame::BLUE);
+
+  datetime_t header_day = first_day; header_day.day += 7 - first_dotw;
   for(int dotw_header = 0; dotw_header <= 6; dotw_header++) {
-    center_text(short_day_name(dotw_header), day_width * dotw_header + xoff, yoff, day_width, 0.6f);
+    center_text(short_day_name(header_day), day_width * dotw_header + xoff, yoff, day_width, 0.6f);
+    header_day.day++;
   }
   yoff += row_height;
 
@@ -158,17 +152,15 @@ void render_calendar_view() {
 
   for(int day = 1; day <= days_in_month(first_day); day++) {
     if(day == now.day) {
-      inky.pen(InkyFrame::RED);
-      inky.rectangle(day_width * dotw + xoff, yoff - (row_height / 2), day_width, row_height);
       inky.pen(InkyFrame::WHITE);
+      inky.rectangle(day_width * dotw + xoff, yoff - (row_height / 2), day_width, row_height);
+      inky.pen(InkyFrame::RED);
       center_text(std::to_string(day), day_width * dotw + xoff, yoff, day_width, 0.6f);
     } else if(dotw == 0 || dotw == 6) {
-      inky.pen(InkyFrame::YELLOW);
-      inky.rectangle(day_width * dotw + xoff, yoff - (row_height / 2), day_width, row_height);
-      inky.pen(InkyFrame::BLACK);
+      inky.pen(InkyFrame::TAUPE);
       center_text(std::to_string(day), day_width * dotw + xoff, yoff, day_width, 0.6f);
     } else {
-      inky.pen(InkyFrame::BLACK);
+      inky.pen(InkyFrame::WHITE);
       center_text(std::to_string(day), day_width * dotw + xoff, yoff, day_width, 0.6f);
     }
 
@@ -354,6 +346,7 @@ void render_calendar_entries() {
   int width = 600 - xoff - spacing;
   int row_height = 50;
 
+  inky.text_tracking(1.0f);
 
   for(auto event : events) {
     // end of event marker, now we can render this event to the screen
@@ -397,7 +390,7 @@ int main() {
   printf("%d\n", event);
 
   // set date to display
-  now = {.year = 2021, .month = 3, .day = 25, .hour = 8, .min = 7, .sec = 12};
+  now = {.year = 2021, .month = 9, .day = 25, .hour = 8, .min = 7, .sec = 12};
   today = {.year = now.year, .month = now.month, .day = now.day};
 
   printf("writing to screen.. ");

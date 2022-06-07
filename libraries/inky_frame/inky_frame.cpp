@@ -267,12 +267,12 @@ namespace pimoroni {
 
   int32_t InkyFrame::measure_text(std::string message, float s) {
     if (_bitmap_font) return bitmap::measure_text(_bitmap_font, message, s);
-    return hershey::measure_text(_font, message, s);
+    return hershey::measure_text(_font, message, s, _text_tracking);
   }
 
   int32_t InkyFrame::measure_glyph(unsigned char c, float s) {
     if (_bitmap_font) return bitmap::measure_character(_bitmap_font, c, s);
-    return hershey::measure_glyph(_font, c, s);
+    return hershey::measure_glyph(_font, c, s, _text_tracking);
   }
 
   void InkyFrame::font(std::string name) {

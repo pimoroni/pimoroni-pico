@@ -46,7 +46,7 @@ namespace hershey {
     return &font->chars[c - 32];
   }
 
-  int32_t measure_glyph(const font_t* font, unsigned char c, float s) {
+  int32_t measure_glyph(const font_t* font, unsigned char c, float s, float k) {
     const font_glyph_t *gd = glyph_data(font, c);
 
     // if glyph data not found (id too great) then skip
@@ -54,13 +54,13 @@ namespace hershey {
       return 0;
     }
 
-    return gd->width * s;
+    return gd->width * s * k;
   }
 
-  int32_t measure_text(const font_t* font, std::string message, float s) {
+  int32_t measure_text(const font_t* font, std::string message, float s, float k) {
     int32_t width = 0;
     for(auto &c : message) {
-      width += measure_glyph(font, c, s);
+      width += measure_glyph(font, c, s, k);
     }
     return width;
   }

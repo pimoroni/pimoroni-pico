@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "hardware/vreg.h"
 
 #include "JPEGDEC.h"
 #include "inky_frame.hpp"
@@ -28,19 +29,18 @@ uint32_t time() {
 }
 
 
+
+// helpful type for storing and manipulating colours
 struct RGB {
   int r, g, b;
 
   RGB() : r(0), g(0), b(0) {}
   RGB(int r, int g, int b) : r(r), g(g), b(b) {}
 
-  RGB  operator+(const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
+  RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
   RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
-  RGB  operator-(const RGB& c) const {return RGB(r - c.r, g - c.g, b - c.b);}
+  RGB  operator- (const RGB& c) const {return RGB(r - c.r, g - c.g, b - c.b);}
 };
-
-
-
 
 // taken by photographing the screen in day light with solid colour bars
 // then applying a strong gaussian blue to the image and eye dropping each
@@ -55,8 +55,12 @@ struct RGB {
   {197, 163,  53}, // yellow
   {200, 128,  41}, // orange
   {175, 140, 134}  // clean / taupe?!
-};
-*/
+};*/
+
+// it turns out that visually things look a lot better if you fully
+// saturate the palette, this makes sense in hindsight as otherwise the
+// palette entries are all quite muted and relatively close to each other
+// perceptively
 
 RGB palette[8] = {
   {  0,   0,   0}, // black
@@ -97,89 +101,130 @@ int closest(const RGB &col) {
   return m;
 }
 
-// finds a suitable pallet index for the specified pixel based on the
-// supplied target colour by applying an ordered dither (4x4)
-int find_colour_dithered(RGB colour, int x, int y) {
-  static uint pattern[16] = // dither pattern
-    {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
-
-  // find a list of candidates by starting with the ideal colours closest
-  // match and then compounding the error before selecting the next candidate
-  // this is repeated until we have enough candidates for all elements in our
-  // dither pattern
-  static std::array<int, 16> candidates;
+// find a list of candidates by starting with the ideal colours closest
+// match and then compounding the error before selecting the next candidate
+// this is repeated until we have enough candidates for all elements in our
+// dither pattern
+void get_candidates(const RGB &col, std::array<uint8_t, 16> &candidates) {
   RGB error;
   for(size_t i = 0; i < std::size(candidates); i++) {
-    candidates[i] = closest(colour + error);
-    error += (colour - palette[candidates[i]]);
+    candidates[i] = closest(col + error);
+    error += (col - palette[candidates[i]]);
   }
 
-  // sort by a rough approximation of luminence
+  // sort by a rough approximation of luminance, this ensures that neighbouring
+  // pixels in the dither matrix are at extreme opposites of luminence
+  // giving a more balanced output
   std::sort(candidates.begin(), candidates.end(), [](int a, int b) {
     return luminance(palette[a]) > luminance(palette[b]);
   });
-
-  // find the pattern coordinate offset
-  uint pattern_index = (x & 0b11) | ((y & 0b11) << 2);
-
-  // return the selected candidate
-  return candidates[pattern[pattern_index]];
 }
 
+// runs around 10x faster but at some cost to image fidelity. the rgb colour
+// is reduced down to 9-bits (rrrgggbbb) and converted into an integer that
+// becomes a key into a cache containing the already found candidates for
+// that colour
+#define CACHE_CANDIDATES 1
 
-void * myOpen(const char *filename, int32_t *size) {
-  FIL *pfil = new FIL;
-  FRESULT fr = f_open(pfil, filename, FA_READ);
+// enables ordered dithering when rendering jpeg images
+#define ENABLE_JPEG_DITHER 1
 
-  printf("open %s..", filename);
-  if(fr) {
-    return nullptr;
-  }
+// finds a suitable pallet index for the specified pixel based on the
+// supplied target colour by applying an ordered dither (4x4)
+int find_colour_dithered(const RGB &col, int x, int y) {
+  static uint pattern[16] = // dither pattern
+    {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
 
-  printf("..done!\n");
+  #if CACHE_CANDIDATES == 1
 
-  *size = f_size(pfil);
-  return (void *)pfil;
+    static std::array<std::array<uint8_t, 16>, 512> candidate_cache;
+    static bool cache_built = false;
+
+    // if we haven't already built the cache then do it now
+    if(!cache_built) {
+      for(uint i = 0; i < 512; i++) {
+        RGB cache_col((i & 0x1C0) >> 1, (i & 0x38) << 2, (i & 0x7) << 5);
+        get_candidates(cache_col, candidate_cache[i]);
+      }
+      cache_built = true;
+    }
+
+    uint cache_key =
+      ((col.r & 0xE0) << 1) | ((col.g & 0xE0) >> 2) | ((col.b & 0xE0) >> 5);
+
+    // find the pattern coordinate offset
+    uint pattern_index = (x & 0b11) | ((y & 0b11) << 2);
+
+    // return the selected candidate
+    return candidate_cache[cache_key][pattern[pattern_index]];
+
+  #else
+
+    static std::array<uint8_t, 16> candidates;
+    get_candidates(col, candidates);
+
+    // find the pattern coordinate offset
+    uint pattern_index = (x & 0b11) | ((y & 0b11) << 2);
+
+    // return the selected candidate
+    return candidates[pattern[pattern_index]];
+
+  #endif
 }
 
+JPEGDEC jpeg;
+struct {
+  int x, y, w, h;
+} jpeg_decode_options;
 
-void myClose(void *handle) {
-  FIL *pf = (FIL *)handle;
-  f_close(pf);
-  delete pf;
+void *jpegdec_open_callback(const char *filename, int32_t *size) {
+  FIL *fil = new FIL;
+  if(f_open(fil, filename, FA_READ)) {return nullptr;}
+  *size = f_size(fil);
+  return (void *)fil;
 }
 
-int32_t myRead(JPEGFILE *handle, uint8_t *buffer, int32_t length) {
-  FIL *pf = (FIL *)handle->fHandle;
-  uint bytes_read;
-  f_read(pf, buffer, length, &bytes_read);
-  return bytes_read;
+void jpegdec_close_callback(void *handle) {
+  f_close((FIL *)handle);
+  delete (FIL *)handle;
 }
 
-int32_t mySeek(JPEGFILE *handle, int32_t position) {
-  FIL *pf = (FIL *)handle->fHandle;
-  FRESULT fr = f_lseek (pf, position);
-  return fr == FR_OK ? 1 : 0;
+int32_t jpegdec_read_callback(JPEGFILE *jpeg, uint8_t *p, int32_t c) {
+  uint br; f_read((FIL *)jpeg->fHandle, p, c, &br);
+  return br;
 }
 
-int JPEGDraw(JPEGDRAW *pDraw) {
-  uint16_t *p = pDraw->pPixels;
+int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
+  return f_lseek((FIL *)jpeg->fHandle, p) == FR_OK ? 1 : 0;
+}
 
-  int xo = pDraw->x;
-  int yo = pDraw->y;
+int jpegdec_draw_callback(JPEGDRAW *draw) {
+  uint16_t *p = draw->pPixels;
 
-  for(int y = 0; y < pDraw->iHeight; y++) {
-    for(int x = 0; x < pDraw->iWidth; x++) {
-      uint16_t rgb = *p;
+  int xo = jpeg_decode_options.x;
+  int yo = jpeg_decode_options.y;
 
-      RGB c;
-      c.r = ((rgb >> 11) &  0b11111) << 3;
-      c.g = ((rgb >>  5) & 0b111111) << 2;
-      c.b = ((rgb >>  0) &  0b11111) << 3;
+  for(int y = 0; y < draw->iHeight; y++) {
+    for(int x = 0; x < draw->iWidth; x++) {
+      int sx = ((draw->x + x + xo) * jpeg_decode_options.w) / jpeg.getWidth();
+      int sy = ((draw->y + y + yo) * jpeg_decode_options.h) / jpeg.getHeight();
 
-      if(x + xo > 0 && x + xo < 600 && y + yo > 0 && y + yo < 448) {
-        inky.fast_pixel(x + xo, y + yo, find_colour_dithered(c, x + xo, y + yo));
-        //inky.fast_pixel(x + xo, y + yo, closest(c));
+      if(xo + sx > 0 && xo + sx < 600 && yo + sy > 0 && yo + sy < 448) {
+        RGB c(
+          ((*p >> 11) &  0b11111) << 3,
+          ((*p >>  5) & 0b111111) << 2,
+          ((*p >>  0) &  0b11111) << 3
+        );
+
+        #if ENABLE_JPEG_DITHER == 1
+
+          inky.fast_pixel(xo + sx, yo + sy, find_colour_dithered(c, xo + sx, yo + sy));
+
+        #else
+
+          inky.fast_pixel(xo + sx, yo + sy, closest(c));
+
+        #endif
       }
 
       p++;
@@ -189,7 +234,31 @@ int JPEGDraw(JPEGDRAW *pDraw) {
   return 1; // continue drawing
 }
 
+void draw_jpeg(std::string filename, int x, int y, int w, int h) {
 
+  // TODO: this is a horrible way to do it but we need to pass some parameters
+  // into the jpegdec_draw_callback() method somehow and the library isn't
+  // setup to allow any sort of user data to be passed around - yuck
+  jpeg_decode_options.x = x;
+  jpeg_decode_options.y = y;
+  jpeg_decode_options.w = w;
+  jpeg_decode_options.h = h;
+
+  jpeg.open(
+    filename.c_str(),
+    jpegdec_open_callback,
+    jpegdec_close_callback,
+    jpegdec_read_callback,
+    jpegdec_seek_callback,
+    jpegdec_draw_callback);
+
+  printf("- starting jpeg decode..");
+  int start = time();
+  jpeg.decode(0, 0, 0);
+  printf("done in %d ms!\n", int(time() - start));
+
+  jpeg.close();
+}
 
 int main() {
   // turn on led to show we're awake
@@ -206,6 +275,10 @@ int main() {
   // time to connect
   stdio_init_all();
   sleep_ms(500);
+
+  vreg_set_voltage(VREG_VOLTAGE_1_20);
+  sleep_ms(10);
+  set_sys_clock_khz(250000, true);
 
   printf("\n");
   printf("\n");
@@ -240,62 +313,42 @@ int main() {
   f_closedir(dir);
   printf("done!\n");
 
-  JPEGDEC jpeg;
-/*
-  printf("updating screen.. ");
-  jpeg.open("test.jpg", myOpen, myClose, myRead, mySeek, JPEGDraw);
-  jpeg.decode(0, 0, 0);
-  jpeg.close();
-  inky.update();
-  printf("done!\n");*/
-/*
-
-  for(int i = 0; i < 8; i++) {
-    inky.pen(i);
-    inky.rectangle(i * 75, 0, 75, 448);
-  }
-  inky.update();
-
-  while(true) {}
-*/
-
   while(true) {
     bool pressed = false;
     std::string filename = "";
+    int offset = 0;
     while(!pressed) {
       if(inky.pressed(InkyFrame::BUTTON_A)) {
         filename = "a.jpg"; pressed = true;
         inky.led(InkyFrame::LED_A, 255);
+        offset = 20;
       }
       if(inky.pressed(InkyFrame::BUTTON_B)) {
         filename = "b.jpg"; pressed = true;
         inky.led(InkyFrame::LED_B, 255);
+        offset = 40;
       }
       if(inky.pressed(InkyFrame::BUTTON_C)) {
         filename = "c.jpg"; pressed = true;
         inky.led(InkyFrame::LED_C, 255);
+        offset = 60;
       }
       if(inky.pressed(InkyFrame::BUTTON_D)) {
         filename = "d.jpg"; pressed = true;
         inky.led(InkyFrame::LED_D, 255);
+        offset = 80;
       }
       if(inky.pressed(InkyFrame::BUTTON_E)) {
         filename = "e.jpg"; pressed = true;
         inky.led(InkyFrame::LED_E, 255);
+        offset = 100;
       }
 
       tight_loop_contents();
     }
 
+    draw_jpeg(filename, offset, offset, 400, 300);
 
-    jpeg.open(filename.c_str(), myOpen, myClose, myRead, mySeek, JPEGDraw);
-
-    printf("- starting jpeg decode..");
-    int start = time();
-    jpeg.decode(0, 0, 0);
-    printf("done in %d ms!\n", int(time() - start));
-
-    jpeg.close();
     inky.update();
     inky.led(InkyFrame::LED_A, 0);
     inky.led(InkyFrame::LED_B, 0);
