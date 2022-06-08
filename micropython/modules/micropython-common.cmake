@@ -29,6 +29,7 @@ include(pico_unicorn/micropython)
 include(pico_wireless/micropython)
 include(pico_explorer/micropython)
 
+include(hershey_fonts/micropython)
 include(bitmap_fonts/micropython)
 
 include(plasma/micropython)

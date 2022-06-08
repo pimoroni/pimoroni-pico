@@ -443,14 +443,16 @@ mp_obj_t ModPicoGraphics_character(size_t n_args, const mp_obj_t *pos_args, mp_m
 }
 
 mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_wrap, ARG_scale };
+    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_wrap, ARG_scale, ARG_angle, ARG_spacing };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_wordwrap, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_angle, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_spacing, MP_ARG_INT, {.u_int = 1} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -469,19 +471,22 @@ mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     int wrap = args[ARG_wrap].u_int;
-    int scale = args[ARG_scale].u_int;
+    float scale = args[ARG_scale].u_obj == mp_const_none ? 2.0f : mp_obj_get_float(args[ARG_scale].u_obj);
+    int angle = args[ARG_angle].u_int;
+    int letter_spacing = args[ARG_spacing].u_int;
 
-    self->graphics->text(t, Point(x, y), wrap, scale);
+    self->graphics->text(t, Point(x, y), wrap, scale, angle, letter_spacing);
 
     return mp_const_none;
 }
 
 mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_text, ARG_scale };
+    enum { ARG_self, ARG_text, ARG_scale, ARG_spacing };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_spacing, MP_ARG_INT, {.u_int = 1} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -497,9 +502,10 @@ mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, m
 
     std::string t((const char*)str);
 
-    int scale = args[ARG_scale].u_int;
+    float scale = args[ARG_scale].u_obj == mp_const_none ? 2.0f : mp_obj_get_float(args[ARG_scale].u_obj);
+    int letter_spacing = args[ARG_spacing].u_int;
 
-    int width = self->graphics->measure_text(t, scale);
+    int width = self->graphics->measure_text(t, scale, letter_spacing);
 
     return mp_obj_new_int(width);
 }

@@ -4,9 +4,13 @@
 #include <cstdint>
 #include <algorithm>
 #include <vector>
+
+#include "libraries/hershey_fonts/hershey_fonts.hpp"
+#include "libraries/bitmap_fonts/bitmap_fonts.hpp"
 #include "libraries/bitmap_fonts/font6_data.hpp"
 #include "libraries/bitmap_fonts/font8_data.hpp"
 #include "libraries/bitmap_fonts/font14_outline_data.hpp"
+
 #include "common/pimoroni_common.hpp"
 
 // A tiny graphics library for our Pico products
@@ -72,7 +76,8 @@ namespace pimoroni {
     Rect bounds;
     Rect clip;
 
-    const bitmap::font_t *font;
+    const bitmap::font_t *bitmap_font;
+    const hershey::font_t *hershey_font;
 
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return (r & 0b11100000) | ((g & 0b11100000) >> 3) | ((b & 0b11000000) >> 6);
@@ -100,13 +105,14 @@ namespace pimoroni {
 
     virtual void set_pen(uint c);
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b);
-    virtual void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
-    virtual void reset_pen(uint8_t i);
+    virtual int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
+    virtual int reset_pen(uint8_t i);
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
-    virtual void set_pixel(void *frame_buffer, uint x, uint y, uint stride);
+    virtual void set_pixel(const Point &p);
     virtual void palette_lookup(void *frame_buffer, void *result, uint offset, uint length);
 
     void set_font(const bitmap::font_t *font);
+    void set_font(const hershey::font_t *font);
     void set_font(std::string font);
 
     void set_dimensions(int width, int height);
@@ -123,9 +129,9 @@ namespace pimoroni {
     void pixel_span(const Point &p, int32_t l);
     void rectangle(const Rect &r);
     void circle(const Point &p, int32_t r);
-    void character(const char c, const Point &p, uint8_t scale = 2);
-    void text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale = 2);
-    int32_t measure_text(const std::string &t, uint8_t scale = 2);
+    void character(const char c, const Point &p, float s = 2.0f, float a = 0.0f);
+    void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
+    int32_t measure_text(const std::string &t, float s = 2.0f, uint8_t letter_spacing = 1);
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
@@ -163,26 +169,28 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // TODO look up closest palette colour, or just NOOP?
       }
-      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
+      int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
         i &= 0xf;
         palette[i].color = rgb_to_rgb565(r, g, b);
         palette[i].used = true;
+        return i;
       }
-      void reset_pen(uint8_t i) override {
+      int reset_pen(uint8_t i) override {
         i &= 0xf;
         palette[i].color = default_palette[i];
+        return i;
       }
-      void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
+      void set_pixel(const Point &p) override {
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
-        uint8_t *p = &buf[(x / 2) + (y * stride / 2)];
+        uint8_t *f = &buf[(p.x / 2) + (p.y * bounds.w / 2)];
 
-        uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
-        uint8_t  m = ~(0b1111 << o); // bit mask for byte
-        uint8_t  b = color << o;     // bit value shifted to position
+        uint8_t  o = (~p.x & 0b1) * 4; // bit offset within byte
+        uint8_t  m = ~(0b1111 << o);   // bit mask for byte
+        uint8_t  b = color << o;       // bit value shifted to position
 
-        *p &= m; // clear bits
-        *p |= b; // set value
+        *f &= m; // clear bits
+        *f |= b; // set value
       }
       void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
@@ -219,15 +227,17 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // TODO look up closest palette colour, or just NOOP?
       }
-      void update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
+      int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override {
         i &= 0xff;
         palette[i].color = rgb_to_rgb565(r, g, b);
         palette[i].used = true;
+        return i;
       }
-      void reset_pen(uint8_t i) override {
+      int reset_pen(uint8_t i) override {
         i &= 0xff;
         palette[i].color = 0;
         palette[i].used = false;
+        return i;
       }
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         // Create a colour and place it in the palette if there's space
@@ -241,9 +251,9 @@ namespace pimoroni {
         }
         return -1;
       }
-      void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
+      void set_pixel(const Point &p) override {
         uint8_t *buf = (uint8_t *)frame_buffer;
-        buf[y * stride + x] = color;
+        buf[p.y * bounds.w + p.x] = color;
       }
       void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
@@ -281,9 +291,9 @@ namespace pimoroni {
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         return rgb_to_rgb332(r, g, b);
       }
-      void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
+      void set_pixel(const Point &p) override {
         uint8_t *buf = (uint8_t *)frame_buffer;
-        buf[y * stride + x] = color;
+        buf[p.y * bounds.w + p.x] = color;
       }
       void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
@@ -316,9 +326,9 @@ namespace pimoroni {
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override {
         return rgb_to_rgb565(r, g, b);
       }
-      void set_pixel(void *frame_buffer, uint x, uint y, uint stride) override {
+      void set_pixel(const Point &p) override {
         uint16_t *buf = (uint16_t *)frame_buffer;
-        buf[y * stride + x] = color;
+        buf[p.y * bounds.w + p.x] = color;
       }
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
