@@ -148,8 +148,10 @@ public:
     void clear();
     void pixel(int32_t x, int32_t y);
     void fast_pixel(int32_t x, int32_t y, uint8_t pen);
+    void fast_hline(int32_t x, int32_t y, int32_t l, uint8_t pen);
     void line(int32_t x1, int32_t y1, int32_t x2, int32_t y2);
     void rectangle(int32_t x, int32_t y, int32_t w, int32_t h);
+    void circle(int32_t x, int32_t y, int32_t r);
 
     void icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy);
     void image(const uint8_t* data);

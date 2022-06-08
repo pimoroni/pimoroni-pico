@@ -349,12 +349,30 @@ void render_calendar_entries() {
   inky.text_tracking(1.0f);
 
   for(auto event : events) {
-    // end of event marker, now we can render this event to the screen
-    inky.pen(InkyFrame::BLACK);
-    inky.thickness(2);
-    inky.text(event.summary, xoff + spacing, yoff + spacing + 10, 0.65f);
+    static char buf[16];
+    std::string time = "All Day";
+    if(event.when.hour != 0 || event.when.min != 0 || event.when.sec != 0) {
+      sprintf(buf, "%02d:%02d", event.when.hour, event.when.min);
+      time = std::string(buf);
+    }
 
-    inky.pen(InkyFrame::GREEN);
+    printf("%s\n", time.c_str());
+
+    int lozenge_width = inky.measure_text(time, 0.5f) + 10;
+    int lozenge_height = 21;
+    inky.pen(InkyFrame::BLACK);
+    inky.circle(xoff + lozenge_height / 2, yoff + lozenge_height / 2, lozenge_height / 2);
+    inky.circle(xoff + lozenge_width - lozenge_height / 2, yoff + lozenge_height / 2, lozenge_height / 2);
+    inky.rectangle(xoff + lozenge_height / 2, yoff, lozenge_width - lozenge_height, lozenge_height);
+    inky.pen(InkyFrame::WHITE);
+    inky.thickness(2);
+    center_text(time, xoff, yoff + lozenge_height / 2, lozenge_width, 0.5f);
+
+    inky.pen(InkyFrame::BLACK);
+    inky.thickness(1);
+    inky.text(event.summary, xoff + spacing + lozenge_width + 10, yoff + spacing + 10, 0.65f);
+
+    inky.pen(InkyFrame::BLUE);
     inky.thickness(1);
     inky.text(event.location, xoff + spacing, yoff + spacing + 10 + 20, 0.6f);
 

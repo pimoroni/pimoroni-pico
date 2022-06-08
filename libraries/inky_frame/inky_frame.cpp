@@ -169,6 +169,13 @@ namespace pimoroni {
     uc8159.pixel(x, y, pen);
   }
 
+  void InkyFrame::fast_hline(int32_t x, int32_t y, int32_t l, uint8_t pen) {
+    while(l--) {
+      uc8159.pixel(x, y, pen);
+      x++;
+    }
+  }
+
   // Display a portion of an image (icon sheet) at dx, dy
   void InkyFrame::icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy) {
     image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
@@ -201,6 +208,21 @@ namespace pimoroni {
     for(int cy = y; cy < y + h; cy++) {
       for(int cx = x; cx < x + w; cx++) {
         pixel(cx, cy);
+      }
+    }
+  }
+
+  void InkyFrame::circle(int32_t x, int32_t y, int32_t r) {
+    int ox = r, oy = 0, err = -r;
+    while (ox >= oy)
+    {
+      int last_oy = oy; err += oy; oy++; err += oy;
+      fast_hline(x - ox, y + last_oy, ox * 2 + 1, _pen);
+      if (last_oy != 0) {fast_hline(x - ox, y - last_oy, ox * 2 + 1, _pen);}
+      if(err >= 0 && ox != last_oy) {
+        fast_hline(x - last_oy, y + ox, last_oy * 2 + 1, _pen);
+        if (ox != 0) {fast_hline(x - last_oy, y - ox, last_oy * 2 + 1, _pen);}
+        err -= ox; ox--; err -= ox;
       }
     }
   }
