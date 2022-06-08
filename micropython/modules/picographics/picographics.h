@@ -26,6 +26,7 @@ extern const mp_obj_type_t ModPicoGraphics_type;
 // Module functions
 extern mp_obj_t ModPicoGraphics_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b);
 extern mp_obj_t ModPicoGraphics_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b);
+extern mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t pen_type_in);
 
 // Class methods
 extern mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);

@@ -3,6 +3,7 @@
 // Module functions
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB332_obj, ModPicoGraphics_module_RGB332);
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB565_obj, ModPicoGraphics_module_RGB565);
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_get_required_buffer_size_obj, ModPicoGraphics_get_required_buffer_size);
 
 // Class Methods
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_update_obj, ModPicoGraphics_update);
@@ -80,6 +81,7 @@ const mp_obj_type_t ModPicoGraphics_type = {
 STATIC const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_picographics) },
     { MP_ROM_QSTR(MP_QSTR_PicoGraphics), (mp_obj_t)&ModPicoGraphics_type },
+    { MP_ROM_QSTR(MP_QSTR_get_buffer_size), MP_ROM_PTR(&ModPicoGraphics_get_required_buffer_size_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_RGB332), MP_ROM_PTR(&ModPicoGraphics_module_RGB332_obj) },
     { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_PTR(&ModPicoGraphics_module_RGB565_obj) },

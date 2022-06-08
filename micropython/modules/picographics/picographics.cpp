@@ -27,6 +27,52 @@ typedef struct _ModPicoGraphics_obj_t {
     void *buffer;
 } ModPicoGraphics_obj_t;
 
+bool get_display_resolution(PicoGraphicsDisplay display, int &width, int &height) {
+    switch(display) {
+        case DISPLAY_PICO_DISPLAY:
+            width = 240;
+            height = 135;
+            break;
+        case DISPLAY_PICO_DISPLAY_2:
+        case DISPLAY_TUFTY_2040:
+            width = 320;
+            height = 240;
+            break;
+        case DISPLAY_PICO_EXPLORER:
+        case DISPLAY_LCD_240X240:
+        case DISPLAY_ENVIRO_PLUS:
+            width = 240;
+            height = 240;
+            break;
+        case DISPLAY_ROUND_LCD_240X240:
+            width = 240;
+            height = 240;
+            break;
+        case DISPLAY_LCD_160X80:
+            width = 160;
+            height = 80;
+            break;
+        default:
+            return false;
+    }
+    return true;
+}
+
+size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint height) {
+    switch(pen_type) {
+        case PEN_P4:
+            return PicoGraphics_PenP4::buffer_size(width, height);
+        case PEN_P8:
+            return PicoGraphics_PenP8::buffer_size(width, height);
+        case PEN_RGB332:
+            return PicoGraphics_PenRGB332::buffer_size(width, height);
+        case PEN_RGB565:
+            return PicoGraphics_PenRGB565::buffer_size(width, height);
+        default:
+            return 0;
+    }
+}
+
 mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     ModPicoGraphics_obj_t *self = nullptr;
 
@@ -47,42 +93,14 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->base.type = &ModPicoGraphics_type;
 
     Rotation rotate = (Rotation)args[ARG_rotate].u_int;
-    bool round = false;
-    int width = 0;
-    int height = 0;
 
     PicoGraphicsPenType pen_type = (PicoGraphicsPenType)args[ARG_pen_type].u_int;
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
 
-    switch(display) {
-        case DISPLAY_PICO_DISPLAY:
-            width = 240;
-            height = 135;
-            break;
-        case DISPLAY_PICO_DISPLAY_2:
-        case DISPLAY_TUFTY_2040:
-            width = 320;
-            height = 240;
-            break;
-        case DISPLAY_PICO_EXPLORER:
-        case DISPLAY_LCD_240X240:
-        case DISPLAY_ENVIRO_PLUS:
-            width = 240;
-            height = 240;
-            break;
-        case DISPLAY_ROUND_LCD_240X240:
-            width = 240;
-            height = 240;
-            round = true;
-            break;
-        case DISPLAY_LCD_160X80:
-            width = 160;
-            height = 80;
-            break;
-        default:
-            mp_raise_ValueError("Unsupported display!");
-            break; // unreachable
-    }
+    bool round = display == DISPLAY_ROUND_LCD_240X240;
+    int width = 0;
+    int height = 0;
+    if(!get_display_resolution(display, width, height)) mp_raise_ValueError("Unsupported display!");
 
     // Try to create an appropriate display driver
     if (display == DISPLAY_TUFTY_2040) {
@@ -115,24 +133,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     }
 
     // Create or fetch buffer
-    size_t required_size = 0;
-    switch(pen_type) {
-        case PEN_P4:
-            required_size = PicoGraphics_PenP4::buffer_size(width, height);
-            break;
-        case PEN_P8:
-            required_size = PicoGraphics_PenP8::buffer_size(width, height);
-            break;
-        case PEN_RGB332:
-            required_size = PicoGraphics_PenRGB332::buffer_size(width, height);
-            break;
-        case PEN_RGB565:
-            required_size = PicoGraphics_PenRGB565::buffer_size(width, height);
-            break;
-        default:
-            mp_raise_ValueError("Unsupported display!");
-            break; // unreachable
-    }
+    size_t required_size = get_required_buffer_size(pen_type, width, height);
+    if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
     if (args[ARG_buffer].u_obj != mp_const_none) {
         mp_buffer_info_t bufinfo;
@@ -201,6 +203,18 @@ mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer)
         self->graphics->set_framebuffer(self->buffer);
     }
     return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t pen_type_in) {
+    PicoGraphicsPenType pen_type = (PicoGraphicsPenType)mp_obj_get_int(pen_type_in);
+    PicoGraphicsDisplay display = (PicoGraphicsDisplay)mp_obj_get_int(display_in);
+    int width = 0;
+    int height = 0;
+    if(!get_display_resolution(display, width, height)) mp_raise_ValueError("Unsupported display!");
+    size_t required_size = get_required_buffer_size(pen_type, width, height);
+    if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
+
+    return mp_obj_new_int(required_size);
 }
 
 mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in) {
