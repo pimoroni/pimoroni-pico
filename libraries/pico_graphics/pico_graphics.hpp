@@ -110,6 +110,7 @@ namespace pimoroni {
     void set_font(std::string font);
 
     void set_dimensions(int width, int height);
+    void set_framebuffer(void *frame_buffer);
 
     void *get_data();
     void get_data(uint y, void *row_buf);

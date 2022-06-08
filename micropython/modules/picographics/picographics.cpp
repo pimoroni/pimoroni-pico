@@ -181,9 +181,6 @@ mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
 }
 
 mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
-    (void)self_in;
-    (void)framebuffer;
-    /*
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
     if (framebuffer == mp_const_none) {
@@ -193,10 +190,16 @@ mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer)
     } else {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(framebuffer, &bufinfo, MP_BUFFER_RW);
+
+        // This should have no effect if you try to replace the framebuffer with itself
+        // but it will free up a buffer that has no other references
+        if(self->buffer != nullptr) {
+            m_del(uint8_t, self->buffer, self->graphics->bounds.w * self->graphics->bounds.h);
+        }
+
         self->buffer = bufinfo.buf;
         self->graphics->set_framebuffer(self->buffer);
     }
-    */
     return mp_const_none;
 }
 

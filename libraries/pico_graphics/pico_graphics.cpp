@@ -11,10 +11,11 @@ namespace pimoroni {
   void PicoGraphics::palette_lookup(void *frame_buffer, void *result, uint offset, uint length) {};
 
   void PicoGraphics::set_dimensions(int width, int height) {
-    bounds.w = width;
-    bounds.h = height;
-    clip.w = width;
-    clip.h = height;
+    bounds = clip = {0, 0, width, height};
+  }
+
+  void PicoGraphics::set_framebuffer(void *frame_buffer) {
+    this->frame_buffer = frame_buffer;
   }
 
   void *PicoGraphics::get_data() {
