@@ -123,15 +123,6 @@ namespace pimoroni {
       int col_offset = 0;
     
       switch(rotate) {
-        case ROTATE_0:
-          if (!round) row_offset = 0;
-          caset[0] = col_offset;
-          caset[1] = width + col_offset - 1;
-          raset[0] = row_offset;
-          raset[1] = width + row_offset - 1;
-
-          madctl = MADCTL::HORIZ_ORDER;
-          break;
         case ROTATE_90:
           if (!round) row_offset = 0;
           caset[0] = row_offset;
@@ -156,6 +147,15 @@ namespace pimoroni {
           raset[1] = width + col_offset - 1;
 
           madctl = MADCTL::ROW_ORDER | MADCTL::SWAP_XY;
+          break;
+        default: // ROTATE_0 (and for any smart-alec who tries to rotate 45 degrees or something...)
+          if (!round) row_offset = 0;
+          caset[0] = col_offset;
+          caset[1] = width + col_offset - 1;
+          raset[0] = row_offset;
+          raset[1] = width + row_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER;
           break;
       }
     }
