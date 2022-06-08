@@ -119,18 +119,45 @@ namespace pimoroni {
 
     // 240x240 Square and Round LCD Breakouts
     if(width == 240 && height == 240) {
-      caset[0] = 0;
-      caset[1] = 239;
-      if(round) {
-        raset[0] = 40;
-        raset[1] = 279;
-      } else {
-        raset[0] = rotate180 ? 80 : 0;
-        raset[1] = rotate180 ? 329 : 239;
+      int row_offset = round ? 40 : 80;
+      int col_offset = 0;
+    
+      switch(rotate) {
+        case ROTATE_0:
+          if (!round) row_offset = 0;
+          caset[0] = col_offset;
+          caset[1] = width + col_offset - 1;
+          raset[0] = row_offset;
+          raset[1] = width + row_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER;
+          break;
+        case ROTATE_90:
+          if (!round) row_offset = 0;
+          caset[0] = row_offset;
+          caset[1] = width + row_offset - 1;
+          raset[0] = col_offset;
+          raset[1] = width + col_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::SWAP_XY;
+          break;
+        case ROTATE_180:
+          caset[0] = col_offset;
+          caset[1] = width + col_offset - 1;
+          raset[0] = row_offset;
+          raset[1] = width + row_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::ROW_ORDER;
+          break;
+        case ROTATE_270:
+          caset[0] = row_offset;
+          caset[1] = width + row_offset - 1;
+          raset[0] = col_offset;
+          raset[1] = width + col_offset - 1;
+
+          madctl = MADCTL::ROW_ORDER | MADCTL::SWAP_XY;
+          break;
       }
-      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
-      if (rotate == ROTATE_90) madctl |= MADCTL::SWAP_XY;
-      madctl |= MADCTL::HORIZ_ORDER;
     }
 
     // Pico Display
