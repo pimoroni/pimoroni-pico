@@ -15,7 +15,7 @@ using namespace pimoroni;
 const int WIDTH = 240;
 const int HEIGHT = 240;
 
-ST7789 st7789(WIDTH, HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+ST7789 st7789(WIDTH, HEIGHT, ROTATE_0, true, get_spi_pins(BG_SPI_FRONT));
 PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
 constexpr float RADIUS = WIDTH / 2;
