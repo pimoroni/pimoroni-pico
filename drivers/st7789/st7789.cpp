@@ -245,33 +245,35 @@ namespace pimoroni {
   }
   
   void ST7789::update(PicoGraphics *graphics) {
-    if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
-      command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
-    } else {
-      uint8_t command = reg::RAMWR;
+    uint8_t cmd = reg::RAMWR;
 
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565) { // Display buffer is screen native
+      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
+    } else if(spi) { // SPI Bus
       gpio_put(dc, 0); // command mode
-
       gpio_put(cs, 0);
-
-      if(spi) {
-        spi_write_blocking(spi, &command, 1);
-      } else {
-        write_blocking_parallel(&command, 1);
-      }
-
+      spi_write_blocking(spi, &cmd, 1);
       gpio_put(dc, 1); // data mode
 
       uint16_t row_buf[width];
-
       for(auto y = 0u; y < height; y++) {
         graphics->get_data(y, &row_buf);
         // TODO: Add DMA->SPI / PIO while we prep the next row
-        if(spi) {
-          spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
-        } else {
-          write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
-        }
+        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
+      }
+
+      gpio_put(cs, 1);
+    } else { // Parallel Bus
+      gpio_put(dc, 0); // command mode
+      gpio_put(cs, 0);
+      write_blocking_parallel(&cmd, 1);
+      gpio_put(dc, 1); // data mode
+
+      uint16_t row_buf[width];
+      for(auto y = 0u; y < height; y++) {
+        graphics->get_data(y, &row_buf);
+        // TODO: Add DMA->SPI / PIO while we prep the next row
+        write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
       }
 
       gpio_put(cs, 1);
