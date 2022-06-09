@@ -13,7 +13,7 @@ namespace pimoroni {
     COL_ORDER   = 0b01000000,
     SWAP_XY     = 0b00100000,  // AKA "MV"
     SCAN_ORDER  = 0b00010000,
-    RGB         = 0b00001000,
+    RGB_BGR     = 0b00001000,
     HORIZ_ORDER = 0b00000100
   };
 
@@ -255,13 +255,10 @@ namespace pimoroni {
       spi_write_blocking(spi, &cmd, 1);
       gpio_put(dc, 1); // data mode
 
-      uint16_t row_buf[width];
-      for(auto y = 0u; y < height; y++) {
-        graphics->get_row_rgb565(&row_buf, width * y, width);
-        // TODO: Add DMA->SPI / PIO while we prep the next row
-        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
-      }
-
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        spi_write_blocking(spi, (const uint8_t*)data, length);
+      });
+  
       gpio_put(cs, 1);
     } else { // Parallel Bus
       gpio_put(dc, 0); // command mode
@@ -269,12 +266,9 @@ namespace pimoroni {
       write_blocking_parallel(&cmd, 1);
       gpio_put(dc, 1); // data mode
 
-      uint16_t row_buf[width];
-      for(auto y = 0u; y < height; y++) {
-        graphics->get_row_rgb565(&row_buf, width * y, width);
-        // TODO: Add DMA->SPI / PIO while we prep the next row
-        write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
-      }
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        write_blocking_parallel((const uint8_t*)data, length);
+      });
 
       gpio_put(cs, 1);
     }

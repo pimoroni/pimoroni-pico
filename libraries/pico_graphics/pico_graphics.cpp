@@ -8,7 +8,7 @@ namespace pimoroni {
   int PicoGraphics::reset_pen(uint8_t i) {return -1;};
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
   void PicoGraphics::set_pixel(const Point &p) {};
-  void PicoGraphics::get_row_rgb565(void *result, uint offset, uint length) {};
+  void PicoGraphics::scanline_convert(PenType type, conversion_callback_func callback) {};
 
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};

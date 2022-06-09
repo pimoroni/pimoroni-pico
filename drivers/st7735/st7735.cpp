@@ -172,12 +172,10 @@ namespace pimoroni {
       gpio_put(dc, 1); // data mode
       gpio_put(cs, 0);
 
-      uint16_t row_buf[width];
-      for(auto y = 0u; y < height; y++) {
-        graphics->get_row_rgb565(&row_buf, width * y, width);
-        // TODO: Add DMA->SPI / PIO while we prep the next row
-        spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
-      }
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        spi_write_blocking(spi, (const uint8_t*)data, length);
+      });
+
       gpio_put(cs, 1);
     }
   }

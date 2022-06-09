@@ -255,41 +255,39 @@ mp_obj_t ModPicoGraphics_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
 }
 
 mp_obj_t ModPicoGraphics_module_RGB332_to_RGB(mp_obj_t rgb332) {
-    uint8_t r, g, b;
-    PicoGraphics::rgb332_to_rgb(mp_obj_get_int(rgb332), r, g, b);
+    RGB c((RGB332)mp_obj_get_int(rgb332));
     mp_obj_t t[] = {
-        mp_obj_new_int(r),
-        mp_obj_new_int(g),
-        mp_obj_new_int(b),
+        mp_obj_new_int(c.r),
+        mp_obj_new_int(c.g),
+        mp_obj_new_int(c.b),
     };
     return mp_obj_new_tuple(3, t);
 }
 
 mp_obj_t ModPicoGraphics_module_RGB565_to_RGB(mp_obj_t rgb565) {
-    uint8_t r, g, b;
-    PicoGraphics::rgb565_to_rgb(mp_obj_get_int(rgb565), r, g, b);
+    RGB c((RGB565)mp_obj_get_int(rgb565));
     mp_obj_t t[] = {
-        mp_obj_new_int(r),
-        mp_obj_new_int(g),
-        mp_obj_new_int(b),
+        mp_obj_new_int(c.r),
+        mp_obj_new_int(c.g),
+        mp_obj_new_int(c.b),
     };
     return mp_obj_new_tuple(3, t);
 }
 
 mp_obj_t ModPicoGraphics_module_RGB_to_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(PicoGraphics::rgb_to_rgb332(
+    return mp_obj_new_int(RGB(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
-    ));
+    ).to_rgb332());
 }
 
 mp_obj_t ModPicoGraphics_module_RGB_to_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
-    return mp_obj_new_int(PicoGraphics::rgb_to_rgb565(
+    return mp_obj_new_int(RGB(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
         mp_obj_get_int(b)
-    ));
+    ).to_rgb565());
 }
 
 mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen) {
