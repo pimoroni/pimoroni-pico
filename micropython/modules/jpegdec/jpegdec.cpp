@@ -38,7 +38,7 @@ int JPEGDraw(JPEGDRAW *pDraw) {
             for(int x = 0; x < pDraw->iWidth; x++) {
                 int i = y * pDraw->iWidth + x;
                 uint8_t p = pixels[i / 2];
-                p >>= (i & 0b1) * 4;
+                p >>= (i & 0b1) ? 0 : 4;
                 p &= 0xf;
                 current_graphics->set_pen(p);
                 current_graphics->pixel({pDraw->x + x, pDraw->y + y});
@@ -108,7 +108,7 @@ static int _open(_JPEG_obj_t *self, void *buf, size_t len) {
                 break;
             // TODO currently uses EIGHT_BIT_GREYSCALE and shifts down should this use a 4-bit dither?
             case PicoGraphics::PEN_P4:
-                self->jpeg->setPixelType(EIGHT_BIT_GRAYSCALE);
+                self->jpeg->setPixelType(FOUR_BIT_DITHERED);
                 break;
             // TODO 2-bit is currently unsupported
             case PicoGraphics::PEN_P2:
@@ -174,7 +174,15 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     // We need to store a pointer to the PicoGraphics surface
     // since the JPEGDRAW struct has no userdata
     current_graphics = self->graphics->graphics;
-    int result = self->jpeg->decode(x, y, f);
+    int result = -1;
+
+    if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4) {
+        uint8_t *buf = new uint8_t[1024];
+        result = self->jpeg->decodeDither(x, y, buf, f);
+        delete[] buf;
+    } else {
+        result = self->jpeg->decode(x, y, f);
+    }
     current_graphics = nullptr;
     return result == 1 ? mp_const_true : mp_const_false;
 }

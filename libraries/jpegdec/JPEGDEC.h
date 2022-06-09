@@ -213,7 +213,7 @@ class JPEGDEC
 #endif
     void close();
     int decode(int x, int y, int iOptions);
-    int decodeDither(uint8_t *pDither, int iOptions);
+    int decodeDither(int x, int y, uint8_t *pDither, int iOptions);
     int getOrientation();
     int getWidth();
     int getHeight();
