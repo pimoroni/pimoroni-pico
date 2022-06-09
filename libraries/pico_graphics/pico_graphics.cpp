@@ -8,7 +8,7 @@ namespace pimoroni {
   int PicoGraphics::reset_pen(uint8_t i) {return -1;};
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
   void PicoGraphics::set_pixel(const Point &p) {};
-  void PicoGraphics::palette_lookup(void *frame_buffer, void *result, uint offset, uint length) {};
+  void PicoGraphics::get_row_rgb565(void *result, uint offset, uint length) {};
 
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};
@@ -16,14 +16,6 @@ namespace pimoroni {
 
   void PicoGraphics::set_framebuffer(void *frame_buffer) {
     this->frame_buffer = frame_buffer;
-  }
-
-  void *PicoGraphics::get_data() {
-    return frame_buffer;
-  }
-
-  void PicoGraphics::get_data(uint y, void *row_buf) {
-    palette_lookup(frame_buffer, row_buf, y * bounds.w, bounds.w);
   }
 
   void PicoGraphics::set_font(const bitmap::font_t *font){

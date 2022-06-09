@@ -109,7 +109,7 @@ namespace pimoroni {
     virtual int reset_pen(uint8_t i);
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
     virtual void set_pixel(const Point &p);
-    virtual void palette_lookup(void *frame_buffer, void *result, uint offset, uint length);
+    virtual void get_row_rgb565(void *result, uint offset, uint length);
 
     void set_font(const bitmap::font_t *font);
     void set_font(const hershey::font_t *font);
@@ -119,7 +119,7 @@ namespace pimoroni {
     void set_framebuffer(void *frame_buffer);
 
     void *get_data();
-    void get_data(uint y, void *row_buf);
+    void get_data(PenType type, uint y, void *row_buf);
 
     void set_clip(const Rect &r);
     void remove_clip();
@@ -192,7 +192,7 @@ namespace pimoroni {
         *f &= m; // clear bits
         *f |= b; // set value
       }
-      void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
+      void get_row_rgb565(void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
         uint16_t *dst = (uint16_t *)result;
         for(auto x = 0u; x < length; x++) {
@@ -255,7 +255,7 @@ namespace pimoroni {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
       }
-      void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
+      void get_row_rgb565(void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
         uint16_t *dst = (uint16_t *)result;
         for(auto x = 0u; x < length; x++) {
@@ -295,7 +295,7 @@ namespace pimoroni {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
       }
-      void palette_lookup(void *frame_buffer, void *result, uint offset, uint length) override {
+      void get_row_rgb565(void *result, uint offset, uint length) override {
         uint8_t *src = (uint8_t *)frame_buffer;
         uint16_t *dst = (uint16_t *)result;
         for(auto x = 0u; x < length; x++) {

@@ -248,7 +248,7 @@ namespace pimoroni {
     uint8_t cmd = reg::RAMWR;
 
     if(graphics->pen_type == PicoGraphics::PEN_RGB565) { // Display buffer is screen native
-      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->get_data());
+      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
     } else if(spi) { // SPI Bus
       gpio_put(dc, 0); // command mode
       gpio_put(cs, 0);
@@ -257,7 +257,7 @@ namespace pimoroni {
 
       uint16_t row_buf[width];
       for(auto y = 0u; y < height; y++) {
-        graphics->get_data(y, &row_buf);
+        graphics->get_row_rgb565(&row_buf, width * y, width);
         // TODO: Add DMA->SPI / PIO while we prep the next row
         spi_write_blocking(spi, (const uint8_t*)row_buf, width * sizeof(uint16_t));
       }
@@ -271,7 +271,7 @@ namespace pimoroni {
 
       uint16_t row_buf[width];
       for(auto y = 0u; y < height; y++) {
-        graphics->get_data(y, &row_buf);
+        graphics->get_row_rgb565(&row_buf, width * y, width);
         // TODO: Add DMA->SPI / PIO while we prep the next row
         write_blocking_parallel((const uint8_t*)row_buf, width * sizeof(uint16_t));
       }
