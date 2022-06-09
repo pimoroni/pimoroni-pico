@@ -8,6 +8,9 @@ using namespace pimoroni;
 extern "C" {
 #include "jpegdec.h"
 #include "micropython/modules/picographics/picographics.h"
+#include "py/stream.h"
+#include "py/reader.h"
+#include "extmod/vfs.h"
 
 typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
@@ -19,7 +22,7 @@ typedef struct _ModPicoGraphics_obj_t {
 typedef struct _JPEG_obj_t {
     mp_obj_base_t base;
     JPEGDEC *jpeg;
-    mp_obj_t callback;
+    void *buf;
     ModPicoGraphics_obj_t *graphics;
 } _JPEG_obj_t;
 
@@ -87,16 +90,13 @@ mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
 mp_obj_t _JPEG_del(mp_obj_t self_in) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    (void)self;
+    self->jpeg->close();
     return mp_const_none;
 }
 
-// open_RAM
-mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
-    _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    mp_buffer_info_t bufinfo;
-    mp_get_buffer_raise(buffer, &bufinfo, MP_BUFFER_READ);
-    int result = self->jpeg->openRAM((uint8_t *)bufinfo.buf, bufinfo.len, JPEGDraw);
+static int _open(_JPEG_obj_t *self, void *buf, size_t len) {
+    self->buf = buf; // Store a pointer to this buffer so GC doesn't eat it
+    int result = self->jpeg->openRAM((uint8_t *)buf, len, JPEGDraw);
     if (result == 1) {
         switch(self->graphics->graphics->pen_type) {
             case PicoGraphics::PEN_RGB332:
@@ -116,7 +116,40 @@ mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
                 break;
         }
     }
-    return result == 1 ? mp_const_true : mp_const_false;
+    return result;
+}
+
+// open_FILE
+mp_obj_t _JPEG_openFILE(mp_obj_t self_in, mp_obj_t filename) {
+    _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
+    mp_obj_t args[2] = {
+        filename,
+        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+    };
+
+    // Stat the file to get its size
+    // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
+    mp_obj_t stat = mp_vfs_stat(filename);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
+    size_t filesize = mp_obj_get_int(tuple->items[6]);
+
+    mp_buffer_info_t bufinfo;
+    bufinfo.buf = (void *)m_new(uint8_t, filesize);
+    mp_obj_t file = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
+    int errcode;
+    bufinfo.len = mp_stream_rw(file, bufinfo.buf, filesize, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
+    if (errcode != 0) {
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to open file!"));
+    }
+    return _open(self, bufinfo.buf, bufinfo.len) == 1 ? mp_const_true : mp_const_false;
+}
+
+// open_RAM
+mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
+    _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(buffer, &bufinfo, MP_BUFFER_READ);
+    return _open(self, bufinfo.buf, bufinfo.len) == 1 ? mp_const_true : mp_const_false;
 }
 
 // decode
