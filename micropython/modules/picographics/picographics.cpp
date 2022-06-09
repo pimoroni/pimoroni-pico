@@ -463,7 +463,7 @@ mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x1, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y1, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_wordwrap, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_wordwrap, MP_ARG_INT, {.u_int = __INT32_MAX__} },  // Sort-of a fudge, but wide-enough to avoid wrapping on any display size
         { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_angle, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_spacing, MP_ARG_INT, {.u_int = 1} },
