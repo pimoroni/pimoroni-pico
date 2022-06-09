@@ -192,6 +192,7 @@ int JPEGDEC::decode(int x, int y, int iOptions)
     return DecodeJPEG(&_jpeg);
 } /* decode() */
 
+// TODO PR these tweaks to https://github.com/bitbank2/JPEGDEC
 int JPEGDEC::decodeDither(int x, int y, uint8_t *pDither, int iOptions)
 {
     _jpeg.iXOffset = x;

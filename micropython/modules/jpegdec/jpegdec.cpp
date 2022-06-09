@@ -177,7 +177,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     int result = -1;
 
     if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4) {
-        uint8_t *buf = new uint8_t[1024];
+        uint8_t *buf = new uint8_t[2048];
         result = self->jpeg->decodeDither(x, y, buf, f);
         delete[] buf;
     } else {
