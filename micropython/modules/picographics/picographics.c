@@ -36,6 +36,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_triangle_obj, 7, 7, ModPicoG
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_line_obj, 5, 5, ModPicoGraphics_line);
 
 // Utility
+//MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_scanline_callback_obj, ModPicoGraphics_set_scanline_callback);
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_get_bounds_obj, ModPicoGraphics_get_bounds);
 MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_font_obj, ModPicoGraphics_set_font);
 MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_framebuffer_obj, ModPicoGraphics_set_framebuffer);
@@ -65,6 +66,7 @@ STATIC const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&ModPicoGraphics_set_backlight_obj) },
 
+    //{ MP_ROM_QSTR(MP_QSTR_set_scanline_callback), MP_ROM_PTR(&ModPicoGraphics_set_scanline_callback_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_bounds), MP_ROM_PTR(&ModPicoGraphics_get_bounds_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_font), MP_ROM_PTR(&ModPicoGraphics_set_font_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_framebuffer), MP_ROM_PTR(&ModPicoGraphics_set_framebuffer_obj) },

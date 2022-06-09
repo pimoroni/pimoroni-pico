@@ -61,6 +61,7 @@ extern mp_obj_t ModPicoGraphics_triangle(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 
 // Utility
+//extern mp_obj_t ModPicoGraphics_set_scanline_callback(mp_obj_t self_in, mp_obj_t cb_in);
 extern mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font);
 extern mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);

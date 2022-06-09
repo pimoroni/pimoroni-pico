@@ -29,10 +29,13 @@ typedef struct _JPEG_obj_t {
 PicoGraphics *current_graphics = nullptr;
 
 int JPEGDraw(JPEGDRAW *pDraw) {
+#ifdef MICROPY_EVENT_POLL_HOOK
+MICROPY_EVENT_POLL_HOOK
+#endif
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw jpeg data out of the framebuffer..
     // Can we clip beforehand and make this faster?
-    if(pDraw->iBpp == 4) { // TODO 4-bit pixel unpacking isn't working. What's up?
+    if(pDraw->iBpp == 4) {
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
@@ -58,11 +61,14 @@ int JPEGDraw(JPEGDRAW *pDraw) {
             for(int x = 0; x < pDraw->iWidth; x++) {
                 int i = y * pDraw->iWidth + x;
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
-                    current_graphics->set_pen(PicoGraphics::rgb565_to_rgb332(pDraw->pPixels[i]));
+                    current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb332());
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+                    // FIXME VERY, VERY SLOW!
+                    //current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)(pDraw->pPixels[i])));
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                 } 
-                current_graphics->pixel({pDraw->x + x, pDraw->y + y});
             }
         }
     }
@@ -106,7 +112,6 @@ static int _open(_JPEG_obj_t *self, void *buf, size_t len) {
             case PicoGraphics::PEN_P8:
                 self->jpeg->setPixelType(EIGHT_BIT_GRAYSCALE);
                 break;
-            // TODO currently uses EIGHT_BIT_GREYSCALE and shifts down should this use a 4-bit dither?
             case PicoGraphics::PEN_P4:
                 self->jpeg->setPixelType(FOUR_BIT_DITHERED);
                 break;

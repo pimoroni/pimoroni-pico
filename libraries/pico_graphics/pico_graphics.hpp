@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <array>
 #include <cstdint>
 #include <algorithm>
 #include <vector>
@@ -24,7 +25,7 @@ namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
   struct RGB {
-    uint8_t r, g, b;
+    int16_t r, g, b;
 
     constexpr RGB() : r(0), g(0), b(0) {}
     constexpr RGB(RGB332 c) :
@@ -37,25 +38,31 @@ namespace pimoroni {
       b((__builtin_bswap16(c) & 0b0000000000011111) << 3) {}
     constexpr RGB(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
 
+    constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
+    constexpr RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
+    constexpr RGB  operator- (const RGB& c) const {return RGB(r - c.r, g - c.g, b - c.b);}
+
     // a rough approximation of how bright a colour is used to compare the
     // relative brightness of two colours
-    int luminance() {
+    int luminance() const {
       // weights based on https://www.johndcook.com/blog/2009/08/24/algorithms-convert-color-grayscale/
-      return r * 21 + g * 72 * b * 7;
+      return r * 21 + g * 72 + b * 7;
     }
 
     // a relatively low cost approximation of how "different" two colours are
     // perceived which avoids expensive colour space conversions.
     // described in detail at https://www.compuphase.com/cmetric.htm
-    int distance(RGB c) {
-      int rmean = ((int)r + c.r) / 2;
-      int rx = (int)r - c.r, gx = (int)g - c.g, bx = (int)b - c.b;
+    int distance(const RGB& c) const {
+      int rmean = (r + c.r) / 2;
+      int rx = r - c.r;
+      int gx = g - c.g;
+      int bx = b - c.b;
       return abs((int)(
         (((512 + rmean) * rx * rx) >> 8) + 4 * gx * gx + (((767 - rmean) * bx * bx) >> 8)
       ));
     }
 
-    int closest(const RGB *palette, size_t len) {
+    int closest(const RGB *palette, size_t len) const {
       int d = INT_MAX, m = -1;
       for(size_t i = 0; i < len; i++) {
         int dc = distance(palette[i]);
@@ -127,6 +134,9 @@ namespace pimoroni {
     Rect clip;
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
+    //typedef std::function<void(int y)> scanline_interrupt_func;
+
+    //scanline_interrupt_func scanline_interrupt = nullptr;
 
     const bitmap::font_t *bitmap_font;
     const hershey::font_t *hershey_font;
@@ -172,6 +182,7 @@ namespace pimoroni {
     virtual int reset_pen(uint8_t i);
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
     virtual void set_pixel(const Point &p);
+    virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
 
     void set_font(const bitmap::font_t *font);
@@ -186,6 +197,8 @@ namespace pimoroni {
 
     void set_clip(const Rect &r);
     void remove_clip();
+
+    void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
 
     void clear();
     void pixel(const Point &p);
@@ -244,6 +257,21 @@ namespace pimoroni {
         *f &= m; // clear bits
         *f |= b; // set value
       }
+      void set_pixel_dither(const Point &p, const RGB &c) override {
+        if(!bounds.contains(p)) return;
+        static uint pattern[16] = // dither pattern
+            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+
+        static std::array<uint8_t, 16> candidates;
+        get_dither_candidates(c, palette, 256, candidates);
+
+        // find the pattern coordinate offset
+        uint pattern_index = (p.x & 0b11) | ((p.y & 0b11) << 2);
+
+        // set the pixel
+        color = candidates[pattern[pattern_index]];
+        set_pixel(p);
+      }
       void scanline_convert(PenType type, conversion_callback_func callback) override {
         if(type == PEN_RGB565) {
           // Cache the RGB888 palette as RGB565
@@ -258,6 +286,14 @@ namespace pimoroni {
           // Allocate a per-row temporary buffer
           uint16_t row_buf[bounds.w];
           for(auto y = 0; y < bounds.h; y++) {
+            /*if(scanline_interrupt != nullptr) {
+              scanline_interrupt(y);
+              // Cache the RGB888 palette as RGB565
+              for(auto i = 0u; i < 16; i++) {
+                cache[i] = palette[i].to_rgb565();
+              }
+            }*/
+
             for(auto x = 0; x < bounds.w; x++) {
               uint8_t c = src[(bounds.w * y / 2) + (x / 2)];
               uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
@@ -322,6 +358,21 @@ namespace pimoroni {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
       }
+      void set_pixel_dither(const Point &p, const RGB &c) override {
+        if(!bounds.contains(p)) return;
+        static uint pattern[16] = // dither pattern
+            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+
+        static std::array<uint8_t, 16> candidates;
+        get_dither_candidates(c, palette, 256, candidates);
+
+        // find the pattern coordinate offset
+        uint pattern_index = (p.x & 0b11) | ((p.y & 0b11) << 2);
+
+        // set the pixel
+        color = candidates[pattern[pattern_index]];
+        set_pixel(p);
+      }
       void scanline_convert(PenType type, conversion_callback_func callback) override {
         if(type == PEN_RGB565) {
           // Cache the RGB888 palette as RGB565
@@ -375,6 +426,21 @@ namespace pimoroni {
       void set_pixel(const Point &p) override {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
+      }
+      void set_pixel_dither(const Point &p, const RGB &c) override {
+        if(!bounds.contains(p)) return;
+        static uint pattern[16] = // dither pattern
+            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+
+        static std::array<uint8_t, 16> candidates;
+        get_dither_candidates(c, palette, 256, candidates);
+
+        // find the pattern coordinate offset
+        uint pattern_index = (p.x & 0b11) | ((p.y & 0b11) << 2);
+
+        // set the pixel
+        color = candidates[pattern[pattern_index]];
+        set_pixel(p);
       }
       void scanline_convert(PenType type, conversion_callback_func callback) override {
         if(type == PEN_RGB565) {

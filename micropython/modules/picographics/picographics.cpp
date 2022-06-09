@@ -25,6 +25,7 @@ typedef struct _ModPicoGraphics_obj_t {
     PicoGraphics *graphics;
     DisplayDriver *display;
     void *buffer;
+    //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
 bool get_display_resolution(PicoGraphicsDisplay display, int &width, int &height) {
@@ -166,6 +167,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             break;
     }
 
+    //self->scanline_callback = mp_const_none;
+
     // Clear the buffer
     self->graphics->set_pen(0);
     self->graphics->clear();
@@ -235,8 +238,28 @@ mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in) {
     return mp_obj_new_tuple(2, tuple);
 }
 
+/*
+mp_obj_t ModPicoGraphics_set_scanline_callback(mp_obj_t self_in, mp_obj_t cb_in) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    self->scanline_callback = cb_in;
+    return mp_const_none;
+}
+*/
+
 mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+/*
+    if(self->scanline_callback != mp_const_none) {
+        self->graphics->scanline_interrupt = [self](int y){
+            mp_obj_t args[] = {
+                mp_obj_new_int(y)
+            };
+            mp_call_function_n_kw(self->scanline_callback, MP_ARRAY_SIZE(args), 0, args);
+        };
+    } else {
+        self->graphics->scanline_interrupt = nullptr;
+    }
+*/
     self->display->update(self->graphics);
 
     return mp_const_none;
