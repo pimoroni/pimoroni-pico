@@ -47,13 +47,14 @@ void PimoroniBus_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
 }
 
 mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    enum { ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_bl };
+    enum { ARG_cs, ARG_dc, ARG_sck, ARG_mosi, ARG_miso, ARG_bl };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_cs, MP_ARG_INT, {.u_int = SPI_BG_FRONT_CS} },
         { MP_QSTR_dc, MP_ARG_INT, {.u_int = SPI_DEFAULT_MISO} },
         { MP_QSTR_sck, MP_ARG_INT, {.u_int = SPI_DEFAULT_SCK} },
         { MP_QSTR_mosi, MP_ARG_INT, {.u_int = SPI_DEFAULT_MOSI} },
-        { MP_QSTR_bl, MP_ARG_INT, {.u_int = SPI_BG_FRONT_PWM} },
+        { MP_QSTR_miso, MP_ARG_INT, {.u_int = PIN_UNUSED} },
+        { MP_QSTR_bl, MP_ARG_INT, {.u_int = PIN_UNUSED} },
     };
 
     // Parse args.
@@ -67,9 +68,9 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         (uint)args[ARG_cs].u_int,
         (uint)args[ARG_sck].u_int,
         (uint)args[ARG_mosi].u_int,
-        PIN_UNUSED,
+        (uint)args[ARG_miso].u_int,
         (uint)args[ARG_dc].u_int,
-        args[ARG_bl].u_int == -1 ? PIN_UNUSED : (uint)args[ARG_bl].u_int
+        (uint)args[ARG_bl].u_int
     };
 
     return MP_OBJ_FROM_PTR(self);
