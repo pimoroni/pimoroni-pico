@@ -85,18 +85,38 @@ namespace pimoroni {
 
     static constexpr RGB565 rgb332_to_rgb565(RGB332 c) {
       uint16_t p = ((c & 0b11100000) << 8) |
-                    ((c & 0b00011100) << 6) |
-                    ((c & 0b00000011) << 3);
+                   ((c & 0b00011100) << 6) |
+                   ((c & 0b00000011) << 3);
       return __builtin_bswap16(p);
+    }
+
+    static constexpr RGB565 rgb565_to_rgb332(RGB565 c) {
+      c = __builtin_bswap16(c);
+      return ((c & 0b1110000000000000) >> 8) |
+             ((c & 0b0000011100000000) >> 6) |
+             ((c & 0b0000000000011000) >> 3);
     }
 
     static constexpr RGB565 rgb_to_rgb565(uint8_t r, uint8_t g, uint8_t b) {
       uint16_t p = ((r & 0b11111000) << 8) |
-                    ((g & 0b11111100) << 3) |
-                    ((b & 0b11111000) >> 3);
+                   ((g & 0b11111100) << 3) |
+                   ((b & 0b11111000) >> 3);
 
       return __builtin_bswap16(p);
     }
+
+    static constexpr void rgb332_to_rgb(RGB332 c, uint8_t &r, uint8_t &g, uint8_t &b) {
+      r = (c & 0b11100000) >> 0;
+      g = (c & 0b00011100) << 3;
+      b = (c & 0b00000011) << 6;
+    };
+
+    static constexpr void rgb565_to_rgb(RGB565 c, uint8_t &r, uint8_t &g, uint8_t &b) {
+      c = __builtin_bswap16(c);
+      r = (c & 0b1111100000000000) >> 8;
+      g = (c & 0b0000011111100000) >> 3;
+      b = (c & 0b0000000000011111) << 3;
+    };
 
     PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
     : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
@@ -141,8 +161,8 @@ namespace pimoroni {
   class PicoGraphics_PenP4 : public PicoGraphics {
     public:
       uint8_t color;
-      PaletteEntry palette[8];
-      const RGB565 default_palette[8] = {
+      PaletteEntry palette[16];
+      const RGB565 default_palette[16] = {
         rgb_to_rgb565(57, 48, 57),     // Black
         rgb_to_rgb565(255, 255, 255),  // White
         rgb_to_rgb565(58, 91, 70),     // Green
@@ -157,6 +177,9 @@ namespace pimoroni {
         this->pen_type = PEN_P4;
         if(this->frame_buffer == nullptr) {
           this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+        }
+        for(auto i = 0u; i < 16; i++) {
+          palette[i].used = false;
         }
         for(auto i = 0u; i < 8; i++) {
           palette[i].color = default_palette[i];

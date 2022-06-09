@@ -1,8 +1,10 @@
 #include "picographics.h"
 
 // Module functions
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB332_obj, ModPicoGraphics_module_RGB332);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB565_obj, ModPicoGraphics_module_RGB565);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB332_obj, ModPicoGraphics_module_RGB_to_RGB332);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB565_obj, ModPicoGraphics_module_RGB_to_RGB565);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB332_to_RGB_obj, ModPicoGraphics_module_RGB332_to_RGB);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB565_to_RGB_obj, ModPicoGraphics_module_RGB565_to_RGB);
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_get_required_buffer_size_obj, ModPicoGraphics_get_required_buffer_size);
 
 // Class Methods
@@ -74,6 +76,7 @@ const mp_obj_type_t ModPicoGraphics_type = {
     { &mp_type_type },
     .name = MP_QSTR_picographics,
     .make_new = ModPicoGraphics_make_new,
+    .buffer_p = { .get_buffer = ModPicoGraphics_get_framebuffer },
     .locals_dict = (mp_obj_dict_t*)&ModPicoGraphics_locals_dict,
 };
 
@@ -83,8 +86,11 @@ STATIC const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PicoGraphics), (mp_obj_t)&ModPicoGraphics_type },
     { MP_ROM_QSTR(MP_QSTR_get_buffer_size), MP_ROM_PTR(&ModPicoGraphics_get_required_buffer_size_obj) },
 
-    { MP_ROM_QSTR(MP_QSTR_RGB332), MP_ROM_PTR(&ModPicoGraphics_module_RGB332_obj) },
-    { MP_ROM_QSTR(MP_QSTR_RGB565), MP_ROM_PTR(&ModPicoGraphics_module_RGB565_obj) },
+    // Colour conversion
+    { MP_ROM_QSTR(MP_QSTR_RGB_to_RGB332), MP_ROM_PTR(&ModPicoGraphics_module_RGB_to_RGB332_obj) },
+    { MP_ROM_QSTR(MP_QSTR_RGB_to_RGB565), MP_ROM_PTR(&ModPicoGraphics_module_RGB_to_RGB565_obj) },
+    { MP_ROM_QSTR(MP_QSTR_RGB332_to_RGB), MP_ROM_PTR(&ModPicoGraphics_module_RGB332_to_RGB_obj) },
+    { MP_ROM_QSTR(MP_QSTR_RGB565_to_RGB), MP_ROM_PTR(&ModPicoGraphics_module_RGB565_to_RGB_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_LCD_240X240), MP_ROM_INT(DISPLAY_LCD_240X240) },
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_ROUND_LCD_240X240), MP_ROM_INT(DISPLAY_ROUND_LCD_240X240) },

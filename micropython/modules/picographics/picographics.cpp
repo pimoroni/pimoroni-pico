@@ -182,6 +182,15 @@ mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
     return mp_const_none;
 }
 
+mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    (void)flags;
+    bufinfo->buf = self->graphics->frame_buffer;
+    bufinfo->len = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, self->graphics->bounds.w, self->graphics->bounds.h);
+    bufinfo->typecode = 'B';
+    return 0;
+}
+
 mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
@@ -245,7 +254,29 @@ mp_obj_t ModPicoGraphics_set_backlight(mp_obj_t self_in, mp_obj_t brightness) {
     return mp_const_none;
 }
 
-mp_obj_t ModPicoGraphics_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
+mp_obj_t ModPicoGraphics_module_RGB332_to_RGB(mp_obj_t rgb332) {
+    uint8_t r, g, b;
+    PicoGraphics::rgb332_to_rgb(mp_obj_get_int(rgb332), r, g, b);
+    mp_obj_t t[] = {
+        mp_obj_new_int(r),
+        mp_obj_new_int(g),
+        mp_obj_new_int(b),
+    };
+    return mp_obj_new_tuple(3, t);
+}
+
+mp_obj_t ModPicoGraphics_module_RGB565_to_RGB(mp_obj_t rgb565) {
+    uint8_t r, g, b;
+    PicoGraphics::rgb565_to_rgb(mp_obj_get_int(rgb565), r, g, b);
+    mp_obj_t t[] = {
+        mp_obj_new_int(r),
+        mp_obj_new_int(g),
+        mp_obj_new_int(b),
+    };
+    return mp_obj_new_tuple(3, t);
+}
+
+mp_obj_t ModPicoGraphics_module_RGB_to_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
     return mp_obj_new_int(PicoGraphics::rgb_to_rgb332(
         mp_obj_get_int(r),
         mp_obj_get_int(g),
@@ -253,7 +284,7 @@ mp_obj_t ModPicoGraphics_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
     ));
 }
 
-mp_obj_t ModPicoGraphics_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
+mp_obj_t ModPicoGraphics_module_RGB_to_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b) {
     return mp_obj_new_int(PicoGraphics::rgb_to_rgb565(
         mp_obj_get_int(r),
         mp_obj_get_int(g),

@@ -24,8 +24,10 @@ enum PicoGraphicsPenType {
 extern const mp_obj_type_t ModPicoGraphics_type;
 
 // Module functions
-extern mp_obj_t ModPicoGraphics_module_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b);
-extern mp_obj_t ModPicoGraphics_module_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b);
+extern mp_obj_t ModPicoGraphics_module_RGB_to_RGB332(mp_obj_t r, mp_obj_t g, mp_obj_t b);
+extern mp_obj_t ModPicoGraphics_module_RGB_to_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b);
+extern mp_obj_t ModPicoGraphics_module_RGB332_to_RGB(mp_obj_t rgb332);
+extern mp_obj_t ModPicoGraphics_module_RGB565_to_RGB(mp_obj_t rgb565);
 extern mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t pen_type_in);
 
 // Class methods
@@ -62,3 +64,5 @@ extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font);
 extern mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);
+
+extern mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags);
