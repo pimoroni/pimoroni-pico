@@ -72,7 +72,6 @@ namespace pimoroni {
 
         private:
             bme280_dev device;
-            bme280_settings settings;
 
             I2C *i2c;
 
