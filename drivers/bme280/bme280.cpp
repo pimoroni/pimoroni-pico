@@ -28,11 +28,11 @@ namespace pimoroni {
     bool BME280::configure(uint8_t filter, uint8_t standby_time, uint8_t os_pressure, uint8_t os_temp, uint8_t os_humidity, uint8_t mode) {
         int8_t result;
 
-        settings.filter = filter;
-        settings.standby_time = standby_time;
-        settings.osr_p = os_pressure;
-        settings.osr_t = os_temp;
-        settings.osr_h = os_humidity;
+        device.settings.filter = filter;
+        device.settings.standby_time = standby_time;
+        device.settings.osr_p = os_pressure;
+        device.settings.osr_t = os_temp;
+        device.settings.osr_h = os_humidity;
 
         result = bme280_set_sensor_settings(BME280_ALL_SETTINGS_SEL, &device);
         if(result != BME280_OK) return false;
