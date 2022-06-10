@@ -183,6 +183,7 @@ namespace pimoroni {
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
     virtual void set_pixel(const Point &p);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
+    virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
 
     void set_font(const bitmap::font_t *font);
@@ -429,17 +430,62 @@ namespace pimoroni {
       }
       void set_pixel_dither(const Point &p, const RGB &c) override {
         if(!bounds.contains(p)) return;
-        static uint pattern[16] = // dither pattern
-            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+        static uint8_t _odm[16] = {
+          0,  8,  2, 10,
+          12,  4, 14,  6,
+          3, 11,  1,  9,
+          15,  7, 13,  5
+        };
 
-        static std::array<uint8_t, 16> candidates;
-        get_dither_candidates(c, palette, 256, candidates);
+        uint8_t _dmv = _odm[(p.x & 0b11) | ((p.y & 0b11) << 2)];
 
-        // find the pattern coordinate offset
-        uint pattern_index = (p.x & 0b11) | ((p.y & 0b11) << 2);
+        uint8_t red = c.r & 0b11000000;        // Two bits red
+        uint8_t red_r = c.r & 0b111111;        // Remaining six bits red
+        red_r >>= 2;                           // Discard down to four bit
 
-        // set the pixel
-        color = candidates[pattern[pattern_index]];
+        uint8_t grn = (c.g & 0b11000000) >> 3; // Two bits green
+        uint8_t grn_r = c.g & 0b111111;        // Remaining six bits green
+        grn_r >>= 2;                           // Discard down to four bit
+
+        uint8_t blu = (c.b & 0b10000000) >> 6; // One bit blue
+        uint8_t blu_r = c.b & 0b1111111;       // Remaining seven bits green
+        blu_r >>= 3;                           // Discard down to four bit
+
+        color = red | grn | blu;
+        if(red_r > _dmv) color |= 0b00100000;
+        if(grn_r > _dmv) color |= 0b00000100;
+        if(blu_r > _dmv) color |= 0b00000001;
+
+        set_pixel(p);
+      }
+      void set_pixel_dither(const Point &p, const RGB565 &c) override {
+        if(!bounds.contains(p)) return;
+        RGB565 cs = __builtin_bswap16(c);
+        static uint8_t _odm[16] = {
+          0,  8,  2, 10,
+          12,  4, 14,  6,
+          3, 11,  1,  9,
+          15,  7, 13,  5
+        };
+
+        uint8_t _dmv = _odm[(p.x & 0b11) | ((p.y & 0b11) << 2)];
+
+        //                      RRRRRGGGGGGBBBBB
+        uint8_t red   = (cs & 0b1100000000000000) >> 8;  // Two bits grn
+        uint8_t red_r = (cs & 0b0011100000000000) >> 10; // Four bits cmp
+
+        uint8_t grn   = (cs & 0b0000011000000000) >> 6;  // Two bit grn
+        uint8_t grn_r = (cs & 0b0000000111100000) >> 5;  // Four bit cmp
+
+        uint8_t blu   = (cs & 0b0000000000010000) >> 3;  // Two bit blu
+        uint8_t blu_r = (cs & 0b0000000000001111);       // Four bit cmp
+
+        color = red | grn | blu;
+        //                          RRRGGGBB
+        if(red_r > _dmv) color |= 0b00100000;
+        if(grn_r > _dmv) color |= 0b00000100;
+        if(blu_r > _dmv) color |= 0b00000001;
+
         set_pixel(p);
       }
       void scanline_convert(PenType type, conversion_callback_func callback) override {

@@ -61,10 +61,10 @@ MICROPY_EVENT_POLL_HOOK
             for(int x = 0; x < pDraw->iWidth; x++) {
                 int i = y * pDraw->iWidth + x;
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
-                    current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb332());
-                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
-                    // FIXME VERY, VERY SLOW!
-                    //current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)(pDraw->pPixels[i])));
+                    //current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb332());
+                    //current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+                    // TODO make dither optional
+                    current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});

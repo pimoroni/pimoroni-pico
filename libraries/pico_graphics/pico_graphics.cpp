@@ -9,6 +9,7 @@ namespace pimoroni {
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
   void PicoGraphics::set_pixel(const Point &p) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
+  void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::scanline_convert(PenType type, conversion_callback_func callback) {};
 
   void PicoGraphics::set_dimensions(int width, int height) {
