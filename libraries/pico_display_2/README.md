@@ -2,16 +2,10 @@
 
 Our Pico Display Pack offers a vibrant 1.14" (240x135) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
 
-We've included helper functions to handle every aspect of drawing to the screen and interfacing with the buttons and LED. See the [function reference](#function-reference) for details.
-
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
   - [PicoGraphics](#picographics)
-  - [init](#init)
-  - [set_backlight](#set_backlight)
-  - [set_led](#set_led)
-  - [is_pressed](#is_pressed)
-  - [update](#update)
+  - [ST7789](#st7789)
 
 ## Example Program
 
@@ -19,49 +13,62 @@ The following example sets up Pico Display, displays some basic demo text and gr
 
 ```c++
 #include "pico_display_2.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "rgbled.hpp"
+#include "button.hpp"
 
-using namespace pimoroni;
+// Display driver
+ST7789 st7789(PicoDisplay2::WIDTH, PicoDisplay2::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
 
-uint16_t buffer[PicoDisplay2::WIDTH * PicoDisplay2::HEIGHT];
-PicoDisplay2 pico_display(buffer);
+// Graphics library - in RGB332 mode you get 256 colours and optional dithering for 75K RAM.
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
+
+// RGB LED
+RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
+
+// And each button
+Button button_a(PicoDisplay2::A);
+Button button_b(PicoDisplay2::B);
+Button button_x(PicoDisplay2::X);
+Button button_y(PicoDisplay2::Y);
 
 int main() {
-    pico_display.init();
 
     // set the backlight to a value between 0 and 255
     // the backlight is driven via PWM and is gamma corrected by our
     // library to give a gorgeous linear brightness range.
-    pico_display.set_backlight(100);
+    st7789.set_backlight(100);
 
     while(true) {
         // detect if the A button is pressed (could be A, B, X, or Y)
-        if(pico_display.is_pressed(pico_display.A)) {
+        if(button_a.raw(display.A)) {
             // make the led glow green
             // parameters are red, green, blue all between 0 and 255
             // these are also gamma corrected
-            pico_display.set_led(0, 255, 0);
+            led.set_rgb(0, 255, 0);
         }
 
         // set the colour of the pen
         // parameters are red, green, blue all between 0 and 255
-        pico_display.set_pen(30, 40, 50);
+        graphics.set_pen(30, 40, 50);
 
         // fill the screen with the current pen colour
-        pico_display.clear();
+        graphics.clear();
 
         // draw a box to put some text in
-        pico_display.set_pen(10, 20, 30);
+        graphics.set_pen(10, 20, 30);
         Rect text_rect(10, 10, 150, 150);
-        pico_display.rectangle(text_rect);
+        graphics.rectangle(text_rect);
 
         // write some text inside the box with 10 pixels of margin
         // automatically word wrapping
         text_rect.deflate(10);
-        pico_display.set_pen(110, 120, 130);
-        pico_display.text("This is a message", Point(text_rect.x, text_rect.y), text_rect.w);
+        graphics.set_pen(110, 120, 130);
+        graphics.text("This is a message", Point(text_rect.x, text_rect.y), text_rect.w);
 
         // now we've done our drawing let's update the screen
-        pico_display.update();
+        st7789.update(&graphics);
     }
 }
 ```
@@ -72,52 +79,6 @@ int main() {
 
 Pico Display uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
 
-### init
+### ST7789
 
-Sets up Pico Display. `init` must be called before any other functions since it configures the required PWM and GPIO:
-
-```c++
-pico_display.init();
-```
-
-### set_backlight
-
-Set the display backlight from 0-255.
-
-```c++
-pico_display.set_backlight(brightness);
-```
-
-Uses hardware PWM to dim the display backlight, dimming values are gamma-corrected to provide smooth brightness transitions across the full range of intensity. This may result in some low values mapping as "off."
-
-### set_led
-
-Sets the RGB LED on Pico Display with an RGB triplet:
-
-```c++
-pico_display.set_led(r, g, b);
-```
-
-Uses hardware PWM to drive the LED. Values are automatically gamma-corrected to provide smooth brightness transitions and low values may map as "off."
-
-### is_pressed
-
-Reads the GPIO pin connected to one of Pico Display's buttons, returning a `bool` - `true` if it's pressed and `false` if it is released.
-
-```c++
-pico_display.is_pressed(button);
-```
-
-The button vaule should be a `uint8_t` denoting a pin, and constants `A`, `B`, `X` and `Y` are supplied to make it easier. e:
-
-```c++
-bool is_a_button_pressed = pico_display.is_pressed(PicoDisplay2::A)
-```
-
-### update
-
-To display your changes on Pico Display's screen you need to call `update`:
-
-```c++
-pico_display.update();
-```
+Pico Display uses the ST7789 display driver to handle the LCD. For more information [read the ST7789 README.](../../drivers/st7789/README.md).

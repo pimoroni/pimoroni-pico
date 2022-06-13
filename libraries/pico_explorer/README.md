@@ -11,35 +11,59 @@ We've included helper functions to handle every aspect of drawing to the screen 
     - [Buttons](#buttons)
     - [ADC Channels](#adc-channels)
     - [GPIO](#gpio)
+    - [Motors](#motors)
   - [Functions](#functions)
-    - [init](#init)
-    - [set_motor](#set_motor)
-    - [get_adc](#get_adc)
-    - [set_audio_pin](#set_audio_pin)
-    - [set_tone](#set_tone)
-    - [is_pressed](#is_pressed)
-    - [update](#update)
+    - [Motors](#motors-1)
+    - [Analog](#analog)
+    - [Buzzer](#buzzer)
+    - [Buttons](#buttons-1)
+  - [ST7789](#st7789)
+
 
 ## Example Program
 
-The following example sets up Pico Explorer, displays some basic demo text and graphics and will illuminate the RGB LED green if the A button is pressed.
+The following example shows how to set up all of Pico Explorers functions:
 
 ```c++
 #include "pico_explorer.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "button.hpp"
+#include "motor.hpp"
+#include "analog.hpp"
 
 using namespace pimoroni;
 
-uint16_t buffer[PicoExplorer::WIDTH * PicoExplorer::HEIGHT];
-PicoExplorer pico_explorer(buffer);
+// Display driver
+ST7789 st7789(PicoExplorer::WIDTH, PicoExplorer::HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+
+// Graphics library - in RGB332 mode you get 256 colours and optional dithering for ~56K RAM.
+PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
+
+// Buttons
+Button button_a(PicoExplorer::A);
+Button button_b(PicoExplorer::B);
+Button button_x(PicoExplorer::X);
+Button button_y(PicoExplorer::Y);
+
+// Motors
+Motor motor1(PicoExplorer::MOTOR1_PINS);
+Motor motor2(PicoExplorer::MOTOR2_PINS);
+
+// Analog
+Analog adc0(PicoExplorer::ADC0_PIN);
+Analog adc1(PicoExplorer::ADC1_PIN);
+Analog adc2(PicoExplorer::ADC2_PIN);
+
 
 int main() {
-    pico_explorer.init();
+  motor1.init();
+  motor2.init();
 
-    while(true) {
-
-        // now we've done our drawing let's update the screen
-        pico_explorer.update();
-    }
+  while(true) {
+    // update screen
+    st7789.update(&graphics);
+  }
 }
 ```
 
@@ -55,132 +79,129 @@ Please note that the backlight on Pico Explorer is not dimmable (we needed the p
 
 #### Buttons
 
-The four buttons, A, B, X and Y have corresponding constants set to their respective GPIO pins. For example:
+The four buttons, A, B, X and Y have corresponding constants set to their respective GPIO pins.
 
 ```c++
-bool a_is_pressed = pico_explorer.is_pressed(pico_explorer.A);
+PicoExplorer::A = 12;
+PicoExplorer::B = 13;
+PicoExplorer::X = 14;
+PicoExplorer::Y = 15;
 ```
 
 #### ADC Channels
 
-The three ADC channels are defined as `ADC0`, `ADC1` and `ADC2`, and should be used with `get_adc`, eg:
+The three ADC channels are defined as `ADC0_PIN`, `ADC1_PIN` and `ADC2_PIN`, and should be used with an instance of the `Analog` class:
 
 ```c++
-float adc0_reading = pico_explorer.get_adc(pico_explorer.ADC0);
+PicoExplorer::ADC0_PIN = 26;
+PicoExplorer::ADC1_PIN = 27;
+PicoExplorer::ADC2_PIN = 28;
 ```
 
 #### GPIO
 
-The 8 general purpose IO pins on the lower Pico Explorer are GP0 through GP7, we've created constants for you to identify them easily. You should use Pico SDK's `gpio_get` to read a pin, eg:
+The 8 general purpose IO pins on the lower Pico Explorer are GP0 through GP7, we've created constants for you to identify them easily.
+
+```c++
+PicoExplorer::GP0 = 0;
+PicoExplorer::GP1 = 1;
+PicoExplorer::GP2 = 2;
+PicoExplorer::GP3 = 3;
+PicoExplorer::GP4 = 4;
+PicoExplorer::GP5 = 5;
+PicoExplorer::GP6 = 6;
+PicoExplorer::GP7 = 7;
+```
+
+You should use Pico SDK's `gpio_get` to read a pin, eg:
 
 ```c++
 bool pin_state = gpio_get(pico_explorer.GP0);
 ```
 
+#### Motors
+
+The two motor channels are defined as pin pairs, and should be used with an instance of the `Motor` class:
+
+```c++
+  PicoExplorer::MOTOR1_PINS = {9, 8};
+  PicoExplorer::MOTOR2_PINS = {11, 10};
+```
+
 ### Functions
 
-#### init
+#### Motors
 
-Sets up Pico Explorer. `init` must be called before any other functions since it configures the required PWM and GPIO:
+Pico Explorer uses our `Motor` library to drive motors. Motors are driven by PWM via an onboard DRV8833. Constants are provided for both motors, so setup is as easy as:
 
 ```c++
-pico_explorer.init();
+#include "motor.hpp"
+
+using namespace motor;
+
+Motor motor1(PicoExplorer::MOTOR1_PINS);
+Motor motor2(PicoExplorer::MOTOR2_PINS);
 ```
 
-#### set_motor
+You should also init your motors to set up the required GPIO/PWM on their pins:
 
 ```c++
-void PicoExplorer::set_motor(uint8_t channel, uint8_t action, float speed);
+motor1.init();
+motor2.init();
 ```
 
-Motors are driven by PWM via an onboard DRV8833, `set_motor` will set the PWM values for the corresponding channel.
-
-Channel should be one of `MOTOR1` or `MOTOR2`.
-
-Action should be `FORWARD`, `REVERSE` or `STOP`.
-
-Speed should be given as a float between `0.0` and `1.0`, eg:
+Speed should be given as a float between `-1.0` and `1.0`, eg:
 
 ```c++
-pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, 0.5f);
-pico_explorer.set_motor(pico_explorer.MOTOR2, pico_explorer.REVERSE, 0.5f);
+motor1.speed(1.0)  // Full-speed forward
+motor1.speed(-1.0) // Full-speed backward
 ```
 
 And to stop the motor:
 
 ```c++
-pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.STOP);
-pico_explorer.set_motor(pico_explorer.MOTOR2, pico_explorer.STOP);
+motor1.stop()
 ```
 
-#### get_adc
+#### Analog
 
 ```c++
 float get_adc(uint8_t channel);
 ```
 
-Pico Explorer's ADC channels are connected to Pico's ADC-capable pins 26, 27 and 28 which correspond to channels 0, 1 and 2 respectively. eg:
+Pico Explorer's ADC channels are connected to Pico's ADC-capable pins 26, 27 and 28 which correspond to channels 0, 1 and 2 respectively.
+
+Constants are supplied for these in the PicoExplorer library, so you can create an Analog instance for each:
 
 ```c++
-float reading = pico_explorer.get_adc(pico_explorer.ADC0);
+#include "analog.hpp"
+Analog adc0(PicoExplorer::ADC0_PIN);
+Analog adc1(PicoExplorer::ADC1_PIN);
+Analog adc2(PicoExplorer::ADC2_PIN);
 ```
 
-Will perform a 12-bit ADC read and return the result as a float scaled from `0.0f` to `1.0f`. This value can be plugged directly into a motor, eg:
+And read a voltage with:
 
 ```c++
-float reading = pico_explorer.get_adc(pico_explorer.ADC0);
-pico_explorer.set_motor(pico_explorer.MOTOR1, pico_explorer.FORWARD, reading);
+adc0.read_voltage();
 ```
 
-#### set_audio_pin
+#### Buzzer
+
+Note: You must bridge the pin you use over to the `AUDIO` pin on the Pico Explorer header in order to drive the onboard Piezo.
+
+TODO document buzzer
+
+#### Buttons
 
 ```c++
-void set_audio_pin(uint8_t p);
+#include "button.hpp"
+Button button_a(PicoExplorer::A);
+Button button_b(PicoExplorer::B);
+Button button_x(PicoExplorer::X);
+Button button_y(PicoExplorer::Y);
 ```
 
-`set_audio_pin` configures the PIN that Pico Explorer uses for audio output. It should be one of `GP0` through `GP7`, eg:
+### ST7789
 
-```c++
-pico_explorer.set_audio_pin(pico_explorer.GP0);
-```
-
-Note: You must bridge this pin over to the `AUDIO` pin on the Pico Explorer header in order to drive the onboard Piezo, eg:
-
-#### set_tone
-
-```c++
-void set_tone(uint16_t frequency, float duty = 0.2f);
-```
-
-`set_tone` will play an audio tone out of your chosen audio pin, if you have bridged that pin to "AUDIO" on the Pico Explorer header then it will sound the onboard Piezo.
-
-```c++
-uint16_t frequency = 440;
-pico_explorer.set_tone(frequency);
-```
-
-#### is_pressed
-
-```c++
-bool is_pressed(uint8_t button);
-```
-
-Reads the GPIO pin connected to one of Pico Explorer's buttons, returning a `bool` - `true` if it's pressed and `false` if it is released.
-
-```c++
-pico_explorer.is_pressed(button);
-```
-
-The button vaule should be a `uint8_t` denoting a pin, and constants `A`, `B`, `X` and `Y` are supplied to make it easier. e:
-
-```c++
-bool is_a_button_pressed = pico_explorer.is_pressed(PicoDisplay::A)
-```
-
-#### update
-
-To display your changes on Pico Explorer's screen you need to call `update`:
-
-```c++
-pico_explorer.update();
-```
+Pico Explorer uses the ST7789 display driver to handle the LCD. For more information [read the ST7789 README.](../../drivers/st7789/README.md).
