@@ -28,16 +28,20 @@ typedef struct _ModPicoGraphics_obj_t {
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
-bool get_display_resolution(PicoGraphicsDisplay display, int &width, int &height) {
+bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate) {
     switch(display) {
         case DISPLAY_PICO_DISPLAY:
             width = 240;
             height = 135;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_270;
             break;
         case DISPLAY_PICO_DISPLAY_2:
         case DISPLAY_TUFTY_2040:
             width = 320;
             height = 240;
+            // Tufty display is upside-down
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
             break;
         case DISPLAY_PICO_EXPLORER:
         case DISPLAY_LCD_240X240:
@@ -80,7 +84,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
-        { MP_QSTR_rotate, MP_ARG_INT, { .u_int = Rotation::ROTATE_0 } },
+        { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_bus, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_buffer, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = PEN_RGB332 } },
@@ -93,7 +97,6 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self = m_new_obj(ModPicoGraphics_obj_t);
     self->base.type = &ModPicoGraphics_type;
 
-    Rotation rotate = (Rotation)args[ARG_rotate].u_int;
 
     PicoGraphicsPenType pen_type = (PicoGraphicsPenType)args[ARG_pen_type].u_int;
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
@@ -101,15 +104,17 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     bool round = display == DISPLAY_ROUND_LCD_240X240;
     int width = 0;
     int height = 0;
-    if(!get_display_resolution(display, width, height)) mp_raise_ValueError("Unsupported display!");
+    int rotate = args[ARG_rotate].u_int;
+    if(!get_display_settings(display, width, height, rotate)) mp_raise_ValueError("Unsupported display!");
+    if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
 
     // Try to create an appropriate display driver
     if (display == DISPLAY_TUFTY_2040) {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(ST7789, width, height, rotate, {10, 11, 12, 13, 14, 2});
+            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, {10, 11, 12, 13, 14, 2});
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(ST7789, width, height, rotate, *(ParallelPins *)(bus->pins));
+            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, *(ParallelPins *)(bus->pins));
         } else {
             mp_raise_ValueError("ParallelBus expected!");
         }
@@ -124,10 +129,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         }
     } else {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(ST7789, width, height, rotate, round, get_spi_pins(BG_SPI_FRONT));
+            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, get_spi_pins(BG_SPI_FRONT));
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(ST7789, width, height, rotate, round, *(SPIPins *)(bus->pins));
+            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, *(SPIPins *)(bus->pins));
         } else {
             mp_raise_ValueError("SPIBus expected!");
         }
@@ -222,7 +227,8 @@ mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t 
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)mp_obj_get_int(display_in);
     int width = 0;
     int height = 0;
-    if(!get_display_resolution(display, width, height)) mp_raise_ValueError("Unsupported display!");
+    int rotation = 0;
+    if(!get_display_settings(display, width, height, rotation)) mp_raise_ValueError("Unsupported display!");
     size_t required_size = get_required_buffer_size(pen_type, width, height);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
