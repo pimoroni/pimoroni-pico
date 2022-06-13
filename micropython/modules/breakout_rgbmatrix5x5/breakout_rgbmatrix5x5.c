@@ -23,7 +23,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutRGBMatrix5x5_locals_dict, BreakoutRGBMatrix5
 const mp_obj_type_t breakout_rgbmatrix5x5_BreakoutRGBMatrix5x5_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_rgbmatrix5x5,
-    .print = BreakoutRGBMatrix5x5_print,
     .make_new = BreakoutRGBMatrix5x5_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutRGBMatrix5x5_locals_dict,
 };

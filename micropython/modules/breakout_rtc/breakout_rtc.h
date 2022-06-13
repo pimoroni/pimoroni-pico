@@ -14,7 +14,6 @@ enum TCR {
 extern const mp_obj_type_t breakout_rtc_BreakoutRTC_type;
 
 /***** Extern of Class Methods *****/
-extern void BreakoutRTC_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t BreakoutRTC_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 
 extern mp_obj_t BreakoutRTC_reset(mp_obj_t self_in);

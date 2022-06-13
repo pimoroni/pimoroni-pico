@@ -17,7 +17,6 @@ static const uint8_t BH1745_I2C_ADDRESS_ALTERNATE = 0x39;
 extern const mp_obj_type_t breakout_bh1745_BreakoutBH1745_type;
 
 /***** Extern of Class Methods *****/
-extern void BreakoutBH1745_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t BreakoutBH1745_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern mp_obj_t BreakoutBH1745_chip_id(mp_obj_t self_in);
 extern mp_obj_t BreakoutBH1745_manufacturer_id(mp_obj_t self_in);

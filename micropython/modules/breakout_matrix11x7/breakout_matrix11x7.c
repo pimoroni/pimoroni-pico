@@ -23,7 +23,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutMatrix11x7_locals_dict, BreakoutMatrix11x7_l
 const mp_obj_type_t breakout_matrix11x7_BreakoutMatrix11x7_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_matrix11x7,
-    .print = BreakoutMatrix11x7_print,
     .make_new = BreakoutMatrix11x7_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutMatrix11x7_locals_dict,
 };
