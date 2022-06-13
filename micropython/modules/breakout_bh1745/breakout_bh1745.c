@@ -30,7 +30,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutBH1745_locals_dict, BreakoutBH1745_locals_di
 /***** Class Definition *****/
 const mp_obj_type_t breakout_bh1745_BreakoutBH1745_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_bh1745,
+    .name = MP_QSTR_BreakoutBH1745,
     .make_new = BreakoutBH1745_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutBH1745_locals_dict,
 };

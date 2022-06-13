@@ -77,7 +77,7 @@ STATIC MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table
 /***** Class Definition *****/
 const mp_obj_type_t Badger2040_type = {
     { &mp_type_type },
-    .name = MP_QSTR_badger2040,
+    .name = MP_QSTR_Badger2040,
     .make_new = Badger2040_make_new,
     .locals_dict = (mp_obj_dict_t*)&Badger2040_locals_dict,
 };

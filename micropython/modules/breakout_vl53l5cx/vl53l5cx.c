@@ -49,7 +49,7 @@ STATIC MP_DEFINE_CONST_DICT(VL53L5CX_locals_dict, VL53L5CX_locals_dict_table);
 /***** Class Definition *****/
 const mp_obj_type_t VL53L5CX_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_vl53l5cx,
+    .name = MP_QSTR_VL53L5CX,
     .make_new = VL53L5CX_make_new,
     .locals_dict = (mp_obj_dict_t*)&VL53L5CX_locals_dict,
 };

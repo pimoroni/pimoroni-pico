@@ -30,7 +30,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutDotMatrix_locals_dict, BreakoutDotMatrix_loc
 /***** Class Definition *****/
 const mp_obj_type_t breakout_dotmatrix_BreakoutDotMatrix_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_dotmatrix,
+    .name = MP_QSTR_BreakoutDotMatrix,
     .make_new = BreakoutDotMatrix_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutDotMatrix_locals_dict,
 };

@@ -34,7 +34,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutPMW3901_locals_dict, BreakoutPMW3901_locals_
 /***** Class Definition *****/
 const mp_obj_type_t breakout_pmw3901_BreakoutPMW3901_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_pmw3901,
+    .name = MP_QSTR_BreakoutPMW3901,
     .print = BreakoutPMW3901_print,
     .make_new = BreakoutPMW3901_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict,
@@ -65,7 +65,7 @@ MP_REGISTER_MODULE(MP_QSTR_breakout_pmw3901, breakout_pmw3901_user_cmodule, MODU
 /***** Class Definition *****/
 const mp_obj_type_t breakout_paa5100_BreakoutPAA5100_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_pmw3901,
+    .name = MP_QSTR_BreakoutPAA5100,
     .print = BreakoutPMW3901_print,
     .make_new = BreakoutPAA5100_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict,

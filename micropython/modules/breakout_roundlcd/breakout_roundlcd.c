@@ -48,7 +48,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutRoundLCD_locals_dict, BreakoutRoundLCD_local
 /***** Class Definition *****/
 const mp_obj_type_t breakout_roundlcd_BreakoutRoundLCD_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_roundlcd,
+    .name = MP_QSTR_BreakoutRoundLCD,
     .print = BreakoutRoundLCD_print,
     .make_new = BreakoutRoundLCD_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutRoundLCD_locals_dict,

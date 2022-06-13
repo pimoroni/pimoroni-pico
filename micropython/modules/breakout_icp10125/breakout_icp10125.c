@@ -24,7 +24,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutICP10125_locals_dict, BreakoutICP10125_local
 /***** Class Definition *****/
 const mp_obj_type_t breakout_icp10125_BreakoutICP10125_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_matrix11x7,
+    .name = MP_QSTR_BreakoutICP10125,
     .make_new = BreakoutICP10125_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutICP10125_locals_dict,
 };
