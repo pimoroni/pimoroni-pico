@@ -83,7 +83,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutMSA301_locals_dict, BreakoutMSA301_locals_di
 /***** Class Definition *****/
 const mp_obj_type_t breakout_msa301_BreakoutMSA301_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_msa301,
+    .name = MP_QSTR_BreakoutMSA301,
     .make_new = BreakoutMSA301_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutMSA301_locals_dict,
 };

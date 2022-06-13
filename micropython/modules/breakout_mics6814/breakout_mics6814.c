@@ -50,7 +50,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutMICS6814_locals_dict, BreakoutMICS6814_local
 /***** Class Definition *****/
 const mp_obj_type_t breakout_mics6814_BreakoutMICS6814_type = {
     { &mp_type_type },
-    .name = MP_QSTR_breakout_mics6814,
+    .name = MP_QSTR_BreakoutMICS6814,
     .make_new = BreakoutMICS6814_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutMICS6814_locals_dict,
 };
