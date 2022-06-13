@@ -96,125 +96,61 @@ mp_obj_t BreakoutAS7262_temperature(mp_obj_t self_in) {
     return mp_obj_new_int(self->breakout->temperature());
 }
 
-mp_obj_t BreakoutAS7262_set_gain(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_gain };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_gain, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
+mp_obj_t BreakoutAS7262_set_gain(mp_obj_t self_in, mp_obj_t value_in) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    int gain = args[ARG_gain].u_int;
-    if(gain < 0 || gain > 3) {
-        mp_raise_ValueError("mode not a valid value. Expected 0 to 3 (X1, X3_7, X16, X64)");
-    }
-    else {
-        breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-        self->breakout->set_gain((BreakoutAS7262::gain)gain);
-    }
-
-    return mp_const_none;
-}
-
-mp_obj_t BreakoutAS7262_set_measurement_mode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_mode };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_mode, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    int mode = args[ARG_mode].u_int;
-    if(mode < 0 || mode > 3) {
-        mp_raise_ValueError("mode not a valid value. Expected 0 to 3 (CONT_YGNV, CONT_ROYG, CONT_ROYGBR, ONESHOT)");
-    }
-    else {
-        breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-        self->breakout->set_measurement_mode((BreakoutAS7262::measurement_mode)mode);
-    }
-
-    return mp_const_none;
-}
-
-mp_obj_t BreakoutAS7262_set_indicator_current(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_current };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_current, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    int value = mp_obj_get_int(value_in) & 3;
     
-    int current = args[ARG_current].u_int;
-    if(current < 0 || current > 3) {
-        mp_raise_ValueError("current not a valid value. Expected 0 to 3 (MA1, MA2, MA4, MA8)");
-    }
-    else {
-        breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-        self->breakout->set_indicator_current((BreakoutAS7262::indicator_current)current);
-    }
+    self->breakout->set_gain((BreakoutAS7262::gain)value);
 
     return mp_const_none;
 }
 
-mp_obj_t BreakoutAS7262_set_illumination_current(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_current };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_current, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
+mp_obj_t BreakoutAS7262_set_measurement_mode(mp_obj_t self_in, mp_obj_t value_in) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    int value = mp_obj_get_int(value_in) & 3;
 
-    int current = args[ARG_current].u_int;
-    if(current < 0 || current > 3) {
-        mp_raise_ValueError("current not a valid value. Expected 0 to 3 (MA12, MA25, MA50, MA100)");
-    }
-    else {  
-        breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-        self->breakout->set_illumination_current((BreakoutAS7262::illumination_current)current);
-    }
+    self->breakout->set_measurement_mode((BreakoutAS7262::measurement_mode)value);
 
     return mp_const_none;
 }
 
-mp_obj_t BreakoutAS7262_set_integration_time(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_integration_time };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_integration_time, MP_ARG_REQUIRED | MP_ARG_OBJ },
-    };
+mp_obj_t BreakoutAS7262_set_indicator_current(mp_obj_t self_in, mp_obj_t value_in) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    int value = mp_obj_get_int(value_in) & 3;
 
-    float integration_time = mp_obj_get_float(args[ARG_integration_time].u_obj);
-
-    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-    self->breakout->set_integration_time(integration_time);
+    self->breakout->set_indicator_current((BreakoutAS7262::indicator_current)value);
 
     return mp_const_none;
 }
 
-mp_obj_t BreakoutAS7262_set_leds(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_illumination, ARG_indicator };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_illumination, MP_ARG_REQUIRED | MP_ARG_BOOL },
-        { MP_QSTR_indicator, MP_ARG_REQUIRED | MP_ARG_BOOL },
-    };
+mp_obj_t BreakoutAS7262_set_illumination_current(mp_obj_t self_in, mp_obj_t value_in) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    int value = mp_obj_get_int(value_in) & 3;
 
-    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_as7262_BreakoutAS7262_obj_t);
-    self->breakout->set_leds(args[ARG_illumination].u_bool, args[ARG_indicator].u_bool);
+    self->breakout->set_illumination_current((BreakoutAS7262::illumination_current)value);
+
+    return mp_const_none;
+}
+
+mp_obj_t BreakoutAS7262_set_integration_time(mp_obj_t self_in, mp_obj_t value_in) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
+
+    self->breakout->set_integration_time(mp_obj_get_float(value_in));
+
+    return mp_const_none;
+}
+
+mp_obj_t BreakoutAS7262_set_leds(mp_obj_t self_in, mp_obj_t illumination, mp_obj_t indicator) {
+    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
+
+    self->breakout->set_leds(
+        illumination == mp_const_true,
+        indicator == mp_const_true
+    );
 
     return mp_const_none;
 }
