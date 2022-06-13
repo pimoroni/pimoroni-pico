@@ -14,27 +14,6 @@ typedef struct _breakout_bme280_BreakoutBME280_obj_t {
     _PimoroniI2C_obj_t *i2c;
 } breakout_bme280_BreakoutBME280_obj_t;
 
-/***** Print *****/
-void BreakoutBME280_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter    
-    breakout_bme280_BreakoutBME280_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_bme280_BreakoutBME280_obj_t);
-    BME280* breakout = self->breakout;
-    mp_print_str(print, "BreakoutBME280(");
-
-    mp_print_str(print, "i2c = ");
-    mp_obj_print_helper(print, mp_obj_new_int((breakout->get_i2c()->get_i2c() == i2c0) ? 0 : 1), PRINT_REPR);
-
-    mp_print_str(print, ", sda = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_i2c()->get_sda()), PRINT_REPR);
-
-    mp_print_str(print, ", scl = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_i2c()->get_scl()), PRINT_REPR);
-
-    mp_print_str(print, ", int = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_int()), PRINT_REPR);
-
-    mp_print_str(print, ")");
-}
 
 /***** Constructor *****/
 mp_obj_t BreakoutBME280_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {

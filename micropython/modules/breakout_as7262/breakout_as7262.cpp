@@ -17,27 +17,6 @@ typedef struct _breakout_as7262_BreakoutAS7262_obj_t {
 } breakout_as7262_BreakoutAS7262_obj_t;
 
 
-/***** Print *****/
-void BreakoutAS7262_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter    
-    breakout_as7262_BreakoutAS7262_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_as7262_BreakoutAS7262_obj_t);
-    BreakoutAS7262* breakout = self->breakout;
-    mp_print_str(print, "BreakoutAS7262(");
-
-    mp_print_str(print, "i2c = ");
-    mp_obj_print_helper(print, mp_obj_new_int((breakout->get_i2c() == i2c0) ? 0 : 1), PRINT_REPR);
-
-    mp_print_str(print, ", sda = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_sda()), PRINT_REPR);
-
-    mp_print_str(print, ", scl = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_scl()), PRINT_REPR);
-
-    mp_print_str(print, ", int = ");
-    mp_obj_print_helper(print, mp_obj_new_int(breakout->get_int()), PRINT_REPR);
-
-    mp_print_str(print, ")");
-}
 
 /***** Constructor *****/
 mp_obj_t BreakoutAS7262_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {

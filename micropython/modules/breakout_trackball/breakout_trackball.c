@@ -39,7 +39,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutTrackball_locals_dict, BreakoutTrackball_loc
 const mp_obj_type_t breakout_trackball_BreakoutTrackball_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_trackball,
-    .print = BreakoutTrackball_print,
     .make_new = BreakoutTrackball_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutTrackball_locals_dict,
 };

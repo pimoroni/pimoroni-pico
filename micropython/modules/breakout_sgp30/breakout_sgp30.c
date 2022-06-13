@@ -37,7 +37,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutSGP30_locals_dict, BreakoutSGP30_locals_dict
 const mp_obj_type_t breakout_sgp30_BreakoutSGP30_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_matrix11x7,
-    .print = BreakoutSGP30_print,
     .make_new = BreakoutSGP30_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutSGP30_locals_dict,
 };

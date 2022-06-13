@@ -10,7 +10,6 @@ static const int HEIGHT     = 7;
 extern const mp_obj_type_t breakout_dotmatrix_BreakoutDotMatrix_type;
 
 /***** Extern of Class Methods *****/
-extern void BreakoutDotMatrix_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t BreakoutDotMatrix_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern mp_obj_t BreakoutDotMatrix_set_brightness(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t BreakoutDotMatrix_set_decimal(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);

@@ -60,14 +60,6 @@ typedef struct _Badger2040_obj_t {
 
 _Badger2040_obj_t *badger2040_obj;
 
-/***** Print *****/
-void Badger2040_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; // Unused input parameter
-    (void)self_in;
-    //_Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
-    mp_print_str(print, "Badger2040( ");
-    mp_print_str(print, " )");
-}
 
 /***** Destructor ******/
 mp_obj_t Badger2040___del__(mp_obj_t self_in) {

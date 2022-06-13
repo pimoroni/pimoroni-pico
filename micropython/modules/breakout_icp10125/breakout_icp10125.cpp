@@ -15,15 +15,6 @@ typedef struct _breakout_icp10125_BreakoutICP10125_obj_t {
     _PimoroniI2C_obj_t *i2c;
 } breakout_icp10125_BreakoutICP10125_obj_t;
 
-/***** Print *****/
-void BreakoutICP10125_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter
-    (void)self_in;
-    // breakout_icp10125_BreakoutICP10125_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_icp10125_BreakoutICP10125_obj_t);
-    // ICP10125* breakout = self->breakout;
-    // TODO put something useful here? There's no point printing I2C info since that's handled by the I2C object now
-    mp_print_str(print, "BreakoutICP10125()");
-}
 
 /***** Constructor *****/
 mp_obj_t BreakoutICP10125_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {

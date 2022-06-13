@@ -19,7 +19,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutBME280_locals_dict, BreakoutBME280_locals_di
 const mp_obj_type_t breakout_bme280_BreakoutBME280_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_bme280,
-    .print = BreakoutBME280_print,
     .make_new = BreakoutBME280_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutBME280_locals_dict,
 };

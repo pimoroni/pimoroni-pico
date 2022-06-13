@@ -66,7 +66,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutIOExpander_locals_dict, BreakoutIOExpander_l
 const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_ioexpander,
-    .print = BreakoutIOExpander_print,
     .make_new = BreakoutIOExpander_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutIOExpander_locals_dict,
 };

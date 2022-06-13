@@ -9,13 +9,6 @@ typedef struct _adcfft_obj_t {
     ADCFFT *adcfft;
 } adcfft_obj_t;
 
-void adcfft_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; //Unused input parameter    
-    adcfft_obj_t *self = MP_OBJ_TO_PTR2(self_in, adcfft_obj_t);
-    (void)self;
-    mp_print_str(print, "ADCFFT()");
-}
-
 mp_obj_t adcfft_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     enum { ARG_adc_channel, ARG_adc_gpio, ARG_sample_rate };
     static const mp_arg_t allowed_args[] = {

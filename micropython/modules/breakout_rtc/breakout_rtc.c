@@ -139,7 +139,6 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutRTC_locals_dict, BreakoutRTC_locals_dict_tab
 const mp_obj_type_t breakout_rtc_BreakoutRTC_type = {
     { &mp_type_type },
     .name = MP_QSTR_breakout_rtc,
-    .print = BreakoutRTC_print,
     .make_new = BreakoutRTC_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutRTC_locals_dict,
 };

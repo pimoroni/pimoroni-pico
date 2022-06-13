@@ -27,22 +27,6 @@ typedef struct _VL53L5CX_obj_t {
 } _VL53L5CX_obj_t;
 
 
-/***** Print *****/
-void VL53L5CX_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind; // Unused input parameter
-    _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    mp_print_str(print, "VL53L5CX( ");
-
-
-    mp_print_str(print, "i2c = ");
-    mp_obj_print_helper(print, mp_obj_new_int((self->breakout->get_configuration()->platform.i2c == i2c0) ? 0 : 1), PRINT_REPR);
-
-    mp_print_str(print, " addr = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->breakout->get_configuration()->platform.address), PRINT_REPR);
-
-    mp_print_str(print, " )");
-}
-
 /***** Destructor ******/
 mp_obj_t VL53L5CX___del__(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
