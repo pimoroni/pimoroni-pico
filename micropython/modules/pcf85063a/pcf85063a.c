@@ -6,11 +6,11 @@
 
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_reset_obj, PCF85063A_reset);
-MP_DEFINE_CONST_FUN_OBJ_KW(PCF85063A_datetime_obj, 1, PCF85063A_datetime);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(PCF85063A_datetime_obj, 1, 2, PCF85063A_datetime);
 
 MP_DEFINE_CONST_FUN_OBJ_KW(PCF85063A_set_alarm_obj, 1, PCF85063A_set_alarm);
 MP_DEFINE_CONST_FUN_OBJ_KW(PCF85063A_set_weekday_alarm_obj, 1, PCF85063A_set_weekday_alarm);
-MP_DEFINE_CONST_FUN_OBJ_KW(PCF85063A_enable_alarm_interrupt_obj, 2, PCF85063A_enable_alarm_interrupt);
+MP_DEFINE_CONST_FUN_OBJ_2(PCF85063A_enable_alarm_interrupt_obj, PCF85063A_enable_alarm_interrupt);
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_read_alarm_flag_obj, PCF85063A_read_alarm_flag);
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_clear_alarm_flag_obj, PCF85063A_clear_alarm_flag);
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_unset_alarm_obj, PCF85063A_unset_alarm);
@@ -21,7 +21,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_read_timer_flag_obj, PCF85063A_read_timer_fl
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_clear_timer_flag_obj, PCF85063A_clear_timer_flag);
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_unset_timer_obj, PCF85063A_unset_timer);
 
-MP_DEFINE_CONST_FUN_OBJ_KW(PCF85063A_set_clock_output_obj, 2, PCF85063A_set_clock_output);
+MP_DEFINE_CONST_FUN_OBJ_2(PCF85063A_set_clock_output_obj, PCF85063A_set_clock_output);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
@@ -49,7 +49,6 @@ STATIC MP_DEFINE_CONST_DICT(PCF85063A_locals_dict, PCF85063A_locals_dict_table);
 const mp_obj_type_t pcf85063a_PCF85063A_type = {
     { &mp_type_type },
     .name = MP_QSTR_pcf85063a,
-    .print = PCF85063A_print,
     .make_new = PCF85063A_make_new,
     .locals_dict = (mp_obj_dict_t*)&PCF85063A_locals_dict,
 };
