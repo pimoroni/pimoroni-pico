@@ -100,6 +100,12 @@ namespace pimoroni {
     Point clamp(const Rect &r) const;
   };
 
+  inline bool operator== (const Point &lhs, const Point &rhs) { return lhs.x == rhs.x && lhs.y == rhs.y; }
+  inline bool operator!= (const Point &lhs, const Point &rhs) { return !(lhs == rhs); }
+  inline Point operator-  (Point lhs, const Point &rhs) { lhs -= rhs; return lhs; }
+  inline Point operator-  (const Point &rhs) { return Point(-rhs.x, -rhs.y); }
+  inline Point operator+  (Point lhs, const Point &rhs) { lhs += rhs; return lhs; }
+
   struct Rect {
     int32_t x = 0, y = 0, w = 0, h = 0;
 
@@ -185,6 +191,7 @@ namespace pimoroni {
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
+    virtual void sprite(void* data, const Point &sprite, const Point &dest, const int transparent);
 
     void set_font(const bitmap::font_t *font);
     void set_font(const hershey::font_t *font);
@@ -262,6 +269,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
       void set_pixel_dither(const Point &p, const RGB565 &c) override;
       void scanline_convert(PenType type, conversion_callback_func callback) override;
+      void sprite(void* data, const Point &sprite, const Point &dest, const int transparent) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }

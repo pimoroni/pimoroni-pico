@@ -60,6 +60,10 @@ extern mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args,
 extern mp_obj_t ModPicoGraphics_triangle(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 
+// Sprites
+extern mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata);
+extern mp_obj_t ModPicoGraphics_sprite(size_t n_args, const mp_obj_t *args);
+
 // Utility
 //extern mp_obj_t ModPicoGraphics_set_scanline_callback(mp_obj_t self_in, mp_obj_t cb_in);
 extern mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font);

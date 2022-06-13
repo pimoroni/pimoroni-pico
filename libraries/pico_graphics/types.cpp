@@ -12,20 +12,6 @@ namespace pimoroni {
     );
   }
 
-  Point operator- (Point lhs, const Point &rhs) {
-    lhs -= rhs;
-    return lhs;
-  }
-
-  Point operator- (const Point &rhs) {
-    return Point(-rhs.x, -rhs.y);
-  }
-
-  Point operator+ (Point lhs, const Point &rhs) {
-    lhs += rhs;
-    return lhs;
-  }
-
   bool Rect::empty() const {
     return w <= 0 || h <= 0;
   }

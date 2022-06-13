@@ -24,6 +24,7 @@ typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
     PicoGraphics *graphics;
     DisplayDriver *display;
+    void *spritedata;
     void *buffer;
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
@@ -139,7 +140,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     }
 
     // Create or fetch buffer
-    size_t required_size = get_required_buffer_size(pen_type, width, height);
+    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
     if (args[ARG_buffer].u_obj != mp_const_none) {
@@ -174,6 +175,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     //self->scanline_callback = mp_const_none;
 
+    self->spritedata = nullptr;
+
     // Clear the buffer
     self->graphics->set_pen(0);
     self->graphics->clear();
@@ -182,6 +185,42 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->display->update(self->graphics);
 
     return MP_OBJ_FROM_PTR(self);
+}
+
+mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    if(spritedata == mp_const_none) {
+        self->spritedata = nullptr;
+    } else {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(spritedata, &bufinfo, MP_BUFFER_RW);
+
+        int required_size = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, 128, 128);
+
+        if(bufinfo.len != (size_t)(required_size)) {
+            mp_raise_ValueError("Spritesheet the wrong size!");
+        }
+
+        self->spritedata = bufinfo.buf;
+    }
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_sprite(size_t n_args, const mp_obj_t *args) {
+    enum { ARG_self, ARG_sprite_x, ARG_sprite_y, ARG_x, ARG_y, ARG_transparent };
+
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
+
+    if(self->spritedata == nullptr) return mp_const_false;
+
+    self->graphics->sprite(
+        self->spritedata,
+        {mp_obj_get_int(args[ARG_sprite_x]), mp_obj_get_int(args[ARG_sprite_y])},
+        {mp_obj_get_int(args[ARG_x]), mp_obj_get_int(args[ARG_y])},
+        mp_obj_get_int(args[ARG_transparent])
+    );
+
+    return mp_const_true;
 }
 
 mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
