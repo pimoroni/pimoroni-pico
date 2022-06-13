@@ -41,6 +41,7 @@ include(qrcode/micropython/micropython)
 include(adcfft/micropython)
 
 include(st7789/micropython)
+include(pcf85063a/micropython)
 
 include(modules_py/modules_py)
 
