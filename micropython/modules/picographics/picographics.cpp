@@ -207,17 +207,24 @@ mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata) 
 }
 
 mp_obj_t ModPicoGraphics_sprite(size_t n_args, const mp_obj_t *args) {
-    enum { ARG_self, ARG_sprite_x, ARG_sprite_y, ARG_x, ARG_y, ARG_transparent };
+    enum { ARG_self, ARG_sprite_x, ARG_sprite_y, ARG_x, ARG_y, ARG_scale, ARG_transparent };
 
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
     if(self->spritedata == nullptr) return mp_const_false;
 
+    int scale = 1;
+    int transparent = 0;
+
+    if(n_args >= 6) scale = mp_obj_get_int(args[ARG_scale]);
+    if(n_args >= 7) transparent = mp_obj_get_int(args[ARG_transparent]);
+
     self->graphics->sprite(
         self->spritedata,
         {mp_obj_get_int(args[ARG_sprite_x]), mp_obj_get_int(args[ARG_sprite_y])},
         {mp_obj_get_int(args[ARG_x]), mp_obj_get_int(args[ARG_y])},
-        mp_obj_get_int(args[ARG_transparent])
+        scale,
+        transparent
     );
 
     return mp_const_true;

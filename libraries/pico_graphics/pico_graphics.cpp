@@ -11,7 +11,7 @@ namespace pimoroni {
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::scanline_convert(PenType type, conversion_callback_func callback) {};
-  void PicoGraphics::sprite(void* data, const Point &sprite, const Point &dest, const int transparent) {};
+  void PicoGraphics::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {};
 
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};

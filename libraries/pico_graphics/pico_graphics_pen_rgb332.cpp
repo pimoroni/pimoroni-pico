@@ -106,7 +106,7 @@ namespace pimoroni {
             }
         }
     }
-    void PicoGraphics_PenRGB332::sprite(void* data, const Point &sprite, const Point &dest, const int transparent) {
+    void PicoGraphics_PenRGB332::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {
         //int sprite_x = (sprite & 0x0f) << 3;
         //int sprite_y = (sprite & 0xf0) >> 1;
         Point s {
@@ -115,10 +115,15 @@ namespace pimoroni {
         };
         RGB332 *ptr = (RGB332 *)data;
         Point o = {0, 0};
-        for(o.y = 0; o.y < 8; o.y++) {
-            for(o.x = 0; o.x < 8; o.x++) {
-                color = ptr[(s.y + o.y) * 128 + (s.x + o.x)];
-                if(color != transparent) set_pixel(dest + o);
+        for(o.y = 0; o.y < 8 * scale; o.y++) {
+            Point so = {
+                0,
+                o.y / scale
+            };
+            for(o.x = 0; o.x < 8 * scale; o.x++) {
+                so.x = o.x / scale;
+                color = ptr[(s.y + so.y) * 128 + (s.x + so.x)];
+                if(color != transparent) pixel(dest + o);
             }
         }
     }
