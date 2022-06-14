@@ -5,19 +5,17 @@
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
-
-#include "../../common/pimoroni_common.hpp"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_bus.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 namespace pimoroni {
 
-  class UC8159 {
+  class UC8159 : public DisplayDriver {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
   private:
-    // screen properties
-    uint16_t width;
-    uint16_t height;
 
     // highest possible resolution is 160x296 which at 1 bit per pixel
     // requires 5920 bytes of frame buffer
@@ -34,8 +32,6 @@ namespace pimoroni {
     uint BUSY   = 26;
     uint RESET  = 25;
 
-    bool inverted = false;
-
   public:
     enum colour : uint8_t {
       BLACK = 0,
@@ -48,53 +44,36 @@ namespace pimoroni {
       CLEAN = 7
     };
 
-    UC8159(uint16_t width, uint16_t height) :
-      width(width), height(height), frame_buffer(new uint8_t[width * height / 2]) {
-    }
+    UC8159(uint16_t width, uint16_t height) : UC8159(width, height, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 27, PIN_UNUSED}) {};
 
-    UC8159(uint16_t width, uint16_t height, uint8_t *frame_buffer) :
-      width(width), height(height), frame_buffer(frame_buffer) {
-    }
-
-    UC8159(uint16_t width, uint16_t height,
-           spi_inst_t *spi,
-           uint CS, uint DC, uint SCK, uint MOSI,
-           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
-      width(width), height(height),
-      frame_buffer(new uint8_t[width * height / 2]),
-      spi(spi),
-      CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
-
-    UC8159(uint16_t width, uint16_t height,
-           uint8_t *frame_buffer,
-           spi_inst_t *spi,
-           uint CS, uint DC, uint SCK, uint MOSI,
-           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
-      width(width), height(height),
-      frame_buffer(frame_buffer),
-      spi(spi),
-      CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
+    UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=26, uint reset=25) :
+      DisplayDriver(width, height, ROTATE_0),
+      spi(pins.spi),
+      CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
+        init();
+      }
 
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    void init();
     void busy_wait();
-    bool is_busy();
     void reset();
-    void setup();
     void power_off();
+  
+    bool is_busy() override;
+    void update(PicoGraphics *graphics) override;
 
+  private:
+    void init();
+    void setup();
+    void update(const void *data, bool blocking = true);
     void command(uint8_t reg, size_t len, const uint8_t *data);
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg, const uint8_t data) {command(reg, 0, &data);};
     void command(uint8_t reg) {command(reg, 0, nullptr);};
     void data(size_t len, const uint8_t *data);
-
-    void update(bool blocking = true);
-    void pixel(int x, int y, int v);
   };
 
 }

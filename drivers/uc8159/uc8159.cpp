@@ -74,93 +74,26 @@ namespace pimoroni {
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
-
-    memset(frame_buffer, WHITE << 4 | WHITE, width * height / 2);
   };
 
   void UC8159::setup() {
     reset();
     busy_wait();
 
-    /*
-    Resolution Setting
-    10bit horizontal followed by a 10bit vertical resolution
-    we'll let struct.pack do the work here and send 16bit values
-    life is too short for manual bit wrangling
-    */
-    uint16_t resolution[2] = {
-      __builtin_bswap16(width),
-      __builtin_bswap16(height)
-    };
-  
-    command(TRES, 4, {
-      (uint8_t *)resolution
-    });
+    command(0x00, {0xE3, 0x08});
+    command(0x01, {0x37, 0x00, 0x23, 0x23});
+    command(0x03, {0x00});
+    command(0x06, {0xC7, 0xC7, 0x1D});
+    command(0x30, {0x3C});
+    command(0x40, {0x00});
+    command(0x50, {0x37});
+    command(0x60, {0x22});
+    command(0x61, {0x02, 0x58, 0x01, 0xC0});
+    command(0xE3, {0xAA});
 
-    /*
-    Panel Setting
-    0b11000000 = Resolution select, 0b00 = 640x480, our panel is 0b11 = 600x448
-    0b00100000 = LUT selection, 0 = ext flash, 1 = registers, we use ext flash
-    0b00010000 = Ignore
-    0b00001000 = Gate scan direction, 0 = down, 1 = up (default)
-    0b00000100 = Source shift direction, 0 = left, 1 = right (default)
-    0b00000010 = DC-DC converter, 0 = off, 1 = on
-    0b00000001 = Soft reset, 0 = Reset, 1 = Normal (Default)
-    0b11 = 600x448
-    0b10 = 640x400
-    */
+    sleep_ms(100);
 
-    command(PSR, {
-      (uint8_t)((width == 640) ? 0b10101111 : 0b11101111),
-      0x08 // UC8159 7-colour
-    });
-
-    command(PWR, {
-      (0x06 << 3) |  // ??? - not documented in UC8159 datasheet
-      (0x01 << 2) |  // SOURCE_INTERNAL_DC_DC
-      (0x01 << 1) |  // GATE_INTERNAL_DC_DC
-      0x01,          // LV_SOURCE_INTERNAL_DC_DC
-      0x00,          // VGx_20V
-      0x23,          // UC8159_7C
-      0x23           // UC8159_7C
-    });
-
-    /*
-    Set the PLL clock frequency to 50Hz
-    0b11000000 = Ignore
-    0b00111000 = M
-    0b00000111 = N
-    PLL = 2MHz * (M / N)
-    PLL = 2MHz * (7 / 4)
-    PLL = 2,800,000 ???
-    */
-    command(PLL, 0x3C);
-
-    command(TSE, 0x00);
-
-    /*
-    VCOM and Data Interval setting
-    0b11100000 = Vborder control (0b001 = LUTB voltage)
-    0b00010000 = Data polarity
-    0b00001111 = Vcom and data interval (0b0111 = 10, default)
-    */
-    command(CDI, (1 << 5) | 0x17);
-
-    /*
-    Gate/Source non-overlap period
-    0b11110000 = Source to Gate (0b0010 = 12nS, default)
-    0b00001111 = Gate to Source
-    */
-    command(TCON, 0x22);
-
-    // Disable externalflash
-    command(DAM, 0x00);
-
-    command(PWS, 0xAA);
-
-    command(PFS, 0x00);
-
-    //power_off();
+    command(0x50, {0x37});
   }
 
   void UC8159::power_off() {
@@ -193,29 +126,14 @@ namespace pimoroni {
     command(reg, values.size(), (uint8_t *)values.begin());
   }
 
-  void UC8159::pixel(int x, int y, int v) {
-    // bounds check
-    if(x < 0 || y < 0 || x >= width || y >= height) return;
-
-    // pointer to byte in framebuffer that contains this pixel
-    uint8_t *p = &frame_buffer[(x / 2) + (y * width / 2)];
-
-    uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
-    uint8_t  m = ~(0b1111 << o); // bit mask for byte
-    uint8_t  b = v << o;         // bit value shifted to position
-
-    *p &= m; // clear bits
-    *p |= b; // set value
-  }
-
-  void UC8159::update(bool blocking) {
+  void UC8159::update(const void *data, bool blocking) {
     if(blocking) {
       busy_wait();
     }
 
     setup();
 
-    command(DTM1, (width * height) / 2, frame_buffer); // transmit framebuffer
+    command(DTM1, (width * height) / 2, (uint8_t *)data); // transmit framebuffer
     busy_wait();
 
     command(PON); // turn on
@@ -229,6 +147,11 @@ namespace pimoroni {
 
       command(POF); // turn off
     }
+  }
+
+  void UC8159::update(PicoGraphics *graphics) {
+    if(graphics->pen_type != PicoGraphics::PEN_P4) return; // Incompatible buffer
+    update(graphics->frame_buffer, false);
   }
 
 }
