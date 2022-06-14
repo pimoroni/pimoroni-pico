@@ -62,6 +62,7 @@ extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 
 // Sprites
 extern mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata);
+extern mp_obj_t ModPicoGraphics_load_spritesheet(mp_obj_t self_in, mp_obj_t filename);
 extern mp_obj_t ModPicoGraphics_sprite(size_t n_args, const mp_obj_t *args);
 
 // Utility

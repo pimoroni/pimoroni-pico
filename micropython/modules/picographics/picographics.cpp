@@ -11,6 +11,9 @@ using namespace pimoroni;
 extern "C" {
 #include "picographics.h"
 #include "micropython/modules/pimoroni_bus/pimoroni_bus.h"
+#include "py/stream.h"
+#include "py/reader.h"
+#include "extmod/vfs.h"
 
 std::string mp_obj_to_string_r(const mp_obj_t &obj) {
     if(mp_obj_is_str_or_bytes(obj)) {
@@ -203,6 +206,33 @@ mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata) 
 
         self->spritedata = bufinfo.buf;
     }
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_load_spritesheet(mp_obj_t self_in, mp_obj_t filename) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    mp_obj_t args[2] = {
+        filename,
+        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+    };
+
+    // Stat the file to get its size
+    // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
+    mp_obj_t stat = mp_vfs_stat(filename);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
+    size_t filesize = mp_obj_get_int(tuple->items[6]);
+
+    mp_buffer_info_t bufinfo;
+    bufinfo.buf = (void *)m_new(uint8_t, filesize);
+    mp_obj_t file = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
+    int errcode;
+    bufinfo.len = mp_stream_rw(file, bufinfo.buf, filesize, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
+    if (errcode != 0) {
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to open sprite file!"));
+    }
+
+    self->spritedata = bufinfo.buf;
+
     return mp_const_none;
 }
 

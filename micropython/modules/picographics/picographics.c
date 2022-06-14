@@ -37,6 +37,7 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_line_obj, 5, 5, ModPicoGraph
 
 // Sprites
 MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_spritesheet_obj, ModPicoGraphics_set_spritesheet);
+MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_load_spritesheet_obj, ModPicoGraphics_load_spritesheet);
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_sprite_obj, 5, 7, ModPicoGraphics_sprite);
 
 // Utility
@@ -64,6 +65,7 @@ STATIC const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&ModPicoGraphics_line_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_set_spritesheet), MP_ROM_PTR(&ModPicoGraphics_set_spritesheet_obj) },
+    { MP_ROM_QSTR(MP_QSTR_load_spritesheet), MP_ROM_PTR(&ModPicoGraphics_load_spritesheet_obj) },
     { MP_ROM_QSTR(MP_QSTR_sprite), MP_ROM_PTR(&ModPicoGraphics_sprite_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_create_pen), MP_ROM_PTR(&ModPicoGraphics_create_pen_obj) },
