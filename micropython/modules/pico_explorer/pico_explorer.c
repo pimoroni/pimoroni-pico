@@ -39,4 +39,8 @@ const mp_obj_module_t picoexplorer_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_picoexplorer_globals,
 };
 
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_picoexplorer, picoexplorer_user_cmodule, MODULE_PICOEXPLORER_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_picoexplorer, picoexplorer_user_cmodule);
+#endif

@@ -41,4 +41,8 @@ const mp_obj_module_t JPEG_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_JPEG_globals,
 };
 
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_jpegdec, JPEG_user_cmodule, MODULE_JPEGDEC_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_jpegdec, JPEG_user_cmodule);
+#endif

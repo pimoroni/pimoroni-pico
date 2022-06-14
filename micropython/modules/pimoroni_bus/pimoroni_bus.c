@@ -29,4 +29,8 @@ const mp_obj_module_t pimoroni_bus_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_pimoroni_bus_globals,
 };
 
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_pimoroni_bus, pimoroni_bus_user_cmodule, MODULE_PIMORONI_BUS_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_pimoroni_bus, pimoroni_bus_user_cmodule);
+#endif

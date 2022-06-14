@@ -123,4 +123,8 @@ const mp_obj_module_t picographics_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_picographics_globals,
 };
 
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_picographics, picographics_user_cmodule, MODULE_PICOGRAPHICS_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_picographics, picographics_user_cmodule);
+#endif
