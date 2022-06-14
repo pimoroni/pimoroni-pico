@@ -22,7 +22,7 @@ typedef struct _ModPicoGraphics_obj_t {
 typedef struct _JPEG_obj_t {
     mp_obj_base_t base;
     JPEGDEC *jpeg;
-    void *buf;
+    mp_buffer_info_t buf;
     ModPicoGraphics_obj_t *graphics;
 } _JPEG_obj_t;
 
@@ -93,9 +93,8 @@ mp_obj_t _JPEG_del(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-static int _open(_JPEG_obj_t *self, void *buf, size_t len) {
-    self->buf = buf; // Store a pointer to this buffer so GC doesn't eat it
-    int result = self->jpeg->openRAM((uint8_t *)buf, len, JPEGDraw);
+static int _open(_JPEG_obj_t *self) {
+    int result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
     if (result == 1) {
         switch(self->graphics->graphics->pen_type) {
             case PicoGraphics::PEN_RGB332:
@@ -127,23 +126,21 @@ mp_obj_t _JPEG_openFILE(mp_obj_t self_in, mp_obj_t filename) {
     mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
     size_t filesize = mp_obj_get_int(tuple->items[6]);
 
-    mp_buffer_info_t bufinfo;
-    bufinfo.buf = (void *)m_new(uint8_t, filesize);
+    self->buf.buf = (void *)m_new(uint8_t, filesize);
     mp_obj_t file = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
     int errcode;
-    bufinfo.len = mp_stream_rw(file, bufinfo.buf, filesize, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
+    self->buf.len = mp_stream_rw(file, self->buf.buf, filesize, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
     if (errcode != 0) {
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to open file!"));
     }
-    return _open(self, bufinfo.buf, bufinfo.len) == 1 ? mp_const_true : mp_const_false;
+    return mp_const_true;
 }
 
 // open_RAM
 mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    mp_buffer_info_t bufinfo;
-    mp_get_buffer_raise(buffer, &bufinfo, MP_BUFFER_READ);
-    return _open(self, bufinfo.buf, bufinfo.len) == 1 ? mp_const_true : mp_const_false;
+    mp_get_buffer_raise(buffer, &self->buf, MP_BUFFER_READ);
+    return mp_const_true;
 }
 
 // decode
@@ -164,6 +161,8 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     int f = args[ARG_scale].u_int;
+
+    if(_open(self) != 1) return mp_const_false;
 
     // We need to store a pointer to the PicoGraphics surface
     // since the JPEGDRAW struct has no userdata
