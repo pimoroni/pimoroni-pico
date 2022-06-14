@@ -11,6 +11,7 @@ namespace pimoroni {
             palette[i] = {uint8_t(i), uint8_t(i), uint8_t(i)};
             used[i] = false;
         }
+        cache_built = false;
     }
     void PicoGraphics_PenP8::set_pen(uint c) {
         color = c;
@@ -21,7 +22,9 @@ namespace pimoroni {
     }
     int PicoGraphics_PenP8::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
         i &= 0xff;
+        used[i] = true;
         palette[i] = {r, g, b};
+        cache_built = false;
         return i;
     }
     int PicoGraphics_PenP8::create_pen(uint8_t r, uint8_t g, uint8_t b) {
@@ -30,6 +33,7 @@ namespace pimoroni {
             if(!used[i]) {
                 palette[i] = {r, g, b};
                 used[i] = true;
+                cache_built = false;
                 return i;
             }
         }
@@ -38,6 +42,7 @@ namespace pimoroni {
     int PicoGraphics_PenP8::reset_pen(uint8_t i) {
         palette[i] = {0, 0, 0};
         used[i] = false;
+        cache_built = false;
         return i;
     }
     void PicoGraphics_PenP8::set_pixel(const Point &p) {
