@@ -62,7 +62,7 @@ namespace pimoroni {
                     row_buf[x] = cache[src[bounds.w * y + x]];
                 }
                 // Callback to the driver with the row data
-                callback(row_buf, bounds.w * sizeof(uint8_t));
+                callback(row_buf, bounds.w * sizeof(RGB565));
             }
         }
     }
