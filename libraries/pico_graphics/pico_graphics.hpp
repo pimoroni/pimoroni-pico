@@ -208,8 +208,6 @@ namespace pimoroni {
     void set_clip(const Rect &r);
     void remove_clip();
 
-    void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
-
     void clear();
     void pixel(const Point &p);
     void pixel_span(const Point &p, int32_t l);
@@ -226,15 +224,28 @@ namespace pimoroni {
 
   class PicoGraphics_PenP4 : public PicoGraphics {
     public:
+      static const uint palette_size = 16;
       uint8_t color;
-      RGB palette[16];
+      RGB palette[palette_size];
+      bool used[palette_size];
+    
+      const uint pattern[16] = // dither pattern
+            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+      std::array<std::array<uint8_t, 16>, 512> candidate_cache;
+      bool cache_built = false;
+      std::array<uint8_t, 16> candidates;
 
       PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int reset_pen(uint8_t i) override;
+
       void set_pixel(const Point &p) override;
+      void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
+
       void scanline_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
@@ -243,16 +254,28 @@ namespace pimoroni {
 
   class PicoGraphics_PenP8 : public PicoGraphics {
     public:
+      static const uint palette_size = 256;
       uint8_t color;
-      RGB palette[256];
-      bool used[256];
+      RGB palette[palette_size];
+      bool used[palette_size];
+    
+      const uint pattern[16] = // dither pattern
+            {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+      std::array<std::array<uint8_t, 16>, 512> candidate_cache;
+      bool cache_built = false;
+      std::array<uint8_t, 16> candidates;
+
       PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int reset_pen(uint8_t i) override;
+
       void set_pixel(const Point &p) override;
+      void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
+      void set_pixel_dither(const Point &p, const RGB &c) override;
+
       void scanline_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
@@ -267,11 +290,14 @@ namespace pimoroni {
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+
       void set_pixel(const Point &p) override;
       void set_pixel_dither(const Point &p, const RGB &c) override;
       void set_pixel_dither(const Point &p, const RGB565 &c) override;
-      void scanline_convert(PenType type, conversion_callback_func callback) override;
+
       void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
+
+      void scanline_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }

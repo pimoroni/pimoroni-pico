@@ -7,8 +7,8 @@ namespace pimoroni {
         if(this->frame_buffer == nullptr) {
             this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
         }
-        for(auto i = 0u; i < 256; i++) {
-            palette[i] = {0, 0, 0};
+        for(auto i = 0u; i < palette_size; i++) {
+            palette[i] = {uint8_t(i), uint8_t(i), uint8_t(i)};
             used[i] = false;
         }
     }
@@ -26,7 +26,7 @@ namespace pimoroni {
     }
     int PicoGraphics_PenP8::create_pen(uint8_t r, uint8_t g, uint8_t b) {
         // Create a colour and place it in the palette if there's space
-        for(auto i = 0u; i < 256u; i++) {
+        for(auto i = 0u; i < palette_size; i++) {
             if(!used[i]) {
                 palette[i] = {r, g, b};
                 used[i] = true;
@@ -44,11 +44,50 @@ namespace pimoroni {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
     }
+    
+    void PicoGraphics_PenP8::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
+        RGB error;
+        for(size_t i = 0; i < candidates.size(); i++) {
+            candidates[i] = (col + error).closest(palette, len);
+            error += (col - palette[candidates[i]]);
+        }
+
+        // sort by a rough approximation of luminance, this ensures that neighbouring
+        // pixels in the dither matrix are at extreme opposites of luminence
+        // giving a more balanced output
+        std::sort(candidates.begin(), candidates.end(), [palette](int a, int b) {
+            return palette[a].luminance() > palette[b].luminance();
+        });
+    }
+
+    void PicoGraphics_PenP8::set_pixel_dither(const Point &p, const RGB &c) {
+        if(!bounds.contains(p)) return;
+
+        if(!cache_built) {
+            for(uint i = 0; i < 512; i++) {
+                RGB cache_col((i & 0x1C0) >> 1, (i & 0x38) << 2, (i & 0x7) << 5);
+                get_dither_candidates(cache_col, palette, palette_size, candidate_cache[i]);
+            }
+            cache_built = true;
+        }
+
+        uint cache_key = ((c.r & 0xE0) << 1) | ((c.g & 0xE0) >> 2) | ((c.b & 0xE0) >> 5);
+        //get_dither_candidates(c, palette, 256, candidates);
+
+        // find the pattern coordinate offset
+        uint pattern_index = (p.x & 0b11) | ((p.y & 0b11) << 2);
+
+        // set the pixel
+        //color = candidates[pattern[pattern_index]];
+        color = candidate_cache[cache_key][pattern[pattern_index]];
+        set_pixel(p);
+    }
+
     void PicoGraphics_PenP8::scanline_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
             // Cache the RGB888 palette as RGB565
-            RGB565 cache[256];
-            for(auto i = 0u; i < 256; i++) {
+            RGB565 cache[palette_size];
+            for(auto i = 0u; i < palette_size; i++) {
                 cache[i] = palette[i].to_rgb565();
             }
 

@@ -32,6 +32,11 @@ const mp_obj_type_t JPEG_type = {
 STATIC const mp_map_elem_t JPEG_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_jpegdec) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_JPEG), (mp_obj_t)&JPEG_type },
+
+    { MP_ROM_QSTR(MP_QSTR_JPEG_SCALE_FULL), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_JPEG_SCALE_HALF), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_JPEG_SCALE_QUARTER), MP_ROM_INT(4) },
+    { MP_ROM_QSTR(MP_QSTR_JPEG_SCALE_EIGHTH), MP_ROM_INT(8) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_JPEG_globals, JPEG_globals_table);

@@ -47,15 +47,6 @@ MICROPY_EVENT_POLL_HOOK
                 current_graphics->pixel({pDraw->x + x, pDraw->y + y});
             }
         }
-    } else if(pDraw->iBpp == 8) {
-        uint8_t *pixels = (uint8_t *)pDraw->pPixels;
-        for(int y = 0; y < pDraw->iHeight; y++) {
-            for(int x = 0; x < pDraw->iWidth; x++) {
-                int i = y * pDraw->iWidth + x;
-                current_graphics->set_pen(pixels[i] >> (current_graphics->pen_type == PicoGraphics::PEN_P4 ? 4 : 0));
-                current_graphics->pixel({pDraw->x + x, pDraw->y + y});
-            }
-        }
     } else {
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
@@ -65,6 +56,8 @@ MICROPY_EVENT_POLL_HOOK
                     //current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                     // TODO make dither optional
                     current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 || current_graphics->pen_type == PicoGraphics::PEN_P4) {
+                    current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});
@@ -107,13 +100,9 @@ static int _open(_JPEG_obj_t *self, void *buf, size_t len) {
         switch(self->graphics->graphics->pen_type) {
             case PicoGraphics::PEN_RGB332:
             case PicoGraphics::PEN_RGB565:
-                self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
-                break;
             case PicoGraphics::PEN_P8:
-                self->jpeg->setPixelType(EIGHT_BIT_GRAYSCALE);
-                break;
             case PicoGraphics::PEN_P4:
-                self->jpeg->setPixelType(FOUR_BIT_DITHERED);
+                self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
                 break;
             // TODO 2-bit is currently unsupported
             case PicoGraphics::PEN_P2:

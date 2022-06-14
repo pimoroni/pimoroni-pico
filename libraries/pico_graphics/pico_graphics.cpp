@@ -53,22 +53,7 @@ namespace pimoroni {
   void PicoGraphics::remove_clip() {
     clip = bounds;
   }
-
-  void PicoGraphics::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
-    RGB error;
-    for(size_t i = 0; i < candidates.size(); i++) {
-      candidates[i] = (col + error).closest(palette, len);
-      error += (col - palette[candidates[i]]);
-    }
-
-    // sort by a rough approximation of luminance, this ensures that neighbouring
-    // pixels in the dither matrix are at extreme opposites of luminence
-    // giving a more balanced output
-    std::sort(candidates.begin(), candidates.end(), [palette](int a, int b) {
-      return palette[a].luminance() > palette[b].luminance();
-    });
-  }
-
+  
   void PicoGraphics::clear() {
     rectangle(clip);
   }
