@@ -35,3 +35,5 @@ add_subdirectory(motor)
 add_subdirectory(vl53l5cx)
 add_subdirectory(pcf85063a)
 add_subdirectory(pms5003)
+add_subdirectory(sh1107)
+

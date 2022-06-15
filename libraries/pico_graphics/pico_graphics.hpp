@@ -128,7 +128,8 @@ namespace pimoroni {
   class PicoGraphics {
   public:
     enum PenType {
-      PEN_P2 = 0,
+      PEN_1BIT,
+      PEN_P2,
       PEN_P4,
       PEN_P8,
       PEN_RGB332,
@@ -219,6 +220,21 @@ namespace pimoroni {
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
+  };
+
+  class PicoGraphics_Pen1Bit : public PicoGraphics {
+    public:
+      uint8_t color;
+    
+      PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+
+      void set_pixel(const Point &p) override;
+
+      static size_t buffer_size(uint w, uint h) {
+          return w * h / 8;
+      }
   };
 
 
