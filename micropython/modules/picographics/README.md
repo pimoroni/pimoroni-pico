@@ -10,7 +10,24 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
   - [Supported Rotations](#supported-rotations)
   - [Custom Pins](#custom-pins)
 - [Function Reference](#function-reference)
+  - [General](#general)
+    - [Creating & Setting Pens](#creating--setting-pens)
+    - [Controlling The Backlight](#controlling-the-backlight)
+    - [Clipping](#clipping)
+    - [Clear](#clear)
+    - [Update](#update)
   - [Text](#text)
+    - [Changing The Font](#changing-the-font)
+    - [Drawing Text](#drawing-text)
+  - [Basic Shapes](#basic-shapes)
+    - [Line](#line)
+    - [Circle](#circle)
+    - [Rectangle](#rectangle)
+    - [Triangle](#triangle)
+    - [Polygon](#polygon)
+  - [Pixels](#pixels)
+  - [Palette Management](#palette-management)
+    - [Utility Functions](#utility-functions)
   - [Sprites](#sprites)
     - [Loading Sprites](#loading-sprites)
     - [Drawing Sprites](#drawing-sprites)
@@ -83,7 +100,257 @@ display = PicoGraphics(display=DISPLAY_PICO_EXPLORER, bus=spibus, pen_type=PEN_R
 
 ## Function Reference
 
+### General
+
+#### Creating & Setting Pens
+
+Create a pen colour for drawing into a screen:
+
+```python
+my_pen = display.create_pen(r, g, b)
+```
+
+In RGB565 and RGB332 modes this packs the given RGB into an integer representing a colour in these formats and returns the result.
+
+In P4 and P8 modes this will consume one palette entry, or return an error if your palette is full. Palette colours are stored as RGB and converted when they are displayed on screen.
+
+To tell PicoGraphics which pen to use:
+
+```python
+display.set_pen(my_pen)
+```
+
+This will be either an RGB332 or RGB565 colour, or a palette index.
+
+#### Controlling The Backlight
+
+You can set the display backlight brightness between `0.0` and `1.0`:
+
+```python
+display.set_backlight(0.5)
+```
+
+#### Clipping
+
+Set the clipping bounds for drawing:
+
+```python
+display.set_clip(x, y, w, h)
+```
+
+Remove the clipping bounds:
+
+```python
+display.remove_clip()
+```
+
+#### Clear
+
+Clear the display to the current pen colour:
+
+```python
+display.clear()
+```
+
+This is equivilent to:
+
+```python
+w, h = display.get_bounds()
+display.rectangle(0, 0, w, h)
+```
+
+You can clear portions of the screen with rectangles to save time redrawing things like JPEGs or complex graphics.
+
+#### Update
+
+Send the contents of your Pico Graphics buffer to your screen:
+
+```python
+display.update()
+```
+
 ### Text
+
+#### Changing The Font
+
+Change the font:
+
+```python
+display.set_font(font)
+```
+
+Bitmap fonts.
+These are aligned from their top-left corner.
+
+* `bitmap6`
+* `bitmap8`
+* `bitmap14_outline`
+
+Vector (Hershey) fonts.
+These are aligned to their midline.
+
+* `sans`
+* `gothic`
+* `cursive`
+* `serif_italic`
+* `serif`
+
+
+#### Drawing Text
+
+Write some text:
+
+```python
+display.text(text, x, y, wordwrap, scale, angle, spacing)
+```
+
+* `text` - the text string to draw
+* `x` - the destination X coordinate
+* `y` - the destination Y coordinate
+* `wordwrap` - number of pixels width before trying to break text into multiple lines
+* `scale` - size
+* `angle` - rotation angle (Vector only!)
+* `spacing` - letter spacing
+
+Text scale can be a whole number (integer) for Bitmap fonts, or a decimal (float) for Vector (Hershey) fonts.
+
+For example:
+
+```python
+display.set_font("bitmap8")
+display.text("Hello World", 0, 0, scale=2)
+```
+
+Draws "Hello World" in a 16px tall, 2x scaled version of the `bitmap8` font.
+
+Sometimes you might want to measure a text string for centering or alignment on screen, you can do this with:
+
+```python
+width = measure_text(text, scale, spacing)
+```
+
+The height of each Bitmap font is explicit in its name.
+
+Write a single character:
+
+```python
+display.character(char, x, y, scale)
+```
+
+### Basic Shapes
+
+#### Line
+
+To draw a line:
+
+```python
+display.line(x1, y1, x2, y2)
+```
+
+The X1/Y1 and X2/Y2 coordinates describe the start and end of the line repsectively. 
+
+#### Circle
+
+To draw a circle:
+
+```python
+display.circle(x, y, r)
+```
+
+* `x` - the destination X coordinate
+* `y` - the destination Y coordinate
+* `r` - the radius
+
+The X/Y coordinates describe the center of your circle.
+
+#### Rectangle
+
+```python
+display.rectangle(x, y, w, h)
+```
+
+* `x` - the destination X coordinate
+* `y` - the destination Y coordinate
+* `w` - the width
+* `h` - the eight
+
+#### Triangle
+
+```python
+display.triangle(x1, y1, x2, y2, x3, y3)
+```
+
+The three pairs of X/Y coordinates describe each point of the triangle.
+
+#### Polygon
+
+To draw other shapes, you can provide a list of points to `polygon`:
+
+```python
+display.polygon([
+  (0, 10),
+  (20, 10),
+  (20, 0),
+  (30, 20),
+  (20, 30),
+  (20, 20),
+  (0, 20),
+])
+```
+
+### Pixels
+
+Setting individual pixels is slow, but you can do it with:
+
+```python
+display.pixel(x, y)
+```
+
+You can set a horiontal span of pixels a little faster with:
+
+```python
+pixel_span(x, y, length)
+```
+
+### Palette Management
+
+Intended for P4 and P8 modes.
+
+You have a 16-color and 256-color palette respectively.
+
+Set n elements in the palette from a list of RGB tuples:
+
+```python
+set_palette([
+  (r, g, b),
+  (r, g, b),
+  (r, g, b)
+])
+```
+
+Update an entry in the P4 or P8 palette with the given colour.
+
+```python
+update_pen(index, r, g, b)
+```
+
+This is stored internally as RGB and converted to whatever format your screen requires when displayed.
+
+Reset a pen back to its default value (black, marked unused):
+
+```python
+reset_pen(index)
+```
+
+#### Utility Functions
+
+Sometimes it can be useful to convert between colour formats:
+
+* `RGB332_to_RGB`
+* `RGB_to_RGB332`
+* `RGB565_to_RGB`
+* `RGB_to_RGB565`
+
 
 ### Sprites
 
