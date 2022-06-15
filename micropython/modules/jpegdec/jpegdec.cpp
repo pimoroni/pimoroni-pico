@@ -107,6 +107,9 @@ static int _open(_JPEG_obj_t *self) {
             case PicoGraphics::PEN_P2:
                 self->jpeg->setPixelType(TWO_BIT_DITHERED);
                 break;
+	    case PicoGraphics::PEN_1BIT:
+		self->jpeg->setPixelType(ONE_BIT_DITHERED);
+		break;
         }
     }
     return result;
