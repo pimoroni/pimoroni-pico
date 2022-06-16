@@ -108,7 +108,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(ModPicoGraphics_obj_t);
+    self = m_new_obj_with_finaliser(ModPicoGraphics_obj_t);
     self->base.type = &ModPicoGraphics_type;
 
 
@@ -208,6 +208,12 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->display->update(self->graphics);
 
     return MP_OBJ_FROM_PTR(self);
+}
+
+mp_obj_t ModPicoGraphics__del__(mp_obj_t self_in) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    self->display->cleanup();
+    return mp_const_none;
 }
 
 mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata) {
