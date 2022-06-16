@@ -109,6 +109,20 @@ namespace pimoroni {
     }
   }
 
+  void ST7789::cleanup() {
+    if(spi) return; // SPI mode needs no tear down
+    if(dma_channel_is_claimed(parallel_dma)) {
+      dma_channel_abort(parallel_dma);
+      dma_channel_unclaim(parallel_dma);
+    }
+
+    if(pio_sm_is_claimed(parallel_pio, parallel_sm)) {
+      pio_sm_set_enabled(parallel_pio, parallel_sm, false);
+      pio_sm_drain_tx_fifo(parallel_pio, parallel_sm);
+      pio_sm_unclaim(parallel_pio, parallel_sm);
+    }
+  }
+
   void ST7789::configure_display(Rotation rotate) {
 
     bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
@@ -209,16 +223,37 @@ namespace pimoroni {
     command(reg::MADCTL, 1, (char *)&madctl);
   }
 
+  void ST7789::write_blocking_parallel_dma(const uint8_t *src, size_t len) {
+    while (dma_channel_is_busy(parallel_dma))
+      ;
+    dma_channel_set_trans_count(parallel_dma, len, false);
+    dma_channel_set_read_addr(parallel_dma, src, true);
+  }
+
   void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
-    uint32_t mask = 0xff << d0;
+    const uint8_t *p = src;
+    while(len--) {
+      // Does not byte align correctly
+      //pio_sm_put_blocking(parallel_pio, parallel_sm, *p);
+      while (pio_sm_is_tx_fifo_full(parallel_pio, parallel_sm))
+        ;
+      *(volatile uint8_t*)&parallel_pio->txf[parallel_sm] = *p;
+      p++;
+    }
+
+    uint32_t sm_stall_mask = 1u << (parallel_sm + PIO_FDEBUG_TXSTALL_LSB);
+    parallel_pio->fdebug = sm_stall_mask;
+      while (!(parallel_pio->fdebug & sm_stall_mask))
+          ;
+    /*uint32_t mask = 0xff << d0;
     while(len--) {
       gpio_put(wr_sck, false);     
       uint8_t v = *src++;
       gpio_put_masked(mask, v << d0);
-      asm("nop;");
+      //asm("nop;");
       gpio_put(wr_sck, true);
       asm("nop;");
-    }
+    }*/
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data) {
@@ -266,8 +301,17 @@ namespace pimoroni {
       write_blocking_parallel(&cmd, 1);
       gpio_put(dc, 1); // data mode
 
-      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
-        write_blocking_parallel((const uint8_t*)data, length);
+      int scanline = 0;
+
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this, scanline](void *data, size_t length) mutable {
+        write_blocking_parallel_dma((const uint8_t*)data, length);
+
+        // Stall on the last scanline since "data" goes out of scope and is lost
+        scanline++;
+        if(scanline == height) {
+            while (dma_channel_is_busy(parallel_dma))
+            ;
+        }
       });
 
       gpio_put(cs, 1);

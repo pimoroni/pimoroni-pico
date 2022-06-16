@@ -1,0 +1,7 @@
+.program st7789_parallel
+.side_set 1
+
+.wrap_target
+    out pins, 8  side 0
+    nop          side 1
+.wrap

@@ -1,4 +1,5 @@
 #include "pico_graphics.hpp"
+#include <string.h>
 
 namespace pimoroni {
     PicoGraphics_PenRGB332::PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer)
@@ -6,9 +7,6 @@ namespace pimoroni {
         this->pen_type = PEN_RGB332;
         if(this->frame_buffer == nullptr) {
             this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
-        }
-        for(auto i = 0u; i < 256; i++) {
-            palette[i] = RGB((RGB332)i);
         }
     }
     void PicoGraphics_PenRGB332::set_pen(uint c) {
@@ -86,11 +84,17 @@ namespace pimoroni {
     }
     void PicoGraphics_PenRGB332::scanline_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
-            // Cache the RGB888 palette as RGB565
-            RGB565 cache[256];
+
+            static RGB565 cache[256];
             for(auto i = 0u; i < 256; i++) {
-                cache[i] = palette[i].to_rgb565();
+                cache[i] = rgb332_to_rgb565_lut[i]; // defined in pico_graphics.hpp
             }
+
+            // 2ms slower, I swear!
+            /*
+            static RGB565 cache[256];
+            memcpy(cache, rgb332_to_rgb565_lut, 256 * sizeof(RGB565));
+            */
 
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
@@ -99,7 +103,8 @@ namespace pimoroni {
             uint16_t row_buf[bounds.w];
             for(auto y = 0; y < bounds.h; y++) {
                 for(auto x = 0; x < bounds.w; x++) {
-                    row_buf[x] = cache[src[bounds.w * y + x]];
+                    row_buf[x] = cache[*src];
+                    src++;
                 }
                 // Callback to the driver with the row data
                 callback(row_buf, bounds.w * sizeof(RGB565));

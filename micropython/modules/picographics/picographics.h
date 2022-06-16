@@ -74,3 +74,5 @@ extern mp_obj_t ModPicoGraphics_get_bounds(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer);
 
 extern mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags);
+
+extern mp_obj_t ModPicoGraphics__del__(mp_obj_t self_in);
