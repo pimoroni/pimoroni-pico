@@ -1,8 +1,10 @@
 #include "drivers/st7789/st7789.hpp"
 #include "drivers/st7735/st7735.hpp"
+#include "drivers/sh1107/sh1107.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
+#include "common/pimoroni_i2c.hpp"
 
 #include "micropython/modules/util.hpp"
 
@@ -11,6 +13,7 @@ using namespace pimoroni;
 extern "C" {
 #include "picographics.h"
 #include "micropython/modules/pimoroni_bus/pimoroni_bus.h"
+#include "pimoroni_i2c.h"
 #include "py/stream.h"
 #include "py/reader.h"
 #include "extmod/vfs.h"
@@ -61,6 +64,11 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             width = 160;
             height = 80;
             break;
+        case DISPLAY_I2C_OLED_128X128:
+            width = 128;
+            height = 128;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            break;
         default:
             return false;
     }
@@ -69,6 +77,8 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
 
 size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint height) {
     switch(pen_type) {
+        case PEN_1BIT:
+            return PicoGraphics_Pen1Bit::buffer_size(width, height);
         case PEN_P4:
             return PicoGraphics_PenP4::buffer_size(width, height);
         case PEN_P8:
@@ -131,6 +141,13 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         } else {
             mp_raise_ValueError("SPIBus expected!");
         }
+    } else if (display == DISPLAY_I2C_OLED_128X128) {
+        if (args[ARG_bus].u_obj == mp_const_none || mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type)) {
+            _PimoroniI2C_obj_t *i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
+            self->display = m_new_class(SH1107, width, height, *(pimoroni::I2C *)(i2c->i2c));
+        } else {
+            mp_raise_ValueError("I2C bus expected!");
+        }
     } else {
         if (args[ARG_bus].u_obj == mp_const_none) {
             self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, get_spi_pins(BG_SPI_FRONT));
@@ -160,6 +177,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     // Create an instance of the graphics library
     // use the *driver* width/height because they may have been swapped due to rotation
     switch(pen_type) {
+        case PEN_1BIT:
+            self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer);
+            break;
         case PEN_P4:
             self->graphics = m_new_class(PicoGraphics_PenP4, self->display->width, self->display->height, self->buffer);
             break;
