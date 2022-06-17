@@ -1,6 +1,7 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
+
     PicoGraphics_PenP4::PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer)
     : PicoGraphics(width, height, frame_buffer) {
         this->pen_type = PEN_P4;
@@ -19,7 +20,7 @@ namespace pimoroni {
     }
     void PicoGraphics_PenP4::set_pen(uint c) {
         color = c & 0xf;
-     }
+        }
     void PicoGraphics_PenP4::set_pen(uint8_t r, uint8_t g, uint8_t b) {
         int pen = RGB(r, g, b).closest(palette, palette_size);
         if(pen != -1) color = pen;
@@ -61,7 +62,25 @@ namespace pimoroni {
         *f &= m; // clear bits
         *f |= b; // set value
     }
-    
+
+    void PicoGraphics_PenP4::set_pixel_span(const Point &p, uint l) {
+        // pointer to byte in framebuffer that contains this pixel
+        uint8_t *buf = (uint8_t *)frame_buffer;
+        uint8_t *f = &buf[(p.x / 2) + (p.y * bounds.w / 2)];
+
+        // doubled up color value, so the color is stored in both nibbles
+        uint8_t cc = color | (color << 4);
+        
+        // handle the first pixel if not byte aligned
+        if(p.x & 0b1) {*f &= 0b11110000; *f |= (cc & 0b00001111); f++; l--;}
+
+        // write any double nibble pixels
+        while(l > 1) {*f++ = cc; l -= 2;}
+
+        // handle the last pixel if not byte aligned
+        if(l) {*f &= 0b00001111; *f |= (cc & 0b11110000);}
+    }
+
     void PicoGraphics_PenP4::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
         RGB error;
         for(size_t i = 0; i < candidates.size(); i++) {

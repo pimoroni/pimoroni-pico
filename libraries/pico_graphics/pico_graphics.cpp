@@ -2,12 +2,9 @@
 
 namespace pimoroni {
 
-  void PicoGraphics::set_pen(uint c) {};
-  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {};
   int PicoGraphics::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {return -1;};
   int PicoGraphics::reset_pen(uint8_t i) {return -1;};
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
-  void PicoGraphics::set_pixel(const Point &p) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::scanline_convert(PenType type, conversion_callback_func callback) {};
@@ -74,10 +71,7 @@ namespace pimoroni {
     if(clipped.x + l >= clip.x + clip.w)  {l  = clip.x + clip.w - clipped.x;}
 
     Point dest(clipped.x, clipped.y);
-    while(l--) {
-        set_pixel(dest);
-        dest.x++;
-    }
+    set_pixel_span(dest, l);
   }
 
   void PicoGraphics::rectangle(const Rect &r) {
@@ -89,7 +83,7 @@ namespace pimoroni {
     Point dest(clipped.x, clipped.y);
     while(clipped.h--) {
       // draw span of pixels for this row
-      pixel_span(dest, clipped.w);
+      set_pixel_span(dest, clipped.w);
       // move to next scanline
       dest.y++;
     }
