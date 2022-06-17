@@ -34,7 +34,7 @@ encoders = [Encoder(0, i, ENCODER_PINS[i], counts_per_rev=COUNTS_PER_REV, count_
 user_sw = Button(motor2040.USER_SW)
 
 # Read the encoders until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     # Print out the angle of each encoder
     for i in range(NUM_ENCODERS):

@@ -33,7 +33,7 @@ user_sw = Button(motor2040.USER_SW)
 
 
 # Read sensors until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     # Read each sensor in turn and print its voltage
     for i in range(len(sensor_addrs)):

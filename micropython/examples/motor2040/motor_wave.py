@@ -40,7 +40,7 @@ led.start()
 offset = 0.0
 
 # Make waves until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     offset += SPEED / 1000.0
 

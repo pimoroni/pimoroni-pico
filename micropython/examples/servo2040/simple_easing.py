@@ -31,7 +31,7 @@ user_sw = Button(servo2040.USER_SW)
 update = 0
 
 # Continually move the servo until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     # Calculate how far along this movement to be
     percent_along = update / UPDATES_PER_MOVE
