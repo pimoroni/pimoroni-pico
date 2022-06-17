@@ -50,6 +50,16 @@ namespace pimoroni {
         buf[p.y * bounds.w + p.x] = color;
     }
     
+    void PicoGraphics_PenP8::set_pixel_span(const Point &p, uint l) {
+        // pointer to byte in framebuffer that contains this pixel
+        uint8_t *buf = (uint8_t *)frame_buffer;
+        buf = &buf[p.y * bounds.w + p.x];
+
+        while(l--) {
+            *buf++ = color;
+        }
+    }
+
     void PicoGraphics_PenP8::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
         RGB error;
         for(size_t i = 0; i < candidates.size(); i++) {

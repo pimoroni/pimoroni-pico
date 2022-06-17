@@ -185,12 +185,14 @@ namespace pimoroni {
       set_font(&font6);
     };
 
-    virtual void set_pen(uint c);
-    virtual void set_pen(uint8_t r, uint8_t g, uint8_t b);
+    virtual void set_pen(uint c) = 0;
+    virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
+    virtual void set_pixel(const Point &p) = 0;
+    virtual void set_pixel_span(const Point &p, uint l) = 0;
+
+    virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
     virtual int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
     virtual int reset_pen(uint8_t i);
-    virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
-    virtual void set_pixel(const Point &p);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
@@ -231,6 +233,7 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
 
       void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
@@ -259,6 +262,7 @@ namespace pimoroni {
       int reset_pen(uint8_t i) override;
 
       void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
@@ -289,6 +293,7 @@ namespace pimoroni {
       int reset_pen(uint8_t i) override;
 
       void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
@@ -308,6 +313,7 @@ namespace pimoroni {
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
 
       void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
       void set_pixel_dither(const Point &p, const RGB &c) override;
       void set_pixel_dither(const Point &p, const RGB565 &c) override;
 
@@ -328,6 +334,7 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
