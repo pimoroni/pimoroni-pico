@@ -1,0 +1,21 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "docs": "",
+    "features": [
+        "SPI Flash",
+        "STEMMA QT/QWIIC",
+        "USB-C",
+        "320*240 LCD",
+        "Buttons",
+        "LiPo/Battery Support"
+    ],
+    "images": [
+    ],
+    "mcu": "rp2040",
+    "product": "Tufty2040 (8MiB)",
+    "thumbnail": "",
+    "url": "https://shop.pimoroni.com/products/pimoroni-tufty-2040",
+    "vendor": "Pimoroni"
+}
