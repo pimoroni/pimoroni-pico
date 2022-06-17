@@ -136,6 +136,10 @@ class Button:
         else:
             return self.pin.value()
 
+    @property
+    def is_pressed(self):
+        return self.raw()
+
 
 class RGBLED:
     def __init__(self, r, g, b, invert=True):
@@ -178,3 +182,17 @@ class PID:
         self._last_value = value
 
         return (error * self.kp) + (self._error_sum * self.ki) - (rate_error * self.kd)
+
+
+class Buzzer:
+    def __init__(self, pin):
+        self.pwm = PWM(Pin(pin))
+
+    def set_tone(self, freq, duty=0.5):
+        if freq < 50.0:  # uh... https://github.com/micropython/micropython/blob/af64c2ddbd758ab6bac0fcca94c66d89046663be/ports/rp2/machine_pwm.c#L105-L119
+            self.pwm.duty_u16(0)
+            return False
+
+        self.pwm.freq(freq)
+        self.pwm.duty_u16(int(65535 * duty))
+        return True

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "drivers/st7789/st7789.hpp"
-#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "drivers/motor/motor.hpp"
 
 namespace pimoroni {
 
-  class PicoExplorer : public PicoGraphics {
+  class PicoExplorer {
   public:
     static const int WIDTH = 240;
     static const int HEIGHT = 240;
@@ -17,6 +16,13 @@ namespace pimoroni {
     static const uint8_t ADC0 = 0;
     static const uint8_t ADC1 = 1;
     static const uint8_t ADC2 = 2;
+
+    static const uint ADC0_PIN = 26;
+    static const uint ADC1_PIN = 27;
+    static const uint ADC2_PIN = 28;
+
+    static constexpr pin_pair MOTOR1_PINS{9, 8};
+    static constexpr pin_pair MOTOR2_PINS{11, 10};
 
     static const uint8_t MOTOR1 = 0;
     static const uint8_t MOTOR2 = 1;
@@ -33,25 +39,6 @@ namespace pimoroni {
     static const uint GP5 = 5;
     static const uint GP6 = 6;
     static const uint GP7 = 7;
-
-    uint16_t *__fb;
-  private:
-    ST7789 screen;
-    int8_t audio_pin = -1;
-
-  public:
-    PicoExplorer(uint16_t *buf);
-
-    void init();
-    void update();
-    bool is_pressed(uint8_t button);
-
-    float get_adc(uint8_t channel);
-
-    void set_motor(uint8_t channel, uint8_t action, float speed = 0.0f);
-
-    void set_audio_pin(uint pin);
-    void set_tone(uint16_t frequency, float duty = 0.2f);
   };
 
 }

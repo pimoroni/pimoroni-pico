@@ -137,4 +137,8 @@ const mp_obj_module_t badger2040_user_cmodule = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t*)&mp_module_badger2040_globals,
 };
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_badger2040, badger2040_user_cmodule, MODULE_BADGER2040_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_badger2040, badger2040_user_cmodule);
+#endif

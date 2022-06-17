@@ -32,6 +32,7 @@ namespace pimoroni {
     // SPI
     static const unsigned int SPI_DEFAULT_MOSI = 19;
     static const unsigned int SPI_DEFAULT_MISO = 16;
+    static const unsigned int SPI_DEFAULT_DC = 16;
     static const unsigned int SPI_DEFAULT_SCK = 18;
 
     static const unsigned int SPI_BG_FRONT_PWM = 20;
@@ -52,6 +53,13 @@ namespace pimoroni {
       PLASMA_2040,
       INTERSTATE_75,
       SERVO_2040
+    };
+  
+    enum Rotation {
+      ROTATE_0 = 0,
+      ROTATE_90 = 90,
+      ROTATE_180 = 180,
+      ROTATE_270 = 270
     };
 
     enum Polarity {
@@ -100,8 +108,8 @@ namespace pimoroni {
       uint8_t enable;
     };
 
-    pin_pair() : first(0), second(0) {}
-    pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
+    constexpr pin_pair() : first(0), second(0) {}
+    constexpr pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
   };
 
   struct bool_pair {

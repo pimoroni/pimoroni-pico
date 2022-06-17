@@ -30,7 +30,7 @@ led.start()
 hue = 0.0
 
 # Make rainbows until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     hue += SPEED / 1000.0
 

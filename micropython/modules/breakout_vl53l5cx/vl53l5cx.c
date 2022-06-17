@@ -80,4 +80,8 @@ const mp_obj_module_t vl53l5cx_user_cmodule = {
 };
 
 /***** Module Registration: as "breakout_vl53l5cx" *****/
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_breakout_vl53l5cx, vl53l5cx_user_cmodule, MODULE_VL53L5CX_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_breakout_vl53l5cx, vl53l5cx_user_cmodule);
+#endif

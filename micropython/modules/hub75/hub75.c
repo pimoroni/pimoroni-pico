@@ -74,4 +74,8 @@ const mp_obj_module_t hub75_user_cmodule = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t*)&mp_module_hub75_globals,
 };
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_hub75, hub75_user_cmodule, MODULE_HUB75_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_hub75, hub75_user_cmodule);
+#endif

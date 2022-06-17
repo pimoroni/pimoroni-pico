@@ -52,7 +52,7 @@ led_bar.start()
 servos.enable_all()
 
 # Read sensors until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     # Select the current sense
     mux.select(servo2040.CURRENT_SENSE_ADDR)

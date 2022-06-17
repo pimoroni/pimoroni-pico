@@ -7,15 +7,17 @@ import utime
 import st7789
 from pimoroni import RGBLED
 
-# Set the display resolution
-# in most cases you can swap WIDTH weith HEIGHT for portrait mode
-WIDTH, HEIGHT = 135, 240    # Pico Display
-# WIDTH, HEIGHT = 320, 240  # Pico Display 2.0
-
-display = st7789.ST7789(WIDTH, HEIGHT, rotate180=False)
+display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
+display.set_palette_mode(st7789.PALETTE_USER)
 
 # Set the display backlight to 50%
 display.set_backlight(0.5)
+
+WIDTH, HEIGHT = display.get_bounds()
+
+BLACK = display.create_pen(0, 0, 0)
+WHITE = display.create_pen(255, 255, 255)
+TEMPERATURE = WHITE + 1
 
 led = RGBLED(6, 7, 8)
 
@@ -53,7 +55,7 @@ def temperature_to_color(temp):
 
 while True:
     # fills the screen with black
-    display.set_pen(0, 0, 0)
+    display.set_pen(BLACK)
     display.clear()
 
     # the following two lines do some maths to convert the number from the temp sensor into celsius
@@ -68,8 +70,9 @@ while True:
 
     i = 0
     for t in temperatures:
-        # chooses a pen colour based on the temperature
-        display.set_pen(*temperature_to_color(t))
+        # chooses a pen colour based on the temperature and update the palette entry
+        display.set_palette(TEMPERATURE, st7789.RGB565(*temperature_to_color(t)))
+        display.set_pen(TEMPERATURE)
 
         # draws the reading as a tall, thin rectangle
         display.rectangle(i, HEIGHT - (round(t) * 4), bar_width, HEIGHT)
@@ -82,11 +85,11 @@ while True:
     led.set_rgb(*temperature_to_color(temperature))
 
     # draws a white background for the text
-    display.set_pen(255, 255, 255)
+    display.set_pen(WHITE)
     display.rectangle(1, 1, 100, 25)
 
     # writes the reading as text in the white rectangle
-    display.set_pen(0, 0, 0)
+    display.set_pen(BLACK)
     display.text("{:.2f}".format(temperature) + "c", 3, 3, 0, 3)
 
     # time to update the display

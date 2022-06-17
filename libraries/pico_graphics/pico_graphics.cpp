@@ -1,21 +1,46 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
-  PicoGraphics::PicoGraphics(uint16_t width, uint16_t height, uint16_t *frame_buffer)
-  : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
-    set_font(&font6);
-  };
+
+  int PicoGraphics::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {return -1;};
+  int PicoGraphics::reset_pen(uint8_t i) {return -1;};
+  int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
+  void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
+  void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
+  void PicoGraphics::scanline_convert(PenType type, conversion_callback_func callback) {};
+  void PicoGraphics::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {};
+
+  void PicoGraphics::set_dimensions(int width, int height) {
+    bounds = clip = {0, 0, width, height};
+  }
+
+  void PicoGraphics::set_framebuffer(void *frame_buffer) {
+    this->frame_buffer = frame_buffer;
+  }
 
   void PicoGraphics::set_font(const bitmap::font_t *font){
-    this->font = font;
+    this->bitmap_font = font;
+    this->hershey_font = nullptr;
   }
 
-  void PicoGraphics::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    pen = create_pen(r, g, b);
+  void PicoGraphics::set_font(const hershey::font_t *font){
+    this->bitmap_font = nullptr;
+    this->hershey_font = font;
   }
 
-  void PicoGraphics::set_pen(Pen p) {
-    pen = p;
+  void PicoGraphics::set_font(std::string name){
+    if (name == "bitmap6") {
+      set_font(&font6);
+    } else if (name == "bitmap8") {
+      set_font(&font8);
+    } else if (name == "bitmap14_outline") {
+      set_font(&font14_outline);
+    } else {
+      // check that font exists and assign it
+      if(hershey::fonts.find(name) != hershey::fonts.end()) {
+        set_font(hershey::fonts[name]);
+      }
+    }
   }
 
   void PicoGraphics::set_clip(const Rect &r) {
@@ -25,26 +50,14 @@ namespace pimoroni {
   void PicoGraphics::remove_clip() {
     clip = bounds;
   }
-
-  Pen* PicoGraphics::ptr(const Rect &r) {
-    return frame_buffer + r.x + r.y * bounds.w;
-  }
-
-  Pen* PicoGraphics::ptr(const Point &p) {
-    return frame_buffer + p.x + p.y * bounds.w;
-  }
-
-  Pen* PicoGraphics::ptr(int32_t x, int32_t y) {
-    return frame_buffer + x + y * bounds.w;
-  }
-
+  
   void PicoGraphics::clear() {
     rectangle(clip);
   }
 
   void PicoGraphics::pixel(const Point &p) {
     if(!clip.contains(p)) return;
-    *ptr(p) = pen;
+    set_pixel(p);
   }
 
   void PicoGraphics::pixel_span(const Point &p, int32_t l) {
@@ -57,10 +70,8 @@ namespace pimoroni {
     if(clipped.x     <  clip.x)           {l += clipped.x - clip.x; clipped.x = clip.x;}
     if(clipped.x + l >= clip.x + clip.w)  {l  = clip.x + clip.w - clipped.x;}
 
-    Pen *dest = ptr(clipped);
-    while(l--) {
-      *dest++ = pen;
-    }
+    Point dest(clipped.x, clipped.y);
+    set_pixel_span(dest, l);
   }
 
   void PicoGraphics::rectangle(const Rect &r) {
@@ -69,15 +80,12 @@ namespace pimoroni {
 
     if(clipped.empty()) return;
 
-    Pen *dest = ptr(clipped);
+    Point dest(clipped.x, clipped.y);
     while(clipped.h--) {
       // draw span of pixels for this row
-      for(int32_t i = 0; i < clipped.w; i++) {
-        *dest++ = pen;
-      }
-
+      set_pixel_span(dest, clipped.w);
       // move to next scanline
-      dest += bounds.w - clipped.w;
+      dest.y++;
     }
   }
 
@@ -109,16 +117,42 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::character(const char c, const Point &p, uint8_t scale) {
-    bitmap::character(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
-      rectangle(Rect(x, y, w, h));
-    }, c, p.x, p.y, scale);
+  void PicoGraphics::character(const char c, const Point &p, float s, float a) {
+    if (bitmap_font) {
+      bitmap::character(bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        rectangle(Rect(x, y, w, h));
+      }, c, p.x, p.y, std::max(1.0f, s));
+      return;
+    }
+
+    if (hershey_font) {
+      hershey::glyph(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(Point(x1, y1), Point(x2, y2));
+      }, c, p.x, p.y, s, a);
+      return;
+    }
   }
 
-  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale) {
-    bitmap::text(font, [this](int32_t x, int32_t y, int32_t w, int32_t h){
-      rectangle(Rect(x, y, w, h));
-    }, t, p.x, p.y, wrap, scale);
+  void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, float s, float a, uint8_t letter_spacing) {
+    if (bitmap_font) {
+      bitmap::text(bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
+        rectangle(Rect(x, y, w, h));
+      }, t, p.x, p.y, wrap, std::max(1.0f, s), letter_spacing);
+      return;
+    }
+
+    if (hershey_font) {
+      hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+        line(Point(x1, y1), Point(x2, y2));
+      }, t, p.x, p.y, s, a);
+      return;
+    }
+  }
+
+  int32_t PicoGraphics::measure_text(const std::string &t, float s, uint8_t letter_spacing) {
+    if (bitmap_font) return bitmap::measure_text(bitmap_font, t, std::max(1.0f, s), letter_spacing);
+    if (hershey_font) return hershey::measure_text(hershey_font, t, s);
+    return 0;
   }
 
   int32_t orient2d(Point p1, Point p2, Point p3) {
@@ -171,13 +205,13 @@ namespace pimoroni {
       int32_t w1 = w1row;
       int32_t w2 = w2row;
 
-      Pen *dest = ptr(triangle_bounds.x, triangle_bounds.y + y);
+      Point dest = Point(triangle_bounds.x, triangle_bounds.y + y);
       for (int32_t x = 0; x < triangle_bounds.w; x++) {
         if ((w0 | w1 | w2) >= 0) {
-          *dest = pen;
+          set_pixel(dest);
         }
 
-        dest++;
+        dest.x++;
 
         w0 += a12;
         w1 += a20;
@@ -239,23 +273,28 @@ namespace pimoroni {
   void PicoGraphics::line(Point p1, Point p2) {
     // fast horizontal line
     if(p1.y == p2.y) {
-      int32_t start = std::max(clip.x, std::min(p1.x, p2.x));
-      int32_t end   = std::min(clip.x + clip.w, std::max(p1.x, p2.x));
+      p1 = p1.clamp(clip);
+      p2 = p2.clamp(clip);
+      int32_t start = std::min(p1.x, p2.x);
+      int32_t end   = std::max(p1.x, p2.x);
       pixel_span(Point(start, p1.y), end - start);
       return;
     }
 
     // fast vertical line
     if(p1.x == p2.x) {
-      int32_t start  = std::max(clip.y, std::min(p1.y, p2.y));
-      int32_t length = std::min(clip.y + clip.h, std::max(p1.y, p2.y)) - start;
-      Pen *dest = ptr(p1.x, start);
+      p1 = p1.clamp(clip);
+      p2 = p2.clamp(clip);
+      int32_t start  = std::min(p1.y, p2.y);
+      int32_t length = std::max(p1.y, p2.y) - start;
+      Point dest(p1.x, start);
       while(length--) {
-        *dest = pen;
-        dest += bounds.w;
+        set_pixel(dest);
+        dest.y++;
       }
       return;
     }
+
 
     // general purpose line
     // lines are either "shallow" or "steep" based on whether the x delta
@@ -271,7 +310,8 @@ namespace pimoroni {
       int32_t x = p1.x;
       int32_t y = p1.y << 16;
       while(s--) {
-        pixel(Point(x, y >> 16));
+        Point p(x, y >> 16);
+        if(clip.contains(p)) set_pixel(p);
         y += sy;
         x += sx;
       }
@@ -283,7 +323,8 @@ namespace pimoroni {
       int32_t y = p1.y;
       int32_t x = p1.x << 16;
       while(s--) {
-        pixel(Point(x >> 16, y));
+        Point p(x >> 16, y);
+        if(clip.contains(p)) set_pixel(p);
         y += sy;
         x += sx;
       }

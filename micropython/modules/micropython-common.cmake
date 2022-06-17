@@ -1,10 +1,10 @@
 include(pimoroni_i2c/micropython)
+include(pimoroni_bus/micropython)
 
 include(breakout_dotmatrix/micropython)
 include(breakout_encoder/micropython)
 include(breakout_ioexpander/micropython)
 include(breakout_ltr559/micropython)
-include(breakout_colourlcd160x80/micropython)
 include(breakout_as7262/micropython)
 include(breakout_rgbmatrix5x5/micropython)
 include(breakout_matrix11x7/micropython)
@@ -26,9 +26,10 @@ include(breakout_vl53l5cx/micropython)
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
 include(pico_unicorn/micropython)
-include(pico_explorer/micropython)
 include(pico_wireless/micropython)
+include(pico_explorer/micropython)
 
+include(hershey_fonts/micropython)
 include(bitmap_fonts/micropython)
 
 include(plasma/micropython)
@@ -39,9 +40,10 @@ include(encoder/micropython)
 include(motor/micropython)
 include(qrcode/micropython/micropython)
 include(adcfft/micropython)
-
-include(st7789/micropython)
 include(pcf85063a/micropython)
+
+include(picographics/micropython)
+include(jpegdec/micropython)
 
 include(modules_py/modules_py)
 

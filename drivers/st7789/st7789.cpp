@@ -13,7 +13,7 @@ namespace pimoroni {
     COL_ORDER   = 0b01000000,
     SWAP_XY     = 0b00100000,  // AKA "MV"
     SCAN_ORDER  = 0b00010000,
-    RGB         = 0b00001000,
+    RGB_BGR     = 0b00001000,
     HORIZ_ORDER = 0b00000100
   };
 
@@ -46,7 +46,23 @@ namespace pimoroni {
     PWMFRSEL  = 0xCC
   };
 
-  void ST7789::init() {
+  void ST7789::common_init() {
+    gpio_set_function(dc, GPIO_FUNC_SIO);
+    gpio_set_dir(dc, GPIO_OUT);
+
+    gpio_set_function(cs, GPIO_FUNC_SIO);
+    gpio_set_dir(cs, GPIO_OUT);
+
+    // if a backlight pin is provided then set it up for
+    // pwm control
+    if(bl != PIN_UNUSED) {
+      pwm_config cfg = pwm_get_default_config();
+      pwm_set_wrap(pwm_gpio_to_slice_num(bl), 65535);
+      pwm_init(pwm_gpio_to_slice_num(bl), &cfg, true);
+      gpio_set_function(bl, GPIO_FUNC_PWM);
+      set_backlight(0); // Turn backlight off initially to avoid nasty surprises
+    }
+
     command(reg::SWRESET);
 
     sleep_ms(150);
@@ -70,8 +86,7 @@ namespace pimoroni {
       command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
     }
 
-    if((width == 320 && height == 240)
-    || (width == 240 && height == 320)) {
+    if(width == 320 && height == 240) {
       command(reg::GCTRL, 1, "\x35");
       command(reg::VCOMS, 1, "\x1f");
       command(0xd6, 1, "\xa1"); // ???
@@ -85,30 +100,78 @@ namespace pimoroni {
 
     sleep_ms(100);
 
-    configure_display(false);
+    configure_display(rotation);
 
     if(bl != PIN_UNUSED) {
-      update(); // Send the new buffer to the display to clear any previous content
+      //update(); // Send the new buffer to the display to clear any previous content
       sleep_ms(50); // Wait for the update to apply
       set_backlight(255); // Turn backlight on now surprises have passed
     }
   }
 
-  void ST7789::configure_display(bool rotate180) {
+  void ST7789::cleanup() {
+    if(spi) return; // SPI mode needs no tear down
+    if(dma_channel_is_claimed(parallel_dma)) {
+      dma_channel_abort(parallel_dma);
+      dma_channel_unclaim(parallel_dma);
+    }
+
+    if(pio_sm_is_claimed(parallel_pio, parallel_sm)) {
+      pio_sm_set_enabled(parallel_pio, parallel_sm, false);
+      pio_sm_drain_tx_fifo(parallel_pio, parallel_sm);
+      pio_sm_unclaim(parallel_pio, parallel_sm);
+    }
+  }
+
+  void ST7789::configure_display(Rotation rotate) {
+
+    bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
+
+    if(rotate == ROTATE_90 || rotate == ROTATE_270) {
+      std::swap(width, height);
+    }
+
     // 240x240 Square and Round LCD Breakouts
-    // TODO: How can we support 90 degree rotations here?
     if(width == 240 && height == 240) {
-      caset[0] = 0;
-      caset[1] = 239;
-      if(round) {
-        raset[0] = 40;
-        raset[1] = 279;
-      } else {
-        raset[0] = rotate180 ? 80 : 0;
-        raset[1] = rotate180 ? 329 : 239;
+      int row_offset = round ? 40 : 80;
+      int col_offset = 0;
+    
+      switch(rotate) {
+        case ROTATE_90:
+          if (!round) row_offset = 0;
+          caset[0] = row_offset;
+          caset[1] = width + row_offset - 1;
+          raset[0] = col_offset;
+          raset[1] = width + col_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::SWAP_XY;
+          break;
+        case ROTATE_180:
+          caset[0] = col_offset;
+          caset[1] = width + col_offset - 1;
+          raset[0] = row_offset;
+          raset[1] = width + row_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER | MADCTL::COL_ORDER | MADCTL::ROW_ORDER;
+          break;
+        case ROTATE_270:
+          caset[0] = row_offset;
+          caset[1] = width + row_offset - 1;
+          raset[0] = col_offset;
+          raset[1] = width + col_offset - 1;
+
+          madctl = MADCTL::ROW_ORDER | MADCTL::SWAP_XY;
+          break;
+        default: // ROTATE_0 (and for any smart-alec who tries to rotate 45 degrees or something...)
+          if (!round) row_offset = 0;
+          caset[0] = col_offset;
+          caset[1] = width + col_offset - 1;
+          raset[0] = row_offset;
+          raset[1] = width + row_offset - 1;
+
+          madctl = MADCTL::HORIZ_ORDER;
+          break;
       }
-      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
-      madctl |= MADCTL::HORIZ_ORDER;
     }
 
     // Pico Display
@@ -160,46 +223,99 @@ namespace pimoroni {
     command(reg::MADCTL, 1, (char *)&madctl);
   }
 
-  spi_inst_t* ST7789::get_spi() const {
-    return spi;
+  void ST7789::write_blocking_parallel_dma(const uint8_t *src, size_t len) {
+    while (dma_channel_is_busy(parallel_dma))
+      ;
+    dma_channel_set_trans_count(parallel_dma, len, false);
+    dma_channel_set_read_addr(parallel_dma, src, true);
   }
 
-  uint ST7789::get_cs() const {
-    return cs;
-  }
+  void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
+    const uint8_t *p = src;
+    while(len--) {
+      // Does not byte align correctly
+      //pio_sm_put_blocking(parallel_pio, parallel_sm, *p);
+      while (pio_sm_is_tx_fifo_full(parallel_pio, parallel_sm))
+        ;
+      *(volatile uint8_t*)&parallel_pio->txf[parallel_sm] = *p;
+      p++;
+    }
 
-  uint ST7789::get_dc() const {
-    return dc;
-  }
-
-  uint ST7789::get_sck() const {
-    return sck;
-  }
-
-  uint ST7789::get_mosi() const {
-    return mosi;
-  }
-
-  uint ST7789::get_bl() const {
-    return bl;
+    uint32_t sm_stall_mask = 1u << (parallel_sm + PIO_FDEBUG_TXSTALL_LSB);
+    parallel_pio->fdebug = sm_stall_mask;
+      while (!(parallel_pio->fdebug & sm_stall_mask))
+          ;
+    /*uint32_t mask = 0xff << d0;
+    while(len--) {
+      gpio_put(wr_sck, false);     
+      uint8_t v = *src++;
+      gpio_put_masked(mask, v << d0);
+      //asm("nop;");
+      gpio_put(wr_sck, true);
+      asm("nop;");
+    }*/
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data) {
-    gpio_put(cs, 0);
-
     gpio_put(dc, 0); // command mode
-    spi_write_blocking(spi, &command, 1);
+
+    gpio_put(cs, 0);
+    
+    if(spi) {
+      spi_write_blocking(spi, &command, 1);
+    } else {
+      write_blocking_parallel(&command, 1);
+    }
 
     if(data) {
       gpio_put(dc, 1); // data mode
-      spi_write_blocking(spi, (const uint8_t*)data, len);
+      if(spi) {
+        spi_write_blocking(spi, (const uint8_t*)data, len);
+      } else {
+        write_blocking_parallel((const uint8_t*)data, len);
+      }
     }
 
     gpio_put(cs, 1);
   }
+  
+  void ST7789::update(PicoGraphics *graphics) {
+    uint8_t cmd = reg::RAMWR;
 
-  void ST7789::update() {
-    command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)frame_buffer);
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565) { // Display buffer is screen native
+      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
+    } else if(spi) { // SPI Bus
+      gpio_put(dc, 0); // command mode
+      gpio_put(cs, 0);
+      spi_write_blocking(spi, &cmd, 1);
+      gpio_put(dc, 1); // data mode
+
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        spi_write_blocking(spi, (const uint8_t*)data, length);
+      });
+  
+      gpio_put(cs, 1);
+    } else { // Parallel Bus
+      gpio_put(dc, 0); // command mode
+      gpio_put(cs, 0);
+      write_blocking_parallel(&cmd, 1);
+      gpio_put(dc, 1); // data mode
+
+      int scanline = 0;
+
+      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this, scanline](void *data, size_t length) mutable {
+        write_blocking_parallel_dma((const uint8_t*)data, length);
+
+        // Stall on the last scanline since "data" goes out of scope and is lost
+        scanline++;
+        if(scanline == height) {
+            while (dma_channel_is_busy(parallel_dma))
+            ;
+        }
+      });
+
+      gpio_put(cs, 1);
+    }
   }
 
   void ST7789::set_backlight(uint8_t brightness) {
@@ -208,9 +324,5 @@ namespace pimoroni {
     float gamma = 2.8;
     uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
-  }
-
-  void ST7789::flip(){
-    configure_display(true);
   }
 }

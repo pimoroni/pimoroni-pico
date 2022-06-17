@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.18
+  MICROPYTHON_VERSION: v1.19
   BOARD_TYPE: PICO   
   # MicroPython version will be contained in github.event.release.tag_name for releases
   RELEASE_FILE: pimoroni-badger2040-${{github.event.release.tag_name || github.sha}}-micropython.uf2

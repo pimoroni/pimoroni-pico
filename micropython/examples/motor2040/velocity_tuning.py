@@ -64,7 +64,7 @@ update = 0
 print_count = 0
 
 # Continually move the motor until the user button is pressed
-while user_sw.raw() is not True:
+while not user_sw.raw():
 
     # Capture the state of the encoder
     capture = enc.capture()

@@ -256,4 +256,8 @@ const mp_obj_module_t servo_user_cmodule = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t*)&mp_module_servo_globals,
 };
+#if MICROPY_VERSION <= 70144
 MP_REGISTER_MODULE(MP_QSTR_servo, servo_user_cmodule, MODULE_SERVO_ENABLED);
+#else
+MP_REGISTER_MODULE(MP_QSTR_servo, servo_user_cmodule);
+#endif
