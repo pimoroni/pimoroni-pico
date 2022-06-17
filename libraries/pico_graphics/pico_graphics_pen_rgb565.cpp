@@ -22,4 +22,13 @@ namespace pimoroni {
         uint16_t *buf = (uint16_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
     }
+    void PicoGraphics_PenRGB565::set_pixel_span(const Point &p, uint l) {
+        // pointer to byte in framebuffer that contains this pixel
+        uint16_t *buf = (uint16_t *)frame_buffer;
+        buf = &buf[p.y * bounds.w + p.x];
+
+        while(l--) {
+            *buf++ = color;
+        }
+    }
 }

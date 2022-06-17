@@ -22,6 +22,15 @@ namespace pimoroni {
         uint8_t *buf = (uint8_t *)frame_buffer;
         buf[p.y * bounds.w + p.x] = color;
     }
+    void PicoGraphics_PenRGB332::set_pixel_span(const Point &p, uint l) {
+        // pointer to byte in framebuffer that contains this pixel
+        uint8_t *buf = (uint8_t *)frame_buffer;
+        buf = &buf[p.y * bounds.w + p.x];
+
+        while(l--) {
+            *buf++ = color;
+        }
+    }
     void PicoGraphics_PenRGB332::set_pixel_dither(const Point &p, const RGB &c) {
         if(!bounds.contains(p)) return;
         static uint8_t _odm[16] = {
