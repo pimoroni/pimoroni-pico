@@ -78,7 +78,7 @@ All SPI LCDs support 0, 90, 180 and 270 degree rotations.
 Eg:
 
 ```python
-display = PicoGraphics(display=PICO_DISPLAY, roation=90)
+display = PicoGraphics(display=PICO_DISPLAY, rotate=90)
 ```
 
 ### Custom Pins
@@ -362,10 +362,23 @@ We've prepared some RGB332-compatible sprite assets for you, but you can use `sp
 
 #### Loading Sprites
 
+You'll need to include the [pen_type](#supported-graphics-modes-pen-type) in the import statement, and define the pen_type before using loading the spritesheet:
+
+``` python
+from picographics import PicoGraphics, PEN_RGB565, PEN_RGB332
+
+display = PicoGraphics(display=PICO_DISPLAY, pen_type=PEN_RGB332)
+```
 Use Thonny to upload your `spritesheet.rgb332` file onto your Pico. Then load it into Pico Graphics:
 
 ```python
 display.load_spritesheet("s4m_ur4i-dingbads.rgb332")
+```
+
+and then update the display, to show the sprite:
+
+```python
+display.update()
 ```
 
 #### Drawing Sprites
