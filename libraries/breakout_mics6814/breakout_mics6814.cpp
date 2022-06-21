@@ -135,7 +135,7 @@ namespace pimoroni {
   float BreakoutMICS6814::read_nh3(uint32_t adc_timeout) {
     float vref = ioe.get_adc_vref();
 
-    float nh3 = get_raw_red(adc_timeout);
+    float nh3 = get_raw_nh3(adc_timeout);
     if((nh3 != -1) && (vref != nh3))
       nh3 = (nh3 * 56000.0f) / (vref - nh3);
     else
@@ -147,7 +147,7 @@ namespace pimoroni {
   float BreakoutMICS6814::read_oxidising(uint32_t adc_timeout) {
     float vref = ioe.get_adc_vref();
 
-    float oxd = get_raw_red(adc_timeout);
+    float oxd = get_raw_oxd(adc_timeout);
     if((oxd != -1) && (vref != oxd))
       oxd = (oxd * 56000.0f) / (vref - oxd);
     else
