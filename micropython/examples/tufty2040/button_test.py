@@ -14,6 +14,7 @@ button_b = Button(8, invert=False)
 button_c = Button(9, invert=False)
 button_up = Button(22, invert=False)
 button_down = Button(6, invert=False)
+button_boot = Button(23, invert=True)
 
 WHITE = display.create_pen(255, 255, 255)
 BLACK = display.create_pen(0, 0, 0)
@@ -22,6 +23,7 @@ MAGENTA = display.create_pen(255, 0, 255)
 YELLOW = display.create_pen(255, 255, 0)
 RED = display.create_pen(255, 0, 0)
 GREEN = display.create_pen(0, 255, 0)
+BLUE = display.create_pen(0, 0, 255)
 
 WIDTH, HEIGHT = display.get_bounds()
 
@@ -54,7 +56,7 @@ while True:
         display.set_pen(BLACK)
         display.clear()
         display.set_pen(YELLOW)
-        display.text("Button up pressed", 10, 10, WIDTH - 10, 3)
+        display.text("Button UP pressed", 10, 10, WIDTH - 10, 3)
         display.update()
         time.sleep(1)
 
@@ -62,7 +64,15 @@ while True:
         display.set_pen(BLACK)
         display.clear()
         display.set_pen(GREEN)
-        display.text("Button down pressed", 10, 10, WIDTH - 10, 3)
+        display.text("Button DOWN pressed", 10, 10, WIDTH - 10, 3)
+        display.update()
+        time.sleep(1)
+
+    elif button_boot.is_pressed:
+        display.set_pen(BLACK)
+        display.clear()
+        display.set_pen(BLUE)
+        display.text("Button BOOT/USR pressed", 10, 10, WIDTH - 10, 3)
         display.update()
         time.sleep(1)
 
