@@ -33,3 +33,7 @@
 
 **/build
 .vscode
+
+# Apple filesystem cruft
+.DS_Store
+venv
