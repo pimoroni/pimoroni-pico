@@ -71,6 +71,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Pico Display 2.0 - https://shop.pimoroni.com/products/pico-display-pack-2-0
 
 ## SHIMs
+
 * LiPo SHIM for Pico - https://shop.pimoroni.com/products/pico-lipo-shim
 * Motor SHIM for Pico - https://shop.pimoroni.com/products/motor-shim-for-pico
 
@@ -79,6 +80,9 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Plasma 2040 (LED strip driver) - https://shop.pimoroni.com/products/plasma-2040
 * Interstate 75 (HUB75 driver) - https://shop.pimoroni.com/products/interstate-75
 * Badger 2040 (E Ink badge) - https://shop.pimoroni.com/products/badger-2040
+* Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
+* Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
+* Tufty 2040 (LCD badge) - https://shop.pimoroni.com/products/tufty-2040
 
 ## Breakouts
 
@@ -109,6 +113,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * PWM3901/PAA5100JE - Near Optical Flow Sensor - https://shop.pimoroni.com/products/paa5100je-optical-tracking-spi-breakout
 * ICP10125 - High Accuracy Pressure / Altitude / Temperature Sensor - https://shop.pimoroni.com/products/icp10125-air-pressure-breakout
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
+* VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
 
 
 # Tutorials & Guides
@@ -118,3 +123,6 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 - :link: [Getting Started with Interstate 75](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
 - :link: [Getting Started with Plasma 2040](https://learn.pimoroni.com/article/plasma-2040)
 - :link: [Assembling Keybow 2040](https://learn.pimoroni.com/article/assembling-keybow-2040)
+- :link: [Getting Started with Badger 2040](https://learn.pimoroni.com/article/getting-started-with-badger-2040)
+- :link: [MicroPython and VL53L5CX](https://learn.pimoroni.com/article/micropython-and-vl53l5cx)
+- :link: [Getting Started with Tufty 2040](https://learn.pimoroni.com/article/getting-started-with-tufty-2040)
