@@ -381,7 +381,7 @@ namespace pimoroni {
     });
 
     command(TCON, {0x22}); // tcon setting
-    command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
+    command(CDI, {(uint8_t)(inverted ? 0b10'01'1100 : 0b01'00'1100)}); // vcom and data interval
 
     command(PLL, {
       HZ_100

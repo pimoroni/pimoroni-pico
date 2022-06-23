@@ -138,7 +138,7 @@ namespace pimoroni {
     uint RESET  = PIN_UNUSED;
 
     uint8_t update_speed = 0;
-    bool inverted = false;
+    bool inverted = true; // Makes 0 black and 1 white, as is foretold.
     bool blocking = true;
 
   public:
