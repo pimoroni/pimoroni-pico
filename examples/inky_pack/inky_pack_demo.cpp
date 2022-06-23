@@ -32,7 +32,7 @@ enum Pin {
 };
 
 
-UC8151 uc8151(296, 128);
+UC8151 uc8151(296, 128, ROTATE_0);
 PicoGraphics_Pen1BitY graphics(uc8151.width, uc8151.height, nullptr);
 
 Button button_a(Pin::A);

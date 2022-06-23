@@ -327,15 +327,14 @@ namespace pimoroni {
 
     update_speed = speed;
 
-    if(speed == 0) {
-      command(PSR, {
-        RES_128x296 | LUT_OTP | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
-      });
-    } else {
-      command(PSR, {
-        RES_128x296 | LUT_REG | FORMAT_BW | SHIFT_RIGHT | BOOSTER_ON | RESET_NONE
-      });
-    }
+    uint8_t psr_setting = RES_128x296 | FORMAT_BW | BOOSTER_ON | RESET_NONE;
+
+    psr_setting |= speed == 0 ? LUT_OTP : LUT_REG;
+
+    psr_setting |= rotation == ROTATE_180 ? SHIFT_LEFT | SCAN_UP : SHIFT_RIGHT | SCAN_DOWN;
+
+    command(PSR, 1, &psr_setting);
+  
     switch(speed) {
       case 0:
         // Note: the defult luts are built in so we don't really need to flash them here

@@ -142,10 +142,10 @@ namespace pimoroni {
     bool blocking = true;
 
   public:
-    UC8151(uint16_t width, uint16_t height) : UC8151(width, height, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED}) {};
+    UC8151(uint16_t width, uint16_t height, Rotation rotate) : UC8151(width, height, rotate, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED}) {};
 
-    UC8151(uint16_t width, uint16_t height, SPIPins pins, uint busy=26, uint reset=21) :
-      DisplayDriver(width, height, ROTATE_0),
+    UC8151(uint16_t width, uint16_t height, Rotation rotate, SPIPins pins, uint busy=26, uint reset=21) :
+      DisplayDriver(width, height, rotate),
       spi(pins.spi),
       CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
         init();

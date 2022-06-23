@@ -162,10 +162,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         }
     } else if (display == DISPLAY_INKY_PACK) {
         if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(UC8151, width, height);
+            self->display = m_new_class(UC8151, width, height, (Rotation)rotate);
         } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
             _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(UC8151, width, height, *(SPIPins *)(bus->pins));
+            self->display = m_new_class(UC8151, width, height, (Rotation)rotate, *(SPIPins *)(bus->pins));
         } else {
             mp_raise_ValueError("SPIBus expected!");
         }
