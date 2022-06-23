@@ -64,7 +64,7 @@ namespace pimoroni {
     gpio_set_function(LED, GPIO_FUNC_PWM);
     led(0);
 
-    uc8151.init();
+    uc8151_legacy.init();
 
     // TODO: set default image?
   }
@@ -126,7 +126,7 @@ namespace pimoroni {
   void Badger2040::clear() {
     const uint32_t column_len = 128 / 8;
     const uint32_t buf_len = column_len * 296;
-    uint8_t* buf = uc8151.get_frame_buffer();
+    uint8_t* buf = uc8151_legacy.get_frame_buffer();
     
     if (_pen == 0) {
       memset(buf, 0xff, buf_len);
@@ -145,12 +145,12 @@ namespace pimoroni {
 
   void Badger2040::pixel(int32_t x, int32_t y) {
     if(_thickness == 1) {
-      uc8151.pixel(x, y, _dither_value(x, y, _pen));
+      uc8151_legacy.pixel(x, y, _dither_value(x, y, _pen));
     }else{
       uint8_t ht = _thickness / 2;
       for(int sy = 0; sy < _thickness; sy++) {
         for(int sx = 0; sx < _thickness; sx++) {
-          uc8151.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
+          uc8151_legacy.pixel(x + sx - ht, y + sy - ht, _dither_value(x + sx - ht, y + sy - ht, _pen));
         }
       }
     }
@@ -163,7 +163,7 @@ namespace pimoroni {
 
   // Display an image that fills the screen (296*128)
   void Badger2040::image(const uint8_t* data) {
-    uint8_t* ptr = uc8151.get_frame_buffer();
+    uint8_t* ptr = uc8151_legacy.get_frame_buffer();
     
     for (uint32_t x = 0; x < 296; ++x) {
       // extract bitmask for this pixel
@@ -205,7 +205,7 @@ namespace pimoroni {
         uint32_t bm = 0b10000000 >> ((x + sx) & 0b111);
 
         // draw the pixel
-        uc8151.pixel(dx + x, dy + y, data[o] & bm);
+        uc8151_legacy.pixel(dx + x, dy + y, data[o] & bm);
       }
     }
   }
@@ -234,7 +234,7 @@ namespace pimoroni {
 
     if (h >= 8) {
       // Directly write to the frame buffer when clearing a large area
-      uint8_t* buf = uc8151.get_frame_buffer();
+      uint8_t* buf = uc8151_legacy.get_frame_buffer();
       
       for(int cx = x; cx < x + w; cx++) {
         uint8_t* buf_ptr = &buf[cx * 16 + y / 8];
@@ -253,7 +253,7 @@ namespace pimoroni {
     else {
       for(int cx = x; cx < x + w; cx++) {
         for(int cy = y; cy < y + h; cy++) {
-          uc8151.pixel(cx, cy, _dither_value(cx, cy, _pen));
+          uc8151_legacy.pixel(cx, cy, _dither_value(cx, cy, _pen));
         }
       }
     }
@@ -283,11 +283,11 @@ namespace pimoroni {
   }
 
   void Badger2040::debug_command(uint8_t reg, size_t len, const uint8_t *data) {
-    uc8151.command(reg, len, data);
+    uc8151_legacy.command(reg, len, data);
   }
 
   void Badger2040::dump_otp(uint8_t *data) {
-    uc8151.read(0xa2,  0xFFF, data);
+    uc8151_legacy.read(0xa2,  0xFFF, data);
   }
 
   void Badger2040::update_button_states() {
@@ -301,31 +301,31 @@ namespace pimoroni {
   }
 
   bool Badger2040::is_busy() {
-    return uc8151.is_busy();
+    return uc8151_legacy.is_busy();
   }
 
   void Badger2040::power_off() {
-    uc8151.power_off();
+    uc8151_legacy.power_off();
   }
 
   void Badger2040::invert(bool invert) {
-    uc8151.invert(invert);
+    uc8151_legacy.invert(invert);
   }
 
   void Badger2040::update_speed(uint8_t speed) {
-    uc8151.update_speed(speed);
+    uc8151_legacy.update_speed(speed);
   }
 
   uint32_t Badger2040::update_time() {
-    return uc8151.update_time();
+    return uc8151_legacy.update_time();
   }
 
   void Badger2040::partial_update(int x, int y, int w, int h, bool blocking) {
-    uc8151.partial_update(x, y, w, h, blocking);
+    uc8151_legacy.partial_update(x, y, w, h, blocking);
   }
 
   void Badger2040::update(bool blocking) {
-    uc8151.update(blocking);
+    uc8151_legacy.update(blocking);
   }
 
   const hershey::font_glyph_t* Badger2040::glyph_data(unsigned char c) {

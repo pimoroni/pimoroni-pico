@@ -1,4 +1,4 @@
-set(DRIVER_NAME uc8151)
+set(DRIVER_NAME uc8151_legacy)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

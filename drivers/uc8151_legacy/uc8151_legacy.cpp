@@ -1,4 +1,4 @@
-#include "uc8151.hpp"
+#include "uc8151_legacy.hpp"
 
 #include <cstdlib>
 #include <math.h>
@@ -48,23 +48,23 @@ namespace pimoroni {
     TSSET    = 0xe5
   };
 
-  bool UC8151::is_busy() {
+  bool UC8151_Legacy::is_busy() {
     return !gpio_get(BUSY);
   }
 
-  void UC8151::busy_wait() {
+  void UC8151_Legacy::busy_wait() {
     while(is_busy()) {
       tight_loop_contents();
     }
   }
 
-  void UC8151::reset() {
+  void UC8151_Legacy::reset() {
     gpio_put(RESET, 0); sleep_ms(10);
     gpio_put(RESET, 1); sleep_ms(10);
     busy_wait();
   }
 
-  void UC8151::default_luts() {
+  void UC8151_Legacy::default_luts() {
     command(LUT_VCOM, {
       0x00, 0x64, 0x64, 0x37, 0x00, 0x01,
       0x00, 0x8c, 0x8c, 0x00, 0x00, 0x04,
@@ -119,7 +119,7 @@ namespace pimoroni {
     busy_wait();
   }
 
-  void UC8151::medium_luts() {
+  void UC8151_Legacy::medium_luts() {
 
     command(LUT_VCOM, {
       0x00, 0x16, 0x16, 0x0d, 0x00, 0x01,
@@ -175,7 +175,7 @@ namespace pimoroni {
     busy_wait();
   }
 
-  void UC8151::fast_luts() {
+  void UC8151_Legacy::fast_luts() {
     // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
     command(LUT_VCOM, {
       0x00, 0x04, 0x04, 0x07, 0x00, 0x01,
@@ -235,7 +235,7 @@ namespace pimoroni {
     busy_wait();
   }
 
-  void UC8151::turbo_luts() {
+  void UC8151_Legacy::turbo_luts() {
     // 0x3c, 0x00, 0x2b, 0x2b, 0x24, 0x1a, ????
     command(LUT_VCOM, {
       0x00, 0x01, 0x01, 0x02, 0x00, 0x01,
@@ -295,7 +295,7 @@ namespace pimoroni {
     busy_wait();
   }
 
-  void UC8151::init() {
+  void UC8151_Legacy::init() {
     // configure spi interface and pins
     spi_init(spi, 12'000'000);
 
@@ -320,7 +320,7 @@ namespace pimoroni {
     setup();
   };
 
-  void UC8151::setup(uint8_t speed) {
+  void UC8151_Legacy::setup(uint8_t speed) {
     reset();
 
     _update_speed = speed;
@@ -389,11 +389,11 @@ namespace pimoroni {
     busy_wait();
   }
 
-  void UC8151::power_off() {
+  void UC8151_Legacy::power_off() {
     command(POF);
   }
 
-  void UC8151::read(uint8_t reg, size_t len, uint8_t *data) {
+  void UC8151_Legacy::read(uint8_t reg, size_t len, uint8_t *data) {
     gpio_put(CS, 0);
 
     gpio_put(DC, 0); // command mode
@@ -421,7 +421,7 @@ namespace pimoroni {
     gpio_put(CS, 1);
   }
 
-  void UC8151::command(uint8_t reg, size_t len, const uint8_t *data) {
+  void UC8151_Legacy::command(uint8_t reg, size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
 
     gpio_put(DC, 0); // command mode
@@ -435,18 +435,18 @@ namespace pimoroni {
     gpio_put(CS, 1);
   }
 
-  void UC8151::data(size_t len, const uint8_t *data) {
+  void UC8151_Legacy::data(size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
     gpio_put(DC, 1); // data mode
     spi_write_blocking(spi, (const uint8_t*)data, len);
     gpio_put(CS, 1);
   }
 
-  void UC8151::command(uint8_t reg, std::initializer_list<uint8_t> values) {
+  void UC8151_Legacy::command(uint8_t reg, std::initializer_list<uint8_t> values) {
     command(reg, values.size(), (uint8_t *)values.begin());
   }
 
-  void UC8151::pixel(int x, int y, int v) {
+  void UC8151_Legacy::pixel(int x, int y, int v) {
     // bounds check
     if(x < 0 || y < 0 || x >= width || y >= height) return;
 
@@ -461,24 +461,24 @@ namespace pimoroni {
     *p |= b; // set bit value
   }
 
-  uint8_t* UC8151::get_frame_buffer() {
+  uint8_t* UC8151_Legacy::get_frame_buffer() {
 	  return frame_buffer;
   }
 
-  void UC8151::invert(bool inv) {
+  void UC8151_Legacy::invert(bool inv) {
     inverted = inv;
     command(CDI, {(uint8_t)(inverted ? 0b01'01'1100 : 0b01'00'1100)}); // vcom and data interval
   }
 
-  void UC8151::update_speed(uint8_t speed) {
+  void UC8151_Legacy::update_speed(uint8_t speed) {
     setup(speed);
   }
 
-  uint8_t UC8151::update_speed() {
+  uint8_t UC8151_Legacy::update_speed() {
     return _update_speed;
   }
 
-  uint32_t UC8151::update_time() {
+  uint32_t UC8151_Legacy::update_time() {
     switch(_update_speed) {
       case 0:
         return 4500;
@@ -493,7 +493,7 @@ namespace pimoroni {
     }
   }
 
-  void UC8151::partial_update(int x, int y, int w, int h, bool blocking) {
+  void UC8151_Legacy::partial_update(int x, int y, int w, int h, bool blocking) {
     // y is given in columns ("banks"), which are groups of 8 horiontal pixels
     // x is given in pixels
     if(blocking) {
@@ -539,7 +539,7 @@ namespace pimoroni {
     }
   }
 
-  void UC8151::update(bool blocking) {
+  void UC8151_Legacy::update(bool blocking) {
     if(blocking) {
       busy_wait();
     }
@@ -560,7 +560,7 @@ namespace pimoroni {
     }
   }
 
-  void UC8151::off() {
+  void UC8151_Legacy::off() {
     busy_wait();
     command(POF); // turn off
   }
