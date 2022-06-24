@@ -32,7 +32,7 @@
 // JPEG Decoder
 // Written by Larry Bank
 // Copyright (c) 2020 BitBank Software, Inc.
-// 
+//
 // Designed to decode baseline JPEG images (8 or 24-bpp)
 // using less than 22K of RAM
 //
@@ -213,7 +213,7 @@ class JPEGDEC
 #endif
     void close();
     int decode(int x, int y, int iOptions);
-    int decodeDither(int x, int y, uint8_t *pDither, int iOptions);
+    int decodeDither(uint8_t *pDither, int iOptions);
     int getOrientation();
     int getWidth();
     int getHeight();

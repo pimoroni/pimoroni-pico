@@ -682,7 +682,7 @@ static int JPEGGetHuffTables(uint8_t *pBuf, int iLen, JPEGIMAGE *pJPEG)
 {
     int i, j, iOffset, iTableOffset;
     uint8_t ucTable, *pHuffVals;
-    
+
     iOffset = 0;
     pHuffVals = (uint8_t *)pJPEG->usPixels; // temp holding area to save RAM
     while (iLen > 17)  // while there are tables to copy (we may have combined more than 1 table together)
@@ -920,7 +920,7 @@ static int JPEGMakeHuffTables(JPEGIMAGE *pJPEG, int bThumbnail)
     uint8_t *p, *pBits, ucCode;
     int iMaxLength, iMaxMask;
     int iTablesUsed;
-    
+
     iTablesUsed = 0;
     pHuffVals = (uint8_t *)pJPEG->usPixels;
     for (j=0; j<4; j++)
@@ -1153,7 +1153,7 @@ static uint32_t TIFFLONG(unsigned char *p, int bMotorola)
 static int TIFFVALUE(unsigned char *p, int bMotorola)
 {
     int i, iType;
-    
+
     iType = TIFFSHORT(p+2, bMotorola);
     /* If pointer to a list of items, must be a long */
     if (TIFFSHORT(p+4, bMotorola) > 1)
@@ -1182,13 +1182,13 @@ static int TIFFVALUE(unsigned char *p, int bMotorola)
             break;
     }
     return i;
-    
+
 } /* TIFFVALUE() */
 static void GetTIFFInfo(JPEGIMAGE *pPage, int bMotorola, int iOffset)
 {
     int iTag, iTagCount, i;
     uint8_t *cBuf = pPage->ucFileBuf;
-    
+
     iTagCount = TIFFSHORT(&cBuf[iOffset], bMotorola);  /* Number of tags in this dir */
     if (iTagCount < 1 || iTagCount > 256) // invalid tag count
         return; /* Bad header info */
@@ -1223,14 +1223,14 @@ static int JPEGGetSOS(JPEGIMAGE *pJPEG, int *iOff)
     int i, j;
     uint8_t uc,c,cc;
     uint8_t *buf = pJPEG->ucFileBuf;
-    
+
     sLen = MOTOSHORT(&buf[iOffset]);
     iOffset += 2;
-    
+
     // Assume no components in this scan
     for (i=0; i<4; i++)
         pJPEG->JPCI[i].component_needed = 0;
-    
+
     uc = buf[iOffset++]; // get number of components
     pJPEG->ucComponentsInScan = uc;
     sLen -= 3;
@@ -1259,10 +1259,10 @@ static int JPEGGetSOS(JPEGIMAGE *pJPEG, int *iOff)
     c = buf[iOffset++]; // successive approximation bits
     pJPEG->cApproxBitsLow = c & 0xf; // also point transform in lossless mode
     pJPEG->cApproxBitsHigh = c >> 4;
-    
+
     *iOff = iOffset;
     return 0;
-    
+
 } /* JPEGGetSOS() */
 //
 // Remove markers from the data stream to allow faster decode
@@ -1273,7 +1273,7 @@ static int JPEGFilter(uint8_t *pBuf, uint8_t *d, int iLen, uint8_t *bFF)
 {
     // since we have the entire jpeg buffer in memory already, we can just change it in place
     unsigned char c, *s, *pEnd, *pStart;
-    
+
     pStart = d;
     s = pBuf;
     pEnd = &s[iLen-1]; // stop just shy of the end to not miss a final marker/stuffed 0
@@ -1344,7 +1344,7 @@ static int JPEGParseInfo(JPEGIMAGE *pPage, int bExtractThumb)
     uint8_t ucTable, *s = pPage->ucFileBuf;
     uint16_t usMarker, usLen = 0;
     int iFilePos = 0;
-    
+
     if (bExtractThumb) // seek to the start of the thumbnail image
     {
         iFilePos = pPage->iThumbData;
@@ -1403,7 +1403,7 @@ static int JPEGParseInfo(JPEGIMAGE *pPage, int bExtractThumb)
             case 0xffc3:
                 pPage->iError = JPEG_UNSUPPORTED_FEATURE;
                 return 0; // currently unsupported modes
-                
+
             case 0xffe1: // App1 (EXIF?)
                 if (s[iOffset+2] == 'E' && s[iOffset+3] == 'x' && (s[iOffset+8] == 'M' || s[iOffset+8] == 'I')) // the EXIF data we want
                 {
@@ -1538,7 +1538,7 @@ static void JPEGFixQuantD(JPEGIMAGE *pJPEG)
     signed short sTemp[DCTSIZE];
     int i;
     uint16_t *p;
-    
+
     for (iTable=0; iTable<pJPEG->ucNumComponents; iTable++)
     {
         iTableOffset = iTable * DCTSIZE;
@@ -1546,7 +1546,7 @@ static void JPEGFixQuantD(JPEGIMAGE *pJPEG)
         for (i=0; i<DCTSIZE; i++)
             sTemp[i] = p[cZigZag[i]];
         memcpy(&pJPEG->sQuantTable[iTableOffset], sTemp, DCTSIZE*sizeof(short)); // copy back to original spot
-        
+
         // Prescale for DCT multiplication
         p = (uint16_t *)&pJPEG->sQuantTable[iTableOffset];
         for (i=0; i<DCTSIZE; i++)
@@ -1570,16 +1570,16 @@ static int JPEGDecodeMCU(JPEGIMAGE *pJPEG, int iMCU, int *iDCPredictor)
     uint8_t *pBuf, *pEnd, *pEnd2;
     signed short *pMCU = &pJPEG->sMCUs[iMCU];
     uint8_t ucMaxACCol, ucMaxACRow;
-    
+
     #define MIN_DCT_THRESHOLD 8
-        
+
     ulBitOff = pJPEG->bb.ulBitOff;
     ulBits = pJPEG->bb.ulBits;
     pBuf = pJPEG->bb.pBuf;
-        
+
     pZig = (unsigned char *)&cZigZag2[1];
     pEnd = (unsigned char *)&cZigZag2[64];
-    
+
     if (ulBitOff > (REGISTER_WIDTH-17)) // need to get more data
     {
         pBuf += (ulBitOff >> 3);
@@ -1758,10 +1758,10 @@ static void JPEGIDCT(JPEGIMAGE *pJPEG, int iMCUOffset, int iQuantTable, int iACF
     unsigned char *pOutput;
     unsigned char ucMaxACRow, ucMaxACCol;
     int16_t *pMCUSrc = &pJPEG->sMCUs[iMCUOffset];
-    
+
     ucMaxACRow = (unsigned char)(iACFlags >> 8);
     ucMaxACCol = iACFlags & 0xff;
-        
+
     // my shortcut method appears to violate patent 20020080052
     // but the patent is invalidated by prior art:
     // http://netilium.org/~mad/dtj/DTJ/DTJK04/
@@ -1992,13 +1992,13 @@ static void JPEGPutMCU8BitGray(JPEGIMAGE *pJPEG, int x, int iPitch)
 {
     int i, j, xcount, ycount;
     uint8_t *pDest, *pSrc = (uint8_t *)&pJPEG->sMCUs[0];
-    
+
     if (pJPEG->pDitherBuffer)
         pDest = &pJPEG->pDitherBuffer[x];
     else
         pDest = (uint8_t *)&pJPEG->usPixels[x/2];
-    
-    if (pJPEG->ucSubSample <= 0x11) // single Y 
+
+    if (pJPEG->ucSubSample <= 0x11) // single Y
     {
         if (pJPEG->iOptions & JPEG_SCALE_HALF) // special handling of 1/2 size (pixel averaging)
         {
@@ -2150,17 +2150,17 @@ static void JPEGPutMCU8BitGray(JPEGIMAGE *pJPEG, int x, int iPitch)
             pDest[1] = pSrc[1];
             pDest[iPitch] = pSrc[2];
             pDest[iPitch+1] = pSrc[3];
-            
+
             pDest[2] = pSrc[128]; // Y1
             pDest[3] = pSrc[129];
             pDest[iPitch+2] = pSrc[130];
             pDest[iPitch+3] = pSrc[131];
-            
+
             pDest[iPitch*2] = pSrc[256]; // Y2
             pDest[iPitch*2+1] = pSrc[257];
             pDest[iPitch*3] = pSrc[258];
             pDest[iPitch*3+1] = pSrc[259];
-            
+
             pDest[iPitch*2+2] = pSrc[384]; // Y3
             pDest[iPitch*2+3] = pSrc[385];
             pDest[iPitch*3+2] = pSrc[386];
@@ -2208,7 +2208,7 @@ static void JPEGPutMCUGray(JPEGIMAGE *pJPEG, int x, int iPitch)
     uint16_t *usDest = (uint16_t *)&pJPEG->usPixels[x];
     int i, j, xcount, ycount;
     uint8_t *pSrc = (uint8_t *)&pJPEG->sMCUs[0];
-    
+
     if (pJPEG->iOptions & JPEG_SCALE_HALF) // special handling of 1/2 size (pixel averaging)
     {
         int pix;
@@ -2298,7 +2298,7 @@ static void JPEGPixelBE(uint16_t *pDest, int iY, int iCb, int iCr)
 {
     int iCBB, iCBG, iCRG, iCRR;
     unsigned short usPixel;
-    
+
     iCBB = 7258  * (iCb-0x80);
     iCBG = -1409 * (iCb-0x80);
     iCRG = -2925 * (iCr-0x80);
@@ -2315,7 +2315,7 @@ static void JPEGPixel2LE(uint16_t *pDest, int iY1, int iY2, int iCb, int iCr)
 //
 // Cortex-M4/M7 has some SIMD instructions which can shave a few cycles
 // off of this function (e.g. Teensy, Arduino Nano 33 BLE, Portenta, etc)
-//    
+//
 #ifdef HAS_SIMD
     uint32_t ulCbCr = (iCb | (iCr << 16));
     uint32_t ulTmp2, ulTmp = -1409 | (-2925 << 16); // for green calc
@@ -2342,7 +2342,7 @@ static void JPEGPixel2LE(uint16_t *pDest, int iY1, int iY2, int iCb, int iCr)
     ulPixel1 = usRangeTableB[((iCBB + iY1) >> 12) & 0x3ff]; // blue pixel
     ulPixel1 |= usRangeTableG[((iCBG + iCRG + iY1) >> 12) & 0x3ff]; // green pixel
     ulPixel1 |= usRangeTableR[((iCRR + iY1) >> 12) & 0x3ff]; // red pixel
-    
+
     ulPixel2 = usRangeTableB[((iCBB + iY2) >> 12) & 0x3ff]; // blue pixel
     ulPixel2 |= usRangeTableG[((iCBG + iCRG + iY2) >> 12) & 0x3ff]; // green pixel
     ulPixel2 |= usRangeTableR[((iCRR + iY2) >> 12) & 0x3ff]; // red pixel
@@ -2354,7 +2354,7 @@ static void JPEGPixel2BE(uint16_t *pDest, int iY1, int iY2, int iCb, int iCr)
 {
     int iCBB, iCBG, iCRG, iCRR;
     uint32_t ulPixel1, ulPixel2;
-    
+
     iCBB = 7258  * (iCb-0x80);
     iCBG = -1409 * (iCb-0x80);
     iCRG = -2925 * (iCr-0x80);
@@ -2362,7 +2362,7 @@ static void JPEGPixel2BE(uint16_t *pDest, int iY1, int iY2, int iCb, int iCr)
     ulPixel1 = usRangeTableB[((iCBB + iY1) >> 12) & 0x3ff]; // blue pixel
     ulPixel1 |= usRangeTableG[((iCBG + iCRG + iY1) >> 12) & 0x3ff]; // green pixel
     ulPixel1 |= usRangeTableR[((iCRR + iY1) >> 12) & 0x3ff]; // red pixel
-    
+
     ulPixel2 = usRangeTableB[((iCBB + iY2) >> 12) & 0x3ff]; // blue pixel
     ulPixel2 |= usRangeTableG[((iCBG + iCRG + iY2) >> 12) & 0x3ff]; // green pixel
     ulPixel2 |= usRangeTableR[((iCRR + iY2) >> 12) & 0x3ff]; // red pixel
@@ -2381,7 +2381,7 @@ static void JPEGPutMCU11(JPEGIMAGE *pJPEG, int x, int iPitch)
     pY  = (unsigned char *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (unsigned char *)&pJPEG->sMCUs[1*DCTSIZE];
     pCr = (unsigned char *)&pJPEG->sMCUs[2*DCTSIZE];
-    
+
     if (pJPEG->iOptions & JPEG_SCALE_HALF)
     {
         for (iRow=0; iRow<4; iRow++) // up to 8 rows to do
@@ -2499,7 +2499,7 @@ static void JPEGPutMCU22(JPEGIMAGE *pJPEG, int x, int iPitch)
     pY  = (unsigned char *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (unsigned char *)&pJPEG->sMCUs[4*DCTSIZE];
     pCr = (unsigned char *)&pJPEG->sMCUs[5*DCTSIZE];
-    
+
     if (pJPEG->iOptions & JPEG_SCALE_HALF) // special handling of 1/2 size (pixel averaging)
     {
         for (iRow=0; iRow<4; iRow++) // 16x16 becomes 8x8 of 2x2 pixels
@@ -2828,11 +2828,11 @@ static void JPEGPutMCU12(JPEGIMAGE *pJPEG, int x, int iPitch)
     int iRow, iCol, iXCount, iYCount;
     uint8_t *pY, *pCr, *pCb;
     uint16_t *pOutput = &pJPEG->usPixels[x];
-    
+
     pY  = (uint8_t *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (uint8_t *)&pJPEG->sMCUs[2*DCTSIZE];
     pCr = (uint8_t *)&pJPEG->sMCUs[3*DCTSIZE];
-    
+
     if (pJPEG->iOptions & JPEG_SCALE_HALF)
     {
         for (iRow=0; iRow<4; iRow++)
@@ -2981,11 +2981,11 @@ static void JPEGPutMCU21(JPEGIMAGE *pJPEG, int x, int iPitch)
     int iRow;
     uint8_t *pY, *pCr, *pCb;
     uint16_t *pOutput = &pJPEG->usPixels[x];
-    
+
     pY  = (uint8_t *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (uint8_t *)&pJPEG->sMCUs[2*DCTSIZE];
     pCr = (uint8_t *)&pJPEG->sMCUs[3*DCTSIZE];
-    
+
     if (pJPEG->iOptions & JPEG_SCALE_HALF)
     {
         for (iRow=0; iRow<4; iRow++)
@@ -3108,7 +3108,7 @@ int32_t e1,e2,e3,e4;
 uint8_t cOut, ucPixelType; // forward errors for gray
 uint8_t *pSrc, *pDest, *errors, *pErrors=NULL, *d, *pPixels; // destination 8bpp image
 uint8_t pixelmask=0, shift=0;
-    
+
     ucPixelType = pJPEG->ucPixelType;
     errors = (uint8_t *)pJPEG->usPixels; // plenty of space here
     errors[0] = errors[1] = errors[2] = 0;
@@ -3214,13 +3214,13 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
         iMaxFill = 1;
         bThumbnail = 1;
     }
-    
+
     // reorder and fix the quantization table for decoding
     JPEGFixQuantD(pJPEG);
     pJPEG->bb.ulBits = MOTOLONG(&pJPEG->ucFileBuf[0]); // preload first 4 bytes
     pJPEG->bb.pBuf = pJPEG->ucFileBuf;
     pJPEG->bb.ulBitOff = 0;
-    
+
     cDCTable0 = pJPEG->JPCI[0].dc_tbl_no;
     cACTable0 = pJPEG->JPCI[0].ac_tbl_no;
     cDCTable1 = pJPEG->JPCI[1].dc_tbl_no;
@@ -3228,7 +3228,7 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
     cDCTable2 = pJPEG->JPCI[2].dc_tbl_no;
     cACTable2 = pJPEG->JPCI[2].ac_tbl_no;
     iDCPred0 = iDCPred1 = iDCPred2 = mcuCX = mcuCY = 0;
-    
+
     switch (pJPEG->ucSubSample) // set up the parameters for the different subsampling options
     {
         case 0x00: // fake value to handle grayscale
@@ -3271,7 +3271,7 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
     // Scale down the MCUs by the requested amount
     mcuCX >>= iScaleShift;
     mcuCY >>= iScaleShift;
-    
+
     iQuant1 = pJPEG->sQuantTable[pJPEG->JPCI[0].quant_tbl_no*DCTSIZE]; // DC quant values
     iQuant2 = pJPEG->sQuantTable[pJPEG->JPCI[1].quant_tbl_no*DCTSIZE];
     iQuant3 = pJPEG->sQuantTable[pJPEG->JPCI[2].quant_tbl_no*DCTSIZE];
