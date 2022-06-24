@@ -99,10 +99,16 @@ namespace pimoroni {
     void PicoGraphics_PenP4::set_pixel_dither(const Point &p, const RGB &c) {
         if(!bounds.contains(p)) return;
 
+        uint used_palette_entries = 0;
+        for(auto i = 0u; i < palette_size; i++) {
+            if(!used[i]) break;
+            used_palette_entries++;
+        }
+
         if(!cache_built) {
             for(uint i = 0; i < 512; i++) {
                 RGB cache_col((i & 0x1C0) >> 1, (i & 0x38) << 2, (i & 0x7) << 5);
-                get_dither_candidates(cache_col, palette, palette_size, candidate_cache[i]);
+                get_dither_candidates(cache_col, palette, used_palette_entries, candidate_cache[i]);
             }
             cache_built = true;
         }
