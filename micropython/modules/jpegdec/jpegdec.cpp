@@ -22,11 +22,61 @@ typedef struct _ModPicoGraphics_obj_t {
 typedef struct _JPEG_obj_t {
     mp_obj_base_t base;
     JPEGDEC *jpeg;
+    mp_obj_t file;
     mp_buffer_info_t buf;
     ModPicoGraphics_obj_t *graphics;
 } _JPEG_obj_t;
 
+
 PicoGraphics *current_graphics = nullptr;
+
+
+void *jpegdec_open_callback(const char *filename, int32_t *size) {
+    mp_obj_t fn = mp_obj_new_str(filename, (mp_uint_t)strlen(filename));
+
+    mp_obj_t args[2] = {
+        fn,
+        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+    };
+
+    // Stat the file to get its size
+    // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
+    mp_obj_t stat = mp_vfs_stat(fn);
+    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
+    *size = mp_obj_get_int(tuple->items[6]);
+
+    mp_obj_t fhandle = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
+
+    return (void *)fhandle;
+}
+
+void jpegdec_close_callback(void *handle) {
+    mp_stream_close((mp_obj_t)handle);
+}
+
+int32_t jpegdec_read_callback(JPEGFILE *jpeg, uint8_t *p, int32_t c) {
+    mp_obj_t fhandle = jpeg->fHandle;
+    int error;
+    return mp_stream_read_exactly(fhandle, p, c, &error);
+}
+
+// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
+    mp_obj_t fhandle = jpeg->fHandle;
+    struct mp_stream_seek_t seek_s;
+    seek_s.offset = p;
+    seek_s.whence = SEEK_SET;
+
+    const mp_stream_p_t *stream_p = mp_get_stream(fhandle);
+
+    int error;
+    mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
+    if (res == MP_STREAM_ERROR) {
+        mp_raise_OSError(error);
+    }
+
+    return seek_s.offset;
+}
 
 int JPEGDraw(JPEGDRAW *pDraw) {
 #ifdef MICROPY_EVENT_POLL_HOOK
@@ -105,56 +155,25 @@ mp_obj_t _JPEG_del(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-static int _open(_JPEG_obj_t *self) {
-    int result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
-    if (result == 1) {
-        switch(self->graphics->graphics->pen_type) {
-            case PicoGraphics::PEN_RGB332:
-            case PicoGraphics::PEN_RGB565:
-            case PicoGraphics::PEN_P8:
-            case PicoGraphics::PEN_P4:
-                self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
-                break;
-            // TODO 2-bit is currently unsupported
-            case PicoGraphics::PEN_P2:
-                self->jpeg->setPixelType(TWO_BIT_DITHERED);
-                break;
-            case PicoGraphics::PEN_1BIT:
-                self->jpeg->setPixelType(ONE_BIT_DITHERED);
-                break;
-        }
-    }
-    return result;
-}
-
 // open_FILE
 mp_obj_t _JPEG_openFILE(mp_obj_t self_in, mp_obj_t filename) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    mp_obj_t args[2] = {
-        filename,
-        MP_OBJ_NEW_QSTR(MP_QSTR_r),
-    };
 
-    // Stat the file to get its size
-    // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
-    mp_obj_t stat = mp_vfs_stat(filename);
-    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
-    size_t filesize = mp_obj_get_int(tuple->items[6]);
+    // TODO Check for valid filename, and maybe that file exists?
 
-    self->buf.buf = (void *)m_new(uint8_t, filesize);
-    mp_obj_t file = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
-    int errcode;
-    self->buf.len = mp_stream_rw(file, self->buf.buf, filesize, &errcode, MP_STREAM_RW_READ | MP_STREAM_RW_ONCE);
-    if (errcode != 0) {
-        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to open file!"));
-    }
+    self->file = filename;
+
     return mp_const_true;
 }
 
 // open_RAM
 mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    mp_get_buffer_raise(buffer, &self->buf, MP_BUFFER_READ);
+
+    // TODO Check for valid buffer
+
+    self->file = buffer;
+
     return mp_const_true;
 }
 
@@ -177,12 +196,53 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     int y = args[ARG_y].u_int;
     int f = args[ARG_scale].u_int;
 
-    if(_open(self) != 1) return mp_const_false;
+    // Just-in-time open of the filename/buffer we stored in self->file via open_RAM or open_file
+
+    // Source is a filename
+    int result = -1;
+
+    if(mp_obj_is_str_or_bytes(self->file)){
+        GET_STR_DATA_LEN(self->file, str, str_len);
+
+        std::string t((const char*)str);
+
+        result = self->jpeg->open(
+            t.c_str(),
+            jpegdec_open_callback,
+            jpegdec_close_callback,
+            jpegdec_read_callback,
+            jpegdec_seek_callback,
+            JPEGDraw);
+
+    // Source is a buffer
+    } else {
+        mp_get_buffer_raise(self->file, &self->buf, MP_BUFFER_READ);
+
+        result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
+    }
+    
+    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, "JPEG: could not read file/buffer.");
+
+    // Force a specific data output type to best match our PicoGraphics buffer
+    switch(self->graphics->graphics->pen_type) {
+        case PicoGraphics::PEN_RGB332:
+        case PicoGraphics::PEN_RGB565:
+        case PicoGraphics::PEN_P8:
+        case PicoGraphics::PEN_P4:
+            self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
+            break;
+        // TODO 2-bit is currently unsupported
+        case PicoGraphics::PEN_P2:
+            self->jpeg->setPixelType(TWO_BIT_DITHERED);
+            break;
+        case PicoGraphics::PEN_1BIT:
+            self->jpeg->setPixelType(ONE_BIT_DITHERED);
+            break;
+    }
 
     // We need to store a pointer to the PicoGraphics surface
     // since the JPEGDRAW struct has no userdata
     current_graphics = self->graphics->graphics;
-    int result = -1;
 
     if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4 || self->graphics->graphics->pen_type == PicoGraphics::PEN_1BIT) {
         uint8_t *buf = new uint8_t[2048];
@@ -191,7 +251,12 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     } else {
         result = self->jpeg->decode(x, y, f);
     }
+
     current_graphics = nullptr;
+
+    // Close the file since we've opened it on-demand
+    self->jpeg->close();
+
     return result == 1 ? mp_const_true : mp_const_false;
 }
 
