@@ -1,0 +1,157 @@
+#include "uc8159.hpp"
+
+#include <cstdlib>
+#include <math.h>
+#include <string.h>
+
+namespace pimoroni {
+
+  enum reg {
+    PSR = 0x00,
+    PWR = 0x01,
+    POF = 0x02,
+    PFS = 0x03,
+    PON = 0x04,
+    BTST = 0x06,
+    DSLP = 0x07,
+    DTM1 = 0x10,
+    DSP = 0x11,
+    DRF = 0x12,
+    IPC = 0x13,
+    PLL = 0x30,
+    TSC = 0x40,
+    TSE = 0x41,
+    TSW = 0x42,
+    TSR = 0x43,
+    CDI = 0x50,
+    LPD = 0x51,
+    TCON = 0x60,
+    TRES = 0x61,
+    DAM = 0x65,
+    REV = 0x70,
+    FLG = 0x71,
+    AMV = 0x80,
+    VV = 0x81,
+    VDCS = 0x82,
+    PWS = 0xE3,
+    TSSET = 0xE5
+  };
+
+  bool UC8159::is_busy() {
+    return !gpio_get(BUSY);
+  }
+
+  void UC8159::busy_wait() {
+    while(is_busy()) {
+      tight_loop_contents();
+    }
+  }
+
+  void UC8159::reset() {
+    gpio_put(RESET, 0); sleep_ms(10);
+    gpio_put(RESET, 1); sleep_ms(10);
+    busy_wait();
+  }
+
+  void UC8159::init() {
+    // configure spi interface and pins
+    spi_init(spi, 3'000'000);
+
+    gpio_set_function(DC, GPIO_FUNC_SIO);
+    gpio_set_dir(DC, GPIO_OUT);
+
+    gpio_set_function(CS, GPIO_FUNC_SIO);
+    gpio_set_dir(CS, GPIO_OUT);
+    gpio_put(CS, 1);
+
+    gpio_set_function(RESET, GPIO_FUNC_SIO);
+    gpio_set_dir(RESET, GPIO_OUT);
+    gpio_put(RESET, 1);
+
+    gpio_set_function(BUSY, GPIO_FUNC_SIO);
+    gpio_set_dir(BUSY, GPIO_IN);
+    gpio_set_pulls(BUSY, true, false);
+
+    gpio_set_function(SCK,  GPIO_FUNC_SPI);
+    gpio_set_function(MOSI, GPIO_FUNC_SPI);
+  };
+
+  void UC8159::setup() {
+    reset();
+    busy_wait();
+
+    command(0x00, {0xE3, 0x08});
+    command(0x01, {0x37, 0x00, 0x23, 0x23});
+    command(0x03, {0x00});
+    command(0x06, {0xC7, 0xC7, 0x1D});
+    command(0x30, {0x3C});
+    command(0x40, {0x00});
+    command(0x50, {0x37});
+    command(0x60, {0x22});
+    command(0x61, {0x02, 0x58, 0x01, 0xC0});
+    command(0xE3, {0xAA});
+
+    sleep_ms(100);
+
+    command(0x50, {0x37});
+  }
+
+  void UC8159::power_off() {
+    busy_wait();
+    command(POF); // turn off
+  }
+
+  void UC8159::command(uint8_t reg, size_t len, const uint8_t *data) {
+    gpio_put(CS, 0);
+
+    gpio_put(DC, 0); // command mode
+    spi_write_blocking(spi, &reg, 1);
+
+    if(len > 0) {
+      gpio_put(DC, 1); // data mode
+      spi_write_blocking(spi, (const uint8_t*)data, len);
+    }
+
+    gpio_put(CS, 1);
+  }
+
+  void UC8159::data(size_t len, const uint8_t *data) {
+    gpio_put(CS, 0);
+    gpio_put(DC, 1); // data mode
+    spi_write_blocking(spi, (const uint8_t*)data, len);
+    gpio_put(CS, 1);
+  }
+
+  void UC8159::command(uint8_t reg, std::initializer_list<uint8_t> values) {
+    command(reg, values.size(), (uint8_t *)values.begin());
+  }
+
+  void UC8159::update(const void *data, bool blocking) {
+    if(blocking) {
+      busy_wait();
+    }
+
+    setup();
+
+    command(DTM1, (width * height) / 2, (uint8_t *)data); // transmit framebuffer
+    busy_wait();
+
+    command(PON); // turn on
+    busy_wait();
+
+    command(DRF); // start display refresh
+    busy_wait();
+
+    if(blocking) {
+      busy_wait();
+
+      command(POF); // turn off
+    }
+  }
+
+  void UC8159::update(PicoGraphics *graphics) {
+    if(graphics->pen_type != PicoGraphics::PEN_P4) return; // Incompatible buffer
+    update(graphics->frame_buffer, false);
+  }
+
+}
