@@ -1,17 +1,19 @@
 import time
 import random
 from picographics import PicoGraphics, DISPLAY_ENVIRO_PLUS
-from pimoroni import RGBLED, Button
+from pimoroni import RGBLED
 
 display = PicoGraphics(display=DISPLAY_ENVIRO_PLUS)
 display.set_backlight(1.0)
 
 led = RGBLED(6, 7, 8)
-led.set_rgb(255, 255,255)
+led.set_rgb(255, 255, 255)
 
 WIDTH, HEIGHT = display.get_bounds()
 
 # From CPython Lib/colorsys.py
+
+
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
         return v, v, v
@@ -65,7 +67,7 @@ hue = 0
 while True:
     hue += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(hue / 360.0, 1.0, 1.0)]  # rainbow magic
-    led.set_rgb(r, g, b) # pretty colours Led
+    led.set_rgb(r, g, b)  # pretty colours Led
     BG = display.create_pen(r, g, b)
     display.set_pen(BG)
     display.clear()
