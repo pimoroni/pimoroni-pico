@@ -1,6 +1,7 @@
 #include "drivers/st7789/st7789.hpp"
 #include "drivers/st7735/st7735.hpp"
 #include "drivers/sh1107/sh1107.hpp"
+#include "drivers/uc8151/uc8151.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
@@ -35,13 +36,14 @@ typedef struct _ModPicoGraphics_obj_t {
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
-bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate) {
+bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type) {
     switch(display) {
         case DISPLAY_PICO_DISPLAY:
             width = 240;
             height = 135;
             // Portrait to match labelling
             if(rotate == -1) rotate = (int)Rotation::ROTATE_270;
+            if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_PICO_DISPLAY_2:
         case DISPLAY_TUFTY_2040:
@@ -49,25 +51,36 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             height = 240;
             // Tufty display is upside-down
             if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
+            if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_PICO_EXPLORER:
         case DISPLAY_LCD_240X240:
         case DISPLAY_ENVIRO_PLUS:
             width = 240;
             height = 240;
+            if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_ROUND_LCD_240X240:
             width = 240;
             height = 240;
+            if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_LCD_160X80:
             width = 160;
             height = 80;
+            if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_I2C_OLED_128X128:
             width = 128;
             height = 128;
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_1BIT;
+            break;
+        case DISPLAY_INKY_PACK:
+            width = 296;
+            height = 128;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_1BIT;
             break;
         default:
             return false;
@@ -101,7 +114,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_bus, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_buffer, MP_ARG_OBJ, { .u_obj = mp_const_none } },
-        { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = PEN_RGB332 } },
+        { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = -1 } },
     };
 
     // Parse args.
@@ -111,15 +124,14 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self = m_new_obj_with_finaliser(ModPicoGraphics_obj_t);
     self->base.type = &ModPicoGraphics_type;
 
-
-    PicoGraphicsPenType pen_type = (PicoGraphicsPenType)args[ARG_pen_type].u_int;
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
 
     bool round = display == DISPLAY_ROUND_LCD_240X240;
     int width = 0;
     int height = 0;
+    int pen_type = args[ARG_pen_type].u_int;
     int rotate = args[ARG_rotate].u_int;
-    if(!get_display_settings(display, width, height, rotate)) mp_raise_ValueError("Unsupported display!");
+    if(!get_display_settings(display, width, height, rotate, pen_type)) mp_raise_ValueError("Unsupported display!");
     if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
 
     // Try to create an appropriate display driver
@@ -147,6 +159,15 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             self->display = m_new_class(SH1107, width, height, *(pimoroni::I2C *)(i2c->i2c));
         } else {
             mp_raise_ValueError("I2C bus expected!");
+        }
+    } else if (display == DISPLAY_INKY_PACK) {
+        if (args[ARG_bus].u_obj == mp_const_none) {
+            self->display = m_new_class(UC8151, width, height, (Rotation)rotate);
+        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
+            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
+            self->display = m_new_class(UC8151, width, height, (Rotation)rotate, *(SPIPins *)(bus->pins));
+        } else {
+            mp_raise_ValueError("SPIBus expected!");
         }
     } else {
         if (args[ARG_bus].u_obj == mp_const_none) {
@@ -176,9 +197,13 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     // Create an instance of the graphics library
     // use the *driver* width/height because they may have been swapped due to rotation
-    switch(pen_type) {
+    switch((PicoGraphicsPenType)pen_type) {
         case PEN_1BIT:
-            self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer);
+            if (display == DISPLAY_INKY_PACK) {
+                self->graphics = m_new_class(PicoGraphics_Pen1BitY, self->display->width, self->display->height, self->buffer);
+            } else {
+                self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer);
+            }
             break;
         case PEN_P4:
             self->graphics = m_new_class(PicoGraphics_PenP4, self->display->width, self->display->height, self->buffer);
@@ -325,13 +350,13 @@ mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer)
 }
 
 mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t pen_type_in) {
-    PicoGraphicsPenType pen_type = (PicoGraphicsPenType)mp_obj_get_int(pen_type_in);
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)mp_obj_get_int(display_in);
     int width = 0;
     int height = 0;
     int rotation = 0;
-    if(!get_display_settings(display, width, height, rotation)) mp_raise_ValueError("Unsupported display!");
-    size_t required_size = get_required_buffer_size(pen_type, width, height);
+    int pen_type = mp_obj_get_int(pen_type_in);
+    if(!get_display_settings(display, width, height, rotation, pen_type)) mp_raise_ValueError("Unsupported display!");
+    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
     return mp_obj_new_int(required_size);

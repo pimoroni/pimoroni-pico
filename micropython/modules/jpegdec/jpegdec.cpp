@@ -47,6 +47,18 @@ MICROPY_EVENT_POLL_HOOK
                 current_graphics->pixel({pDraw->x + x, pDraw->y + y});
             }
         }
+    } else if(pDraw->iBpp == 1) {
+        uint8_t *pixels = (uint8_t *)pDraw->pPixels;
+        for(int y = 0; y < pDraw->iHeight; y++) {
+            for(int x = 0; x < pDraw->iWidth; x++) {
+                int i = y * pDraw->iWidth + x;
+                uint8_t p = pixels[i / 8];
+                p >>= 7 - (i & 0b111);
+                p &= 0x1;
+                current_graphics->set_pen(p);
+                current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+            }
+        }
     } else {
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
@@ -107,9 +119,9 @@ static int _open(_JPEG_obj_t *self) {
             case PicoGraphics::PEN_P2:
                 self->jpeg->setPixelType(TWO_BIT_DITHERED);
                 break;
-	    case PicoGraphics::PEN_1BIT:
-		self->jpeg->setPixelType(ONE_BIT_DITHERED);
-		break;
+            case PicoGraphics::PEN_1BIT:
+                self->jpeg->setPixelType(ONE_BIT_DITHERED);
+                break;
         }
     }
     return result;
@@ -172,7 +184,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     current_graphics = self->graphics->graphics;
     int result = -1;
 
-    if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4) {
+    if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4 || self->graphics->graphics->pen_type == PicoGraphics::PEN_1BIT) {
         uint8_t *buf = new uint8_t[2048];
         result = self->jpeg->decodeDither(x, y, buf, f);
         delete[] buf;

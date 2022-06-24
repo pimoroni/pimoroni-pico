@@ -10,7 +10,8 @@ enum PicoGraphicsDisplay {
     DISPLAY_TUFTY_2040,
     DISPLAY_ENVIRO_PLUS,
     DISPLAY_LCD_160X80,
-    DISPLAY_I2C_OLED_128X128
+    DISPLAY_I2C_OLED_128X128,
+    DISPLAY_INKY_PACK
 };
 
 enum PicoGraphicsPenType {

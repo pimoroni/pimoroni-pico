@@ -43,6 +43,8 @@ add_subdirectory(pico_trackball_display)
 add_subdirectory(pico_audio)
 add_subdirectory(pico_wireless)
 
+add_subdirectory(inky_pack)
+
 add_subdirectory(plasma2040)
 add_subdirectory(badger2040)
 add_subdirectory(tufty2040)

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "drivers/uc8151/uc8151.hpp"
+#include "drivers/uc8151_legacy/uc8151_legacy.hpp"
 
 #include "libraries/hershey_fonts/hershey_fonts.hpp"
 #include "libraries/bitmap_fonts/bitmap_fonts.hpp"
@@ -14,7 +14,7 @@ namespace pimoroni {
 
   class Badger2040 {
   protected:
-    UC8151 uc8151;
+    UC8151_Legacy uc8151_legacy;
     const hershey::font_t *_font = &hershey::futural;
     const bitmap::font_t *_bitmap_font = nullptr;
     uint8_t _pen = 0;
@@ -25,11 +25,11 @@ namespace pimoroni {
 
   public:
     Badger2040()
-      : uc8151(296, 128, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
+      : uc8151_legacy(296, 128, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
     };
     // Constructor for Python-managed buffer
     Badger2040(uint8_t *framebuffer)
-      : uc8151(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
+      : uc8151_legacy(296, 128, framebuffer, spi0, CS, DC, CLK, MOSI, BUSY, RESET) {
     };
     void init();
     void update(bool blocking=false);

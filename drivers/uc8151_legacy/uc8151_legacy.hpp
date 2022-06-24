@@ -6,13 +6,11 @@
 #include "hardware/spi.h"
 #include "hardware/gpio.h"
 
-#include "common/pimoroni_common.hpp"
-#include "common/pimoroni_bus.hpp"
-#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "../../common/pimoroni_common.hpp"
 
 namespace pimoroni {
 
-  class UC8151 : public DisplayDriver {
+  class UC8151_Legacy {
     enum PSR_FLAGS {
       RES_96x230   = 0b00000000,
       RES_96x252   = 0b01000000,
@@ -127,66 +125,90 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
+    // screen properties
+    uint16_t width;
+    uint16_t height;
+
+    // highest possible resolution is 160x296 which at 1 bit per pixel
+    // requires 5920 bytes of frame buffer
+    //uint8_t frame_buffer[5920] = {0};
+    uint8_t *frame_buffer;
+
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
     uint CS     = SPI_BG_FRONT_CS;
-    uint DC     = 20;
+    uint DC     = SPI_DEFAULT_MISO;
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
     uint BUSY   = PIN_UNUSED;
     uint RESET  = PIN_UNUSED;
 
-    uint8_t update_speed = 0;
-    bool inverted = true; // Makes 0 black and 1 white, as is foretold.
-    bool blocking = true;
+    bool inverted = false;
+
+    uint8_t _update_speed = 0;
 
   public:
-    UC8151(uint16_t width, uint16_t height, Rotation rotate) : UC8151(width, height, rotate, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED}) {};
+    UC8151_Legacy(uint16_t width, uint16_t height) :
+      width(width), height(height), frame_buffer(new uint8_t[width * height / 8]) {
+    }
 
-    UC8151(uint16_t width, uint16_t height, Rotation rotate, SPIPins pins, uint busy=26, uint reset=21) :
-      DisplayDriver(width, height, rotate),
-      spi(pins.spi),
-      CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
-        init();
-      }
+    UC8151_Legacy(uint16_t width, uint16_t height, uint8_t *frame_buffer) :
+      width(width), height(height), frame_buffer(frame_buffer) {
+    }
+
+    UC8151_Legacy(uint16_t width, uint16_t height,
+           spi_inst_t *spi,
+           uint CS, uint DC, uint SCK, uint MOSI,
+           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
+      width(width), height(height),
+      frame_buffer(new uint8_t[width * height / 8]),
+      spi(spi),
+      CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
+
+    UC8151_Legacy(uint16_t width, uint16_t height,
+           uint8_t *frame_buffer,
+           spi_inst_t *spi,
+           uint CS, uint DC, uint SCK, uint MOSI,
+           uint BUSY = PIN_UNUSED, uint RESET = PIN_UNUSED) :
+      width(width), height(height),
+      frame_buffer(frame_buffer),
+      spi(spi),
+      CS(CS), DC(DC), SCK(SCK), MOSI(MOSI), BUSY(BUSY), RESET(RESET) {}
+
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
+    void init();
     void busy_wait();
+    bool is_busy();
     void reset();
+    void setup(uint8_t speed=0);
     void power_off();
-  
-    // DisplayDriver API
-    bool is_busy() override;
-    void update(PicoGraphics *graphics) override;
-    void partial_update(PicoGraphics *graphics, Rect region) override;
-  
-    // UC8151 Specific
+
     void default_luts();
     void medium_luts();
     void fast_luts();
     void turbo_luts();
 
-    void set_update_speed(uint8_t speed);
-    uint8_t get_update_speed();
-    uint32_t update_time();
-
-  private:
-    void init();
-    void setup(uint8_t speed=0);
-  
     void read(uint8_t reg, size_t len, uint8_t *data);
     void command(uint8_t reg, size_t len, const uint8_t *data);
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg) {command(reg, 0, nullptr);};
     void data(size_t len, const uint8_t *data);
 
+    void invert(bool invert);
+    void update_speed(uint8_t speed);
+    uint8_t update_speed();
+    uint32_t update_time();
     void update(bool blocking = true);
     void partial_update(int x, int y, int w, int h, bool blocking = true);
     void off();
+
+    void pixel(int x, int y, int v);
+    uint8_t* get_frame_buffer();
   };
 
 }

@@ -259,6 +259,21 @@ namespace pimoroni {
       }
   };
 
+  class PicoGraphics_Pen1BitY : public PicoGraphics {
+    public:
+      uint8_t color;
+    
+      PicoGraphics_Pen1BitY(uint16_t width, uint16_t height, void *frame_buffer);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+
+      static size_t buffer_size(uint w, uint h) {
+          return w * h / 8;
+      }
+  };
 
   class PicoGraphics_PenP4 : public PicoGraphics {
     public:
@@ -368,7 +383,9 @@ namespace pimoroni {
        : width(width), height(height), rotation(rotation) {};
 
       virtual void update(PicoGraphics *display) {};
+      virtual void partial_update(PicoGraphics *display, Rect region) {};
       virtual void set_backlight(uint8_t brightness) {};
+      virtual bool is_busy() {return false;};
       virtual void cleanup() {};
   };
 
