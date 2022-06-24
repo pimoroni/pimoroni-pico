@@ -8,7 +8,7 @@ on:
 
 env:
   MICROPYTHON_VERSION: v1.19
-  BOARD_TYPE: PICO   
+  BOARD_TYPE: PIMORONI_BADGER2040
   # MicroPython version will be contained in github.event.release.tag_name for releases
   RELEASE_FILE: pimoroni-badger2040-${{github.event.release.tag_name || github.sha}}-micropython.uf2
 
@@ -82,11 +82,11 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
 
-    # Copy Python module files
-    - name: HACK - Copy board config fixup
-      if: env.BOARD_TYPE == 'PICO'
+    - name: "HACK: MicroPython Board Fixups"
+      shell: bash
+      working-directory: micropython/ports/rp2
       run: |
-        cp pimoroni-pico-${GITHUB_SHA}/micropython/badger2040-mpconfigboard.h micropython/ports/rp2/boards/PICO/mpconfigboard.h
+        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board/board-fixup.sh badger2040 ${{env.BOARD_TYPE}} ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board
 
     # Linux deps
     - name: Install Compiler & CCache
