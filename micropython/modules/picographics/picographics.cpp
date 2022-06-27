@@ -115,7 +115,7 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
 mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     ModPicoGraphics_obj_t *self = nullptr;
 
-    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins };
+    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
@@ -123,6 +123,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         { MP_QSTR_buffer, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_extra_pins, MP_ARG_OBJ, { .u_obj = mp_const_none } },
+        { MP_QSTR_i2c_address, MP_ARG_INT, { .u_int = -1 } },
     };
 
     // Parse args.
@@ -174,11 +175,14 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             mp_raise_ValueError("SPIBus expected!");
         }
     } else if (display == DISPLAY_I2C_OLED_128X128) {
-        if (args[ARG_bus].u_obj == mp_const_none || mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type)) {
+        if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type)) {
             _PimoroniI2C_obj_t *i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
-            self->display = m_new_class(SH1107, width, height, *(pimoroni::I2C *)(i2c->i2c));
+
+            int i2c_address = args[ARG_i2c_address].u_int;
+            if(i2c_address == -1) i2c_address = SH1107::DEFAULT_I2C_ADDRESS;
+            self->display = m_new_class(SH1107, width, height, *(pimoroni::I2C *)(i2c->i2c), (uint8_t)i2c_address);
         } else {
-            mp_raise_ValueError("I2C bus expected!");
+            mp_raise_ValueError("I2C bus required!");
         }
     } else if (display == DISPLAY_INKY_PACK) {
         if (args[ARG_bus].u_obj == mp_const_none) {
