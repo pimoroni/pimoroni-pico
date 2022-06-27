@@ -234,6 +234,7 @@ namespace pimoroni {
     void pixel(const Point &p);
     void pixel_span(const Point &p, int32_t l);
     void rectangle(const Rect &r);
+    void midptellipse(int rx, int ry, Point &p);
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, float s = 2.0f, float a = 0.0f);
     void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
