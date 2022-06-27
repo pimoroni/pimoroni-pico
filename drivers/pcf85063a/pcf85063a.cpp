@@ -178,4 +178,12 @@ namespace pimoroni {
       address, Registers::CONTROL_2, bits);
   }
 
+  void PCF85063A::set_byte(uint8_t v) {
+    i2c->reg_write_uint8(address, Registers::RAM_BYTE, v);
+  }
+
+  uint8_t PCF85063A::get_byte() {
+    return i2c->reg_read_uint8(address, Registers::RAM_BYTE);
+  }
+
 }
