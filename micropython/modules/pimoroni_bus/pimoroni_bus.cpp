@@ -8,6 +8,7 @@ extern "C" {
 #include "pimoroni_bus.h"
 #include "py/mperrno.h"
 
+
 void PimoroniBus_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     _PimoroniBus_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniBus_obj_t);
     if(self->base.type == &SPIPins_type) {
