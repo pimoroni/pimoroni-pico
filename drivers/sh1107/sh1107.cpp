@@ -31,14 +31,14 @@ namespace pimoroni {
       uint8_t buf[page_size + 1];
 
       for(int i = 0; i < 16; i++) {
-        i2c.reg_write_uint8(0x3c, 0, 0xb0 + i);
-        i2c.reg_write_uint8(0x3c, 0, 0x00);
-        i2c.reg_write_uint8(0x3c, 0, 0x10);
+        i2c.reg_write_uint8(i2c_address, 0, 0xb0 + i);
+        i2c.reg_write_uint8(i2c_address, 0, 0x00);
+        i2c.reg_write_uint8(i2c_address, 0, 0x10);
 
         memcpy(buf + 1, ptemp, page_size);
         buf[0] = 0x40;
 
-        i2c.write_blocking(0x3c, buf, page_size + 1, false);
+        i2c.write_blocking(i2c_address, buf, page_size + 1, false);
 
         ptemp += page_size;
       }
