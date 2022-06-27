@@ -65,9 +65,7 @@ class PMS5003Response:
     @classmethod
     def check_data_len(cls, raw_data_len, desc="Data"):
         if raw_data_len != cls.DATA_LEN:
-            raise FrameLengthError(desc + " too "
-                                   + ("short" if raw_data_len < cls.DATA_LEN else "long")
-                                   + " {:d} bytes".format(raw_data_len))
+            raise FrameLengthError(desc + " too " + ("short" if raw_data_len < cls.DATA_LEN else "long") + " {:d} bytes".format(raw_data_len))
 
     def __init__(self, raw_data, *, frame_length_bytes):
         raw_data_len = len(raw_data)
@@ -179,7 +177,6 @@ class PMS5003():
         cmd_frame.extend(sum(cmd_frame).to_bytes(2, "big"))
         return cmd_frame
 
-
     def __init__(self,
                  uart,
                  pin_reset,
@@ -247,7 +244,7 @@ class PMS5003():
             resp = self._read_data(PMS5003CmdResponse)
         time.sleep(self.MIN_CMD_INTERVAL)
         return resp
-        
+
     def _reset_input_buffer(self):
         while self._uart.read() is not None:
             pass
