@@ -133,6 +133,10 @@ namespace pimoroni {
 
     // Clock output
     void set_clock_output(ClockOut co);
+
+    // FREE byte of RAM!!
+    void set_byte(uint8_t v);
+    uint8_t get_byte();
   };
 
 }
