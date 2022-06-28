@@ -322,20 +322,18 @@ namespace pimoroni {
     setup();
   };
 
-  void UC8151::setup(uint8_t speed) {
+  void UC8151::setup() {
     reset();
-
-    update_speed = speed;
 
     uint8_t psr_setting = RES_128x296 | FORMAT_BW | BOOSTER_ON | RESET_NONE;
 
-    psr_setting |= speed == 0 ? LUT_OTP : LUT_REG;
+    psr_setting |= update_speed == 0 ? LUT_OTP : LUT_REG;
 
     psr_setting |= rotation == ROTATE_180 ? SHIFT_LEFT | SCAN_UP : SHIFT_RIGHT | SCAN_DOWN;
 
     command(PSR, 1, &psr_setting);
   
-    switch(speed) {
+    switch(update_speed) {
       case 0:
         // Note: the defult luts are built in so we don't really need to flash them here
         // they are preserved above for posterity and reference mostly.
@@ -447,12 +445,10 @@ namespace pimoroni {
     command(reg, values.size(), (uint8_t *)values.begin());
   }
 
-  void UC8151::set_update_speed(uint8_t speed) {
-    setup(speed);
-  }
-
-  uint8_t UC8151::get_update_speed() {
-    return update_speed;
+  bool UC8151::set_update_speed(int update_speed) {
+    this->update_speed = (uint8_t)update_speed;
+    setup();
+    return true;
   }
 
   uint32_t UC8151::update_time() {
@@ -511,9 +507,7 @@ namespace pimoroni {
     command(DRF); // start display refresh
 
     if(blocking) {
-      busy_wait();
-
-      command(POF); // turn off
+      off();
     }
   }
 
@@ -534,9 +528,7 @@ namespace pimoroni {
     command(DRF); // start display refresh
 
     if(blocking) {
-      busy_wait();
-
-      command(POF); // turn off
+      off();
     }
   }
 

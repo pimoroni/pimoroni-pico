@@ -384,6 +384,7 @@ namespace pimoroni {
 
       virtual void update(PicoGraphics *display) {};
       virtual void partial_update(PicoGraphics *display, Rect region) {};
+      virtual bool set_update_speed(int update_speed) {return false;};
       virtual void set_backlight(uint8_t brightness) {};
       virtual bool is_busy() {return false;};
       virtual void cleanup() {};

@@ -163,6 +163,7 @@ namespace pimoroni {
     bool is_busy() override;
     void update(PicoGraphics *graphics) override;
     void partial_update(PicoGraphics *graphics, Rect region) override;
+    bool set_update_speed(int update_speed) override;
   
     // UC8151 Specific
     void default_luts();
@@ -170,13 +171,12 @@ namespace pimoroni {
     void fast_luts();
     void turbo_luts();
 
-    void set_update_speed(uint8_t speed);
     uint8_t get_update_speed();
     uint32_t update_time();
 
   private:
     void init();
-    void setup(uint8_t speed=0);
+    void setup();
   
     void read(uint8_t reg, size_t len, uint8_t *data);
     void command(uint8_t reg, size_t len, const uint8_t *data);

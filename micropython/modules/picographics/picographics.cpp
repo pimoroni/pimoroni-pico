@@ -34,24 +34,34 @@ typedef struct _ModPicoGraphics_obj_t {
     DisplayDriver *display;
     void *spritedata;
     void *buffer;
+    _PimoroniI2C_obj_t *i2c;
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
-bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type) {
+bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type, PicoGraphicsBusType &bus_type) {
     switch(display) {
         case DISPLAY_PICO_DISPLAY:
             width = 240;
             height = 135;
+            bus_type = BUS_SPI;
             // Portrait to match labelling
             if(rotate == -1) rotate = (int)Rotation::ROTATE_270;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
-        case DISPLAY_PICO_DISPLAY_2:
         case DISPLAY_TUFTY_2040:
             width = 320;
             height = 240;
+            bus_type = BUS_PARALLEL;
             // Tufty display is upside-down
             if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
+            if(pen_type == -1) pen_type = PEN_RGB332;
+            break;
+        case DISPLAY_PICO_DISPLAY_2:
+            width = 320;
+            height = 240;
+            bus_type = BUS_SPI;
+            // Tufty display is upside-down
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_PICO_EXPLORER:
@@ -59,35 +69,41 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
         case DISPLAY_ENVIRO_PLUS:
             width = 240;
             height = 240;
+            bus_type = BUS_SPI;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_ROUND_LCD_240X240:
             width = 240;
             height = 240;
+            bus_type = BUS_SPI;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_LCD_160X80:
             width = 160;
             height = 80;
+            bus_type = BUS_SPI;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_I2C_OLED_128X128:
             width = 128;
             height = 128;
+            bus_type = BUS_I2C;
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_1BIT;
             break;
         case DISPLAY_INKY_PACK:
             width = 296;
             height = 128;
+            bus_type = BUS_SPI;
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_1BIT;
             break;
         case DISPLAY_INKY_FRAME:
             width = 600;
             height = 448;
-	    if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
-	    if(pen_type == -1) pen_type = PEN_P4;
+            bus_type = BUS_SPI;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_P4;
             break;
         default:
             return false;
@@ -140,68 +156,67 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     int height = 0;
     int pen_type = args[ARG_pen_type].u_int;
     int rotate = args[ARG_rotate].u_int;
-    if(!get_display_settings(display, width, height, rotate, pen_type)) mp_raise_ValueError("Unsupported display!");
+    PicoGraphicsBusType bus_type = BUS_SPI;
+    if(!get_display_settings(display, width, height, rotate, pen_type, bus_type)) mp_raise_ValueError("Unsupported display!");
     if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+
+    pimoroni::SPIPins spi_bus = get_spi_pins(BG_SPI_FRONT);
+    pimoroni::ParallelPins parallel_bus = {10, 11, 12, 13, 14, 2}; // Default for Tufty 2040 parallel
+    pimoroni::I2C *i2c_bus = nullptr;
+
+    if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
+        if(bus_type != BUS_SPI) mp_raise_ValueError("unexpected SPI bus!");
+        _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
+        spi_bus = *(SPIPins *)(bus->pins);
+
+    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
+        if(bus_type != BUS_PARALLEL) mp_raise_ValueError("unexpected Parallel bus!");
+        _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
+        parallel_bus = *(ParallelPins *)(bus->pins);
+
+    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type) || MP_OBJ_IS_TYPE(args[ARG_bus].u_obj, &machine_hw_i2c_type)) {
+        if(bus_type != BUS_I2C) mp_raise_ValueError("unexpected I2C bus!");
+        self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
+        i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
+
+    } else {
+        // No bus given, fall back to defaults
+        if(bus_type == BUS_I2C) {
+            self->i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(PimoroniI2C_make_new(&PimoroniI2C_type, 0, 0, nullptr));
+            i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
+        } else if (bus_type == BUS_SPI) {
+            if(display == DISPLAY_INKY_FRAME) {
+                spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 27, PIN_UNUSED};
+            } else if (display == DISPLAY_INKY_PACK) {
+                spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
+            }
+        }
+    }
 
     // Try to create an appropriate display driver
     if (display == DISPLAY_INKY_FRAME) {
         pen_type = PEN_P4; // FORCE to P4 since it's the only supported mode
         // TODO grab BUSY and RESET from ARG_extra_pins
-        if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(UC8159, width, height);
-        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
-            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(UC8159, width, height, *(SPIPins *)(bus->pins));
-        } else {
-            mp_raise_ValueError("SPIBus expected!");
-        }
+        self->display = m_new_class(UC8159, width, height, spi_bus);
+
     }
     else if (display == DISPLAY_TUFTY_2040) {
-        if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, {10, 11, 12, 13, 14, 2});
-        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
-            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, *(ParallelPins *)(bus->pins));
-        } else {
-            mp_raise_ValueError("ParallelBus expected!");
-        }
-    } else if (display == DISPLAY_LCD_160X80) {
-        if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(ST7735, width, height, get_spi_pins(BG_SPI_FRONT));
-        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
-            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(ST7735, width, height, *(SPIPins *)(bus->pins));
-        } else {
-            mp_raise_ValueError("SPIBus expected!");
-        }
-    } else if (display == DISPLAY_I2C_OLED_128X128) {
-        if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type)) {
-            _PimoroniI2C_obj_t *i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
+        self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
 
-            int i2c_address = args[ARG_i2c_address].u_int;
-            if(i2c_address == -1) i2c_address = SH1107::DEFAULT_I2C_ADDRESS;
-            self->display = m_new_class(SH1107, width, height, *(pimoroni::I2C *)(i2c->i2c), (uint8_t)i2c_address);
-        } else {
-            mp_raise_ValueError("I2C bus required!");
-        }
+    } else if (display == DISPLAY_LCD_160X80) {
+        self->display = m_new_class(ST7735, width, height, spi_bus);
+
+    } else if (display == DISPLAY_I2C_OLED_128X128) {
+        int i2c_address = args[ARG_i2c_address].u_int;
+        if(i2c_address == -1) i2c_address = SH1107::DEFAULT_I2C_ADDRESS;
+
+        self->display = m_new_class(SH1107, width, height, *i2c_bus, (uint8_t)i2c_address);
+
     } else if (display == DISPLAY_INKY_PACK) {
-        if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(UC8151, width, height, (Rotation)rotate);
-        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
-            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(UC8151, width, height, (Rotation)rotate, *(SPIPins *)(bus->pins));
-        } else {
-            mp_raise_ValueError("SPIBus expected!");
-        }
+        self->display = m_new_class(UC8151, width, height, (Rotation)rotate, spi_bus);
+
     } else {
-        if (args[ARG_bus].u_obj == mp_const_none) {
-            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, get_spi_pins(BG_SPI_FRONT));
-        } else if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
-            _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
-            self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, *(SPIPins *)(bus->pins));
-        } else {
-            mp_raise_ValueError("SPIBus expected!");
-        }
+        self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, spi_bus);
     }
 
     // Create or fetch buffer
@@ -254,7 +269,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->graphics->clear();
 
     // Update the LCD from the graphics library
-    if (display != DISPLAY_INKY_FRAME) {
+    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_PACK) {
         self->display->update(self->graphics);
     }
 
@@ -381,7 +396,8 @@ mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t 
     int height = 0;
     int rotation = 0;
     int pen_type = mp_obj_get_int(pen_type_in);
-    if(!get_display_settings(display, width, height, rotation, pen_type)) mp_raise_ValueError("Unsupported display!");
+    PicoGraphicsBusType bus_type = BUS_SPI;
+    if(!get_display_settings(display, width, height, rotation, pen_type, bus_type)) mp_raise_ValueError("Unsupported display!");
     size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
@@ -432,6 +448,45 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     #ifdef MICROPY_EVENT_POLL_HOOK
     MICROPY_EVENT_POLL_HOOK
     #endif
+    }
+
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h };
+
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
+
+    while(self->display->is_busy()) {
+    #ifdef MICROPY_EVENT_POLL_HOOK
+    MICROPY_EVENT_POLL_HOOK
+    #endif
+    }
+
+    self->display->partial_update(self->graphics, {
+        mp_obj_get_int(args[ARG_x]),
+        mp_obj_get_int(args[ARG_y]),
+        mp_obj_get_int(args[ARG_w]),
+        mp_obj_get_int(args[ARG_h])
+    });
+
+    while(self->display->is_busy()) {
+    #ifdef MICROPY_EVENT_POLL_HOOK
+    MICROPY_EVENT_POLL_HOOK
+    #endif
+    }
+
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_set_update_speed(mp_obj_t self_in, mp_obj_t update_speed) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    int speed = mp_obj_get_int(update_speed);
+
+    if(!self->display->set_update_speed(speed)) {
+        mp_raise_ValueError("update speed not supported");
     }
 
     return mp_const_none;
