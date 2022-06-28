@@ -1,11 +1,9 @@
 '''
 Particle Sensor Example
 
-This example requires pms5003.py to be saved onto pico device.
--Open pms5003.py in thonny
--Click save as from the file menu
--Select Raspberry Pi Pico as the save location
--Save the file as pms5003.py
+This example requires seperate MicroPython drivers for the PMS5003 particulate sensor.
+(You can find it at https://github.com/pimoroni/pms5003-micropython )
+or install from PyPi by searching for 'pms5003-micropython' in Thonny's 'Tools > Manage Packages'
 
 '''
 from picographics import PicoGraphics, DISPLAY_ENVIRO_PLUS
@@ -14,7 +12,7 @@ from pms5003 import PMS5003
 import machine
 import time
 
-print("""partical.py - Continously print all data values.
+print("""particle.py - Continously print all data values.
 and draw a pretty histogram on display
 """)
 
