@@ -1,4 +1,4 @@
-# This example shows you a simple, non-interrupt way of reading Pico Eviro Plus's buttons with a loop that checks to see if buttons are pressed.
+# This example shows you a simple, non-interrupt way of reading Pico Enviro's buttons with a loop that checks to see if buttons are pressed.
 
 import time
 from pimoroni import Button

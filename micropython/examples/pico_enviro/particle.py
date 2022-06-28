@@ -12,7 +12,7 @@ from pms5003 import PMS5003
 import machine
 import time
 
-print("""particle.py - Continously print all data values.
+print("""particle.py - Continuously print all data values.
 and draw a pretty histogram on display
 """)
 
