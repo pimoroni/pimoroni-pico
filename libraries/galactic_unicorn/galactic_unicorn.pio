@@ -1,0 +1,66 @@
+.program galactic_unicorn
+.side_set 1 opt
+
+; out pins:
+; 0: data1 (base)
+; 1: data0
+; 2: clock
+; 3: latch
+; 4: blank
+; 5: row1
+; 6: row2
+; 7: row_clear
+
+
+; sideset pin: row_clock
+
+.wrap_target
+
+
+; set row select pins
+    pull
+    out pins, 8 side 0 [4]
+    nop side 1         [4]         ; pulse row select clock
+    out null, 24                ; discard dummy data
+
+; loop for bcd frames
+    set x, 14
+bcd_frame:
+
+; clock out 53 pixels worth of data - two pixels at a time, so 27 (actually 26.5) bits of data
+    set y, 26                   ; 26 because `jmp` test is pre decrement
+
+pixels:
+
+    pull ifempty
+    out pins, 8  [1]               ; two red bits..
+    out pins, 8  [1]               ; ..with clock pulse
+
+    pull ifempty
+    out pins, 8  [1]               ; two green bits..
+    out pins, 8  [1]               ; ..with green pulse
+
+    pull ifempty
+    out pins, 8  [1]               ; two blue bits..
+    out pins, 8  [1]               ; ..with blue pulse
+
+    jmp y-- pixels
+    
+    out pins, 8                 ; LATCH pixel data
+    out pins, 8                 ; turn off BLANK signal
+
+    pull
+
+; pull bcd tick count into x register
+    out y, 16
+
+bcd_count:
+    jmp y-- bcd_count       ; loop until bcd delay complete
+
+; disable led output (blank) and clear latch pin
+    out pins, 8             ; turn off BLANK signal and clear row output
+    out null, 8             ; discard dummy data
+
+    jmp x-- bcd_frame       ; loop to next bcd frame
+
+.wrap
