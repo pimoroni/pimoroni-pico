@@ -26,13 +26,13 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     uint CS     = SPI_BG_FRONT_CS;
-    uint DC     = 28;
+    uint DC     = 28; // 27;
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
     uint BUSY   = PIN_UNUSED;
-    uint RESET  = 27;
+    uint RESET  = 27; //25;
 
-    absolute_time_t timeout = 0;
+    absolute_time_t timeout;
 
   public:
     enum colour : uint8_t {

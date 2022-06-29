@@ -39,10 +39,9 @@ namespace pimoroni {
 
   bool UC8159::is_busy() {
     if(BUSY == PIN_UNUSED) {
-      if(timeout > 0 && absolute_time_diff_us(get_absolute_time(), timeout) > 0) {
+      if(absolute_time_diff_us(get_absolute_time(), timeout) > 0) {
         return true;
       } else {
-        timeout = 0;
         return false;
       }
     }
