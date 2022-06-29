@@ -1,5 +1,7 @@
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
+#include "common/pimoroni_common.hpp"
+#include "common/pimoroni_i2c.hpp"
 #include <cstring>
 
 constexpr char PMS5003_SOF[] = "\x42\x4d";
@@ -13,6 +15,8 @@ constexpr char PMS5003_CMD_WAKEUP[] = "\xe4\x00\x01";
 constexpr uint PMS5003_MAX_RESET_TIME = 20000;
 constexpr uint PMS5003_MAX_RESP_TIME = 5000;
 constexpr uint PMS5003_MIN_CMD_INTERVAL = 100;
+
+const uint8_t PMSA003I_DEFAULT_I2C_ADDRESS = 0x12;
 
 
 class PMS5003 {
@@ -45,11 +49,14 @@ class PMS5003 {
                     uart_init(uart, 9600);
                     gpio_init(pin_tx);gpio_set_function(pin_tx, GPIO_FUNC_UART);
                     gpio_init(pin_rx);gpio_set_function(pin_rx, GPIO_FUNC_UART);
-                    gpio_init(pin_reset);gpio_set_function(pin_reset, GPIO_FUNC_SIO);gpio_set_dir(pin_reset, GPIO_OUT);gpio_put(pin_reset, false);
-                    gpio_init(pin_enable);gpio_set_function(pin_enable, GPIO_FUNC_SIO);gpio_set_dir(pin_enable, GPIO_OUT);gpio_put(pin_enable, true);
 
-                    reset();
+                    common_init();
                 };
+
+        PMS5003(pimoroni::I2C *i2c, uint pin_reset, uint pin_enable) : i2c(i2c), pin_reset(pin_reset), pin_enable(pin_enable) {
+            common_init();
+        }
+
         ~PMS5003() {};
 
         void reset() {
@@ -58,13 +65,20 @@ class PMS5003 {
             reset_input_buffer();
             sleep_ms(100);
             gpio_put(pin_reset, true);
+            if(i2c) {
+                sleep_ms(1000);
+            }
         };
 
         bool read(response_data &data) {
             reset_input_buffer();
 
             // Read the 32 byte transaction - SOF + Size + Data + CRC
-            uart_read_blocking(uart, buffer, 32);
+            if(i2c) {
+                i2c->read_blocking(PMSA003I_DEFAULT_I2C_ADDRESS, buffer, 32, false);
+            } else {
+                uart_read_blocking(uart, buffer, 32);
+            }
 
             // test the checksum matches, if not quit early with a false return value
             uint16_t checksum = (buffer[30] << 8) | buffer[31];
@@ -98,17 +112,28 @@ class PMS5003 {
         }
 
     private:
-        uart_inst_t *uart;
-        uint pin_tx;
-        uint pin_rx;
+        // I2C mode
+        pimoroni::I2C *i2c = nullptr;
+
+        // UART mode
+        uart_inst_t *uart = nullptr;
+        uint pin_tx = pimoroni::PIN_UNUSED;
+        uint pin_rx = pimoroni::PIN_UNUSED;
         uint pin_reset;
         uint pin_enable;
 
         uint8_t buffer[64];
 
         void reset_input_buffer() {
+            if(i2c) return;
             while(uart_is_readable(uart)) {
                 uart_getc(uart);
             }
+        };
+
+        void common_init() {
+            gpio_init(pin_reset);gpio_set_function(pin_reset, GPIO_FUNC_SIO);gpio_set_dir(pin_reset, GPIO_OUT);gpio_put(pin_reset, false);
+            gpio_init(pin_enable);gpio_set_function(pin_enable, GPIO_FUNC_SIO);gpio_set_dir(pin_enable, GPIO_OUT);gpio_put(pin_enable, true);
+            reset();
         };
 };

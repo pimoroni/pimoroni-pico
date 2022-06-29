@@ -1,12 +1,7 @@
-set(OUTPUT_NAME pms5003_demo)
+add_executable(pms5003_demo pms5003_demo.cpp)
+target_link_libraries(pms5003_demo pico_stdlib pms5003)
+pico_add_extra_outputs(pms5003_demo)
 
-add_executable(
-  ${OUTPUT_NAME}
-  pms5003_demo.cpp
-)
-
-# Pull in pico libraries that we need
-target_link_libraries(${OUTPUT_NAME} pico_stdlib pms5003)
-
-# create map/bin/hex file etc.
-pico_add_extra_outputs(${OUTPUT_NAME})
+add_executable(pmsa003i_demo pmsa003i_demo.cpp)
+target_link_libraries(pmsa003i_demo pico_stdlib pms5003)
+pico_add_extra_outputs(pmsa003i_demo)
