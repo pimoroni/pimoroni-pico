@@ -132,8 +132,16 @@ namespace bitmap {
         next_space = t.length();
       }
 
+      size_t next_linebreak = t.find('\n', i + 1);
+
+      if(next_linebreak == std::string::npos) {
+        next_linebreak = t.length();
+      }
+
+      size_t next_break = std::min(next_space, next_linebreak);
+
       uint16_t word_width = 0;
-      for(size_t j = i; j < next_space; j++) {
+      for(size_t j = i; j < next_break; j++) {
         if (t[j] == unicode_sorta::PAGE_194_START) {
           codepage = unicode_sorta::PAGE_194;
           continue;
@@ -152,22 +160,27 @@ namespace bitmap {
       }
 
       // draw word
-      for(size_t j = i; j < next_space; j++) {
+      for(size_t j = i; j < next_break; j++) {
         if (t[j] == unicode_sorta::PAGE_194_START) {
           codepage = unicode_sorta::PAGE_194;
           continue;
         } else if (t[j] == unicode_sorta::PAGE_195_START) {
           continue;
         }
-        character(font, rectangle, t[j], x + co, y + lo, scale, codepage);
-        co += measure_character(font, t[j], scale, codepage);
-        co += letter_spacing * scale;
+        if (t[j] == '\n') {
+          lo += (font->height + 1) * scale;
+          co = 0;
+        } else {
+          character(font, rectangle, t[j], x + co, y + lo, scale, codepage);
+          co += measure_character(font, t[j], scale, codepage);
+          co += letter_spacing * scale;
+        }
         codepage = unicode_sorta::PAGE_195;
       }
 
       // move character offset to end of word and add a space
       co += font->widths[0] * scale;
-      i = next_space + 1;
+      i = next_break += 1;
     }
   }
 }
