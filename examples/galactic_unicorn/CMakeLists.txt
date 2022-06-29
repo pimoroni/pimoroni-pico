@@ -8,3 +8,16 @@ target_link_libraries(galactic_unicorn_demo pico_stdlib hardware_pio hardware_dm
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(galactic_unicorn_demo)
+
+
+
+add_executable(
+  galactic_unicorn_demo2
+  demo2.cpp
+)
+
+# Pull in pico libraries that we need
+target_link_libraries(galactic_unicorn_demo2 pico_stdlib hardware_pio hardware_dma pico_graphics galactic_unicorn)
+
+# create map/bin/hex file etc.
+pico_add_extra_outputs(galactic_unicorn_demo2)
