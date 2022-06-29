@@ -218,7 +218,7 @@ namespace pimoroni {
         bitstream[frame_offset + 163] = 0b10001000;  // BLANK low to enable column outputs
 
         // set the number of bcd ticks for this frame
-        uint16_t bcd_ticks = frame == BCD_FRAMES - 1 ? 65535 : 1 << frame;
+        uint16_t bcd_ticks = frame == BCD_FRAMES - 1 ? 1 : 1 << frame;
         bitstream[frame_offset + 164] = (bcd_ticks &  0xff);
         bitstream[frame_offset + 165] = (bcd_ticks &  0xff00) >> 8;
 
@@ -330,7 +330,7 @@ namespace pimoroni {
     // determine offset in the buffer for this row
     uint16_t row_offset = y * (ROW_BYTES + ROW_FRAME_BYTES * BCD_FRAMES);
 
-    uint16_t bits[3] = {r_gamma_lut[r], g_gamma_lut[g], b_gamma_lut[b]};
+    uint16_t bits[3] = {r_gamma_lut[b], g_gamma_lut[g], b_gamma_lut[r]};
     //uint16_t gr = r_gamma_lut[r];
     //uint16_t gg = g_gamma_lut[g];
     //uint16_t gb = b_gamma_lut[b];
