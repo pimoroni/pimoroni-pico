@@ -38,10 +38,19 @@ namespace pimoroni {
   };
 
   bool UC8159::is_busy() {
+    if(BUSY == PIN_UNUSED) {
+      if(timeout > 0 && absolute_time_diff_us(get_absolute_time(), timeout) > 0) {
+        return true;
+      } else {
+        timeout = 0;
+        return false;
+      }
+    }
     return !gpio_get(BUSY);
   }
 
-  void UC8159::busy_wait() {
+  void UC8159::busy_wait(uint minimum_wait_ms) {
+    timeout = make_timeout_time_ms(minimum_wait_ms);
     while(is_busy()) {
       tight_loop_contents();
     }
@@ -137,15 +146,17 @@ namespace pimoroni {
     busy_wait();
 
     command(PON); // turn on
-    busy_wait();
+    busy_wait(200);
 
     command(DRF); // start display refresh
-    busy_wait();
+    busy_wait(200);
 
     if(blocking) {
-      busy_wait();
+      busy_wait(32 * 1000);
 
       command(POF); // turn off
+    } else {
+      timeout = make_timeout_time_ms(32 * 1000);
     }
   }
 

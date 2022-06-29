@@ -26,11 +26,13 @@ namespace pimoroni {
 
     // interface pins with our standard defaults where appropriate
     uint CS     = SPI_BG_FRONT_CS;
-    uint DC     = 27;
+    uint DC     = 28;
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
-    uint BUSY   = 26;
-    uint RESET  = 25;
+    uint BUSY   = PIN_UNUSED;
+    uint RESET  = 27;
+
+    absolute_time_t timeout = 0;
 
   public:
     enum colour : uint8_t {
@@ -44,9 +46,9 @@ namespace pimoroni {
       CLEAN = 7
     };
 
-    UC8159(uint16_t width, uint16_t height) : UC8159(width, height, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 27, PIN_UNUSED}) {};
+    UC8159(uint16_t width, uint16_t height) : UC8159(width, height, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED}) {};
 
-    UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=26, uint reset=25) :
+    UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=PIN_UNUSED, uint reset=27) :
       DisplayDriver(width, height, ROTATE_0),
       spi(pins.spi),
       CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
@@ -58,7 +60,7 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    void busy_wait();
+    void busy_wait(uint minimum_wait_ms=0);
     void reset();
     void power_off();
   
