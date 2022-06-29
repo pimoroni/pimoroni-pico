@@ -5,6 +5,7 @@
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "galactic_unicorn.hpp"
+#include "okcolor.hpp"
 
 using namespace pimoroni;
 
@@ -106,10 +107,71 @@ gpio_set_function(28, GPIO_FUNC_SIO);
 
 
 
-  uint i = 0;
-  int v = 255;
+  //uint i = 0;
+  //int v = 255;
+
+  float hue_offset = 0.0f;
+  float brightness = 0.5f;
+  float curve = 4.0f;
+
   while(true) {
-    i++;
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
+      hue_offset += 0.05;
+      if(hue_offset > 1.0f) hue_offset = 1.0f;
+    }
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_DOWN)) {
+      hue_offset -= 0.05;
+      if(hue_offset < 0.0f) hue_offset = 0.0f;
+    }
+
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
+      brightness += 0.05;
+      if(brightness > 1.0f) brightness = 1.0f;
+    }
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
+      brightness -= 0.05;
+      if(brightness < 0.0f) brightness = 0.0f;
+    }
+
+
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
+      curve += 0.5;
+      if(curve > 100.0f) curve = 100.0f;
+    }
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
+      curve -= 0.5;
+      if(curve < 0.5) curve = 0.5;
+    }
+
+    for(int y = 0; y < 11; y++) {
+      for(int x = 0; x < 53; x++) {
+        float fx = x / 53.0f;
+        float fy = (y / 11.0f) - 0.5f;
+        float twopi = M_PI * 2;
+        float hue = fy + (sin(fx * twopi / curve));
+        float fade = 1.0f;
+       /* if(hue < 0.0f) {
+          fade += (hue * 10.0f);
+          if(fade < 0.0f) fade = 0.0f;
+        }
+        if(hue > 1.0f) {
+          fade -= ((hue - 1.0f) * 10.0f);
+          if(fade < 0.0f) fade = 0.0f;
+        }*/
+
+        hue += hue_offset;
+        while(hue < 0.0f) {hue += 1.0f;}
+        while(hue > 1.0f) {hue -= 1.0f;}
+        hue = 1.0f - hue;
+/*
+        uint8_t r = 0, g = 0, b = 0;
+        from_hsv(hue, 1.0f, brightness * fade, r, g, b);*/
+        ok_color::HSL hsl{.h = hue, .s = 1.0f, .l = brightness * fade};
+        ok_color::RGB rgb = ok_color::okhsl_to_srgb(hsl);
+        galactic_unicorn.set_pixel(x, y, rgb.r * 255.0f, rgb.g * 255.0f, rgb.b * 255.0f);
+      }
+    }
+    /*i++;
 
     graphics.set_pen(0, 0, 0);
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {graphics.set_pen(255, 0, 0);}
@@ -151,7 +213,7 @@ graphics.set_pen(255, 255, 255);
       }
       galactic_unicorn.set_pixel(x, y, r, g, b);
     }
-
+*/
 
     sleep_ms(10);
   }
