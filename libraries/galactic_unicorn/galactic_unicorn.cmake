@@ -1,14 +1,12 @@
-add_library(galactic_unicorn INTERFACE)
+add_library(pico_unicorn INTERFACE)
 
-pico_generate_pio_header(galactic_unicorn ${CMAKE_CURRENT_LIST_DIR}/galactic_unicorn.pio)
-pico_generate_pio_header(galactic_unicorn ${CMAKE_CURRENT_LIST_DIR}/audio_i2s.pio)
+pico_generate_pio_header(pico_unicorn ${CMAKE_CURRENT_LIST_DIR}/pico_unicorn.pio)
 
-
-target_sources(galactic_unicorn INTERFACE
-  ${CMAKE_CURRENT_LIST_DIR}/galactic_unicorn.cpp
+target_sources(pico_unicorn INTERFACE
+  ${CMAKE_CURRENT_LIST_DIR}/pico_unicorn.cpp
 )
 
-target_include_directories(galactic_unicorn INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(pico_unicorn INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 # Pull in pico libraries that we need
-target_link_libraries(galactic_unicorn INTERFACE pico_stdlib pico_graphics hardware_adc hardware_pio hardware_dma)
+target_link_libraries(pico_unicorn INTERFACE pico_stdlib hardware_pio hardware_dma)

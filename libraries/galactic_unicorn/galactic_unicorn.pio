@@ -2,79 +2,65 @@
 .side_set 1 opt
 
 ; out pins:
-;
-; - 3: row select bit 0
-; - 4: row select bit 1
-; - 5: row select bit 2
-; - 6: row select bit 3
+; 0: data1 (base)
+; 1: data0
+; 2: clock
+; 3: latch
+; 4: blank
+; 5: row1
+; 6: row2
+; 7: row_clear
 
-; set pins:
-;
-; - 0: column data (base)
-; - 1: column latch
-; - 2: column blank
 
-; sideset pin:
-;
-; - 0: column clock
-
-; for each row:
-;   for each bcd frame:
-;            0: 00110110                           // row pixel count (minus one)
-;      1  - 53: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
-;      54 - 55: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
-;           56: xxxxrrrr                           // row select bits
-;      57 - 59: tttttttt, tttttttt, tttttttt,      // bcd tick count (0-65536)
-;
-;  .. and back to the start
-
+; sideset pin: row_clock
 
 .wrap_target
 
-; loop over row pixels
-  out y, 8                        ; get row pixel count (minus 1 because test is pre decrement)
+
+; set row select pins
+    pull
+    out pins, 8 side 0 [4]
+    nop side 1         [4]         ; pulse row select clock
+    out null, 24                ; discard dummy data
+
+; loop for bcd frames
+    set x, 14
+bcd_frame:
+
+; clock out 53 pixels worth of data - two pixels at a time, so 27 (actually 26.5) bits of data
+    set y, 26                   ; 26 because `jmp` test is pre decrement
+
 pixels:
+
+    pull ifempty
+    out pins, 8  [1]               ; two red bits..
+    out pins, 8  [1]               ; ..with clock pulse
+
+    pull ifempty
+    out pins, 8  [1]               ; two green bits..
+    out pins, 8  [1]               ; ..with green pulse
+
+    pull ifempty
+    out pins, 8  [1]               ; two blue bits..
+    out pins, 8  [1]               ; ..with blue pulse
+
+    jmp y-- pixels
     
-    ; red bit
-    out x, 1       side 0  [1]       ; pull in blue bit from OSR into register x, clear clock
-    set pins, 0b100               ; clear data bit, blank high
-    jmp !x endb                   ; if bit was zero jump
-    set pins, 0b101               ; set data bit, blank high
-  endb:                      
-    nop            side 1 [2]     ; clock in bit
+    out pins, 8                 ; LATCH pixel data
+    out pins, 8                 ; turn off BLANK signal
 
-    ; green bit
-    out x, 1       side 0 [1]        ; pull in green bit from OSR into register X, clear clock
-    set pins, 0b100               ; clear data bit, blank high
-    jmp !x endg                   ; if bit was zero jump
-    set pins, 0b101               ; set data bit, blank high
-  endg:                      
-    nop            side 1 [2]     ; clock in bit
+    pull
 
-    ; blue bit
-    out x, 1       side 0  [1]       ; pull in red bit from OSR into register X, clear clock
-    set pins, 0b100               ; clear data bit, blank high
-    jmp !x endr                   ; if bit was zero jump
-    set pins, 0b101               ; set data bit, blank high
-  endr:                      
-    out null, 5             side 1 [2]     ; clock in bit
+; pull bcd tick count into x register
+    out y, 16
 
-    ;out null, 5    side 0         ; discard the five dummy bits for this pixel
+bcd_count:
+    jmp y-- bcd_count       ; loop until bcd delay complete
 
-  jmp y-- pixels
+; disable led output (blank) and clear latch pin
+    out pins, 8             ; turn off BLANK signal and clear row output
+    out null, 8             ; discard dummy data
 
-  out null, 16                    ; discard dummy bytes
-
-  out pins, 8                     ; output row select
-
-  set pins, 0b110 [5]             ; latch high, blank high
-  set pins, 0b000                 ; blank low (enable output)
-
-; loop over bcd delay period
-  out y, 24                       ; get bcd delay counter value
-bcd_delay:
-  jmp y-- bcd_delay         
-
-  set pins 0b100                  ; blank high (disable output)
+    jmp x-- bcd_frame       ; loop to next bcd frame
 
 .wrap
