@@ -377,49 +377,6 @@ namespace pimoroni {
         //bit_offset += 2;
         bits[bit] >>= 1;
       }
-   /*   // setup pixel data and matching mask
-      uint8_t bit_position = x >= 26 ? 1 : 0;
-      uint8_t mask = 0b1 << bit_position;
-      uint8_t red = (gr & 0b1) << bit_position;
-      uint8_t green = (gg & 0b1) << bit_position;
-      uint8_t blue = (gb & 0b1) << bit_position;
-
-      // clear existing data and set new data
-      bitstream[offset + 0] &= ~mask;
-      bitstream[offset + 0] |= red;
-      bitstream[offset + 1] &= ~mask;
-      bitstream[offset + 1] |= red;
-      bitstream[offset + 2] &= ~mask;
-      bitstream[offset + 2] |= green;
-      bitstream[offset + 3] &= ~mask;
-      bitstream[offset + 3] |= green;
-      bitstream[offset + 4] &= ~mask;
-      bitstream[offset + 4] |= blue;
-      bitstream[offset + 5] &= ~mask;
-      bitstream[offset + 5] |= blue;*/
-/*
-
-      uint8_t mask = 0b11;
-      uint8_t red = ((gr & 0b1) << 1) | (gr & 0b1) ;
-      uint8_t green = ((gg & 0b1) << 1) | (gg & 0b1) ;
-      uint8_t blue = ((gb & 0b1) << 1) | (gb & 0b1) ;
-
-      bitstream[offset + 0] &= ~mask;
-      bitstream[offset + 0] |= red;
-      bitstream[offset + 1] &= ~mask;
-      bitstream[offset + 1] |= red;
-      bitstream[offset + 2] &= ~mask;
-      bitstream[offset + 2] |= green;
-      bitstream[offset + 3] &= ~mask;
-      bitstream[offset + 3] |= green;
-      bitstream[offset + 4] &= ~mask;
-      bitstream[offset + 4] |= blue;
-      bitstream[offset + 5] &= ~mask;
-      bitstream[offset + 5] |= blue;
-*/
-     /* gr >>= 1;
-      gg >>= 1;
-      gb >>= 1;*/
     }
   }
 
