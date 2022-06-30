@@ -1,0 +1,2 @@
+include(inventor2040w_motor_song.cmake)
+include(inventor2040w_tone_song.cmake)

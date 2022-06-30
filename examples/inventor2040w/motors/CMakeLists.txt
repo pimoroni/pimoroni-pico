@@ -1,0 +1,11 @@
+add_subdirectory(tuning)
+
+include(inventor2040w_driving_sequence.cmake)
+include(inventor2040w_dual_motors.cmake)
+include(inventor2040w_motor_wave.cmake)
+include(inventor2040w_position_control.cmake)
+include(inventor2040w_position_on_velocity_control.cmake)
+include(inventor2040w_position_wave.cmake)
+include(inventor2040w_reactive_encoder.cmake)
+include(inventor2040w_single_motor.cmake)
+include(inventor2040w_velocity_control.cmake)
