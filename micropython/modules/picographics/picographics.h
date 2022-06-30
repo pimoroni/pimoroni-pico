@@ -17,6 +17,7 @@ enum PicoGraphicsDisplay {
 
 enum PicoGraphicsPenType {
     PEN_1BIT = 0,
+    PEN_3BIT,
     PEN_P2,
     PEN_P4,
     PEN_P8,

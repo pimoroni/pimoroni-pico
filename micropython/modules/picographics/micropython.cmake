@@ -13,6 +13,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bitY.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_3bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_p4.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_p8.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb332.cpp

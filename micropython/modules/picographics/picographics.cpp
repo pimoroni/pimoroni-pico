@@ -115,6 +115,8 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
     switch(pen_type) {
         case PEN_1BIT:
             return PicoGraphics_Pen1Bit::buffer_size(width, height);
+        case PEN_3BIT:
+            return PicoGraphics_Pen3Bit::buffer_size(width, height);
         case PEN_P4:
             return PicoGraphics_PenP4::buffer_size(width, height);
         case PEN_P8:
@@ -195,12 +197,11 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     // Try to create an appropriate display driver
     if (display == DISPLAY_INKY_FRAME) {
-        pen_type = PEN_P4; // FORCE to P4 since it's the only supported mode
+        pen_type = PEN_3BIT; // FORCE to 3BIT
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(UC8159, width, height, spi_bus);
 
-    }
-    else if (display == DISPLAY_TUFTY_2040) {
+    } else if (display == DISPLAY_TUFTY_2040) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
 
     } else if (display == DISPLAY_LCD_160X80) {
@@ -243,6 +244,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             } else {
                 self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer);
             }
+            break;
+        case PEN_3BIT:
+            self->graphics = m_new_class(PicoGraphics_Pen3Bit, self->display->width, self->display->height, self->buffer);
             break;
         case PEN_P4:
             self->graphics = m_new_class(PicoGraphics_PenP4, self->display->width, self->display->height, self->buffer);
