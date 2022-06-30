@@ -15,9 +15,9 @@ const uint Automation2040W::ADC_PINS[] = {26, 27, 28};
 
 Automation2040W::Automation2040W()
 : i2c(I2C_SDA_PIN, I2C_SCL_PIN, 100000)
-, analogs({Analog(ADC_PINS[0], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET),
-           Analog(ADC_PINS[1], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET),
-           Analog(ADC_PINS[2], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET)}) {
+, analogs{Analog(ADC_PINS[0], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET),
+          Analog(ADC_PINS[1], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET),
+          Analog(ADC_PINS[2], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET)} {
 }
 
 bool Automation2040W::init() {
