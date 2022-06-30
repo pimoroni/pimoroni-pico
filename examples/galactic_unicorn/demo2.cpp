@@ -70,100 +70,120 @@ void step_star(star_t &s) {
   }
 }
 
-void number(int n, int x, int y) {
-  switch(n) {
-    case 6: {
-      graphics.rectangle(Rect(x, y, 6, 2));
-      graphics.rectangle(Rect(x, y + 4, 6, 2));
-      graphics.rectangle(Rect(x, y + 9, 6, 2));
-      graphics.rectangle(Rect(x, y, 2, 11));
-      graphics.rectangle(Rect(x + 4, y + 4, 2, 5));
-    }break;
-
-    case 9: {
-      graphics.rectangle(Rect(x, y, 6, 2));
-      graphics.rectangle(Rect(x, y + 4, 6, 2));
-      graphics.rectangle(Rect(x, y + 9, 6, 2));
-      graphics.rectangle(Rect(x + 4, y, 2, 11));
-      graphics.rectangle(Rect(x, y, 2, 5));
-    }break;
-
-    case 4: {
-      graphics.rectangle(Rect(x, y + 4, 6, 2));
-      graphics.rectangle(Rect(x + 4, y, 2, 11));
-      graphics.rectangle(Rect(x, y, 2, 5));
-    }break;
-
-    case 0: {
-      graphics.rectangle(Rect(x, y, 6, 2));
-      graphics.rectangle(Rect(x + 4, y, 2, 11));
-      graphics.rectangle(Rect(x, y, 2, 11));
-      graphics.rectangle(Rect(x, y + 9, 6, 2));
-    }break;
-  }
-}
 
 int main() {
 
+  uint8_t hue_map[53][3];
+  for(int i = 0; i < 53; i++) {
+    from_hsv(i / 53.0f, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
+  }
+
+  star_t stars[100];
+  for(int i = 0; i < 100; i++) {
+    init_star(stars[i]);
+    stars[i].a = i;
+  }
+
+gpio_set_function(28, GPIO_FUNC_SIO);
+    gpio_set_dir(28, GPIO_OUT);
+
+  for(int i = 0; i < 10; i++) {
+    gpio_put(28, !gpio_get(28));
+    sleep_ms(100);
+  }
+  sleep_ms(1000);
+
+  gpio_put(28,true);
+
   galactic_unicorn.init();
 
-  // graphics.set_font("sans");
+/*
+  bool a_pressed = false;
+  bool b_pressed = false;
+  bool x_pressed = false;
+  bool y_pressed = false;
+*/
+  graphics.set_font("sans");
 
+
+
+  uint i = 0;
+  int v = 255;
+
+  float hue_offset = 0.0f;
+  float brightness = 0.5f;
+  float curve = 4.0f;
 
   while(true) {
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
+      hue_offset += 0.05;
+      if(hue_offset > 1.0f) hue_offset = 1.0f;
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_DOWN)) {
+      hue_offset -= 0.05;
+      if(hue_offset < 0.0f) hue_offset = 0.0f;
     }
 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
+      brightness += 0.05;
+      if(brightness > 1.0f) brightness = 1.0f;
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
+      brightness -= 0.05;
+      if(brightness < 0.0f) brightness = 0.0f;
     }
+
 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
+      curve += 0.5;
+      if(curve > 100.0f) curve = 100.0f;
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
+      curve -= 0.5;
+      if(curve < 0.5) curve = 0.5;
     }
+i++;
 
     graphics.set_pen(0, 0, 0);
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {graphics.set_pen(255, 0, 0);}
     graphics.clear();
-    graphics.set_pen(200, 200, 0);
-    number(6, 23, 0);
-    number(9, 31, 0);
-    number(4, 39, 0);
-    number(0, 47, 0);
 
-    graphics.set_pen(200, 0, 0);
-    graphics.circle(Point(8, 5), 6);
-
-    graphics.set_pen(255, 255, 255);
-    std::vector<Point> triangle = {Point(5, 2), Point(10, 5), Point(5, 7)};
-    graphics.polygon(triangle);
+    
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {v = v == 0 ? 0 : v - 1;}
 
 
-    graphics.set_pen(255, 0, 0);
-    graphics.rectangle(Rect(0, 0, 10, 11));
-    graphics.set_pen(0, 255, 0);
-    graphics.rectangle(Rect(10, 0, 10, 11));
-    graphics.set_pen(0, 0, 255);
-    graphics.rectangle(Rect(20, 0, 10, 11));
+    for(int i = 0; i < 100; i++) {
+      star_t &star = stars[i];
+      step_star(star);
 
+      uint b = star.brightness();
+      graphics.set_pen(b, b, b);
+      //graphics.pixel(Point(star.x + (53 / 2), star.y + (11 / 2)));
+    }
+
+graphics.set_pen(255, 255, 255);
+    float s = 0.8f;//0.65f + (sin(i / 25.0f) * 0.15f);
+    float a = 1.0f;// (sin(i / 25.0f) * 100.0f);
+    float x = (sin(i / 25.0f) * 40.0f) * s;
+    float y = (cos(i / 15.0f) * 10.0f) * s;
+    text("Galactic", Point(x, y), s, a);
+    
     uint16_t *p = (uint16_t *)graphics.frame_buffer;
     for(size_t i = 0; i < 53 * 11; i++) {
       int x = i % 53;
       int y = i / 53;
-     /* uint r = ((*p & 0b0111110000000000) >> 10) << 3;
-      uint g = ((*p & 0b0000001111100000) >>  5) << 3;
-      uint b = ((*p & 0b0000000000011111) >>  0) << 3;*/
+      uint r = ((*p & 0b1111100000000000) >> 11) << 3;
+      uint g = ((*p & 0b0000011111100000) >>  5) << 2;
+      uint b = ((*p & 0b0000000000011111) >>  0) << 3;
       p++;
 
-/*      if(r > 200 && g > 200 && b > 200) {
+      if(r > 200 && g > 200 && b > 200) {
         r = hue_map[x][0];
         g = hue_map[x][1];
         b = hue_map[x][2];
-      }*/
-      galactic_unicorn.set_pixel(x, y, 0, 0, 255);
+      }
+      
+      galactic_unicorn.set_pixel(x, y, r, g, b);
     }
 
 
