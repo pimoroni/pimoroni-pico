@@ -45,6 +45,7 @@ add_subdirectory(pico_wireless)
 
 add_subdirectory(inky_pack)
 
+add_subdirectory(automation2040w)
 add_subdirectory(plasma2040)
 add_subdirectory(badger2040)
 add_subdirectory(tufty2040)
