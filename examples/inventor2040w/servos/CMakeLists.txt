@@ -1,0 +1,5 @@
+include(inventor2040w_calibration.cmake)
+include(inventor2040w_multiple_servos.cmake)
+include(inventor2040w_servo_wave.cmake)
+include(inventor2040w_simple_easing.cmake)
+include(inventor2040w_single_servo.cmake)
