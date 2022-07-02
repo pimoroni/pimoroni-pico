@@ -135,8 +135,9 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            // Allocate a per-row temporary buffer
-            uint16_t row_buf[bounds.w];
+            // Allocate two per-row temporary buffers, as the callback may transfer by DMA
+            // while we're preparing the next row
+            uint16_t row_buf[2][bounds.w];
             for(auto y = 0; y < bounds.h; y++) {
                 /*if(scanline_interrupt != nullptr) {
                     scanline_interrupt(y);
@@ -150,10 +151,10 @@ namespace pimoroni {
                     uint8_t c = src[(bounds.w * y / 2) + (x / 2)];
                     uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
                     uint8_t  b = (c >> o) & 0xf; // bit value shifted to position
-                    row_buf[x] = cache[b];
+                    row_buf[y & 1][x] = cache[b];
                 }
                 // Callback to the driver with the row data
-                callback(row_buf, bounds.w * sizeof(RGB565));
+                callback(row_buf[y & 1], bounds.w * sizeof(RGB565));
             }
         }
     }

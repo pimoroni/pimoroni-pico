@@ -84,16 +84,17 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            // Allocate a per-row temporary buffer
-            uint16_t row_buf[bounds.w];
+            // Allocate two per-row temporary buffers, as the callback may transfer by DMA
+            // while we're preparing the next row
+            uint16_t row_buf[2][bounds.w];
             for(auto y = 0; y < bounds.h; y++) {
                 for(auto x = 0; x < bounds.w; x++) {
-                    row_buf[x] = rgb332_to_rgb565_lut[*src];
+                    row_buf[y & 1][x] = rgb332_to_rgb565_lut[*src];
 
                     src++;
                 }
                 // Callback to the driver with the row data
-                callback(row_buf, bounds.w * sizeof(RGB565));
+                callback(row_buf[y & 1], bounds.w * sizeof(RGB565));
             }
         }
     }
