@@ -33,14 +33,7 @@ namespace pimoroni {
     }
     void PicoGraphics_PenRGB332::set_pixel_dither(const Point &p, const RGB &c) {
         if(!bounds.contains(p)) return;
-        static uint8_t _odm[16] = {
-            0,  8,  2, 10,
-            12,  4, 14,  6,
-            3, 11,  1,  9,
-            15,  7, 13,  5
-        };
-
-        uint8_t _dmv = _odm[(p.x & 0b11) | ((p.y & 0b11) << 2)];
+        uint8_t _dmv = dither16_pattern[(p.x & 0b11) | ((p.y & 0b11) << 2)];
 
         uint8_t red = c.r & 0b11000000;        // Two bits red
         uint8_t red_r = c.r & 0b111111;        // Remaining six bits red
@@ -64,14 +57,8 @@ namespace pimoroni {
     void PicoGraphics_PenRGB332::set_pixel_dither(const Point &p, const RGB565 &c) {
         if(!bounds.contains(p)) return;
         RGB565 cs = __builtin_bswap16(c);
-        static uint8_t _odm[16] = {
-            0,  8,  2, 10,
-            12,  4, 14,  6,
-            3, 11,  1,  9,
-            15,  7, 13,  5
-        };
 
-        uint8_t _dmv = _odm[(p.x & 0b11) | ((p.y & 0b11) << 2)];
+        uint8_t _dmv = dither16_pattern[(p.x & 0b11) | ((p.y & 0b11) << 2)];
 
         //                      RRRRRGGGGGGBBBBB
         uint8_t red   = (cs & 0b1100000000000000) >> 8;  // Two bits grn

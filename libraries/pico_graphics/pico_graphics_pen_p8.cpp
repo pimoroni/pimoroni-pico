@@ -94,7 +94,7 @@ namespace pimoroni {
 
         // set the pixel
         //color = candidates[pattern[pattern_index]];
-        color = candidate_cache[cache_key][pattern[pattern_index]];
+        color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
         set_pixel(p);
     }
 

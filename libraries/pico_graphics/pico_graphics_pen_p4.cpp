@@ -121,7 +121,7 @@ namespace pimoroni {
 
         // set the pixel
         //color = candidates[pattern[pattern_index]];
-        color = candidate_cache[cache_key][pattern[pattern_index]];
+        color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
         set_pixel(p);
     }
     void PicoGraphics_PenP4::scanline_convert(PenType type, conversion_callback_func callback) {

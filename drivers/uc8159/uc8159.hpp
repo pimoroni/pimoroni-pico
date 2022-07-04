@@ -16,12 +16,6 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-
-    // highest possible resolution is 160x296 which at 1 bit per pixel
-    // requires 5920 bytes of frame buffer
-    //uint8_t frame_buffer[5920] = {0};
-    uint8_t *frame_buffer;
-
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
@@ -33,6 +27,8 @@ namespace pimoroni {
     uint RESET  = 27; //25;
 
     absolute_time_t timeout;
+
+    bool blocking = false;
 
   public:
     enum colour : uint8_t {
@@ -67,10 +63,11 @@ namespace pimoroni {
     bool is_busy() override;
     void update(PicoGraphics *graphics) override;
 
+    void set_blocking(bool blocking);
+
   private:
     void init();
     void setup();
-    void update(const void *data, bool blocking = true);
     void command(uint8_t reg, size_t len, const uint8_t *data);
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg, const uint8_t data) {command(reg, 0, &data);};
