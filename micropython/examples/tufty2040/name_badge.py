@@ -19,11 +19,14 @@ RED = display.create_pen(200, 0, 0)
 # Read name from file
 try:
     file = open("badge.txt", "r")
-    name = file.readline()
-    file.close()
 except OSError:
-    name = "open name.txt in thonny to edit badge :)"
-
+    with open("badge.txt", "w") as f:
+        f.write("open badge.txt in thonny to edit badge :)")
+        f.flush()
+    file = open("badge.txt", "r")
+    
+name = file.readline()
+file.close()
 
 text_size = 12
 text_x = 0
