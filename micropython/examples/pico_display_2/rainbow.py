@@ -2,10 +2,10 @@
 # We're using a RAM intensive 64K colour palette here to get a nice smooth colour transition.
 
 import time
-from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB565
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB565
 from pimoroni import RGBLED
 
-display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB565, rotate=0)
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
 
 led = RGBLED(6, 7, 8)
