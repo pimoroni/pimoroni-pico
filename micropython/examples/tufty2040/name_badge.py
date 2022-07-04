@@ -24,7 +24,7 @@ except OSError:
         f.write("open badge.txt in thonny to edit badge :)")
         f.flush()
     file = open("badge.txt", "r")
-    
+
 name = file.readline()
 file.close()
 
