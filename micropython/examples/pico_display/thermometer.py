@@ -2,28 +2,26 @@
 # It's based on the thermometer example in the "Getting Started with MicroPython on the Raspberry Pi Pico" book, which is a great read if you're a beginner!
 
 import machine
-import utime
-
-import st7789
+import time
 from pimoroni import RGBLED
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
-display.set_palette_mode(st7789.PALETTE_USER)
+# set up the hardware
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
+sensor_temp = machine.ADC(4)
+led = RGBLED(6, 7, 8)
 
-# Set the display backlight to 50%
+# set the display backlight to 50%
 display.set_backlight(0.5)
 
+# set up constants for drawing
 WIDTH, HEIGHT = display.get_bounds()
 
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
-TEMPERATURE = WHITE + 1
 
-led = RGBLED(6, 7, 8)
+conversion_factor = 3.3 / (65535)  # used for calculating a temperature from the raw sensor reading
 
-# reads from Pico's temp sensor and converts it into a more manageable number
-sensor_temp = machine.ADC(4)
-conversion_factor = 3.3 / (65535)
 temp_min = 10
 temp_max = 30
 bar_width = 5
@@ -69,10 +67,11 @@ while True:
         temperatures.pop(0)
 
     i = 0
+
     for t in temperatures:
-        # chooses a pen colour based on the temperature and update the palette entry
-        display.set_palette(TEMPERATURE, st7789.RGB565(*temperature_to_color(t)))
-        display.set_pen(TEMPERATURE)
+        # chooses a pen colour based on the temperature
+        TEMPERATURE_COLOUR = display.create_pen(*temperature_to_color(t))
+        display.set_pen(TEMPERATURE_COLOUR)
 
         # draws the reading as a tall, thin rectangle
         display.rectangle(i, HEIGHT - (round(t) * 4), bar_width, HEIGHT)
@@ -96,4 +95,4 @@ while True:
     display.update()
 
     # waits for 5 seconds
-    utime.sleep(5)
+    time.sleep(5)

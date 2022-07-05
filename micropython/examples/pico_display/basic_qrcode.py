@@ -1,12 +1,13 @@
-import st7789
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 import qrcode
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
+display.set_backlight(1.0)
 
 WIDTH, HEIGHT = display.get_bounds()
 
 BG = display.create_pen(0, 0, 0)
-FG = display.create_pen(128, 128, 128)
+FG = display.create_pen(255, 255, 255)
 
 
 def measure_qr_code(size, code):
