@@ -29,6 +29,7 @@ def clear():
     display.clear()
     display.update()
 
+
 # set up
 clear()
 
