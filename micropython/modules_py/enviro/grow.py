@@ -1,4 +1,10 @@
-from enviro.base import *
+import time
+from machine import Pin, PWM
+
+from enviro.base import EnviroBase
+from breakout_bme280 import BreakoutBME280
+from breakout_ltr559 import BreakoutLTR559
+
 
 ##################################################
 # Enviro Grow
@@ -16,6 +22,7 @@ PUMP_C = 2
 # Count Constants
 NUM_SENSORS = 3
 NUM_PUMPS = 3
+
 
 class EnviroGrow(EnviroBase):
     SENSOR_PINS = (15, 14, 13)

@@ -1,4 +1,7 @@
-from enviro.base import *
+from enviro.base import EnviroBase, CELCIUS, FAHRENHEIT, KELVIN, HECTOPASCAL, BAR, INHG, PSI
+from breakout_bme68x import BreakoutBME68X
+from breakout_bh1745 import BreakoutBH1745
+
 
 ##################################################
 # Enviro Indoor
@@ -34,7 +37,7 @@ class EnviroIndoor(EnviroBase):
         self.bh1745.measurement_time_ms(160)
         self.__light = self.bh1745.rgbc_raw()
 
-        has_reading = True
+        self.has_reading = True
 
         return True
 

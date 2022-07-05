@@ -1,4 +1,5 @@
-from enviro.base import *
+from enviro.base import EnviroBase, CELCIUS, HECTOPASCAL
+
 
 ##################################################
 # Enviro Urban
@@ -38,9 +39,6 @@ class EnviroUrban(EnviroBase):
         raise NotImplementedError("This function is not yet implemented.")
 
     def particulates(self, measure):
-        raise NotImplementedError("This function is not yet implemented.")
-
-    def noise_level(self):
         raise NotImplementedError("This function is not yet implemented.")
 
     def noise_level(self, sample_time_ms=1000):

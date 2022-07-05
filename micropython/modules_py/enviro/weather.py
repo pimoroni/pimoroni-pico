@@ -1,4 +1,12 @@
-from enviro.base import *
+import time
+import math
+from machine import Pin
+from pimoroni import Analog
+
+from enviro.base import EnviroBase
+from breakout_bme280 import BreakoutBME280
+from breakout_ltr559 import BreakoutLTR559
+
 
 ##################################################
 # Enviro Weather
@@ -22,7 +30,6 @@ class EnviroWeather(EnviroBase):
     WIND_DIRECTION_SOUTHWEST = 225
     WIND_DIRECTION_WEST = 270
     WIND_DIRECTION_NORTHWEST = 315
-
 
     def __init__(self):
         EnviroBase.__init__(self)

@@ -1,13 +1,5 @@
-import time
-import math
 from machine import Pin, PWM
-
-from pimoroni import Analog
 from pimoroni_i2c import PimoroniI2C
-from breakout_bme280 import BreakoutBME280
-from breakout_bme68x import BreakoutBME68X
-from breakout_ltr559 import BreakoutLTR559
-from breakout_bh1745 import BreakoutBH1745
 from pcf85063a import PCF85063A
 
 
@@ -45,7 +37,6 @@ class EnviroBase():
     REASON_CAMERA_TRIGGER = 2
     REASON_RAIN_TRIGGER = 3
     REASON_NONE = -1
-
 
     def __init__(self):
         self.i2c = PimoroniI2C(self.I2C_SDA_PIN, self.I2C_SCL_PIN, 100000)
