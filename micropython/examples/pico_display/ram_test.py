@@ -1,12 +1,11 @@
 import gc
 import time
-from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332, PEN_RGB565
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332
 
 # PEN_RGB332 is an 8 bit, fixed 256 colour palette which conserves your RAM.
-# Try switching the pen_type to PEN_RGB565 below (16 bit, 65K colour) and see the difference!
+# Try switching the pen_type to PEN_RGB565 (16 bit, 65K colour) and see the difference!
 
-display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)  # 8 bit
-# display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB565, rotate=0)  # 16 bit
+display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
 
 # set up constants for drawing
 WIDTH, HEIGHT = display.get_bounds()

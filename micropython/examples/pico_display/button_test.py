@@ -2,9 +2,10 @@
 
 import time
 from pimoroni import Button
-from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_P4
 
-display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
+# We're only using a few colours so we can use a 4 bit/16 colour palette and save RAM!
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_P4, rotate=0)
 
 display.set_backlight(0.5)
 display.set_font("bitmap8")
@@ -28,6 +29,8 @@ def clear():
     display.clear()
     display.update()
 
+# set up
+clear()
 
 while True:
     if button_a.read():                                   # if a button press is detected then...
