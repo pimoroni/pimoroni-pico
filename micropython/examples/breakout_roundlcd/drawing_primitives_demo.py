@@ -104,4 +104,3 @@ while True:
     display.remove_clip()
 
     display.update()
-

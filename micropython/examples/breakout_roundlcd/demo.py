@@ -70,4 +70,3 @@ while True:
     display.update()
     time.sleep(0.02)
     t += 0.02
-

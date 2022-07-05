@@ -62,4 +62,3 @@ while True:
 
     display.update()
     time.sleep(0.01)
-
