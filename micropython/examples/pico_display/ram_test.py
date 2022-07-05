@@ -5,7 +5,8 @@ from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB332, PEN_RGB
 # PEN_RGB332 is an 8 bit, fixed 256 colour palette which conserves your RAM.
 # Try switching the pen_type to PEN_RGB565 below (16 bit, 65K colour) and see the difference!
 
-display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)
+display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB332, rotate=0)  # 8 bit
+# display = PicoGraphics(DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB565, rotate=0)  # 16 bit
 
 # set up constants for drawing
 WIDTH, HEIGHT = display.get_bounds()
@@ -18,10 +19,12 @@ def free(full=False):
     gc.collect()
     F = gc.mem_free()
     A = gc.mem_alloc()
-    T = F+A
-    P = '{0:.2f}%'.format(F/T*100)
-    if not full: return P
-    else : return (f"Total RAM: \n{T} KB. \nUnused RAM: \n{F} KB. \n({P} free)")
+    T = F + A
+    P = '{0:.2f}%'.format(F / T * 100)
+    if not full:
+        return P
+    else:
+        return (f"Total RAM \n{T} KB \nUnused RAM \n{F} KB \n({P} free)")
 
 
 def hsv_to_rgb(h, s, v):
