@@ -257,7 +257,6 @@ namespace pimoroni {
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
-      void set_pixel_dither(const Point &p, const uint8_t &c) override;
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
@@ -274,7 +273,6 @@ namespace pimoroni {
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
-      void set_pixel_dither(const Point &p, const uint8_t &c) override;
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
