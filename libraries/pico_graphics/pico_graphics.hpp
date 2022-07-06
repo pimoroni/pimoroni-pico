@@ -432,6 +432,7 @@ namespace pimoroni {
       virtual bool set_update_speed(int update_speed) {return false;};
       virtual void set_backlight(uint8_t brightness) {};
       virtual bool is_busy() {return false;};
+      virtual void power_off() {};
       virtual void cleanup() {};
   };
 
