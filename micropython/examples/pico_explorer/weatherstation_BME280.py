@@ -1,22 +1,18 @@
 # This example lets you plug a BME280 breakout into your Pico Explorer and make a little indoor weather station, with barometer style descriptions.
 
-import utime
-
+import time
 from breakout_bme280 import BreakoutBME280
 from pimoroni_i2c import PimoroniI2C
 from pimoroni import PICO_EXPLORER_I2C_PINS
+from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 
-# Pico Explorer boilerplate
-import st7789
-display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
-display.set_palette_mode(st7789.PALETTE_USER)
-display.set_backlight(1.0)
-
+# set up the hardware
+display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)
 i2c = PimoroniI2C(**PICO_EXPLORER_I2C_PINS)
-bme = BreakoutBME280(i2c)
+bme = BreakoutBME280(i2c, address=0x76)
 
 # lets set up some pen colours to make drawing easier
-TEMPCOLOUR = display.reserve_palette()  # this colour will get changed in a bit
+TEMPCOLOUR = display.create_pen(0, 0, 0)  # this colour will get changed in a bit
 WHITE = display.create_pen(255, 255, 255)
 BLACK = display.create_pen(0, 0, 0)
 RED = display.create_pen(255, 0, 0)
@@ -28,22 +24,22 @@ def describe_temperature(temperature):
     global TEMPCOLOUR
     if temperature < 10:
         description = "very cold"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 255))
+        TEMPCOLOUR = display.create_pen(0, 255, 255)
     elif 10 <= temperature < 20:
         description = "cold"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 255))
+        TEMPCOLOUR = display.create_pen(0, 0, 255)
     elif 20 <= temperature < 25:
         description = "temperate"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 0))
+        TEMPCOLOUR = display.create_pen(0, 255, 0)
     elif 25 <= temperature < 30:
         description = "warm"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 255, 0))
+        TEMPCOLOUR = display.create_pen(255, 255, 0)
     elif temperature >= 30:
         description = "very warm"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 0, 0))
+        TEMPCOLOUR = display.create_pen(255, 0, 0)
     else:
         description = ""
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 0))
+        TEMPCOLOUR = display.create_pen(0, 0, 0)
     return description
 
 
@@ -53,22 +49,22 @@ def describe_temperature(temperature):
     global TEMPCOLOUR
     if temperature < 10:
         description = "frozzed"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 255))
+        TEMPCOLOUR = display.create_pen(0, 255, 255)
     elif 10 <= temperature < 20:
         description = "nithering"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 255))
+        TEMPCOLOUR = display.create_pen(0, 0, 255)
     elif 20 <= temperature < 25:
         description = "fair t' middlin"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 255, 0))
+        TEMPCOLOUR = display.create_pen(0, 255, 0)
     elif 25 <= temperature < 30:
         description = "chuffing warm"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 255, 0))
+        TEMPCOLOUR = display.create_pen(255, 255, 0)
     elif temperature >= 30:
         description = "crackin t' flags"
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(255, 0, 0))
+        TEMPCOLOUR = display.create_pen(255, 0, 0)
     else:
         description = ""
-        display.set_palette(TEMPCOLOUR, st7789.RGB565(0, 0, 0))
+        TEMPCOLOUR = display.create_pen(0, 0, 0)
     return description
 """
 
@@ -145,4 +141,4 @@ while True:
     display.update()
 
     # waits for 1 second and clears to BLACK
-    utime.sleep(1)
+    time.sleep(1)

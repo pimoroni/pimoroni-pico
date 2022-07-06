@@ -2,17 +2,14 @@
 # It uses code written by Avram Piltch - check out his Tom's Hardware article! https://www.tomshardware.com/uk/how-to/buzzer-music-raspberry-pi-pico
 # You'll need to connect a jumper wire between GPO and AUDIO on the Explorer Base to hear noise.
 
-import utime
-import st7789
+import time
+from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 from pimoroni import Buzzer
 
+display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
-display.set_palette_mode(st7789.PALETTE_USER)
-display.set_backlight(1.0)
-
-# tCreate a buzzer on pin 0
-# Don't forget t write GP0 to AUDIO!
+# Create a buzzer on pin 0
+# Don't forget to wire GP0 to AUDIO!
 BUZZER = Buzzer(0)
 
 BLACK = display.create_pen(0, 0, 0)
@@ -143,7 +140,7 @@ def playsong(song):                 # this function plays your song
             clear()
             a = 0
         display.update()
-        utime.sleep(0.15)  # change this number if you want to alter how long the notes play for
+        time.sleep(0.15)  # change this number if you want to alter how long the notes play for
     bequiet()
 
 

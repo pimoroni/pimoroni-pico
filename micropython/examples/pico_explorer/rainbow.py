@@ -1,19 +1,14 @@
-# This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Explorer's screen.
-# If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
+# This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Explorer's screen. If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
+# We're using a RAM intensive 64K colour palette here to get a nice smooth colour transition.
 
-import utime
-import st7789
+import time
+from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER, PEN_RGB565
 
+display = PicoGraphics(display=DISPLAY_PICO_EXPLORER, pen_type=PEN_RGB565)
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
-display.set_palette_mode(st7789.PALETTE_USER)
-display.set_backlight(1.0)
+WIDTH, HEIGHT = display.get_bounds()
 
-# Create a text colour
-TEXT_COLOR = display.create_pen(0, 0, 0)
-
-# Reserve a palette entry for our rainbow background colour
-RAINBOW = display.reserve_palette()
+BLACK = display.create_pen(0, 0, 0)
 
 
 # From CPython Lib/colorsys.py
@@ -45,12 +40,12 @@ h = 0
 while True:
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
-    display.set_palette(RAINBOW, st7789.RGB565(r, g, b))  # Set pen to a converted HSV value
-    display.set_pen(RAINBOW)
+    RAINBOW = display.create_pen(r, g, b)  # Create pen with converted HSV value
+    display.set_pen(RAINBOW)  # Set pen
     display.clear()           # Fill the screen with the colour
-    display.set_pen(TEXT_COLOR)
-    display.text("pico disco!", 25, 20, 240, 6)  # Add some text
+    display.set_pen(BLACK)    # Set pen to black
+    display.text("pico disco!", 10, 10, 240, 6)  # Add some text
     display.text("\\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/ \\o/", 25, 120, 240, 4)  # and some more text
     display.text("oontz oontz oontz", 25, 220, 240, 2)  # and a bit more tiny text
     display.update()          # Update the display
-    utime.sleep(1.0 / 60)
+    time.sleep(1.0 / 60)
