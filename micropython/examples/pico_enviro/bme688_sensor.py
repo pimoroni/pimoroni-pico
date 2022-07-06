@@ -18,7 +18,7 @@ bmp = BreakoutBME68X(i2c, address=0x77)
 display = PicoGraphics(display=DISPLAY_ENVIRO_PLUS)
 display.set_backlight(1.0)
 
-led = RGBLED(6, 7, 8, invert=True)  # seting pins for the RGB led
+led = RGBLED(6, 7, 10, invert=True)  # seting pins for the RGB led
 led.set_rgb(0, 0, 0)
 
 
