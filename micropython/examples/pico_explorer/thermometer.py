@@ -3,7 +3,6 @@
 
 import machine
 import time
-from pimoroni import RGBLED
 from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 
 # set up the hardware
