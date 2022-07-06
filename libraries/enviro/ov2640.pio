@@ -1,0 +1,29 @@
+.program ov2640
+.wrap_target
+	wait 1 gpio 18  ; wait for hsync
+	wait 1 gpio 1   ; wait for rising pclk
+	in pins 8       ; read in 8 bits of pixel data
+	wait 0 gpio 1   ; wait for falling pclk
+.wrap
+
+% c-sdk {
+void ov2640_program_init(PIO pio, uint sm, uint offset) {
+  constexpr uint8_t HSYNC_PIN = 18;
+  constexpr uint8_t PCLK_PIN  =  1;
+  constexpr uint8_t DATA2_PIN = 10;
+
+	// set pclk and hsync as inputs
+	pio_sm_set_pindirs_with_mask(pio, sm, 0, (1U << PCLK_PIN) | (1U << HSYNC_PIN));
+
+	// set data2..9 as inputs (0..1 aren't used)
+	pio_sm_set_consecutive_pindirs(pio, sm, DATA2_PIN, 8, false);
+
+	pio_sm_config c = ov2640_program_get_default_config(offset);
+	sm_config_set_in_pins(&c, DATA2_PIN);
+	sm_config_set_in_shift(&c, false, true, 8);
+	sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+	pio_sm_init(pio, sm, offset, &c);
+	pio_sm_set_enabled(pio, sm, true);
+}
+%}

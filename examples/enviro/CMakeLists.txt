@@ -1,0 +1,5 @@
+include(enviro_indoor.cmake)
+include(enviro_weather.cmake)
+include(enviro_urban.cmake)
+include(enviro_grow.cmake)
+include(enviro_camera.cmake)
