@@ -22,6 +22,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_clear_timer_flag_obj, PCF85063A_clear_timer_
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_unset_timer_obj, PCF85063A_unset_timer);
 
 MP_DEFINE_CONST_FUN_OBJ_2(PCF85063A_set_clock_output_obj, PCF85063A_set_clock_output);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(PCF85063A_byte_obj, 1, 2, PCF85063A_byte);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
@@ -42,6 +43,7 @@ STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_unset_timer), MP_ROM_PTR(&PCF85063A_unset_timer_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_set_clock_output), MP_ROM_PTR(&PCF85063A_set_clock_output_obj) },
+    { MP_ROM_QSTR(MP_QSTR_byte), MP_ROM_PTR(&PCF85063A_byte_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_CLOCK_OUT_32768HZ), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_CLOCK_OUT_16384HZ), MP_ROM_INT(1) },

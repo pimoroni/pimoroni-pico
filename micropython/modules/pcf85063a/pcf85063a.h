@@ -24,3 +24,4 @@ extern mp_obj_t PCF85063A_read_timer_flag(mp_obj_t self_in);
 extern mp_obj_t PCF85063A_unset_timer(mp_obj_t self_in);
 
 extern mp_obj_t PCF85063A_set_clock_output(mp_obj_t self_in, mp_obj_t co_in);
+extern mp_obj_t PCF85063A_byte(size_t n_args, const mp_obj_t *args);
