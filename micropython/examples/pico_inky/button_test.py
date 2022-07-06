@@ -18,9 +18,9 @@ button_c = Button(14)
 
 
 # a handy function we can call to clear the screen
-# display.set_pen(1) is white and display.set_pen(0) is black
+# display.set_pen(15) is white and display.set_pen(0) is black
 def clear():
-    display.set_pen(1)
+    display.set_pen(15)
     display.clear()
 
 
