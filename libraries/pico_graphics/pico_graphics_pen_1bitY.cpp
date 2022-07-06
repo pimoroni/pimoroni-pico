@@ -40,4 +40,14 @@ namespace pimoroni {
     }
   }
 
+  void PicoGraphics_Pen1BitY::set_pixel_dither(const Point &p, const uint8_t &c) {
+    if(!bounds.contains(p)) return;
+
+    uint8_t _dmv = dither16_pattern[(p.x & 0b11) | ((p.y & 0b11) << 2)];
+    uint8_t _dc = c >> 4;
+    color = _dc > _dmv ? 1 : 0;
+
+    set_pixel(p);
+  };
+
 }

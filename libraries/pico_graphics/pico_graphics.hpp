@@ -217,6 +217,7 @@ namespace pimoroni {
     virtual int reset_pen(uint8_t i);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
+    virtual void set_pixel_dither(const Point &p, const uint8_t &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
@@ -256,6 +257,7 @@ namespace pimoroni {
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
+      void set_pixel_dither(const Point &p, const uint8_t &c) override;
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
@@ -272,6 +274,7 @@ namespace pimoroni {
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
+      void set_pixel_dither(const Point &p, const uint8_t &c) override;
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
