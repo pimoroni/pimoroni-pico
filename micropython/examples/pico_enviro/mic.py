@@ -14,7 +14,7 @@ display = PicoGraphics(display=DISPLAY_ENVIRO_PLUS)
 display.set_backlight(1.0)
 
 # Setup RGB Led
-led = RGBLED(6, 7, 8, invert=True)
+led = RGBLED(6, 7, 10, invert=True)
 led.set_rgb(0, 0, 0)
 
 # Setup background

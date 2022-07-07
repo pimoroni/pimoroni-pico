@@ -6,7 +6,7 @@ from pimoroni import RGBLED
 display = PicoGraphics(display=DISPLAY_ENVIRO_PLUS)
 display.set_backlight(1.0)
 
-led = RGBLED(6, 7, 8)
+led = RGBLED(6, 7, 10)
 led.set_rgb(255, 255, 255)
 
 WIDTH, HEIGHT = display.get_bounds()
