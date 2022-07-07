@@ -99,9 +99,9 @@ void APA102::set_hsv(uint32_t index, float h, float s, float v) {
 
 void APA102::set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, bool gamma) {
     if(gamma) {
-        r = pimoroni::GAMMA[r];
-        g = pimoroni::GAMMA[g];
-        b = pimoroni::GAMMA[b];
+        r = pimoroni::GAMMA_8BIT[r];
+        g = pimoroni::GAMMA_8BIT[g];
+        b = pimoroni::GAMMA_8BIT[b];
     }
     buffer[index].rgb(r, g, b);
 }

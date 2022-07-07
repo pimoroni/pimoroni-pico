@@ -1,7 +1,7 @@
 #include "pico_scroll_font.hpp"
 
 /* static font data */
-static unsigned char __bitmap[256][5] = {
+static const unsigned char __bitmap[256][5] = {
     {0x0, 0x0, 0x8, 0x0, 0x0},      {0x0, 0x10, 0x0, 0x4, 0x0},
     {0x0, 0x10, 0x8, 0x4, 0x0},     {0x0, 0x14, 0x0, 0x14, 0x0},
     {0x0, 0x14, 0x8, 0x14, 0x0},    {0x0, 0x1c, 0x0, 0x1c, 0x0},
@@ -137,7 +137,7 @@ int render_text(const char *text, unsigned int nchr, unsigned char *buffer, unsi
     // TODO check nbfr >= 6 * nchr
 
     for (unsigned int i = 0; i < nchr; i++) {
-        unsigned char *symbol = __bitmap[(unsigned int)text[i]];
+        const unsigned char *symbol = __bitmap[(unsigned int)text[i]];
         for (unsigned int j = 0; j < 5; j++) {
             buffer[i * 6 + j] = symbol[j];
         }

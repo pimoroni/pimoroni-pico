@@ -1,7 +1,6 @@
-#include <math.h>
-
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "common/pimoroni_common.hpp"
 
 #include "pico_unicorn.pio.h"
 #include "pico_unicorn.hpp"
@@ -52,10 +51,6 @@ constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
 
 // must be aligned for 32bit dma transfer
 alignas(4) static uint8_t bitstream[BITSTREAM_LENGTH] = {0};
-
-static uint16_t r_gamma_lut[256] = {0};
-static uint16_t g_gamma_lut[256] = {0};
-static uint16_t b_gamma_lut[256] = {0};
 
 static uint32_t dma_channel;
 
@@ -138,20 +133,6 @@ namespace pimoroni {
     gpio_init(pin::ROW_4); gpio_set_dir(pin::ROW_4, GPIO_OUT);
     gpio_init(pin::ROW_5); gpio_set_dir(pin::ROW_5, GPIO_OUT);
     gpio_init(pin::ROW_6); gpio_set_dir(pin::ROW_6, GPIO_OUT);
-
-    // create 14-bit gamma luts
-    for(uint16_t v = 0; v < 256; v++) {
-      // gamma correct the provided 0-255 brightness value onto a
-      // 0-65535 range for the pwm counter
-      float r_gamma = 2.8f;
-      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
-
-      float g_gamma = 2.8f;
-      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
-
-      float b_gamma = 2.8f;
-      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
-    }
 
     // initialise the bcd timing values and row selects in the bitstream
     for(uint8_t row = 0; row < HEIGHT; row++) {
@@ -254,9 +235,9 @@ namespace pimoroni {
     uint8_t shift = x % 2 == 0 ? 0 : 4;
     uint8_t nibble_mask = 0b00001111 << shift;
 
-    uint16_t gr = r_gamma_lut[r];
-    uint16_t gg = g_gamma_lut[g];
-    uint16_t gb = b_gamma_lut[b];
+    uint16_t gr = pimoroni::GAMMA_14BIT[r];
+    uint16_t gg = pimoroni::GAMMA_14BIT[g];
+    uint16_t gb = pimoroni::GAMMA_14BIT[b];
 
     // set the appropriate bits in the separate bcd frames
     for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {

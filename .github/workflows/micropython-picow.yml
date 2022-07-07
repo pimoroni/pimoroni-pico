@@ -63,7 +63,7 @@ jobs:
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython.uf2
+      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
 
     steps:
     - name: Compiler Cache
@@ -86,16 +86,7 @@ jobs:
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ccache
-
-    - name: Install ARM Toolchain
-      if: runner.os == 'Linux'
-      working-directory: ${{runner.workspace}}
-      run: |
-        wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-        tar xf gcc-*.tar.bz2
-        cd gcc*/bin
-        pwd >> $GITHUB_PATH
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
   
     - uses: actions/checkout@v2
       with:
@@ -125,13 +116,21 @@ jobs:
     - name: Rename .uf2 for artifact
       shell: bash
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
-      run: cp firmware.uf2 $RELEASE_FILE
+      run: |
+        cp firmware.uf2 $RELEASE_FILE.uf2
+        cp firmware.elf $RELEASE_FILE.elf
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{env.RELEASE_FILE}}
-        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}
+        name: ${{env.RELEASE_FILE}}.uf2
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.uf2
+
+    - name: Store .elf as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.RELEASE_FILE}}.elf
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.elf
 
     - name: Upload .uf2
       if: github.event_name == 'release'
@@ -141,5 +140,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build-${{matrix.board}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}
+        asset_name: ${{env.RELEASE_FILE}}.uf2
         asset_content_type: application/octet-stream
