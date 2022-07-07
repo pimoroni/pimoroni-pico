@@ -427,7 +427,7 @@ JPEG files must be small enough to load into RAM for decoding, and must *not* be
 
 JPEG files will be automatically dithered in RGB332 mode.
 
-In P4 and P8 modes JPEGs are dithered to your custom colour paleete. Their appearance of an image will vary based on the colours you choose.
+In P4 and P8 modes JPEGs are dithered to your custom colour palette. Their appearance of an image will vary based on the colours you choose.
 
 The arguments for `decode` are as follows:
 
