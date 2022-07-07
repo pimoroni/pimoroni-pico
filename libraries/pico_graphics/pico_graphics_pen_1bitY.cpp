@@ -11,11 +11,11 @@ namespace pimoroni {
   }
 
   void PicoGraphics_Pen1BitY::set_pen(uint c) {
-    color = c != 0 ? 1 : 0;
+    color = c;
   }
 
   void PicoGraphics_Pen1BitY::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    color = r != 0 || g != 0 || b != 0 ? 1 : 0;
+    color = std::max(r, std::max(g, b));
   }
 
   void PicoGraphics_Pen1BitY::set_pixel(const Point &p) {
@@ -25,18 +25,32 @@ namespace pimoroni {
 
     uint bo = 7 - (p.y & 0b111);
 
+    uint8_t _dc = 0;
+
+    if(color == 0) {
+      _dc = 0;
+    } else if (color == 15) {
+      _dc = 1;
+    } else {
+      uint8_t _dmv = dither16_pattern[(p.x & 0b11) | ((p.y & 0b11) << 2)];
+      _dc = color > _dmv ? 1 : 0;
+    }
+
     // forceably clear the bit
     *f &= ~(1U << bo); 
 
     // set pixel
-    *f |= (color << bo);
+    *f |= (_dc << bo);
   }
 
   void PicoGraphics_Pen1BitY::set_pixel_span(const Point &p, uint l) {
-    Point po(p);
+    Point lp = p;
+    if(p.x + (int)l >= bounds.w) {
+      l = bounds.w - p.x;
+    }
     while(l--) {
-      set_pixel(po);
-      po.x++;
+        set_pixel(lp);
+        lp.x++;
     }
   }
 

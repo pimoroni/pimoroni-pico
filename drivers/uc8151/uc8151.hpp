@@ -157,10 +157,10 @@ namespace pimoroni {
   public:
     void busy_wait();
     void reset();
-    void power_off();
   
     // DisplayDriver API
     bool is_busy() override;
+    void power_off() override;
     void update(PicoGraphics *graphics) override;
     void partial_update(PicoGraphics *graphics, Rect region) override;
     bool set_update_speed(int update_speed) override;

@@ -22,6 +22,7 @@ typedef struct _ModPicoGraphics_obj_t {
 typedef struct _JPEG_obj_t {
     mp_obj_base_t base;
     JPEGDEC *jpeg;
+    void *dither_buffer;
     mp_obj_t file;
     mp_buffer_info_t buf;
     ModPicoGraphics_obj_t *graphics;
@@ -85,7 +86,16 @@ MICROPY_EVENT_POLL_HOOK
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw jpeg data out of the framebuffer..
     // Can we clip beforehand and make this faster?
-    if(pDraw->iBpp == 4) {
+    if(pDraw->iBpp == 8) {
+        uint8_t *pixel = (uint8_t *)pDraw->pPixels;
+        for(int y = 0; y < pDraw->iHeight; y++) {
+            for(int x = 0; x < pDraw->iWidth; x++) {
+                current_graphics->set_pen((uint8_t)(*pixel >> 4));
+                current_graphics->set_pixel({pDraw->x + x, pDraw->y + y});
+                pixel++;
+            }
+        }
+    } else if(pDraw->iBpp == 4) {
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
@@ -146,6 +156,7 @@ mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     self->base.type = &JPEG_type;
     self->jpeg = m_new_class(JPEGDEC);
     self->graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
+
     return self;
 }
 
@@ -234,10 +245,8 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
             break;
         // TODO 2-bit is currently unsupported
         case PicoGraphics::PEN_P2:
-            self->jpeg->setPixelType(TWO_BIT_DITHERED);
-            break;
         case PicoGraphics::PEN_1BIT:
-            self->jpeg->setPixelType(ONE_BIT_DITHERED);
+            self->jpeg->setPixelType(EIGHT_BIT_GRAYSCALE);
             break;
     }
 
@@ -245,13 +254,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     // since the JPEGDRAW struct has no userdata
     current_graphics = self->graphics->graphics;
 
-    if(self->graphics->graphics->pen_type == PicoGraphics::PEN_P4 || self->graphics->graphics->pen_type == PicoGraphics::PEN_1BIT) {
-        uint8_t *buf = new uint8_t[2048];
-        result = self->jpeg->decodeDither(x, y, buf, f);
-        delete[] buf;
-    } else {
-        result = self->jpeg->decode(x, y, f);
-    }
+    result = self->jpeg->decode(x, y, f);
 
     current_graphics = nullptr;
 

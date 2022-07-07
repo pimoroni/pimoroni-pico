@@ -454,6 +454,8 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     #endif
     }
 
+    self->display->power_off();
+
     return mp_const_none;
 }
 

@@ -217,6 +217,7 @@ namespace pimoroni {
     virtual int reset_pen(uint8_t i);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
+    virtual void set_pixel_dither(const Point &p, const uint8_t &c);
     virtual void scanline_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
@@ -431,6 +432,7 @@ namespace pimoroni {
       virtual bool set_update_speed(int update_speed) {return false;};
       virtual void set_backlight(uint8_t brightness) {};
       virtual bool is_busy() {return false;};
+      virtual void power_off() {};
       virtual void cleanup() {};
   };
 
