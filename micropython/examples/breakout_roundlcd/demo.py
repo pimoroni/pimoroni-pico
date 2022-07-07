@@ -1,14 +1,14 @@
 import time
 import math
-from st7789 import ST7789
+from picographics import PicoGraphics, DISPLAY_ROUND_LCD_240X240
 
-WIDTH, HEIGHT = 240, 240
-
-display = ST7789(WIDTH, HEIGHT, round=True)
-
+display = PicoGraphics(display=DISPLAY_ROUND_LCD_240X240)
 display.set_backlight(1.0)
 
+WIDTH, HEIGHT = display.get_bounds()
 RADIUS = WIDTH // 2
+
+BLACK = display.create_pen(0, 0, 0)
 
 
 def hsv_to_rgb(h, s, v):
@@ -37,7 +37,7 @@ def hsv_to_rgb(h, s, v):
 t = 0
 
 while True:
-    display.set_pen(0, 0, 0)
+    display.set_pen(BLACK)
     display.clear()
 
     angle = t % (math.pi * 2)
@@ -60,7 +60,8 @@ while True:
         y = RADIUS + int(distance * math.sin(angle))
 
         radius = ((math.sin(t + angle) + 1) / 2.0) * 10
-        display.set_pen(r, g, b)
+        dot_colour = display.create_pen(r, g, b)
+        display.set_pen(dot_colour)
         display.circle(int(x), int(y), int(radius))
 
         prev_x = x

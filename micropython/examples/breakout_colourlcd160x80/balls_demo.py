@@ -1,12 +1,14 @@
 import time
 import random
-import st7789
+from picographics import PicoGraphics, DISPLAY_LCD_160X80, PEN_P8
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
+display = PicoGraphics(display=DISPLAY_LCD_160X80, pen_type=PEN_P8)
+display.set_backlight(1.0)
 
 WIDTH, HEIGHT = display.get_bounds()
 
-display.set_backlight(1.0)
+# We're creating 100 balls with their own individual colour and 1 BG colour
+# for a total of 101 colours, which will all fit in the custom 256 entry palette!
 
 
 class Ball:
@@ -34,8 +36,10 @@ for i in range(0, 100):
         )
     )
 
+BG = display.create_pen(40, 40, 40)
+
 while True:
-    display.set_pen(40, 40, 40)
+    display.set_pen(BG)
     display.clear()
 
     for ball in balls:

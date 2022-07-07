@@ -1,13 +1,10 @@
 import time
-import st7789
+from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 from motor import Motor
 import picoexplorer
 from pimoroni import Button, Analog, Buzzer
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_EXPLORER, rotate=0)
-display.set_palette_mode(st7789.PALETTE_USER)
-display.set_backlight(1.0)
-
+display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)
 
 adc0 = Analog(picoexplorer.ADC0)
 adc1 = Analog(picoexplorer.ADC1)
@@ -21,9 +18,9 @@ button_y = Button(picoexplorer.BUTTON_Y)
 BG = display.create_pen(32, 32, 64)
 WHITE = display.create_pen(255, 255, 255)
 
-ADC0_PEN = display.reserve_palette()
-ADC1_PEN = display.reserve_palette()
-ADC2_PEN = display.reserve_palette()
+ADC0_PEN = display.create_pen(255, 0, 0)
+ADC1_PEN = display.create_pen(0, 255, 0)
+ADC2_PEN = display.create_pen(0, 0, 255)
 
 MOTOR1 = Motor(picoexplorer.MOTOR_1)
 MOTOR2 = Motor(picoexplorer.MOTOR_2)
@@ -40,11 +37,6 @@ while True:
     adc0v = int(adc0.read_voltage() / 3.3 * 120)
     adc1v = int(adc1.read_voltage() / 3.3 * 120)
     adc2v = int(adc2.read_voltage() / 3.3 * 120)
-
-    # Update our ADC channel palette colours
-    display.set_palette(ADC0_PEN, st7789.RGB565(adc0v * 2, 10, 10))
-    display.set_palette(ADC1_PEN, st7789.RGB565(10, adc1v * 2, 10))
-    display.set_palette(ADC2_PEN, st7789.RGB565(10, 10, adc2v * 2))
 
     # ADC labels
     display.set_pen(WHITE)

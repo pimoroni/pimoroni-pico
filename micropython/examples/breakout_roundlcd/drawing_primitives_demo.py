@@ -1,20 +1,25 @@
-from breakout_roundlcd import BreakoutRoundLCD
+from picographics import PicoGraphics, DISPLAY_ROUND_LCD_240X240
 
+display = PicoGraphics(display=DISPLAY_ROUND_LCD_240X240)
+display.set_backlight(1.0)
 
-width = BreakoutRoundLCD.WIDTH
-height = BreakoutRoundLCD.HEIGHT
+width, height = display.get_bounds()
 
-display_buffer = bytearray(width * height * 2)  # 2-bytes per pixel (RGB565)
-display = BreakoutRoundLCD(display_buffer)
-
-display.set_backlight(1)
+BLACK = display.create_pen(0, 0, 0)
+RED = display.create_pen(255, 0, 0)
+YELLOW = display.create_pen(255, 255, 0)
+GREEN = display.create_pen(0, 255, 0)
+CYAN = display.create_pen(0, 255, 255)
+WHITE = display.create_pen(255, 255, 255)
+BLUE = display.create_pen(0, 0, 255)
+MAGENTA = display.create_pen(255, 0, 255)
 
 while True:
-    display.set_pen(0, 0, 0)
+    display.set_pen(BLACK)
     display.clear()
 
     # circle
-    display.set_pen(255, 0, 0)
+    display.set_pen(RED)
     display.circle(
         width // 5,  # center point x
         height // 3,  # center point y
@@ -22,7 +27,7 @@ while True:
     )
 
     # rectangle
-    display.set_pen(255, 255, 0)
+    display.set_pen(YELLOW)
     display.rectangle(
         int((width * 2 / 5) - 16),  # starting point x
         int(height // 3) - 8,  # starting point y
@@ -31,7 +36,7 @@ while True:
     )
 
     # triangle
-    display.set_pen(0, 255, 0)
+    display.set_pen(GREEN)
     display.triangle(
         int(width * 3 / 5), int(height // 3) - 16,  # point 1 x, y
         int(width * 3 / 5) - 16, int(height // 3) + 16,  # point 2 x, y
@@ -39,7 +44,7 @@ while True:
     )
 
     # character
-    display.set_pen(0, 255, 255)
+    display.set_pen(CYAN)
     display.character(
         64,  # int character code
         int(width * 4 / 5 - 16),  # box starting point x
@@ -48,7 +53,7 @@ while True:
     )
 
     # pixel span
-    display.set_pen(255, 255, 255)
+    display.set_pen(WHITE)
     display.pixel_span(
         int(width * 1 / 5),  # starting point x
         int(height * 2.5 / 5),  # starting point y
@@ -56,7 +61,7 @@ while True:
     )
 
     # text
-    display.set_pen(0, 0, 255)
+    display.set_pen(BLUE)
     display.text(
         'test text',  # text
         int(width // 5),  # box starting point x
@@ -66,7 +71,7 @@ while True:
     )
 
     # lines
-    display.set_pen(255, 0, 255)
+    display.set_pen(MAGENTA)
     display.line(
         0,  # staring point x
         int(height / 2),  # staring point y

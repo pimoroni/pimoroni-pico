@@ -1,16 +1,18 @@
 # This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Display's screen and RGB LED . If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
+# We're using a RAM intensive 64K colour palette here to get a nice smooth colour transition.
 
-import utime
-import st7789
+import time
+from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_RGB565
 from pimoroni import RGBLED
 
-display = st7789.ST7789(st7789.DISPLAY_PICO_DISPLAY, rotate=0)
+display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
-display.set_palette_mode(st7789.PALETTE_USER)
+
+led = RGBLED(6, 7, 8)
 
 WIDTH, HEIGHT = display.get_bounds()
 
-led = RGBLED(6, 7, 8)
+BLACK = display.create_pen(0, 0, 0)
 
 
 # From CPython Lib/colorsys.py
@@ -39,18 +41,14 @@ def hsv_to_rgb(h, s, v):
 
 h = 0
 
-BLACK = display.create_pen(0, 0, 0)
-RAINBOW = BLACK + 1  # Put RAINBOW right after BLACK in the palette
-
-
 while True:
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
     led.set_rgb(r, g, b)      # Set LED to a converted HSV value
-    display.set_palette(RAINBOW, st7789.RGB565(r, g, b))  # Create pen with converted HSV value
+    RAINBOW = display.create_pen(r, g, b)  # Create pen with converted HSV value
     display.set_pen(RAINBOW)  # Set pen
     display.clear()           # Fill the screen with the colour
     display.set_pen(BLACK)    # Set pen to black
     display.text("pico disco!", 10, 10, 240, 6)  # Add some text
     display.update()          # Update the display
-    utime.sleep(1.0 / 60)
+    time.sleep(1.0 / 60)
