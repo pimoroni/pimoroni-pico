@@ -2,7 +2,7 @@
 
 Pico Graphics is a tiny graphics library supporting a number of underlying buffer formats including 8-bit paletted (256 colour), 8-bit RGB332 (256 colour), 16-bit RGB565 (65K colour) and 4-bit packed (8 colour).
 
-It supports drawing text, primitive and individual pixels and includes basic types such as `Rect` and `point` brimming with methods to help you develop games and applications.
+It supports drawing text, primitive and individual pixels and includes basic types such as `Rect` and `Point` brimming with methods to help you develop games and applications.
 
 - [Overview](#overview)
   - [Pen Types](#pen-types)
@@ -179,7 +179,7 @@ graphics.rectangle(box);
 
 #### Point
 
-The `Point` type descrives a single point - synonymous with a pixel - in terms of its x and y position.
+The `Point` type describes a single point - synonymous with a pixel - in terms of its x and y position.
 
 ##### Point.clamp
 
