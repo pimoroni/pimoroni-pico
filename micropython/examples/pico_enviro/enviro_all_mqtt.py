@@ -30,21 +30,6 @@ UPDATE_INTERVAL = 60  # how often to post MQTT data, in seconds
 # WIFI settings
 WIFI_COUNTRY = "GB"  # Changeme!
 
-# some constants we'll use for drawing
-WHITE = display.create_pen(255, 255, 255)
-BLACK = display.create_pen(0, 0, 0)
-RED = display.create_pen(255, 0, 0)
-GREEN = display.create_pen(0, 255, 0)
-
-WIDTH, HEIGHT = display.get_bounds()
-display.set_font("bitmap8")
-
-# some other variables we'll use to keep track of stuff
-current_time = 0
-mqtt_time = 0
-mqtt_success = False
-e = "Wait a minute"
-
 
 def status_handler(mode, status, ip):
     display.set_pen(BLACK)
@@ -100,6 +85,21 @@ pms5003 = PMS5003(
 # sets up MQTT
 mqtt_client = umqtt.simple.MQTTClient(client_id=CLIENT_ID,server=SERVER_ADDRESS,user=MQTT_USERNAME,password=MQTT_PASSWORD)
 
+# some constants we'll use for drawing
+WHITE = display.create_pen(255, 255, 255)
+BLACK = display.create_pen(0, 0, 0)
+RED = display.create_pen(255, 0, 0)
+GREEN = display.create_pen(0, 255, 0)
+
+WIDTH, HEIGHT = display.get_bounds()
+display.set_font("bitmap8")
+
+# some other variables we'll use to keep track of stuff
+current_time = 0
+mqtt_time = 0
+mqtt_success = False
+e = "Wait a minute"
+
 while True:
     # connect to wifi
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
@@ -124,16 +124,16 @@ while True:
     # read particle sensor
     particulate_reading = pms5003.read()
 
-    if heater is "Stable" and ltr_reading is not None:
+    if heater == "Stable" and ltr_reading != None:
         led.set_rgb(0, 0, 0)
         current_time = time.ticks_ms()     
-        if (current_time - mqtt_time)/1000 >= UPDATE_INTERVAL:
+        if (current_time - mqtt_time) / 1000 >= UPDATE_INTERVAL:
             # then do an MQTT
             try:
                 mqtt_client.connect()
                 mqtt_client.publish(topic="EnviroTemperature", msg=str(corrected_temperature))
                 mqtt_client.publish(topic="EnviroHumidity", msg=str(corrected_humidity))
-                mqtt_client.publish(topic="EnviroPressure", msg=str(pressure/100))
+                mqtt_client.publish(topic="EnviroPressure", msg=str(pressure / 100))
                 mqtt_client.publish(topic="EnviroGas", msg=str(gas))
                 mqtt_client.publish(topic="EnviroLux", msg=str(lux))
                 mqtt_client.publish(topic="EnviroMic", msg=str(mic_reading))
@@ -149,7 +149,7 @@ while True:
                 mqtt_success = False
                 led.set_rgb(255, 0, 0)
     else:
-	    # light up the LED red if there's a problem with MQTT or sensor readings
+    # light up the LED red if there's a problem with MQTT or sensor readings
         led.set_rgb(255, 0, 0)
 
     # turn off the backlight with A and turn it back on with B
@@ -168,13 +168,14 @@ while True:
     display.clear()
     display.set_pen(WHITE)
     display.text("Posting Enviro+ sensor data to Home Assistant via MQTT", 10, 10, WIDTH, scale=3)
-    if mqtt_success == True:
+    if mqtt_success is True:
         current_time = time.ticks_ms()
         display.set_pen(GREEN)
-        display.text(f"Last MQTTed {(current_time-mqtt_time)/1000:.0f} seconds ago", 10, 130, WIDTH, scale=3)
+        display.text(f"Last MQTTed {(current_time - mqtt_time) / 1000:.0f} seconds ago", 10, 130, WIDTH, scale=3)
     else:
         display.set_pen(RED)
         display.text(e, 10, 130, WIDTH, scale=3)
     display.update()
 
     time.sleep(1.0)
+

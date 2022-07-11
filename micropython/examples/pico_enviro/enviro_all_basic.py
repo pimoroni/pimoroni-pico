@@ -61,9 +61,9 @@ while True:
     # read particle sensor
     particulate_reading = pms5003.read()
 
-    if heater is "Stable" and ltr_reading is not None:
+    if heater == "Stable" and ltr_reading != None:
         led.set_rgb(0, 0, 0)
-         print(f"""
+        print(f"""
              Temperature = {corrected_temperature} °C
              Humidity = {corrected_humidity} %
              Pressure = {pressure/100} hPa
@@ -75,7 +75,7 @@ while True:
              Particulates (10) = {particulate_reading.pm_ug_per_m3(10)} ug/m3
              """)               
     else:
-	    # light up the LED red if there's a problem with the BME688 or LTR559 sensor readings
+    # light up the LED red if there's a problem with the BME688 or LTR559 sensor readings
         led.set_rgb(255, 0, 0)
 
     time.sleep(1.0)
