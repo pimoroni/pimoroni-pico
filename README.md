@@ -29,6 +29,7 @@ New releases are issued regularly with new libraries, bug fixes to our existing 
 * :link: [Tutorial: Getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 * [Readme: Instructions for setting up MicroPython](setting-up-micropython.md)
 * [Pimoroni Pico MicroPython + Drivers Releases](https://github.com/pimoroni/pimoroni-pico/releases)
+* [Readme: PicoGraphics](micropython/modules/picographics)
 
 ## MicroPython Examples
 
@@ -69,6 +70,8 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Pico Audio Pack (C++ only) - https://shop.pimoroni.com/products/pico-audio-pack
 * Pico Wireless Pack - https://shop.pimoroni.com/products/pico-wireless-pack
 * Pico Display 2.0 - https://shop.pimoroni.com/products/pico-display-pack-2-0
+* Pico Enviro+ Pack - https://shop.pimoroni.com/products/pico-enviro-pack
+* Pico Inky Pack - https://shop.pimoroni.com/products/pico-inky-pack
 
 ## SHIMs
 
@@ -83,6 +86,11 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
 * Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
 * Tufty 2040 (LCD badge) - https://shop.pimoroni.com/products/tufty-2040
+
+## Pico W Aboard
+
+* Automation 2040 W (inputs, outputs and relays, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w
+* Inventor 2040 W (motors, servos, noise) - https://shop.pimoroni.com/products/inventor-2040-w
 
 ## Breakouts
 
