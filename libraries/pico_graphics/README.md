@@ -40,8 +40,12 @@ Pico Graphics comes in multiple flavours depending on which underlying buffer ty
 
 Your buffer doesn't have to be native to your display. For example a 16-bit ST7789 display can work with P4, P8, RGB332 and RGB565 buffers, with palette lookups handled for you on the fly.
 
+A monochrome OLED display can currently only work with `1Bit` type buffers, and Inky Frame only with `3Bit`.
+
 ### Pen Types
 
+* `1Bit` and `1BitY` - 1-bit packed, with automatic dithering from 16 shades of grey. 0 == Black, 15 == White. (For Inky Pack, or monochrome OLEDs)
+* `3Bit` - 3-bit bitplaned, using three 1-bit buffers and supporting up to 8 colours. (For Inky Frame)
 * `P4` - 4-bit packed, with an 8 colour palette. This is commonly used for 7/8-colour e-ink displays or driving large displays with few colours.
 * `P8` - 8-bit, with a 256 colour palette. Great balance of memory usage versus available colours. You can replace palette entries on the fly.
 * `RGB332` - 8-bit, with a fixed 256 colour RGB332 palette. Great for quickly porting an RGB565 app to use less RAM. Limits your colour choices, but is easier to grok.
@@ -52,10 +56,13 @@ Your buffer doesn't have to be native to your display. For example a 16-bit ST77
 To create a Pico Graphics instance to draw into, you should construct an instance of the Pen type class you want to use:
 
 ```c++
-PicoGraphics_PenP4 graphics(WITH, HEIGHT, nullptr);
-PicoGraphics_PenP8 graphics(WITH, HEIGHT, nullptr);
-PicoGraphics_PenRGB332 graphics(WITH, HEIGHT, nullptr);
-PicoGraphics_PenRGB565 graphics(WITH, HEIGHT, nullptr);
+PicoGraphics_Pen3Bit graphics(WIDTH, HEIGHT, nullptr);   // For Inky Frame
+PicoGraphics_Pen1Bit graphics(WIDTH, HEIGHT, nullptr);   // For MonoChrome OLEDs
+PicoGraphics_Pen1BitY graphics(WIDTH, HEIGHT, nullptr);  // For Inky Pack / Badger 2040
+PicoGraphics_PenP4 graphics(WIDTH, HEIGHT, nullptr);     // For colour LCDs such as Pico Display
+PicoGraphics_PenP8 graphics(WIDTH, HEIGHT, nullptr);     // ditto- uses 2x the RAM of P4
+PicoGraphics_PenRGB332 graphics(WIDTH, HEIGHT, nullptr); // ditto
+PicoGraphics_PenRGB565 graphics(WIDTH, HEIGHT, nullptr); // For 16-bit colour LCDs. Uses 2x the RAM of P8 or RGB332 but permits 65K colour.
 ```
 
 To draw something to a display you should create a display driver instance, eg:
@@ -230,9 +237,15 @@ void PicoGraphics::remove_clip();
 
 ### Palette
 
-By default Pico Graphics uses an `RGB332` palette and clamps all pens to their `RGB332` values so it can give you an approximate colour for every `RGB888` value you request. If you don't want to think about colours and palettes you can leave it as is.
+If you construct an instance of PicoGraphics with `PicoGraphics_PenRGB332` all colour values (created pens) will be clamped to their `RGB332` equivalent values.
 
-Alternatively `set_palette_mode()` lets you switch into an RGB565 `USER` palette which gives you up to 256 16-bit colours of your choice.
+This will give you an approximate colour for every RGB888 value you request, but only a fixed palette of 256 total colours is actually supported and displayed on screen.
+
+If you don't want to think about or manage a palette of custom colours, `RGB332` is the way to go.
+
+If you wish to choose your own custom palette you should use either `PicoGraphics_PenP8` or `PicoGraphics_PenP4` which support up to 256 and 16 colours respectively.
+
+Internally all colours are stored as RGB888 and converted when they are displayed on your screen.
 
 #### update_pen
 
@@ -241,7 +254,6 @@ int PicoGraphics::update_pen(uint8_t index, uint8_t r, uint8_t g, uint8_t b);
 ```
 
 Modify a palette entry to the given RGB colour (or nearest supported equivilent.)
-
 
 #### reset_pen
 
