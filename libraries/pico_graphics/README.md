@@ -2,21 +2,21 @@
 
 Pico Graphics is a tiny graphics library supporting a number of underlying buffer formats including 8-bit paletted (256 colour), 8-bit RGB332 (256 colour), 16-bit RGB565 (65K colour) and 4-bit packed (8 colour).
 
-It supports drawing text, primitive and individual pixels and includes basic types such as `rect` and `point` brimming with methods to help you develop games and applications.
+It supports drawing text, primitive and individual pixels and includes basic types such as `Rect` and `Point` brimming with methods to help you develop games and applications.
 
 - [Overview](#overview)
   - [Pen Types](#pen-types)
   - [Creating A Pico Graphics Instance](#creating-a-pico-graphics-instance)
 - [Function Reference](#function-reference)
   - [Types](#types)
-    - [rect](#rect)
-      - [rect.empty](#rectempty)
-      - [rect.contains](#rectcontains)
-      - [rect.intersects](#rectintersects)
-      - [rect.intersection](#rectintersection)
-      - [rect.inflate & rect.deflate](#rectinflate--rectdeflate)
-    - [point](#point)
-      - [point.clamp](#pointclamp)
+    - [Rect](#rect)
+      - [Rect.empty](#rectempty)
+      - [Rect.contains](#rectcontains)
+      - [Rect.intersects](#rectintersects)
+      - [Rect.intersection](#rectintersection)
+      - [Rect.inflate & Rect.deflate](#rectinflate--rectdeflate)
+    - [Point](#point)
+      - [Point.clamp](#pointclamp)
   - [Pens & Clipping](#pens--clipping)
     - [set_pen](#set_pen)
     - [create_pen](#create_pen)
@@ -76,80 +76,80 @@ The driver will check your graphics type and act accordingly.
 
 ### Types
 
-#### rect
+#### Rect
 
-The `rect` type describes a rectangle in terms of its x, y position, width and height.
+The `Rect` type describes a rectangle in terms of its x, y position, width and height.
 
-##### rect.empty
+##### Rect.empty
 
 ```c++
-bool rect::empty();
+bool Rect::empty();
 ```
 
-##### rect.contains
+##### Rect.contains
 
 ```c++
-bool rect::contains(const rect &p);
+bool Rect::contains(const Rect &p);
 ```
 
-`contains` allows you to check if a `rect` contains a specific `point`. This can be useful for checking collissions (have I clicked on something?):
+`contains` allows you to check if a `Rect` contains a specific `Point`. This can be useful for checking collissions (have I clicked on something?):
 
 ```c++
-point cursor(50, 50);
-rect widget(0, 0, 100, 100);
+Point cursor(50, 50);
+Rect widget(0, 0, 100, 100);
 bool hover = widet.contains(cursor);
 ```
 
-##### rect.intersects
+##### Rect.intersects
 
 ```c++
-bool rect::intersects(const rect &r);
+bool Rect::intersects(const Rect &r);
 ```
 
-`intersects` allows you to check if a `rect` intersects or overlaps another `rect`, for example these rectangles do not intersect:
+`intersects` allows you to check if a `Rect` intersects or overlaps another `Rect`, for example these rectangles do not intersect:
 
 ```c++
-rect a(10, 10, 10, 10);
-rect b(30, 10, 10, 10);
+Rect a(10, 10, 10, 10);
+Rect b(30, 10, 10, 10);
 a.intersects(b) == false
 ```
 
 And these do:
 
 ```c++
-rect a(10, 10, 10, 10);
-rect b(15, 10, 10, 10);
+Rect a(10, 10, 10, 10);
+Rect b(15, 10, 10, 10);
 a.intersects(b) == true
 ```
 
-##### rect.intersection
+##### Rect.intersection
 
 ```c++
-rect rect::intersection(const rect &r);
+Rect Rect::intersection(const Rect &r);
 ```
 
-`intersection` takes an input `rect` and returns a new `rect` that describes the region in which the two `rect`s overlap. For example:
+`intersection` takes an input `Rect` and returns a new `Rect` that describes the region in which the two `Rect`s overlap. For example:
 
 ```c++
-rect a(0, 0, 10, 20);
-rect b(0, 0, 20, 10);
-rect c = a.intersection(b);
+Rect a(0, 0, 10, 20);
+Rect b(0, 0, 20, 10);
+Rect c = a.intersection(b);
 ```
 
-In this case `c` would equal `rect c(0, 0, 10, 10);` since this is the region that `a` and `b` overlap.
+In this case `c` would equal `Rect c(0, 0, 10, 10);` since this is the region that `a` and `b` overlap.
 
 
-##### rect.inflate & rect.deflate
+##### Rect.inflate & Rect.deflate
 
 ```c++
-void rect::inflate(int32_t v);
-void rect::declate(int32_t v);
+void Rect::inflate(int32_t v);
+void Rect::declate(int32_t v);
 ```
 
-`inflate` will inflate a `rect`, like a balooon, by adding the number of pixels you specify to all sides. For example:
+`inflate` will inflate a `Rect`, like a balooon, by adding the number of pixels you specify to all sides. For example:
 
 ```c++
-rect box(10, 10, 10, 10);
+Rect box(10, 10, 10, 10);
 box.inflate(10);
 ```
 
@@ -158,7 +158,7 @@ Would inflate our `box` to start at 0,0 and be 30x30 pixels in size.
 `deflate` does the opposite:
 
 ```c++
-rect box(10, 10, 10, 10);
+Rect box(10, 10, 10, 10);
 box.deflate(1);
 ```
 
@@ -167,31 +167,31 @@ Would deflate our `box` to start at `11,11` and be 8x8 pixels in size.
 Since `rectangle` *always* draws a filled rectangle, this can be useful to add an outline of your desired thickness:
 
 ```c++
-WHITE = screen.create_pen(255, 255, 255);
-rect box(10, 10, 100, 100);
+WHITE = graphics.create_pen(255, 255, 255);
+Rect box(10, 10, 100, 100);
 box.inflate(1); // Inflate our box by 1px on all sides
-screen.set_pen(WHITE); // White outline
-screen.rectangle(box);
+graphics.set_pen(WHITE); // White outline
+graphics.rectangle(box);
 box.deflate(1); // Return to our original box size
-screen.set_pen(0, 0, 0); /// Black fill
-screen.rectangle(box);
+graphics.set_pen(0, 0, 0); /// Black fill
+graphics.rectangle(box);
 ```
 
-#### point
+#### Point
 
-The `point` type descrives a single point - synonymous with a pixel - in terms of its x and y position.
+The `Point` type describes a single point - synonymous with a pixel - in terms of its x and y position.
 
-##### point.clamp
+##### Point.clamp
 
 ```c++
-point point::clamp(const rect &r);
+Point Point::clamp(const Rect &r);
 ```
 
-A point can be clamped within the confines of a `rect`. This is useful for keeping - for example - a cursor within the bounds of the screen:
+A point can be clamped within the confines of a `Rect`. This is useful for keeping - for example - a cursor within the bounds of the screen:
 
 ```c++
-point cursor(10, 1000);       // A point, far outside the bounds of our screen
-cursor.clamp(screen.bounds);  // Clamp to the screen
+Point cursor(10, 1000);       // A point, far outside the bounds of our screen
+cursor.clamp(graphics.bounds);  // Clamp to the screen
 ```
 
 ### Pens & Clipping
@@ -220,7 +220,7 @@ You must create pens before using them with `set_pen()` which accepts only a pal
 #### set_clip & remove_clip
 
 ```c++
-void PicoGraphics::set_clip(const rect &r);
+void PicoGraphics::set_clip(const Rect &r);
 void PicoGraphics::remove_clip();
 ```
 
@@ -256,44 +256,44 @@ Return a palette entry to its default value. Usually black and marked unused.
 #### pixel
 
 ```c++
-void PicoGraphics::pixel(const point &p);
+void PicoGraphics::pixel(const Point &p);
 ```
 
-`pixel` sets the pixel at `point p` to the current `pen`.
+`pixel` sets the pixel at `Point p` to the current `pen`.
 
 #### pixel_span
 
 ```c++
-void PicoGraphics::pixel_span(const point &p, int32_t l)
+void PicoGraphics::pixel_span(const Point &p, int32_t l)
 ```
 
-`pixel_span` draws a horizontal line of pixels of length `int32_t l` starting at `point p`.
+`pixel_span` draws a horizontal line of pixels of length `int32_t l` starting at `Point p`.
 
 ### Primitives
 
 #### rectangle
 
 ```c++
-void PicoGraphics::rectangle(const rect &r) ;
+void PicoGraphics::rectangle(const Rect &r) ;
 ```
 
-`rectangle` draws a filled rectangle described by `rect`.
+`rectangle` draws a filled rectangle described by `Rect`.
 
 #### circle
 
 ```c++
-PicoGraphics::circle(const point &p, int32_t radius) 
+PicoGraphics::circle(const Point &p, int32_t radius) 
 ```
 
-`circle` draws a filled circle centered on `point p` with radius `int32_t radius`.
+`circle` draws a filled circle centered on `Point p` with radius `int32_t radius`.
 
 ### Text
 
 ```c++
-void PicoGraphics::text(const std::string &t, const point &p, int32_t wrap, uint8_t scale);
+void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale);
 ```
 
-`text` allows you to draw a string at `point p`, with a maximum line-width of `int32_t wrap`.
+`text` allows you to draw a string at `Point p`, with a maximum line-width of `int32_t wrap`.
 
 The 6x6 and 6x8 pixel font characters are encoded in `font6_data.hpp` and `font8_data.hpp` along with their character widths so that text can be drawn variable-width.
 
