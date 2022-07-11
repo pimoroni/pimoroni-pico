@@ -29,7 +29,7 @@ New releases are issued regularly with new libraries, bug fixes to our existing 
 * :link: [Tutorial: Getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 * [Readme: Instructions for setting up MicroPython](setting-up-micropython.md)
 * [Pimoroni Pico MicroPython + Drivers Releases](https://github.com/pimoroni/pimoroni-pico/releases)
-* [PicoGraphics readme](micropython/modules/picographics)
+* [Readme: PicoGraphics](micropython/modules/picographics)
 
 ## MicroPython Examples
 
