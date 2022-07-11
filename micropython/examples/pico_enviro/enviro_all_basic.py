@@ -1,5 +1,5 @@
 import time
-from machine import Pin, ADC
+from machine import Pin, ADC, UART
 from pimoroni import RGBLED
 from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE
 from pimoroni_i2c import PimoroniI2C
@@ -33,14 +33,13 @@ mic = ADC(Pin(26))
 
 # configure the PMS5003 for Enviro+
 pms5003 = PMS5003(
-    uart=machine.UART(1, tx=machine.Pin(8), rx=machine.Pin(9), baudrate=9600),
-    pin_enable=machine.Pin(3),
-    pin_reset=machine.Pin(2),
+    uart=UART(1, tx=Pin(8), rx=Pin(9), baudrate=9600),
+    pin_enable=Pin(3),
+    pin_reset=Pin(2),
     mode="active"
 )
 
 while True:
-    
     # read BME688
     temperature, pressure, humidity, gas, status, _, _ = bme.read()
     heater = "Stable" if status & STATUS_HEATER_STABLE else "Unstable"
@@ -61,7 +60,7 @@ while True:
     # read particle sensor
     particulate_reading = pms5003.read()
 
-    if heater == "Stable" and ltr_reading != None:
+    if heater == "Stable" and ltr_reading is not None:
         led.set_rgb(0, 0, 0)
         print(f"""
              Temperature = {corrected_temperature} °C
@@ -73,9 +72,9 @@ while True:
              Particulates (1.0) = {particulate_reading.pm_ug_per_m3(1.0)} ug/m3
              Particulates (2.5) = {particulate_reading.pm_ug_per_m3(2.5)} ug/m3
              Particulates (10) = {particulate_reading.pm_ug_per_m3(10)} ug/m3
-             """)               
+             """)
     else:
-    # light up the LED red if there's a problem with the BME688 or LTR559 sensor readings
+        # light up the LED red if there's a problem with the BME688 or LTR559 sensor readings
         led.set_rgb(255, 0, 0)
 
     time.sleep(1.0)

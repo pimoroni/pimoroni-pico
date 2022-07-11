@@ -1,5 +1,5 @@
 import time
-from machine import Pin, ADC
+from machine import Pin, ADC, UART
 from picographics import PicoGraphics, DISPLAY_ENVIRO_PLUS
 from pimoroni import RGBLED, Button
 from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE
@@ -76,14 +76,14 @@ mic = ADC(Pin(26))
 
 # configure the PMS5003 for Enviro+
 pms5003 = PMS5003(
-    uart=machine.UART(1, tx=machine.Pin(8), rx=machine.Pin(9), baudrate=9600),
-    pin_enable=machine.Pin(3),
-    pin_reset=machine.Pin(2),
+    uart=UART(1, tx=Pin(8), rx=Pin(9), baudrate=9600),
+    pin_enable=Pin(3),
+    pin_reset=Pin(2),
     mode="active"
 )
 
 # sets up MQTT
-mqtt_client = umqtt.simple.MQTTClient(client_id=CLIENT_ID,server=SERVER_ADDRESS,user=MQTT_USERNAME,password=MQTT_PASSWORD)
+mqtt_client = umqtt.simple.MQTTClient(client_id=CLIENT_ID, server=SERVER_ADDRESS, user=MQTT_USERNAME, password=MQTT_PASSWORD)
 
 # some constants we'll use for drawing
 WHITE = display.create_pen(255, 255, 255)
@@ -124,9 +124,9 @@ while True:
     # read particle sensor
     particulate_reading = pms5003.read()
 
-    if heater == "Stable" and ltr_reading != None:
+    if heater == "Stable" and ltr_reading is not None:
         led.set_rgb(0, 0, 0)
-        current_time = time.ticks_ms()     
+        current_time = time.ticks_ms()
         if (current_time - mqtt_time) / 1000 >= UPDATE_INTERVAL:
             # then do an MQTT
             try:
@@ -149,7 +149,7 @@ while True:
                 mqtt_success = False
                 led.set_rgb(255, 0, 0)
     else:
-    # light up the LED red if there's a problem with MQTT or sensor readings
+        # light up the LED red if there's a problem with MQTT or sensor readings
         led.set_rgb(255, 0, 0)
 
     # turn off the backlight with A and turn it back on with B
@@ -178,4 +178,3 @@ while True:
     display.update()
 
     time.sleep(1.0)
-
