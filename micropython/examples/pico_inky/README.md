@@ -1,10 +1,10 @@
 # Pico Inky Pack MicroPython Examples <!-- omit in toc -->
 
 - [PicoGraphics](#picographics)
-- [Function Examples](#function-examples)
+- [Non-Wireless Examples](#non-wireless-examples)
   - [Button Test](#button-test)
   - [Clock](#clock)
-- [Non-Wireless Examples](#non-wireless-examples)
+- [Wireless Examples](#wireless-examples)
   - [Bored API](#bored-api)
   - [Place Kitten](#place-kitten)
   - [Quote of the Day](#quote-of-the-day)
