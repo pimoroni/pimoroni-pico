@@ -42,7 +42,7 @@ def status_handler(mode, status, ip):
 def hex_to_rgb(hex):
     # converts a hex colour code into RGB
     h = hex.lstrip('#')
-    r, g, b = (int(h[i:i+2], 16) for i in (0, 2, 4))
+    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
     return r, g, b
 
 
@@ -66,17 +66,17 @@ led = RGBLED(0, 1, 2, invert=False)
 while True:
     # connect to wifi
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-    
+
     # open the json file
     print(f"Requesting URL: {URL}")
     socket = urequest.urlopen(URL)
     data = ujson.load(socket)
     socket.close()
-    print(f"Data obtained!")
+    print("Data obtained!")
 
     # extract hex colour from the data
     hex = data['field2']
-    
+
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)
 
@@ -93,9 +93,8 @@ while True:
     # light up RGB LED
     led.set_rgb(r, g, b)
     print(f"RGB LED set to {hex}")
-    
+
     # sleep
     print(f"""Sleeping for {UPDATE_INTERVAL} seconds.
         """)
     time.sleep(UPDATE_INTERVAL)
-
