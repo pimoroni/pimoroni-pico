@@ -1,6 +1,6 @@
 # Pico Explorer MicroPython Examples <!-- omit in toc -->
 
-- - [PicoGraphics](#picographics)
+- [PicoGraphics](#picographics)
 - [Non-Wireless Examples](#non-wireless-examples)
   - [Balls Demo](#balls-demo)
   - [Button Test](#button-test)
