@@ -3,15 +3,47 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
 import uasyncio
-import tinyweb
 from automation import *
 import time
 
 
+board = Automation2040W()
+
+def status_handler(mode, status, ip):
+   
+    print("Network: {}".format(WIFI_CONFIG.SSID))
+    status_text = "Connecting..."
+    board.conn_led(20)
+    if status is not None:
+        if status:
+            status_text = "Connection successful!"
+            board.conn_led(True)
+        else:
+            status_text = "Connection failed!"
+            board.conn_led(False)
+
+    print(status_text)
+    print("IP: {}".format(ip))
+    
+    
+try:
+    import tinyweb
+    
+except ImportError:
+    # WIFI settings
+    WIFI_COUNTRY = "GB"  # Changeme!
+    network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    #install missing module
+    import upip
+    upip.install('logging')
+    import tinyweb
+    
+    
 
 # Create web server application
 app = tinyweb.webserver()
-board = Automation2040W()
+
 
 #static page
 html_file = open('index.html', 'r')
@@ -141,28 +173,9 @@ async def index(request, response):
 async def redirect(request, response):
     # Start HTTP response with content-type text/html
     await response.redirect('/')
-
-
-def status_handler(mode, status, ip):
-   
-    print("Network: {}".format(WIFI_CONFIG.SSID))
-    status_text = "Connecting..."
-    board.conn_led(20)
-    if status is not None:
-        if status:
-            status_text = "Connection successful!"
-            board.conn_led(True)
-        else:
-            status_text = "Connection failed!"
-            board.conn_led(False)
-
-    print(status_text)
-    print("IP: {}".format(ip))
     
 
 
-# set up wifi
-network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
 
 
 def run():
