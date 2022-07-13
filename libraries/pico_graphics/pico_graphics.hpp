@@ -36,10 +36,11 @@ namespace pimoroni {
       r((__builtin_bswap16(c) & 0b1111100000000000) >> 8),
       g((__builtin_bswap16(c) & 0b0000011111100000) >> 3),
       b((__builtin_bswap16(c) & 0b0000000000011111) << 3) {}
-    constexpr RGB(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {}
+    constexpr RGB(int16_t r, int16_t g, int16_t b) : r(r), g(g), b(b) {}
 
     constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
     constexpr RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
+    constexpr RGB& operator-=(const RGB& c) {r -= c.r; g -= c.g; b -= c.b; return *this;}
     constexpr RGB  operator- (const RGB& c) const {return RGB(r - c.r, g - c.g, b - c.b);}
 
     // a rough approximation of how bright a colour is used to compare the
