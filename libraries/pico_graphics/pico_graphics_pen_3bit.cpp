@@ -66,7 +66,14 @@ namespace pimoroni {
 
         if(!cache_built) {
             for(uint i = 0; i < 512; i++) {
-                RGB cache_col((i & 0x1C0) >> 1, (i & 0x38) << 2, (i & 0x7) << 5);
+                uint r = (i & 0x1c0) >> 1;
+                uint g = (i & 0x38) << 2;
+                uint b = (i & 0x7) << 5;
+                RGB cache_col(
+                    r | (r >> 3) | (r >> 6),
+                    g | (g >> 3) | (g >> 6),
+                    b | (b >> 3) | (b >> 6)
+                );
                 get_dither_candidates(cache_col, palette, palette_size, candidate_cache[i]);
             }
             cache_built = true;
