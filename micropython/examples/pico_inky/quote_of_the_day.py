@@ -11,7 +11,6 @@ from picographics import PicoGraphics, DISPLAY_INKY_PACK
 Grab the quote of the day from Wikipedia.
 """
 
-WIFI_COUNTRY = "GB"  # Changeme!
 
 graphics = PicoGraphics(DISPLAY_INKY_PACK)
 
@@ -49,7 +48,7 @@ def status_handler(mode, status, ip):
     graphics.update()
 
 
-network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 while True:
     graphics.set_font("bitmap8")

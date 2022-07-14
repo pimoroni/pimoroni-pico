@@ -14,9 +14,6 @@ If you wire up a four legged RGB LED to GP0, GP1 and GP2 (and the long leg to gr
 it will change the colour of that too!
 """
 
-# WIFI settings
-WIFI_COUNTRY = "GB"  # Changeme!
-
 URL = "http://api.thingspeak.com/channels/1417/field/2/last.json"
 UPDATE_INTERVAL = 120  # refresh interval in secs. Be nice to free APIs!
 
@@ -47,7 +44,7 @@ def hex_to_rgb(hex):
 
 
 # set up wifi
-network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 # set up the display
 display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)

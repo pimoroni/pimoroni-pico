@@ -15,8 +15,6 @@ Optionally cache to flash, if you need the RAM
 for something else.
 """
 
-WIFI_COUNTRY = "GB"  # Changeme!
-
 
 graphics = PicoGraphics(DISPLAY_INKY_PACK)
 
@@ -46,7 +44,7 @@ def status_handler(mode, status, ip):
 graphics.set_font("bitmap8")
 graphics.set_update_speed(1)
 
-network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
 
