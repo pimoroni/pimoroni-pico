@@ -46,12 +46,12 @@ This example shows you a simple, non-interrupt way of reading Pico Enviro+'s but
 ### Enviro All
 [enviro_all.py](enviro_all.py)
 
-An advanced example that reads from all the sensors on Enviro+ (including the particulate sensor) and displays the results on screen. Press A and B to turn the backlight on and off, and press X and Y to switch between sensor mode and graphic equaliser mode!
+An advanced example that reads from all the sensors on Pico Enviro+ (including the particulate sensor) and displays the results on screen. Press A and B to turn the backlight on and off, and press X and Y to switch between sensor mode and graphic equaliser mode!
 
 ### Enviro All (Basic)
 [enviro_all_basic.py](enviro_all_basic.py)
 
-This basic example shows how to read from all the sensors on Enviro+ (plus the optional particulate sensor). Prints results to the REPL only.
+This basic example shows how to read from all the sensors on Pico Enviro+ (plus the optional particulate sensor). Prints results to the REPL only.
 
 ### LCD
 [lcd.py](lcd.py)
@@ -82,4 +82,4 @@ For MQTT, you'll need to install `micropython-mqtt.simple` using Thonny's 'Tools
 ### Enviro All (MQTT)
 [enviro_all_mqtt.py](enviro_all_mqtt.py)
 
-This example reads from all the sensors on Enviro+ (plus the optional particulate sensor) and posts the results into an MQTT broker.
+This example reads from all the sensors on Pico Enviro+ (plus the optional particulate sensor) and posts the results into an MQTT broker.
