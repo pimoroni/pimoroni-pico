@@ -37,7 +37,7 @@ def graphic_equaliser():
         m = max(m, v)
         v = min(239, v)
         v = 239 - v
-        display.line(x-5, v, x-5, 239)
+        display.line(x - 5, v, x - 5, 239)
     m_arr[i] = min(255, m)
     i += 1
     if i >= len(m_arr):
@@ -211,7 +211,7 @@ while True:
             min_gas = gas
 
         # convert pressure into hpa
-        pressure_hpa = pressure/100
+        pressure_hpa = pressure / 100
 
         # read LTR559
         ltr_reading = ltr.get_reading()
