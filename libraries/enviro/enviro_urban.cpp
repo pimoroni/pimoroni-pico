@@ -4,7 +4,8 @@ namespace enviro {
 
   EnviroUrban::EnviroUrban()
   : EnviroBase()
-  , bme280(&i2c, 0x77) {
+  , bme280(&i2c, 0x77)
+  , pms_i2c(14, 15, 100000) {
   //, pms5003i(&i2c) {
   }
 
@@ -16,6 +17,14 @@ namespace enviro {
 
     adc_init();
     adc_gpio_init(MICROPHONE_PIN);
+
+    gpio_set_function(SENSOR_EN, GPIO_FUNC_SIO);
+    gpio_set_dir(SENSOR_EN, GPIO_OUT);
+    gpio_put(SENSOR_EN, true);
+
+    gpio_set_function(BOOST_EN, GPIO_FUNC_SIO);
+    gpio_set_dir(BOOST_EN, GPIO_OUT);
+    gpio_put(BOOST_EN, true);
 
     return true;
   }
@@ -32,7 +41,7 @@ namespace enviro {
 
   bool EnviroUrban::take_reading() {
     // get data from particulate sensor
-    i2c.read_bytes(0x12, 0, particulate_reading, 32);
+    pms_i2c.read_bytes(0x12, 0, particulate_reading, 32);
 
     // read sensor data from bme280
     BME280::bme280_reading data = bme280.read_forced();
