@@ -472,7 +472,7 @@ class webserver:
                 # Send exception info if desired
                 if self.debug:
                     sys.print_exception(e, resp.writer.s)
-            except Exception as e:
+            except Exception:
                 pass
         finally:
             await writer.aclose()

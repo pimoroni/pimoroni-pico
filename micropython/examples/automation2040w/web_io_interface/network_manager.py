@@ -20,7 +20,7 @@ class NetworkManager:
 
     def isconnected(self):
         return self._sta_if.isconnected() or self._ap_if.isconnected()
-    
+
     def mode(self):
         if self._sta_if.isconnected():
             return self._ifname[0]
@@ -75,7 +75,7 @@ class NetworkManager:
 
         self._sta_if.disconnect()
         self._sta_if.active(False)
-        
+
         self._ap_if.ifconfig(("10.10.1.1", "255.255.255.0", "10.10.1.1", "10.10.1.1"))
         self._ap_if.active(True)
 
