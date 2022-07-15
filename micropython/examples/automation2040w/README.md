@@ -7,6 +7,8 @@
   - [Toggle Outputs](#toggle-outputs)
   - [Switches and LEDs](#switches-and-leds)
   - [Reset Automation](#reset-automation)
+- [Wireless Examples](#wireless-examples)
+  - [Web IO Interface](#web-io-interface)
 
 
 ## Function Examples
@@ -45,3 +47,14 @@ An example of the user switches and LEDs on Automation 2040 W.
 [reset_automation.py](reset_automation.py)
 
 A simple program that resets Automation 2040 W, turning off its Relays, Outputs, and LEDs.
+
+## Wireless Examples
+
+The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+
+### Web IO Interface
+[web_io_interface/](web_io_interface/)
+
+Provides a basic web interface for all your Automation 2040W features.
+
+Needs `lib/tinyweb` from `common`!

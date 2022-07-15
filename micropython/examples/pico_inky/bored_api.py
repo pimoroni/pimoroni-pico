@@ -12,8 +12,6 @@ from pimoroni import Button
 Simple demo to get a random activity from BoredAPI.com
 """
 
-WIFI_COUNTRY = "GB"  # Changeme!
-
 
 button_a = Button(12)
 button_b = Button(13)
@@ -44,7 +42,7 @@ def status_handler(mode, status, ip):
     graphics.update()
 
 
-network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 
 def update():
