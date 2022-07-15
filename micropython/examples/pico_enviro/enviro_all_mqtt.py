@@ -97,9 +97,10 @@ mqtt_time = 0
 mqtt_success = False
 e = "Wait a minute"
 
+# connect to wifi
+uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+
 while True:
-    # connect to wifi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     # read BME688
     temperature, pressure, humidity, gas, status, _, _ = bme.read()
