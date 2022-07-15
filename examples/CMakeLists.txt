@@ -44,6 +44,7 @@ add_subdirectory(pico_audio)
 add_subdirectory(pico_wireless)
 
 add_subdirectory(inky_pack)
+add_subdirectory(inky_frame)
 
 add_subdirectory(automation2040w)
 add_subdirectory(plasma2040)
