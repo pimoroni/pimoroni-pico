@@ -9,9 +9,14 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
   - [Supported Graphics Modes (Pen Type)](#supported-graphics-modes-pen-type)
   - [Supported Rotations](#supported-rotations)
   - [Custom Pins](#custom-pins)
+    - [SPI / Parallel](#spi--parallel)
+    - [I2C](#i2c)
 - [Function Reference](#function-reference)
   - [General](#general)
     - [Creating & Setting Pens](#creating--setting-pens)
+      - [RGB565, RGB332, P8 and P4 modes](#rgb565-rgb332-p8-and-p4-modes)
+      - [Monochrome Modes](#monochrome-modes)
+      - [Inky Frame](#inky-frame)
     - [Controlling The Backlight](#controlling-the-backlight)
     - [Clipping](#clipping)
     - [Clear](#clear)
@@ -55,17 +60,28 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * 240x240 Round SPI LCD Breakout - `DISPLAY_ROUND_LCD_240X240`
 * 240x240 Square SPI LCD Breakout - `DISPLAY_LCD_240X240`
 * 160x80 SPI LCD Breakout - `DISPLAY_LCD_160X80`
+* 128x128 I2C OLED - `DISPLAY_I2C_OLED_128X128`
+* Pico Inky Pack - 296x128 mono e-ink - `DISPLAY_INKY_PACK`
+* Inky Frame - 600x447 7-colour e-ink - `DISPLAY_INKY_FRAME`
 
 ### Supported Graphics Modes (Pen Type)
 
+* 1-bit - `PEN_1BIT` - mono, used for Pico Inky Pack and i2c OLED
+* 3-bit - `PEN_3BIT` - 8-colour, used for Inky Frame
 * 4-bit - `PEN_P4` - 16-colour palette of your choice
 * 8-bit - `PEN_P8` - 256-colour palette of your choice
 * 8-bit RGB332 - `PEN_RGB332` - 256 fixed colours (3 bits red, 3 bits green, 2 bits blue)
 * 16-bit RGB565 - `PEN_RGB565` - 64K colours at the cost of RAM. (5 bits red, 6 bits green, 5 bits blue)
 
-These offer a tradeoff between RAM usage and available colours. In most cases you would probably use `RGB332` since it offers the easiest tradeoff. It's also the default.
+These offer a tradeoff between RAM usage and available colours. In most cases you would probably use `RGB332` since it offers the easiest tradeoff. It's also the default for colour LCDs.
 
 Eg:
+
+```python
+display = PicoGraphics(display=PICO_DISPLAY)
+```
+
+Is equivalent to:
 
 ```python
 display = PicoGraphics(display=PICO_DISPLAY, pen_type=PEN_RGB332)
@@ -83,6 +99,8 @@ display = PicoGraphics(display=PICO_DISPLAY, rotate=90)
 
 ### Custom Pins
 
+#### SPI / Parallel
+
 The `pimoroni_bus` library includes `SPIBus` for SPI LCDs and `ParallelBus` for Parallel LCDs (like Tufty 2040).
 
 In most cases you'll never need to use these, but they come in useful if you're wiring breakouts to your Pico or using multiple LCDs.
@@ -98,11 +116,26 @@ spibus = SPIBus(cs=17, dc=16, sck=18, mosi=19)
 display = PicoGraphics(display=DISPLAY_PICO_EXPLORER, bus=spibus, pen_type=PEN_RGB332)
 ```
 
+#### I2C
+
+The `pimoroni_i2c` library includes `PimoroniI2C` which can be used to change the pins used by the mono OLED:
+
+```python
+from pimoroni_i2c import PimoroniI2C
+from picographics import PicoGraphics, DISPLAY_I2C_OLED_128X128
+
+i2cbus = PimoroniI2C(4, 5)
+
+display = PicoGraphics(display=DISPLAY_I2C_OLED_128X128, bus=i2cbus)
+```
+
 ## Function Reference
 
 ### General
 
 #### Creating & Setting Pens
+
+##### RGB565, RGB332, P8 and P4 modes
 
 Create a pen colour for drawing into a screen:
 
@@ -121,6 +154,46 @@ display.set_pen(my_pen)
 ```
 
 This will be either an RGB332 or RGB565 colour, or a palette index.
+
+##### Monochrome Modes
+
+For 1BIT mode - such as for Inky Pack and the Mono OLED - pens are handled a little differently.
+
+There's no need to create one, since mapping an RGB colour to black/white is meaningless.
+
+Instead you can pick from 16 shades of grey which are automatically dithered into the PicoGraphics buffer, where:
+
+* `0` is Black,
+* `1 - 14` are shades of grey,
+* `15` is white.
+
+And just call `set_pen` with your desired shade:
+
+```python
+display.set_pen(0)   # Black
+display.set_pen(15)  # White
+```
+
+Because shades 1 through 14 are created with ordered dither you should avoid using them for text, small details or lines.
+
+Dithering works by mixing black and white pixels in various patterns and quantities to fake grey shades.
+
+If you were to try and draw a single "grey" pixel it will end up either black or white depending on where it's drawn and which shade of grey you pick.
+
+##### Inky Frame
+
+Inky Frame is a special case- the display itself supports only 7 (8 if you include its cleaning "clear" colour, which we call Tapue) colours.
+
+These are:
+
+* `BLACK` = 0
+* `WHITE` = 1
+* `GREEN` = 2
+* `BLUE` = 3
+* `RED` = 4
+* `YELLOW` = 5
+* `ORANGE` = 6
+* `TAUPE` = 7
 
 #### Controlling The Backlight
 
