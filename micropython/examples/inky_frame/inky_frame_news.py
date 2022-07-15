@@ -8,6 +8,7 @@ import qrcode
 from machine import Pin
 from pimoroni_i2c import PimoroniI2C
 from pcf85063a import PCF85063A
+import time
 
 I2C_SDA_PIN = 4
 I2C_SCL_PIN = 5
@@ -186,3 +187,4 @@ while True:
     # Time to have a little nap until the next update
     rtc.set_timer(UPDATE_INTERVAL)
     hold_vsys_en_pin.init(Pin.IN)
+    time.sleep(UPDATE_INTERVAL)
