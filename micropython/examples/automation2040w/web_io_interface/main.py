@@ -28,7 +28,7 @@ def status_handler(mode, status, ip):
 
 
 try:
-    import tinyweb
+    from tinyweb.server import webserver
 
 except ImportError:
     # WIFI settings
@@ -38,11 +38,11 @@ except ImportError:
     # Install missing module
     import upip
     upip.install('logging')
-    import tinyweb
+    from tinyweb.server import webserver
 
 
 # Create web server application
-app = tinyweb.webserver()
+app = webserver()
 
 
 # Static page
