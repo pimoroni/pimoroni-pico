@@ -51,7 +51,7 @@
 #define CT_BLOCK       0x08            /* Block addressing */
 
 #define CLK_SLOW	(100 * KHZ)
-#define CLK_FAST	(50 * MHZ)
+#define CLK_FAST	(30 * MHZ)
 
 static volatile
 DSTATUS Stat = STA_NOINIT;	/* Physical drive status */
