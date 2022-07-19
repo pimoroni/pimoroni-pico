@@ -1,4 +1,4 @@
-# Pico Enviro+ MicroPython Examples <!-- omit in toc -->
+# Pico Inky Frame MicroPython Examples <!-- omit in toc -->
 
 - [PicoGraphics](#picographics)
 - [Examples](#examples)
@@ -24,6 +24,8 @@ Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`.
 
 ### Daily Activity
 [inky_frame_daily_activity.py](inky_frame_daily_activity.py)
+
+Generate a random activity from Bored API.
 
 ### News
 [inky_frame_news.py](inky_frame_news.py)
