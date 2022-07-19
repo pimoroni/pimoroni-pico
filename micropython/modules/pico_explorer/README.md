@@ -1,12 +1,20 @@
-# Pico Explorer Base
+# Pico Explorer Base <!-- omit in toc -->
 
 Pico Explorer Base straps a whole host of physical computing goodies to your Pico - a vibrant 1.14" (240x240) IPS LCD screen, four switches, a piezo buzzer/speaker and a DRV8833 motor driver. It also has a bunch of handy accessible general purpose inputs and outputs and a built in breadboard.
 
 [You can buy one here!](https://shop.pimoroni.com/products/pico-explorer-base)
 
-The `picoexplorer` module contains constants you can use with our shared libraries to make it easy to draw to the screen and interface with the buttons, piezo buzzer and motor driver. 
+The `picoexplorer` module contains constants you can use with our shared libraries to make it easy to draw to the screen and interface with the buttons, piezo buzzer and motor driver. You don't need to use the constants of course, you can skip the `import pico_explorer` and just enter the pin number/s if you prefer. There's a handy reference of what pins are used for which functions on the bottom of the board.
 
-toc goes here
+- [Board Functions](#board-functions)
+  - [Display](#display)
+  - [Buttons](#buttons)
+  - [ADC](#adc)
+  - [Motors](#motors)
+  - [Audio](#audio)
+  - [GPIO](#gpio)
+  - [Breakout Garden slots / I2C](#breakout-garden-slots--i2c)
+- [Pin Constants](#pin-constants)
 
 ## Board Functions
 
@@ -101,82 +109,66 @@ And read them like this
 reading =  adc0.read_voltage()
 ```
 
-
-
---
-
-
-
 ### Motors
 
-Motors are driven by PWM via an onboard DRV8833.  We'd recommend using our Motor library to driver them - here's a quick example
+Motors are driven by PWM via an onboard DRV8833.  We'd recommend using our fully featured Motor library to drive them - here's a quick example:
+
+``` python
+import picoexplorer
+from motor import Motor
+import time
+
+m = Motor(picoexplorer.MOTOR_1)
+
+m.enable()
+
+# run the motor full speed in one direction for 2 seconds
+m.speed(1.0)
+time.sleep(2)
+
+# and in the opposite direction for 2 seconds
+m.speed(-1.0)
+time.sleep(2)
+
+m.disable()
+```
+
+You can find much more info about working with motors in the [Motor library documentation](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/motor).
 
 The red LED next to the motor connectors is part of the motor driver circuit - it will light up if the overvoltage/undervoltage/short circuit auto shutdown functions of the motor driver are triggered. It's not user controllable.
 
-#### set_motor
-
-```python
-picoexplorer.set_motor(channel, action, speed)
-```
-
-Channel should be one of `0` (motor 1) or `1` (motor 2).
-
-Action should be `0` (forwards) or `1` (backwards).
-
-Speed should be given as a number between `0.0` and `1.0`, eg:
-
-```python
-picoexplorer.set_motor(0, 0, 0.5)    # motor 1 forwards
-picoexplorer.set_motor(1, 1, 0.5)    # motor 2 backwards
-```
-
-And to stop the motor:
-
-```python
-picoexplorer.set_motor(0, 0, 0)      # motor 1 stop
-picoexplorer.set_motor(1, 0, 0)      # motor 2 stop
-```
-
 ### Audio
 
-To make noise with Explorer, you must first select one of the GP0 to GP7  pins to PWM for audio. You'll then need to connect this pin to AUDIO with a jumper wire.
+To make noise with Explorer, you must select one of the GP0 to GP7 pins to PWM for audio. You'll then need to connect this pin to AUDIO with a jumper wire.
 
-#### set_audio_pin
+To set up the buzzer, first import the `Buzzer` class from the `pimoroni` module and the pin constants from `picoexplorer`:
 
-```python
-picoexplorer.set_audio_pin(channel)
+``` python
+from pimoroni import Buzzer
+import picoexplorer
 ```
 
-`set_audio_pin` configures the PIN that Pico Explorer uses for audio output. It should be one of `GP0` through `GP7`, eg:
+Then create a `Buzzer` instance:
 
-```python
-picoexplorer.set_audio_pin(0)
+``` python
+BUZZER = Buzzer(picoexplorer.GP0)
 ```
 
-This pin must be bridged to the `AUDIO` pin on the Pico Explorer header in order to drive the onboard Piezo.
+You can then play audio tones like this - frequency should probably be a number between 1 and 5000 if you have human ears. 
 
-#### set_tone
-
-```python
-picoexplorer.set_tone(frequency)
-```
-
-`set_tone` will play an audio tone out of your chosen audio pin.
-
-```python
-frequency = 440
-picoexplorer.set_tone(frequency)
+``` python
+buzzer.set_tone(frequency)
 ```
 
 To make the buzzer be quiet, you can:
 
 ``` python
-picoexplorer.set_tone(-1)
+buzzer.set_tone(0)
 ```
 
 ### GPIO
 
-The 8 general purpose IO pins on the lower Pico Explorer are GP0 through GP7. You can use `machine` to read a pin in the same way as you would if you were using a Pico on its own.
+The 8 general purpose IO pins on Pico Explorer are connected to GP0 through GP7. You can use `machine` to read inputs in the same way as you would if you were using a Pico on its own.
 
 ```python
 import machine
@@ -184,8 +176,40 @@ import machine
 GP0 = machine.Pin(0, machine.Pin.IN, machine.Pin.PULL_DOWN)
 ```
 
+You can also use these pins as outputs, if you wanted to connect up stuff like LEDs:
+
+```python
+import machine
+
+GPO = machine.Pin(0, machine.Pin.OUT)
+
+```
+Note that if you're connecting external LEDs up to Explorer Base, GP0-7 have built in 100 Ohm resistors, so you don't need to include a resistor in your circuit to protect your LED from drawing too much current.
+
 There's lots more info about how to use `machine` in the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/rp2040/getting-started/#getting-started-with-micropython).
 
+### Breakout Garden slots / I2C
+
+The slots at the top of the board let you plug (I2C) Breakout Garden breakouts into Pico Explorer.
+
+- [List of Pico-compatible breakouts](https://github.com/pimoroni/pimoroni-pico/blob/main/README.md#breakouts)
+
+Pico Explorer uses GP20 and GP21 for its I2C interface - these pins differ from our default Breakout Garden pins so you will specify you're using a Pico Explorer when running breakout examples. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
+
+``` python
+from pimoroni_i2c import PimoroniI2C
+from pimoroni import PICO_EXPLORER_I2C_PINS
+
+i2c = PimoroniI2C(**PICO_EXPLORER_I2C_PINS)
+```
+
+Alternatively, you can specify the pin numbers directly:
+
+``` python
+from pimoroni_i2c import PimoroniI2C
+
+i2c = PimoroniI2C(sda=(20), scl=(21))
+```
 ## Pin Constants
 
 Here's a list of constants that are available in `picoexplorer`, and the pin numbers that they correspond to on the Pico.
@@ -199,23 +223,11 @@ Here's a list of constants that are available in `picoexplorer`, and the pin num
 
 **ADC**
 
-- `ADC0`
-- `ADC1`
-- `ADC2`
+- `ADC0` = `26`
+- `ADC1` = `27`
+- `ADC2` = `28`
 
 **Motors**
 
-- `MOTOR1`
-- `MOTOR2`
-
-**GPIO**
-
-- `GP0`
-- `GP1`
-- `GP2`
-- `GP3`
-- `GP4`
-- `GP5`
-- `GP6`
-- `GP7`
-
+- `MOTOR_1` = `8, 9`
+- `MOTOR_2` = `10, 11`
