@@ -24,6 +24,9 @@ typedef struct _VL53L5CX_obj_t {
     mp_obj_base_t base;
     _PimoroniI2C_obj_t *i2c;
     pimoroni::VL53L5CX* breakout;
+    void *configuration;
+    void *motion_configuration;
+    void *results;
 } _VL53L5CX_obj_t;
 
 
@@ -62,6 +65,10 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
+    self->configuration = m_new(VL53L5CX_Configuration, 1);
+    self->motion_configuration = m_new(VL53L5CX_Motion_Configuration, 1);
+    self->results = m_new(pimoroni::VL53L5CX::ResultsData, 1);
+
     mp_buffer_info_t bufinfo;
     const size_t firmware_size = 84 * 1024;
 
@@ -85,7 +92,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
         mp_raise_ValueError("Firmware must be 84k bytes!");
     }
 
-    self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr);
+    self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr, self->configuration, self->motion_configuration);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: init error");
@@ -213,8 +220,8 @@ mp_obj_t VL53L5CX_data_ready(mp_obj_t self_in) {
 
 mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    pimoroni::VL53L5CX::ResultsData results;
-    bool status = self->breakout->get_data(&results);
+    pimoroni::VL53L5CX::ResultsData *results = (pimoroni::VL53L5CX::ResultsData *)self->results;
+    bool status = self->breakout->get_data(results);
     if(!status) {
         mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: get_data error");
     }
@@ -235,10 +242,10 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
 
     // Build a tuple of motion data
     for(int i = 0u; i < tuple_size; i++) {
-        tuple_distance_mm[i] = mp_obj_new_int(results.distance_mm[i]);
-        tuple_reflectance[i] = mp_obj_new_int(results.reflectance[i]);
-        average_distance += results.distance_mm[i];
-        average_reflectance += results.reflectance[i];
+        tuple_distance_mm[i] = mp_obj_new_int(results->distance_mm[i]);
+        tuple_reflectance[i] = mp_obj_new_int(results->reflectance[i]);
+        average_distance += results->distance_mm[i];
+        average_reflectance += results->reflectance[i];
     }
 
     average_distance /= tuple_size;
@@ -247,14 +254,14 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
     mp_obj_t tuple_motion_data[32];
 
     for(int i = 0u; i < 32; i++) {
-        tuple_motion_data[i] = mp_obj_new_int(results.motion_indicator.motion[i]);
+        tuple_motion_data[i] = mp_obj_new_int(results->motion_indicator.motion[i]);
     }
 
     STATIC const qstr tuple_motion_fields[] = {MP_QSTR_global_indicator_1, MP_QSTR_global_indicator_2, MP_QSTR_motion};
 
     mp_obj_t tuple_motion[] = {
-        mp_obj_new_int(results.motion_indicator.global_indicator_1),
-        mp_obj_new_int(results.motion_indicator.global_indicator_2),
+        mp_obj_new_int(results->motion_indicator.global_indicator_1),
+        mp_obj_new_int(results->motion_indicator.global_indicator_2),
         mp_obj_new_tuple(sizeof(tuple_motion_data) / sizeof(mp_obj_t), tuple_motion_data)
     };
 
