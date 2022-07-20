@@ -135,8 +135,8 @@ If there is a need to put Automation 2040W back into a known safe-state, without
 Here is the complete list of functions available on the `Automation2040W` class:
 
 ```c++
-Automation2040W()
-bool init()
+Automation2040W();
+bool init();
 void conn_led(bool on);
 void conn_led(float brightness);
 bool switch_pressed(uint sw);
