@@ -3,7 +3,7 @@
 This library offers convenient functions for interacting with your new [Pimoroni Automation 2040W](https://shop.pimoroni.com/products/automation-2040-w), an all-in-one, Pico W powered industrial/automation controller with 2.4GHz wireless connectivity, relays and a plethora of inputs and outputs.
 
 ## Table of Content
-- [Automation2040W Class](#automation2040w-class)
+- [Automation 2040W Class](#automation-2040w-class)
   - [User Switches and LEDs](#user-switches-and-leds)
   - [Connectivity LED](#connectivity-led)
   - [Actuating the Relays](#actuating-the-relays)
@@ -12,6 +12,7 @@ This library offers convenient functions for interacting with your new [Pimoroni
   - [Reading the ADCs](#reading-the-adcs)
   - [Extra GPIOs](#extra-gpios)
   - [Software Reset](#software-reset)
+  - [Function Reference](#function-reference)
 
 
 ## Automation 2040W Class
@@ -110,3 +111,24 @@ There is also a `NUM_GPIOS` for times when any iteration needs to be performed.
 ### Software Reset
 
 If there is a need to put Automation 2040W back into a known safe-state, without resorting to the hardware reset switch, then `.reset()` can be called. This deactivates all outputs, releases all relays, and turns off all user-controllable LEDs.
+
+
+### Function Reference
+
+Here is the complete list of functions available on the `Automation2040W` class:
+
+```python
+Automation2040W()
+conn_led(brightness)
+switch_pressed(switch)
+switch_led(switch, brightness)
+relay(relay)
+relay(relay, actuate)
+actuate_relay(relay)
+release_relay(relay)
+output(output)
+output(output, value)
+read_input(input)
+read_adc(adc)
+reset()
+```
