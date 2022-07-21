@@ -196,3 +196,31 @@ class Buzzer:
         self.pwm.freq(freq)
         self.pwm.duty_u16(int(65535 * duty))
         return True
+
+
+class ShiftRegister:
+    def __init__(self, clk, lat, dat):
+        self.clk = Pin(clk, Pin.OUT)
+        self.lat = Pin(lat, Pin.OUT)
+        self.dat = Pin(dat, Pin.IN)
+
+    def __iter__(self):
+        self.lat.off()
+        self.lat.on()
+        for _ in range(8):
+            yield self.dat.value()
+            self.clk.on()
+            self.clk.off()
+
+    def __getitem__(self, k):
+        return list(self)[k]
+
+    def read(self):
+        out = 0
+        for bit in self:
+            out <<= 1
+            out += bit
+        return out
+
+    def is_set(self, mask):
+        return self.read() & mask == mask
