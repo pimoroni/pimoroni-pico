@@ -122,6 +122,7 @@ while True:
     graphics.set_pen(0)
 
     # Main text
+    graphics.set_font("cursive")
     graphics.set_pen(4)
     graphics.text("Activity Idea", 55, 30, WIDTH - 20, 2)
     graphics.set_pen(0)
