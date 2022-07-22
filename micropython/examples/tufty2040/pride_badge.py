@@ -20,6 +20,7 @@ BROWN = display.create_pen(97, 57, 21)
 BLACK = display.create_pen(0, 0, 0)
 MAGENTA = display.create_pen(255, 33, 140)
 CYAN = display.create_pen(33, 177, 255)
+AMETHYST = display.create_pen(156, 89, 209)
 
 # Uncomment one of these to change flag
 # If adding your own, colour order is left to right (or top to bottom)
@@ -28,6 +29,7 @@ COLOUR_ORDER = [RED, ORANGE, YELLOW, GREEN, INDIGO, VIOLET]  # traditional pride
 # COLOUR_ORDER = [BLUE, PINK, WHITE, PINK, BLUE]  # trans flag
 # COLOUR_ORDER = [MAGENTA, YELLOW, CYAN]  # pan flag
 # COLOUR_ORDER = [MAGENTA, VIOLET, INDIGO]  # bi flag
+# COLOUR_ORDER = [YELLOW, WHITE, AMETHYST, BLACK]  # non-binary flag
 
 # Change this for vertical stripes
 STRIPES_DIRECTION = "horizontal"

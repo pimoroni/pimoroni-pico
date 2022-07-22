@@ -80,7 +80,7 @@ pms5003 = PMS5003(
 )
 
 # sets up MQTT
-mqtt_client = umqtt.simple.MQTTClient(client_id=CLIENT_ID, server=SERVER_ADDRESS, user=MQTT_USERNAME, password=MQTT_PASSWORD)
+mqtt_client = umqtt.simple.MQTTClient(client_id=CLIENT_ID, server=SERVER_ADDRESS, user=MQTT_USERNAME, password=MQTT_PASSWORD, keepalive=30)
 
 # some constants we'll use for drawing
 WHITE = display.create_pen(255, 255, 255)
@@ -165,7 +165,7 @@ while True:
     display.set_pen(BLACK)
     display.clear()
     display.set_pen(WHITE)
-    display.text("Posting Enviro+ sensor data to Home Assistant via MQTT", 10, 10, WIDTH, scale=3)
+    display.text("Posting Enviro+ sensor data via MQTT", 10, 10, WIDTH, scale=3)
     if mqtt_success is True:
         current_time = time.ticks_ms()
         display.set_pen(GREEN)
