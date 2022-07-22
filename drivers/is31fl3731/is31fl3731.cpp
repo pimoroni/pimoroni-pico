@@ -81,7 +81,7 @@ namespace pimoroni {
   }
 
   void IS31FL3731::set(uint8_t index, uint8_t brightness) {
-    buf[index + 1] = pimoroni::GAMMA[brightness];
+    buf[index + 1] = pimoroni::GAMMA_8BIT[brightness];
   }
 
   void IS31FL3731::update(uint8_t frame) {

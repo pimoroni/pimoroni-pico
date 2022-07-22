@@ -49,8 +49,8 @@ include(plasma/micropython)
 include(hub75/micropython)
 
 # Packs
-# include(pico_unicorn/micropython) # 2408 bytes RAM
-# include(pico_scroll/micropython)  # 1284 bytes RAM
+include(pico_unicorn/micropython)
+include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
 
 # Servos & Motors
