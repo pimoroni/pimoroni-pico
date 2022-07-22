@@ -24,7 +24,7 @@ You'll also need to install the `micropython-urllib.urequest` library using Thon
 
 Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`. You should place this file in `lib` on your Pico W.
 
-- [micropython/examples/common](../common)
+- [/micropython/examples/common](../common)
 
 ### Button Test
 [button_test.py](button_test.py)
