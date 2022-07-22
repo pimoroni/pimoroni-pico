@@ -5,6 +5,7 @@ extern "C" {
 #include "drivers/vl53l5cx/src/VL53L5CX_ULD_API/inc/vl53l5cx_plugin_motion_indicator.h"
 }
 
+#include <new>
 #include "common/pimoroni_i2c.hpp"
 #include "src/VL53L5CX_ULD_API/inc/vl53l5cx_api.h"
 #include "src/VL53L5CX_ULD_API/inc/vl53l5cx_plugin_motion_indicator.h"
@@ -33,15 +34,18 @@ namespace pimoroni {
             // 7-bit version of the default address (0x52)
             static const uint8_t DEFAULT_ADDRESS = VL53L5CX_DEFAULT_I2C_ADDRESS >> 1;
 
-            VL53L5CX(I2C *i2c, uint8_t *firmware, uint8_t i2c_addr=DEFAULT_ADDRESS) {
-                configuration = new VL53L5CX_Configuration{
+            VL53L5CX(I2C *i2c, uint8_t *firmware, uint8_t i2c_addr=DEFAULT_ADDRESS, void* configuration_buffer=nullptr, void* motion_configuration_buffer=nullptr) {
+                if(!configuration_buffer) configuration_buffer = new VL53L5CX_Configuration;
+                if(!motion_configuration_buffer) motion_configuration_buffer = new VL53L5CX_Motion_Configuration;
+
+                configuration = new(configuration_buffer) VL53L5CX_Configuration{
                     .platform = VL53L5CX_Platform{
                         .address = i2c_addr,
                         .i2c = i2c->get_i2c(),
                         .firmware = firmware
                     },
                 };
-                motion_configuration = new VL53L5CX_Motion_Configuration{};
+                motion_configuration = new(motion_configuration_buffer) VL53L5CX_Motion_Configuration{};
             }
             ~VL53L5CX() {
                 delete configuration;
