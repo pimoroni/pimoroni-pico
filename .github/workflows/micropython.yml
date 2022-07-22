@@ -94,16 +94,7 @@ jobs:
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ccache
-
-    - name: Install ARM Toolchain
-      if: runner.os == 'Linux'
-      working-directory: ${{runner.workspace}}
-      run: |
-        wget -q https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2
-        tar xf gcc-*.tar.bz2
-        cd gcc*/bin
-        pwd >> $GITHUB_PATH
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
   
     - uses: actions/checkout@v2
       with:
