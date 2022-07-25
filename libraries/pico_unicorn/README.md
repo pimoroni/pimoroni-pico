@@ -12,13 +12,12 @@ We've included helper functions to handle every aspect of drawing to the display
     - [Buttons](#buttons)
     - [WIDTH / HEIGHT](#width--height)
   - [Functions](#functions)
-    - [init](#init)
-    - [set_pixel](#set_pixel)
-    - [is_pressed](#is_pressed)
+    - [set\_pixel](#set_pixel)
+    - [is\_pressed](#is_pressed)
 
 ## Example Program
 
-The following example sets up Pico Unicorn, displays some basic demo text and graphics and will illuminate the RGB LED green if the A button is presse
+The following example sets up Pico Unicorn, displays some basic demo text and graphics and will illuminate the RGB LED green if the A button is pressed.
 
 ```c++
 
@@ -47,15 +46,6 @@ int num_pixels = pico_unicorn.WIDTH * pico_unicorn.HEIGHT;
 ```
 
 ### Functions
-
-#### init
-
-Sets up Pico Unicorn. `init` must be called before any other functions since it configures the PIO and require GPIO inputs. Just call `init()` like so: 
-
-```c++
-PicoUnicorn pico_unicorn;
-pico_unicorn.init();
-```
 
 #### set_pixel
 
