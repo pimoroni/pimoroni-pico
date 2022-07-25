@@ -5,6 +5,7 @@
   - [Button Test](#button-test)
   - [Daily Activity](#daily-activity)
   - [Image Gallery](#image-gallery)
+  - [LED PWM](#led-pwm)
   - [News](#news)
   - [PlaceKitten](#placekitten)
   - [Quote of the Day](#quote-of-the-day)
@@ -40,6 +41,11 @@ Generate a random activity from Bored API.
 [/image_gallery](/image_gallery)
 
 This photo frame example displays local images on Inky Frame and lets you switch between them with the buttons. Use `image_gallery.py` if your images are stored on your Pico, or `image_gallery_sd.py` if the images are on your SD card.
+
+### LED PWM
+[led_pwm.py](led_pwm.py)
+
+A basic example showing how you can control the brightness of Inky Frame's LEDs using PWM.
 
 ### News
 [inky_frame_news.py](inky_frame_news.py)

@@ -1,8 +1,5 @@
 # An offline image gallery that switches between five jpg images
 # Copy them into your Pico's flash using Thonny.
-# Sample images are taken by the Webb Space Telescope
-# Credit: NASA and the Space Telescope Science Institute (STScI).
-# More images and info @ https://webbtelescope.org/
 # If you want to use your own images they must be 600 x 448 pixels or smaller
 # and saved as *non-progressive* jpgs
 
