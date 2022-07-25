@@ -3,6 +3,7 @@
 #include "bme280.hpp"
 //#include "pms5003i.hpp"
 #include "hardware/adc.h" //TODO replace with analog class
+#include "common/pimoroni_i2c.hpp"
 
 using namespace pimoroni;
 
@@ -32,6 +33,8 @@ namespace enviro {
   public:
     static const uint MICROPHONE_PIN = 26;
     static const uint SENSOR_RESET = 9;
+    static const uint SENSOR_EN = 10;
+    static const uint BOOST_EN = 11;
 
 
     //--------------------------------------------------
@@ -39,6 +42,7 @@ namespace enviro {
     //--------------------------------------------------
   public:
     BME280 bme280;
+    I2C pms_i2c;
     //PMS5003I pms5003i;
 
   protected:
