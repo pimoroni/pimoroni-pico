@@ -2,88 +2,47 @@
 
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+#include "hardware/adc.h"
+#include "hardware/clocks.h"
+
 
 #include "galactic_unicorn.pio.h"
+#include "audio_i2s.pio.h"
+
 #include "galactic_unicorn.hpp"
 
 // pixel data is stored as a stream of bits delivered in the
 // order the PIO needs to manage the shift registers, row
 // selects, delays, and latching/blanking
 //
-// the data consists of 11 rows each of which has 14 frames of
-// bcd timing data
+// the pins used are:
 //
-// bits are output in order:
+//  - 13: column clock (sideset)
+//  - 14: column data  (out base)
+//  - 15: column latch
+//  - 16: column blank
+//  - 17: row select bit 0
+//  - 18: row select bit 1
+//  - 19: row select bit 2
+//  - 20: row select bit 3
 //
-//  ROW_CLEAR, ROW_DATA1, ROW_DATA0, LED_BLANK, LED_LATCH, LED_CLOCK, LED_DATA0, LED_DATA1
+// the framebuffer data is structured like this:
 //
-// the data is structured like this:
-//
-// loop through the eleven rows of the display...
-//
-//   1rr00000                     // set row select bit on rows 0 and 8 (side set the clock)
-//   00000000 00000000 00000000   // dummy bytes to align to dwords
-//
-//   within this row we loop through the 14 bcd frames for this row...
-//
-//      0  -  161: 100100rr, 100101rr, 100100gg, 100101gg, 100100bb, 100101bb, ... x 27 # left+right half rgb pixel data doubled for clock pulses, keep BLANK high
-//            162: 10011000  // LATCH pixel data
-//            163: 10000000  // turn off BLANK to output pixel data - now at 164 bytes (41 dwords)
-//      164 - 165: 00001111, 11111111, # bcd tick count (0-65536)
-//            166: 10010000  // turn BLANK back on 
-//            167: 00000000  // dummy byte to ensure dword aligned
+// for each row:
+//   for each bcd frame:
+//            0: 00110110                           // row pixel count (minus one)
+//      1  - 53: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+//      54 - 55: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
+//           56: xxxxrrrr                           // row select bits
+//      57 - 59: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
 //
 //  .. and back to the start
 
-/*
-enum pin {
-  LED_DATA  = 8,
-  LED_CLOCK = 9,
-  LED_LATCH = 10,
-  LED_BLANK = 11,
-  ROW_0 = 22,
-  ROW_1 = 21,
-  ROW_2 = 20,
-  ROW_3 = 19,
-  ROW_4 = 18,
-  ROW_5 = 17,
-  ROW_6 = 16,
-  A     = 12,
-  B     = 13,
-  X     = 14,
-  Y     = 15,
-};*/
-
-enum pin {
-  LED_DATA1 = 12,
-  LED_DATA0 = 13,
-  LED_CLOCK = 14,
-  LED_LATCH = 15,
-  LED_BLANK = 16,
-
-  ROW_DATA0 = 17,
-  ROW_DATA1 = 18,
-  ROW_CLEAR = 19,
-  ROW_CLOCK = 20,
-  
-  SWITCH_A = 0,
-  SWITCH_B = 1,
-  SWITCH_C = 3,
-  SWITCH_D = 6,
-  SWITCH_E = 2,
-  SWITCH_VOLUME_UP = 21,
-  SWITCH_VOLUME_DOWN = 26,
-  SWITCH_BRIGHTNESS_UP = 7,
-  SWITCH_BRIGHTNESS_DOWN = 8
-};
-
-
-
 constexpr uint32_t ROW_COUNT = 11;
-constexpr uint32_t ROW_BYTES = 4;
-constexpr uint32_t ROW_FRAME_BYTES = 168;
-constexpr uint32_t BCD_FRAMES = 15; // includes fet discharge frame
-constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES + ROW_COUNT * ROW_FRAME_BYTES * BCD_FRAMES);
+constexpr uint32_t BCD_FRAME_COUNT = 14;
+constexpr uint32_t BCD_FRAME_BYTES = 60;
+constexpr uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
+constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
 
 // must be aligned for 32bit dma transfer
 alignas(4) static uint8_t bitstream[BITSTREAM_LENGTH] = {0};
@@ -93,38 +52,7 @@ static uint16_t g_gamma_lut[256] = {0};
 static uint16_t b_gamma_lut[256] = {0};
 
 static uint32_t dma_channel;
-
-static inline void unicorn_jetpack_program_init(PIO pio, uint sm, uint offset) {
-  pio_gpio_init(pio, pin::LED_DATA1);
-  pio_gpio_init(pio, pin::LED_DATA0);
-  pio_gpio_init(pio, pin::LED_CLOCK);
-  pio_gpio_init(pio, pin::LED_LATCH);
-  pio_gpio_init(pio, pin::LED_BLANK);
-
-  pio_gpio_init(pio, pin::ROW_DATA0);
-  pio_gpio_init(pio, pin::ROW_DATA1);
-  pio_gpio_init(pio, pin::ROW_CLEAR);
-  pio_gpio_init(pio, pin::ROW_CLOCK);
-
-  pio_sm_set_consecutive_pindirs(pio, sm, pin::LED_DATA1, 5, true);
-  pio_sm_set_consecutive_pindirs(pio, sm, pin::ROW_DATA0, 4, true);
-
-  pio_sm_config c = galactic_unicorn_program_get_default_config(offset);
-
-  // osr shifts right, autopull on, autopull threshold 8
-  sm_config_set_out_shift(&c, true, false, 32);
-
-  // configure out, set, and sideset pins
-  sm_config_set_out_pins(&c, pin::LED_DATA1, 8);
-  sm_config_set_sideset_pins(&c, pin::ROW_CLOCK);
-
-  // join fifos as only tx needed (gives 8 deep fifo instead of 4)
-  sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-
-  pio_sm_init(pio, sm, offset, &c);
-  pio_sm_set_enabled(pio, sm, true);
-  ///pio_sm_set_clkdiv(pio, sm, 4.0f);
-}
+static uint32_t audio_dma_channel;
 
 namespace pimoroni {
 
@@ -154,118 +82,124 @@ namespace pimoroni {
     pio_sm_restart(bitstream_pio, bitstream_sm);
   }
 
+  uint16_t GalacticUnicorn::light() {
+    adc_select_input(2);
+    return adc_read();
+  }
+
   void GalacticUnicorn::init() {
     // todo: shouldn't need to do this if things were cleaned up properly but without
     // this any attempt to run a micropython script twice will fail
     static bool already_init = false;
 
-    // setup pins
-    gpio_init(pin::LED_DATA0); gpio_set_dir(pin::LED_DATA0, GPIO_OUT);
-    gpio_init(pin::LED_DATA1); gpio_set_dir(pin::LED_DATA1, GPIO_OUT);
-    gpio_init(pin::LED_CLOCK); gpio_set_dir(pin::LED_CLOCK, GPIO_OUT);
-    gpio_init(pin::LED_LATCH); gpio_set_dir(pin::LED_LATCH, GPIO_OUT);
-    gpio_init(pin::LED_BLANK); gpio_set_dir(pin::LED_BLANK, GPIO_OUT);
-
-    gpio_init(pin::ROW_DATA0); gpio_set_dir(pin::ROW_DATA0, GPIO_OUT);
-    gpio_init(pin::ROW_DATA1); gpio_set_dir(pin::ROW_DATA1, GPIO_OUT);
-    gpio_init(pin::ROW_CLEAR); gpio_set_dir(pin::ROW_CLEAR, GPIO_OUT);
-    gpio_init(pin::ROW_CLOCK); gpio_set_dir(pin::ROW_CLOCK, GPIO_OUT);
-
     // create 14-bit gamma luts
     for(uint16_t v = 0; v < 256; v++) {
       // gamma correct the provided 0-255 brightness value onto a
       // 0-65535 range for the pwm counter
-      float r_gamma = 2.8f;
-      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * 16383.0f + 0.5f);
-
-      float g_gamma = 2.8f;
-      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * 16383.0f + 0.5f);
-
-      float b_gamma = 2.8f;
-      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * 16383.0f + 0.5f);
+      float r_gamma = 1.8f;
+      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
+      float g_gamma = 2.0f;
+      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
+      float b_gamma = 1.8f;
+      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
     }
+                
+    // for each row:
+    //   for each bcd frame:
+    //            0: 00110110                           // row pixel count (minus one)
+    //      1  - 53: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+    //      54 - 55: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
+    //           56: xxxxrrrr                           // row select bits
+    //      57 - 59: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+    //
+    //  .. and back to the start
 
-// the data is structured like this:
-//
-// loop through the eleven rows of the display...
-//
-//   1rr00000                     // set row select bit on rows 0 and 8 (side set the clock)
-//   00000000 00000000 00000000   // dummy bytes to align to dwords
-//
-//   within this row we loop through the 14 bcd frames for this row...
-//
-//      0  -  161: 100100rr, 100101rr, 100100gg, 100101gg, 100100bb, 100101bb, ... x 27 # left+right half rgb pixel data doubled for clock pulses, keep BLANK high
-//            162: 10011000  // LATCH pixel data
-//            163: 10000000  // turn off BLANK to output pixel data - now at 164 bytes (41 dwords)
-//      164 - 165: 00001111, 11111111, # bcd tick count (0-65536)
-//            166: 10010000  // turn BLANK back on 
-//            167: 00000000  // dummy byte to ensure dword aligned
-//
-//  .. and back to the start
 
     // initialise the bcd timing values and row selects in the bitstream
     for(uint8_t row = 0; row < HEIGHT; row++) {
-      uint16_t row_offset = row * (ROW_BYTES + ROW_FRAME_BYTES * BCD_FRAMES);
+      for(uint8_t frame = 0; frame < BCD_FRAME_COUNT; frame++) {
+        // find the offset of this row and frame in the bitstream
+        uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
-      // setup row select on rows 0 and 8
-      uint8_t row_select = row == 0 ? 0b10111000 : (row == 8 ? 0b11011000 : 0b10011000);
-      bitstream[row_offset + 0] = row_select;
-
-      for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {
-        uint16_t frame_offset = row_offset + ROW_BYTES + (ROW_FRAME_BYTES * frame);
-
-        bitstream[frame_offset + 162] = 0b10011000;  // LATCH pixel data
-        bitstream[frame_offset + 163] = 0b10001000;  // BLANK low to enable column outputs
+        p[ 0] = WIDTH - 1;               // row pixel count
+        p[56] = row;                     // row select
 
         // set the number of bcd ticks for this frame
-        uint16_t bcd_ticks = frame == BCD_FRAMES - 1 ? 1 : 1 << frame;
-        bitstream[frame_offset + 164] = (bcd_ticks &  0xff);
-        bitstream[frame_offset + 165] = (bcd_ticks &  0xff00) >> 8;
-
-        bitstream[frame_offset + 166] = 0b10010000;  // BLANK high again to disable outputs
-
-        // setup empty pixels with BLANK high and a clock pulse
-        for(uint8_t col = 0; col < 162; col += 2) {
-          bitstream[frame_offset + col + 0] = 0b10010000;
-          bitstream[frame_offset + col + 1] = 0b10010100;
-        }
-
-/*
-        uint16_t row_select_offset = offset + 164;
-        uint16_t bcd_offset = offset + 165;
-
-        // the last bcd frame is used to allow the fets to discharge to avoid ghosting
-        if(frame == BCD_FRAMES - 1) {
-          uint16_t bcd_ticks = 65535;
-          bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
-          bitstream[bcd_offset]     = (bcd_ticks &  0xff);
-        }else{
-          uint8_t row_select = row == 0 ? 0b01000000 : (row == 8 ? 0b00100000 : 0b00000000);
-          bitstream[row_select_offset] = row_select;
-          
-          uint16_t bcd_ticks = 1 << frame;
-          bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
-          bitstream[bcd_offset]     = (bcd_ticks &  0xff);
-        }*/
+        uint32_t bcd_ticks = (1 << frame);
+        p[57] = (bcd_ticks &     0xff) >>  0;
+        p[58] = (bcd_ticks &   0xff00) >>  8;
+        p[59] = (bcd_ticks & 0xff0000) >> 16;
       }
-/*
-      for(size_t i = 0; i < sizeof(bitstream); i++) {
-        bitstream[i] = 0b11100000;
-      }*/
     }
 
+    // setup light sensor adc
+    adc_init();
+    adc_gpio_init(LIGHT_SENSOR);
+
+    pio_gpio_init(bitstream_pio, COLUMN_CLOCK);
+    pio_gpio_init(bitstream_pio, COLUMN_DATA);
+    pio_gpio_init(bitstream_pio, COLUMN_LATCH);
+
+    gpio_init(COLUMN_CLOCK); gpio_set_dir(COLUMN_CLOCK, GPIO_OUT); gpio_put(COLUMN_CLOCK, false);
+    gpio_init(COLUMN_DATA); gpio_set_dir(COLUMN_DATA, GPIO_OUT); gpio_put(COLUMN_DATA, false);
+    gpio_init(COLUMN_LATCH); gpio_set_dir(COLUMN_LATCH, GPIO_OUT); gpio_put(COLUMN_LATCH, false);
+    
+    sleep_ms(100);
+
+    // configure full output current in register 2
+
+    uint16_t reg1 = 0b1111111111001110;
+
+    // clock the register value to the first 9 driver chips
+    for(int j = 0; j < 9; j++) {      
+      for(int i = 0; i < 16; i++) {
+        if(reg1 & (1U << (15 - i))) {
+          gpio_put(COLUMN_DATA, true);
+        }else{
+          gpio_put(COLUMN_DATA, false);
+        }
+        sleep_us(10);
+        gpio_put(COLUMN_CLOCK, true);
+        sleep_us(10);
+        gpio_put(COLUMN_CLOCK, false);
+      }
+    }
+
+    // clock the last chip and latch the value
+    for(int i = 0; i < 16; i++) {
+      if(reg1 & (1U << (15 - i))) {
+        gpio_put(COLUMN_DATA, true);
+      }else{
+        gpio_put(COLUMN_DATA, false);
+      }
+
+      sleep_us(10);
+      gpio_put(COLUMN_CLOCK, true);
+      sleep_us(10);
+      gpio_put(COLUMN_CLOCK, false);
+
+      if(i == 4) {
+        gpio_put(COLUMN_LATCH, true);
+      }
+    }
+    gpio_put(COLUMN_LATCH, false);
+    
+
+    gpio_init(MUTE); gpio_set_dir(MUTE, GPIO_OUT); gpio_put(MUTE, true);
+
     // setup button inputs
-    gpio_set_function(pin::SWITCH_A, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_A, GPIO_IN); gpio_pull_up(pin::SWITCH_A);
-    gpio_set_function(pin::SWITCH_B, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_B, GPIO_IN); gpio_pull_up(pin::SWITCH_B);
-    gpio_set_function(pin::SWITCH_C, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_C, GPIO_IN); gpio_pull_up(pin::SWITCH_C);
-    gpio_set_function(pin::SWITCH_D, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_D, GPIO_IN); gpio_pull_up(pin::SWITCH_D);
-    gpio_set_function(pin::SWITCH_E, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_E, GPIO_IN); gpio_pull_up(pin::SWITCH_E);
+    gpio_init(SWITCH_A); gpio_pull_up(SWITCH_A);
+    gpio_init(SWITCH_B); gpio_pull_up(SWITCH_B);
+    gpio_init(SWITCH_C); gpio_pull_up(SWITCH_C);
+    gpio_init(SWITCH_D); gpio_pull_up(SWITCH_D);
 
-    gpio_set_function(pin::SWITCH_BRIGHTNESS_UP, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_BRIGHTNESS_UP, GPIO_IN); gpio_pull_up(pin::SWITCH_BRIGHTNESS_UP);
-    gpio_set_function(pin::SWITCH_BRIGHTNESS_DOWN, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_BRIGHTNESS_DOWN, GPIO_IN); gpio_pull_up(pin::SWITCH_BRIGHTNESS_DOWN);
+    gpio_init(SWITCH_SLEEP); gpio_pull_up(SWITCH_SLEEP);
 
-    gpio_set_function(pin::SWITCH_VOLUME_UP, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_VOLUME_UP, GPIO_IN); gpio_pull_up(pin::SWITCH_VOLUME_UP);
-    gpio_set_function(pin::SWITCH_VOLUME_DOWN, GPIO_FUNC_SIO); gpio_set_dir(pin::SWITCH_VOLUME_DOWN, GPIO_IN); gpio_pull_up(pin::SWITCH_VOLUME_DOWN);
+    gpio_init(SWITCH_BRIGHTNESS_UP); gpio_pull_up(SWITCH_BRIGHTNESS_UP);
+    gpio_init(SWITCH_BRIGHTNESS_DOWN); gpio_pull_up(SWITCH_BRIGHTNESS_DOWN);
+
+    gpio_init(SWITCH_VOLUME_UP); gpio_pull_up(SWITCH_VOLUME_UP);
+    gpio_init(SWITCH_VOLUME_DOWN); gpio_pull_up(SWITCH_VOLUME_DOWN);
 
     if(already_init) {
       // stop and release the dma channel
@@ -288,9 +222,38 @@ namespace pimoroni {
 
     // setup the pio
     bitstream_pio = pio0;
-    bitstream_sm = pio_claim_unused_sm(pio0, true);
-    sm_offset = pio_add_program(bitstream_pio, &galactic_unicorn_program);
-    unicorn_jetpack_program_init(bitstream_pio, bitstream_sm, sm_offset);
+    bitstream_sm = pio_claim_unused_sm(bitstream_pio, true);
+    bitstream_sm_offset = pio_add_program(bitstream_pio, &galactic_unicorn_program);
+      
+    pio_gpio_init(bitstream_pio, COLUMN_CLOCK);
+    pio_gpio_init(bitstream_pio, COLUMN_DATA);
+    pio_gpio_init(bitstream_pio, COLUMN_LATCH);
+    pio_gpio_init(bitstream_pio, COLUMN_BLANK);
+
+    pio_gpio_init(bitstream_pio, ROW_BIT_0);
+    pio_gpio_init(bitstream_pio, ROW_BIT_1);
+    pio_gpio_init(bitstream_pio, ROW_BIT_2);
+    pio_gpio_init(bitstream_pio, ROW_BIT_3);
+
+    // set all led driving pins as outputs
+    pio_sm_set_consecutive_pindirs(bitstream_pio, bitstream_sm, COLUMN_CLOCK, 8, true);
+
+    pio_sm_config c = galactic_unicorn_program_get_default_config(bitstream_sm_offset);
+
+    // osr shifts right, autopull on, autopull threshold 8
+    sm_config_set_out_shift(&c, true, true, 32);
+
+    // configure out, set, and sideset pins
+    sm_config_set_out_pins(&c, ROW_BIT_0, 4);
+    sm_config_set_set_pins(&c, COLUMN_DATA, 3);
+    sm_config_set_sideset_pins(&c, COLUMN_CLOCK);
+
+    // join fifos as only tx needed (gives 8 deep fifo instead of 4)
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    pio_sm_init(bitstream_pio, bitstream_sm, bitstream_sm_offset, &c);
+    pio_sm_set_enabled(bitstream_pio, bitstream_sm, true);
+
 
     // setup dma transfer for pixel data to the pio
     dma_channel = dma_claim_unused_channel(true);
@@ -308,6 +271,52 @@ namespace pimoroni {
     dma_channel_set_read_addr(dma_channel, bitstream, true);
 
     already_init = true;
+
+
+    // setup audio pio program
+      /*
+    audio_pio = pio0;
+    audio_sm = pio_claim_unused_sm(audio_pio, true);
+    audio_sm_offset = pio_add_program(audio_pio, &audio_i2s_program);
+    audio_i2s_program_init(audio_pio, audio_sm, audio_sm_offset, I2S_DATA, I2S_BCLK);
+    //pio_sm_set_enabled(audio_pio, audio_sm, true);
+
+    uint32_t system_clock_frequency = clock_get_hz(clk_sys);
+    uint32_t divider = system_clock_frequency * 4 / 22050; // avoid arithmetic overflow
+    pio_sm_set_clkdiv_int_frac(audio_pio, audio_sm, divider >> 8u, divider & 0xffu);
+
+
+
+    audio_dma_channel = dma_claim_unused_channel(true);
+    dma_channel_config audio_config = dma_channel_get_default_config(audio_dma_channel);
+    channel_config_set_transfer_data_size(&audio_config, DMA_SIZE_32);
+    channel_config_set_bswap(&audio_config, false); // byte swap to reverse little endian
+    channel_config_set_dreq(&audio_config, pio_get_dreq(audio_pio, audio_sm, true));
+    dma_channel_configure(audio_dma_channel, &audio_config, &audio_pio->txf[audio_sm], NULL, 0, false);
+    dma_channel_set_irq0_enabled(audio_dma_channel, true);
+    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);*/
+    //irq_set_exclusive_handler(DMA_IRQ_0, dma_complete);
+    //irq_set_enabled(DMA_IRQ_0, true);
+
+/*    dma_channel_set_trans_count(audio_dma_channel, BITSTREAM_LENGTH / 4, false);
+    dma_channel_set_read_addr(audio_dma_channel, bitstream, true);*/
+    //pio_sm_config audio_i2s_config = audio_i2s_program_get_default_config(audio_sm_offset);
+
+    // osr shifts right, autopull on, autopull threshold 8
+    //sm_config_set_out_shift(&audio_i2s_config, true, true, 32);
+
+    // // configure out, set, and sideset pins
+    // sm_config_set_out_pins(&audio_i2s_config, ROW_BIT_0, 4);
+    // sm_config_set_set_pins(&audio_i2s_config, COLUMN_DATA, 3);
+    // sm_config_set_sideset_pins(&audio_i2s_config, COLUMN_CLOCK);
+
+    // // join fifos as only tx needed (gives 8 deep fifo instead of 4)
+    // sm_config_set_fifo_join(&audio_i2s_config, PIO_FIFO_JOIN_TX);
+
+
+    //pio_sm_init(audio_pio, audio_sm, audio_sm_offset, &audio_i2s_config);
+    //pio_sm_set_enabled(audio_pio, audio_sm, true);
+
   }
 
   void GalacticUnicorn::clear() {
@@ -318,70 +327,98 @@ namespace pimoroni {
     }
   }
 
-  void GalacticUnicorn::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
-    
+  void GalacticUnicorn::play_sample(uint8_t *data, uint32_t length) {
+    dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 4);
+  }
 
+  void GalacticUnicorn::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
     // make those coordinates sane
     x = (WIDTH - 1) - x;
     y = (HEIGHT - 1) - y;
 
-    // determine offset in the buffer for this row
-    uint16_t row_offset = y * (ROW_BYTES + ROW_FRAME_BYTES * BCD_FRAMES);
+    uint16_t gamma_r = r_gamma_lut[r];
+    uint16_t gamma_g = g_gamma_lut[g];
+    uint16_t gamma_b = b_gamma_lut[b];
 
-    uint16_t bits[3] = {r_gamma_lut[b], g_gamma_lut[g], b_gamma_lut[r]};
-    //uint16_t gr = r_gamma_lut[r];
-    //uint16_t gg = g_gamma_lut[g];
-    //uint16_t gb = b_gamma_lut[b];
+    // for each row:
+    //   for each bcd frame:
+    //            0: 00110110                           // row pixel count (minus one)
+    //      1  - 53: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+    //      54 - 55: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
+    //           56: xxxxrrrr                           // row select bits
+    //      57 - 59: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+    //
+    //  .. and back to the start
 
     // set the appropriate bits in the separate bcd frames
-    for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {
-      uint16_t frame_offset = (ROW_FRAME_BYTES * frame) + 4;
-      uint16_t offset = row_offset + frame_offset;// + byte_offset;
+    for(uint8_t frame = 0; frame < BCD_FRAME_COUNT; frame++) {
+      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 1 + x];
 
-// loop through the eleven rows of the display...
-//
-//   1rr00000                     // set row select bit on rows 0 and 8 (side set the clock)
-//   00000000 00000000 00000000   // dummy bytes to align to dwords
-//
-//   within this row we loop through the 14 bcd frames for this row...
-//
-//      0  -  161: 100100rr, 100101rr, 100100gg, 100101gg, 100100bb, 100101bb, ... x 27 # left+right half rgb pixel data doubled for clock pulses, keep BLANK high
-//            162: 10011000  // LATCH pixel data
-//            163: 10000000  // turn off BLANK to output pixel data - now at 164 bytes (41 dwords)
-//      164 - 165: 00001111, 11111111, # bcd tick count (0-65536)
-//            166: 10010000  // turn BLANK back on 
-//            167: 00000000  // dummy byte to ensure dword aligned
-//
-//  .. and back to the start
+      uint8_t red_bit = gamma_r & 0b1;
+      uint8_t green_bit = gamma_g & 0b1;
+      uint8_t blue_bit = gamma_b & 0b1;
 
-      // work out the byte offset of this pixel
-      /*if(bit_offset >= 160) {
-        bit_offset -= 160;
-      }*/
+      *p = (blue_bit << 2) | (green_bit << 1) | (red_bit << 0);
 
-      for(int bit = 0; bit < 3; bit++) {
-        int16_t bit_offset = x * 6 + 4 + (bit * 2);
-        
-
-        uint8_t bit_position = bit_offset >= 160 ? 1 : 0;
-        uint8_t mask = 0b1 << bit_position;
-        uint8_t value = (bits[bit] & 0b1) << bit_position;
-        
-        bitstream[offset + (bit_offset % 160) + 0] &= ~mask;
-        bitstream[offset + (bit_offset % 160) + 0] |= value;
-        bitstream[offset + (bit_offset % 160) + 1] &= ~mask;
-        bitstream[offset + (bit_offset % 160) + 1] |= value;
-
-        //bit_offset += 2;
-        bits[bit] >>= 1;
-      }
+      gamma_r >>= 1;
+      gamma_g >>= 1;
+      gamma_b >>= 1;
     }
   }
 
   void GalacticUnicorn::set_pixel(int x, int y, uint8_t v) {
     set_pixel(x, y, v, v, v);
+  }
+
+  void GalacticUnicorn::set_brightness(float value) {
+    value = value < 0.0f ? 0.0f : value;
+    value = value > 1.0f ? 1.0f : value;
+    this->brightness = floor(value * 255.0f);
+  }
+
+  float GalacticUnicorn::get_brightness() {
+    return this->brightness / 255.0f;
+  }
+
+  void GalacticUnicorn::adjust_brightness(float delta) {
+    this->set_brightness(this->get_brightness() + delta);
+  }
+
+  void GalacticUnicorn::set_volume(float value) {
+    value = value < 0.0f ? 0.0f : value;
+    value = value > 1.0f ? 1.0f : value;
+    this->volume = floor(value * 255.0f);
+  }
+
+  float GalacticUnicorn::get_volume() {
+    return this->volume / 255.0f;
+  }
+
+  void GalacticUnicorn::adjust_volume(float delta) {
+    this->set_volume(this->get_volume() + delta);
+  }
+
+
+  void GalacticUnicorn::update(PicoGraphics_PenRGB565 &graphics) {
+    uint16_t *p = (uint16_t *)graphics.frame_buffer;
+    for(size_t j = 0; j < 53 * 11; j++) {
+      int x = j % 53;
+      int y = j / 53;
+
+      uint16_t col = __builtin_bswap16(*p);
+      uint8_t r = ((col & 0b1111100000000000) >> 11) << 3;
+      uint8_t g = ((col & 0b0000011111100000) >>  5) << 2;
+      uint8_t b = ((col & 0b0000000000011111) >>  0) << 3;
+      p++;
+
+      r = (r * this->brightness) >> 8;
+      g = (g * this->brightness) >> 8;
+      b = (b * this->brightness) >> 8;
+    
+      set_pixel(x, y, b, g, r);
+    }
   }
 
   bool GalacticUnicorn::is_pressed(uint8_t button) {
