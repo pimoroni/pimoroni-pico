@@ -37,9 +37,9 @@ void text(std::string t, Point p, float s = 1.0f, float a = 1.0f) {
   p.x += (53 / 2) - (w / 2);
   p.y += (11 / 2);
   graphics.text(t, Point(p.x, p.y), -1, s, a);
-  graphics.text(t, Point(p.x + 1, p.y), -1, s, a);
-  graphics.text(t, Point(p.x + 1, p.y + 1), -1, s, a);
-  graphics.text(t, Point(p.x, p.y + 1), -1, s, a);
+  //graphics.text(t, Point(p.x + 1, p.y), -1, s, a);
+  //graphics.text(t, Point(p.x + 1, p.y + 1), -1, s, a);
+  //graphics.text(t, Point(p.x, p.y + 1), -1, s, a);
 }
 
 struct star_t {
@@ -73,6 +73,8 @@ void step_star(star_t &s) {
 
 int main() {
 
+  stdio_init_all();
+
   uint8_t hue_map[53][3];
   for(int i = 0; i < 53; i++) {
     from_hsv(i / 53.0f, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
@@ -103,18 +105,17 @@ gpio_set_function(28, GPIO_FUNC_SIO);
   bool x_pressed = false;
   bool y_pressed = false;
 */
-  graphics.set_font("sans");
+graphics.set_font("bitmap8");
 
 
 
   uint i = 0;
-  int v = 255;
 
   float hue_offset = 0.0f;
-  float brightness = 0.5f;
-  float curve = 4.0f;
 
   while(true) {
+    i++;
+
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
       hue_offset += 0.05;
       if(hue_offset > 1.0f) hue_offset = 1.0f;
@@ -125,69 +126,37 @@ gpio_set_function(28, GPIO_FUNC_SIO);
     }
 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
-      brightness += 0.05;
-      if(brightness > 1.0f) brightness = 1.0f;
+      galactic_unicorn.adjust_brightness(+0.01);
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
-      brightness -= 0.05;
-      if(brightness < 0.0f) brightness = 0.0f;
+      galactic_unicorn.adjust_brightness(-0.01);
     }
 
-
-    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
-      curve += 0.5;
-      if(curve > 100.0f) curve = 100.0f;
-    }
-    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
-      curve -= 0.5;
-      if(curve < 0.5) curve = 0.5;
-    }
-i++;
-
-    graphics.set_pen(0, 0, 0);
-    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {graphics.set_pen(255, 0, 0);}
-    graphics.clear();
 
     
-    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {v = v == 0 ? 0 : v - 1;}
-
-
-    for(int i = 0; i < 100; i++) {
-      star_t &star = stars[i];
-      step_star(star);
-
-      uint b = star.brightness();
-      graphics.set_pen(b, b, b);
-      //graphics.pixel(Point(star.x + (53 / 2), star.y + (11 / 2)));
-    }
-
-graphics.set_pen(255, 255, 255);
-    float s = 0.8f;//0.65f + (sin(i / 25.0f) * 0.15f);
+/*
+    graphics.set_pen(255, 255, 255);
+    float s = 0.65f;//0.65f + (sin(i / 25.0f) * 0.15f);
     float a = 1.0f;// (sin(i / 25.0f) * 100.0f);
-    float x = (sin(i / 25.0f) * 40.0f) * s;
-    float y = (cos(i / 15.0f) * 10.0f) * s;
-    text("Galactic", Point(x, y), s, a);
-    
-    uint16_t *p = (uint16_t *)graphics.frame_buffer;
-    for(size_t i = 0; i < 53 * 11; i++) {
-      int x = i % 53;
-      int y = i / 53;
-      uint r = ((*p & 0b1111100000000000) >> 11) << 3;
-      uint g = ((*p & 0b0000011111100000) >>  5) << 2;
-      uint b = ((*p & 0b0000000000011111) >>  0) << 3;
-      p++;
+    float x = (sin(i / 74.0f) * 80.0f) * s;
+    float y = (cos(i / 43.0f) * 6.0f) * s;
+    text("Chester smells!", Point(x, y - 3), s, a);
+*/
 
-      if(r > 200 && g > 200 && b > 200) {
-        r = hue_map[x][0];
-        g = hue_map[x][1];
-        b = hue_map[x][2];
+    for(int x = 0; x < 53; x++) {
+      for(int y = 0; y < 11; y++) {
+        int v = ((sin((x + y) / 3.0f + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
+        
+        graphics.set_pen(v, v, v);
+        graphics.pixel(Point(x, y));      
       }
-      
-      galactic_unicorn.set_pixel(x, y, r, g, b);
     }
+    
+    galactic_unicorn.update(graphics);
+    
 
-
-    sleep_ms(10);
+    printf("%d\n", galactic_unicorn.light());
+    sleep_ms(20);
   }
 
 
