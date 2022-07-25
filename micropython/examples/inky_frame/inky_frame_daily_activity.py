@@ -40,7 +40,6 @@ network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_hand
 gc.collect()
 graphics = PicoGraphics(DISPLAY_INKY_FRAME)
 WIDTH, HEIGHT = graphics.get_bounds()
-graphics.set_font("cursive")
 gc.collect()
 
 
@@ -124,6 +123,7 @@ while True:
     # Main text
     graphics.set_font("cursive")
     graphics.set_pen(4)
+    graphics.set_font("cursive")
     graphics.text("Activity Idea", 55, 30, WIDTH - 20, 2)
     graphics.set_pen(0)
     graphics.set_font("bitmap8")
