@@ -182,7 +182,7 @@ If you were to try and draw a single "grey" pixel it will end up either black or
 
 ##### Inky Frame
 
-Inky Frame is a special case- the display itself supports only 7 (8 if you include its cleaning "clear" colour, which we call Tapue) colours.
+Inky Frame is a special case- the display itself supports only 7 (8 if you include its cleaning "clear" colour, which we call Taupe) colours.
 
 These are:
 
