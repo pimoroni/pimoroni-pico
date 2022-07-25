@@ -175,7 +175,7 @@ MICROPY_EVENT_POLL_HOOK
 
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
-    while(self->badger2040->is_busy() || absolute_time_diff_us(t_end, get_absolute_time()) > 0) {
+    while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
