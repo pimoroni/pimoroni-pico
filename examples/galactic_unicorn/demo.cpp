@@ -114,6 +114,9 @@ gpio_set_function(28, GPIO_FUNC_SIO);
   float brightness = 0.5f;
   float curve = 4.0f;
 
+  int x = 10; 
+  int y = 5;
+
   while(true) {
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
       hue_offset += 0.05;
@@ -143,6 +146,27 @@ gpio_set_function(28, GPIO_FUNC_SIO);
       if(curve < 0.5) curve = 0.5;
     }
 
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
+      x -= 1;
+      sleep_ms(250);
+    }
+
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
+      x += 1;
+      sleep_ms(250);
+    }
+
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_C)) {
+      y -= 1;
+      sleep_ms(250);
+    }
+
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_D)) {
+      y += 1;
+      sleep_ms(250);
+    }
+
+/*
     for(int y = 0; y < 11; y++) {
       for(int x = 0; x < 53; x++) {
         float fx = x / 53.0f;
@@ -150,27 +174,18 @@ gpio_set_function(28, GPIO_FUNC_SIO);
         float twopi = M_PI * 2;
         float hue = fy + (sin(fx * twopi / curve));
         float fade = 1.0f;
-       /* if(hue < 0.0f) {
-          fade += (hue * 10.0f);
-          if(fade < 0.0f) fade = 0.0f;
-        }
-        if(hue > 1.0f) {
-          fade -= ((hue - 1.0f) * 10.0f);
-          if(fade < 0.0f) fade = 0.0f;
-        }*/
 
         hue += hue_offset;
         while(hue < 0.0f) {hue += 1.0f;}
         while(hue > 1.0f) {hue -= 1.0f;}
         hue = 1.0f - hue;
-/*
-        uint8_t r = 0, g = 0, b = 0;
-        from_hsv(hue, 1.0f, brightness * fade, r, g, b);*/
         ok_color::HSL hsl{.h = hue, .s = 1.0f, .l = brightness * fade};
         ok_color::RGB rgb = ok_color::okhsl_to_srgb(hsl);
         galactic_unicorn.set_pixel(x, y, rgb.r * 255.0f, rgb.g * 255.0f, rgb.b * 255.0f);
       }
-    }
+    }*/
+
+    galactic_unicorn.set_pixel(x, y, 255, 255, 255);
     /*i++;
 
     graphics.set_pen(0, 0, 0);

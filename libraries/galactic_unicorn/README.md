@@ -17,6 +17,7 @@ We've included helper functions to handle every aspect of drawing to the display
     - [init](#init)
     - [set_pixel](#set_pixel)
     - [is_pressed](#is_pressed)
+- [Examples](#examples)
 
 ## Example Program
 
@@ -99,3 +100,15 @@ The button vaule should be a `uint8_t` denoting a pin, and constants `A`, `B`, `
 ```c++
 bool is_a_button_pressed = pico_unicorn.is_pressed(PicoUnicorn::A)
 ```
+
+# Examples
+
+## Game of Life
+
+## Retro Super-computer
+
+Random LEDs blink on and off mimicing the look of a movie super computer doing it's work in the eighties.
+
+## Nostalgia Terminal
+
+A collection of copies of classic terminal styles including C64, MS-DOS, Spectrum, and more.
