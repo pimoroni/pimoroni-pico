@@ -24,6 +24,7 @@
 namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
+  typedef uint32_t RGB888;
   struct RGB {
     int16_t r, g, b;
 
@@ -82,6 +83,10 @@ namespace pimoroni {
 
     constexpr RGB565 to_rgb332() {
       return (r & 0b11100000) | ((g & 0b11100000) >> 3) | ((b & 0b11000000) >> 6);
+    }
+
+    constexpr RGB888 to_rgb888() {
+      return (r << 16) | (g << 8) | (b << 0);
     }
   };
 
@@ -418,6 +423,23 @@ namespace pimoroni {
         return w * h * sizeof(RGB565);
       }
   };
+
+  
+  class PicoGraphics_PenRGB888 : public PicoGraphics {
+    public:
+      RGB src_color;
+      RGB888 color;
+      PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      static size_t buffer_size(uint w, uint h) {
+        return w * h * sizeof(uint32_t);
+      }
+  };
+
 
   class DisplayDriver {
     public:
