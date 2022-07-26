@@ -38,15 +38,6 @@
 //
 //  .. and back to the start
 
-constexpr uint32_t ROW_COUNT = 11;
-constexpr uint32_t BCD_FRAME_COUNT = 14;
-constexpr uint32_t BCD_FRAME_BYTES = 60;
-constexpr uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
-constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
-
-// must be aligned for 32bit dma transfer
-alignas(4) static uint8_t bitstream[BITSTREAM_LENGTH] = {0};
-
 static uint16_t r_gamma_lut[256] = {0};
 static uint16_t g_gamma_lut[256] = {0};
 static uint16_t b_gamma_lut[256] = {0};
@@ -56,14 +47,22 @@ static uint32_t audio_dma_channel;
 
 namespace pimoroni {
 
+  GalacticUnicorn* GalacticUnicorn::unicorn = nullptr;
+
   // once the dma transfer of the scanline is complete we move to the
   // next scanline (or quit if we're finished)
-  void __isr dma_complete() {
-    if (dma_hw->ints0 & (1u << dma_channel)) {
-      dma_hw->ints0 = (1u << dma_channel); // clear irq flag
-      dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
-      dma_channel_set_read_addr(dma_channel, bitstream, true);
+  void __isr GalacticUnicorn::dma_complete() {
+    if(dma_channel_get_irq0_status(dma_channel) && unicorn != nullptr) {
+      unicorn->next_dma_sequence();
     }
+  }
+
+  void GalacticUnicorn::next_dma_sequence() {
+    // Clear any interrupt request caused by our channel
+    dma_channel_acknowledge_irq0(dma_channel);
+
+    dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
+    dma_channel_set_read_addr(dma_channel, bitstream, true);
   }
 
   GalacticUnicorn::~GalacticUnicorn() {
@@ -266,6 +265,8 @@ namespace pimoroni {
     irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), true);
     irq_set_exclusive_handler(DMA_IRQ_0, dma_complete);
     irq_set_enabled(DMA_IRQ_0, true);
+
+    unicorn = this;
 
     dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
     dma_channel_set_read_addr(dma_channel, bitstream, true);

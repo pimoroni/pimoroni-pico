@@ -47,6 +47,7 @@ include(adcfft/micropython)
 # LEDs & Matrices
 include(plasma/micropython)
 include(hub75/micropython)
+include(galactic_unicorn/micropython)
 
 # Packs
 include(pico_unicorn/micropython)
