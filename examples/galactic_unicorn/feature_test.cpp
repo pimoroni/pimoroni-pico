@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-PicoGraphics_PenRGB565 graphics(53, 11, nullptr);
+PicoGraphics_PenRGB888 graphics(53, 11, nullptr);
 GalacticUnicorn galactic_unicorn;
 
 // left_channel_bin and right_channel_bin are in audio_samples.cpp

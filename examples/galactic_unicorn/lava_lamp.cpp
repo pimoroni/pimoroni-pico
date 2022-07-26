@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-PicoGraphics_PenRGB565 graphics(53, 11, nullptr);
+PicoGraphics_PenRGB888 graphics(53, 11, nullptr);
 GalacticUnicorn galactic_unicorn;
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel

@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-PicoGraphics_PenRGB565 graphics(53, 11, nullptr);
+PicoGraphics_PenRGB888 graphics(53, 11, nullptr);
 GalacticUnicorn galactic_unicorn;
 
 std::string message = "Pirate. Monkey. Robot. Ninja.";
