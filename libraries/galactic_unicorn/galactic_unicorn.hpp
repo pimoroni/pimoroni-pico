@@ -53,8 +53,8 @@ namespace pimoroni {
     uint audio_sm = 0;
     uint audio_sm_offset = 0;
 
-    uint8_t brightness = 255;
-    uint8_t volume = 127;
+    uint16_t brightness = 256;
+    uint16_t volume = 127;
 
   public:
     ~GalacticUnicorn();
@@ -64,6 +64,7 @@ namespace pimoroni {
 
     void clear();
 
+    void update(PicoGraphics_PenRGB565 &graphics);
     void update(PicoGraphics_PenRGB888 &graphics);
 
     void set_brightness(float value);

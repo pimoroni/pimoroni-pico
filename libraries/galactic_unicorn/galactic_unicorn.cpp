@@ -39,7 +39,7 @@
 //  .. and back to the start
 
 constexpr uint32_t ROW_COUNT = 11;
-constexpr uint32_t BCD_FRAME_COUNT = 12;
+constexpr uint32_t BCD_FRAME_COUNT = 14;
 constexpr uint32_t BCD_FRAME_BYTES = 60;
 constexpr uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
@@ -98,7 +98,7 @@ namespace pimoroni {
       // 0-65535 range for the pwm counter
       float r_gamma = 1.8f;
       r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-      float g_gamma = 2.0f;
+      float g_gamma = 1.8f;
       g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
       float b_gamma = 1.8f;
       b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
@@ -356,7 +356,7 @@ namespace pimoroni {
   void GalacticUnicorn::set_brightness(float value) {
     value = value < 0.0f ? 0.0f : value;
     value = value > 1.0f ? 1.0f : value;
-    this->brightness = floor(value * 255.0f);
+    this->brightness = floor(value * 256.0f);
   }
 
   float GalacticUnicorn::get_brightness() {
@@ -382,13 +382,33 @@ namespace pimoroni {
   }
 
 
-  void GalacticUnicorn::update(PicoGraphics_PenRGB888 &graphics) {
+  void GalacticUnicorn::update(PicoGraphics_PenRGB565 &graphics) {
     uint16_t *p = (uint16_t *)graphics.frame_buffer;
     for(size_t j = 0; j < 53 * 11; j++) {
       int x = j % 53;
       int y = j / 53;
 
       uint16_t col = __builtin_bswap16(*p);
+      uint8_t r = (col & 0b1111100000000000) >> 8;
+      uint8_t g = (col & 0b0000011111100000) >> 3;
+      uint8_t b = (col & 0b0000000000011111) << 3;
+      p++;
+
+      r = (r * this->brightness) >> 8;
+      g = (g * this->brightness) >> 8;
+      b = (b * this->brightness) >> 8;
+    
+      set_pixel(x, y, b, g, r);
+    }
+  }
+
+  void GalacticUnicorn::update(PicoGraphics_PenRGB888 &graphics) {
+    uint32_t *p = (uint32_t *)graphics.frame_buffer;
+    for(size_t j = 0; j < 53 * 11; j++) {
+      int x = j % 53;
+      int y = j / 53;
+
+      uint32_t col = *p;
       uint8_t r = (col & 0xff0000) >> 16;
       uint8_t g = (col & 0x00ff00) >>  8;
       uint8_t b = (col & 0x0000ff) >>  0;
@@ -397,7 +417,7 @@ namespace pimoroni {
       r = (r * this->brightness) >> 8;
       g = (g * this->brightness) >> 8;
       b = (b * this->brightness) >> 8;
-    
+
       set_pixel(x, y, b, g, r);
     }
   }
