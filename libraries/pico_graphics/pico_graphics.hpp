@@ -161,7 +161,8 @@ namespace pimoroni {
       PEN_P4,
       PEN_P8,
       PEN_RGB332,
-      PEN_RGB565
+      PEN_RGB565,
+      PEN_RGB888,
     };
 
     void *frame_buffer;
