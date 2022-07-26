@@ -25,9 +25,6 @@ void set(int x, int y, float v) {
 }
 
 float get(int x, int y) {
-  /*if(x < 0 || x >= width || y < 0 || y >= height) {
-    return 0.0f;
-  }*/
   x = x < 0 ? 0 : x;
   x = x >= width ? width - 1 : x;
 
