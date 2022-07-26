@@ -21,7 +21,8 @@ extern uint32_t right_channel_bin_len;
 void gradient(uint8_t r, uint8_t g, uint8_t b) {
   for(int y = 0; y < 12; y++) {
     for(int x = 0; x < 53; x++) {
-      graphics.set_pen((r * x) / 52, (g * x) / 52, (b * x) / 52);
+//      graphics.set_pen((r * x) / 52, (g * x) / 52, (b * x) / 52);
+      graphics.set_pen(x, x, x);
       graphics.pixel(Point(x, y));
     }
   }
@@ -72,7 +73,7 @@ int main() {
   galactic_unicorn.init();
 
   
-  galactic_unicorn.set_brightness(0.5f);
+  //galactic_unicorn.set_brightness(0.5f);
 
   while(true) {
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
