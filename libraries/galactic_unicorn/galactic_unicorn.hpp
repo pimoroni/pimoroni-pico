@@ -45,6 +45,13 @@ namespace pimoroni {
     static const uint8_t SWITCH_BRIGHTNESS_DOWN = 26;
 
   private:
+    static const uint32_t ROW_COUNT = 11;
+    static const uint32_t BCD_FRAME_COUNT = 14;
+    static const uint32_t BCD_FRAME_BYTES = 60;
+    static const uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
+    static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
+
+  private:
     PIO bitstream_pio = pio0;
     uint bitstream_sm = 0;
     uint bitstream_sm_offset = 0;
@@ -55,6 +62,11 @@ namespace pimoroni {
 
     uint16_t brightness = 256;
     uint16_t volume = 127;
+
+    // must be aligned for 32bit dma transfer
+    alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+    static GalacticUnicorn* unicorn;
+    static void dma_complete();
 
   public:
     ~GalacticUnicorn();
@@ -85,6 +97,8 @@ namespace pimoroni {
 
     void play_sample(uint8_t *data, uint32_t length);
 
+  private:
+    void next_dma_sequence();
   };
 
 }

@@ -44,6 +44,8 @@ include(pcf85063a/micropython)
 
 include(picographics/micropython)
 include(jpegdec/micropython)
+include(galactic_unicorn/micropython)
+
 
 include(modules_py/modules_py)
 
