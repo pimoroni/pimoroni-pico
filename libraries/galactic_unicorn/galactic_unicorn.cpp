@@ -39,7 +39,7 @@
 //  .. and back to the start
 
 constexpr uint32_t ROW_COUNT = 11;
-constexpr uint32_t BCD_FRAME_COUNT = 14;
+constexpr uint32_t BCD_FRAME_COUNT = 12;
 constexpr uint32_t BCD_FRAME_BYTES = 60;
 constexpr uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
 constexpr uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
@@ -274,48 +274,29 @@ namespace pimoroni {
 
 
     // setup audio pio program
-      /*
     audio_pio = pio0;
     audio_sm = pio_claim_unused_sm(audio_pio, true);
     audio_sm_offset = pio_add_program(audio_pio, &audio_i2s_program);
-    audio_i2s_program_init(audio_pio, audio_sm, audio_sm_offset, I2S_DATA, I2S_BCLK);
-    //pio_sm_set_enabled(audio_pio, audio_sm, true);
 
+    pio_gpio_init(audio_pio, I2S_DATA);
+    pio_gpio_init(audio_pio, I2S_BCLK);
+    pio_gpio_init(audio_pio, I2S_LRCLK);
+
+    audio_i2s_program_init(audio_pio, audio_sm, audio_sm_offset, I2S_DATA, I2S_BCLK);
     uint32_t system_clock_frequency = clock_get_hz(clk_sys);
     uint32_t divider = system_clock_frequency * 4 / 22050; // avoid arithmetic overflow
     pio_sm_set_clkdiv_int_frac(audio_pio, audio_sm, divider >> 8u, divider & 0xffu);
-
+    pio_sm_set_enabled(audio_pio, audio_sm, true);
 
 
     audio_dma_channel = dma_claim_unused_channel(true);
     dma_channel_config audio_config = dma_channel_get_default_config(audio_dma_channel);
-    channel_config_set_transfer_data_size(&audio_config, DMA_SIZE_32);
-    channel_config_set_bswap(&audio_config, false); // byte swap to reverse little endian
+    channel_config_set_transfer_data_size(&audio_config, DMA_SIZE_16);
+    //channel_config_set_bswap(&audio_config, false); // byte swap to reverse little endian
     channel_config_set_dreq(&audio_config, pio_get_dreq(audio_pio, audio_sm, true));
     dma_channel_configure(audio_dma_channel, &audio_config, &audio_pio->txf[audio_sm], NULL, 0, false);
-    dma_channel_set_irq0_enabled(audio_dma_channel, true);
-    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);*/
-    //irq_set_exclusive_handler(DMA_IRQ_0, dma_complete);
-    //irq_set_enabled(DMA_IRQ_0, true);
-
-/*    dma_channel_set_trans_count(audio_dma_channel, BITSTREAM_LENGTH / 4, false);
-    dma_channel_set_read_addr(audio_dma_channel, bitstream, true);*/
-    //pio_sm_config audio_i2s_config = audio_i2s_program_get_default_config(audio_sm_offset);
-
-    // osr shifts right, autopull on, autopull threshold 8
-    //sm_config_set_out_shift(&audio_i2s_config, true, true, 32);
-
-    // // configure out, set, and sideset pins
-    // sm_config_set_out_pins(&audio_i2s_config, ROW_BIT_0, 4);
-    // sm_config_set_set_pins(&audio_i2s_config, COLUMN_DATA, 3);
-    // sm_config_set_sideset_pins(&audio_i2s_config, COLUMN_CLOCK);
-
-    // // join fifos as only tx needed (gives 8 deep fifo instead of 4)
-    // sm_config_set_fifo_join(&audio_i2s_config, PIO_FIFO_JOIN_TX);
-
-
-    //pio_sm_init(audio_pio, audio_sm, audio_sm_offset, &audio_i2s_config);
-    //pio_sm_set_enabled(audio_pio, audio_sm, true);
+    //dma_channel_set_irq0_enabled(audio_dma_channel, true);
+    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);
 
   }
 
@@ -328,7 +309,7 @@ namespace pimoroni {
   }
 
   void GalacticUnicorn::play_sample(uint8_t *data, uint32_t length) {
-    dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 4);
+    dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 2);
   }
 
   void GalacticUnicorn::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
