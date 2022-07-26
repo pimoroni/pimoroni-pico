@@ -109,19 +109,28 @@ graphics.set_font("bitmap8");
 
 
 
-  uint i = 0;
+  float i = 0;
 
   float hue_offset = 0.0f;
 
+  bool animate = true;
+
+  float stripe_width = 3.0f;
+  float speed = 1.0f;
+  float curve = 0.0f;
+
   while(true) {
-    i++;
+
+    if(animate) {
+ i += speed;
+    }   
 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
-      hue_offset += 0.05;
+      curve += 0.05;
       if(hue_offset > 1.0f) hue_offset = 1.0f;
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_DOWN)) {
-      hue_offset -= 0.05;
+      curve -= 0.05;
       if(hue_offset < 0.0f) hue_offset = 0.0f;
     }
 
@@ -132,8 +141,31 @@ graphics.set_font("bitmap8");
       galactic_unicorn.adjust_brightness(-0.01);
     }
 
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_SLEEP)) {
+      animate = false;
+    }
 
-    
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
+      speed += 0.05f;
+      speed = speed >= 10.0f ? 10.0f : speed;
+      animate = true;
+    }
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
+      speed -= 0.05f;
+      speed = speed <= 0.0f ? 0.0f : speed;
+      animate = true;
+    }
+
+ 
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_C)) {
+      stripe_width += 0.05f;
+      stripe_width = stripe_width >= 10.0f ? 10.0f : stripe_width;
+    }
+    if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_D)) {
+      stripe_width -= 0.05f;
+      stripe_width = stripe_width <= 1.0f ? 1.0f : stripe_width;
+    }
+
 /*
     graphics.set_pen(255, 255, 255);
     float s = 0.65f;//0.65f + (sin(i / 25.0f) * 0.15f);
@@ -145,9 +177,14 @@ graphics.set_font("bitmap8");
 
     for(int x = 0; x < 53; x++) {
       for(int y = 0; y < 11; y++) {
-        int v = ((sin((x + y) / 3.0f + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
+        int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / 11.0f) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
         
-        graphics.set_pen(v, v, v);
+
+        uint8_t r = (hue_map[x][0] * v) / 256;
+        uint8_t g = (hue_map[x][1] * v) / 256;
+        uint8_t b = (hue_map[x][2] * v) / 256;
+
+        graphics.set_pen(r, g, b);
         graphics.pixel(Point(x, y));      
       }
     }

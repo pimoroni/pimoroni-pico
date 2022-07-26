@@ -71,19 +71,20 @@ int main() {
 
   galactic_unicorn.init();
 
- // galactic_unicorn.play_sample(left_channel_bin, left_channel_bin_len);
+  
+  galactic_unicorn.set_brightness(0.5f);
 
   while(true) {
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
-      galactic_unicorn.adjust_brightness(+0.01);
+      galactic_unicorn.adjust_brightness(+0.01f);
     }
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
-      galactic_unicorn.adjust_brightness(-0.01);
+      galactic_unicorn.adjust_brightness(-0.01f);
     }
 
     uint ms = to_ms_since_boot(get_absolute_time());
 
-    uint8_t test = (ms / 5000) % 4;
+    uint8_t test = (ms / 1000) % 4;
 
     graphics.set_pen(0, 0, 0);
     graphics.clear();
@@ -113,6 +114,17 @@ int main() {
     printf("%d\n", galactic_unicorn.light());
     
     std::string text = "";
+    static bool was_a_pressed = false;
+
+    if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_A)) {
+      if(!was_a_pressed) {
+        galactic_unicorn.play_sample(left_channel_bin, left_channel_bin_len);
+      }
+      was_a_pressed = true;
+    }else{
+      was_a_pressed = false;
+    }
+
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_A)) {
       text = "Button A";      
     }
@@ -142,9 +154,6 @@ int main() {
     }
 
     outline_text(text);
-
-    graphics.set_pen(255, 255, 255);
-    graphics.clear();
 
     galactic_unicorn.update(graphics);
     
