@@ -382,16 +382,16 @@ namespace pimoroni {
   }
 
 
-  void GalacticUnicorn::update(PicoGraphics_PenRGB565 &graphics) {
+  void GalacticUnicorn::update(PicoGraphics_PenRGB888 &graphics) {
     uint16_t *p = (uint16_t *)graphics.frame_buffer;
     for(size_t j = 0; j < 53 * 11; j++) {
       int x = j % 53;
       int y = j / 53;
 
       uint16_t col = __builtin_bswap16(*p);
-      uint8_t r = ((col & 0b1111100000000000) >> 11) << 3;
-      uint8_t g = ((col & 0b0000011111100000) >>  5) << 2;
-      uint8_t b = ((col & 0b0000000000011111) >>  0) << 3;
+      uint8_t r = (col & 0xff0000) >> 16;
+      uint8_t g = (col & 0x00ff00) >>  8;
+      uint8_t b = (col & 0x0000ff) >>  0;
       p++;
 
       r = (r * this->brightness) >> 8;
