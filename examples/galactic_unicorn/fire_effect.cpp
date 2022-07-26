@@ -25,6 +25,12 @@ void set(int x, int y, float v) {
 }
 
 float get(int x, int y) {
+  /*if(x < 0 || x >= width || y < 0 || y >= height) {
+    return 0.0f;
+  }*/
+  x = x < 0 ? 0 : x;
+  x = x >= width ? width - 1 : x;
+
   return heat[x + y * width];
 }
 
@@ -33,6 +39,7 @@ int main() {
   stdio_init_all();
 
   galactic_unicorn.init();
+  galactic_unicorn.set_brightness(0.5);
 
   bool landscape = true;
 
@@ -67,9 +74,9 @@ int main() {
         }else if(value > 0.4f) {
           graphics.set_pen(220, 160, 0);
         }else if(value > 0.3f) {
-          graphics.set_pen(180, 50, 0);
-        }else if(value > 0.2f) {
-          graphics.set_pen(40, 40, 40);
+          graphics.set_pen(180, 30, 0);
+        }else if(value > 0.22f) {
+          graphics.set_pen(20, 20, 20);
         }
         
         if(landscape) {
@@ -80,17 +87,12 @@ int main() {
         
 
         // update this pixel by averaging the below pixels
-        float average = 0.0f;
-        if(x == 0) {
-          average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x + 1, y + 1)) / 4.0f;
-        } else if(x == 52) {
-          average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1)) / 4.0f;
-        } else {
-          average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1) + get(x + 1, y + 1)) / 5.0f;
-        }
+        float average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1) + get(x + 1, y + 1)) / 5.0f;
 
-        average -= landscape ? 0.01f : 0.004f;
-        average = average < 0.0f ? 0.0f: average;
+        // damping factor to ensure flame tapers out towards the top of the displays
+        average *= landscape ? 0.95f : 0.99f;
+
+        // update the heat map with our newly averaged value
         set(x, y, average);
       }
     }
