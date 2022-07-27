@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 0c45a28d24e1a7f9ea5912c928d7b5a860a6514a
+  MICROPYTHON_VERSION: 45ab801c300d605db96229f6e0626ebe2801f24d
 
 jobs:
   deps:
@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -32,6 +32,14 @@ jobs:
         ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
+
+    # Check out MicroPython Libs
+    - name: Checkout MicroPython Libs
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2
+      with:
+        repository: micropython/micropython-lib
+        path: micropython-lib
 
     - name: Fetch base MicroPython submodules
       if: steps.cache.outputs.cache-hit != 'true'
@@ -79,9 +87,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
 
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
