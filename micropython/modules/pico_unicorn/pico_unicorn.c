@@ -22,7 +22,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(picounicorn_get_height_obj, picounicorn_get_hei
 //STATIC MP_DEFINE_CONST_FUN_OBJ_0(picounicorn_update_obj, picounicorn_update);
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picounicorn_set_pixel_obj, 5, 5, picounicorn_set_pixel);
 STATIC MP_DEFINE_CONST_FUN_OBJ_3(picounicorn_set_pixel_value_obj, picounicorn_set_pixel_value);
-STATIC MP_DEFINE_CONST_FUN_OBJ_0(picounicorn_clear_obj, picounicorn_init);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(picounicorn_clear_obj, picounicorn_clear);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_is_pressed_obj, picounicorn_is_pressed);
 
 /***** Globals Table *****/
