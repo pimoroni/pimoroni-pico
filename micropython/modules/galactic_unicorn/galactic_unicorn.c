@@ -3,23 +3,23 @@
 
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn___del___obj, GalacticUnicorn___del__);
-/*MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_clear_obj, GalacticUnicorn_clear);
-MP_DEFINE_CONST_FUN_OBJ_KW(GalacticUnicorn_update_obj, 1, GalacticUnicorn_update);
+MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_clear_obj, GalacticUnicorn_clear);
+MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_update_obj, GalacticUnicorn_update);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_set_brightness_obj, GalacticUnicorn_set_brightness);
 MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_get_brightness_obj, GalacticUnicorn_get_brightness);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_adjust_brightness_obj, GalacticUnicorn_adjust_brightness);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_set_volume_obj, GalacticUnicorn_set_volume);
 MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_get_volume_obj, GalacticUnicorn_get_volume);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_adjust_volume_obj, GalacticUnicorn_adjust_volume);
-MP_DEFINE_CONST_FUN_OBJ_KW(GalacticUnicorn_set_pixel_obj, 1, GalacticUnicorn_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_KW(GalacticUnicorn_set_pixel_obj, 4, GalacticUnicorn_set_pixel);
 MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_light_obj, GalacticUnicorn_light);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_is_pressed_obj, GalacticUnicorn_is_pressed);
-MP_DEFINE_CONST_FUN_OBJ_KW(GalacticUnicorn_play_sample_obj, 1, GalacticUnicorn_play_sample);*/
+//MP_DEFINE_CONST_FUN_OBJ_KW(GalacticUnicorn_play_sample_obj, 1, GalacticUnicorn_play_sample);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t GalacticUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&GalacticUnicorn___del___obj) },
-    /*{ MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&GalacticUnicorn_clear_obj) },
+    { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&GalacticUnicorn_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&GalacticUnicorn_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&GalacticUnicorn_set_brightness_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_brightness), MP_ROM_PTR(&GalacticUnicorn_get_brightness_obj) },
@@ -30,7 +30,7 @@ STATIC const mp_rom_map_elem_t GalacticUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&GalacticUnicorn_set_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_light), MP_ROM_PTR(&GalacticUnicorn_light_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&GalacticUnicorn_is_pressed_obj) },
-    { MP_ROM_QSTR(MP_QSTR_play_sample), MP_ROM_PTR(&GalacticUnicorn_play_sample_obj) },*/
+    //{ MP_ROM_QSTR(MP_QSTR_play_sample), MP_ROM_PTR(&GalacticUnicorn_play_sample_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(53) },
     { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(11) },

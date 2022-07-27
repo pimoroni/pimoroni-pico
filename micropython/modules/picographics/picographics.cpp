@@ -105,6 +105,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_P4;
             break;
+        case DISPLAY_GALACTIC_UNICORN:
+            width = 53;
+            height = 11;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -125,6 +133,8 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
             return PicoGraphics_PenRGB332::buffer_size(width, height);
         case PEN_RGB565:
             return PicoGraphics_PenRGB565::buffer_size(width, height);
+        case PEN_RGB888:
+            return PicoGraphics_PenRGB888::buffer_size(width, height);
         default:
             return 0;
     }
@@ -216,7 +226,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     } else if (display == DISPLAY_INKY_PACK) {
         self->display = m_new_class(UC8151, width, height, (Rotation)rotate, spi_bus);
 
-    } else {
+    } else if (display == DISPLAY_GALACTIC_UNICORN) {
+        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
+    }
+    else {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, spi_bus);
     }
 
@@ -259,6 +272,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             break;
         case PEN_RGB565:
             self->graphics = m_new_class(PicoGraphics_PenRGB565, self->display->width, self->display->height, self->buffer);
+            break;
+        case PEN_RGB888:
+            self->graphics = m_new_class(PicoGraphics_PenRGB888, self->display->width, self->display->height, self->buffer);
             break;
         default:
             break;
