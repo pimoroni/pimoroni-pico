@@ -24,7 +24,7 @@ uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.
 graphics = PicoGraphics(DISPLAY)
 
 WIDTH, HEIGHT = graphics.get_bounds()
-FILENAME = "random-joke.jpg"
+FILENAME = "/sd/random-joke.jpg"
 
 JOKE_IDS = "https://pimoroni.github.io/feed2image/jokeapi-ids.txt"
 JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-600x448.jpg"
