@@ -320,6 +320,10 @@ namespace pimoroni {
     x = (WIDTH - 1) - x;
     y = (HEIGHT - 1) - y;
 
+    r = (r * this->brightness) >> 8;
+    g = (g * this->brightness) >> 8;
+    b = (b * this->brightness) >> 8;
+
     uint16_t gamma_r = r_gamma_lut[r];
     uint16_t gamma_g = g_gamma_lut[g];
     uint16_t gamma_b = b_gamma_lut[b];
@@ -342,7 +346,7 @@ namespace pimoroni {
       uint8_t green_bit = gamma_g & 0b1;
       uint8_t blue_bit = gamma_b & 0b1;
 
-      *p = (blue_bit << 2) | (green_bit << 1) | (red_bit << 0);
+      *p = (blue_bit << 0) | (green_bit << 1) | (red_bit << 2);
 
       gamma_r >>= 1;
       gamma_g >>= 1;
@@ -395,11 +399,7 @@ namespace pimoroni {
       uint8_t b = (col & 0b0000000000011111) << 3;
       p++;
 
-      r = (r * this->brightness) >> 8;
-      g = (g * this->brightness) >> 8;
-      b = (b * this->brightness) >> 8;
-    
-      set_pixel(x, y, b, g, r);
+      set_pixel(x, y, r, g, b);
     }
   }
 
@@ -415,11 +415,7 @@ namespace pimoroni {
       uint8_t b = (col & 0x0000ff) >>  0;
       p++;
 
-      r = (r * this->brightness) >> 8;
-      g = (g * this->brightness) >> 8;
-      b = (b * this->brightness) >> 8;
-
-      set_pixel(x, y, b, g, r);
+      set_pixel(x, y, r, g, b);
     }
   }
 

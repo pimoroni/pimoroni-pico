@@ -1,134 +1,123 @@
 import time
 import random
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN
 from galactic import GalacticUnicorn
-from ulab import numpy as np
 
-graphics = PicoGraphics(DISPLAY_GALACTIC_UNICORN)
 gu = GalacticUnicorn()
 
-width = 53
-height = 15
-
-heat = [0.0] * 1000
-#heat = np.full((width + 5, height + 5), 0.0)
 
 @micropython.native
-def set(x, y, v):
-    global heat
-    heat[x + y * width] = v
-    #heat[x, y] = v
-
-@micropython.native
-def get(x, y):
-    global heat
-    x = x if x >= 0 else 0
-    x = x if x < width else width - 1
-    #try:
-    #return heat[x, y]
-    return heat[x + y * width]
-    #except IndexError:
-    #    pass
-
-@micropython.native
-def select_colour(x, y):
-    #value = heat[x, y]
-    value = heat[x + y * width]
-    if value > 0.5:
-        return 255, 255, 180
-    elif value > 0.4:
-        return 220, 160, 0
-    elif value > 0.3:
-        return 180, 30, 0
-    elif value > 0.22:
-        return 20, 20, 20
-    else:
-        return 0, 0, 0
+def setup_landscape():
+    global width, height, heat, fire_spawns, damping_factor
+    width = GalacticUnicorn.WIDTH + 2
+    height = GalacticUnicorn.HEIGHT + 4
+    heat = [[0.0 for y in range(height)] for x in range(width)]
+    fire_spawns = 5
+    damping_factor = 0.97
 
 
 @micropython.native
-def calc_average(x, y):
-    #if x > 0:
-    #    return (heat[x, y] + heat[x, y + 2] + heat[x, y + 1] + heat[x - 1, y + 1] + heat[x + 1, y + 1]) / 5.0
-    return (heat[x + (y * width)] + heat[x + ((y + 2) * width)] + heat[x + ((y + 1) * width)] + heat[(x - 1 if x >= 0 else 0) + ((y + 1) * width)] + heat[(x + 1) + ((y + 1) * width)]) / 5.0
-    #else:
-        #return (heat[x, y] + heat[x, y + 2] + heat[x, y + 1] + heat[x - 0, y + 1] + heat[x + 1, y + 1]) / 5.0
-        #return (heat[x + (y * width)] + heat[x + ((y + 2) * width)] + heat[x + ((y + 1) * width)] + heat[(x) + ((y + 1) * width)] + heat[(x + 1) + ((y + 1) * width)]) / 5.0
+def setup_portrait():
+    global width, height, heat, fire_spawns, damping_factor
+    width = GalacticUnicorn.HEIGHT + 2
+    height = GalacticUnicorn.WIDTH + 4
+    heat = [[0.0 for y in range(height)] for x in range(width)]
+    fire_spawns = 2
+    damping_factor = 0.99
 
 
-gu.set_brightness(0.3)
+@micropython.native
+def update():
+    # clear the bottom row and then add a new fire seed to it
+    for x in range(width):
+        heat[x][height - 1] = 0.0
+        heat[x][height - 2] = 0.0
 
-# heat[x-1:x+2, y:y+3]
-#weights = np.array([[0.0, 0.0, 0.0],
-                    #[0.0, 0.0, 0.0],
-                    #[0.0, 0.0, 0.0]])
+    for c in range(fire_spawns):
+        x = random.randint(0, width - 4) + 2
+        heat[x + 0][height - 1] = 1.0
+        heat[x + 1][height - 1] = 1.0
+        heat[x - 1][height - 1] = 1.0
+        heat[x + 0][height - 2] = 1.0
+        heat[x + 1][height - 2] = 1.0
+        heat[x - 1][height - 2] = 1.0
 
-landscape = True
-
-while True:
-    start = time.ticks_ms()
-    if gu.is_pressed(21):
-        gu.adjust_brightness(+0.01)
-    if gu.is_pressed(26):
-        gu.adjust_brightness(-0.01)
-
-    if gu.is_pressed(0):
-        landscape = True
-        width = 53
-        height = 15
-        for i in range(0, len(heat)):
-            heat[i] = 0.0
-
-    if gu.is_pressed(1):
-        landscape = False
-        width = 11
-        height = 55
-        for i in range(0, len(heat)):
-            heat[i] = 0.0
-
-    #for y, row in enumerate(heat):
-        #for x, val in enumerate(row):
-         #   print(x, y, row, val)
-
-    for y in range(0, height):
-        for x in range(0, width):
-            r, g, b = select_colour(x, y)
-
-            if landscape:
-                gu.set_pixel(x, y, r, g, b)
-                #graphics.pixel(x, y)
-            else:
-                gu.set_pixel(y, x, r, g, b)
-                #graphics.pixel(y, x)
-
+    for y in range(0, height - 2):
+        for x in range(1, width - 1):
             # update this pixel by averaging the below pixels
-            #average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1) + get(x + 1, y + 1)) / 5.0
-            average = calc_average(x, y)
+            average = (
+                heat[x][y] + heat[x][y + 1] + heat[x][y + 2] + heat[x - 1][y + 1] + heat[x + 1][y + 1]
+            ) / 5.0
 
             # damping factor to ensure flame tapers out towards the top of the displays
-            average *= 0.95 if landscape else 0.99
+            average *= damping_factor
 
             # update the heat map with our newly averaged value
-            set(x, y, average)
+            heat[x][y] = average
 
-    #gu.update(graphics)
 
-    # clear the bottom row and then add a new fire seed to it
-    for x in range(0, width):
-        set(x, height - 1, 0.0)
+@micropython.native
+def draw_landscape():
+    for y in range(GalacticUnicorn.HEIGHT):
+        for x in range(GalacticUnicorn.WIDTH):
+            value = heat[x + 1][y]
 
-    # add a new random heat source
-    source_count = 5 if landscape else 1
+            if value < 0.15:
+                gu.set_pixel(x, y, 0, 0, 0)
+            elif value < 0.25:
+                gu.set_pixel(x, y, 20, 20, 20)
+            elif value < 0.35:
+                gu.set_pixel(x, y, 180, 30, 0)
+            elif value < 0.45:
+                gu.set_pixel(x, y, 220, 160, 0)
+            else:
+                gu.set_pixel(x, y, 255, 255, 180)
 
-    for c in range(0, source_count):
-        px = random.randint(0, width - 4) + 2
-        set(px    , height - 2, 1.0)
-        set(px + 1, height - 2, 1.0)
-        set(px - 1, height - 2, 1.0)
-        set(px    , height - 1, 1.0)
-        set(px + 1, height - 1, 1.0)
-        set(px - 1, height - 1, 1.0)
 
-    end = time.ticks_ms()
-    print("Time:", end - start)
-    #time.sleep(0.02)
+@micropython.native
+def draw_portrait():
+    for y in range(GalacticUnicorn.WIDTH):
+        for x in range(GalacticUnicorn.HEIGHT):
+            value = heat[x + 1][y]
+
+            if value < 0.15:
+                gu.set_pixel(y, x, 0, 0, 0)
+            elif value < 0.25:
+                gu.set_pixel(y, x, 20, 20, 20)
+            elif value < 0.35:
+                gu.set_pixel(y, x, 180, 30, 0)
+            elif value < 0.45:
+                gu.set_pixel(y, x, 220, 160, 0)
+            else:
+                gu.set_pixel(y, x, 255, 255, 180)
+
+
+landscape = True
+setup_landscape()
+
+gu.set_brightness(0.5)
+
+while True:
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+        gu.adjust_brightness(+0.01)
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        gu.adjust_brightness(-0.01)
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+        landscape = True
+        setup_landscape()
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_B):
+        landscape = False
+        setup_portrait()
+
+    start = time.ticks_ms()
+
+    update()
+    if landscape:
+        draw_landscape()
+    else:
+        draw_portrait()
+
+    print("total took: {} ms".format(time.ticks_ms() - start))
