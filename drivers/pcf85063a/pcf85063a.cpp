@@ -17,8 +17,6 @@ namespace pimoroni {
       gpio_set_dir(interrupt, GPIO_IN);
       gpio_set_pulls(interrupt, false, true);
     }
-
-    reset();
   }
 
   void PCF85063A::reset() {
