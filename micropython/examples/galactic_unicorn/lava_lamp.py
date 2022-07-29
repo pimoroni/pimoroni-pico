@@ -17,7 +17,7 @@ class Blob():
         self.dy = (float(random.randint(0, 2)) / 10.0) - 0.05  # positive bias
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def setup_portrait():
     global width, height, liquid, blobs
     width = GalacticUnicorn.HEIGHT
@@ -29,7 +29,7 @@ def setup_portrait():
 hue = 0.0
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def from_hsv(h, s, v):
     i = math.floor(h * 6.0)
     f = h * 6.0 - i
@@ -53,7 +53,7 @@ def from_hsv(h, s, v):
         return int(v), int(p), int(q)
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def update_liquid():
     for y in range(height):
         for x in range(width):
@@ -75,7 +75,7 @@ def update_liquid():
                     liquid[x][y] += 1.0 - (d_sq / r_sq)
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def move_blobs():
     for blob in blobs:
         blob.x += blob.dx
@@ -88,7 +88,7 @@ def move_blobs():
             blob.dy = 0.0 - blob.dy
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def draw_portrait():
     global hue
     hue += 0.001

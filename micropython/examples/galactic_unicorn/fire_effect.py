@@ -5,7 +5,7 @@ from galactic import GalacticUnicorn
 gu = GalacticUnicorn()
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def setup_landscape():
     global width, height, heat, fire_spawns, damping_factor
     width = GalacticUnicorn.WIDTH + 2
@@ -15,7 +15,7 @@ def setup_landscape():
     damping_factor = 0.97
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def setup_portrait():
     global width, height, heat, fire_spawns, damping_factor
     width = GalacticUnicorn.HEIGHT + 2
@@ -25,7 +25,7 @@ def setup_portrait():
     damping_factor = 0.99
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def update():
     # clear the bottom row and then add a new fire seed to it
     for x in range(width):
@@ -55,7 +55,7 @@ def update():
             heat[x][y] = average
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def draw_landscape():
     for y in range(GalacticUnicorn.HEIGHT):
         for x in range(GalacticUnicorn.WIDTH):
@@ -73,7 +73,7 @@ def draw_landscape():
                 gu.set_pixel(x, y, 255, 255, 180)
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def draw_portrait():
     for y in range(GalacticUnicorn.WIDTH):
         for x in range(GalacticUnicorn.HEIGHT):
