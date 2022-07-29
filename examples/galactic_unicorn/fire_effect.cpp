@@ -17,9 +17,10 @@ GalacticUnicorn galactic_unicorn;
 int width = 53;
 int height = 15;
 
-// a buffer that's at least big enough to store 55 x 15 values (to allow for both orientations)
+// a buffer that's at least big enough to store 55 x 11 or 13 x 53 values (to allow for both orientations plus padding at bottom)
 float heat[1000] = {0.0f};
 
+// helpers to set and get the heat value at a location
 void set(int x, int y, float v) {
   heat[x + y * width] = v;
 }
@@ -27,12 +28,10 @@ void set(int x, int y, float v) {
 float get(int x, int y) {
   x = x < 0 ? 0 : x;
   x = x >= width ? width - 1 : x;
-
   return heat[x + y * width];
 }
 
 int main() {
-
   stdio_init_all();
 
   galactic_unicorn.init();
@@ -41,19 +40,25 @@ int main() {
   bool landscape = true;
 
   while(true) {
+    // adjust brightness up
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_UP)) {
       galactic_unicorn.adjust_brightness(+0.01);
     }
+
+    // adjust brightness down
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
       galactic_unicorn.adjust_brightness(-0.01);
     }
 
+    // switch to landscape mode
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {
       landscape = true;
       width = 53;
       height = 15;
       memset(heat, 0, sizeof(heat));
     }
+
+    // switch to portrait mode
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_B)) {
       landscape = false;
       width = 11;
@@ -63,8 +68,10 @@ int main() {
     
     for(int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
+        // grab the heat value for the current pixel
         float value = get(x, y);
 
+        // select colour for pixel based on thresholds
         graphics.set_pen(0, 0, 0);
         if(value > 0.5f) {
           graphics.set_pen(255, 255, 180);
@@ -76,13 +83,13 @@ int main() {
           graphics.set_pen(20, 20, 20);
         }
         
+        // draw pixel based on orientation
         if(landscape) {
           graphics.pixel(Point(x, y));  
         }else{
           graphics.pixel(Point(y, x));  
         }
         
-
         // update this pixel by averaging the below pixels
         float average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1) + get(x + 1, y + 1)) / 5.0f;
 
@@ -94,6 +101,7 @@ int main() {
       }
     }
 
+    // output the image to the leds
     galactic_unicorn.update(graphics);
 
     // clear the bottom row and then add a new fire seed to it
@@ -101,7 +109,7 @@ int main() {
       set(x, height - 1, 0.0f);
     }
 
-    // add a new random heat source
+    // add a new random heat source at the bottom of the frame
     int source_count = landscape ? 5 : 1;
     for(int c = 0; c < source_count; c++) {
       int px = (rand() % (width - 4)) + 2;
@@ -113,6 +121,7 @@ int main() {
       set(px - 1, height - 1, 1.0f);
     }
 
+    // and relax
     sleep_ms(20);
   }
 

@@ -45,6 +45,7 @@ int main() {
   stdio_init_all();
 
   galactic_unicorn.init();
+  galactic_unicorn.set_brightness(0.5);
 
   // randomise blob start positions, directions, and size
   std::array<blob_t, blob_count> blobs;
