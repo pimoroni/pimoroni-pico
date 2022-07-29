@@ -58,7 +58,7 @@ PROMPT_BBC_MICRO = 2
 prompt = 0
 
 
-@micropython.native
+@micropython.native  # noqa: F821
 def draw(image, fg, bg, time_ms):
     for y in range(len(image)):
         row = image[y]
