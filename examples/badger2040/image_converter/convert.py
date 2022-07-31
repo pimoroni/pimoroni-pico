@@ -34,6 +34,7 @@ parser.add_argument('--out_dir', type=Path, default=None, help='output directory
 parser.add_argument('--binary', action="store_true", help='output binary file for MicroPython')
 parser.add_argument('--py', action="store_true", help='output .py file for MicroPython embedding')
 parser.add_argument('--resize', action="store_true", help='force images to 296x128 pixels')
+parser.add_argument('--bg', default=None, choices={'black', 'white'}, help='add a background color for images with transparency')
 
 options = parser.parse_args()
 
@@ -78,6 +79,10 @@ class ByteWriter(object):
 
 
 def convert_image(img):
+    if options.bg:
+        bg = Image.new('RGBA', img.size, options.bg)
+        bg.paste(img, mask=img)
+        img = bg
     if options.resize:
         img = img.resize((296, 128))  # resize
     try:
