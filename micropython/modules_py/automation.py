@@ -38,7 +38,7 @@ NUM_INPUTS = 4
 NUM_SWITCHES = 2
 
 
-class Automation2040W():
+class Automation2040():
     CONN_LED_PIN = 3
     I2C_SDA_PIN = 4
     I2C_SCL_PIN = 5
@@ -67,11 +67,13 @@ class Automation2040W():
             self.__relays.append(Pin(self.RELAY_PINS[i], Pin.OUT))
             self.release_relay(i)
 
-        # Set up the output pins
+        # Set up outputs with pwm
         self.__outputs = []
         for i in range(NUM_OUTPUTS):
-            self.__outputs.append(Pin(self.OUTPUT_PINS[i], Pin.OUT))
-            self.output(i, False)
+            output = PWM(Pin(self.OUTPUT_PINS[i]))
+            output.freq(1000)
+            output.duty_u16(0)
+            self.__outputs.append(output)
 
         # Set up the input pins
         self.__inputs = []
@@ -116,12 +118,12 @@ class Automation2040W():
             self.__conn_led_pwm.duty_u16(value)
 
     def switch_pressed(self, switch):
-        if switch < 0 or switch > NUM_SWITCHES:
+        if switch < 0 or switch >= NUM_SWITCHES:
             raise ValueError("switch out of range. Expected SWITCH_A (0) or SWITCH_B (1)")
         return not self.__switches[switch].value()
 
     def switch_led(self, switch, brightness):
-        if switch < 0 or switch > NUM_SWITCHES:
+        if switch < 0 or switch >= NUM_SWITCHES:
             raise ValueError("switch out of range. Expected SWITCH_A (0) or SWITCH_B (1)")
 
         if brightness is True:
@@ -136,7 +138,7 @@ class Automation2040W():
             self.__switch_led_pwms[switch].duty_u16(value)
 
     def relay(self, relay, actuate=None):
-        if relay < 0 or relay > NUM_RELAYS:
+        if relay < 0 or relay >= NUM_RELAYS:
             raise ValueError("relay out of range. Expected RELAY_1 (0), RELAY_2 (1), or RELAY_3 (2)")
 
         if actuate is None:
@@ -145,31 +147,56 @@ class Automation2040W():
         self.__relays[relay].value(actuate)
 
     def actuate_relay(self, relay):
-        if relay < 0 or relay > NUM_RELAYS:
+        if relay < 0 or relay >= NUM_RELAYS:
             raise ValueError("relay out of range. Expected RELAY_1 (0), RELAY_2 (1), or RELAY_3 (2)")
         self.__relays[relay].on()
 
     def release_relay(self, relay):
-        if relay < 0 or relay > NUM_RELAYS:
+        if relay < 0 or relay >= NUM_RELAYS:
             raise ValueError("relay out of range. Expected RELAY_1 (0), RELAY_2 (1), or RELAY_3 (2)")
         self.__relays[relay].off()
 
     def output(self, output, value=None):
-        if output < 0 or output > NUM_OUTPUTS:
+        if output < 0 or output >= NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
         if value is None:
-            return self.__outputs[output].value()
+            return(self.__outputs[output].duty_u16() != 0)
 
-        self.__outputs[output].value(value)
+        elif isinstance(value, bool):
+
+            if value is True:
+                self.__outputs[output].duty_u16(65535)
+            else:
+                self.__outputs[output].duty_u16(0)
+
+        elif value > 0.0 and value < 100.0:
+            self.__outputs[output].duty_u16(int((value / 100.0) * 65535))
+        else:
+            raise ValueError("value out of range. Expected 0 to 100, or True or False")
+
+    def output_percent(self, output):
+        if output < 0 or output >= NUM_OUTPUTS:
+            raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
+
+        return(self.__outputs[output].duty_u16() / 65535) * 100.0
+
+    def change_output_freq(self, output, freq):
+        if output < 0 or output >= NUM_OUTPUTS:
+            raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
+
+        if freq < 10 or freq > 1000.0:
+            raise ValueError("freq out of range. Expected 10Hz to 1000Hz")
+
+        self.__outputs[output].freq(freq)
 
     def read_input(self, input):
-        if input < 0 or input > NUM_INPUTS:
+        if input < 0 or input >= NUM_INPUTS:
             raise ValueError("input out of range. Expected INPUT_1 (0), INPUT_2 (1), INPUT_3 (2), or INPUT_4 (3)")
         return self.__inputs[input].value()
 
     def read_adc(self, adc):
-        if adc < 0 or adc > NUM_ADCS:
+        if adc < 0 or adc >= NUM_ADCS:
             raise ValueError("adc out of range. Expected ADC_1 (0), ADC_2 (1), or ADC_3 (2)")
 
         voltage = self.__analogs[adc].read_voltage()
