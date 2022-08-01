@@ -1,8 +1,10 @@
 import time
 import random
 from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY)
 
 colour = (230, 150, 0)
 
@@ -25,10 +27,15 @@ def draw():
     for y in range(height):
         for x in range(width):
             if age[x][y] < lifetime[x][y] * 0.3:
-                gu.set_pixel(x, y, colour[0], colour[1], colour[2])
+                graphics.set_pen(graphics.create_pen(colour[0], colour[1], colour[2]))
             elif age[x][y] < lifetime[x][y] * 0.5:
                 decay = (lifetime[x][y] * 0.5 - age[x][y]) * 5.0
-                gu.set_pixel(x, y, int(decay * colour[0]), int(decay * colour[1]), int(decay * colour[2]))
+                graphics.set_pen(graphics.create_pen(int(decay * colour[0]), int(decay * colour[1]), int(decay * colour[2])))
+            else:
+                graphics.set_pen(0)
+            graphics.pixel(x, y)
+
+    gu.update(graphics)
 
 
 @micropython.native  # noqa: F821
