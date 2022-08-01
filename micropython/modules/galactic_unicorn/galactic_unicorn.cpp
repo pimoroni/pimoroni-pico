@@ -9,6 +9,7 @@ using namespace pimoroni;
 
 extern "C" {
 #include "galactic_unicorn.h"
+#include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
 #include "py/builtin.h"
 
 
@@ -25,7 +26,10 @@ typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
     PicoGraphics *graphics;
     DisplayDriver *display;
+    void *spritedata;
     void *buffer;
+    _PimoroniI2C_obj_t *i2c;
+    //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
 /***** Print *****/
@@ -107,9 +111,9 @@ extern mp_obj_t GalacticUnicorn_clear(mp_obj_t self_in) {
 
 extern mp_obj_t GalacticUnicorn_update(mp_obj_t self_in, mp_obj_t graphics_in) {
     _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
-    ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
 
-    self->galactic->update(*((PicoGraphics_PenRGB888 *)picographics->graphics));
+    self->galactic->update(picographics->graphics);
 
     return mp_const_none;
 }

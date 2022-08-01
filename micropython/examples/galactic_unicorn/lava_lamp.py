@@ -2,8 +2,10 @@ import time
 import random
 import math
 from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY)
 
 blob_count = 10
 
@@ -40,17 +42,17 @@ def from_hsv(h, s, v):
 
     i = int(i) % 6
     if i == 0:
-        return int(v), int(t), int(p)
+        return graphics.create_pen(int(v), int(t), int(p))
     if i == 1:
-        return int(q), int(v), int(p)
+        return graphics.create_pen(int(q), int(v), int(p))
     if i == 2:
-        return int(p), int(v), int(t)
+        return graphics.create_pen(int(p), int(v), int(t))
     if i == 3:
-        return int(p), int(q), int(v)
+        return graphics.create_pen(int(p), int(q), int(v))
     if i == 4:
-        return int(t), int(p), int(v)
+        return graphics.create_pen(int(t), int(p), int(v))
     if i == 5:
-        return int(v), int(p), int(q)
+        return graphics.create_pen(int(v), int(p), int(q))
 
 
 @micropython.native  # noqa: F821
@@ -93,9 +95,9 @@ def draw_portrait():
     global hue
     hue += 0.001
 
-    dark_r, dark_g, dark_b = from_hsv(hue, 1.0, 0.3)
-    mid_r, mid_g, mid_b = from_hsv(hue, 1.0, 0.6)
-    bright_r, bright_g, bright_b = from_hsv(hue, 1.0, 1.0)
+    dark = from_hsv(hue, 1.0, 0.3)
+    mid = from_hsv(hue, 1.0, 0.6)
+    bright = from_hsv(hue, 1.0, 1.0)
 
     for y in range(height):
         for x in range(width):
@@ -104,13 +106,16 @@ def draw_portrait():
             # select a colour for this pixel based on how much
             # "blobfluence" there is at this position in the liquid
             if v >= 1.5:
-                gu.set_pixel(y, x, bright_r, bright_g, bright_b)
+                graphics.set_pen(bright)
             elif v >= 1.25:
-                gu.set_pixel(y, x, mid_r, mid_g, mid_b)
+                graphics.set_pen(mid)
             elif v >= 1.0:
-                gu.set_pixel(y, x, dark_r, dark_g, dark_b)
+                graphics.set_pen(dark)
             else:
-                gu.set_pixel(y, x, 0, 0, 0)
+                graphics.set_pen(0)
+            graphics.pixel(y, x)
+
+    gu.update(graphics)
 
 
 setup_portrait()

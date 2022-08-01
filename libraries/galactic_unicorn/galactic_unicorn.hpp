@@ -76,6 +76,7 @@ namespace pimoroni {
 
     void clear();
 
+    void update(PicoGraphics *graphics);
     void update(PicoGraphics_PenRGB565 &graphics);
     void update(PicoGraphics_PenRGB888 &graphics);
 

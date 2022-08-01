@@ -1,7 +1,9 @@
 import time
 from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY)
 
 
 c64 = [
@@ -60,20 +62,26 @@ prompt = 0
 
 @micropython.native  # noqa: F821
 def draw(image, fg, bg, time_ms):
+    fg_pen = graphics.create_pen(fg[0], fg[1], fg[2])
+    bg_pen = graphics.create_pen(bg[0], bg[1], bg[2])
     for y in range(len(image)):
         row = image[y]
         for x in range(len(row)):
             pixel = row[x]
             # draw the prompt text
             if pixel == 'O':
-                gu.set_pixel(x, y, fg[0], fg[1], fg[2])
+                graphics.set_pen(fg_pen)
 
             # draw the caret blinking
             elif pixel == 'X' and (time_ms // 300) % 2:
-                gu.set_pixel(x, y, fg[0], fg[1], fg[2])
+                graphics.set_pen(fg_pen)
 
             else:
-                gu.set_pixel(x, y, bg[0], bg[1], bg[2])
+                graphics.set_pen(bg_pen)
+
+            graphics.pixel(x, y)
+
+    gu.update(graphics)
 
 
 gu.set_brightness(0.5)

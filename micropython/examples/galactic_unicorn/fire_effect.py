@@ -1,8 +1,16 @@
 import time
 import random
 from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY)
+
+fire_colours = [graphics.create_pen(0, 0, 0),
+                graphics.create_pen(20, 20, 20),
+                graphics.create_pen(180, 30, 0),
+                graphics.create_pen(220, 160, 0),
+                graphics.create_pen(255, 255, 180)]
 
 
 @micropython.native  # noqa: F821
@@ -60,17 +68,19 @@ def draw_landscape():
     for y in range(GalacticUnicorn.HEIGHT):
         for x in range(GalacticUnicorn.WIDTH):
             value = heat[x + 1][y]
-
             if value < 0.15:
-                gu.set_pixel(x, y, 0, 0, 0)
+                graphics.set_pen(fire_colours[0])
             elif value < 0.25:
-                gu.set_pixel(x, y, 20, 20, 20)
+                graphics.set_pen(fire_colours[1])
             elif value < 0.35:
-                gu.set_pixel(x, y, 180, 30, 0)
+                graphics.set_pen(fire_colours[2])
             elif value < 0.45:
-                gu.set_pixel(x, y, 220, 160, 0)
+                graphics.set_pen(fire_colours[3])
             else:
-                gu.set_pixel(x, y, 255, 255, 180)
+                graphics.set_pen(fire_colours[4])
+            graphics.pixel(x, y)
+
+    gu.update(graphics)
 
 
 @micropython.native  # noqa: F821
@@ -78,17 +88,19 @@ def draw_portrait():
     for y in range(GalacticUnicorn.WIDTH):
         for x in range(GalacticUnicorn.HEIGHT):
             value = heat[x + 1][y]
-
             if value < 0.15:
-                gu.set_pixel(y, x, 0, 0, 0)
+                graphics.set_pen(fire_colours[0])
             elif value < 0.25:
-                gu.set_pixel(y, x, 20, 20, 20)
+                graphics.set_pen(fire_colours[1])
             elif value < 0.35:
-                gu.set_pixel(y, x, 180, 30, 0)
+                graphics.set_pen(fire_colours[2])
             elif value < 0.45:
-                gu.set_pixel(y, x, 220, 160, 0)
+                graphics.set_pen(fire_colours[3])
             else:
-                gu.set_pixel(y, x, 255, 255, 180)
+                graphics.set_pen(fire_colours[4])
+            graphics.pixel(y, x)
+
+    gu.update(graphics)
 
 
 landscape = True

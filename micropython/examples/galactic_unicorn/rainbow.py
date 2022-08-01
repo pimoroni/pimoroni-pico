@@ -1,8 +1,10 @@
 import time
 import math
 from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY)
 
 width = GalacticUnicorn.WIDTH
 height = GalacticUnicorn.HEIGHT
@@ -41,11 +43,10 @@ def draw():
         for y in range(height):
             v = ((math.sin((x + y) / stripe_width + phase_percent) + 1.5) / 2.5)
 
-            r = int(colour[0] * v)
-            g = int(colour[1] * v)
-            b = int(colour[2] * v)
+            graphics.set_pen(graphics.create_pen(int(colour[0] * v), int(colour[1] * v), int(colour[2] * v)))
+            graphics.pixel(x, y)
 
-            gu.set_pixel(x, y, r, g, b)
+    gu.update(graphics)
 
 
 hue_map = [from_hsv(x / width, 1.0, 1.0) for x in range(width)]
