@@ -43,15 +43,10 @@ include(pcf85063a/micropython)
 
 # Utility
 include(adcfft/micropython)
+include(wakeup/micropython)
 
 # LEDs & Matrices
 include(plasma/micropython)
-include(hub75/micropython)
-
-# Packs
-include(pico_unicorn/micropython)
-include(pico_scroll/micropython)
-include(pico_rgb_keypad/micropython)
 
 # Servos & Motors
 include(pwm/micropython)
