@@ -52,9 +52,9 @@ namespace pimoroni {
     static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
 
   private:
-    PIO bitstream_pio = pio0;
-    uint bitstream_sm = 0;
-    uint bitstream_sm_offset = 0;
+    static PIO bitstream_pio;
+    static uint bitstream_sm;
+    static uint bitstream_sm_offset;
 
     PIO audio_pio = pio0;
     uint audio_sm = 0;
@@ -67,6 +67,9 @@ namespace pimoroni {
     alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
     static GalacticUnicorn* unicorn;
     static void dma_complete();
+
+  private:
+    void teardown();
 
   public:
     ~GalacticUnicorn();
