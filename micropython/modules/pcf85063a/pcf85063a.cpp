@@ -286,4 +286,21 @@ mp_obj_t PCF85063A_set_clock_output(mp_obj_t self_in, mp_obj_t co_in) {
 
     return mp_const_none;
 }
+
+mp_obj_t PCF85063A_set_byte(mp_obj_t self_in, mp_obj_t v) {
+    pcf85063a_PCF85063A_obj_t *self = MP_OBJ_TO_PTR2(self_in, pcf85063a_PCF85063A_obj_t);
+
+    int val = mp_obj_get_int(v);
+    if(val < 0 || val > 255) mp_raise_ValueError("out of range. Expected 0 to 255");
+
+    self->breakout->set_byte((uint8_t)val);
+
+    return mp_const_none;
+}
+
+mp_obj_t PCF85063A_get_byte(mp_obj_t self_in) {
+    pcf85063a_PCF85063A_obj_t *self = MP_OBJ_TO_PTR2(self_in, pcf85063a_PCF85063A_obj_t);
+
+    return mp_obj_new_int(self->breakout->get_byte());
+}
 }
