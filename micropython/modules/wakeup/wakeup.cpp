@@ -12,19 +12,16 @@
 #define WAKEUP_PIN_VALUE ((0b1 << 2) | (0b1 << 6))
 #endif
 
+extern uint32_t wakeup_gpio_state;
+
 namespace {
     struct Wakeup {
         public:
-            uint32_t wakeup_gpio_state;
-
             Wakeup() {
                 // Assert wakeup pins (indicator LEDs, VSYS hold etc)
                 gpio_init_mask(WAKEUP_PIN_MASK);
                 gpio_set_dir_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_DIR);
                 gpio_put_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_VALUE);
-
-                // Latch GPIO state into variable
-                Wakeup::wakeup_gpio_state = gpio_get_all();
             }
     };
 
@@ -35,7 +32,7 @@ extern "C" {
 #include "wakeup.h"
 
 mp_obj_t Wakeup_get_gpio_state() {
-    return mp_obj_new_int(wakeup.wakeup_gpio_state);
+    return mp_obj_new_int(wakeup_gpio_state);
 }
 
 }
