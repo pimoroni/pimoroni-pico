@@ -16,7 +16,7 @@ import usocket as socket
 
 log = logging.getLogger('WEB')
 
-type_gen = type((lambda: (yield))())
+type_gen = type((lambda: (yield))())  # noqa: E275
 
 # uasyncio v3 is shipped with MicroPython 1.13, and contains some subtle
 # but breaking changes. See also https://github.com/peterhinch/micropython-async/blob/master/v3/README.md

@@ -29,7 +29,7 @@ def value_to_char(value):
     return chosen_char * 2  # Double chars to - sort of - correct aspect ratio
 
 
-while(True):
+while True:
     print("Capturing...")
     time.sleep(0.1)
 

@@ -16,7 +16,7 @@ ty = 0
 x = 0
 y = 0
 
-while(True):
+while True:
     delta = flo.get_motion()
     if delta is not None:
         x = delta[0]
