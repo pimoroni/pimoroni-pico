@@ -17,14 +17,14 @@ jobs:
     - name: Lint micropython/modules_py
       shell: bash
       run: |
-        python3 -m flake8 --ignore E501 micropython/modules_py
+        python3 -m flake8 --show-source --ignore E501 micropython/modules_py
 
     - name: Lint micropython/examples
       shell: bash
       run: |
-        python3 -m flake8 --ignore E501 micropython/examples
+        python3 -m flake8 --show-source --ignore E501 micropython/examples
 
     - name: Lint .py tools in C++ examples
       shell: bash
       run: |
-        python3 -m flake8 --ignore E501 examples
+        python3 -m flake8 --show-source --ignore E501 examples
