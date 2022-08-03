@@ -1,16 +1,5 @@
 #include "hardware/gpio.h"
-
-#ifndef WAKEUP_PIN_MASK
-#define WAKEUP_PIN_MASK ((0b1 << 2) | (0b1 << 6))
-#endif
-
-#ifndef WAKEUP_PIN_DIR
-#define WAKEUP_PIN_DIR ((0b1 << 2) | (0b1 << 6))
-#endif
-
-#ifndef WAKEUP_PIN_VALUE
-#define WAKEUP_PIN_VALUE ((0b1 << 2) | (0b1 << 6))
-#endif
+#include "wakeup.config.hpp"
 
 extern uint32_t wakeup_gpio_state;
 
@@ -22,6 +11,25 @@ namespace {
                 gpio_init_mask(WAKEUP_PIN_MASK);
                 gpio_set_dir_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_DIR);
                 gpio_put_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_VALUE);
+
+#if WAKEUP_HAS_RTC==1
+                // Set up RTC I2C pins and send reset command
+                i2c_init(WAKEUP_RTC_I2C_INST, 100000);
+                gpio_init(WAKEUP_RTC_SDA);
+                gpio_init(WAKEUP_RTC_SCL);
+                gpio_set_function(WAKEUP_RTC_SDA, GPIO_FUNC_I2C); gpio_pull_up(WAKEUP_RTC_SDA);
+                gpio_set_function(WAKEUP_RTC_SCL, GPIO_FUNC_I2C); gpio_pull_up(WAKEUP_RTC_SCL);
+
+                // Turn off CLOCK_OUT by writing 0b111 to CONTROL_2 (0x01) register
+                uint8_t data[] = {0x01, 0b111};
+                i2c_write_blocking(WAKEUP_RTC_I2C_INST, WAKEUP_RTC_I2C_ADDR, data, 2, false);
+
+                i2c_deinit(WAKEUP_RTC_I2C_INST);
+
+                // Cleanup
+                gpio_init(WAKEUP_RTC_SDA);
+                gpio_init(WAKEUP_RTC_SCL);
+#endif
             }
     };
 
