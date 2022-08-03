@@ -148,7 +148,7 @@ namespace pimoroni {
       float lux = ((int32_t)data.als0 * ch0_c[ch_idx]) - ((int32_t)data.als1 * ch1_c[ch_idx]);
       lux /= (float)this->data.integration_time / 100.0f;
       lux /= (float)this->data.gain;
-      data.lux = (uint16_t)(lux / 10000.0f);
+      data.lux = lux / 10000.0f;
     }
 
     return has_updated;
