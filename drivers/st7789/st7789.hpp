@@ -5,6 +5,7 @@
 #include "hardware/gpio.h"
 #include "hardware/pio.h"
 #include "hardware/pwm.h"
+#include "hardware/clocks.h"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
@@ -82,7 +83,12 @@ namespace pimoroni {
       sm_config_set_sideset_pins(&c, wr_sck);
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
       sm_config_set_out_shift(&c, false, true, 8);
-      sm_config_set_clkdiv(&c, 4);
+      
+      // Determine clock divider
+      constexpr uint32_t max_pio_clk = 32 * MHZ;
+      const uint32_t sys_clk_hz = clock_get_hz(clk_sys);
+      const uint32_t clk_div = (sys_clk_hz + max_pio_clk - 1) / max_pio_clk;
+      sm_config_set_clkdiv(&c, clk_div);
       
       pio_sm_init(parallel_pio, parallel_sm, parallel_offset, &c);
       pio_sm_set_enabled(parallel_pio, parallel_sm, true);
