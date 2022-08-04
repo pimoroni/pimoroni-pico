@@ -161,7 +161,8 @@ class Automation2040():
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
         if value is None:
-            return(self.__outputs[output].duty_u16() != 0)
+
+            return self.__outputs[output].duty_u16()
 
         elif isinstance(value, bool):
 
@@ -170,7 +171,10 @@ class Automation2040():
             else:
                 self.__outputs[output].duty_u16(0)
 
-        elif value > 0.0 and value < 100.0:
+        elif not (isinstance(value, int) or isinstance(value, float)):
+            raise ValueError("value out of range. Expected 0 to 100, or True or False")
+
+        elif value >= 0.0 and value <= 100.0:
             self.__outputs[output].duty_u16(int((value / 100.0) * 65535))
         else:
             raise ValueError("value out of range. Expected 0 to 100, or True or False")
@@ -179,7 +183,7 @@ class Automation2040():
         if output < 0 or output >= NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
-        return(self.__outputs[output].duty_u16() / 65535) * 100.0
+        return round((self.__outputs[output].duty_u16() / 65535) * 100.0, 1)
 
     def change_output_freq(self, output, freq):
         if output < 0 or output >= NUM_OUTPUTS:
