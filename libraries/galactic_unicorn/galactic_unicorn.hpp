@@ -70,6 +70,7 @@ namespace pimoroni {
 
   private:
     void teardown();
+    void partial_teardown();
 
   public:
     ~GalacticUnicorn();
