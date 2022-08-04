@@ -63,21 +63,28 @@ index 70dd3bb..b8c1ed0 100644
      // (basically anything in aeabi that uses bootrom)
  
 diff --git a/src/rp2_common/pico_standard_link/crt0.S b/src/rp2_common/pico_standard_link/crt0.S
-index b2992f6..80367da 100644
+index b2992f6..6091e70 100644
 --- a/src/rp2_common/pico_standard_link/crt0.S
 +++ b/src/rp2_common/pico_standard_link/crt0.S
-@@ -9,6 +9,7 @@
+@@ -9,6 +9,8 @@
  #include "hardware/regs/addressmap.h"
  #include "hardware/regs/sio.h"
  #include "pico/binary_info/defs.h"
 +#include "hardware/regs/resets.h"
++#include "hardware/regs/rosc.h"
  
  #ifdef NDEBUG
  #ifndef COLLAPSE_IRQS
-@@ -225,6 +226,17 @@ _reset_handler:
+@@ -225,6 +227,23 @@ _reset_handler:
      cmp r0, #0
      bne hold_non_core0_in_bootrom
  
++    // Increase ROSC frequency to ~48MHz (range 14.4 - 96)
++    // Startup drops from ~160ms to ~32ms on Pico W MicroPython
++    ldr r0, =(ROSC_BASE + ROSC_DIV_OFFSET)
++    ldr r1, =0xaa2
++    str r1, [r0]
++
 +    ldr r1, =runtime_reset_peripherals
 +    blx r1
 +
@@ -92,7 +99,7 @@ index b2992f6..80367da 100644
      // In a NO_FLASH binary, don't perform .data copy, since it's loaded
      // in-place by the SRAM load. Still need to clear .bss
  #if !PICO_NO_FLASH
-@@ -251,6 +263,10 @@ bss_fill_test:
+@@ -251,6 +270,10 @@ bss_fill_test:
      cmp r1, r2
      bne bss_fill_loop
  
@@ -103,7 +110,7 @@ index b2992f6..80367da 100644
  platform_entry: // symbol for stack traces
      // Use 32-bit jumps, in case these symbols are moved out of branch range
      // (e.g. if main is in SRAM and crt0 in flash)
-@@ -314,6 +330,19 @@ data_cpy_table:
+@@ -314,6 +337,19 @@ data_cpy_table:
  runtime_init:
      bx lr
  
@@ -123,7 +130,7 @@ index b2992f6..80367da 100644
  // ----------------------------------------------------------------------------
  // If core 1 somehow gets into crt0 due to a spectacular VTOR mishap, we need to
  // catch it and send back to the sleep-and-launch code in the bootrom. Shouldn't
-@@ -345,3 +374,9 @@ __get_current_exception:
+@@ -345,3 +381,9 @@ __get_current_exception:
  .align 2
      .equ HeapSize, PICO_HEAP_SIZE
  .space HeapSize
