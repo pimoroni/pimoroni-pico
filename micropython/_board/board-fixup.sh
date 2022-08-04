@@ -14,3 +14,8 @@ if [[ ! -d "$MPY_DIR/boards/$BOARD" ]] && [[ -d "$FIXUP_DIR/$NAME/$BOARD/" ]]; t
     echo "Missing board dir. Copying: $FIXUP_DIR/$NAME/$BOARD/ to $MPY_DIR/boards/"
     cp -r "$FIXUP_DIR/$NAME/$BOARD/" "$MPY_DIR/boards/"
 fi
+
+if [[ -f "$FIXUP_DIR/$NAME/fixup.sh" ]]; then
+    echo "Running custom fixup[.sh"
+    bash "$FIXUP_DIR/$NAME/fixup.sh" "$FIXUP_DIR/$NAME" "$MPY_DIR"
+fi
