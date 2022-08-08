@@ -9,20 +9,21 @@ extern "C" {
 #include "py/builtin.h"
 #include "py/mpthread.h"
 
-extern uint32_t badger_buttons_on_wake;
+extern uint32_t runtime_wakeup_gpio_state;
+const uint32_t BUTTON_MASK = 0b11111 << 11;
 
 static bool _Badger2040_wake_state_any() {
-    return badger_buttons_on_wake > 0;
+    return (runtime_wakeup_gpio_state & BUTTON_MASK) > 0;
 }
 
 static bool _Badger2040_wake_state_get(uint32_t pin) {
-    return badger_buttons_on_wake & (0b1 << pin);
+    return runtime_wakeup_gpio_state & BUTTON_MASK & (0b1 << pin);
 }
 
 static bool _Badger2040_wake_state_get_once(uint32_t pin) {
     uint32_t mask = 0b1 << pin;
-    bool value = badger_buttons_on_wake & mask;
-    badger_buttons_on_wake &= ~mask;
+    bool value = runtime_wakeup_gpio_state & BUTTON_MASK & mask;
+    runtime_wakeup_gpio_state &= ~mask;
     return value;
 }
 
