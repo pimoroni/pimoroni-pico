@@ -2,7 +2,7 @@ import time
 from automation import Automation2040W, SWITCH_A
 
 """
-Demonstrates how to toggle each of Automation 2040's output terminals.
+Demonstrates how to toggle each of Automation 2040 W's output terminals.
 
 Press "A" to exit the program.
 """
@@ -26,9 +26,9 @@ while not board.switch_pressed(SWITCH_A):
     for output_percentage in range(101):
 
         if toggle is True:
-            board.output(index, float(output_percentage))
+            board.output(index, output_percentage)
         else:
-            board.output(index, 100.0 - float(output_percentage))
+            board.output(index, 100.0 - output_percentage)
 
         # Print the state of all outputs
         for i in range(board.NUM_OUTPUTS):

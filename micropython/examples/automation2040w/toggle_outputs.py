@@ -1,5 +1,6 @@
 import time
 from automation import Automation2040W, SWITCH_A
+
 """
 Demonstrates how to toggle each of Automation 2040 W's output terminals.
 

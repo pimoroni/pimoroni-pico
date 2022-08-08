@@ -158,7 +158,6 @@ class Automation2040W():
         self.__relays[relay].off()
 
     def output(self, output, value=None):
-
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
@@ -239,8 +238,8 @@ class Automation2040WMini():
     RELAY_PIN = 9
     USER_SW_PINS = (12, 13)
     USER_LED_PINS = (14, 15)
-    OUTPUT_PINS = (16, 17, 18)
-    IN_BUFFERED_PINS = (19, 20, 21, 22)
+    OUTPUT_PINS = (16, 17)
+    IN_BUFFERED_PINS = (19, 20)
     ADC_PINS = (26, 27, 28)
 
     # Count Constants
@@ -336,7 +335,6 @@ class Automation2040WMini():
             self.__switch_led_pwms[switch].duty_u16(value)
 
     def relay(self, actuate=None):
-
         if actuate is None:
             return self.__relay.value()
 
@@ -349,7 +347,6 @@ class Automation2040WMini():
         self.__relay.off()
 
     def output(self, output, value=None):
-
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0) or OUTPUT_2 (1)")
 
@@ -402,9 +399,8 @@ class Automation2040WMini():
         return voltage
 
     def reset(self):
-        # Reset the relays
-        for i in range(self.NUM_RELAYS):
-            self.release_relay(i)
+        # Reset the relay
+        self.release_relay()
 
         # Reset the outputs
         for i in range(self.NUM_OUTPUTS):
