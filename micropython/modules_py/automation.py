@@ -30,9 +30,7 @@ SWITCH_A = 0
 SWITCH_B = 1
 
 
-
 class Automation2040W():
-
 
     CONN_LED_PIN = 3
     I2C_SDA_PIN = 4
@@ -52,7 +50,6 @@ class Automation2040W():
     NUM_ADCS = 3
     NUM_INPUTS = 4
     NUM_SWITCHES = 2
-
 
     VOLTAGE_GAIN = 0.06  # 56 / (56 + 820)
     VOLTAGE_OFFSET = -0.06
@@ -161,7 +158,7 @@ class Automation2040W():
         self.__relays[relay].off()
 
     def output(self, output, value=None):
-        
+
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
@@ -187,7 +184,7 @@ class Automation2040W():
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
-        return round((self.__outputs[output].duty_u16() / 65535) * 100.0,1)
+        return round((self.__outputs[output].duty_u16() / 65535) * 100.0, 1)
 
     def change_output_freq(self, output, freq):
         if output < 0 or output >= self.NUM_OUTPUTS:
@@ -233,6 +230,7 @@ class Automation2040W():
         # Reset the connectivity LED
         self.__conn_led_pwm.duty_u16(0)
 
+
 class Automation2040WMini():
     CONN_LED_PIN = 3
     I2C_SDA_PIN = 4
@@ -253,7 +251,6 @@ class Automation2040WMini():
     NUM_INPUTS = 2
     NUM_SWITCHES = 2
 
-
     VOLTAGE_GAIN = 0.06  # 56 / (56 + 820)
     VOLTAGE_OFFSET = -0.06
     MAX_ADC_LED_VOLTAGE = 45.0
@@ -267,7 +264,7 @@ class Automation2040WMini():
 
         # Set up the relay pins
         self.__relay = Pin(self.RELAY_PIN, Pin.OUT)
-        
+
         # Set up outputs with pwm
         self.__outputs = []
         for i in range(self.NUM_OUTPUTS):
@@ -349,10 +346,10 @@ class Automation2040WMini():
         self.__relay.on()
 
     def release_relay(self):
-        self.__relay[relay].off()
+        self.__relay.off()
 
     def output(self, output, value=None):
-        
+
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0) or OUTPUT_2 (1)")
 
@@ -378,7 +375,7 @@ class Automation2040WMini():
         if output < 0 or output >= self.NUM_OUTPUTS:
             raise ValueError("output out of range. Expected OUTPUT_1 (0) or OUTPUT_2 (1)")
 
-        return round((self.__outputs[output].duty_u16() / 65535) * 100.0,1)
+        return round((self.__outputs[output].duty_u16() / 65535) * 100.0, 1)
 
     def change_output_freq(self, output, freq):
         if output < 0 or output >= self.NUM_OUTPUTS:
