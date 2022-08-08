@@ -10,6 +10,7 @@
   - [PlaceKitten](#placekitten)
   - [Quote of the Day](#quote-of-the-day)
   - [Random Joke](#random-joke)
+  - [SD Card Test](#sd-card-test)
   - [XKCD Daily](#xkcd-daily)
 
 ## PicoGraphics
@@ -30,7 +31,9 @@ Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`.
 ### Button Test
 [button_test.py](button_test.py)
 
-This example shows you a simple, non-interrupt way of reading Inky Frame's buttons with a loop that checks to see if buttons are pressed.
+Inky Frame's buttons (and the RTC alarm, busy signal from the screen and external trigger from the hack header) are connected to a shift register to help conserve pins, and to allow these inputs to wake the board up from sleep.
+
+This example demonstrates a simple way of reading when a button has been pushed by reading the shift register and checking if the bit in a specific position is 0 or 1.
 
 ### Daily Activity
 [inky_frame_daily_activity.py](inky_frame_daily_activity.py)
@@ -38,7 +41,7 @@ This example shows you a simple, non-interrupt way of reading Inky Frame's butto
 Generate a random activity from Bored API.
 
 ### Image Gallery
-[/image_gallery](/image_gallery)
+[/image_gallery](../inky_frame/image_gallery)
 
 This photo frame example displays local images on Inky Frame and lets you switch between them with the buttons. Use `image_gallery.py` if your images are stored on your Pico, or `image_gallery_sd.py` if the images are on your SD card.
 
@@ -73,6 +76,11 @@ Jokes are rendered into images "offline" by our feed2image service for two reaso
 2. JokeAPI.dev needs TLS1.3 which Pico W does not support!
 
 For bugs/contributions or to complain about a joke, see: https://github.com/pimoroni/feed2image
+
+### SD Card Test
+[sd_test.py](sd_test.py)
+
+This simple example shows how to read and write from the SD card on Inky Frame.
 
 ### XKCD Daily
 [inky_frame_xkcd_daily.py](inky_frame_xkcd_daily.py)

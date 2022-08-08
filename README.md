@@ -91,6 +91,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 * Automation 2040 W (inputs, outputs and relays, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w
 * Inventor 2040 W (motors, servos, noise) - https://shop.pimoroni.com/products/inventor-2040-w
+* Inky Frame 5.7" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-5-7
 
 ## Breakouts
 
