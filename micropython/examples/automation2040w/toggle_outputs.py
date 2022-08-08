@@ -1,6 +1,5 @@
 import time
-from automation import Automation2040W, SWITCH_A, NUM_OUTPUTS
-
+from automation import Automation2040W, SWITCH_A
 """
 Demonstrates how to toggle each of Automation 2040 W's output terminals.
 
@@ -26,14 +25,14 @@ while not board.switch_pressed(SWITCH_A):
     board.output(index, toggle)
 
     # Print the state of all outputs
-    for i in range(NUM_OUTPUTS):
-        print(OUTPUT_NAMES[i], " = ", board.output(i), sep="", end=", ")
+    for i in range(board.NUM_OUTPUTS):
+        print(OUTPUT_NAMES[i], " = ", bool(board.output(i)), sep="", end=", ")
 
     # Print a new line
     print()
 
     index += 1                  # Move on to the next output
-    if index >= NUM_OUTPUTS:
+    if index >= board.NUM_OUTPUTS:
         index = 0               # Go back to the first output
         toggle = not toggle     # Invert the toggle value
 
