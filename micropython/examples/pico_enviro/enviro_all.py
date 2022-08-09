@@ -22,6 +22,9 @@ TEMPERATURE_OFFSET = 3
 
 BRIGHTNESS = 0.8
 
+# change this to adjust pressure based on your altitude
+altitude = 0
+
 # light the LED red if the gas reading is less than 50%
 GAS_ALERT = 0.5
 
@@ -44,6 +47,18 @@ def graphic_equaliser():
         i = 0
     ms = int(sum(m_arr) / len(m_arr))
     led.set_rgb(0, ms, 0)
+
+
+def adjust_to_sea_pressure(pressure_hpa, temperature, altitude):
+    """
+    Adjust pressure based on your altitude.
+
+    credits to @cubapp https://gist.github.com/cubapp/23dd4e91814a995b8ff06f406679abcf
+    """
+
+    # Adjusted-to-the-sea barometric pressure
+    adjusted_hpa = pressure_hpa + ((pressure_hpa * 9.80665 * altitude) / (287 * (273 + temperature + (altitude / 400))))
+    return adjusted_hpa
 
 
 def describe_pressure(pressure_hpa):
@@ -212,6 +227,9 @@ while True:
 
         # convert pressure into hpa
         pressure_hpa = pressure / 100
+
+        # correct pressure
+        pressure_hpa = adjust_to_sea_pressure(pressure_hpa, corrected_temperature, altitude)
 
         # read LTR559
         ltr_reading = ltr.get_reading()
