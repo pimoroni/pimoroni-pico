@@ -8,6 +8,8 @@ This library offers convenient functions for interacting with your new [Pimoroni
   - [Connectivity LED](#connectivity-led)
   - [Actuating the Relays](#actuating-the-relays)
   - [Setting the Outputs](#setting-the-outputs)
+    - [Reading as a percentage](#reading-as-a-percentage)
+    - [Changing the frequency](#changing-the-frequency)
   - [Reading the Inputs](#reading-the-inputs)
   - [Reading the ADCs](#reading-the-adcs)
   - [Extra GPIOs](#extra-gpios)
@@ -65,36 +67,26 @@ For all these functions, `relay` is a value from `0` to `.NUM_RELAYS - 1`. To co
 
 ### Setting the Outputs
 
-Three sourcing outputs, capable of 2A+, are present on Automation 2040W.
+Three sourcing outputs, capable of PWM at up to 2A, are present on Automation 2040W.
 
-An output can be controlled by calling `.output(output, value)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`, and `value` is `True`, `False` or an integer or float between '0' and '100'
+An output can be controlled by calling `.output(output, value)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`, and `value` is `True`, `False` or a number between `0.0` and `100.0`
 
-The state of an output can be read by calling `.output(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`. This returns the brightness between `0` which is also the off state and `65535` which is fully on. The state is also reflected by LEDs that neighbour each output terminal.
-
-To control a specific output, the `automation` module contains these handy constants:
-* `OUTPUT_1` = `0`
-* `OUTPUT_2` = `1`
-* `OUTPUT_3` = `2`
-
-#### Getting PWM percentage
-
-If you prefer to know the current PWM setting as the percentage this can be accessed by calling `.output_precent(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`
-
-This will return a float between `0.0` and `100.0`
+The state of an output can be read by calling `.output(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`. This returns `True` if the output is on by any percent, or `False` if it is off. The state is also reflected by LEDs that neighbour each output terminal.
 
 To control a specific output, the `automation` module contains these handy constants:
 * `OUTPUT_1` = `0`
 * `OUTPUT_2` = `1`
 * `OUTPUT_3` = `2`
 
-#### Setting PWM speed 
 
-The PWM frequency of the output can be set by calling `.output_freq(output, freq)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1` and  freq is the frequency in Hz required between `10` and `1000`. Values outside of this range will cause a `ValueError`
+#### Reading as a percentage
 
-To control a specific output, the `automation` module contains these handy constants:
-* `OUTPUT_1` = `0`
-* `OUTPUT_2` = `1`
-* `OUTPUT_3` = `2`
+If you prefer to know the current PWM setting of an output as a percentage, this can be accessed by calling `.output_precent(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`. This will return a float between `0.0` and `100.0`.
+
+
+#### Changing the frequency
+
+The PWM frequency of the output can be set by calling `.change_output_freq(output, freq)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1` and `freq` is a frequency in Hz between `10.0` and `1000.0`. Values outside of this range will cause a `ValueError`.
 
 
 ### Reading the Inputs
@@ -148,6 +140,8 @@ actuate_relay(relay)
 release_relay(relay)
 output(output)
 output(output, value)
+output_percent(output)
+change_output_freq(output, freq)
 read_input(input)
 read_adc(adc)
 reset()

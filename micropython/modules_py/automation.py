@@ -31,7 +31,6 @@ SWITCH_B = 1
 
 
 class Automation2040W():
-
     CONN_LED_PIN = 3
     I2C_SDA_PIN = 4
     I2C_SCL_PIN = 5
@@ -162,7 +161,7 @@ class Automation2040W():
             raise ValueError("output out of range. Expected OUTPUT_1 (0), OUTPUT_2 (1), or OUTPUT_3 (2)")
 
         if value is None:
-            return self.__outputs[output].duty_u16()
+            return self.__outputs[output].duty_u16() != 0
 
         if value is True:
             value = 100.0
@@ -351,7 +350,7 @@ class Automation2040WMini():
             raise ValueError("output out of range. Expected OUTPUT_1 (0) or OUTPUT_2 (1)")
 
         if value is None:
-            return self.__outputs[output].duty_u16()
+            return self.__outputs[output].duty_u16() != 0
 
         if value is True:
             value = 100.0
