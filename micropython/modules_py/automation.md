@@ -32,9 +32,9 @@ From here, all features of Automation 2040W can be accessed by calling functions
 
 Automation 2040W has two handy switches onboard, with neighbouring LEDs, offering a tactile way to interact with your program and be notified of actions that need attention.
 
-To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
+To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
 
-To set a switch's neighbouring LED, call `.switch_led(switch, brightness)`, where `switch` is a value from `0` to `NUM_SWITCHES - 1`, and `brightness` is either `True`, `False`, or a number from `0.0` to `100.0`.
+To set a switch's neighbouring LED, call `.switch_led(switch, brightness)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`, and `brightness` is either `True`, `False`, or a number from `0.0` to `100.0`.
 
 
 To make it easier to use a specific switch or it's LED, the `automation` module contains these handy constants:
@@ -57,7 +57,7 @@ A relay can be actuated by calling `.actuate_relay(relay)`, or released by calli
 
 The state of each relay can be read by calling `.relay(relay)`. This returns `True` if the relay is actuated, and `False` if it is released. The actuation state is also reflected by LEDs that neighbour each relay.
 
-For all these functions, `relay` is a value from `0` to `NUM_RELAYS - 1`. To control a specific relay, the `automation` module contains these handy constants:
+For all these functions, `relay` is a value from `0` to `.NUM_RELAYS - 1`. To control a specific relay, the `automation` module contains these handy constants:
 * `RELAY_1` = `0`
 * `RELAY_2` = `1`
 * `RELAY_3` = `2`
@@ -67,9 +67,29 @@ For all these functions, `relay` is a value from `0` to `NUM_RELAYS - 1`. To con
 
 Three sourcing outputs, capable of 2A+, are present on Automation 2040W.
 
-An output can be controlled by calling `.output(output, value)`, where `output` is a value from `0` to `NUM_OUTPUTS - 1`, and `value` is `True` or `False`.
+An output can be controlled by calling `.output(output, value)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`, and `value` is `True`, `False` or an integer or float between '0' and '100'
 
-The state of an output can be read by calling `.output(output)`, where `output` is a value from `0` to `NUM_OUTPUTS - 1`. This returns `True` if the output is active, and `False` if it is inactive. The state is also reflected by LEDs that neighbour each output terminal.
+The state of an output can be read by calling `.output(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`. This returns the brightness between `0` which is also the off state and `65535` which is fully on. The state is also reflected by LEDs that neighbour each output terminal.
+
+To control a specific output, the `automation` module contains these handy constants:
+* `OUTPUT_1` = `0`
+* `OUTPUT_2` = `1`
+* `OUTPUT_3` = `2`
+
+#### Getting PWM percentage
+
+If you prefer to know the current PWM setting as the percentage this can be accessed by calling `.output_precent(output)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1`
+
+This will return a float between `0.0` and `100.0`
+
+To control a specific output, the `automation` module contains these handy constants:
+* `OUTPUT_1` = `0`
+* `OUTPUT_2` = `1`
+* `OUTPUT_3` = `2`
+
+#### Setting PWM speed 
+
+The PWM frequency of the output can be set by calling `.output_freq(output, freq)`, where `output` is a value from `0` to `.NUM_OUTPUTS - 1` and  freq is the frequency in Hz required between `10` and `1000`. Values outside of this range will cause a `ValueError`
 
 To control a specific output, the `automation` module contains these handy constants:
 * `OUTPUT_1` = `0`
@@ -79,7 +99,7 @@ To control a specific output, the `automation` module contains these handy const
 
 ### Reading the Inputs
 
-Automation 2040W has four buffered digital inputs. These can be read by calling `.read_input(input)`, where `input` is a value from `0` to `NUM_INPUTS - 1`.
+Automation 2040W has four buffered digital inputs. These can be read by calling `.read_input(input)`, where `input` is a value from `0` to `.NUM_INPUTS - 1`.
 
 To read a specific input, the `automation` module contains these handy constants:
 * `INPUT_1` = `0`
@@ -90,7 +110,7 @@ To read a specific input, the `automation` module contains these handy constants
 
 ### Reading the ADCs
 
-Automation 2040W has three analog inputs, capable of reading up to 40V. The voltage on these can be read by calling `.read_adc(adc)`, where `adc` is a value from `0` to `NUM_ADCS - 1`.
+Automation 2040W has three analog inputs, capable of reading up to 40V. The voltage on these can be read by calling `.read_adc(adc)`, where `adc` is a value from `0` to `.NUM_ADCS - 1`.
 
 To read a specific adc, the `automation` module contains these handy constants:
 * `ADC_1` = `0`
@@ -105,7 +125,7 @@ On the left hand side of Automation 2040W are three GPIO pins. These are 3.3V lo
 * `GP1` = `1`
 * `GP2` = `2`
 
-There is also a `NUM_GPIOS` for times when any iteration needs to be performed.
+There is also a `.NUM_GPIOS` for times when any iteration needs to be performed.
 
 
 ### Software Reset
