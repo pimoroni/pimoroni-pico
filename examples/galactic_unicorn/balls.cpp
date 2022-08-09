@@ -32,7 +32,6 @@ int main() {
     graphics.set_pen(0, 0, 0);
     graphics.clear();
 
-    
     for(int y = 0; y < 12; y++) {
       for(int x = 0; x < 53; x++) {
         if(heat[x][y] > 0.5f) {
@@ -63,7 +62,7 @@ int main() {
       }
     }
 
-    galactic_unicorn.update(graphics);
+    galactic_unicorn.update(&graphics);
 
     // clear the bottom row and then add a new fire seed to it
     for(int x = 0; x < 53; x++) {
@@ -80,7 +79,7 @@ int main() {
       heat[px + 1][12] = 1.0f;
       heat[px - 1][12] = 1.0f;
     }
-    
+
     sleep_ms(50);
   }
 

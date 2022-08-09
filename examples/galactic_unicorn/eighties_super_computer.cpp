@@ -39,7 +39,6 @@ int main() {
     graphics.set_pen(0, 0, 0);
     graphics.clear();
 
-    
     for(int y = 0; y < 11; y++) {
       for(int x = 0; x < 53; x++) {
         if(age[x][y] < lifetime[x][y] * 0.3f) {
@@ -60,8 +59,8 @@ int main() {
       }
     }
 
-    galactic_unicorn.update(graphics);
-    
+    galactic_unicorn.update(&graphics);
+
     sleep_ms(10);
   }
 

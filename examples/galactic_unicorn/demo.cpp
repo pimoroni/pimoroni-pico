@@ -185,14 +185,15 @@ gpio_set_function(28, GPIO_FUNC_SIO);
       }
     }*/
 
-    galactic_unicorn.set_pixel(x, y, 255, 255, 255);
+    graphics.set_pen(255, 255, 255);
+    graphics.pixel(Point(x, y));
+    galactic_unicorn.update(&graphics);
     /*i++;
 
     graphics.set_pen(0, 0, 0);
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_A)) {graphics.set_pen(255, 0, 0);}
     graphics.clear();
 
-    
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {v = v == 0 ? 0 : v - 1;}
 
 

@@ -20,8 +20,6 @@ extern mp_obj_t GalacticUnicorn_set_volume(mp_obj_t self_in, mp_obj_t value);
 extern mp_obj_t GalacticUnicorn_get_volume(mp_obj_t self_in);
 extern mp_obj_t GalacticUnicorn_adjust_volume(mp_obj_t self_in, mp_obj_t delta);
 
-extern mp_obj_t GalacticUnicorn_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
-//extern mp_obj_t GalacticUnicorn_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t GalacticUnicorn_light(mp_obj_t self_in);
 
 extern mp_obj_t GalacticUnicorn_is_pressed(mp_obj_t self_in, mp_obj_t button);
