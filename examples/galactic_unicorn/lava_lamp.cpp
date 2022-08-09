@@ -66,7 +66,7 @@ int main() {
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_BRIGHTNESS_DOWN)) {
       galactic_unicorn.adjust_brightness(-0.01);
     }
-    
+
     uint start_ms = to_ms_since_boot(get_absolute_time());
 
     // calculate the influence of each blob on the liquid based
@@ -141,7 +141,7 @@ int main() {
 
     printf("rendering took %dms\n", end_ms - start_ms);
 
-    galactic_unicorn.update(graphics);
+    galactic_unicorn.update(&graphics);
   }
 
   return 0;

@@ -86,8 +86,8 @@ int main() {
     stars[i].a = i;
   }
 
-gpio_set_function(28, GPIO_FUNC_SIO);
-    gpio_set_dir(28, GPIO_OUT);
+  gpio_set_function(28, GPIO_FUNC_SIO);
+  gpio_set_dir(28, GPIO_OUT);
 
   for(int i = 0; i < 10; i++) {
     gpio_put(28, !gpio_get(28));
@@ -105,7 +105,7 @@ gpio_set_function(28, GPIO_FUNC_SIO);
   bool x_pressed = false;
   bool y_pressed = false;
 */
-graphics.set_font("bitmap8");
+  graphics.set_font("bitmap8");
 
 
 
@@ -122,8 +122,8 @@ graphics.set_font("bitmap8");
   while(true) {
 
     if(animate) {
- i += speed;
-    }   
+      i += speed;
+    }
 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_VOLUME_UP)) {
       curve += 0.05;
@@ -156,7 +156,6 @@ graphics.set_font("bitmap8");
       animate = true;
     }
 
- 
     if(galactic_unicorn.is_pressed(galactic_unicorn.SWITCH_C)) {
       stripe_width += 0.05f;
       stripe_width = stripe_width >= 10.0f ? 10.0f : stripe_width;
@@ -178,19 +177,16 @@ graphics.set_font("bitmap8");
     for(int x = 0; x < 53; x++) {
       for(int y = 0; y < 11; y++) {
         int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / 11.0f) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
-        
 
         uint8_t r = (hue_map[x][0] * v) / 256;
         uint8_t g = (hue_map[x][1] * v) / 256;
         uint8_t b = (hue_map[x][2] * v) / 256;
 
         graphics.set_pen(r, g, b);
-        graphics.pixel(Point(x, y));      
+        graphics.pixel(Point(x, y));
       }
     }
-    
-    galactic_unicorn.update(graphics);
-    
+    galactic_unicorn.update(&graphics);
 
     printf("%d\n", galactic_unicorn.light());
     sleep_ms(20);

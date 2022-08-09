@@ -69,80 +69,25 @@ namespace pimoroni {
   }
 
   GalacticUnicorn::~GalacticUnicorn() {
-    // if(unicorn == this) {
-    //   // stop and release the dma channel
-    //   irq_set_enabled(DMA_IRQ_0, false);
-    //   dma_channel_set_irq0_enabled(dma_channel, false);
-    //   irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), false);
-    //   irq_remove_handler(DMA_IRQ_0, dma_complete);
-
-    //   dma_channel_wait_for_finish_blocking(dma_channel);
-    //   dma_channel_unclaim(dma_channel);
-
-    //   // release the pio and sm
-    //   pio_sm_unclaim(bitstream_pio, bitstream_sm);
-    //   pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
-    //   //pio_sm_restart(bitstream_pio, bitstream_sm);
-
-    //   unicorn = nullptr;
-    // }
-
     if(unicorn == this) {
-      teardown();
-      /*pio_sm_set_enabled(bitstream_pio, bitstream_sm, false);
-
-      // Tear down the DMA channel.
-      // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
-      uint32_t irq0_save = dma_hw->inte0 & (1u << dma_channel);
-      hw_clear_bits(&dma_hw->inte0, irq0_save);
-
-      dma_hw->abort = 1u << dma_channel;
-
-      // To fence off on in-flight transfers, the BUSY bit should be polled
-      // rather than the ABORT bit, because the ABORT bit can clear prematurely.
-      while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
-
-      // Clear the interrupt (if any) and restore the interrupt masks.
-      dma_hw->ints0 = 1u << dma_channel;
-      hw_set_bits(&dma_hw->inte0, irq0_save);
+      partial_teardown();
 
       dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
       unicorn = nullptr;
 
       pio_sm_unclaim(bitstream_pio, bitstream_sm);
       pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
-      irq_remove_handler(DMA_IRQ_0, dma_complete);*/
+      irq_remove_handler(DMA_IRQ_0, dma_complete);
     }
   }
 
-  void GalacticUnicorn::teardown() {
-    pio_sm_set_enabled(bitstream_pio, bitstream_sm, false);
-
-    // Tear down the DMA channel.
-    // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
-    uint32_t irq0_save = dma_hw->inte0 & (1u << dma_channel);
-    hw_clear_bits(&dma_hw->inte0, irq0_save);
-
-    dma_hw->abort = 1u << dma_channel;
-
-    // To fence off on in-flight transfers, the BUSY bit should be polled
-    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
-    while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
-
-    // Clear the interrupt (if any) and restore the interrupt masks.
-    dma_hw->ints0 = 1u << dma_channel;
-    hw_set_bits(&dma_hw->inte0, irq0_save);
-
-    dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
-    unicorn = nullptr;
-
-    pio_sm_unclaim(bitstream_pio, bitstream_sm);
-    pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
-    irq_remove_handler(DMA_IRQ_0, dma_complete);
-  }
-
   void GalacticUnicorn::partial_teardown() {
+
     pio_sm_set_enabled(bitstream_pio, bitstream_sm, false);
+
+    // Make sure the display is off and switch it to an invisible row, to be safe
+    const uint pins_to_set = 1 << COLUMN_BLANK | 0b1111 << ROW_BIT_0;
+    pio_sm_set_pins_with_mask(bitstream_pio, bitstream_sm, pins_to_set, pins_to_set);
 
     // Tear down the DMA channel.
     // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
@@ -158,13 +103,6 @@ namespace pimoroni {
     // Clear the interrupt (if any) and restore the interrupt masks.
     dma_hw->ints0 = 1u << dma_channel;
     hw_set_bits(&dma_hw->inte0, irq0_save);
-
-    //dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
-    //unicorn = nullptr;
-
-    //pio_sm_unclaim(bitstream_pio, bitstream_sm);
-    //pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
-    //irq_remove_handler(DMA_IRQ_0, dma_complete);
   }
 
   uint16_t GalacticUnicorn::light() {
@@ -179,10 +117,6 @@ namespace pimoroni {
       partial_teardown();
     }
 
-    
-    // todo: shouldn't need to do this if things were cleaned up properly but without
-    // this any attempt to run a micropython script twice will fail
-    //static bool already_init = false;
 
     // create 14-bit gamma luts
     for(uint16_t v = 0; v < 256; v++) {
@@ -228,14 +162,17 @@ namespace pimoroni {
     adc_init();
     adc_gpio_init(LIGHT_SENSOR);
 
-    pio_gpio_init(bitstream_pio, COLUMN_CLOCK);
-    pio_gpio_init(bitstream_pio, COLUMN_DATA);
-    pio_gpio_init(bitstream_pio, COLUMN_LATCH);
-
     gpio_init(COLUMN_CLOCK); gpio_set_dir(COLUMN_CLOCK, GPIO_OUT); gpio_put(COLUMN_CLOCK, false);
     gpio_init(COLUMN_DATA); gpio_set_dir(COLUMN_DATA, GPIO_OUT); gpio_put(COLUMN_DATA, false);
     gpio_init(COLUMN_LATCH); gpio_set_dir(COLUMN_LATCH, GPIO_OUT); gpio_put(COLUMN_LATCH, false);
-    
+    gpio_init(COLUMN_BLANK); gpio_set_dir(COLUMN_BLANK, GPIO_OUT); gpio_put(COLUMN_BLANK, true);
+
+    // initialise the row select, and set them to a non-visible row to avoid flashes during setup
+    gpio_init(ROW_BIT_0); gpio_set_dir(ROW_BIT_0, GPIO_OUT); gpio_put(ROW_BIT_0, true);
+    gpio_init(ROW_BIT_1); gpio_set_dir(ROW_BIT_1, GPIO_OUT); gpio_put(ROW_BIT_1, true);
+    gpio_init(ROW_BIT_2); gpio_set_dir(ROW_BIT_2, GPIO_OUT); gpio_put(ROW_BIT_2, true);
+    gpio_init(ROW_BIT_3); gpio_set_dir(ROW_BIT_3, GPIO_OUT); gpio_put(ROW_BIT_3, true);
+
     sleep_ms(100);
 
     // configure full output current in register 2
@@ -276,6 +213,11 @@ namespace pimoroni {
     }
     gpio_put(COLUMN_LATCH, false);
 
+    // reapply the blank as the above seems to cause a slight glow.
+    // Note, this will produce a brief flash if a visible row is selected (which it shouldn't be)
+    gpio_put(COLUMN_BLANK, false);
+    sleep_us(10);
+    gpio_put(COLUMN_BLANK, true);
 
     gpio_init(MUTE); gpio_set_dir(MUTE, GPIO_OUT); gpio_put(MUTE, true);
 
@@ -292,26 +234,6 @@ namespace pimoroni {
 
     gpio_init(SWITCH_VOLUME_UP); gpio_pull_up(SWITCH_VOLUME_UP);
     gpio_init(SWITCH_VOLUME_DOWN); gpio_pull_up(SWITCH_VOLUME_DOWN);
-
-    // if(already_init) {
-    //   // stop and release the dma channel
-    //   irq_set_enabled(DMA_IRQ_0, false);
-    //   dma_channel_abort(dma_channel);
-    //   dma_channel_wait_for_finish_blocking(dma_channel);
-
-    //   dma_channel_set_irq0_enabled(dma_channel, false);
-    //   irq_set_enabled(pio_get_dreq(bitstream_pio, bitstream_sm, true), false);
-    //   irq_remove_handler(DMA_IRQ_0, dma_complete);
-
-    //   dma_channel_unclaim(dma_channel);
-
-    //   // release the pio and sm
-    //   pio_sm_unclaim(bitstream_pio, bitstream_sm);
-    //   pio_clear_instruction_memory(bitstream_pio);
-    //   pio_sm_restart(bitstream_pio, bitstream_sm);
-    //   //return;
-    // }
-
 
     // setup the pio if it has not previously been set up
     bitstream_pio = pio0;
@@ -330,7 +252,10 @@ namespace pimoroni {
     pio_gpio_init(bitstream_pio, ROW_BIT_2);
     pio_gpio_init(bitstream_pio, ROW_BIT_3);
 
-    // set all led driving pins as outputs
+    // set the blank and row pins to be high, then set all led driving pins as outputs.
+    // This order is important to avoid a momentary flash
+    const uint pins_to_set = 1 << COLUMN_BLANK | 0b1111 << ROW_BIT_0;
+    pio_sm_set_pins_with_mask(bitstream_pio, bitstream_sm, pins_to_set, pins_to_set);
     pio_sm_set_consecutive_pindirs(bitstream_pio, bitstream_sm, COLUMN_CLOCK, 8, true);
 
     pio_sm_config c = galactic_unicorn_program_get_default_config(bitstream_sm_offset);
@@ -378,8 +303,6 @@ namespace pimoroni {
 
     next_dma_sequence();
 
-    //already_init = true;
-
     // TODO Add audio back in
     // setup audio pio program
     /*audio_pio = pio0;
@@ -412,7 +335,7 @@ namespace pimoroni {
     if(unicorn == this) {
       for(uint8_t y = 0; y < HEIGHT; y++) {
         for(uint8_t x = 0; x < WIDTH; x++) {
-          set_pixel(x, y, 0);
+          set_pixel(x, y, 0, 0, 0);
         }
       }
     }
@@ -465,10 +388,6 @@ namespace pimoroni {
     }
   }
 
-  void GalacticUnicorn::set_pixel(int x, int y, uint8_t v) {
-    set_pixel(x, y, v, v, v);
-  }
-
   void GalacticUnicorn::set_brightness(float value) {
     value = value < 0.0f ? 0.0f : value;
     value = value > 1.0f ? 1.0f : value;
@@ -496,7 +415,6 @@ namespace pimoroni {
   void GalacticUnicorn::adjust_volume(float delta) {
     this->set_volume(this->get_volume() + delta);
   }
-
 
   void GalacticUnicorn::update(PicoGraphics *graphics) {
     if(unicorn == this) {
@@ -529,42 +447,6 @@ namespace pimoroni {
 
           set_pixel(x, y, r, g, b);
         }
-      }
-    }
-  }
-
-  void GalacticUnicorn::update(PicoGraphics_PenRGB565 &graphics) {
-    if(unicorn == this) {
-      uint16_t *p = (uint16_t *)graphics.frame_buffer;
-      for(size_t j = 0; j < 53 * 11; j++) {
-        int x = j % 53;
-        int y = j / 53;
-
-        uint16_t col = __builtin_bswap16(*p);
-        uint8_t r = (col & 0b1111100000000000) >> 8;
-        uint8_t g = (col & 0b0000011111100000) >> 3;
-        uint8_t b = (col & 0b0000000000011111) << 3;
-        p++;
-
-        set_pixel(x, y, r, g, b);
-      }
-    }
-  }
-
-  void GalacticUnicorn::update(PicoGraphics_PenRGB888 &graphics) {
-    if(unicorn == this) {
-      uint32_t *p = (uint32_t *)graphics.frame_buffer;
-      for(size_t j = 0; j < 53 * 11; j++) {
-        int x = j % 53;
-        int y = j / 53;
-
-        uint32_t col = *p;
-        uint8_t r = (col & 0xff0000) >> 16;
-        uint8_t g = (col & 0x00ff00) >>  8;
-        uint8_t b = (col & 0x0000ff) >>  0;
-        p++;
-
-        set_pixel(x, y, r, g, b);
       }
     }
   }

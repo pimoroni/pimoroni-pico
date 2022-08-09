@@ -19,7 +19,6 @@ extern "C" {
 typedef struct _GalacticUnicorn_obj_t {
     mp_obj_base_t base;
     GalacticUnicorn* galactic;
-    //PicoGraphics_PenRGB888* graphics;
 } _GalacticUnicorn_obj_t;
 
 typedef struct _ModPicoGraphics_obj_t {
@@ -68,26 +67,10 @@ mp_obj_t GalacticUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     GalacticUnicorn *galactic = m_new_class(GalacticUnicorn);
     galactic->init();
-    //if(!galactic->init()) {
-        //m_del_class(GalacticUnicorn, galactic);
-        //mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this GalacticUnicorn. Try running `import gc` followed by `gc.collect()` before creating it");
-    //}
-    //PicoGraphics_PenRGB888 *graphics = m_new_class(PicoGraphics_PenRGB888, 53, 11, m_new(uint8_t, PicoGraphics_PenRGB888::buffer_size(53, 11)));
-
-    /*for(int y = 0; y < 11; y++) {
-        for(int x = 0; x < 53; x++) {
-//          graphics.set_pen((r * x) / 52, (g * x) / 52, (b * x) / 52);
-            graphics->set_pen(x, x, x);
-            graphics->pixel(Point(x, y));
-        }
-    }*/
-
-    //galactic->update(*graphics);
 
     self = m_new_obj_with_finaliser(_GalacticUnicorn_obj_t);
     self->base.type = &GalacticUnicorn_type;
     self->galactic = galactic;
-    //self->graphics = graphics;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -97,7 +80,6 @@ mp_obj_t GalacticUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size
 mp_obj_t GalacticUnicorn___del__(mp_obj_t self_in) {
     _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
     m_del_class(GalacticUnicorn, self->galactic);
-    //m_del_class(PicoGraphics_PenRGB888, self->graphics);
     return mp_const_none;
 }
 
@@ -152,61 +134,10 @@ extern mp_obj_t GalacticUnicorn_adjust_volume(mp_obj_t self_in, mp_obj_t delta) 
     return mp_const_none;
 }
 
-extern mp_obj_t GalacticUnicorn_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    if(n_args <= 4) {
-        enum { ARG_self, ARG_x, ARG_y, ARG_v };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_v, MP_ARG_REQUIRED | MP_ARG_INT }
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        int x = args[ARG_x].u_int;
-        int y = args[ARG_y].u_int;
-        int v = args[ARG_v].u_int;
-
-        _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _GalacticUnicorn_obj_t);
-        //self->graphics->set_pen(v, v, v);
-        //self->graphics->set_pixel(Point(x, y));
-        self->galactic->set_pixel(x, y, v);
-    }
-    else {
-        enum { ARG_self, ARG_x, ARG_y, ARG_r, ARG_g, ARG_b };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_r, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_g, MP_ARG_REQUIRED | MP_ARG_INT },
-            { MP_QSTR_b, MP_ARG_REQUIRED | MP_ARG_INT }
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        int x = args[ARG_x].u_int;
-        int y = args[ARG_y].u_int;
-        int r = args[ARG_r].u_int;
-        int g = args[ARG_g].u_int;
-        int b = args[ARG_b].u_int;
-
-        _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _GalacticUnicorn_obj_t);
-        //self->graphics->set_pen(r, g, b);
-        //self->graphics->set_pixel(Point(x, y));
-        self->galactic->set_pixel(x, y, r, g, b);
-    }
-    return mp_const_none;
-}
 
 extern mp_obj_t GalacticUnicorn_light(mp_obj_t self_in) {
-//_GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
-    return mp_const_none;
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+    return mp_obj_new_float(self->galactic->light());
 }
 
 extern mp_obj_t GalacticUnicorn_is_pressed(mp_obj_t self_in, mp_obj_t button) {

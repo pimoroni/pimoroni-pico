@@ -60,7 +60,7 @@ int main() {
       height = 55;
       memset(heat, 0, sizeof(heat));
     }
-    
+
     for(int y = 0; y < height; y++) {
       for(int x = 0; x < width; x++) {
         float value = get(x, y);
@@ -75,13 +75,12 @@ int main() {
         }else if(value > 0.22f) {
           graphics.set_pen(20, 20, 20);
         }
-        
+
         if(landscape) {
-          graphics.pixel(Point(x, y));  
+          graphics.pixel(Point(x, y));
         }else{
-          graphics.pixel(Point(y, x));  
+          graphics.pixel(Point(y, x));
         }
-        
 
         // update this pixel by averaging the below pixels
         float average = (get(x, y) + get(x, y + 2) + get(x, y + 1) + get(x - 1, y + 1) + get(x + 1, y + 1)) / 5.0f;
@@ -94,7 +93,7 @@ int main() {
       }
     }
 
-    galactic_unicorn.update(graphics);
+    galactic_unicorn.update(&graphics);
 
     // clear the bottom row and then add a new fire seed to it
     for(int x = 0; x < width; x++) {

@@ -72,7 +72,6 @@ int main() {
 
   galactic_unicorn.init();
 
-  
   //galactic_unicorn.set_brightness(0.5f);
 
   while(true) {
@@ -113,7 +112,7 @@ int main() {
     }
 
     printf("%d\n", galactic_unicorn.light());
-    
+
     std::string text = "";
     static bool was_a_pressed = false;
 
@@ -127,37 +126,37 @@ int main() {
     }
 
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_A)) {
-      text = "Button A";      
+      text = "Button A";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_B)) {
-      text = "Button B";      
+      text = "Button B";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_C)) {
-      text = "Button C";      
+      text = "Button C";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_D)) {
-      text = "Button D";      
+      text = "Button D";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_VOLUME_UP)) {
-      text = "Louder!";      
+      text = "Louder!";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_VOLUME_DOWN)) {
-      text = "quieter";      
+      text = "quieter";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_BRIGHTNESS_UP)) {
-      text = "Brighter!";      
+      text = "Brighter!";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_BRIGHTNESS_DOWN)) {
-      text = "Darker";      
+      text = "Darker";
     }
     if(galactic_unicorn.is_pressed(GalacticUnicorn::SWITCH_SLEEP)) {
-      text = "Zzz... zzz...";      
+      text = "Zzz... zzz...";
     }
 
     outline_text(text);
 
-    galactic_unicorn.update(graphics);
-    
+    galactic_unicorn.update(&graphics);
+
     sleep_ms(50);
   }
 
