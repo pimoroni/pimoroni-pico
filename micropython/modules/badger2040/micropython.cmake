@@ -5,7 +5,6 @@ add_library(usermod_${MOD_NAME} INTERFACE)
 target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/badgerinit.S
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/badger2040/badger2040.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8151_legacy/uc8151_legacy.cpp
 )

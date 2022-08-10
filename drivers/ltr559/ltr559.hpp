@@ -94,7 +94,7 @@ namespace pimoroni {
 	  uint16_t integration_time;
 	  uint16_t gain;
 	  float ratio;
-    uint16_t lux;
+    float lux;
   } ltr559_reading;
 
   class lookup {

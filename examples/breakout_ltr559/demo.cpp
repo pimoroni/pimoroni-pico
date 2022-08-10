@@ -25,7 +25,7 @@ int main() {
   while(true){
     bool new_data = ltr559.get_reading();
     if(new_data) {
-      printf("Lux: %d Prox: %d\n", ltr559.data.lux, ltr559.data.proximity);
+      printf("Lux: %.2f Prox: %d\n", ltr559.data.lux, ltr559.data.proximity);
     }
     sleep_ms(100);
   };

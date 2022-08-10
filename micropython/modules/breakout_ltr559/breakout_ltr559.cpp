@@ -72,7 +72,7 @@ mp_obj_t BreakoutLTR559_get_reading(mp_obj_t self_in) {
         tuple[INTEGRATION_TIME] = mp_obj_new_int(data.integration_time);
         tuple[GAIN] = mp_obj_new_int(data.gain);
         tuple[RATIO] = mp_obj_new_float(data.ratio);
-        tuple[LUX] = mp_obj_new_int(data.lux);
+        tuple[LUX] = mp_obj_new_float(data.lux);
 
         return mp_obj_new_tuple(7, tuple);
     }
