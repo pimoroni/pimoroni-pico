@@ -45,6 +45,8 @@ include(pcf85063a/micropython)
 include(picographics/micropython)
 include(jpegdec/micropython)
 
+include(picosleep/micropython)
+
 include(modules_py/modules_py)
 
 function(enable_ulab)
