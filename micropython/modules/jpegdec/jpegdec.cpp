@@ -30,6 +30,11 @@ typedef struct _JPEG_obj_t {
 
 
 PicoGraphics *current_graphics = nullptr;
+uint8_t current_flags = 0;
+
+enum FLAGS : uint8_t {
+    FLAG_NO_DITHER = 1u
+};
 
 
 void *jpegdec_open_callback(const char *filename, int32_t *size) {
@@ -124,10 +129,14 @@ MICROPY_EVENT_POLL_HOOK
             for(int x = 0; x < pDraw->iWidth; x++) {
                 int i = y * pDraw->iWidth + x;
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
-                    //current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb332());
-                    //current_graphics->pixel({pDraw->x + x, pDraw->y + y});
-                    // TODO make dither optional
-                    current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
+                    if (current_flags & FLAG_NO_DITHER) {
+                        // Posterized output to RGB332
+                        current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb332());
+                        current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+                    } else {
+                        // Dithered output to RGB332
+                        current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
+                    }
                 } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 || current_graphics->pen_type == PicoGraphics::PEN_P4 || current_graphics->pen_type == PicoGraphics::PEN_3BIT) {
                     current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                 } else {
@@ -190,12 +199,13 @@ mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_dither };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
         { MP_QSTR_y, MP_ARG_INT, {.u_int = 0}  },
         { MP_QSTR_scale, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_dither, MP_ARG_OBJ, {.u_obj = mp_const_true} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -206,6 +216,8 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     int f = args[ARG_scale].u_int;
+
+    current_flags = args[ARG_dither].u_obj == mp_const_false ? FLAG_NO_DITHER : 0;
 
     // Just-in-time open of the filename/buffer we stored in self->file via open_RAM or open_file
 
@@ -258,6 +270,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     result = self->jpeg->decode(x, y, f);
 
     current_graphics = nullptr;
+    current_flags = 0;
 
     // Close the file since we've opened it on-demand
     self->jpeg->close();
