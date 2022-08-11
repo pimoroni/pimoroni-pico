@@ -56,9 +56,9 @@ namespace pimoroni {
     static uint bitstream_sm;
     static uint bitstream_sm_offset;
 
-    PIO audio_pio = pio0;
-    uint audio_sm = 0;
-    uint audio_sm_offset = 0;
+    static PIO audio_pio;
+    static uint audio_sm;
+    static uint audio_sm_offset;
 
     uint16_t brightness = 256;
     uint16_t volume = 127;
