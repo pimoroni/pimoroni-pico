@@ -51,6 +51,9 @@ namespace pimoroni {
   PIO GalacticUnicorn::bitstream_pio = pio0;
   uint GalacticUnicorn::bitstream_sm = 0;
   uint GalacticUnicorn::bitstream_sm_offset = 0;
+  PIO GalacticUnicorn::audio_pio = pio0;
+  uint GalacticUnicorn::audio_sm = 0;
+  uint GalacticUnicorn::audio_sm_offset = 0;
 
   // once the dma transfer of the scanline is complete we move to the
   // next scanline (or quit if we're finished)
@@ -73,11 +76,15 @@ namespace pimoroni {
       partial_teardown();
 
       dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
-      unicorn = nullptr;
-
       pio_sm_unclaim(bitstream_pio, bitstream_sm);
       pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
       irq_remove_handler(DMA_IRQ_0, dma_complete);
+
+      dma_channel_unclaim(audio_dma_channel); // This works now the teardown behaves correctly
+      pio_sm_unclaim(audio_pio, audio_sm);
+      pio_remove_program(audio_pio, &audio_i2s_program, audio_sm_offset);
+
+      unicorn = nullptr;
     }
   }
 
@@ -91,6 +98,17 @@ namespace pimoroni {
 
     // Abort any in-progress DMA transfer
     dma_safe_abort(dma_channel);
+
+
+    // Stop the audio SM
+    pio_sm_set_enabled(audio_pio, audio_sm, false);
+
+    // Reset the I2S pins to avoid popping when audio is suddenly stopped
+    const uint pins_to_clear = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
+    pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_clear);
+
+    // Abort any in-progress DMA transfer
+    dma_safe_abort(audio_dma_channel);
   }
 
   uint16_t GalacticUnicorn::light() {
@@ -287,15 +305,13 @@ namespace pimoroni {
       irq_set_enabled(DMA_IRQ_0, true);
     }
 
-    unicorn = this;
-
-    next_dma_sequence();
-
     // TODO Made audio tear down cleanly
     // setup audio pio program
     audio_pio = pio0;
-    audio_sm = pio_claim_unused_sm(audio_pio, true);
-    audio_sm_offset = pio_add_program(audio_pio, &audio_i2s_program);
+    if(unicorn == nullptr) {
+      audio_sm = pio_claim_unused_sm(audio_pio, true);
+      audio_sm_offset = pio_add_program(audio_pio, &audio_i2s_program);
+    }
 
     pio_gpio_init(audio_pio, I2S_DATA);
     pio_gpio_init(audio_pio, I2S_BCLK);
@@ -305,8 +321,6 @@ namespace pimoroni {
     uint32_t system_clock_frequency = clock_get_hz(clk_sys);
     uint32_t divider = system_clock_frequency * 4 / 22050; // avoid arithmetic overflow
     pio_sm_set_clkdiv_int_frac(audio_pio, audio_sm, divider >> 8u, divider & 0xffu);
-    //pio_sm_set_enabled(audio_pio, audio_sm, true);  // No need to enable the SM until audio is playing
-
 
     audio_dma_channel = dma_claim_unused_channel(true);
     dma_channel_config audio_config = dma_channel_get_default_config(audio_dma_channel);
@@ -314,8 +328,11 @@ namespace pimoroni {
     //channel_config_set_bswap(&audio_config, false); // byte swap to reverse little endian
     channel_config_set_dreq(&audio_config, pio_get_dreq(audio_pio, audio_sm, true));
     dma_channel_configure(audio_dma_channel, &audio_config, &audio_pio->txf[audio_sm], NULL, 0, false);
-    //dma_channel_set_irq0_enabled(audio_dma_channel, true);
-    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);
+
+
+    unicorn = this;
+
+    next_dma_sequence();
   }
 
   void GalacticUnicorn::clear() {
@@ -351,8 +368,8 @@ namespace pimoroni {
       pio_sm_set_enabled(audio_pio, audio_sm, false);
 
       // Reset the I2S pins to avoid popping when audio is suddenly stopped
-      const uint pins_to_set = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
-      pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_set);
+      const uint pins_to_clear = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
+      pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_clear);
 
       // Abort any in-progress DMA transfer
       dma_safe_abort(audio_dma_channel);

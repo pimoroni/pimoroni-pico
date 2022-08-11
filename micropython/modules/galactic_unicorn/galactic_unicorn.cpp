@@ -145,8 +145,17 @@ extern mp_obj_t GalacticUnicorn_is_pressed(mp_obj_t self_in, mp_obj_t button) {
     return mp_obj_new_bool(self->galactic->is_pressed((uint8_t)mp_obj_get_int(button)));
 }
 
-extern mp_obj_t GalacticUnicorn_play_sample(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //_GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+extern mp_obj_t GalacticUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+
+    mp_buffer_info_t bufinfo;
+    mp_get_buffer_raise(data, &bufinfo, MP_BUFFER_RW);
+    if(bufinfo.len < 1) {
+        mp_raise_ValueError("Supplied buffer is too small!");
+    }
+
+    self->galactic->play_sample((uint8_t *)bufinfo.buf, bufinfo.len);
+
     return mp_const_none;
 }
 }
