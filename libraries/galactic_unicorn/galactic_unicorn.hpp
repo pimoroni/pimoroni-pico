@@ -77,8 +77,6 @@ namespace pimoroni {
     void clear();
 
     void update(PicoGraphics *graphics);
-    //void update(PicoGraphics_PenRGB565 &graphics);
-    //void update(PicoGraphics_PenRGB888 &graphics);
 
     void set_brightness(float value);
     float get_brightness();
@@ -90,7 +88,6 @@ namespace pimoroni {
 
   private:
     void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
-    //void set_pixel(int x, int y, uint8_t v);
   public:
 
     uint16_t light();
@@ -102,6 +99,7 @@ namespace pimoroni {
   private:
     void next_dma_sequence();
     void partial_teardown();
+    void dma_safe_abort(uint channel);
   };
 
 }

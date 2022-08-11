@@ -82,27 +82,15 @@ namespace pimoroni {
   }
 
   void GalacticUnicorn::partial_teardown() {
-
+    // Stop the bitstream SM
     pio_sm_set_enabled(bitstream_pio, bitstream_sm, false);
 
     // Make sure the display is off and switch it to an invisible row, to be safe
     const uint pins_to_set = 1 << COLUMN_BLANK | 0b1111 << ROW_BIT_0;
     pio_sm_set_pins_with_mask(bitstream_pio, bitstream_sm, pins_to_set, pins_to_set);
 
-    // Tear down the DMA channel.
-    // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
-    uint32_t irq0_save = dma_hw->inte0 & (1u << dma_channel);
-    hw_clear_bits(&dma_hw->inte0, irq0_save);
-
-    dma_hw->abort = 1u << dma_channel;
-
-    // To fence off on in-flight transfers, the BUSY bit should be polled
-    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
-    while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
-
-    // Clear the interrupt (if any) and restore the interrupt masks.
-    dma_hw->ints0 = 1u << dma_channel;
-    hw_set_bits(&dma_hw->inte0, irq0_save);
+    // Abort any in-progress DMA transfer
+    dma_safe_abort(dma_channel);
   }
 
   uint16_t GalacticUnicorn::light() {
@@ -303,9 +291,9 @@ namespace pimoroni {
 
     next_dma_sequence();
 
-    // TODO Add audio back in
+    // TODO Made audio tear down cleanly
     // setup audio pio program
-    /*audio_pio = pio0;
+    audio_pio = pio0;
     audio_sm = pio_claim_unused_sm(audio_pio, true);
     audio_sm_offset = pio_add_program(audio_pio, &audio_i2s_program);
 
@@ -317,7 +305,7 @@ namespace pimoroni {
     uint32_t system_clock_frequency = clock_get_hz(clk_sys);
     uint32_t divider = system_clock_frequency * 4 / 22050; // avoid arithmetic overflow
     pio_sm_set_clkdiv_int_frac(audio_pio, audio_sm, divider >> 8u, divider & 0xffu);
-    pio_sm_set_enabled(audio_pio, audio_sm, true);
+    //pio_sm_set_enabled(audio_pio, audio_sm, true);  // No need to enable the SM until audio is playing
 
 
     audio_dma_channel = dma_claim_unused_channel(true);
@@ -327,8 +315,7 @@ namespace pimoroni {
     channel_config_set_dreq(&audio_config, pio_get_dreq(audio_pio, audio_sm, true));
     dma_channel_configure(audio_dma_channel, &audio_config, &audio_pio->txf[audio_sm], NULL, 0, false);
     //dma_channel_set_irq0_enabled(audio_dma_channel, true);
-    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);*/
-
+    irq_set_enabled(pio_get_dreq(audio_pio, audio_sm, true), true);
   }
 
   void GalacticUnicorn::clear() {
@@ -341,8 +328,37 @@ namespace pimoroni {
     }
   }
 
+  void GalacticUnicorn::dma_safe_abort(uint channel) {
+    // Tear down the DMA channel.
+    // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
+    uint32_t irq0_save = dma_hw->inte0 & (1u << channel);
+    hw_clear_bits(&dma_hw->inte0, irq0_save);
+
+    dma_hw->abort = 1u << channel;
+
+    // To fence off on in-flight transfers, the BUSY bit should be polled
+    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
+    while (dma_hw->ch[channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
+
+    // Clear the interrupt (if any) and restore the interrupt masks.
+    dma_hw->ints0 = 1u << channel;
+    hw_set_bits(&dma_hw->inte0, irq0_save);
+  }
+
   void GalacticUnicorn::play_sample(uint8_t *data, uint32_t length) {
     if(unicorn == this) {
+      // Stop the audio SM
+      pio_sm_set_enabled(audio_pio, audio_sm, false);
+
+      // Reset the I2S pins to avoid popping when audio is suddenly stopped
+      const uint pins_to_set = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
+      pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_set);
+
+      // Abort any in-progress DMA transfer
+      dma_safe_abort(audio_dma_channel);
+
+      // Restart the audio SM and start a new DMA transfer
+      pio_sm_set_enabled(audio_pio, audio_sm, true);
       dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 2);
     }
   }
