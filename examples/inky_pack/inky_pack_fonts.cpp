@@ -5,55 +5,69 @@
 #include <algorithm>
 #include "pico/time.h"
 #include "pico/platform.h"
+#include "drivers/uc8151/uc8151.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "button.hpp"
 
-#include "common/pimoroni_common.hpp"
-#include "badger2040.hpp"
 
 using namespace pimoroni;
 
-Badger2040 badger;
+enum Pin {
+    A           = 12,
+    B           = 13,
+    C           = 14,
+    CS          = 17,
+    CLK         = 18,
+    MOSI        = 19,
+    DC          = 20,
+    RESET       = 21,
+    BUSY        = 26,
+};
 
-uint32_t time() {
-  absolute_time_t t = get_absolute_time();
-  return to_ms_since_boot(t);
-}
 
-std::array<std::string, 8> font_names = {
-  "sans", "sans_bold", "gothic", "cursive",
-  "cursive_bold", "serif", "serif_bold", "serif_italic"
+UC8151 uc8151(296, 128, ROTATE_0); //Initalise the display 
+PicoGraphics_Pen1BitY graphics(uc8151.width, uc8151.height, nullptr); //Create a PicoGraphics frame buffer
+
+//Initiliase the from buffer
+Button button_a(Pin::A);
+Button button_b(Pin::B);
+Button button_c(Pin::C);
+
+std::array<std::string, 5> font_names = {
+  "sans",  "gothic", "cursive", "serif"
 };
 int8_t selected_font = 0;
 
 void draw() {
-  badger.pen(15);
-  badger.clear();
+  graphics.set_pen(15);
+  graphics.clear();
 
-  badger.font("sans");
+  graphics.set_font("sans");
   for(int i = 0; i < int(font_names.size()); i++) {
     std::string name = font_names[i];
 
     if(selected_font == i) {
-      badger.pen(0);
-      badger.rectangle(0, i * 16, 80, 16);
-      badger.pen(15);
+      graphics.set_pen(0);
+      graphics.rectangle(Rect(0, i * 16, 80, 16));
+      graphics.set_pen(15);
     }else{
-      badger.pen(0);
+      graphics.set_pen(0);
     }
 
-    badger.text(name, 2, i * 16 + 7, 0.4f);
+    graphics.text(name, Point( 2, i * 16 + 7), 296, 0.5f);
   }
 
-  badger.font(font_names[selected_font]);
-  badger.thickness(2);
-  badger.text("The quick", 90, 10, 0.80f);
-  badger.text("brown fox", 90, 32, 0.80f);
-  badger.text("jumped over", 90, 54, 0.80f);
-  badger.text("the lazy dog.", 90, 76, 0.80f);
-  badger.text("0123456789", 90, 98, 0.80f);
-  badger.text("!\"£$%^&*()", 90, 120, 0.80f);
-  badger.thickness(1);
+  graphics.set_font(font_names[selected_font]);
+  //graphics.thickness(2);
+  graphics.text("The quick", Point(100, 10), 296, 0.8f, 1.0f);
+  graphics.text("brown fox", Point(100, 32), 296, 0.8f);
+  graphics.text("jumped over", Point(100, 54), 296, 0.8f);
+  graphics.text("the lazy dog.", Point(100, 76), 296, 0.8f);
+  graphics.text("0123456789", Point(100, 98), 296, 0.8f);
+  graphics.text("!\"£$%^&*()", Point(100, 120), 296, 0.8f);
+  //graphics.thickness(1);
 
-  badger.update();
+  uc8151.update(&graphics);
 }
 
 int main() {
@@ -62,44 +76,42 @@ int main() {
 
   sleep_ms(500);
 
-  printf("\n\n=======\nbadger2040 starting up\n\n");
+  printf("\n\n=======\nInky Pack starting up\n\n");
 
-  badger.init();
-  badger.update_speed(1);
-
-  uint32_t i = 0;
-
+  
+  uc8151.set_update_speed(1);
+  bool update_now = true;
   while(true) {
-    printf("> drawing..");
-
-    draw();
-
-    printf("done!\n");
-
-    printf("> waiting for a button press..");
-    badger.wait_for_press();
-    printf("done!\n");
-
-    if(badger.pressed(badger.DOWN)) {
-      printf("> down pressed\n");
-      selected_font++;
+    
+    if (update_now){
+      printf("> drawing..");
+      draw();
+      update_now = false;
+      printf("done!\n");
     }
 
-    if(badger.pressed(badger.UP)) {
-      printf("> up pressed\n");
+    if(button_a.read()) {
+      printf("> A pressed\n");
       selected_font--;
+      update_now = true;
     }
 
-    if(badger.pressed(badger.C)) {
+    if(button_b.read()) {
+      printf("> B pressed\n");
+      selected_font++;
+      update_now = true;
+    }
+
+    if(button_c.read()) {
       printf("> C pressed\n");
-      badger.halt();
+      selected_font = 0;
+      update_now = true;
     }
-
+    
     selected_font = selected_font < 0 ? int(font_names.size()) - 1 : selected_font;
     selected_font = selected_font >= int(font_names.size()) ? 0 : selected_font;
-
-    printf("> newly selected font is %s (%d)\n", font_names[selected_font].c_str(), selected_font);
-
-    i++;
+    if (update_now){
+      printf("> newly selected font is %s (%d)\n", font_names[selected_font].c_str(), selected_font);
+    }    
   }
 }

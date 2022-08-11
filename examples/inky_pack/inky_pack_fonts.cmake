@@ -3,7 +3,13 @@ add_executable(${OUTPUT_NAME} inky_pack_fonts.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
         badger2040
-        hardware_spi
+        pico_stdlib 
+        hardware_spi 
+        hardware_pwm 
+        hardware_dma  
+        button 
+        uc8151 
+        pico_graphics
 )
 
 # enable usb output

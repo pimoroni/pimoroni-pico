@@ -39,12 +39,12 @@ int main() {
 
   stdio_init_all();
 
-  int ball_qty = 5;
+  int ball_qty = 20;
   sleep_ms(500);
 
   printf("\n\n=======\nInky pack going to do some drawing\n\n");
 
-  uc8151.set_update_speed(3); //Change EInk Update speed  0=Default, 1=Medium, 2=Fast, 3=Trubo
+  uc8151.set_update_speed(1); //Change EInk Update speed  0=Default, 1=Medium, 2=Fast, 3=Trubo
 
 
   struct pt {
@@ -68,10 +68,7 @@ int main() {
     shapes.push_back(shape);
   }
   
-
  uint32_t i = 0;
-
-
 
   while(true) {
 
@@ -90,70 +87,28 @@ int main() {
       graphics.circle(Point(shape.x, shape.y), shape.r);
     }
 
-    /*
-
-
-    std::vector<Point> poly;
-    poly.push_back(Point(30, 30));
-    poly.push_back(Point(50, 35));
-    poly.push_back(Point(70, 25));
-    poly.push_back(Point(80, 65));
-    poly.push_back(Point(50, 85));
-    poly.push_back(Point(30, 45));
-
-    graphics.set_pen(6);
-    //pico_display.pixel(Point(0, 0));
-    //graphics.polygon(poly);
-
-    graphics.set_pen(4);
-    //graphics.triangle(Point(50, 50), Point(130, 80), Point(80, 110));
-
-    graphics.set_pen(15);
-    //graphics.line(Point(50, 50), Point(120, 80));
-    //graphics.line(Point(20, 20), Point(120, 20));
-    //graphics.line(Point(20, 20), Point(20, 120));
-
-    for(int r = 0; r < 30; r++) {
-      for(int j = 0; j < 10; j++) {
-        float rads = ((M_PI * 2) / 30.0f) * float(r);
-        rads += (float(i) / 100.0f);
-        rads += (float(j) / 100.0f);
-        float cx = sin(rads) * 300.0f;
-        float cy = cos(rads) * 300.0f;
-        //graphics.line(Point(120, 67), Point(cx + 120, cy + 67));
-      }
-    }
-    */
     // update screen
     uc8151.update(&graphics);
-    sleep_ms(1000 / 5);
+    sleep_ms(1000 / 1);
     i++;
     if (button_a.read()){
-      ball_qty++;
-      for(int i = 0; i < ball_qty; i++) {
-        pt shape;
-        shape.x = rand() % 240;
-        shape.y = rand() % 135;
-        shape.r = (rand() % 10) + 3;
-        shape.dx = float(rand() % 255) / 32.0f;
-        shape.dy = float(rand() % 255) / 32.0f;
-        shape.pen = (rand() % 14);
-        shapes.push_back(shape);
-      }
+      pt shape;
+      shape.x = rand() % 240;
+      shape.y = rand() % 135;
+      shape.r = (rand() % 10) + 3;
+      shape.dx = float(rand() % 255) / 32.0f;
+      shape.dy = float(rand() % 255) / 32.0f;
+      shape.pen = (rand() % 14);
+      shapes.push_back(shape);
+      
     }
+    
+    
     if (button_b.read()){
-      ball_qty--;
-      for(int i = 0; i < ball_qty; i++) {
-        pt shape;
-        shape.x = rand() % 240;
-        shape.y = rand() % 135;
-        shape.r = (rand() % 10) + 3;
-        shape.dx = float(rand() % 255) / 32.0f;
-        shape.dy = float(rand() % 255) / 32.0f;
-        shape.pen = (rand() % 14);
-        shapes.push_back(shape);
-      }
+      shapes.pop_back();
+
     }
+    
   }
 
     return 0;
