@@ -2,7 +2,6 @@ set(OUTPUT_NAME inky_pack_fonts)
 add_executable(${OUTPUT_NAME} inky_pack_fonts.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
-        badger2040
         pico_stdlib 
         hardware_spi 
         hardware_pwm 

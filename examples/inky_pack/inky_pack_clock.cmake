@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inky_pack_image)
-add_executable(${OUTPUT_NAME} inky_pack_image.cpp)
+set(OUTPUT_NAME inky_pack_drawing)
+add_executable(${OUTPUT_NAME} inky_pack_drawing.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
         pico_stdlib 
