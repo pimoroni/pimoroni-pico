@@ -7,6 +7,7 @@ target_link_libraries(${OUTPUT_NAME}
         hardware_spi 
         hardware_pwm 
         hardware_dma  
+        hardware_rtc
         button 
         uc8151 
         pico_graphics
