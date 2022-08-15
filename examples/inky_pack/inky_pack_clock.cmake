@@ -1,7 +1,8 @@
-set(OUTPUT_NAME inky_pack_drawing)
-add_executable(${OUTPUT_NAME} inky_pack_drawing.cpp)
+set(OUTPUT_NAME inky_pack_clock)
+add_executable(${OUTPUT_NAME} inky_pack_clock.cpp)
 
 target_link_libraries(${OUTPUT_NAME}
+        
         pico_stdlib 
         hardware_spi 
         hardware_pwm 
@@ -10,6 +11,11 @@ target_link_libraries(${OUTPUT_NAME}
         uc8151 
         pico_graphics
 )
+
+target_compile_definitions(${OUTPUT_NAME} PRIVATE
+        WIFI_SSID=\"${WIFI_SSID}\"
+        WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+        )
 
 # enable usb output
 pico_enable_stdio_usb(${OUTPUT_NAME} 1)
