@@ -158,4 +158,18 @@ extern mp_obj_t GalacticUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
 
     return mp_const_none;
 }
+
+extern mp_obj_t GalacticUnicorn_play_tone(mp_obj_t self_in, mp_obj_t freq) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+    self->galactic->play_tone(mp_obj_get_float(freq));
+
+    return mp_const_none;
+}
+
+extern mp_obj_t GalacticUnicorn_stop_playing(mp_obj_t self_in) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+    self->galactic->stop_playing();
+
+    return mp_const_none;
+}
 }

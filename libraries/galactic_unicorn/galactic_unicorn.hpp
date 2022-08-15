@@ -68,6 +68,10 @@ namespace pimoroni {
     static GalacticUnicorn* unicorn;
     static void dma_complete();
 
+    static const uint TONE_BUFFER_SIZE = 22050 / 2;
+    uint8_t tone_buffer[TONE_BUFFER_SIZE * 2] = {0};
+    uint buffer_length = 0;
+
   public:
     ~GalacticUnicorn();
 
@@ -95,11 +99,14 @@ namespace pimoroni {
     bool is_pressed(uint8_t button);
 
     void play_sample(uint8_t *data, uint32_t length);
+    void play_tone(float frequency);
+    void stop_playing();
 
   private:
     void next_dma_sequence();
     void partial_teardown();
     void dma_safe_abort(uint channel);
+    void loop_tone();
   };
 
 }
