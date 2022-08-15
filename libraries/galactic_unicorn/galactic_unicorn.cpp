@@ -58,8 +58,16 @@ namespace pimoroni {
   // once the dma transfer of the scanline is complete we move to the
   // next scanline (or quit if we're finished)
   void __isr GalacticUnicorn::dma_complete() {
-    if(dma_channel_get_irq0_status(dma_channel) && unicorn != nullptr) {
-      unicorn->next_dma_sequence();
+    if(unicorn != nullptr) {
+      uint mask = (1u << dma_channel) | (1u << audio_dma_channel);
+      while(dma_hw->ints0 & mask) {
+        if(dma_channel_get_irq0_status(dma_channel)) {
+          unicorn->next_dma_sequence();
+        }
+        if(dma_channel_get_irq0_status(audio_dma_channel)) {
+          unicorn->loop_tone();
+        }
+      }
     }
   }
 
@@ -300,12 +308,7 @@ namespace pimoroni {
 
     pio_sm_set_enabled(bitstream_pio, bitstream_sm, true);
 
-    if(unicorn == nullptr) {
-      irq_add_shared_handler(DMA_IRQ_0, dma_complete, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
-      irq_set_enabled(DMA_IRQ_0, true);
-    }
 
-    // TODO Made audio tear down cleanly
     // setup audio pio program
     audio_pio = pio0;
     if(unicorn == nullptr) {
@@ -329,6 +332,12 @@ namespace pimoroni {
     channel_config_set_dreq(&audio_config, pio_get_dreq(audio_pio, audio_sm, true));
     dma_channel_configure(audio_dma_channel, &audio_config, &audio_pio->txf[audio_sm], NULL, 0, false);
 
+    dma_channel_set_irq0_enabled(audio_dma_channel, true);
+
+    if(unicorn == nullptr) {
+      irq_add_shared_handler(DMA_IRQ_0, dma_complete, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
+      irq_set_enabled(DMA_IRQ_0, true);
+    }
 
     unicorn = this;
 
@@ -363,6 +372,58 @@ namespace pimoroni {
   }
 
   void GalacticUnicorn::play_sample(uint8_t *data, uint32_t length) {
+    stop_playing();
+
+    if(unicorn == this) {
+      // Restart the audio SM and start a new DMA transfer
+      pio_sm_set_enabled(audio_pio, audio_sm, true);
+      dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 2);
+    }
+  }
+
+  void GalacticUnicorn::play_tone(float frequency) {
+    stop_playing();
+
+    const uint system_freq = 22050;
+
+    if(unicorn == this) {
+      uint wraps = 1;
+      uint rounded_freq = (int)roundf(frequency);
+      if(system_freq % rounded_freq != 0) {
+        while((rounded_freq * wraps) < (system_freq / 5)) {
+          if((system_freq * wraps) % rounded_freq != 0) {
+            wraps += 1;
+          }
+          else {
+            break;
+          }
+        }
+      }
+
+      uint samples_for_full_wave = (uint)((system_freq * wraps) / rounded_freq);
+      buffer_length = samples_for_full_wave;
+      for(uint i = 0; i < buffer_length; i++) {
+        int16_t val = roundf(sinf(((float)(i * wraps) / (float)samples_for_full_wave) * 2 * M_PI) * 0x1fff);
+        tone_buffer[(i * 2)] = (uint8_t)(val & 0xff);
+        tone_buffer[(i * 2) + 1] = (uint8_t)((val >> 8) & 0xff);
+      }
+
+      // Restart the audio SM and start a new DMA transfer
+      pio_sm_set_enabled(audio_pio, audio_sm, true);
+
+      loop_tone();
+    }
+  }
+
+  void GalacticUnicorn::loop_tone() {
+    // Clear any interrupt request caused by our channel
+    dma_channel_acknowledge_irq0(audio_dma_channel);
+
+    if(buffer_length > 0)
+      dma_channel_transfer_from_buffer_now(audio_dma_channel, tone_buffer, buffer_length);
+  }
+
+  void GalacticUnicorn::stop_playing() {
     if(unicorn == this) {
       // Stop the audio SM
       pio_sm_set_enabled(audio_pio, audio_sm, false);
@@ -371,12 +432,10 @@ namespace pimoroni {
       const uint pins_to_clear = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
       pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_clear);
 
+      buffer_length = 0;
+
       // Abort any in-progress DMA transfer
       dma_safe_abort(audio_dma_channel);
-
-      // Restart the audio SM and start a new DMA transfer
-      pio_sm_set_enabled(audio_pio, audio_sm, true);
-      dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 2);
     }
   }
 
