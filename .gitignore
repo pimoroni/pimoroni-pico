@@ -37,3 +37,4 @@
 # Apple filesystem cruft
 .DS_Store
 venv
+*.code-workspace
