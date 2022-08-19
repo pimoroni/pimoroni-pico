@@ -16,6 +16,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_is_pressed_obj, GalacticUnicorn_is_pre
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_play_sample_obj, GalacticUnicorn_play_sample);
 MP_DEFINE_CONST_FUN_OBJ_2(GalacticUnicorn_play_tone_obj, GalacticUnicorn_play_tone);
 MP_DEFINE_CONST_FUN_OBJ_3(GalacticUnicorn_play_dual_tone_obj, GalacticUnicorn_play_dual_tone);
+MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_play_synth_obj, GalacticUnicorn_play_synth);
 MP_DEFINE_CONST_FUN_OBJ_1(GalacticUnicorn_stop_playing_obj, GalacticUnicorn_stop_playing);
 
 /***** Binding of Methods *****/
@@ -34,6 +35,7 @@ STATIC const mp_rom_map_elem_t GalacticUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_play_sample), MP_ROM_PTR(&GalacticUnicorn_play_sample_obj) },
     { MP_ROM_QSTR(MP_QSTR_play_tone), MP_ROM_PTR(&GalacticUnicorn_play_tone_obj) },
     { MP_ROM_QSTR(MP_QSTR_play_dual_tone), MP_ROM_PTR(&GalacticUnicorn_play_dual_tone_obj) },
+    { MP_ROM_QSTR(MP_QSTR_play_synth), MP_ROM_PTR(&GalacticUnicorn_play_synth_obj) },
     { MP_ROM_QSTR(MP_QSTR_stop_playing), MP_ROM_PTR(&GalacticUnicorn_stop_playing_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(53) },

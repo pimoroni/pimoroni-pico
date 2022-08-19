@@ -658,6 +658,7 @@ was_a_pressed = False
 was_b_pressed = False
 was_c_pressed = False
 was_d_pressed = False
+was_z_pressed = False
 
 bool_playing = False
 freq_a = 0
@@ -724,6 +725,13 @@ while True:
         if bool_playing:
             freq_a -= 10
             gu.play_dual_tone(freq_a, freq_b)
+            
+    if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
+        if not was_z_pressed:
+            gu.play_synth()
+        was_z_pressed = True
+    else:
+        was_z_pressed = False
 
     graphics.set_pen(graphics.create_pen(0, 0, 0))
     graphics.clear()
@@ -747,31 +755,31 @@ while True:
     text = ""
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
-        text = "Button A"
+        text = "Play Sample"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_B):
-        text = "Button B"
+        text = "Tone A"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_C):
-        text = "Button C"
+        text = "Tone B"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_D):
-        text = "Button D"
+        text = "Stop"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
-        text = "Louder!"
+        text = "Raise A"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
-        text = "Quieter"
+        text = "Lower A"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-        text = "Brighter!"
+        text = "Raise B"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        text = "Darker"
+        text = "Power B"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
-        text = "Zzz... zzz..."
+        text = "Play Synth"
 
     outline_text(text)
 
