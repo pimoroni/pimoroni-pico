@@ -26,4 +26,5 @@ extern mp_obj_t GalacticUnicorn_is_pressed(mp_obj_t self_in, mp_obj_t button);
 
 extern mp_obj_t GalacticUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data);
 extern mp_obj_t GalacticUnicorn_play_tone(mp_obj_t self_in, mp_obj_t freq);
+extern mp_obj_t GalacticUnicorn_play_dual_tone(mp_obj_t self_in, mp_obj_t freq_a, mp_obj_t freq_b);
 extern mp_obj_t GalacticUnicorn_stop_playing(mp_obj_t self_in);

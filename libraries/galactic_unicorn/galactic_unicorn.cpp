@@ -45,6 +45,8 @@ static uint16_t b_gamma_lut[256] = {0};
 static uint32_t dma_channel;
 static uint32_t audio_dma_channel;
 
+static const int16_t sine_waveform[256] = {-32768,-32758,-32729,-32679,-32610,-32522,-32413,-32286,-32138,-31972,-31786,-31581,-31357,-31114,-30853,-30572,-30274,-29957,-29622,-29269,-28899,-28511,-28106,-27684,-27246,-26791,-26320,-25833,-25330,-24812,-24279,-23732,-23170,-22595,-22006,-21403,-20788,-20160,-19520,-18868,-18205,-17531,-16846,-16151,-15447,-14733,-14010,-13279,-12540,-11793,-11039,-10279,-9512,-8740,-7962,-7180,-6393,-5602,-4808,-4011,-3212,-2411,-1608,-804,0,804,1608,2411,3212,4011,4808,5602,6393,7180,7962,8740,9512,10279,11039,11793,12540,13279,14010,14733,15447,16151,16846,17531,18205,18868,19520,20160,20788,21403,22006,22595,23170,23732,24279,24812,25330,25833,26320,26791,27246,27684,28106,28511,28899,29269,29622,29957,30274,30572,30853,31114,31357,31581,31786,31972,32138,32286,32413,32522,32610,32679,32729,32758,32767,32758,32729,32679,32610,32522,32413,32286,32138,31972,31786,31581,31357,31114,30853,30572,30274,29957,29622,29269,28899,28511,28106,27684,27246,26791,26320,25833,25330,24812,24279,23732,23170,22595,22006,21403,20788,20160,19520,18868,18205,17531,16846,16151,15447,14733,14010,13279,12540,11793,11039,10279,9512,8740,7962,7180,6393,5602,4808,4011,3212,2411,1608,804,0,-804,-1608,-2411,-3212,-4011,-4808,-5602,-6393,-7180,-7962,-8740,-9512,-10279,-11039,-11793,-12540,-13279,-14010,-14733,-15447,-16151,-16846,-17531,-18205,-18868,-19520,-20160,-20788,-21403,-22006,-22595,-23170,-23732,-24279,-24812,-25330,-25833,-26320,-26791,-27246,-27684,-28106,-28511,-28899,-29269,-29622,-29957,-30274,-30572,-30853,-31114,-31357,-31581,-31786,-31972,-32138,-32286,-32413,-32522,-32610,-32679,-32729,-32758};
+
 namespace pimoroni {
 
   GalacticUnicorn* GalacticUnicorn::unicorn = nullptr;
@@ -59,21 +61,26 @@ namespace pimoroni {
   // next scanline (or quit if we're finished)
   void __isr GalacticUnicorn::dma_complete() {
     if(unicorn != nullptr) {
-      uint mask = (1u << dma_channel) | (1u << audio_dma_channel);
-      while(dma_hw->ints0 & mask) {
-        if(dma_channel_get_irq0_status(dma_channel)) {
-          unicorn->next_dma_sequence();
-        }
-        if(dma_channel_get_irq0_status(audio_dma_channel)) {
-          unicorn->loop_tone();
-        }
+      if(dma_channel_get_irq0_status(dma_channel)) {
+        gpio_put(I2C_SCL, true);
+        unicorn->next_dma_sequence();
+        gpio_put(I2C_SCL, false);
+      }
+      if(dma_channel_get_irq0_status(audio_dma_channel)) {
+        gpio_put(I2C_SDA, true);
+        unicorn->loop_tone();
+        gpio_put(I2C_SDA, false);
+
       }
     }
   }
 
   void GalacticUnicorn::next_dma_sequence() {
     // Clear any interrupt request caused by our channel
-    dma_channel_acknowledge_irq0(dma_channel);
+    //dma_channel_acknowledge_irq0(dma_channel);
+    // NOTE Temporary replacement of the above until this reaches pico-sdk main:
+    // https://github.com/raspberrypi/pico-sdk/issues/974
+    dma_hw->ints0 = 1u << dma_channel;
 
     dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
     dma_channel_set_read_addr(dma_channel, bitstream, true);
@@ -171,6 +178,10 @@ namespace pimoroni {
         p[59] = (bcd_ticks & 0xff0000) >> 16;
       }
     }
+
+    // temp for debugging
+    gpio_init(I2C_SDA); gpio_set_dir(I2C_SDA, GPIO_OUT); gpio_put(I2C_SDA, false);
+    gpio_init(I2C_SCL); gpio_set_dir(I2C_SCL, GPIO_OUT); gpio_put(I2C_SCL, false);
 
     // setup light sensor adc
     adc_init();
@@ -322,7 +333,7 @@ namespace pimoroni {
 
     audio_i2s_program_init(audio_pio, audio_sm, audio_sm_offset, I2S_DATA, I2S_BCLK);
     uint32_t system_clock_frequency = clock_get_hz(clk_sys);
-    uint32_t divider = system_clock_frequency * 4 / 22050; // avoid arithmetic overflow
+    uint32_t divider = system_clock_frequency * 4 / SYSTEM_FREQ; // avoid arithmetic overflow
     pio_sm_set_clkdiv_int_frac(audio_pio, audio_sm, divider >> 8u, divider & 0xffu);
 
     audio_dma_channel = dma_claim_unused_channel(true);
@@ -378,49 +389,79 @@ namespace pimoroni {
       // Restart the audio SM and start a new DMA transfer
       pio_sm_set_enabled(audio_pio, audio_sm, true);
       dma_channel_transfer_from_buffer_now(audio_dma_channel, data, length / 2);
+      play_mode = PLAYING_BUFFER;
     }
   }
 
   void GalacticUnicorn::play_tone(float frequency) {
-    stop_playing();
+    play_dual_tone(frequency, 0.0f);
+  }
 
-    const uint system_freq = 22050;
+  void GalacticUnicorn::play_dual_tone(float freq_a, float freq_b) {
+    if(play_mode != PLAYING_TONE) {
+      stop_playing();
+    }
 
     if(unicorn == this) {
-      uint wraps = 1;
-      uint rounded_freq = (int)roundf(frequency);
-      if(system_freq % rounded_freq != 0) {
-        while((rounded_freq * wraps) < (system_freq / 5)) {
-          if((system_freq * wraps) % rounded_freq != 0) {
-            wraps += 1;
-          }
-          else {
-            break;
-          }
-        }
+
+      tone_frequency_a = MAX(freq_a, 0.0f);
+      tone_frequency_b = MAX(freq_b, 0.0f);
+
+      if(play_mode == NOT_PLAYING) {
+        // Nothing is playing, so we can set up the first buffer straight away
+        current_buffer = 0;
+
+        populate_next_buffer();
+
+        // Restart the audio SM and start a new DMA transfer
+        pio_sm_set_enabled(audio_pio, audio_sm, true);
+
+        play_mode = PLAYING_TONE;
+
+        loop_tone();
       }
-
-      uint samples_for_full_wave = (uint)((system_freq * wraps) / rounded_freq);
-      buffer_length = samples_for_full_wave;
-      for(uint i = 0; i < buffer_length; i++) {
-        int16_t val = roundf(sinf(((float)(i * wraps) / (float)samples_for_full_wave) * 2 * M_PI) * 0x1fff);
-        tone_buffer[(i * 2)] = (uint8_t)(val & 0xff);
-        tone_buffer[(i * 2) + 1] = (uint8_t)((val >> 8) & 0xff);
-      }
-
-      // Restart the audio SM and start a new DMA transfer
-      pio_sm_set_enabled(audio_pio, audio_sm, true);
-
-      loop_tone();
     }
   }
 
   void GalacticUnicorn::loop_tone() {
     // Clear any interrupt request caused by our channel
-    dma_channel_acknowledge_irq0(audio_dma_channel);
+    //dma_channel_acknowledge_irq0(audio_dma_channel);
+    // NOTE Temporary replacement of the above until this reaches pico-sdk main:
+    // https://github.com/raspberrypi/pico-sdk/issues/974
+    dma_hw->ints0 = 1u << audio_dma_channel;
 
-    if(buffer_length > 0)
-      dma_channel_transfer_from_buffer_now(audio_dma_channel, tone_buffer, buffer_length);
+    if(play_mode == PLAYING_TONE) {
+
+      dma_channel_transfer_from_buffer_now(audio_dma_channel, tone_buffers[current_buffer], TONE_BUFFER_SIZE);
+      current_buffer = (current_buffer + 1) % NUM_TONE_BUFFERS;
+
+      populate_next_buffer();
+    }
+    else {
+      play_mode = NOT_PLAYING;
+    }
+  }
+
+  void GalacticUnicorn::populate_next_buffer() {
+    float percent_along_a, percent_along_b;
+    int16_t val;
+    int16_t* buffer = tone_buffers[current_buffer];
+
+    //sine_waveform
+    for(uint i = 0; i < TONE_BUFFER_SIZE; i++) {
+      percent_along_a = (((float)i * tone_frequency_a) / SYSTEM_FREQ) + wave_start_a;
+      val = (sine_waveform[(int)(percent_along_a * 256.0f) % 256] * 0x0fff) >> 16;
+      //val = sinf(percent_along_a * 2 * M_PI) * 0x0fff;
+
+      percent_along_b = (((float)i * tone_frequency_b) / SYSTEM_FREQ) + wave_start_b;
+      val += (sine_waveform[(int)(percent_along_b * 256.0f) % 256] * 0x0fff) >> 16;
+      //val += sinf(percent_along_b * 2 * M_PI) * 0x0fff;
+
+      buffer[i] = val;
+    }
+
+    wave_start_a = fmodf((((float)TONE_BUFFER_SIZE * tone_frequency_a) / SYSTEM_FREQ) + wave_start_a, 1.0f);
+    wave_start_b = fmodf((((float)TONE_BUFFER_SIZE * tone_frequency_b) / SYSTEM_FREQ) + wave_start_b, 1.0f);
   }
 
   void GalacticUnicorn::stop_playing() {
@@ -432,10 +473,10 @@ namespace pimoroni {
       const uint pins_to_clear = 1 << I2S_DATA | 1 << I2S_BCLK | 1 << I2S_LRCLK;
       pio_sm_set_pins_with_mask(audio_pio, audio_sm, 0, pins_to_clear);
 
-      buffer_length = 0;
-
       // Abort any in-progress DMA transfer
       dma_safe_abort(audio_dma_channel);
+
+      play_mode = NOT_PLAYING;
     }
   }
 
