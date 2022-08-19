@@ -659,6 +659,10 @@ was_b_pressed = False
 was_c_pressed = False
 was_d_pressed = False
 
+bool_playing = False
+freq_a = 0
+freq_b = 0
+
 while True:
 
     time_ms = time.ticks_ms()
@@ -667,54 +671,77 @@ while True:
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         if not was_a_pressed:
             gu.play_sample(left_channel)
+            bool_playing = False
         was_a_pressed = True
     else:
         was_a_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_B):
         if not was_b_pressed:
-            gu.play_tone(1000)
+            freq_a = 400
+            gu.play_dual_tone(freq_a, freq_b)
+            bool_playing = True
         was_b_pressed = True
     else:
         was_b_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_C):
         if not was_c_pressed:
-            gu.play_tone(2000)
+            freq_b = 600
+            gu.play_dual_tone(freq_a, freq_b)
+            bool_playing = True
         was_c_pressed = True
     else:
         was_c_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_D):
         if not was_d_pressed:
+            freq_a = 0
+            freq_b = 0
             gu.stop_playing()
         was_d_pressed = True
     else:
         was_d_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+        # gu.adjust_brightness(+0.01)
+        if bool_playing:
+            freq_b += 10
+            gu.play_dual_tone(freq_a, freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+        # gu.adjust_brightness(-0.01)
+        if bool_playing:
+            freq_a -= 10
+            gu.play_dual_tone(freq_a, freq_b)
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
+        if bool_playing:
+            freq_a += 10
+            gu.play_dual_tone(freq_a, freq_b)
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
+        if bool_playing:
+            freq_a -= 10
+            gu.play_dual_tone(freq_a, freq_b)
 
     graphics.set_pen(graphics.create_pen(0, 0, 0))
     graphics.clear()
 
     if test == 0:
-        print("grid pattern")
+        # print("grid pattern")
         grid(255, 255, 255)
     elif test == 1:
-        print("red gradient")
+        # print("red gradient")
         gradient(255, 0, 0)
     elif test == 2:
-        print("green gradient")
+        # print("green gradient")
         gradient(0, 255, 0)
     elif test == 3:
-        print("blue gradient")
+        # print("blue gradient")
         gradient(0, 0, 255)
     elif test == 4:
-        print("white gradient")
+        # print("white gradient")
         gradient(255, 255, 255)
 
     text = ""

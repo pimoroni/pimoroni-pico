@@ -50,6 +50,7 @@ namespace pimoroni {
     static const uint32_t BCD_FRAME_BYTES = 60;
     static const uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
     static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
+    static const uint SYSTEM_FREQ = 22050;
 
   private:
     static PIO bitstream_pio;
@@ -68,9 +69,22 @@ namespace pimoroni {
     static GalacticUnicorn* unicorn;
     static void dma_complete();
 
-    static const uint TONE_BUFFER_SIZE = 22050 / 2;
-    uint8_t tone_buffer[TONE_BUFFER_SIZE * 2] = {0};
-    uint buffer_length = 0;
+    static const uint NUM_TONE_BUFFERS = 2;
+    static const uint TONE_BUFFER_SIZE = 16;
+    int16_t tone_buffers[NUM_TONE_BUFFERS][TONE_BUFFER_SIZE] = {0};
+    uint current_buffer = 0;
+
+    float tone_frequency_a = 0.0f;
+    float tone_frequency_b = 0.0f;
+    float wave_start_a = 0.0f;
+    float wave_start_b = 0.0f;
+
+    enum PlayMode {
+      PLAYING_BUFFER,
+      PLAYING_TONE,
+      NOT_PLAYING
+    };
+    PlayMode play_mode = NOT_PLAYING;
 
   public:
     ~GalacticUnicorn();
@@ -100,6 +114,7 @@ namespace pimoroni {
 
     void play_sample(uint8_t *data, uint32_t length);
     void play_tone(float frequency);
+    void play_dual_tone(float freq_a, float freq_b);
     void stop_playing();
 
   private:
@@ -107,6 +122,7 @@ namespace pimoroni {
     void partial_teardown();
     void dma_safe_abort(uint channel);
     void loop_tone();
+    void populate_next_buffer();
   };
 
 }
