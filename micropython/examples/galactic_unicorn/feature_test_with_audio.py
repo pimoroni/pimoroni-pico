@@ -1,6 +1,7 @@
 import gc
 import time
 import math
+from machine import Timer
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
@@ -611,6 +612,39 @@ left_channel = bytearray((
     0xa0, 0xfe, 0x6c, 0xfb, 0x59, 0xf8, 0x5a, 0xf8, 0xd0, 0xf8, 0xba, 0xfd,
 ))
 
+SONG_LENGTH = 384
+HAT = 20000
+BASS = 500
+SNARE = 6000
+SUB = 50
+
+melody_notes = (
+    147, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 247, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 175, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 330, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 349, 0, 0, 0, 0, 0, 0, 0, 349, 0, 330, 0, 294, 0, 220, 0, 262, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 0, 247, 0, 220, 0, 196, 0, 147, 0, 175, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0,
+    147, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 247, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 175, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 330, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 349, 0, 0, 0, 0, 0, 0, 0, 349, 0, 330, 0, 294, 0, 220, 0, 262, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 0, 247, 0, 220, 0, 196, 0, 147, 0, 175, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0,
+    147, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 247, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 175, 0, 0, 0, 0, 0, 0, 0, 175, 0, 196, 0, 220, 0, 262, 0, 330, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 349, 0, 0, 0, 0, 0, 0, 0, 349, 0, 330, 0, 294, 0, 220, 0, 262, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 247, 0, 0, 0, 0, 0, 0, 0, 247, 0, 262, 0, 294, 0, 392, 0, 440, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+rhythm_notes = (
+    294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 392, 0, 523, 0, 659, 0, 523, 0, 392, 0, 523, 0, 659, 0, 523, 0, 698, 0, 587, 0, 440, 0, 587, 0, 698, 0, 587, 0, 440, 0, 587, 0, 523, 0, 440, 0, 330, 0, 440, 0, 523, 0, 440, 0, 330, 0, 440, 0, 349, 0, 294, 0, 220, 0, 294, 0, 349, 0, 294, 0, 220, 0, 294, 0, 262, 0, 247, 0, 220, 0, 175, 0, 165, 0, 147, 0, 131, 0, 98, 0,
+    294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 392, 0, 523, 0, 659, 0, 523, 0, 392, 0, 523, 0, 659, 0, 523, 0, 698, 0, 587, 0, 440, 0, 587, 0, 698, 0, 587, 0, 440, 0, 587, 0, 523, 0, 440, 0, 330, 0, 440, 0, 523, 0, 440, 0, 330, 0, 440, 0, 349, 0, 294, 0, 220, 0, 294, 0, 349, 0, 294, 0, 220, 0, 294, 0, 262, 0, 247, 0, 220, 0, 175, 0, 165, 0, 147, 0, 131, 0, 98, 0,
+    294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 294, 0, 440, 0, 587, 0, 440, 0, 392, 0, 523, 0, 659, 0, 523, 0, 392, 0, 523, 0, 659, 0, 523, 0, 698, 0, 587, 0, 440, 0, 587, 0, 698, 0, 587, 0, 440, 0, 587, 0, 523, 0, 440, 0, 330, 0, 440, 0, 523, 0, 440, 0, 330, 0, 440, 0, 349, 0, 294, 0, 220, 0, 294, 0, 349, 0, 294, 0, 220, 0, 294, 0, 262, 0, 247, 0, 220, 0, 175, 0, 165, 0, 147, 0, 131, 0, 98, 0)
+
+drum_beats = (
+    BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0,
+    BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0,
+    BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, BASS, -1, BASS, -1, 0, 0, 0, 0, 0, 0, SNARE, 0, -1, 0, 0, 0, 0, 0)
+
+hi_hat = (
+    HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1,
+    HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1,
+    HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1, HAT, -1)
+
+bass_notes = (
+    SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0,
+    SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0,
+    SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0)
+
+notes = [melody_notes, rhythm_notes, drum_beats, hi_hat, bass_notes]
+
 
 def gradient(r, g, b):
     for y in range(0, height):
@@ -664,6 +698,30 @@ bool_playing = False
 freq_a = 0
 freq_b = 0
 
+beat = 0
+
+
+def next_beat():
+    global beat
+    for i in range(5):
+        if notes[i][beat] > 0:
+            gu.channel_freq(i, notes[i][beat])
+            gu.channel_trigger_attack(i)
+        elif notes[i][beat] == -1:
+            gu.channel_trigger_release(i)
+
+    beat = (beat + 1) % SONG_LENGTH
+
+
+def tick(timer):
+    next_beat()
+
+
+timer = Timer(-1)
+
+synthing = False
+
+
 while True:
 
     time_ms = time.ticks_ms()
@@ -671,26 +729,100 @@ while True:
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         if not was_a_pressed:
-            gu.play_sample(left_channel)
-            bool_playing = False
+            gu.channel_configure(0, gu.WF_TRIANGLE + gu.WF_SQUARE,
+                                 16,
+                                 168,
+                                 0,
+                                 168,
+                                 0)
+            gu.channel_configure(1, gu.WF_SINE + gu.WF_SQUARE,
+                                 38,
+                                 300,
+                                 0,
+                                 0,
+                                 12000)
+            gu.channel_configure(2, gu.WF_NOISE,
+                                 5,
+                                 10,
+                                 16000,
+                                 100,
+                                 0)
+            gu.channel_configure(3, gu.WF_NOISE,
+                                 5,
+                                 5,
+                                 8000,
+                                 40,
+                                 0)
+            gu.channel_configure(4, gu.WF_SQUARE,
+                                 10,
+                                 100,
+                                 0,
+                                 500,
+                                 0)
+            if not synthing:
+                beat = 0
+                next_beat()
+            gu.play_synth()
+            synthing = True
+            timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
+
         was_a_pressed = True
     else:
         was_a_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_B):
         if not was_b_pressed:
+            timer.deinit()
             freq_a = 400
-            gu.play_dual_tone(freq_a, freq_b)
+
+            gu.channel_freq(0, freq_a)
+            gu.channel_configure(0, gu.WF_SINE,
+                                 1,
+                                 1,
+                                 0xffff,
+                                 1,
+                                 4000)
+            gu.channel_configure(1, gu.WF_SINE,
+                                 1,
+                                 1,
+                                 0xffff,
+                                 1,
+                                 4000)
+            gu.channel_trigger_attack(0)
+            gu.play_synth()
+            synthing = False
+
             bool_playing = True
+
         was_b_pressed = True
     else:
         was_b_pressed = False
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_C):
         if not was_c_pressed:
+            timer.deinit()
             freq_b = 600
-            gu.play_dual_tone(freq_a, freq_b)
+
+            gu.channel_freq(1, freq_b)
+            gu.channel_configure(0, gu.WF_SINE,
+                                 1,
+                                 1,
+                                 0xffff,
+                                 1,
+                                 4000)
+            gu.channel_configure(1, gu.WF_SINE,
+                                 1,
+                                 1,
+                                 0xffff,
+                                 1,
+                                 4000)
+
+            gu.channel_trigger_attack(1)
+            gu.play_synth()
+            synthing = False
+
             bool_playing = True
+
         was_c_pressed = True
     else:
         was_c_pressed = False
@@ -700,6 +832,8 @@ while True:
             freq_a = 0
             freq_b = 0
             gu.stop_playing()
+            timer.deinit()
+            synthing = False
         was_d_pressed = True
     else:
         was_d_pressed = False
@@ -708,27 +842,62 @@ while True:
         # gu.adjust_brightness(+0.01)
         if bool_playing:
             freq_b += 10
-            gu.play_dual_tone(freq_a, freq_b)
+            gu.channel_freq(1, freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         # gu.adjust_brightness(-0.01)
         if bool_playing:
-            freq_a -= 10
-            gu.play_dual_tone(freq_a, freq_b)
+            freq_b -= 10
+            gu.channel_freq(1, freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
         if bool_playing:
             freq_a += 10
-            gu.play_dual_tone(freq_a, freq_b)
+            gu.channel_freq(0, freq_a)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
         if bool_playing:
             freq_a -= 10
-            gu.play_dual_tone(freq_a, freq_b)
-            
+            gu.channel_freq(0, freq_a)
+
     if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
         if not was_z_pressed:
+            gu.channel_configure(0, gu.WF_TRIANGLE + gu.WF_SQUARE,
+                                 16,
+                                 168,
+                                 0xafff,
+                                 168,
+                                 10000)
+            gu.channel_configure(1, gu.WF_SINE + gu.WF_SQUARE,
+                                 38,
+                                 300,
+                                 0,
+                                 0,
+                                 12000)
+            gu.channel_configure(2, gu.WF_NOISE,
+                                 5,
+                                 10,
+                                 16000,
+                                 100,
+                                 18000)
+            gu.channel_configure(3, gu.WF_NOISE,
+                                 5,
+                                 5,
+                                 8000,
+                                 40,
+                                 8000)
+            gu.channel_configure(4, gu.WF_SQUARE,
+                                 10,
+                                 100,
+                                 0,
+                                 500,
+                                 12000)
+            if not synthing:
+                beat = 0
+                next_beat()
             gu.play_synth()
+            synthing = True
+            timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
         was_z_pressed = True
     else:
         was_z_pressed = False
