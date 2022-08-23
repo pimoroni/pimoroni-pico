@@ -290,8 +290,10 @@ namespace pimoroni {
       spi_write_blocking(spi, &cmd, 1);
       gpio_put(dc, 1); // data mode
 
-      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
-        spi_write_blocking(spi, (const uint8_t*)data, length);
+      graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        if (length > 0) {
+          spi_write_blocking(spi, (const uint8_t*)data, length);
+        }
       });
   
       gpio_put(cs, 1);
@@ -301,16 +303,12 @@ namespace pimoroni {
       write_blocking_parallel(&cmd, 1);
       gpio_put(dc, 1); // data mode
 
-      int scanline = 0;
-
-      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this, scanline](void *data, size_t length) mutable {
-        write_blocking_parallel_dma((const uint8_t*)data, length);
-
-        // Stall on the last scanline since "data" goes out of scope and is lost
-        scanline++;
-        if(scanline == height) {
-            while (dma_channel_is_busy(parallel_dma))
-            ;
+      graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        if (length > 0) {
+          write_blocking_parallel_dma((const uint8_t*)data, length);
+        }
+        else {
+          dma_channel_wait_for_finish_blocking(parallel_dma);
         }
       });
 

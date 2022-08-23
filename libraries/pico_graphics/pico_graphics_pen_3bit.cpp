@@ -90,7 +90,7 @@ namespace pimoroni {
         color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
         set_pixel(p);
     }
-    void PicoGraphics_Pen3Bit::scanline_convert(PenType type, conversion_callback_func callback) {
+    void PicoGraphics_Pen3Bit::frame_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_P4) {
             uint8_t row_buf[bounds.w / 2];
             uint offset = (bounds.w * bounds.h) / 8;

@@ -124,7 +124,7 @@ namespace pimoroni {
         color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
         set_pixel(p);
     }
-    void PicoGraphics_PenP4::scanline_convert(PenType type, conversion_callback_func callback) {
+    void PicoGraphics_PenP4::frame_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
             // Cache the RGB888 palette as RGB565
             RGB565 cache[palette_size];
@@ -134,28 +134,18 @@ namespace pimoroni {
 
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
+            uint8_t o = 4;
 
-            // Allocate two per-row temporary buffers, as the callback may transfer by DMA
-            // while we're preparing the next row
-            uint16_t row_buf[2][bounds.w];
-            for(auto y = 0; y < bounds.h; y++) {
-                /*if(scanline_interrupt != nullptr) {
-                    scanline_interrupt(y);
-                    // Cache the RGB888 palette as RGB565
-                    for(auto i = 0u; i < 16; i++) {
-                    cache[i] = palette[i].to_rgb565();
-                    }
-                }*/
+            frame_convert_rgb565(callback, [&]() {
+                uint8_t c = *src;
+                uint8_t b = (c >> o) & 0xf; // bit value shifted to position
+                
+                // Increment to next 4-bit entry 
+                o ^= 4;
+                if (o != 0) ++src;
 
-                for(auto x = 0; x < bounds.w; x++) {
-                    uint8_t c = src[(bounds.w * y / 2) + (x / 2)];
-                    uint8_t  o = (~x & 0b1) * 4; // bit offset within byte
-                    uint8_t  b = (c >> o) & 0xf; // bit value shifted to position
-                    row_buf[y & 1][x] = cache[b];
-                }
-                // Callback to the driver with the row data
-                callback(row_buf[y & 1], bounds.w * sizeof(RGB565));
-            }
+                return cache[b];
+            });
         }
     }
 }
