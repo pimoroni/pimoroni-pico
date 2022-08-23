@@ -6,6 +6,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.c
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/galactic_unicorn/galactic_unicorn.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_synth/pico_synth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb888.cpp
 )
 pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/galactic_unicorn/galactic_unicorn.pio)

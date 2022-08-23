@@ -2,9 +2,7 @@
 
 #include "hardware/pio.h"
 #include "pico_graphics.hpp"
-#include "synth.hpp"
-
-using namespace synth;
+#include "../pico_synth/pico_synth.hpp"
 
 namespace pimoroni {
 
@@ -77,16 +75,13 @@ namespace pimoroni {
     int16_t tone_buffers[NUM_TONE_BUFFERS][TONE_BUFFER_SIZE] = {0};
     uint current_buffer = 0;
 
-    float tone_frequency_a = 0.0f;
-    float tone_frequency_b = 0.0f;
-    float wave_start_a = 0.0f;
-    float wave_start_b = 0.0f;
+  public:
+    PicoSynth synth;
 
-    synth::AudioChannel channels[CHANNEL_COUNT];
-
+  private:
     enum PlayMode {
       PLAYING_BUFFER,
-      PLAYING_TONE,
+      //PLAYING_TONE,
       PLAYING_SYNTH,
       NOT_PLAYING
     };
@@ -119,19 +114,14 @@ namespace pimoroni {
     bool is_pressed(uint8_t button);
 
     void play_sample(uint8_t *data, uint32_t length);
-    void play_tone(float frequency);
-    void play_dual_tone(float freq_a, float freq_b);
     void play_synth();
     void stop_playing();
 
-    uint64_t synth_start = 0;
-
   private:
-    void next_dma_sequence();
+    void next_bitstream_sequence();
     void partial_teardown();
     void dma_safe_abort(uint channel);
-    void loop_tone();
-    void populate_next_tone();
+    void next_audio_sequence();
     void populate_next_synth();
   };
 

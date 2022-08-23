@@ -159,20 +159,6 @@ extern mp_obj_t GalacticUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
     return mp_const_none;
 }
 
-extern mp_obj_t GalacticUnicorn_play_tone(mp_obj_t self_in, mp_obj_t freq) {
-    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
-    self->galactic->play_tone(mp_obj_get_float(freq));
-
-    return mp_const_none;
-}
-
-extern mp_obj_t GalacticUnicorn_play_dual_tone(mp_obj_t self_in, mp_obj_t freq_a, mp_obj_t freq_b) {
-    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
-    self->galactic->play_dual_tone(mp_obj_get_float(freq_a), mp_obj_get_float(freq_b));
-
-    return mp_const_none;
-}
-
 extern mp_obj_t GalacticUnicorn_play_synth(mp_obj_t self_in) {
     _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
     self->galactic->play_synth();
@@ -183,6 +169,58 @@ extern mp_obj_t GalacticUnicorn_play_synth(mp_obj_t self_in) {
 extern mp_obj_t GalacticUnicorn_stop_playing(mp_obj_t self_in) {
     _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
     self->galactic->stop_playing();
+
+    return mp_const_none;
+}
+
+extern mp_obj_t GalacticUnicorn_channel_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_channel, ARG_waveforms, ARG_attack_ms, ARG_decay_ms, ARG_sustain, ARG_release_ms, ARG_volume };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_channel, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_waveforms, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_attack_ms, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_decay_ms, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_sustain, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_release_ms, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_volumes, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _GalacticUnicorn_obj_t);
+
+    int c = args[ARG_channel].u_int;
+    self->galactic->synth.channels[c].waveforms = args[ARG_waveforms].u_int;
+    self->galactic->synth.channels[c].attack_ms = args[ARG_attack_ms].u_int;
+    self->galactic->synth.channels[c].decay_ms = args[ARG_decay_ms].u_int;
+    self->galactic->synth.channels[c].sustain = args[ARG_sustain].u_int;
+    self->galactic->synth.channels[c].release_ms = args[ARG_release_ms].u_int;
+    self->galactic->synth.channels[c].volume = args[ARG_volume].u_int;
+
+    return mp_const_none;
+}
+
+extern mp_obj_t GalacticUnicorn_channel_freq(mp_obj_t self_in, mp_obj_t channel, mp_obj_t freq) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+
+    self->galactic->synth.channels[mp_obj_get_int(channel)].frequency = mp_obj_get_float(freq);
+
+    return mp_const_none;
+}
+
+extern mp_obj_t GalacticUnicorn_channel_trigger_attack(mp_obj_t self_in, mp_obj_t channel) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+    self->galactic->synth.channels[mp_obj_get_int(channel)].trigger_attack();
+
+    return mp_const_none;
+}
+
+extern mp_obj_t GalacticUnicorn_channel_trigger_release(mp_obj_t self_in, mp_obj_t channel) {
+    _GalacticUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _GalacticUnicorn_obj_t);
+    self->galactic->synth.channels[mp_obj_get_int(channel)].trigger_release();
 
     return mp_const_none;
 }
