@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "src/headers/MLX90640_API.h"
 #include "common/pimoroni_i2c.hpp"
 
@@ -8,13 +9,16 @@ void MLX90640_I2CConfigure(pimoroni::I2C *i2c_instance);
 namespace pimoroni {
     class MLX90640 {
         public:
+            static const int WIDTH = 32;
+            static const int HEIGHT = 24;
+
             enum MLX90640_Error {
                 OK = 0,
                 INVALID_BAUDRATE = 1,
                 INVALID_FPS = 2,
             };
 
-            float mlx90640To[768] = {0.0f};
+            float mlx90640To[WIDTH * HEIGHT] = {0.0f};
             float emissivity = 1.0f;
             float reflected_temperature = 8.0f;
 
