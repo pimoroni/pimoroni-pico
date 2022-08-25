@@ -41,7 +41,7 @@ int main() {
 
     graphics.set_pen(0, 0, 0);
     graphics.clear();
-    
+
     ok_color::HSL hsl{scroll / 100.0f, 1.0f, 0.5f};
     ok_color::RGB rgb = ok_color::okhsl_to_srgb(hsl);
     graphics.set_pen(rgb.r * 255, rgb.g * 255, rgb.b * 255);
@@ -59,8 +59,8 @@ int main() {
       }
     }*/
 
-    galactic_unicorn.update(graphics);
-    
+    galactic_unicorn.update(&graphics);
+
     sleep_ms(10);
   }
 

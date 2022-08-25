@@ -6,6 +6,7 @@ pico_generate_pio_header(galactic_unicorn ${CMAKE_CURRENT_LIST_DIR}/audio_i2s.pi
 
 target_sources(galactic_unicorn INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/galactic_unicorn.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../pico_synth/pico_synth.cpp
 )
 
 target_include_directories(galactic_unicorn INTERFACE ${CMAKE_CURRENT_LIST_DIR})

@@ -2,6 +2,7 @@
 
 #include "hardware/pio.h"
 #include "pico_graphics.hpp"
+#include "../pico_synth/pico_synth.hpp"
 
 namespace pimoroni {
 
@@ -45,16 +46,44 @@ namespace pimoroni {
     static const uint8_t SWITCH_BRIGHTNESS_DOWN = 26;
 
   private:
-    PIO bitstream_pio = pio0;
-    uint bitstream_sm = 0;
-    uint bitstream_sm_offset = 0;
+    static const uint32_t ROW_COUNT = 11;
+    static const uint32_t BCD_FRAME_COUNT = 14;
+    static const uint32_t BCD_FRAME_BYTES = 60;
+    static const uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
+    static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
+    static const uint SYSTEM_FREQ = 22050;
 
-    PIO audio_pio = pio0;
-    uint audio_sm = 0;
-    uint audio_sm_offset = 0;
+  private:
+    static PIO bitstream_pio;
+    static uint bitstream_sm;
+    static uint bitstream_sm_offset;
+
+    static PIO audio_pio;
+    static uint audio_sm;
+    static uint audio_sm_offset;
 
     uint16_t brightness = 256;
     uint16_t volume = 127;
+
+    // must be aligned for 32bit dma transfer
+    alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+    static GalacticUnicorn* unicorn;
+    static void dma_complete();
+
+    static const uint NUM_TONE_BUFFERS = 2;
+    static const uint TONE_BUFFER_SIZE = 4;
+    int16_t tone_buffers[NUM_TONE_BUFFERS][TONE_BUFFER_SIZE] = {0};
+    uint current_buffer = 0;
+
+    PicoSynth synth;
+
+    enum PlayMode {
+      PLAYING_BUFFER,
+      //PLAYING_TONE,
+      PLAYING_SYNTH,
+      NOT_PLAYING
+    };
+    PlayMode play_mode = NOT_PLAYING;
 
   public:
     ~GalacticUnicorn();
@@ -64,8 +93,7 @@ namespace pimoroni {
 
     void clear();
 
-    void update(PicoGraphics_PenRGB565 &graphics);
-    void update(PicoGraphics_PenRGB888 &graphics);
+    void update(PicoGraphics *graphics);
 
     void set_brightness(float value);
     float get_brightness();
@@ -75,16 +103,25 @@ namespace pimoroni {
     float get_volume();
     void adjust_volume(float delta);
 
-
+  private:
     void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
-    void set_pixel(int x, int y, uint8_t v);
+  public:
 
     uint16_t light();
 
     bool is_pressed(uint8_t button);
 
     void play_sample(uint8_t *data, uint32_t length);
+    void play_synth();
+    void stop_playing();
+    AudioChannel& synth_channel(uint channel);
 
+  private:
+    void next_bitstream_sequence();
+    void partial_teardown();
+    void dma_safe_abort(uint channel);
+    void next_audio_sequence();
+    void populate_next_synth();
   };
 
 }

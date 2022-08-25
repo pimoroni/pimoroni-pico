@@ -88,7 +88,7 @@ int main() {
     }else if(prompt == PROMPT_BBC_MICRO){
       graphics.set_pen(0, 0, 0);
     }
-    
+
     graphics.clear();
 
     if(prompt == PROMPT_C64) {
@@ -103,18 +103,18 @@ int main() {
       for(size_t x = 0; x < image[y].length(); x++) {
         // draw the prompt text
         if(image[y][x] == 'O') {
-          graphics.pixel(Point(x, y + 1));    
+          graphics.pixel(Point(x, y + 1));
         }
 
         // draw the caret blinking
         if(image[y][x] == 'X' && (time_ms / 300) % 2) {
-          graphics.pixel(Point(x, y + 1));    
+          graphics.pixel(Point(x, y + 1));
         }
       }
     }
 
-    galactic_unicorn.update(graphics);
-    
+    galactic_unicorn.update(&graphics);
+
     sleep_ms(10);
   }
 
