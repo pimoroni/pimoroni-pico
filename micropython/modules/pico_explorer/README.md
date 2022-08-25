@@ -109,7 +109,7 @@ reading =  adc0.read_voltage()
 
 Motors are driven by PWM via an onboard DRV8833.  We'd recommend using our fully featured Motor library to drive them - here's a quick example for how to drive motor 1:
 
-``` python
+```python
 from motor import Motor
 import time
 
@@ -138,25 +138,25 @@ To make noise with Explorer, you must select one of the GP0 to GP7 pins to PWM f
 
 To set up the buzzer, first import the `Buzzer` class from the `pimoroni` module:
 
-``` python
+```python
 from pimoroni import Buzzer
 ```
 
 Then create a `Buzzer` instance:
 
-``` python
-BUZZER = Buzzer(0)
+```python
+buzzer = Buzzer(0)
 ```
 
 You can then play audio tones like this - frequency should probably be a number between 1 and 5000 if you have human ears. 
 
-``` python
+```python
 buzzer.set_tone(frequency)
 ```
 
 To make the buzzer be quiet, you can:
 
-``` python
+```python
 buzzer.set_tone(0)
 ```
 
@@ -176,8 +176,8 @@ You can also use these pins as outputs, if you wanted to connect up stuff like L
 import machine
 
 GPO = machine.Pin(0, machine.Pin.OUT)
-
 ```
+
 Note that if you're connecting external LEDs up to Explorer Base, GP0-7 have built in 100 Ohm resistors, so you don't need to include a resistor in your circuit to protect your LED from drawing too much current.
 
 There's lots more info about how to use `machine` in the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/rp2040/getting-started/#getting-started-with-micropython).
@@ -190,7 +190,7 @@ The slots at the top of the board let you plug (I2C) Breakout Garden breakouts i
 
 Pico Explorer uses GP20 and GP21 for its I2C interface - these pins differ from our default Breakout Garden pins so you will need to specify you're using a Pico Explorer when running breakout examples. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
 
-``` python
+```python
 from pimoroni_i2c import PimoroniI2C
 from pimoroni import PICO_EXPLORER_I2C_PINS
 
@@ -199,11 +199,12 @@ i2c = PimoroniI2C(**PICO_EXPLORER_I2C_PINS)
 
 Alternatively, you can specify the pin numbers directly:
 
-``` python
+```python
 from pimoroni_i2c import PimoroniI2C
 
 i2c = PimoroniI2C(sda=(20), scl=(21))
 ```
+
 ## Pins
 
 Here's a list of the pins associated with the various features of Pico Explorer. You can also find a list of pins on the underneath of the board!
