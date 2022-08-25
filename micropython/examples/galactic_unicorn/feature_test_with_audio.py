@@ -738,10 +738,10 @@ while True:
         if not was_a_pressed:
             channel0.configure(Channel.TRIANGLE + Channel.SQUARE,
                                16,
-                                 168,
-                                 0,
-                                 168,
-                                 0)
+                               168,
+                               0,
+                               168,
+                               0)
             channel1.configure(Channel.SINE + Channel.SQUARE,
                                38,
                                300,
