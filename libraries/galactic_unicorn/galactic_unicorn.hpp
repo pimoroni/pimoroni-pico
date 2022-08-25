@@ -75,10 +75,8 @@ namespace pimoroni {
     int16_t tone_buffers[NUM_TONE_BUFFERS][TONE_BUFFER_SIZE] = {0};
     uint current_buffer = 0;
 
-  public:
     PicoSynth synth;
 
-  private:
     enum PlayMode {
       PLAYING_BUFFER,
       //PLAYING_TONE,
@@ -116,6 +114,7 @@ namespace pimoroni {
     void play_sample(uint8_t *data, uint32_t length);
     void play_synth();
     void stop_playing();
+    AudioChannel& synth_channel(uint channel);
 
   private:
     void next_bitstream_sequence();
