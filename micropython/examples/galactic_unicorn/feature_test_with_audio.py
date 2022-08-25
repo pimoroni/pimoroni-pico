@@ -2,7 +2,7 @@ import gc
 import time
 import math
 from machine import Timer
-from galactic import GalacticUnicorn
+from galactic import GalacticUnicorn, Channel
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 gc.collect()
@@ -700,15 +700,22 @@ freq_b = 0
 
 beat = 0
 
+channel0 = gu.synth_channel(0)
+channel1 = gu.synth_channel(1)
+channel2 = gu.synth_channel(2)
+channel3 = gu.synth_channel(3)
+channel4 = gu.synth_channel(7)
+channels = [channel0, channel1, channel2, channel3, channel4]
+
 
 def next_beat():
     global beat
     for i in range(5):
         if notes[i][beat] > 0:
-            gu.channel_freq(i, notes[i][beat])
-            gu.channel_trigger_attack(i)
+            channels[i].freq(notes[i][beat])
+            channels[i].trigger_attack()
         elif notes[i][beat] == -1:
-            gu.channel_trigger_release(i)
+            channels[i].trigger_release()
 
     beat = (beat + 1) % SONG_LENGTH
 
@@ -729,36 +736,36 @@ while True:
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         if not was_a_pressed:
-            gu.channel_configure(0, gu.WF_TRIANGLE + gu.WF_SQUARE,
-                                 16,
+            channel0.configure(Channel.TRIANGLE + Channel.SQUARE,
+                               16,
                                  168,
                                  0,
                                  168,
                                  0)
-            gu.channel_configure(1, gu.WF_SINE + gu.WF_SQUARE,
-                                 38,
-                                 300,
-                                 0,
-                                 0,
-                                 12000)
-            gu.channel_configure(2, gu.WF_NOISE,
-                                 5,
-                                 10,
-                                 16000,
-                                 100,
-                                 0)
-            gu.channel_configure(3, gu.WF_NOISE,
-                                 5,
-                                 5,
-                                 8000,
-                                 40,
-                                 0)
-            gu.channel_configure(4, gu.WF_SQUARE,
-                                 10,
-                                 100,
-                                 0,
-                                 500,
-                                 0)
+            channel1.configure(Channel.SINE + Channel.SQUARE,
+                               38,
+                               300,
+                               0,
+                               0,
+                               12000)
+            channel2.configure(Channel.NOISE,
+                               5,
+                               10,
+                               16000,
+                               100,
+                               0)
+            channel3.configure(Channel.NOISE,
+                               5,
+                               5,
+                               8000,
+                               40,
+                               0)
+            channel4.configure(Channel.SQUARE,
+                               10,
+                               100,
+                               0,
+                               500,
+                               0)
             if not synthing:
                 beat = 0
                 next_beat()
@@ -774,21 +781,8 @@ while True:
         if not was_b_pressed:
             timer.deinit()
             freq_a = 400
+            channel0.play_tone(freq_a, 0.06)
 
-            gu.channel_freq(0, freq_a)
-            gu.channel_configure(0, gu.WF_SINE,
-                                 1,
-                                 1,
-                                 0xffff,
-                                 1,
-                                 4000)
-            gu.channel_configure(1, gu.WF_SINE,
-                                 1,
-                                 1,
-                                 0xffff,
-                                 1,
-                                 4000)
-            gu.channel_trigger_attack(0)
             gu.play_synth()
             synthing = False
 
@@ -803,21 +797,8 @@ while True:
             timer.deinit()
             freq_b = 600
 
-            gu.channel_freq(1, freq_b)
-            gu.channel_configure(0, gu.WF_SINE,
-                                 1,
-                                 1,
-                                 0xffff,
-                                 1,
-                                 4000)
-            gu.channel_configure(1, gu.WF_SINE,
-                                 1,
-                                 1,
-                                 0xffff,
-                                 1,
-                                 4000)
+            channel1.play_tone(freq_b, 0.06, fade_in=0.5)
 
-            gu.channel_trigger_attack(1)
             gu.play_synth()
             synthing = False
 
@@ -842,56 +823,56 @@ while True:
         # gu.adjust_brightness(+0.01)
         if bool_playing:
             freq_b += 10
-            gu.channel_freq(1, freq_b)
+            channel1.freq(freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         # gu.adjust_brightness(-0.01)
         if bool_playing:
             freq_b -= 10
-            gu.channel_freq(1, freq_b)
+            channel1.freq(freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
         if bool_playing:
             freq_a += 10
-            gu.channel_freq(0, freq_a)
+            channel0.freq(freq_a)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
         if bool_playing:
             freq_a -= 10
-            gu.channel_freq(0, freq_a)
+            channel0.freq(freq_a)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
         if not was_z_pressed:
-            gu.channel_configure(0, gu.WF_TRIANGLE + gu.WF_SQUARE,
-                                 16,
-                                 168,
-                                 0xafff,
-                                 168,
-                                 10000)
-            gu.channel_configure(1, gu.WF_SINE + gu.WF_SQUARE,
-                                 38,
-                                 300,
-                                 0,
-                                 0,
-                                 12000)
-            gu.channel_configure(2, gu.WF_NOISE,
-                                 5,
-                                 10,
-                                 16000,
-                                 100,
-                                 18000)
-            gu.channel_configure(3, gu.WF_NOISE,
-                                 5,
-                                 5,
-                                 8000,
-                                 40,
-                                 8000)
-            gu.channel_configure(4, gu.WF_SQUARE,
-                                 10,
-                                 100,
-                                 0,
-                                 500,
-                                 12000)
+            channel0.configure(Channel.TRIANGLE + Channel.SQUARE,
+                               16,
+                               168,
+                               0xafff,
+                               168,
+                               10000)
+            channel1.configure(Channel.SINE + Channel.SQUARE,
+                               38,
+                               300,
+                               0,
+                               0,
+                               12000)
+            channel2.configure(Channel.NOISE,
+                               5,
+                               10,
+                               16000,
+                               100,
+                               18000)
+            channel3.configure(Channel.NOISE,
+                               5,
+                               5,
+                               8000,
+                               40,
+                               8000)
+            channel4.configure(Channel.SQUARE,
+                               10,
+                               100,
+                               0,
+                               500,
+                               12000)
             if not synthing:
                 beat = 0
                 next_beat()

@@ -444,6 +444,11 @@ namespace pimoroni {
     }
   }
 
+  AudioChannel& GalacticUnicorn::synth_channel(uint channel) {
+    assert(channel < PicoSynth::CHANNEL_COUNT);
+    return synth.channels[channel];
+  }
+
   void GalacticUnicorn::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
     if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
