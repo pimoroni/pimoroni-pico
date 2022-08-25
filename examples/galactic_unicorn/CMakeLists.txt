@@ -1,14 +1,14 @@
 add_executable(
-  galactic_unicorn_demo
-  demo.cpp
+  rainbow_text
+  rainbow_text.cpp
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(galactic_unicorn_demo pico_stdlib hardware_pio hardware_adc hardware_dma pico_graphics galactic_unicorn)
-pico_enable_stdio_usb(galactic_unicorn_demo 1)
+target_link_libraries(rainbow_text pico_stdlib hardware_pio hardware_adc hardware_dma pico_graphics galactic_unicorn)
+pico_enable_stdio_usb(rainbow_text 1)
 
 # create map/bin/hex file etc.
-pico_add_extra_outputs(galactic_unicorn_demo)
+pico_add_extra_outputs(rainbow_text)
 
 
 
