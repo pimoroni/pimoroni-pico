@@ -3,21 +3,14 @@
 import time
 from pimoroni import Button
 from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER, PEN_P4
-import picoexplorer
 
 # We're only using a few colours so we can use a 4 bit/16 colour palette and save RAM!
 display = PicoGraphics(display=DISPLAY_PICO_EXPLORER, pen_type=PEN_P4)
 
-button_a = Button(picoexplorer.BUTTON_A)
-button_b = Button(picoexplorer.BUTTON_B)
-button_x = Button(picoexplorer.BUTTON_X)
-button_y = Button(picoexplorer.BUTTON_Y)
-
-# alternatively, you could set up the buttons using pin number if you prefer
-# button_a = Button(12)
-# button_b = Button(13)
-# button_x = Button(14)
-# button_y = Button(15)
+button_a = Button(12)
+button_b = Button(13)
+button_x = Button(14)
+button_y = Button(15)
 
 WHITE = display.create_pen(255, 255, 255)
 BLACK = display.create_pen(0, 0, 0)

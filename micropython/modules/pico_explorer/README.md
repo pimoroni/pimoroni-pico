@@ -4,8 +4,6 @@ Pico Explorer Base straps a whole host of physical computing goodies to your Pic
 
 [You can buy one here!](https://shop.pimoroni.com/products/pico-explorer-base)
 
-The `picoexplorer` module contains constants you can use with our shared libraries to make it easy to draw to the screen and interface with the buttons, piezo buzzer and motor driver. You don't need to use the constants of course, you can skip the `import pico_explorer` and just enter the pin number/s if you prefer. There's a handy reference of what pins are used for which functions on the bottom of the board.
-
 - [Board Functions](#board-functions)
   - [Display](#display)
   - [Buttons](#buttons)
@@ -14,7 +12,7 @@ The `picoexplorer` module contains constants you can use with our shared librari
   - [Audio](#audio)
   - [GPIO](#gpio)
   - [Breakout Garden slots / I2C](#breakout-garden-slots--i2c)
-- [Pin Constants](#pin-constants)
+- [Pins](#pins)
 
 ## Board Functions
 
@@ -24,7 +22,7 @@ Pico Explorer uses a shared Pico Graphics library to draw graphics and text on i
 
 - [PicoGraphics MicroPython function reference](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics)
 
-Please note that the backlight on Pico Explorer is not dimmable (we needed the pins to hook up other functions) so `set_backlight` won't do anything on this board.
+Please note that the backlight on Pico Explorer is not dimmable (we needed the pins to hook up all the other functions) so `set_backlight` won't do anything on this board.
 
 Here's a simple Hello World example that uses PicoGraphics to set up the display and draw some text on the screen.
 
@@ -56,20 +54,19 @@ The four buttons, A, B, X and Y have corresponding constants set to their respec
 Button(button, invert=True, repeat_time=200, hold_time=1000)
 ```
 
-To set up the buttons, first import the `Button` class from the `pimoroni` module and the pin constants from `picoexplorer`:
+To set up the buttons, first import the `Button` class from the `pimoroni` module:
 
 ```
 from pimoroni import Button
-import picoexplorer
 ```
 
-Then create instances of `Button` using our constants:
+Then create instances of `Button` using the correct pin numbers:
 
 ```
-button_a = Button(picoexplorer.BUTTON_A)
-button_b = Button(picoexplorer.BUTTON_B)
-button_x = Button(picoexplorer.BUTTON_X)
-button_y = Button(picoexplorer.BUTTON_Y)
+button_a = Button(12)
+button_b = Button(13)
+button_x = Button(14)
+button_y = Button(15)
 ```
 
 To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `repeat_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values:
@@ -88,19 +85,18 @@ state = button_a.raw()
 
 Pico Explorer's ADC channels are connected to Pico's ADC-capable pins (26, 27 and 28). You can read the voltages from them using the `Analog` class in the shared `pimoroni` module.
 
-First import the `Analog` class from the `pimoroni` module and the pin constants from `picoexplorer`:
+First import the `Analog` class from the `pimoroni` module:
 
 ```
 from pimoroni import Analog
-import pico explorer
 ```
 
-Then create instances of `Analog` using our constants:
+Then create instances of `Analog` using the correct pin numbers:
 
 ```python
- adc0 = Analog(picoexplorer.ADC0)
- adc1 = Analog(picoexplorer.ADC1)
- adc2 = Analog(picoexplorer.ADC2)
+ adc0 = Analog(26)
+ adc1 = Analog(27)
+ adc2 = Analog(28)
 ```
 
 And read them like this
@@ -111,26 +107,25 @@ reading =  adc0.read_voltage()
 
 ### Motors
 
-Motors are driven by PWM via an onboard DRV8833.  We'd recommend using our fully featured Motor library to drive them - here's a quick example:
+Motors are driven by PWM via an onboard DRV8833.  We'd recommend using our fully featured Motor library to drive them - here's a quick example for how to drive motor 1:
 
 ``` python
-import picoexplorer
 from motor import Motor
 import time
 
-m = Motor(picoexplorer.MOTOR_1)
+m1 = Motor((8, 9))
 
-m.enable()
+m1.enable()
 
 # run the motor full speed in one direction for 2 seconds
-m.speed(1.0)
+m1.speed(1.0)
 time.sleep(2)
 
 # and in the opposite direction for 2 seconds
-m.speed(-1.0)
+m1.speed(-1.0)
 time.sleep(2)
 
-m.disable()
+m1.disable()
 ```
 
 You can find much more info about working with motors in the [Motor library documentation](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/motor).
@@ -139,19 +134,18 @@ The red LED next to the motor connectors is part of the motor driver circuit - i
 
 ### Audio
 
-To make noise with Explorer, you must select one of the GP0 to GP7 pins to PWM for audio. You'll then need to connect this pin to AUDIO with a jumper wire.
+To make noise with Explorer, you must select one of the GP0 to GP7 pins to PWM for audio (We're using GP0 in the code below). You'll then need to connect this pin to AUDIO with a jumper wire.
 
-To set up the buzzer, first import the `Buzzer` class from the `pimoroni` module and the pin constants from `picoexplorer`:
+To set up the buzzer, first import the `Buzzer` class from the `pimoroni` module:
 
 ``` python
 from pimoroni import Buzzer
-import picoexplorer
 ```
 
 Then create a `Buzzer` instance:
 
 ``` python
-BUZZER = Buzzer(picoexplorer.GP0)
+BUZZER = Buzzer(0)
 ```
 
 You can then play audio tones like this - frequency should probably be a number between 1 and 5000 if you have human ears. 
@@ -194,7 +188,7 @@ The slots at the top of the board let you plug (I2C) Breakout Garden breakouts i
 
 - [List of Pico-compatible breakouts](https://github.com/pimoroni/pimoroni-pico/blob/main/README.md#breakouts)
 
-Pico Explorer uses GP20 and GP21 for its I2C interface - these pins differ from our default Breakout Garden pins so you will specify you're using a Pico Explorer when running breakout examples. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
+Pico Explorer uses GP20 and GP21 for its I2C interface - these pins differ from our default Breakout Garden pins so you will need to specify you're using a Pico Explorer when running breakout examples. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
 
 ``` python
 from pimoroni_i2c import PimoroniI2C
@@ -210,24 +204,50 @@ from pimoroni_i2c import PimoroniI2C
 
 i2c = PimoroniI2C(sda=(20), scl=(21))
 ```
-## Pin Constants
+## Pins
 
-Here's a list of constants that are available in `picoexplorer`, and the pin numbers that they correspond to on the Pico.
+Here's a list of the pins associated with the various features of Pico Explorer. You can also find a list of pins on the underneath of the board!
 
-**Buttons**
+**GPIO (General Purpose Input Output) pins**
 
-- `BUTTON_A` = `12`
-- `BUTTON_B` = `13`
-- `BUTTON_X` = `14`
-- `BUTTON_Y` = `15`
+- GP0 = `0`
+- GP1 = `1`
+- GP2 = `2`
+- GP3 = `3`
+- GP4 = `4`
+- GP5 = `5`
+- GP6 = `6`
+- GP7 = `7`
 
-**ADC**
+**Buttons/Switches**
 
-- `ADC0` = `26`
-- `ADC1` = `27`
-- `ADC2` = `28`
+- Button A = `12`
+- Button B = `13`
+- Button X = `14`
+- Button Y = `15`
 
 **Motors**
 
-- `MOTOR_1` = `8, 9`
-- `MOTOR_2` = `10, 11`
+- Motor 1 (-) = `8`
+- Motor 1 (+) = `9`
+- Motor 2 (-) = `10`
+- Motor 2 (+) = `11`
+
+**SPI pins (used for the display)**
+
+- SPI MISO - `16`
+- LCD CS - `17`
+- SPI SCK - `18`
+- SPI MOSI - `19`
+
+**I2C pins**
+
+- I2C SDA - `20`
+- I2C SCL - `21`
+- I2C INT - `22`
+
+**Analog pins**
+
+- ADC0 = `26`
+- ADC1 = `27`
+- ADC2 = `28`
