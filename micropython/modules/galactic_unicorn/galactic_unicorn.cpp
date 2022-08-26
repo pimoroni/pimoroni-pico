@@ -45,17 +45,86 @@ mp_obj_t Channel___del__(mp_obj_t self_in) {
 }
 
 
+/***** Helper Functions *****/
+void set_channel_waveforms(AudioChannel& channel, mp_obj_t in) {
+    int waveforms = mp_obj_get_int(in);
+    const int mask = (NOISE | SQUARE | SAW | TRIANGLE | SINE | WAVE);
+    if(waveforms < 0 || (waveforms & mask) == 0) {
+        mp_raise_ValueError("waveforms invalid. Expected a combination of NOISE, SQUARE, SAW, TRIANGLE, SINE, or WAVE");
+    }
+    channel.waveforms = (uint8_t)waveforms;
+}
+
+void set_channel_frequency(AudioChannel& channel, mp_obj_t in) {
+    int freq = mp_obj_get_int(in);
+    if(freq <= 0 || freq > UINT16_MAX) {
+        mp_raise_ValueError("frequency out of range. Expected greater than 0Hz to 65535Hz");
+    }
+    channel.frequency = (uint16_t)freq;
+}
+
+void set_channel_volume(AudioChannel& channel, mp_obj_t in) {
+    float volume = mp_obj_get_float(in);
+    if(volume < 0.0f || volume > 1.0f) {
+        mp_raise_ValueError("volume out of range. Expected 0.0 to 1.0");
+    }
+    channel.volume = (uint16_t)(volume * UINT16_MAX);
+}
+
+void set_channel_attack(AudioChannel& channel, mp_obj_t in) {
+    int attack_ms = (int)(mp_obj_get_float(in) * 1000.0f);
+    if(attack_ms < 0 || attack_ms > UINT16_MAX) {
+        mp_raise_ValueError("attack out of range. Expected 0.0s to 65.5s");
+    }
+    channel.attack_ms = MAX(attack_ms, 1);
+}
+
+void set_channel_decay(AudioChannel& channel, mp_obj_t in) {
+    int decay_ms = (int)(mp_obj_get_float(in) * 1000.0f);
+    if(decay_ms < 0 || decay_ms > UINT16_MAX) {
+        mp_raise_ValueError("decay out of range. Expected 0.0s to 65.5s");
+    }
+    channel.decay_ms = MAX(decay_ms, 1);
+}
+
+void set_channel_sustain(AudioChannel& channel, mp_obj_t in) {
+    float sustain = mp_obj_get_float(in);
+    if(sustain < 0.0f || sustain > 1.0f) {
+        mp_raise_ValueError("sustain out of range. Expected 0.0 to 1.0");
+    }
+    channel.sustain = (uint16_t)(sustain * UINT16_MAX);
+}
+
+void set_channel_release(AudioChannel& channel, mp_obj_t in) {
+    int release_ms = (int)(mp_obj_get_float(in) * 1000.0f);
+    if(release_ms < 0 || release_ms > UINT16_MAX) {
+        mp_raise_ValueError("release out of range. Expected 0.0s to 65.5s");
+    }
+    channel.release_ms = MAX(release_ms, 1);
+}
+
+void set_channel_pulse_width(AudioChannel& channel, mp_obj_t in) {
+    float pulse_width = mp_obj_get_float(in);
+    if(pulse_width < 0.0f || pulse_width > 1.0f) {
+        mp_raise_ValueError("pulse_width out of range. Expected 0.0 to 1.0");
+    }
+    channel.pulse_width = (uint16_t)(pulse_width * UINT16_MAX);
+}
+
+
 /***** Methods *****/
 mp_obj_t Channel_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_waveforms, ARG_attack_ms, ARG_decay_ms, ARG_sustain, ARG_release_ms, ARG_volume };
+    enum { ARG_self, ARG_waveforms, ARG_frequency, ARG_volume, ARG_attack, ARG_decay, ARG_sustain, ARG_release, ARG_pulse_width };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_waveforms, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_attack_ms, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_decay_ms, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_sustain, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_release_ms, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_volumes, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_waveforms, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_frequency, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_volume, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_attack, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_decay, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_sustain, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_release, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_pulse_width, MP_ARG_OBJ, {.u_obj = mp_const_none} }
     };
 
     // Parse args.
@@ -64,25 +133,140 @@ mp_obj_t Channel_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
 
     _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Channel_obj_t);
 
-    self->channel->waveforms = args[ARG_waveforms].u_int;
-    self->channel->attack_ms = args[ARG_attack_ms].u_int;
-    self->channel->decay_ms = args[ARG_decay_ms].u_int;
-    self->channel->sustain = args[ARG_sustain].u_int;
-    self->channel->release_ms = args[ARG_release_ms].u_int;
-    self->channel->volume = args[ARG_volume].u_int;
+    mp_obj_t waveforms = args[ARG_waveforms].u_obj;
+    if(waveforms != mp_const_none) {
+        set_channel_waveforms(*self->channel, waveforms);
+    }
+
+    mp_obj_t frequency = args[ARG_frequency].u_obj;
+    if(frequency != mp_const_none) {
+        set_channel_frequency(*self->channel, frequency);
+    }
+
+    mp_obj_t volume = args[ARG_volume].u_obj;
+    if(volume != mp_const_none) {
+        set_channel_volume(*self->channel, volume);
+    }
+
+    mp_obj_t attack = args[ARG_attack].u_obj;
+    if(attack != mp_const_none) {
+        set_channel_attack(*self->channel, attack);
+    }
+
+    mp_obj_t decay = args[ARG_decay].u_obj;
+    if(decay != mp_const_none) {
+        set_channel_decay(*self->channel, decay);
+    }
+
+    mp_obj_t sustain = args[ARG_sustain].u_obj;
+    if(sustain != mp_const_none) {
+        set_channel_sustain(*self->channel, sustain);
+    }
+
+    mp_obj_t release = args[ARG_release].u_obj;
+    if(release != mp_const_none) {
+        set_channel_release(*self->channel, release);
+    }
+
+    mp_obj_t pulse_width = args[ARG_pulse_width].u_obj;
+    if(pulse_width != mp_const_none) {
+        set_channel_pulse_width(*self->channel, pulse_width);
+    }
 
     return mp_const_none;
 }
 
-mp_obj_t Channel_freq(mp_obj_t self_in, mp_obj_t freq_in) {
+mp_obj_t Channel_restore(mp_obj_t self_in) {
     _Channel_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Channel_obj_t);
+    self->channel->restore();
+    return mp_const_none;
+}
 
-    float freq = mp_obj_get_float(freq_in);
-    if(freq <= 0.0f) {
-        mp_raise_ValueError("freq out of range. Expected greater than 0.0");
+mp_obj_t Channel_waveforms(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_int(self->channel->waveforms);
     }
-    self->channel->frequency = freq;
 
+    set_channel_waveforms(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_frequency(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_int(self->channel->frequency);
+    }
+
+    set_channel_frequency(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_volume(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->volume / UINT16_MAX);
+    }
+
+    set_channel_volume(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_attack_duration(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->attack_ms / 1000.0f);
+    }
+
+    set_channel_attack(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_decay_duration(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->decay_ms / 1000.0f);
+    }
+
+    set_channel_decay(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_sustain_level(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->sustain / UINT16_MAX);
+    }
+
+    set_channel_sustain(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_release_duration(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->release_ms / 1000.0f);
+    }
+
+    set_channel_release(*self->channel, args[1]);
+    return mp_const_none;
+}
+
+mp_obj_t Channel_pulse_width(size_t n_args, const mp_obj_t *args) {
+    _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[0], _Channel_obj_t);
+
+    if(n_args == 1) {
+        return mp_obj_new_float((float)self->channel->pulse_width / 0xffff);
+    }
+
+    set_channel_pulse_width(*self->channel, args[1]);
     return mp_const_none;
 }
 
@@ -104,10 +288,10 @@ mp_obj_t Channel_play_tone(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
     enum { ARG_self, ARG_freq, ARG_volume, ARG_fade_in, ARG_fade_out };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_freq, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_frequency, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_volume, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_fade_in, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-        { MP_QSTR_fade_out, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_attack, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_release, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     // Parse args.
@@ -116,45 +300,35 @@ mp_obj_t Channel_play_tone(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
 
     _Channel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Channel_obj_t);
 
-    float freq = mp_obj_get_float(args[ARG_freq].u_obj);
-    if(freq <= 0.0f) {
-        mp_raise_ValueError("freq out of range. Expected greater than 0.0");
+    set_channel_frequency(*self->channel, args[ARG_freq].u_obj);
+
+    mp_obj_t volume = args[ARG_volume].u_obj;
+    if(volume != mp_const_none) {
+        set_channel_volume(*self->channel, volume);
+    }
+    else {
+        self->channel->volume = UINT16_MAX;
     }
 
-    float volume = 1.0f;
-    if(args[ARG_volume].u_obj != mp_const_none) {
-        volume = mp_obj_get_float(args[ARG_volume].u_obj);
-        if(volume < 0.0f || volume > 1.0f) {
-            mp_raise_ValueError("volume out of range. Expected 0.0 to 1.0");
-        }
+    mp_obj_t attack_ms = args[ARG_fade_in].u_obj;
+    if(attack_ms != mp_const_none) {
+        set_channel_attack(*self->channel, attack_ms);
+    }
+    else {
+        self->channel->attack_ms = 1;
     }
 
-    int fade_in_ms = 1;
-    if(args[ARG_fade_in].u_obj != mp_const_none) {
-        float fade_in = mp_obj_get_float(args[ARG_fade_in].u_obj);
-        if(fade_in <= 0.0f) {
-            mp_raise_ValueError("fade_in out of range. Expected greater than 0.0");
-        }
-        fade_in_ms = (uint16_t)(fade_in * 1000.0f);
+    mp_obj_t release_ms = args[ARG_fade_out].u_obj;
+    if(release_ms != mp_const_none) {
+        set_channel_release(*self->channel, release_ms);
+    }
+    else {
+        self->channel->release_ms = 1;
     }
 
-    int fade_out_ms = 1;
-    if(args[ARG_fade_out].u_obj != mp_const_none) {
-        float fade_out = mp_obj_get_float(args[ARG_fade_out].u_obj);
-        if(fade_out <= 0.0f) {
-            mp_raise_ValueError("fade_out out of range. Expected greater than 0.0");
-        }
-        fade_out_ms = (uint16_t)(fade_out * 1000.0f);
-    }
-
-
-    self->channel->frequency = freq;
     self->channel->waveforms = Waveform::SINE;
-    self->channel->attack_ms = MAX(fade_in_ms, 1);
     self->channel->decay_ms = 1;
-    self->channel->sustain = 0xffff;
-    self->channel->release_ms = MAX(fade_out_ms, 1);
-    self->channel->volume = (uint16_t)(volume * 0xffff);
+    self->channel->sustain = UINT16_MAX;
 
     self->channel->trigger_attack();
 
