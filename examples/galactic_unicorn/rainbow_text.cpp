@@ -68,7 +68,7 @@ int main() {
     i++;
     graphics.set_pen(0, 0, 0);
     graphics.clear();
-    
+
     float s = 0.8f;//0.65f + (sin(i / 25.0f) * 0.15f);
     float a = 1.0f;// (sin(i / 25.0f) * 100.0f);
 
@@ -76,7 +76,7 @@ int main() {
     float y = (cos((i) / 40.0f) * 5.0f);
     graphics.set_pen(255, 255, 255);
     text("Galactic Unicorn", Point(x, y), s, a);
-    
+
     uint8_t *p = (uint8_t *)graphics.frame_buffer;
     for(size_t i = 0; i < 53 * 11; i++) {
       int x = i % 53;
@@ -92,13 +92,10 @@ int main() {
         b = hue_map[x][2]; 
       }
 
-      galactic_unicorn.set_pixel(x, y, r, g, b);
+      graphics.set_pen(r, g, b);
+      graphics.pixel(Point(x, y));
     }
-
-
   }
-
-
 
   printf("done\n");
 

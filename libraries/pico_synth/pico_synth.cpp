@@ -56,6 +56,20 @@ namespace pimoroni {
     adsr_step = 0;
   }
 
+  void AudioChannel::restore() {
+    // Put all the parameters back to their initial values
+    waveforms     = 0;
+    frequency     = 660;
+    volume        = 0xffff;
+
+    attack_ms     = 2;
+    decay_ms      = 6;
+    sustain       = 0xffff;
+    release_ms    = 1;
+    pulse_width   = 0x7fff;
+    noise         = 0;
+  }
+
   bool PicoSynth::is_audio_playing() {
     if(volume == 0) {
       return false;

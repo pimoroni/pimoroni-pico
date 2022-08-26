@@ -69,11 +69,11 @@ namespace pimoroni {
   struct AudioChannel {
     uint8_t   waveforms     = 0;      // bitmask for enabled waveforms (see Waveform enum for values)
     uint16_t  frequency     = 660;    // frequency of the voice (Hz)
-    uint16_t  volume        = 0xffff; // channel volume
+    uint16_t  volume        = UINT16_MAX; // channel volume
 
     uint16_t  attack_ms     = 2;      // attack period (cannot be zero)
     uint16_t  decay_ms      = 6;      // decay period (cannot be zero)
-    uint16_t  sustain       = 0xffff; // sustain volume
+    uint16_t  sustain       = UINT16_MAX; // sustain volume
     uint16_t  release_ms    = 1;      // release period
     uint16_t  pulse_width   = 0x7fff; // duty cycle of square wave (default 50%)
     int16_t   noise         = 0;      // current noise value
@@ -101,6 +101,7 @@ namespace pimoroni {
     void trigger_sustain();
     void trigger_release();
     void off();
+    void restore();
   };
 
   class PicoSynth {

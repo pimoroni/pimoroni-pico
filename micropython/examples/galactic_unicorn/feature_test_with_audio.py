@@ -712,7 +712,7 @@ def next_beat():
     global beat
     for i in range(5):
         if notes[i][beat] > 0:
-            channels[i].freq(notes[i][beat])
+            channels[i].frequency(notes[i][beat])
             channels[i].trigger_attack()
         elif notes[i][beat] == -1:
             channels[i].trigger_release()
@@ -736,36 +736,36 @@ while True:
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         if not was_a_pressed:
-            channel0.configure(Channel.TRIANGLE + Channel.SQUARE,
-                               16,
-                               168,
-                               0,
-                               168,
-                               0)
-            channel1.configure(Channel.SINE + Channel.SQUARE,
-                               38,
-                               300,
-                               0,
-                               0,
-                               12000)
-            channel2.configure(Channel.NOISE,
-                               5,
-                               10,
-                               16000,
-                               100,
-                               0)
-            channel3.configure(Channel.NOISE,
-                               5,
-                               5,
-                               8000,
-                               40,
-                               0)
-            channel4.configure(Channel.SQUARE,
-                               10,
-                               100,
-                               0,
-                               500,
-                               0)
+            channel0.configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
+                               attack=0.016,
+                               decay=0.168,
+                               sustain=0,
+                               release=0.168,
+                               volume=0)
+            channel1.configure(waveforms=Channel.SINE + Channel.SQUARE,
+                               attack=0.038,
+                               decay=0.300,
+                               sustain=0,
+                               release=0,
+                               volume=12000/65535)
+            channel2.configure(waveforms=Channel.NOISE,
+                               attack=0.005,
+                               decay=0.010,
+                               sustain=16000/65535,
+                               release=0.100,
+                               volume=0)
+            channel3.configure(waveforms=Channel.NOISE,
+                               attack=0.005,
+                               decay=0.005,
+                               sustain=8000/65535,
+                               release=0.040,
+                               volume=0)
+            channel4.configure(waveforms=Channel.SQUARE,
+                               attack=0.010,
+                               decay=0.100,
+                               sustain=0,
+                               release=0.500,
+                               volume=0)
             if not synthing:
                 beat = 0
                 next_beat()
@@ -797,7 +797,7 @@ while True:
             timer.deinit()
             freq_b = 600
 
-            channel1.play_tone(freq_b, 0.06, fade_in=0.5)
+            channel1.play_tone(freq_b, 0.06, attack=0.5)
 
             gu.play_synth()
             synthing = False
@@ -822,57 +822,57 @@ while True:
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
         # gu.adjust_brightness(+0.01)
         if bool_playing:
-            freq_b += 10
-            channel1.freq(freq_b)
+            freq_b = min(freq_b + 10, 20000)
+            channel1.frequency(freq_b)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         # gu.adjust_brightness(-0.01)
         if bool_playing:
-            freq_b -= 10
-            channel1.freq(freq_b)
+            freq_b = max(freq_b - 10, 10)
+            channel1.frequency(max(freq_b, 10))
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
         if bool_playing:
-            freq_a += 10
-            channel0.freq(freq_a)
+            freq_a = min(freq_a + 10, 20000)
+            channel0.frequency(freq_a)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
         if bool_playing:
-            freq_a -= 10
-            channel0.freq(freq_a)
+            freq_a = max(freq_a - 10, 10)
+            channel0.frequency(freq_a)
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
         if not was_z_pressed:
-            channel0.configure(Channel.TRIANGLE + Channel.SQUARE,
-                               16,
-                               168,
-                               0xafff,
-                               168,
-                               10000)
-            channel1.configure(Channel.SINE + Channel.SQUARE,
-                               38,
-                               300,
-                               0,
-                               0,
-                               12000)
-            channel2.configure(Channel.NOISE,
-                               5,
-                               10,
-                               16000,
-                               100,
-                               18000)
-            channel3.configure(Channel.NOISE,
-                               5,
-                               5,
-                               8000,
-                               40,
-                               8000)
-            channel4.configure(Channel.SQUARE,
-                               10,
-                               100,
-                               0,
-                               500,
-                               12000)
+            channel0.configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
+                               attack=0.016,
+                               decay=0.168,
+                               sustain=0xafff/65535,
+                               release=0.168,
+                               volume=10000/65535)
+            channel1.configure(waveforms=Channel.SINE + Channel.SQUARE,
+                               attack=0.038,
+                               decay=0.300,
+                               sustain=0,
+                               release=0,
+                               volume=12000/65535)
+            channel2.configure(waveforms=Channel.NOISE,
+                               attack=0.005,
+                               decay=0.010,
+                               sustain=16000/65535,
+                               release=0.100,
+                               volume=18000/65535)
+            channel3.configure(waveforms=Channel.NOISE,
+                               attack=0.005,
+                               decay=0.005,
+                               sustain=8000/65535,
+                               release=0.040,
+                               volume=8000/65535)
+            channel4.configure(waveforms=Channel.SQUARE,
+                               attack=0.010,
+                               decay=0.100,
+                               sustain=0,
+                               release=0.500,
+                               volume=12000/65535)
             if not synthing:
                 beat = 0
                 next_beat()
