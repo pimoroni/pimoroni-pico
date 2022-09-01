@@ -1,6 +1,7 @@
 # A name badge with customisable Pride flag background.
 
 from picographics import PicoGraphics, DISPLAY_TUFTY_2040
+import math
 
 display = PicoGraphics(display=DISPLAY_TUFTY_2040)
 
@@ -31,6 +32,12 @@ COLOUR_ORDER = [RED, ORANGE, YELLOW, GREEN, INDIGO, VIOLET]  # traditional pride
 # COLOUR_ORDER = [MAGENTA, VIOLET, INDIGO]  # bi flag
 # COLOUR_ORDER = [YELLOW, WHITE, AMETHYST, BLACK]  # non-binary flag
 
+# Add chevrons to the left
+# CHEVRONS = [] # No chevrons
+CHEVRONS = [WHITE, PINK, BLUE, BROWN, BLACK] # Progress Pride Flag
+# Initial chevron height compared to screen height
+FIRST_CHEVRON_HEIGHT = 0.5
+
 # Change this for vertical stripes
 STRIPES_DIRECTION = "horizontal"
 
@@ -54,6 +61,17 @@ if STRIPES_DIRECTION == "vertical":
     for x in range(len(COLOUR_ORDER)):
         display.set_pen(COLOUR_ORDER[x])
         display.rectangle(stripe_width * x, 0, stripe_width, HEIGHT)
+        
+if len(CHEVRONS) > 0:
+    stripe_width = round((HEIGHT * FIRST_CHEVRON_HEIGHT) / len(CHEVRONS))
+    offset = -stripe_width * math.floor((len(CHEVRONS) + 1) / 2)
+    middle = round(HEIGHT / 2)
+    for x in range(len(CHEVRONS) -1 ,-1, -1):
+        display.set_pen(CHEVRONS[x])
+        display.triangle(
+            x * stripe_width + offset, -stripe_width,
+            (x + 1) * stripe_width + offset + middle, middle,
+            x * stripe_width + offset, HEIGHT + stripe_width)
 
 # Set a starting scale for text size.
 # This is intentionally bigger than will fit on the screen, we'll shrink it to fit.
