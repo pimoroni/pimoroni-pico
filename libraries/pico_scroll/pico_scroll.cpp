@@ -8,8 +8,8 @@
 #include "pico_scroll_font.hpp"
 
 enum pin {
-  SDA   =  4,
-  SCL   =  5,
+  SDA   =  19,
+  SCL   =  20,
   A     = 12,
   B     = 13,
   X     = 14,
