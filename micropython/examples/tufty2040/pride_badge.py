@@ -36,7 +36,7 @@ COLOUR_ORDER = [RED, ORANGE, YELLOW, GREEN, INDIGO, VIOLET]  # traditional pride
 # CHEVRONS = [] # No chevrons
 CHEVRONS = [WHITE, PINK, BLUE, BROWN, BLACK]  # Progress Pride Flag
 # Initial chevron height compared to screen height
-FIRST_CHEVRON_HEIGHT = 0.5
+FIRST_CHEVRON_HEIGHT = 0.4
 
 # Change this for vertical stripes
 STRIPES_DIRECTION = "horizontal"
@@ -63,7 +63,7 @@ if STRIPES_DIRECTION == "vertical":
         display.rectangle(stripe_width * x, 0, stripe_width, HEIGHT)
 
 if len(CHEVRONS) > 0:
-    stripe_width = round((HEIGHT * FIRST_CHEVRON_HEIGHT) / len(CHEVRONS))
+    stripe_width = round((HEIGHT * (1 - FIRST_CHEVRON_HEIGHT)) / len(CHEVRONS))
     offset = -stripe_width * math.floor((len(CHEVRONS) + 1) / 2)
     middle = round(HEIGHT / 2)
     for x in range(len(CHEVRONS) - 1, -1, -1):
