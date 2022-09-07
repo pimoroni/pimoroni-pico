@@ -1,19 +1,18 @@
 import time
 from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 from motor import Motor
-import picoexplorer
 from pimoroni import Button, Analog, Buzzer
 
 display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)
 
-adc0 = Analog(picoexplorer.ADC0)
-adc1 = Analog(picoexplorer.ADC1)
-adc2 = Analog(picoexplorer.ADC2)
+adc0 = Analog(26)
+adc1 = Analog(27)
+adc2 = Analog(28)
 
-button_a = Button(picoexplorer.BUTTON_A)
-button_b = Button(picoexplorer.BUTTON_B)
-button_x = Button(picoexplorer.BUTTON_X)
-button_y = Button(picoexplorer.BUTTON_Y)
+button_a = Button(12)
+button_b = Button(13)
+button_x = Button(14)
+button_y = Button(15)
 
 BG = display.create_pen(32, 32, 64)
 WHITE = display.create_pen(255, 255, 255)
@@ -22,8 +21,8 @@ ADC0_PEN = display.create_pen(255, 0, 0)
 ADC1_PEN = display.create_pen(0, 255, 0)
 ADC2_PEN = display.create_pen(0, 0, 255)
 
-MOTOR1 = Motor(picoexplorer.MOTOR_1)
-MOTOR2 = Motor(picoexplorer.MOTOR_2)
+MOTOR1 = Motor((8, 9))
+MOTOR2 = Motor((10, 11))
 
 BUZZER = Buzzer(0)
 
