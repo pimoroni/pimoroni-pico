@@ -1,4 +1,5 @@
 #include "pico_graphics.hpp"
+#include "pretty-poly.hpp"
 
 namespace pimoroni {
 
@@ -16,6 +17,13 @@ namespace pimoroni {
 
   int PicoGraphics::get_palette_size() {return 0;}
   RGB* PicoGraphics::get_palette() {return nullptr;}
+  size_t PicoGraphics::pretty_poly_buffer_size() {
+    return pretty_poly::buffer_size();
+  }
+
+  void PicoGraphics::pretty_poly_init(void *mem) {
+    pretty_poly::init(mem);
+  }
 
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};
@@ -241,7 +249,46 @@ namespace pimoroni {
     }
   }
 
+  void PicoGraphics::polygon(std::vector<pretty_poly::contour_t<int>> contours) {
+    set_options([this](const pretty_poly::tile_t &tile) -> void {
+        for(auto y = 0; y < tile.bounds.h; y++) {
+          for(auto x = 0; x < tile.bounds.w; x++) {
+            uint8_t alpha = tile.get_value(x, y);
+            if (alpha > 0) {
+              pixel({x + tile.bounds.x, y + tile.bounds.y});
+            }
+          }
+        }
+    }, pretty_poly::NONE, {0, 0, bounds.w, bounds.h});
+
+    pretty_poly::draw_polygon<int>(contours);
+  }
+
   void PicoGraphics::polygon(const std::vector<Point> &points) {
+
+    pretty_poly::contour_t<int> contour(new pretty_poly::point_t<int>[points.size()], points.size());
+
+    for(auto i = 0; i < points.size(); i++) {
+      contour.points[i] = pretty_poly::point_t<int>(points[i].x, points[i].y);
+    }
+
+    set_options([this](const pretty_poly::tile_t &tile) -> void {
+        for(auto y = 0; y < tile.bounds.h; y++) {
+          for(auto x = 0; x < tile.bounds.w; x++) {
+            uint8_t alpha = tile.get_value(x, y);
+            if (alpha > 0) {
+              pixel({x + tile.bounds.x, y + tile.bounds.y});
+            }
+          }
+        }
+      }, pretty_poly::NONE, {0, 0, bounds.w, bounds.h});
+
+    std::vector<pretty_poly::contour_t<int>> contours;
+    contours.push_back(contour);
+
+    pretty_poly::draw_polygon(contours);
+
+    /*
     static int32_t nodes[64]; // maximum allowed number of nodes per scanline for polygon rendering
 
     int32_t miny = points[0].y, maxy = points[0].y;
@@ -285,6 +332,7 @@ namespace pimoroni {
         pixel_span(Point(nodes[i], p.y), nodes[i + 1] - nodes[i] + 1);
       }
     }
+    */
   }
 
   void PicoGraphics::thick_line(Point p1, Point p2, uint thickness) {
