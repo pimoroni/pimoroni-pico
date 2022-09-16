@@ -9,6 +9,8 @@ Shows how to read the 3 Input terminals of Automation 2040 W.
 Press "A" to exit the program.
 */
 
+//#define AUTOMATION_MINI // Uncomment for Automation Mini
+
 using namespace automation;
 
 // How many times to update per second
@@ -25,8 +27,15 @@ Automation2040W board;
 int main() {
   stdio_init_all();
 
+  #ifndef AUTOMATION_MINI
   // Attempt to initialise the board
-  if(board.init()) {
+  if(board.init(false)) { 
+  
+  #else 
+  
+  if(board.init(true)) { 
+  
+  #endif
 
     // Enable the LED of the switch used to exit the loop
     board.switch_led(SWITCH_A, 50.0f);  // Half Brightness
@@ -35,7 +44,7 @@ int main() {
     while(!board.switch_pressed(SWITCH_A)) {
 
       // Read each input in turn and print its voltage
-      for(uint i = 0; i < NUM_INPUTS; i++) {
+      for(uint i = 0; i < board.NUM_INPUTS; i++) {
         bool value = board.read_input(i);
         printf("%s = %d, ", INPUT_NAMES[i], (int)value);
       }

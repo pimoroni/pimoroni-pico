@@ -37,13 +37,23 @@ namespace automation {
   const uint SWITCH_B = 1;
 
 
-  // Count Constants
-  const uint NUM_GPIOS = 3;
-  const uint NUM_RELAYS = 3;
-  const uint NUM_OUTPUTS = 3;
-  const uint NUM_ADCS = 3;
-  const uint NUM_INPUTS = 4;
-  const uint NUM_SWITCHES = 2;
+  // Count Constants Regualr
+  const uint NUM_GPIOS_REGULAR = 3;
+  const uint NUM_RELAYS_REGULAR = 3;
+  const uint NUM_OUTPUTS_REGULAR = 3;
+  const uint NUM_ADCS_REGULAR = 3;
+  const uint NUM_INPUTS_REGULAR = 4;
+  const uint NUM_SWITCHES_REGULAR = 2;
+
+  // For Automation Mini
+  const uint NUM_GPIOS_MINI = 3;
+  const uint NUM_RELAYS_MINI = 1;
+  const uint NUM_OUTPUTS_MINI = 2;
+  const uint NUM_ADCS_MINI = 3;
+  const uint NUM_INPUTS_MINI = 2;
+  const uint NUM_SWITCHES_MINI = 2;
+
+  const uint NUM_ADCS_DEFAULT = 3;
 
 
   class Automation2040W {
@@ -72,9 +82,16 @@ namespace automation {
     //--------------------------------------------------
   public:
     I2C i2c;
+    bool isMini = false;
+    uint NUM_GPIOS = 0;
+    uint NUM_RELAYS = 0;
+    uint NUM_OUTPUTS = 0;
+    uint NUM_ADCS = NUM_ADCS_DEFAULT;
+    uint NUM_INPUTS = 0;
+    uint NUM_SWITCHES = 0;
 
   private:
-    Analog analogs[NUM_ADCS];
+    Analog analogs[NUM_ADCS_DEFAULT];
 
 
     //--------------------------------------------------
@@ -88,7 +105,7 @@ namespace automation {
     // Methods
     //--------------------------------------------------
   public:
-    bool init();
+    bool init(bool automationMini);
 
     void conn_led(bool on);
     void conn_led(float brightness);

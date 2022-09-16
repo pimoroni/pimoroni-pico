@@ -9,6 +9,8 @@ Demonstrates how to toggle each of Automation 2040 W's output terminals.
 Press "A" to exit the program.
 */
 
+//#define AUTOMATION_MINI // Uncomment for Automation Mini
+
 using namespace automation;
 
 // How much time to wait between each toggle (in milliseconds)
@@ -25,8 +27,16 @@ Automation2040W board;
 int main() {
   stdio_init_all();
 
+  #ifndef AUTOMATION_MINI
   // Attempt to initialise the board
-  if(board.init()) {
+  if(board.init(false)) { 
+  
+  #else 
+  
+  if(board.init(true)) { 
+  
+  #endif
+
 
     // Enable the LED of the switch used to exit the loop
     board.switch_led(SWITCH_A, 50.0f);  // Half Brightness
@@ -41,7 +51,7 @@ int main() {
       board.output(index, toggle);
 
       // Print the state of all outputs
-      for(uint i = 0; i < NUM_OUTPUTS; i++) {
+      for(uint i = 0; i < board.NUM_OUTPUTS; i++) {
         printf("%s = %d, ", OUTPUT_NAMES[i], (int)board.output(i));
       }
 
@@ -49,7 +59,7 @@ int main() {
       printf("\n");
 
       index++;              // Move on to the next output
-      if(index >= NUM_OUTPUTS) {
+      if(index >= board.NUM_OUTPUTS) {
         index = 0;          // Go back to the first output
         toggle = !toggle;   // Invert the toggle value
       }

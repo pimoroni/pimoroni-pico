@@ -20,7 +20,25 @@ Automation2040W::Automation2040W()
           Analog(ADC_PINS[2], VOLTAGE_GAIN, 0.0f, VOLTAGE_OFFSET)} {
 }
 
-bool Automation2040W::init() {
+bool Automation2040W::init(bool automationMini=false) {
+
+  if (automationMini){
+    NUM_GPIOS = NUM_GPIOS_MINI;
+    NUM_RELAYS = NUM_RELAYS_MINI;
+    NUM_OUTPUTS = NUM_OUTPUTS_MINI;
+    NUM_ADCS = NUM_ADCS_MINI;
+    NUM_INPUTS = NUM_INPUTS_MINI;
+    NUM_SWITCHES = NUM_SWITCHES_MINI;
+  }
+  else{
+    NUM_GPIOS = NUM_GPIOS_REGULAR;
+    NUM_RELAYS = NUM_RELAYS_REGULAR;
+    NUM_OUTPUTS = NUM_OUTPUTS_REGULAR;
+    NUM_ADCS = NUM_ADCS_REGULAR;
+    NUM_INPUTS = NUM_INPUTS_REGULAR;
+    NUM_SWITCHES = NUM_SWITCHES_REGULAR;
+  }
+
   // Set up the relay pins
   for(auto i = 0u; i < NUM_RELAYS; i++) {
     gpio_set_function(RELAY_PINS[i], GPIO_FUNC_SIO);

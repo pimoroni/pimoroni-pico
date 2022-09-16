@@ -9,6 +9,8 @@ An example of the user switches and LEDs on Automation 2040 W.
 Press "A" and "B" together to exit the program.
 */
 
+//#define AUTOMATION_MINI // Uncomment for Automation Mini
+
 using namespace automation;
 
 // How many times to update per second
@@ -28,8 +30,15 @@ Automation2040W board;
 int main() {
   stdio_init_all();
 
+  #ifndef AUTOMATION_MINI
   // Attempt to initialise the board
-  if(board.init()) {
+  if(board.init(false)) { 
+  
+  #else 
+  
+  if(board.init(true)) { 
+  
+  #endif
 
     // Enable the Conn LED
     board.conn_led(true);  // Full Brightness
@@ -39,7 +48,7 @@ int main() {
     // Interact with the switches and LEDs until both are pressed simultaneously
     while(!board.switch_pressed(SWITCH_A) || !board.switch_pressed(SWITCH_B)) {
 
-      for(uint i = 0; i < NUM_SWITCHES; i++) {
+      for(uint i = 0; i < board.NUM_SWITCHES; i++) {
         // Change the LED brightness based on switch's state
         if(board.switch_pressed(i)) {
           printf("%s = Pressed, ", SWITCH_NAMES[i]);
