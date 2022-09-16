@@ -7,6 +7,7 @@
 #include "drivers/inky73/inky73.hpp"
 #include "drivers/psram_display/psram_display.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
+#include "libraries/pico_graphics/pretty-poly-types.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
 #include "common/pimoroni_i2c.hpp"
@@ -298,17 +299,17 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     pimoroni::ParallelPins parallel_bus = {10, 11, 12, 13, 14, 2}; // Default for Tufty 2040 parallel
     pimoroni::I2C *i2c_bus = nullptr;
 
-    if (mp_obj_is_type(args[ARG_bus].u_obj, &SPIPins_type)) {
+    if (mp_obj_is_exact_type(args[ARG_bus].u_obj, &SPIPins_type)) {
         if(bus_type != BUS_SPI) mp_raise_ValueError("unexpected SPI bus!");
         _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
         spi_bus = *(SPIPins *)(bus->pins);
 
-    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
+    } else if (mp_obj_is_exact_type(args[ARG_bus].u_obj, &ParallelPins_type)) {
         if(bus_type != BUS_PARALLEL) mp_raise_ValueError("unexpected Parallel bus!");
         _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
         parallel_bus = *(ParallelPins *)(bus->pins);
 
-    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type) || MP_OBJ_IS_TYPE(args[ARG_bus].u_obj, &machine_i2c_type)) {
+    } else if (mp_obj_is_exact_type(args[ARG_bus].u_obj, &PimoroniI2C_type) || mp_obj_is_exact_type(args[ARG_bus].u_obj, &machine_hw_i2c_type)) {
         if(bus_type != BUS_I2C) mp_raise_ValueError("unexpected I2C bus!");
         self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
         i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
@@ -441,6 +442,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7) {
         self->display->update(self->graphics);
     }
+
+    self->graphics->pretty_poly_init(m_tracked_calloc(self->graphics->pretty_poly_buffer_size(), sizeof(uint8_t)));
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -807,7 +810,7 @@ mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp
 
     // Check if there is only one argument, which might be a list
     if(n_args == 2) {
-        if(mp_obj_is_type(pos_args[1], &mp_type_list)) {
+        if(mp_obj_is_exact_type(pos_args[1], &mp_type_list)) {
             mp_obj_list_t *points = MP_OBJ_TO_PTR2(pos_args[1], mp_obj_list_t);
 
             if(points->len <= 0) mp_raise_ValueError("set_palette(): cannot provide an empty list");
@@ -822,7 +825,7 @@ mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp
 
     for(size_t i = 0; i < num_tuples; i++) {
         mp_obj_t obj = tuples[i];
-        if(!mp_obj_is_type(obj, &mp_type_tuple)) mp_raise_ValueError("set_palette(): can't convert object to tuple");
+        if(!mp_obj_is_exact_type(obj, &mp_type_tuple)) mp_raise_ValueError("set_palette(): can't convert object to tuple");
 
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
 
@@ -1019,6 +1022,58 @@ mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, m
     return mp_obj_new_int(width);
 }
 
+/*
+pretty_polygon((
+    (0, 0),
+    (0, 0)
+), (
+
+), (
+
+))
+*/
+
+mp_obj_t ModPicoGraphics_pretty_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    size_t num_tuples = n_args - 1;
+    const mp_obj_t *lists = pos_args + 1;
+
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], ModPicoGraphics_obj_t);
+
+    std::vector<pretty_poly::contour_t<int>> contours;
+
+    for(auto i = 0; i < num_tuples; i++) {
+        mp_obj_t c_obj = lists[i];
+
+        if(!mp_obj_is_exact_type(c_obj, &mp_type_list)) mp_raise_ValueError("Not a list");
+
+        mp_obj_list_t *t_contour = MP_OBJ_TO_PTR2(c_obj, mp_obj_list_t);
+
+        pretty_poly::point_t<int> *points = new pretty_poly::point_t<int>[t_contour->len];
+
+        for(auto p = 0; p < t_contour->len; p++) {
+            mp_obj_t p_obj = t_contour->items[p];
+
+            if(!mp_obj_is_exact_type(p_obj, &mp_type_tuple)) mp_raise_ValueError("Not a tuple");
+
+            mp_obj_tuple_t *t_point = MP_OBJ_TO_PTR2(p_obj, mp_obj_tuple_t);
+            points[p] = {
+                mp_obj_get_int(t_point->items[0]),
+                mp_obj_get_int(t_point->items[1]),
+            };
+        }
+
+        contours.push_back({points, t_contour->len});
+    }
+
+    self->graphics->polygon(contours);
+
+    for(auto contour : contours) {
+        delete contour.points;
+    }
+
+    return mp_const_none;
+}
+
 mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     size_t num_tuples = n_args - 1;
     const mp_obj_t *tuples = pos_args + 1;
@@ -1027,7 +1082,7 @@ mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     // Check if there is only one argument, which might be a list
     if(n_args == 2) {
-        if(mp_obj_is_type(pos_args[1], &mp_type_list)) {
+        if(mp_obj_is_exact_type(pos_args[1], &mp_type_list)) {
             mp_obj_list_t *points = MP_OBJ_TO_PTR2(pos_args[1], mp_obj_list_t);
 
             if(points->len <= 0) mp_raise_ValueError("poly(): cannot provide an empty list");
@@ -1044,7 +1099,7 @@ mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map
         std::vector<Point> points;
         for(size_t i = 0; i < num_tuples; i++) {
             mp_obj_t obj = tuples[i];
-            if(!mp_obj_is_type(obj, &mp_type_tuple)) mp_raise_ValueError("poly(): can't convert object to tuple");
+            if(!mp_obj_is_exact_type(obj, &mp_type_tuple)) mp_raise_ValueError("poly(): can't convert object to tuple");
 
             mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(obj, mp_obj_tuple_t);
 

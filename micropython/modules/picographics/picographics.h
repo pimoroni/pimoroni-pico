@@ -93,6 +93,7 @@ extern mp_obj_t ModPicoGraphics_character(size_t n_args, const mp_obj_t *pos_arg
 extern mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t ModPicoGraphics_pretty_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ModPicoGraphics_triangle(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args);
 
