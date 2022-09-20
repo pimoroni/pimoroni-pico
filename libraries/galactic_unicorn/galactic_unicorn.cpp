@@ -43,6 +43,7 @@ static uint16_t g_gamma_lut[256] = {0};
 static uint16_t b_gamma_lut[256] = {0};
 
 static uint32_t dma_channel;
+static uint32_t dma_ctrl_channel;
 static uint32_t audio_dma_channel;
 
 namespace pimoroni {
@@ -58,39 +59,24 @@ namespace pimoroni {
   // once the dma transfer of the scanline is complete we move to the
   // next scanline (or quit if we're finished)
   void __isr GalacticUnicorn::dma_complete() {
-    if(unicorn != nullptr) {
-      if(dma_channel_get_irq0_status(dma_channel)) {
-        unicorn->next_bitstream_sequence();
-      }
-      if(dma_channel_get_irq0_status(audio_dma_channel)) {
-        unicorn->next_audio_sequence();
-      }
+    if(unicorn != nullptr && dma_channel_get_irq0_status(audio_dma_channel)) {
+      unicorn->next_audio_sequence();
     }
-  }
-
-  void GalacticUnicorn::next_bitstream_sequence() {
-    // Clear any interrupt request caused by our channel
-    //dma_channel_acknowledge_irq0(dma_channel);
-    // NOTE Temporary replacement of the above until this reaches pico-sdk main:
-    // https://github.com/raspberrypi/pico-sdk/issues/974
-    dma_hw->ints0 = 1u << dma_channel;
-
-    dma_channel_set_trans_count(dma_channel, BITSTREAM_LENGTH / 4, false);
-    dma_channel_set_read_addr(dma_channel, bitstream, true);
   }
 
   GalacticUnicorn::~GalacticUnicorn() {
     if(unicorn == this) {
       partial_teardown();
 
+      dma_channel_unclaim(dma_ctrl_channel); // This works now the teardown behaves correctly
       dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
       pio_sm_unclaim(bitstream_pio, bitstream_sm);
       pio_remove_program(bitstream_pio, &galactic_unicorn_program, bitstream_sm_offset);
-      irq_remove_handler(DMA_IRQ_0, dma_complete);
 
       dma_channel_unclaim(audio_dma_channel); // This works now the teardown behaves correctly
       pio_sm_unclaim(audio_pio, audio_sm);
       pio_remove_program(audio_pio, &audio_i2s_program, audio_sm_offset);
+      irq_remove_handler(DMA_IRQ_0, dma_complete);
 
       unicorn = nullptr;
     }
@@ -104,7 +90,13 @@ namespace pimoroni {
     const uint pins_to_set = 1 << COLUMN_BLANK | 0b1111 << ROW_BIT_0;
     pio_sm_set_pins_with_mask(bitstream_pio, bitstream_sm, pins_to_set, pins_to_set);
 
+
+    dma_hw->ch[dma_ctrl_channel].al1_ctrl = (dma_hw->ch[dma_ctrl_channel].al1_ctrl & ~DMA_CH0_CTRL_TRIG_CHAIN_TO_BITS) | (dma_ctrl_channel << DMA_CH0_CTRL_TRIG_CHAIN_TO_LSB);
+    dma_hw->ch[dma_channel].al1_ctrl = (dma_hw->ch[dma_channel].al1_ctrl & ~DMA_CH0_CTRL_TRIG_CHAIN_TO_BITS) | (dma_channel << DMA_CH0_CTRL_TRIG_CHAIN_TO_LSB);
     // Abort any in-progress DMA transfer
+    dma_safe_abort(dma_ctrl_channel);
+    //dma_channel_abort(dma_ctrl_channel);
+    //dma_channel_abort(dma_channel);
     dma_safe_abort(dma_channel);
 
 
@@ -286,27 +278,46 @@ namespace pimoroni {
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
       // setup dma transfer for pixel data to the pio
-    if(unicorn == nullptr) {
+    //if(unicorn == nullptr) {
       dma_channel = dma_claim_unused_channel(true);
-    }
+      dma_ctrl_channel = dma_claim_unused_channel(true);
+    //}
+    dma_channel_config ctrl_config = dma_channel_get_default_config(dma_ctrl_channel);
+    channel_config_set_transfer_data_size(&ctrl_config, DMA_SIZE_32);
+    channel_config_set_read_increment(&ctrl_config, false);
+    channel_config_set_write_increment(&ctrl_config, false);
+    channel_config_set_chain_to(&ctrl_config, dma_channel);
+
+    dma_channel_configure(
+      dma_ctrl_channel,
+      &ctrl_config,
+      &dma_hw->ch[dma_channel].read_addr,
+      &bitstream_addr,
+      1,
+      false
+    );
+
+
     dma_channel_config config = dma_channel_get_default_config(dma_channel);
     channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
     channel_config_set_bswap(&config, false); // byte swap to reverse little endian
     channel_config_set_dreq(&config, pio_get_dreq(bitstream_pio, bitstream_sm, true));
+    channel_config_set_chain_to(&config, dma_ctrl_channel); 
 
     dma_channel_configure(
       dma_channel,
       &config,
       &bitstream_pio->txf[bitstream_sm],
       NULL,
-      0,
+      BITSTREAM_LENGTH / 4,
       false);
-
-    dma_channel_set_irq0_enabled(dma_channel, true);
 
     pio_sm_init(bitstream_pio, bitstream_sm, bitstream_sm_offset, &c);
 
     pio_sm_set_enabled(bitstream_pio, bitstream_sm, true);
+
+    // start the control channel
+    dma_start_channel_mask(1u << dma_ctrl_channel);
 
 
     // setup audio pio program
@@ -340,8 +351,6 @@ namespace pimoroni {
     }
 
     unicorn = this;
-
-    next_bitstream_sequence();
   }
 
   void GalacticUnicorn::clear() {
