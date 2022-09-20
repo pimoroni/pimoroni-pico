@@ -67,6 +67,7 @@ namespace pimoroni {
 
     // must be aligned for 32bit dma transfer
     alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
+    const uint32_t bitstream_addr = (uint32_t)bitstream;
     static GalacticUnicorn* unicorn;
     static void dma_complete();
 
@@ -117,7 +118,6 @@ namespace pimoroni {
     AudioChannel& synth_channel(uint channel);
 
   private:
-    void next_bitstream_sequence();
     void partial_teardown();
     void dma_safe_abort(uint channel);
     void next_audio_sequence();
