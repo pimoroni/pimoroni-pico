@@ -34,12 +34,22 @@ STATIC const mp_rom_map_elem_t BreakoutSGP30_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutSGP30_locals_dict, BreakoutSGP30_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_sgp30_BreakoutSGP30_type,
+    MP_QSTR_BreakoutSGP30,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutSGP30_make_new,
+    locals_dict, (mp_obj_dict_t*)&BreakoutSGP30_locals_dict
+);
+#else
 const mp_obj_type_t breakout_sgp30_BreakoutSGP30_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutSGP30,
     .make_new = BreakoutSGP30_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutSGP30_locals_dict,
 };
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

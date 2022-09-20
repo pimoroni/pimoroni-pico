@@ -2,19 +2,39 @@
 
 MP_DEFINE_CONST_FUN_OBJ_1(SPISlot_obj, SPISlot);
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    SPIPins_type,
+    MP_QSTR_SPIBus,
+    MP_TYPE_FLAG_NONE,
+    make_new, SPIPins_make_new,
+    print, PimoroniBus_print
+);
+#else
 const mp_obj_type_t SPIPins_type = {
     { &mp_type_type },
     .name = MP_QSTR_SPIBus,
     .print = PimoroniBus_print,
     .make_new = SPIPins_make_new
 };
+#endif
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    ParallelPins_type,
+    MP_QSTR_ParallelBus,
+    MP_TYPE_FLAG_NONE,
+    make_new, ParallelPins_make_new,
+    print, PimoroniBus_print
+);
+#else
 const mp_obj_type_t ParallelPins_type = {
     { &mp_type_type },
     .name = MP_QSTR_ParallelBus,
     .print = PimoroniBus_print,
     .make_new = ParallelPins_make_new
 };
+#endif
 
 STATIC const mp_map_elem_t pimoroni_bus_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pimoroni_bus) },
