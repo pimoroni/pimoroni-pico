@@ -40,7 +40,7 @@ namespace pimoroni {
     uint parallel_sm;
     PIO parallel_pio;
     uint parallel_offset;
-    uint parallel_dma;
+    uint st_dma;
 
 
     // The ST7789 requires 16 ns between SPI rising edges.
@@ -94,12 +94,12 @@ namespace pimoroni {
       pio_sm_set_enabled(parallel_pio, parallel_sm, true);
 
 
-      parallel_dma = dma_claim_unused_channel(true);
-      dma_channel_config config = dma_channel_get_default_config(parallel_dma);
+      st_dma = dma_claim_unused_channel(true);
+      dma_channel_config config = dma_channel_get_default_config(st_dma);
       channel_config_set_transfer_data_size(&config, DMA_SIZE_8);
       channel_config_set_bswap(&config, false);
       channel_config_set_dreq(&config, pio_get_dreq(parallel_pio, parallel_sm, true));
-      dma_channel_configure(parallel_dma, &config, &parallel_pio->txf[parallel_sm], NULL, 0, false);
+      dma_channel_configure(st_dma, &config, &parallel_pio->txf[parallel_sm], NULL, 0, false);
   
       gpio_put(rd_sck, 1);
 
@@ -118,6 +118,13 @@ namespace pimoroni {
       gpio_set_function(wr_sck, GPIO_FUNC_SPI);
       gpio_set_function(d0, GPIO_FUNC_SPI);
 
+      st_dma = dma_claim_unused_channel(true);
+      dma_channel_config config = dma_channel_get_default_config(st_dma);
+      channel_config_set_transfer_data_size(&config, DMA_SIZE_8);
+      channel_config_set_bswap(&config, false);
+      channel_config_set_dreq(&config, spi_get_dreq(spi, true));
+      dma_channel_configure(st_dma, &config, &spi_get_hw(spi)->dr, NULL, 0, false);
+  
       common_init();
     }
 
@@ -128,7 +135,7 @@ namespace pimoroni {
   private:
     void common_init();
     void configure_display(Rotation rotate);
-    void write_blocking_parallel_dma(const uint8_t *src, size_t len);
+    void write_blocking_dma(const uint8_t *src, size_t len);
     void write_blocking_parallel(const uint8_t *src, size_t len);
     void command(uint8_t command, size_t len = 0, const char *data = NULL);
   };

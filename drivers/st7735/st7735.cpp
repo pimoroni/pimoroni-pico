@@ -172,8 +172,10 @@ namespace pimoroni {
       gpio_put(dc, 1); // data mode
       gpio_put(cs, 0);
 
-      graphics->scanline_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
-        spi_write_blocking(spi, (const uint8_t*)data, length);
+      graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        if (length > 0) {
+          spi_write_blocking(spi, (const uint8_t*)data, length);
+        }
       });
 
       gpio_put(cs, 1);

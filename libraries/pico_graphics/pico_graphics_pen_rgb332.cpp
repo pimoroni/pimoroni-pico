@@ -78,23 +78,15 @@ namespace pimoroni {
 
         set_pixel(p);
     }
-    void PicoGraphics_PenRGB332::scanline_convert(PenType type, conversion_callback_func callback) {
+    void PicoGraphics_PenRGB332::frame_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
 
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            // Allocate a per-row temporary buffer
-            uint16_t row_buf[bounds.w];
-            for(auto y = 0; y < bounds.h; y++) {
-                for(auto x = 0; x < bounds.w; x++) {
-                    row_buf[x] = rgb332_to_rgb565_lut[*src];
-
-                    src++;
-                }
-                // Callback to the driver with the row data
-                callback(row_buf, bounds.w * sizeof(RGB565));
-            }
+            frame_convert_rgb565(callback, [&]() {
+                return rgb332_to_rgb565_lut[*src++];
+            });
         }
     }
     void PicoGraphics_PenRGB332::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {

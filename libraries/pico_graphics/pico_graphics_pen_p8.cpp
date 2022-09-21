@@ -98,7 +98,7 @@ namespace pimoroni {
         set_pixel(p);
     }
 
-    void PicoGraphics_PenP8::scanline_convert(PenType type, conversion_callback_func callback) {
+    void PicoGraphics_PenP8::frame_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
             // Cache the RGB888 palette as RGB565
             RGB565 cache[palette_size];
@@ -109,15 +109,9 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            // Allocate a per-row temporary buffer
-            uint16_t row_buf[bounds.w];
-            for(auto y = 0; y < bounds.h; y++) {
-                for(auto x = 0; x < bounds.w; x++) {
-                    row_buf[x] = cache[src[bounds.w * y + x]];
-                }
-                // Callback to the driver with the row data
-                callback(row_buf, bounds.w * sizeof(RGB565));
-            }
+            frame_convert_rgb565(callback, [&]() {
+                return cache[*src++];
+            });
         }
     }
 }

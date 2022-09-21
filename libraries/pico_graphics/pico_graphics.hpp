@@ -172,6 +172,7 @@ namespace pimoroni {
     Rect clip;
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
+    typedef std::function<RGB565()> next_pixel_func;
     //typedef std::function<void(int y)> scanline_interrupt_func;
 
     //scanline_interrupt_func scanline_interrupt = nullptr;
@@ -225,7 +226,7 @@ namespace pimoroni {
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void set_pixel_dither(const Point &p, const uint8_t &c);
-    virtual void scanline_convert(PenType type, conversion_callback_func callback);
+    virtual void frame_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
     void set_font(const bitmap::font_t *font);
@@ -252,6 +253,9 @@ namespace pimoroni {
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
+
+  protected:
+    void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
@@ -325,7 +329,7 @@ namespace pimoroni {
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
-      void scanline_convert(PenType type, conversion_callback_func callback) override;
+      void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return (w * h / 8) * 3;
       }
@@ -354,7 +358,7 @@ namespace pimoroni {
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
-      void scanline_convert(PenType type, conversion_callback_func callback) override;
+      void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
       }
@@ -383,7 +387,7 @@ namespace pimoroni {
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
-      void scanline_convert(PenType type, conversion_callback_func callback) override;
+      void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
@@ -404,7 +408,7 @@ namespace pimoroni {
 
       void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
 
-      void scanline_convert(PenType type, conversion_callback_func callback) override;
+      void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
