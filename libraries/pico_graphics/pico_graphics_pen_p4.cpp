@@ -51,11 +51,13 @@ namespace pimoroni {
         return i;
     }
     void PicoGraphics_PenP4::set_pixel(const Point &p) {
+        auto i = (p.x + p.y * bounds.w);
+
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
-        uint8_t *f = &buf[(p.x / 2) + (p.y * bounds.w / 2)];
+        uint8_t *f = &buf[i / 2];
 
-        uint8_t  o = (~p.x & 0b1) * 4; // bit offset within byte
+        uint8_t  o = (~i & 0b1) * 4;   // bit offset within byte
         uint8_t  m = ~(0b1111 << o);   // bit mask for byte
         uint8_t  b = color << o;       // bit value shifted to position
 
@@ -64,15 +66,17 @@ namespace pimoroni {
     }
 
     void PicoGraphics_PenP4::set_pixel_span(const Point &p, uint l) {
+        auto i = (p.x + p.y * bounds.w);
+
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
-        uint8_t *f = &buf[(p.x / 2) + (p.y * bounds.w / 2)];
+        uint8_t *f = &buf[i / 2];
 
         // doubled up color value, so the color is stored in both nibbles
         uint8_t cc = color | (color << 4);
         
         // handle the first pixel if not byte aligned
-        if(p.x & 0b1) {*f &= 0b11110000; *f |= (cc & 0b00001111); f++; l--;}
+        if(i & 0b1) {*f &= 0b11110000; *f |= (cc & 0b00001111); f++; l--;}
 
         // write any double nibble pixels
         while(l > 1) {*f++ = cc; l -= 2;}
