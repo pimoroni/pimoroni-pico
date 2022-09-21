@@ -46,7 +46,7 @@ int main() {
     graphics.set_pen(0);
     graphics.clear();
 
-    graphics.set_pen(1);
+    graphics.set_pen(15);
     graphics.set_font("bitmap8");
     graphics.text("Hello World", {0, 0}, 296);
     graphics.text("Has this worked?!", {0, 16}, 296);
