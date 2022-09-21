@@ -342,22 +342,22 @@ namespace pimoroni {
     const int BUF_LEN = 64;
     uint16_t row_buf[2][BUF_LEN];
     int buf_idx = 0;
-    for(auto y = 0; y < bounds.h; y++) {
-        for(auto x = 0; x < bounds.w; x++) {
-            int buf_entry = x & (BUF_LEN - 1);
-            row_buf[buf_idx][buf_entry] = get_next_pixel();
+    int buf_entry = 0;
+    for(auto i = 0; i < bounds.w * bounds.h; i++) {
+      row_buf[buf_idx][buf_entry] = get_next_pixel();
+      buf_entry++;
 
-            if (buf_entry == BUF_LEN - 1) {
-                callback(row_buf[buf_idx], BUF_LEN * sizeof(RGB565));
-                buf_idx ^= 1;
-            }
-        }
+      // Transfer a filled buffer and swap to the next one
+      if (buf_entry == BUF_LEN) {
+          callback(row_buf[buf_idx], BUF_LEN * sizeof(RGB565));
+          buf_idx ^= 1;
+          buf_entry = 0;
+      }
+    }
 
-        if ((bounds.w & (BUF_LEN - 1)) != 0) {
-            // Callback to the driver with the remaining row data
-            callback(row_buf[buf_idx], (bounds.w & (BUF_LEN - 1)) * sizeof(RGB565));
-            buf_idx ^= 1;
-        }
+    // Transfer any remaining pixels ( < BUF_LEN )
+    if(buf_entry > 0) {
+        callback(row_buf[buf_idx], buf_entry * sizeof(RGB565));
     }
 
     // Callback with zero length to ensure previous buffer is fully written
