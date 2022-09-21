@@ -75,7 +75,7 @@ Reads from the (optional) particulate sensor and displays the results on screen.
 
 ## Wireless Examples
 
-The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the [micropython/examples/common](/micropython/examples/common) directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
 For MQTT, you'll need to install `micropython-mqtt.simple` using Thonny's 'Tools' > 'Manage Packages'.
 
