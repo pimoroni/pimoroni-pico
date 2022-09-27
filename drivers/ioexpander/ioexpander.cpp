@@ -370,7 +370,7 @@ namespace pimoroni {
 
   void IOExpander::set_address(uint8_t address) {
     set_bit(reg::CTRL, 4);
-    i2c->reg_write_uint8(address, reg::ADDR, address);
+    i2c->reg_write_uint8(this->address, reg::ADDR, address);
     this->address = address;
     sleep_ms(250); //TODO Handle addr change IOError better
     //wait_for_flash()
