@@ -3,6 +3,7 @@ from pimoroni_i2c import PimoroniI2C
 from breakout_ioexpander import BreakoutIOExpander
 from adafruit_is31fl3731 import IS31FL3731
 import sys
+from machine import I2C, Pin
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
@@ -18,8 +19,15 @@ ENC_TERM_B   = 12
 
 ENC_CHANNEL  = 1
 
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
-ioe = BreakoutIOExpander(i2c, address=0x18)
+#i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = I2C(0, sda=Pin(4), scl=Pin(5))
+ioe = BreakoutIOExpander(i2c, address=0x18)#, interrupt=3)
+ioe.enable_interrupt_out(pin_swap=True)
+#ioe.set_address(0x13)
+
+#2c.writeto(0x18, bytearray([0xF9, 0x06]))
+#i2c.writeto(0x18, bytearray([0x00, 0b11000000]))
+#i2c.writeto(0x18, bytearray([0x01, 0b00110001]))
 
 ioe.set_mode(s1_pin, BreakoutIOExpander.PIN_IN_PU)
 ioe.set_mode(s2_pin, BreakoutIOExpander.PIN_IN_PU)
@@ -30,9 +38,18 @@ ioe.set_mode(s5_pin, BreakoutIOExpander.PIN_IN_PU)
 ioe.setup_rotary_encoder(ENC_CHANNEL, ENC_TERM_A, ENC_TERM_B, 6, count_microsteps=True)
 #ioe.set_mode(ENC_TERM_A, BreakoutIOExpander.PIN_IN_PU)
 #ioe.set_mode(ENC_TERM_B, BreakoutIOExpander.PIN_IN_PU)
+ioe.set_pin_interrupt(s1_pin, True)
+ioe.set_pin_interrupt(s2_pin, True)
+ioe.set_pin_interrupt(s3_pin, True)
+ioe.set_pin_interrupt(s4_pin, True)
+ioe.set_pin_interrupt(s5_pin, True)
 
 display = IS31FL3731(i2c, address=0x77)
-#display.fill(10)
+display2 = IS31FL3731(i2c, address=0x77-3)
+display.fill(10)
+display2.fill(10)
+
+time.sleep(1)
 
 mapping = ((128, 32, 48),
            (129, 33, 49),
@@ -106,6 +123,14 @@ last_count = -1
 last_enc_a = False
 last_enc_b = False
 
+toggler = False
+
+import sys
+from machine import Pin
+p15 = Pin(15, Pin.OUT)
+p15.value(True)
+
+last_sp = 0
 
 while True:
     s1 = bool(ioe.input(s1_pin))
@@ -148,24 +173,45 @@ while True:
             print("Right (S5) has been pressed")
         last_s5 = s5
        
-    count = ioe.read_rotary_encoder(ENC_CHANNEL) // 2
+    if ioe.get_interrupt_flag():
+        ioe.clear_interrupt_flag()
+        
+    count = ioe.read_rotary_encoder(ENC_CHANNEL) // 2    
     if count != last_count:
         if count - last_count > 0:
             print("Clockwise, Count = ", count)
         else:
             print("Counter Clockwise, Count = ", count)
             
+        if count == 0 and (last_count > 1 or last_count < -1):
+            p15.value(False)
+            #sys.exit()
+            
         last_single = mapping[last_count % 24]
         display.pixel(last_single[0], 0, 0)
         display.pixel(last_single[1], 0, 0)
         display.pixel(last_single[2], 0, 0)
+        display2.pixel(last_single[0], 0, 0)
+        display2.pixel(last_single[1], 0, 0)
+        display2.pixel(last_single[2], 0, 0)
         single = mapping[count % 24]
         r, g, b = hsv_to_rgb(count / 24, 1.0, 1.0)
         display.pixel(single[0], 0, int(255 * r))
         display.pixel(single[1], 0, int(255 * g))
         display.pixel(single[2], 0, int(255 * b))
+        display2.pixel(single[0], 0, int(255 * r))
+        display2.pixel(single[1], 0, int(255 * g))
+        display2.pixel(single[2], 0, int(255 * b))
         last_count = count
+    
+            
+    i2c.writeto(0x13, bytearray([0x41]))
+    sp = i2c.readfrom(0x13, 1)
+    if sp != last_sp:
+        print("SP =", sp)
+    last_sp = sp
        
+    
     '''
     enc_a = bool(ioe.input(ENC_TERM_A))
     enc_b = bool(ioe.input(ENC_TERM_B))
@@ -185,4 +231,4 @@ while True:
         last_enc_b = enc_b
     '''    
 
-    time.sleep(0.005)
+    #time.sleep(0.001)
