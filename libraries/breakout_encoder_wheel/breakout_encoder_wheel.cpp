@@ -56,11 +56,12 @@ namespace pimoroni {
   }
 
   BreakoutEncoderWheel::Direction BreakoutEncoderWheel::get_encoder_direction() {
-    return direction;
+    //return direction;
+    return DEFAULT_DIRECTION;
   }
 
   void BreakoutEncoderWheel::set_encoder_direction(Direction direction) {
-    this->direction = direction;
+    //this->direction = direction;
   }
 
   void BreakoutEncoderWheel::set_pixel(uint8_t index, uint8_t r, uint8_t g, uint8_t b) {
@@ -75,12 +76,13 @@ namespace pimoroni {
   }
 
   int16_t BreakoutEncoderWheel::read_wheel() {
-    int16_t count = ioe.read_rotary_encoder(ENC_CHANNEL);
-    if(direction != DIRECTION_CW)
-      count = 0 - count;
+    //int16_t count = ioe.read_rotary_encoder(ENC_CHANNEL);
+    //if(direction != DIRECTION_CW)
+    //  count = 0 - count;
 
     ioe.clear_interrupt_flag();
-    return count;
+    //return count;
+    return 0;
   }
 
   void BreakoutEncoderWheel::clear_wheel() {

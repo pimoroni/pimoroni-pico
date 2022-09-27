@@ -83,7 +83,7 @@ namespace pimoroni {
   private:
     IOExpander ioe;
     IS31FL3731 led_ring;
-    Direction direction = DEFAULT_DIRECTION;
+    //Direction direction = DEFAULT_DIRECTION;
     uint interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
 
 
