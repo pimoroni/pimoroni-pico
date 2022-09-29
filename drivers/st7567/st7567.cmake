@@ -1,4 +1,4 @@
-set(DRIVER_NAME st7735)
+set(DRIVER_NAME st7567)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

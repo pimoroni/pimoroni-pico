@@ -1,1 +1,1 @@
-include(st7735.cmake)
+include(st7567.cmake)
