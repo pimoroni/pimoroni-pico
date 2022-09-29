@@ -22,19 +22,19 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
 
-    spi_inst_t *spi = spi0;
+        spi_inst_t *spi = spi0;
 
     uint32_t dma_channel;
 
     // interface pins with our standard defaults where appropriate
-    uint cs     = SPI_BG_FRONT_CS;
-    uint dc     = 20;
-    uint sck    = SPI_DEFAULT_SCK ;
-    uint mosi   = SPI_DEFAULT_MOSI;
-    uint bl     = PIN_UNUSED;
-    uint reset  = PIN_UNUSED;
+    uint cs;
+    uint dc;
+    uint sck;
+    uint mosi;
+    uint bl;
+    uint reset_pin;
 
-    uint32_t spi_baud = 30 * 1024 * 1024;
+    uint32_t spi_baud = 1 * 1024 * 1024;
 
     uint8_t offset_cols = 0;
     uint8_t offset_rows = 0;
@@ -43,15 +43,11 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ST7567(uint16_t width, uint16_t height, Rotation rotate) : ST7567(width, height, rotate, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED}) {};
-
-    ST7567(uint16_t width, uint16_t height, SPIPins pins, uint busy=26, uint reset=21) :
+    ST7567(uint16_t width, uint16_t height, SPIPins pins) :
       DisplayDriver(width, height, ROTATE_0),
-      spi(pins.spi),
-      CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
+      spi(pins.spi), cs(pins.cs), dc(pins.dc), sck(pins.sck), mosi(pins.mosi), bl(pins.bl) {
         init();
       }
-
 
     //--------------------------------------------------
     // Methods
@@ -59,6 +55,7 @@ namespace pimoroni {
   public:
     void update(PicoGraphics *graphics) override;
     void set_backlight(uint8_t brightness) override;
+    void reset();
 
   private:
     void init(bool auto_init_sequence = true);

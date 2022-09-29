@@ -1,25 +1,26 @@
-#include <string.h>
 #include <math.h>
-#include <vector>
 #include <cstdlib>
+#include <string.h>
+#include <time.h>
+#include <cstdio>
 
-#include "libraries/pico_display_2/pico_display_2.hpp"
-#include "drivers/st7789/st7789.hpp"
+#include "pico/stdlib.h"
 #include "libraries/pico_graphics/pico_graphics.hpp"
-#include "rgbled.hpp"
-#include "button.hpp"
+#include "libraries/gfx_pack/gfx_pack.hpp"
+#include "drivers/st7567/st7567.hpp"
+#include "drivers/button/button.hpp"
 
 using namespace pimoroni;
 
-ST7789 st7789(320, 240, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
-PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
+ST7567 st7567(128, 64, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB332 graphics(st7567.width, st7567.height, nullptr);
 
-RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
 
-Button button_a(PicoDisplay2::A);
-Button button_b(PicoDisplay2::B);
-Button button_x(PicoDisplay2::X);
-Button button_y(PicoDisplay2::Y);
+
+Button button_a(gfx_pack::A);
+Button button_b(gfx_pack::B);
+Button button_x(gfx_pack::X);
+Button button_y(gfx_pack::Y);
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
 // Outputs are rgb in the range 0-255 for each channel
@@ -42,7 +43,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
-  st7789.set_backlight(255);
+  st7567.set_backlight(255);
 
   struct pt {
     float      x;
@@ -110,14 +111,14 @@ int main() {
     // we want a full colour cycle to take. 5000 = 5 sec.
     uint8_t r = 0, g = 0, b = 0;
     from_hsv((float)millis() / 5000.0f, 1.0f, 0.5f + sinf(millis() / 100.0f / 3.14159f) * 0.5f, r, g, b);
-    led.set_rgb(r, g, b);
+   
 
 
     graphics.set_pen(WHITE);
     graphics.text("Hello World", text_location, 320);
 
     // update screen
-    st7789.update(&graphics);
+    st7567.update(&graphics);
   }
 
     return 0;

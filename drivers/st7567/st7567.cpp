@@ -1,4 +1,4 @@
-#include "ST7567.hpp"
+#include "st7567.hpp"
 
 #include <cstdlib>
 #include <math.h>
@@ -49,9 +49,9 @@ namespace pimoroni {
   };
 
   void ST7567::reset() {
-    if(RESET == PIN_UNUSED) return;
-    gpio_put(RESET, 0); sleep_ms(10);
-    gpio_put(RESET, 1); sleep_ms(10);
+    if(reset_pin == PIN_UNUSED) return;
+    gpio_put(reset_pin, 0); sleep_ms(10);
+    gpio_put(reset_pin, 1); sleep_ms(10);
     sleep_ms(100);
   }
 
@@ -59,8 +59,8 @@ namespace pimoroni {
   void ST7567::init(bool auto_init_sequence) {
     spi_init(spi, spi_baud);
 
-    gpio_set_function(reset, GPIO_FUNC_SIO);
-    gpio_set_dir(reset, GPIO_OUT);
+    gpio_set_function(reset_pin, GPIO_FUNC_SIO);
+    gpio_set_dir(reset_pin, GPIO_OUT);
 
     gpio_set_function(dc, GPIO_FUNC_SIO);
     gpio_set_dir(dc, GPIO_OUT);
@@ -124,12 +124,12 @@ namespace pimoroni {
 
   // Native 16-bit framebuffer update
   void ST7567::update(PicoGraphics *graphics) {
-    uint8_t offset;
+    
     uint8_t *fb = (uint8_t *)graphics->frame_buffer;
     
 
     if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
-      command(reg::ENTER_RWMODE);
+      command(reg::ENTER_RMWMODE);
       for (uint8_t page=0; page < 8 ; page++){
         command(reg::SETPAGESTART | page);
         command(reg::SETCOLL);
@@ -137,32 +137,33 @@ namespace pimoroni {
         gpio_put(dc, 1); // data mode
         gpio_put(cs, 0);
         spi_write_blocking(spi, fb, PAGESIZE / 8);
-        fb += PAGESIZE / 8;
+        fb += (PAGESIZE / 8);
         gpio_put(cs, 1);
         
       }
 
-    } else {
-      command(reg::ENTER_RWMODE);
+    } /*else {
+      command(reg::ENTER_RMWMODE);
       gpio_put(dc, 1); // data mode
       gpio_put(cs, 0);
 
       graphics->frame_convert(PicoGraphics::PEN_1BIT, [this](void *data, size_t length) {
         if (length > 0) {
           for (uint8_t page=0; page < 8 ; page++){
-            offset = page * PAGESIZE;
+            
             command(reg::SETPAGESTART | page);
             command(reg::SETCOLL);
             command(reg::SETCOLH);
             gpio_put(dc, 1); // data mode
             gpio_put(cs, 0);
-            spi_write_blocking(spi, (const uint8_t*)data[offset/8], PAGESIZE / 8);
+            spi_write_blocking(spi, fb, PAGESIZE / 8);
+            fb += PAGESIZE / 8;
             gpio_put(cs, 1);
         }
-      });
-
+      };
+*/
       gpio_put(cs, 1);
-    }
+    
   }
 
   void ST7567::set_backlight(uint8_t brightness) {
@@ -172,4 +173,4 @@ namespace pimoroni {
     uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
   }
-}
+} 
