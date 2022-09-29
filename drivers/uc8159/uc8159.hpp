@@ -16,6 +16,8 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
+    uint16_t width;
+    uint16_t height;
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
@@ -46,6 +48,8 @@ namespace pimoroni {
 
     UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=PIN_UNUSED, uint reset=27) :
       DisplayDriver(width, height, ROTATE_0),
+      width(width),
+      height(height),
       spi(pins.spi),
       CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
         init();

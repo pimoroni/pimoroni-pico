@@ -109,7 +109,7 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             width = 640;
             height = 400;
             bus_type = BUS_SPI;
-            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
             if(pen_type == -1) pen_type = PEN_P4;
             break;
         default:
