@@ -109,7 +109,7 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             width = 640;
             height = 400;
             bus_type = BUS_SPI;
-            if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_P4;
             break;
         default:
@@ -206,7 +206,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     if (display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4) {
         pen_type = PEN_3BIT; // FORCE to 3BIT
         // TODO grab BUSY and RESET from ARG_extra_pins
-        self->display = m_new_class(UC8159, width, height, spi_bus);
+        self->display = m_new_class(UC8159, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_TUFTY_2040) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);

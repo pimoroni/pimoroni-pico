@@ -96,9 +96,17 @@ namespace pimoroni {
     };
 
     if (width == 600) {
-      command(PSR,  {0xE3, 0x08});
+      if (rotation == ROTATE_0) {
+        command(PSR,  {0xE3, 0x08});
+      } else {
+        command(PSR,  {0xEF, 0x08});
+      }
     } else {
-      command(PSR,  {0xA3, 0x08});
+      if (rotation == ROTATE_0) {
+        command(PSR,  {0xA3, 0x08});
+      } else {
+        command(PSR,  {0xAF, 0x08});
+      }
     }
     command(PWR,  {0x37, 0x00, 0x23, 0x23});
     command(PFS,  {0x00});
@@ -171,7 +179,7 @@ namespace pimoroni {
     // are reversed.
     // Any garbage data will do.
     // 2px per byte, so we need width * 24 bytes
-    if(height == 400) {
+    if(height == 400 && rotation == ROTATE_0) {
       spi_write_blocking(spi, (uint8_t *)graphics->frame_buffer, width * 24);
     }
     graphics->frame_convert(PicoGraphics::PEN_P4, [this](void *buf, size_t length) {
