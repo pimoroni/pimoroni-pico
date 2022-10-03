@@ -66,18 +66,19 @@ namespace pimoroni {
       gpio_set_dir(interrupt, GPIO_IN);
       gpio_pull_up(interrupt);
     }
-
+    /* No chip id on this version 
     uint8_t chip_id = 0;
     i2c->read_bytes(address, RV3032_ID, &chip_id, 1);
     if(chip_id != (RV3032_CHIP_ID | RV3032_VERSION)) {
       return false;
     }
+    */
 
     return true;
   }
 
   void RV3032::reset() {
-    set_bit(RV3032_CTRL2, CTRL2_RESET);
+    set_bit(RV3032_CTRL2, RV3032_CTRL2_RESET);
   }
 
   i2c_inst_t* RV3032::get_i2c() const {
@@ -182,26 +183,7 @@ namespace pimoroni {
     times[TIME_MINUTES] = dec_to_bcd(BUILD_MINUTE);
     times[TIME_HOURS] = dec_to_bcd(BUILD_HOUR);
 
-    // Build_Hour is 0-23, convert to 1-12 if needed
-    if(is_12_hour()) {
-      uint8_t hour = BUILD_HOUR;
 
-      bool pm = false;
-
-      if(hour == 0)
-        hour += 12;
-      else if(hour == 12)
-        pm = true;
-      else if(hour > 12) {
-        hour -= 12;
-        pm = true;
-      }
-
-      times[TIME_HOURS] = dec_to_bcd(hour); // Load the modified hours
-
-      if(pm == true)
-        times[TIME_HOURS] |= (1 << HOURS_AM_PM); // Set AM/PM bit if needed
-    }
 
     // Calculate weekday (from here: http://stackoverflow.com/a/21235587)
     // 0 = Sunday, 6 = Saturday
@@ -224,9 +206,6 @@ namespace pimoroni {
   bool RV3032::update_time() {
     if(read_multiple_registers(RV3032_SECONDS, times, TIME_ARRAY_LENGTH) == false)
       return false; // Something went wrong
-
-    if(is_12_hour())
-      times[TIME_HOURS] &= ~(1 << HOURS_AM_PM); // Remove this bit from value
 
     return true;
   }
@@ -305,84 +284,30 @@ namespace pimoroni {
     return bcd_to_dec(times[TIME_YEAR]) + 2000;
   }
 
-  // Returns true if RTC has been configured for 12 hour mode
+  // Always returns false due to rtc always being 24 hours 
   bool RV3032::is_12_hour() {
-    uint8_t controlRegister2 = read_register(RV3032_CTRL2);
-    return (controlRegister2 & (1 << CTRL2_12_24));
+    return false;
   }
 
-  // Returns true if RTC has PM bit set and 12Hour bit set
+  // Returns false due to rtc not deterinaing am or pm 
   bool RV3032::is_pm() {
-    uint8_t hourRegister = read_register(RV3032_HOURS);
-    if(is_12_hour() && (hourRegister & (1 << HOURS_AM_PM)))
-      return true;
     return false;
   }
 
   // Configure RTC to output 1-12 hours
   // Converts any current hour setting to 12 hour
   void RV3032::set_12_hour() {
-    // Do we need to change anything?
-    if(is_12_hour() == false) {
-      uint8_t hour = bcd_to_dec(read_register(RV3032_HOURS)); // Get the current hour in the RTC
-
-      // Set the 12/24 hour bit
-      uint8_t setting = read_register(RV3032_CTRL2);
-      setting |= (1 << CTRL2_12_24);
-      write_register(RV3032_CTRL2, setting);
-
-      // Take the current hours and convert to 12, complete with AM/PM bit
-      bool pm = false;
-
-      if(hour == 0)
-        hour += 12;
-      else if(hour == 12)
-        pm = true;
-      else if(hour > 12) {
-        hour -= 12;
-        pm = true;
-      }
-
-      hour = dec_to_bcd(hour); // Convert to BCD
-
-      if(pm == true) hour |= (1 << HOURS_AM_PM); // Set AM/PM bit if needed
-
-      write_register(RV3032_HOURS, hour); // Record this to hours register
-    }
+    
   }
 
   // Configure RTC to output 0-23 hours
   // Converts any current hour setting to 24 hour
   void RV3032::set_24_hour() {
-    // Do we need to change anything?
-    if(is_12_hour() == true) {
-      // Not sure what changing the CTRL2 register will do to hour register so let's get a copy
-      uint8_t hour = read_register(RV3032_HOURS); //Get the current 12 hour formatted time in BCD
-      bool pm = false;
-      if(hour & (1 << HOURS_AM_PM)) { // Is the AM/PM bit set?
-        pm = true;
-        hour &= ~(1 << HOURS_AM_PM); // Clear the bit
-      }
-
-      // Change to 24 hour mode
-      uint8_t setting = read_register(RV3032_CTRL2);
-      setting &= ~(1 << CTRL2_12_24); // Clear the 12/24 hr bit
-      write_register(RV3032_CTRL2, setting);
-
-      // Given a BCD hour in the 1-12 range, make it 24
-      hour = bcd_to_dec(hour); // Convert core of register to DEC
-
-      if(pm == true) hour += 12; // 2PM becomes 14
-      if(hour == 12) hour = 0;   // 12AM stays 12, but should really be 0
-      if(hour == 24) hour = 12;  // 12PM becomes 24, but should really be 12
-
-      hour = dec_to_bcd(hour);   // Convert to BCD
-
-      write_register(RV3032_HOURS, hour); // Record this to hours register
-    }
+    
   }
-
+  
   // ATTENTION: Real Time and UNIX Time are INDEPENDENT!
+  /*
   bool RV3032::set_unix(uint32_t value) {
     uint8_t unix_reg[4];
     unix_reg[0] = value;
@@ -399,7 +324,7 @@ namespace pimoroni {
     read_multiple_registers(RV3032_UNIX_TIME0, unix_reg, 4);
     return ((uint32_t)unix_reg[3] << 24) | ((uint32_t)unix_reg[2] << 16) | ((uint32_t)unix_reg[1] << 8) | unix_reg[0];
   }
-
+*/
   /*********************************
   Set the alarm mode in the following way:
   0: When minutes, hours and weekday/date match (once per weekday/date)
@@ -421,11 +346,12 @@ namespace pimoroni {
     set_24_hour();
 
     // Set WADA bit (Weekday/Date Alarm)
+    /* No weekday alarm option
     if(set_weekday_alarm_not_date)
-      clear_bit(RV3032_CTRL1, CTRL1_WADA);
+      clear_bit(RV3032_CTRL1, RV3032_CTRL1_WADA);
     else
       set_bit(RV3032_CTRL1, CTRL1_WADA);
-
+    */
     // Write alarm settings in registers 0x07 to 0x09
     uint8_t alarmTime[3];
     alarmTime[0] = dec_to_bcd(min);        //minutes
@@ -436,11 +362,11 @@ namespace pimoroni {
       mode = 0b111; // 0 to 7 is valid
 
     if(mode & 0b001)
-      alarmTime[0] |= 1 << MINUTESALM_AE_M;
+      alarmTime[0] |= 1 << RV3032_MINUTESALM_AE_M;
     if(mode & 0b010)
-      alarmTime[1] |= 1 << HOURSALM_AE_H;
+      alarmTime[1] |= 1 << RV3032_HOURSALM_AE_H;
     if(mode & 0b100)
-      alarmTime[2] |= 1 << DATE_AE_WD;
+      alarmTime[2] |= 1 << RV3032_DATE_AE_WD;
 
     write_multiple_registers(RV3032_MINUTES_ALM, alarmTime, 3);
 
@@ -448,26 +374,26 @@ namespace pimoroni {
 
     // Clock output?
     if(enable_clock_output)
-      set_bit(RV3032_INT_MASK, IMT_MASK_CAIE);
+      set_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CAIE);
     else
-      clear_bit(RV3032_INT_MASK, IMT_MASK_CAIE);
+      clear_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CAIE);
   }
 
   void RV3032::enable_alarm_interrupt() {
-    set_bit(RV3032_CTRL2, CTRL2_AIE);
+    set_bit(RV3032_CTRL2, RV3032_CTRL2_AIE);
   }
 
   // Only disables the interrupt (not the alarm flag)
   void RV3032::disable_alarm_interrupt() {
-    clear_bit(RV3032_CTRL2, CTRL2_AIE);
+    clear_bit(RV3032_CTRL2, RV3032_CTRL2_AIE);
   }
 
   bool RV3032::read_alarm_interrupt_flag() {
-    return read_bit(RV3032_STATUS, STATUS_AF);
+    return read_bit(RV3032_STATUS, RV3032_STATUS_AF);
   }
 
   void RV3032::clear_alarm_interrupt_flag() {
-    clear_bit(RV3032_STATUS, STATUS_AF);
+    clear_bit(RV3032_STATUS, RV3032_STATUS_AF);
   }
 
   /*********************************
@@ -481,14 +407,16 @@ namespace pimoroni {
     write_register(RV3032_TIMERVAL_0, timer_value & 0xff);
     write_register(RV3032_TIMERVAL_1, timer_value >> 8);
 
+    
     uint8_t ctrl1_val = read_register(RV3032_CTRL1);
+    /* Timer automatically repeats 
     if(timer_repeat) {
-      ctrl1_val |= 1 << CTRL1_TRPT;
+      ctrl1_val |= 1 << RV3032_CTRL1_TRPT;
     }
     else {
       ctrl1_val &= ~(1 << CTRL1_TRPT);
     }
-
+    */
     switch(timer_frequency) {
       case 4096:         // 4096Hz (default)    // up to 122us error on first time
         ctrl1_val &= ~3; // Clear both the bits
@@ -513,45 +441,46 @@ namespace pimoroni {
       enable_timer_interrupt();
     }
     if(start_timer) {
-      ctrl1_val |= (1 << CTRL1_TE);
+      ctrl1_val |= (1 << RV3032_CTRL1_TE);
     }
     write_register(RV3032_CTRL1, ctrl1_val);
 
     // Clock output?
     if(enable_clock_output)
-      set_bit(RV3032_INT_MASK, IMT_MASK_CTIE);
+      set_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CTIE);
     else
-      clear_bit(RV3032_INT_MASK, IMT_MASK_CTIE);
+      clear_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CTIE);
   }
-
+ 
+ /*
   uint16_t RV3032::get_timer_count() {
     // Reads the number of remaining timer ticks
     uint8_t r0 = read_register(RV3032_TIMERSTAT_0);
     return (r0 + (read_register(RV3032_TIMERSTAT_1) << 8));
   }
-
+ */
   void RV3032::enable_timer_interrupt() {
-    set_bit(RV3032_CTRL2, CTRL2_TIE);
+    set_bit(RV3032_CTRL2, RV3032_CTRL2_TIE);
   }
 
   void RV3032::disable_timer_interrupt() {
-    clear_bit(RV3032_CTRL2, CTRL2_TIE);
+    clear_bit(RV3032_CTRL2, RV3032_CTRL2_TIE);
   }
 
   bool RV3032::read_timer_interrupt_flag() {
-    return read_bit(RV3032_STATUS, STATUS_TF);
+    return read_bit(RV3032_STATUS, RV3032_STATUS_TF);
   }
 
   void RV3032::clear_timer_interrupt_flag() {
-    clear_bit(RV3032_STATUS, STATUS_TF);
+    clear_bit(RV3032_STATUS, RV3032_STATUS_TF);
   }
 
   void RV3032::enable_timer() {
-    set_bit(RV3032_CTRL1, CTRL1_TE);
+    set_bit(RV3032_CTRL1, RV3032_CTRL1_TE);
   }
 
   void RV3032::disable_timer() {
-    clear_bit(RV3032_CTRL1, CTRL1_TE);
+    clear_bit(RV3032_CTRL1, RV3032_CTRL1_TE);
   }
 
   /*********************************
@@ -562,29 +491,29 @@ namespace pimoroni {
     clear_periodic_update_interrupt_flag();
 
     if(every_second)
-      clear_bit(RV3032_CTRL1, CTRL1_USEL);
+      clear_bit(RV3032_CTRL1, RV3032_CTRL1_USEL);
     else  // every minute
-      set_bit(RV3032_CTRL1, CTRL1_USEL);
+      set_bit(RV3032_CTRL1, RV3032_CTRL1_USEL);
 
-    set_bit(RV3032_CTRL2, CTRL2_UIE);
+    set_bit(RV3032_CTRL2, RV3032_CTRL2_UIE);
 
     // Clock output?
     if(enable_clock_output)
-      set_bit(RV3032_INT_MASK, IMT_MASK_CUIE);
+      set_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CUIE);
     else
-      clear_bit(RV3032_INT_MASK, IMT_MASK_CUIE);
+      clear_bit(RV3032_INT_MASK, RV3032_IMT_MASK_CUIE);
   }
 
   void RV3032::disable_periodic_update_interrupt() {
-    clear_bit(RV3032_CTRL2, CTRL2_UIE);
+    clear_bit(RV3032_CTRL2, RV3032_CTRL2_UIE);
   }
 
   bool RV3032::read_periodic_update_interrupt_flag() {
-    return read_bit(RV3032_STATUS, STATUS_UF);
+    return read_bit(RV3032_STATUS, RV3032_STATUS_UF);
   }
 
   void RV3032::clear_periodic_update_interrupt_flag() {
-    clear_bit(RV3032_STATUS, STATUS_UF);
+    clear_bit(RV3032_STATUS, RV3032_STATUS_UF);
   }
 
   /*********************************
@@ -599,23 +528,23 @@ namespace pimoroni {
       return;
 
     // Read EEPROM Backup Register (0x37)
-    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
+    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register);
     // Set TCR Bits (Trickle Charge Resistor)
-    eeprom_backup &= EEPROMBackup_TCR_CLEAR;         // Clear TCR Bits
-    eeprom_backup |= tcr << EEPROMBackup_TCR_SHIFT;  // Shift values into EEPROM Backup Register
+    eeprom_backup &= RV3032_EEPROMBackup_TCR_CLEAR;         // Clear TCR Bits
+    eeprom_backup |= tcr << RV3032_EEPROMBackup_TCR_SHIFT;  // Shift values into EEPROM Backup Register
     // Write 1 to TCE Bit
-    eeprom_backup |= 1 << EEPROMBackup_TCE_BIT;
+    eeprom_backup |= 1 << RV3032_EEPROMBackup_TCE_BIT;
     // Write EEPROM Backup Register
-    write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup);
+    write_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register, eeprom_backup);
   }
 
   void RV3032::disable_trickle_charge() {
     // Read EEPROM Backup Register (0x37)
-    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
+    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register);
     // Write 0 to TCE Bit
-    eeprom_backup &= ~(1 << EEPROMBackup_TCE_BIT);
+    eeprom_backup &= ~(1 << RV3032_EEPROMBackup_TCE_BIT);
     // Write EEPROM Backup Register
-    write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup);
+    write_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register, eeprom_backup);
   }
 
 
@@ -632,19 +561,19 @@ namespace pimoroni {
     bool success = true;
 
     // Read EEPROM Backup Register (0x37)
-    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(EEPROM_Backup_Register);
+    uint8_t eeprom_backup = read_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register);
     if(eeprom_backup == 0xFF)
       success = false;
 
     // Ensure FEDE Bit is set to 1
-    eeprom_backup |= 1 << EEPROMBackup_FEDE_BIT;
+    eeprom_backup |= 1 << RV3032_EEPROMBackup_FEDE_BIT;
 
     // Set BSM Bits (Backup Switchover Mode)
-    eeprom_backup &= EEPROMBackup_BSM_CLEAR;         // Clear BSM Bits of EEPROM Backup Register
-    eeprom_backup |= val << EEPROMBackup_BSM_SHIFT;  // Shift values into EEPROM Backup Register
+    eeprom_backup &= RV3032_EEPROMBackup_BSM_CLEAR;         // Clear BSM Bits of EEPROM Backup Register
+    eeprom_backup |= val << RV3032_EEPROMBackup_BSM_SHIFT;  // Shift values into EEPROM Backup Register
 
     // Write EEPROM Backup Register
-    if(!write_config_eeprom_ram_mirror(EEPROM_Backup_Register, eeprom_backup))
+    if(!write_config_eeprom_ram_mirror(RV3032_EEPROM_Backup_Register, eeprom_backup))
       success = false;
 
     return success;
@@ -659,13 +588,13 @@ namespace pimoroni {
       return; // check out of bounds
 
     // Read EEPROM CLKOUT Register (0x35)
-    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
+    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register);
     // Ensure CLKOE Bit is set to 1
-    eeprom_clkout |= 1 << EEPROMClkout_CLKOE_BIT;
+    eeprom_clkout |= 1 << RV3032_EEPROMClkout_CLKOE_BIT;
     // Shift values into EEPROM Backup Register
-    eeprom_clkout |= freq << EEPROMClkout_FREQ_SHIFT;
+    eeprom_clkout |= freq << RV3032_EEPROMClkout_FREQ_SHIFT;
     // Write EEPROM Backup Register
-    write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
+    write_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register, eeprom_clkout);
   }
 
   void RV3032::enable_interrupt_controlled_clockout(uint8_t freq) {
@@ -673,34 +602,34 @@ namespace pimoroni {
       return; // check out of bounds
 
     // Read EEPROM CLKOUT Register (0x35)
-    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
+    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register);
     // Shift values into EEPROM Backup Register
-    eeprom_clkout |= freq << EEPROMClkout_FREQ_SHIFT;
+    eeprom_clkout |= freq << RV3032_EEPROMClkout_FREQ_SHIFT;
     // Write EEPROM Backup Register
-    write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
+    write_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register, eeprom_clkout);
 
     // Set CLKIE Bit
-    set_bit(RV3032_CTRL2, CTRL2_CLKIE);
+    set_bit(RV3032_CTRL2, RV3032_CTRL2_CLKIE);
   }
 
   void RV3032::disable_clock_out() {
     // Read EEPROM CLKOUT Register (0x35)
-    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(EEPROM_Clkout_Register);
+    uint8_t eeprom_clkout = read_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register);
     // Clear CLKOE Bit
-    eeprom_clkout &= ~(1 << EEPROMClkout_CLKOE_BIT);
+    eeprom_clkout &= ~(1 << RV3032_EEPROMClkout_CLKOE_BIT);
     // Write EEPROM CLKOUT Register
-    write_config_eeprom_ram_mirror(EEPROM_Clkout_Register, eeprom_clkout);
+    write_config_eeprom_ram_mirror(RV3032_EEPROM_Clkout_Register, eeprom_clkout);
 
     // Clear CLKIE Bit
-    clear_bit(RV3032_CTRL2, CTRL2_CLKIE);
+    clear_bit(RV3032_CTRL2, RV3032_CTRL2_CLKIE);
   }
 
   bool RV3032::read_clock_output_interrupt_flag() {
-    return read_bit(RV3032_STATUS, STATUS_CLKF);
+    return read_bit(RV3032_TEMP_LSB, RV3032_TEMP_CLKF);
   }
 
   void RV3032::clear_clock_output_interrupt_flag() {
-    clear_bit(RV3032_STATUS, STATUS_CLKF);
+    clear_bit(RV3032_TEMP_LSB, RV3032_TEMP_CLKF);
   }
 
   // Returns the status byte
@@ -752,7 +681,7 @@ namespace pimoroni {
 
     // Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
     uint8_t ctrl1 = read_register(RV3032_CTRL1);
-    ctrl1 |= 1 << CTRL1_EERD;
+    ctrl1 |= 1 << RV3032_CTRL1_EERD;
 
     if(!write_register(RV3032_CTRL1, ctrl1))
       success = false;
@@ -761,8 +690,8 @@ namespace pimoroni {
     write_register(eeprom_addr, val);
 
     // Update EEPROM (All Configuration RAM -> EEPROM)
-    write_register(RV3032_EEPROM_CMD, EEPROMCMD_First);
-    write_register(RV3032_EEPROM_CMD, EEPROMCMD_Update);
+    write_register(RV3032_EEPROM_CMD, RV3032_EEPROMCMD_First);
+    write_register(RV3032_EEPROM_CMD, RV3032_EEPROMCMD_Update);
     
     if(!wait_for_eeprom())
       success = false;
@@ -772,7 +701,7 @@ namespace pimoroni {
     if(ctrl1 == 0x00)
       success = false;
       
-    ctrl1 &= ~(1 << CTRL1_EERD);
+    ctrl1 &= ~(1 << RV3032_CTRL1_EERD);
     write_register(RV3032_CTRL1, ctrl1);
 
     if(!wait_for_eeprom())
@@ -786,14 +715,14 @@ namespace pimoroni {
 
     // Disable auto refresh by writing 1 to EERD control bit in CTRL1 register
     uint8_t ctrl1 = read_register(RV3032_CTRL1);
-    ctrl1 |= 1 << CTRL1_EERD;
+    ctrl1 |= 1 << RV3032_CTRL1_EERD;
     if(!write_register(RV3032_CTRL1, ctrl1))
       success = false;
 
     // Read EEPROM Register
     write_register(RV3032_EEPROM_ADDR, eeprom_addr);
-    write_register(RV3032_EEPROM_CMD, EEPROMCMD_First);
-    write_register(RV3032_EEPROM_CMD, EEPROMCMD_ReadSingle);
+    write_register(RV3032_EEPROM_CMD, RV3032_EEPROMCMD_First);
+    write_register(RV3032_EEPROM_CMD, RV3032_EEPROMCMD_ReadSingle);
 
     if(!wait_for_eeprom())
       success = false;
@@ -807,7 +736,7 @@ namespace pimoroni {
     if(ctrl1 == 0x00)
       success = false;
 
-    ctrl1 &= ~(1 << CTRL1_EERD);
+    ctrl1 &= ~(1 << RV3032_CTRL1_EERD);
     write_register(RV3032_CTRL1, ctrl1);
 
     if(!success)
@@ -820,7 +749,7 @@ namespace pimoroni {
   bool RV3032::wait_for_eeprom() {
     // Timeout is number of loops round while - don't have access to millisecond counter
     unsigned long timeout = 500;
-    while ((read_register(RV3032_STATUS) & 1 << STATUS_EEBUSY) && --timeout > 0);
+    while ((read_register(RV3032_TEMP_LSB) & 1 << RV3032_TEMP_EEBUSY) && --timeout > 0);
     return timeout > 0;
  
   }
@@ -837,4 +766,5 @@ namespace pimoroni {
     uint8_t value = i2c->get_bits(address, reg_addr, bit_num, 0x01);
     return value;
   }
+
 }
