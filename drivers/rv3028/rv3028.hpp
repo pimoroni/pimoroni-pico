@@ -182,6 +182,9 @@ Distributed as-is; no warranty is given.
 
 namespace pimoroni {
 
+
+#ifndef TIME_ORDER
+#define TIME_ORDER
   enum time_order {
     TIME_SECONDS,    // 0
     TIME_MINUTES,    // 1
@@ -191,6 +194,7 @@ namespace pimoroni {
     TIME_MONTH,      // 5
     TIME_YEAR,       // 6
   };
+#endif
 
   class RV3028 {
     //--------------------------------------------------
