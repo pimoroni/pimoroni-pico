@@ -1,6 +1,5 @@
 import gc
 import uos
-import random
 import machine
 import jpegdec
 import uasyncio
@@ -8,7 +7,8 @@ import sdcard
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 
 """
 xkcd daily
@@ -46,7 +46,10 @@ uos.mount(sd, "/sd")
 gc.collect()  # Claw back some RAM!
 
 
-url = ENDPOINT.format(WIDTH, HEIGHT + random.randint(0, 10))
+url = ENDPOINT
+
+if (WIDTH, HEIGHT) != (600, 448):
+    url = url.replace("xkcd-", f"xkcd-{WIDTH}x{HEIGHT}-")
 
 socket = urequest.urlopen(url)
 
