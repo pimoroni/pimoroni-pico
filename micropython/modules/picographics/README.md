@@ -299,7 +299,7 @@ Draws "Hello World" in a 16px tall, 2x scaled version of the `bitmap8` font.
 Sometimes you might want to measure a text string for centering or alignment on screen, you can do this with:
 
 ```python
-width = measure_text(text, scale, spacing)
+width = display.measure_text(text, scale, spacing)
 ```
 
 The height of each Bitmap font is explicit in its name.
