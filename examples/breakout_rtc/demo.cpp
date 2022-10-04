@@ -5,7 +5,11 @@
 using namespace pimoroni;
 
 I2C i2c(BOARD::PICO_EXPLORER);
-BreakoutRTC3032 rtc(&i2c);
+
+// Uncomment for RV3028 RTC Breakout
+BreakoutRTC rtc(&i2c);
+// Uncomment for RV3032 RTC Breakout
+//BreakoutRTC3032 rtc(&i2c);
 
 int main() {
   stdio_init_all();
@@ -17,7 +21,7 @@ int main() {
   if(!rtc.init()) {
     printf("Init failed! Check your connections and i2c pin choices.\n");
   }
-  if(rtc.setup(true, false, true)){
+  if(rtc.setup()){
     printf("RTC setup correctly\n");
   }
   else{
@@ -41,7 +45,7 @@ int main() {
     
     if(rtc.read_periodic_update_interrupt_flag()) {
       rtc.clear_periodic_update_interrupt_flag();
-    }
+    
       // Update the locally stored time from the RTC
       if(rtc.update_time()) {
         printf("Date: %s, Time: %s\n", rtc.string_date(), rtc.string_time());
@@ -53,7 +57,7 @@ int main() {
         gpio_put(PICO_DEFAULT_LED_PIN, false);
 #endif
       }
-    //}
+    }
     sleep_ms(100);
   }
 
