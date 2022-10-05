@@ -1,5 +1,4 @@
 import time
-import qrcode
 from pimoroni import Button
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_P4
 
@@ -15,7 +14,6 @@ button_y = Button(15)
 
 WHITE = display.create_pen(255, 255, 255)
 BLACK = display.create_pen(0, 0, 0)
-GREEN = display.create_pen(0, 121, 64)
 
 def clear():
     display.set_pen(BLACK)
@@ -26,10 +24,6 @@ clear()
 
 WIDTH, HEIGHT = display.get_bounds()
 
-BG = display.create_pen(0, 0, 0)
-FG = display.create_pen(255, 255, 255)
-
-stateChange = 0
 currentTimeHours = "12"
 currentTimeMinutes = "00"
 
