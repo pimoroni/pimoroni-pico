@@ -97,10 +97,10 @@ namespace pimoroni {
       command(reg::DISPNORMAL);
       command(reg::SETSTARTLINE | 0x00); //Startline from 0x40-0x7F
       command(reg::POWERCTRL);
-      command(reg::REG_RATIO | 3);
+      command(reg::REG_RATIO | 4);
       command(reg::DISPON);
       command(reg::SETCONTRAST);
-      command(58); // defalut contrast level
+      command(30); // defalut contrast level
     }
 
     if(bl != PIN_UNUSED) {
@@ -113,13 +113,17 @@ namespace pimoroni {
 
     gpio_put(dc, 0); // command mode
     spi_write_blocking(spi, &command, 1);
+    gpio_put(cs, 1);
 
+    sleep_us(100);
     if(data) {
+      gpio_put(cs, 0);
       gpio_put(dc, 1); // data mode
       spi_write_blocking(spi, (const uint8_t*)data, len);
+      gpio_put(cs, 1);
     }
 
-    gpio_put(cs, 1);
+    
   }
 
   // Native 16-bit framebuffer update
@@ -136,9 +140,10 @@ namespace pimoroni {
         command(reg::SETCOLH);
         gpio_put(dc, 1); // data mode
         gpio_put(cs, 0);
-        spi_write_blocking(spi, fb, PAGESIZE / 8);
-        fb += (PAGESIZE / 8);
+        spi_write_blocking(spi, fb, PAGESIZE );
+        fb += (PAGESIZE/8);
         gpio_put(cs, 1);
+        gpio_put(dc, 0); // Back to command mode
         
       }
 

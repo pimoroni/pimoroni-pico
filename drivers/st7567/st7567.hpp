@@ -32,9 +32,9 @@ namespace pimoroni {
     uint sck;
     uint mosi;
     uint bl;
-    uint reset_pin;
+    uint reset_pin=21;
 
-    uint32_t spi_baud = 1 * 1024 * 1024;
+    uint32_t spi_baud = 500000;
 
     uint8_t offset_cols = 0;
     uint8_t offset_rows = 0;
