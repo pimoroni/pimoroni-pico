@@ -8,7 +8,7 @@
 
 using namespace pimoroni;
 
-InkyFrame inky;
+InkyFrame inky(640, 400);
 datetime_t now;
 datetime_t today;
 
@@ -79,7 +79,7 @@ int days_in_month(datetime_t &dt)
 
 void center_text(std::string message, int y, float scale = 1.0f) {
   int32_t tw = inky.measure_text(message, scale);
-  inky.text(message, {(600 / 2) - (tw / 2), y}, scale);
+  inky.text(message, {(inky.width / 2) - (tw / 2), y}, scale);
 }
 
 void center_text(std::string message, int x, int y, int w, float scale = 1.0f) {
@@ -94,7 +94,7 @@ void render_calendar_view() {
   //inky.text_aspect(1.1f);
 
   inky.set_pen(InkyFrame::RED);
-  inky.rectangle({0, 0, width, 448});
+  inky.rectangle({0, 0, width, inky.height});
 
   inky.set_pen(InkyFrame::WHITE);
 
@@ -343,7 +343,7 @@ void render_calendar_entries() {
   int spacing = 5;
   int xoff = 240 + spacing;
   int yoff = spacing;
-  int width = 600 - xoff - spacing;
+  int width = inky.width - xoff - spacing;
   int row_height = 50;
 
   //inky.text_tracking(1.0f);
