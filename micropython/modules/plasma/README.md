@@ -9,12 +9,12 @@ The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel
   - [Set An LED](#set-an-led)
     - [RGB](#rgb)
     - [HSV](#hsv)
-  - [Set Brightness](#set-brightness)
 - [APA102](#apa102)
   - [Getting Started](#getting-started-1)
   - [Set An LED](#set-an-led-1)
     - [RGB](#rgb-1)
     - [HSV](#hsv-1)
+  - [Set Brightness](#set-brightness)
 - [Using the Buttons & RGB LED](#using-the-buttons--rgb-led)
   - [Buttons](#buttons)
   - [RGBLED](#rgbled)
@@ -92,16 +92,6 @@ Set the first LED - `0` - to Red `0.0`:
 led_strip.set_hsv(0, 0.0, 1.0, 1.0)
 ```
 
-### Set Brightness
-
-APA102 pixels support global brightness, allowing their brightness to be specified independent of their colour. You can set the overall brightness of your strip by calling:
-
-```python
-led_strip.set_brightness(15)
-```
-
-You can set brightness from `0` to `31`. This directly maps to the 5-bit brightness value sent to the APA102 LEDs.
-
 ## APA102
 
 ### Getting Started
@@ -143,6 +133,16 @@ Set the first LED - `0` - to Red `0.0`:
 ```python
 led_strip.set_hsv(0, 0.0, 1.0, 1.0)
 ```
+
+### Set Brightness
+
+APA102 pixels support global brightness, allowing their brightness to be specified independent of their colour. You can set the overall brightness of your strip by calling:
+
+```python
+led_strip.set_brightness(15)
+```
+
+You can set brightness from `0` to `31`. This directly maps to the 5-bit brightness value sent to the APA102 LEDs.
 
 ## Using the Buttons & RGB LED
 
