@@ -17,7 +17,7 @@ Pop an SD card into your computer to copy the images across. (Alternatively, you
 
 This example requires `sdcard.mpy` from `common/lib`  - copy this file into `lib` on your Pico W.
 
-- [/micropython/examples/common](../common)
+- [/micropython/examples/common](../../common)
 
 ## Image Credits
 
