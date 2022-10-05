@@ -140,9 +140,9 @@ def clouds():
     # add highlights and lowlights
     for i in range(NUM_LEDS):
         if uniform(0, 1) < 0.001:  # highlight
-            target_leds[i] = [x+20 for x in cloud_colour]
+            target_leds[i] = [x + 20 for x in cloud_colour]
         elif uniform(0, 1) < 0.001:  # lowlight
-            target_leds[i] = [x-20 for x in cloud_colour]
+            target_leds[i] = [x - 20 for x in cloud_colour]
         elif uniform(0, 1) < 0.005:  # normal
             target_leds[i] = cloud_colour
 
@@ -228,7 +228,7 @@ get_data()
 
 # start timer (the timer will update our data every UPDATE_INTERVAL)
 timer = Timer(-1)
-timer.init(period=UPDATE_INTERVAL*1000, mode=Timer.PERIODIC, callback=lambda t: get_data())
+timer.init(period=UPDATE_INTERVAL * 1000, mode=Timer.PERIODIC, callback=lambda t: get_data())
 
 while True:
     # do some fancy stuff with the LEDs based on the weather code
