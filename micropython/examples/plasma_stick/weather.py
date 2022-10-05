@@ -1,9 +1,8 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
 import uasyncio
-from urequests import get
+import urequests
 import time
-import ujson
 import plasma
 from plasma import plasma2040
 # Random functions! randrange is for picking integers from a range, and uniform is for floats.
@@ -28,7 +27,7 @@ LNG = -1.4239983439328177
 TIMEZONE = "auto"  # determines time zone from lat/long
 
 URL = "https://api.open-meteo.com/v1/forecast?latitude=" + str(LAT) + "&longitude=" + str(LNG) + "&current_weather=true&timezone=" + TIMEZONE
-UPDATE_INTERVAL = 500  # refresh interval in secs. Be nice to free APIs!
+UPDATE_INTERVAL = 300  # refresh interval in secs. Be nice to free APIs!
 
 # Weather codes from https://open-meteo.com/en/docs#:~:text=WMO%20Weather%20interpretation%20codes%20(WW)
 WEATHERCODES = {
@@ -82,54 +81,60 @@ def status_handler(mode, status, ip):
             for i in range(NUM_LEDS):
                 led_strip.set_rgb(i, 255, 0, 0)
 
+
 def get_data():
     global weathercode
-    # open the json file
     print(f"Requesting URL: {URL}")
-    j = get(URL).json()
+    r = urequests.get(URL)
+    # open the json data
+    j = r.json()
     print("Data obtained!")
-    
+    r.close()
+    gc.collect()  # protecc the RAM
+
     # parse relevant data from JSON
-    current= j["current_weather"]
+    current = j["current_weather"]
     temperature = current["temperature"]
     weathercode = current["weathercode"]
     datetime_arr = current["time"].split("T")
-   
+
     print(f"""
     Temperature = {temperature}°C
     Conditions = {WEATHERCODES[weathercode]}
     Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
-    
-    gc.collect()
+
 
 # the rest of our functions are for animations!
 def display_current():
     # paint our current LED colours to the strip
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, current_leds[i][0], current_leds[i][1], current_leds[i][2])
-        
+
+
 def move_to_target():
-     # nudge our current colours closer to the target colours
+    # nudge our current colours closer to the target colours
     for i in range(NUM_LEDS):
-        for c in range(3): # 3 times, for R, G & B channels 
+        for c in range(3):  # 3 times, for R, G & B channels
             if current_leds[i][c] < target_leds[i][c]:
-                current_leds[i][c] = min(current_leds[i][c] + ANIMATION_SPEED, target_leds[i][c]) # increase current, up to a maximum of target
+                current_leds[i][c] = min(current_leds[i][c] + ANIMATION_SPEED, target_leds[i][c])  # increase current, up to a maximum of target
             elif current_leds[i][c] > target_leds[i][c]:
-                current_leds[i][c] = max(current_leds[i][c] - ANIMATION_SPEED, target_leds[i][c]) # reduce current, down to a minimum of target
-              
+                current_leds[i][c] = max(current_leds[i][c] - ANIMATION_SPEED, target_leds[i][c])  # reduce current, down to a minimum of target
+
+
 def clear():
     # nice sunny yellow
     for i in range(NUM_LEDS):
-        target_leds[i] = [242, 237,80]
-    
+        target_leds[i] = [242, 237, 80]
+
+
 def clouds():
     # base colours:
-    if weathercode == 2: 
+    if weathercode == 2:
         cloud_colour = [165, 168, 138]  # partly cloudy
-    if weathercode == 3: 
+    if weathercode == 3:
         cloud_colour = [93, 94, 83]  # cloudy
-    if weathercode in (45, 48): 
+    if weathercode in (45, 48):
         cloud_colour = [186, 185, 182]  # foggy
 
     # add highlights and lowlights
@@ -137,14 +142,15 @@ def clouds():
         if uniform(0, 1) < 0.001:  # highlight
             target_leds[i] = [x+20 for x in cloud_colour]
         elif uniform(0, 1) < 0.001:  # lowlight
-            target_leds[i] = [x-20 for x in cloud_colour]         
+            target_leds[i] = [x-20 for x in cloud_colour]
         elif uniform(0, 1) < 0.005:  # normal
             target_leds[i] = cloud_colour
-        
+
+
 def storm():
     # heavy rain, with lightning!
     raindrop_chance = 0.01
-        
+
     for i in range(NUM_LEDS):
         if raindrop_chance > uniform(0, 1):
             # paint a raindrop (use current rather than target, for an abrupt change to the drop colour)
@@ -152,40 +158,44 @@ def storm():
         else:
             # paint backdrop
             target_leds[i] = [0, 15, 60]
-    
+
     lightning_chance = 0.001
     if lightning_chance > uniform(0, 1):
         for i in range(NUM_LEDS):
             current_leds[i] = [255, 255, 255]
+
 
 def rain():
     # splodgy blues
     # first, work out how many raindrops:
     if weathercode in (51, 56, 61, 66, 80):  # light rain
         raindrop_chance = 0.001
-    elif weathercode in (53, 63, 81):  #moderate rain    
+    elif weathercode in (53, 63, 81):  # moderate rain
         raindrop_chance = 0.005
-    else:  #heavy rain
+    else:
+        # heavy rain
         raindrop_chance = 0.01
-        
+
     for i in range(NUM_LEDS):
-        if raindrop_chance > uniform(0,1):
+        if raindrop_chance > uniform(0, 1):
             # paint a raindrop (use current rather than target, for an abrupt change to the drop colour)
             current_leds[i] = [randrange(0, 50), randrange(20, 100), randrange(50, 255)]
         else:
             # paint backdrop
             target_leds[i] = [0, 15, 60]
-    
+
+
 def snow():
     # splodgy whites
     # first, work out how many snowflakes:
     if weathercode in (71, 85):  # light snow
         snowflake_chance = 0.001
-    elif weathercode in (73, 77):  # moderate snow   
-       snowflake_chance = 0.005
-    else:  #heavy snow
+    elif weathercode in (73, 77):  # moderate snow
+        snowflake_chance = 0.005
+    else:
+        # heavy snow
         snowflake_chance = 0.01
-        
+
     for i in range(NUM_LEDS):
         if snowflake_chance > uniform(0, 1):
             # paint a snowflake (use current rather than target, for an abrupt change to the drop colour)
@@ -193,12 +203,15 @@ def snow():
         else:
             # paint backdrop
             target_leds[i] = [54, 54, 54]
-            
+
+
 # some variables we'll use for animations
 ANIMATION_SPEED = 2  # higher number gets from current to target colour faster
 
-current_leds =  [ [0] * 3 for i in range(NUM_LEDS)]  # Create an list of [r, g, b] values that will hold current LED colours, for display
-target_leds =  [ [0] * 3 for i in range(NUM_LEDS)]   # Create an list of [r, g, b] values that will hold target LED colours, to move towards
+# Create an list of [r, g, b] values that will hold current LED colours, for display
+current_leds = [[0] * 3 for i in range(NUM_LEDS)]
+# Create an list of [r, g, b] values that will hold target LED colours, to move towards
+target_leds = [[0] * 3 for i in range(NUM_LEDS)]
 
 # set up the WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
@@ -215,15 +228,15 @@ get_data()
 
 # start timer (the timer will update our data every UPDATE_INTERVAL)
 timer = Timer(-1)
-timer.init(period=UPDATE_INTERVAL*1000, mode=Timer.PERIODIC, callback=lambda t:get_data())
+timer.init(period=UPDATE_INTERVAL*1000, mode=Timer.PERIODIC, callback=lambda t: get_data())
 
 while True:
     # do some fancy stuff with the LEDs based on the weather code
-    if 0 <= weathercode <= 1: 
+    if 0 <= weathercode <= 1:
         clear()
-    elif 2 <= weathercode <= 48: 
+    elif 2 <= weathercode <= 48:
         clouds()
-    elif 51 <= weathercode <= 67 or 80 <= weathercode <= 82: 
+    elif 51 <= weathercode <= 67 or 80 <= weathercode <= 82:
         rain()
     elif 71 <= weathercode <= 77 or 85 <= weathercode <= 86:
         snow()
@@ -231,7 +244,8 @@ while True:
         storm()
     else:
         print("Unknown weather code :(")
-        
+
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip
-    
+
+    gc.collect()  # try and conserve RAM

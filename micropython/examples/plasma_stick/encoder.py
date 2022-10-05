@@ -78,4 +78,3 @@ while True:
             count += STEPS_PER_REV
 
         count_changed(count)
-        

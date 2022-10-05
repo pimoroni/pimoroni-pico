@@ -1,9 +1,8 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
 import uasyncio
-from urequests import get
+import urequests
 import time
-import ujson
 import plasma
 from plasma import plasma2040
 
@@ -37,7 +36,7 @@ def status_handler(mode, status, ip):
             # light up red if connection fails
             for i in range(NUM_LEDS):
                 led_strip.set_rgb(i, 255, 0, 0)
-            
+
 
 def hex_to_rgb(hex):
     # converts a hex colour code into RGB
@@ -59,15 +58,18 @@ uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.
 while True:
     # open the json file
     print(f"Requesting URL: {URL}")
-    data = get(URL).json()
+    r = urequests.get(URL)
+    # open the json data
+    j = r.json()
     print("Data obtained!")
+    r.close()
 
     # extract hex colour from the data
-    hex = data['field2']
+    hex = j["field2"]
 
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)
-    
+
     # light up the LEDs
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, r, g, b)
