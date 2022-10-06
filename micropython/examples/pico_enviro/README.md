@@ -14,6 +14,9 @@
   - [Particle](#particle)
 - [Wireless Examples](#wireless-examples)
   - [Enviro All (MQTT)](#enviro-all-mqtt)
+  - [Enviro All (Adafruit IO)](#enviro-all-adafruit-io)
+
+The examples in this folder are for use with [Pico Enviro+ Pack](https://shop.pimoroni.com/products/pico-enviro-pack). If you have an Enviro (Pico W Aboard) product, your software is in [another repo](https://github.com/pimoroni/enviro)! 
 
 ## PicoGraphics
 
@@ -83,3 +86,8 @@ For MQTT, you'll need to install `micropython-mqtt.simple` using Thonny's 'Tools
 [enviro_all_mqtt.py](enviro_all_mqtt.py)
 
 This example reads from all the sensors on Pico Enviro+ (plus the optional particulate sensor) and posts the results into an MQTT broker.
+
+### Enviro All (Adafruit IO)
+[enviro_all_adafruitio.py]
+
+This example reads from all the sensors on Pico Enviro+ (plus the optional particulate sensor) and posts the results into [Adafruit IO](https://io.adafruit.com).
