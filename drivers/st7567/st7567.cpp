@@ -140,8 +140,8 @@ namespace pimoroni {
         command(reg::SETCOLH);
         gpio_put(dc, 1); // data mode
         gpio_put(cs, 0);
-        spi_write_blocking(spi, fb, PAGESIZE );
-        fb += (PAGESIZE/8);
+        spi_write_blocking(spi, fb, PAGESIZE/8 );
+        fb += (PAGESIZE);
         gpio_put(cs, 1);
         gpio_put(dc, 0); // Back to command mode
         
