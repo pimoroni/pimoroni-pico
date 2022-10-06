@@ -306,7 +306,7 @@ class Automation2040WMini():
             self.__conn_led_pwm.duty_u16(65535)
         elif brightness is False:
             self.__conn_led_pwm.duty_u16(0)
-        elif brightness > 0.0 or brightness > 100.0:
+        elif brightness < 0.0 or brightness > 100.0:
             raise ValueError("brightness out of range. Expected 0 to 100, or True or False")
         else:
             gamma = 2.8
