@@ -88,16 +88,35 @@ namespace pimoroni {
     reset();
     busy_wait();
 
-    command(0x00, {0xE3, 0x08});
-    command(0x01, {0x37, 0x00, 0x23, 0x23});
-    command(0x03, {0x00});
-    command(0x06, {0xC7, 0xC7, 0x1D});
-    command(0x30, {0x3C});
-    command(0x40, {0x00});
-    command(0x50, {0x37});
-    command(0x60, {0x22});
-    command(0x61, {0x02, 0x58, 0x01, 0xC0});
-    command(0xE3, {0xAA});
+    uint8_t dimensions[4] = {
+      uint8_t(width >> 8),
+      uint8_t(width),
+      uint8_t(height >> 8),
+      uint8_t(height)
+    };
+
+    if (width == 600) {
+      if (rotation == ROTATE_0) {
+        command(PSR,  {0xE3, 0x08});
+      } else {
+        command(PSR,  {0xEF, 0x08});
+      }
+    } else {
+      if (rotation == ROTATE_0) {
+        command(PSR,  {0xA3, 0x08});
+      } else {
+        command(PSR,  {0xAF, 0x08});
+      }
+    }
+    command(PWR,  {0x37, 0x00, 0x23, 0x23});
+    command(PFS,  {0x00});
+    command(BTST, {0xC7, 0xC7, 0x1D});
+    command(PLL,  {0x3C});
+    command(TSC,  {0x00});
+    command(CDI,  {0x37});
+    command(TCON, {0x22});
+    command(TRES, 4, dimensions);
+    command(PWS,  {0xAA});
 
     sleep_ms(100);
 
@@ -154,6 +173,15 @@ namespace pimoroni {
     spi_write_blocking(spi, &reg, 1);
 
     gpio_put(DC, 1); // data mode
+
+    // HACK: Output 48 rows of data since our buffer is 400px tall
+    // but the display has no offset configuration and H/V scan 
+    // are reversed.
+    // Any garbage data will do.
+    // 2px per byte, so we need width * 24 bytes
+    if(height == 400 && rotation == ROTATE_0) {
+      spi_write_blocking(spi, (uint8_t *)graphics->frame_buffer, width * 24);
+    }
     graphics->frame_convert(PicoGraphics::PEN_P4, [this](void *buf, size_t length) {
       if (length > 0) {
         spi_write_blocking(spi, (const uint8_t*)buf, length);

@@ -18,10 +18,16 @@ led_e = PWM(Pin(15))
 
 led_activity.freq(1000)
 
+leds = [led_activity, led_connect, led_a, led_b, led_c, led_d, led_e]
+n = 0
+
 while True:
-    for duty in range(65025):
-        led_activity.duty_u16(duty)
-        sleep(0.0001)
-    for duty in range(65025, 0, -1):
-        led_activity.duty_u16(duty)
-        sleep(0.0001)
+    for _ in range(2):
+        for duty in range(65025, 2):
+            leds[n].duty_u16(duty)
+            sleep(0.0001)
+        for duty in range(65025, 0, -2):
+            leds[n].duty_u16(duty)
+            sleep(0.0001)
+    n += 1
+    n %= len(leds)

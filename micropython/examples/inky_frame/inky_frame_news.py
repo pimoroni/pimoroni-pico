@@ -1,4 +1,5 @@
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 from network_manager import NetworkManager
 import uasyncio
 from urllib import urequest
@@ -27,7 +28,7 @@ URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
 # Frequent updates will reduce battery life!
 UPDATE_INTERVAL = 60 * 1
 
-graphics = PicoGraphics(DISPLAY_INKY_FRAME)
+graphics = PicoGraphics(DISPLAY)
 WIDTH, HEIGHT = graphics.get_bounds()
 graphics.set_font("bitmap8")
 code = qrcode.QRCode()
