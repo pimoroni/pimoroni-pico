@@ -1,6 +1,7 @@
 # Automation 2040 W Micropython Examples <!-- omit in toc -->
 
 - [Function Examples](#function-examples)
+  - [PWM Outputs](#pwm-outputs)
   - [Read ADCs](#read-adcs)
   - [Read Inputs](#read-inputs)
   - [Toggle Relays](#toggle-relays)
@@ -13,16 +14,23 @@
 
 ## Function Examples
 
+These examples will work with Automation 2040 W and Automation 2040 W Mini. If you have an Automation 2040 W Mini, initialise your board with `board = Automation2040WMini` to see the correct numbers of inputs, outputs and relays!
+
+### PWM Outputs
+[pwm_outputs.py](pwm_outputs.py)
+
+Shows how to PWM the output terminals of Automation 2040 W.
+
 ### Read ADCs
 [read_adcs.py](read_adcs.py)
 
-Shows how to read the 3 ADC terminals of Automation 2040 W.
+Shows how to read the ADC terminals of Automation 2040 W.
 
 
 ### Read Inputs
 [read_inputs.py](read_inputs.py)
 
-Shows how to read the 3 Input terminals of Automation 2040 W.
+Shows how to read the input terminals of Automation 2040 W.
 
 
 ### Toggle Relays
@@ -50,11 +58,11 @@ A simple program that resets Automation 2040 W, turning off its Relays, Outputs,
 
 ## Wireless Examples
 
-The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `micropython/examples/common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
 ### Web IO Interface
 [web_io_interface/](web_io_interface/)
 
 Provides a basic web interface for all your Automation 2040W features.
 
-Needs `lib/tinyweb` from `common`!
+Needs `lib/tinyweb` from `micropython/examples/common`!
