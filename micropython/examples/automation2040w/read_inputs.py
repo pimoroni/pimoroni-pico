@@ -1,7 +1,7 @@
 import time
 from automation import Automation2040W, SWITCH_A
 
-# Uncomment fo Automation2040W Mini and comment out above import
+# Uncomment for Automation2040W Mini and comment out above import
 # from automation import Automation2040WMini, SWITCH_A
 
 """
@@ -15,7 +15,7 @@ INPUT_NAMES = ("I1", "I2", "I3", "I4")  # The friendly names to give each digita
 
 # Create a new Automation2040W
 board = Automation2040W()
-# Uncomment fo Automation2040W Mini
+# Uncomment for Automation2040W Mini
 # board = Automation2040WMini()
 
 # Enable the LED of the switch used to exit the loop

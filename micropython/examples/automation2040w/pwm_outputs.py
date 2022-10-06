@@ -1,6 +1,9 @@
 import time
 from automation import Automation2040W, SWITCH_A
 
+# Uncomment for Automation2040W Mini and comment out above import
+# from automation import Automation2040WMini, SWITCH_A
+
 """
 Demonstrates how to toggle each of Automation 2040 W's output terminals.
 
@@ -12,6 +15,8 @@ OUTPUT_NAMES = ("O1", "O2", "O3")   # The friendly names to give each digital ou
 
 # Create a new Automation2040W
 board = Automation2040W()
+# Uncomment for Automation2040W Mini
+# board = Automation2040WMini()
 
 # Enable the LED of the switch used to exit the loop
 board.switch_led(SWITCH_A, 50)  # Half Brightness
