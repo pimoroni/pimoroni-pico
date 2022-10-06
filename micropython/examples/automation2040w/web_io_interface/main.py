@@ -14,7 +14,7 @@ def status_handler(mode, status, ip):
 
     print("Network: {}".format(WIFI_CONFIG.SSID))
     status_text = "Connecting..."
-    board.conn_led(20)
+    board.conn_led(20.0)
     if status is not None:
         if status:
             status_text = "Connection successful!"
@@ -119,12 +119,12 @@ class outputs:
 
     def get(self, data):
         if 'one' in data.keys():
-            board.output(0, int(data['one']))
+            board.output(0, bool(data['one']))
         if 'two' in data.keys():
-            board.output(1, int(data['two']))
+            board.output(1, bool(data['two']))
         if 'three' in data.keys():
-            board.output(2, int(data['three']))
-        return {"one": board.output(0), "two": board.output(1), "three": board.output(2)}, 201
+            board.output(2, bool(data['three']))
+        return {"one": bool(board.output(0)), "two": bool(board.output(1)), "three": bool(board.output(2))}, 201
 
     def post(self, data):
         if 'one' in data.keys():

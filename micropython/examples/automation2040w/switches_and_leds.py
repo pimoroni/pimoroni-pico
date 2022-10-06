@@ -1,5 +1,5 @@
 import time
-from automation import Automation2040W, SWITCH_A, SWITCH_B, NUM_SWITCHES
+from automation import Automation2040W, SWITCH_A, SWITCH_B
 
 """
 An example of the user switches and LEDs on Automation 2040 W.
@@ -22,7 +22,7 @@ led_brightnesses = [0.0, 0.0]
 # Interact with the switches and LEDs until both are pressed simultaneously
 while not board.switch_pressed(SWITCH_A) or not board.switch_pressed(SWITCH_B):
 
-    for i in range(NUM_SWITCHES):
+    for i in range(board.NUM_SWITCHES):
         # Change the LED brightness based on switch's state
         if board.switch_pressed(i):
             print(SWITCH_NAMES[i], " = Pressed", sep="", end=", ")

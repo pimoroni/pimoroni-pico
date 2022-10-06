@@ -1,5 +1,8 @@
 import time
-from automation import Automation2040W, SWITCH_A, NUM_INPUTS
+from automation import Automation2040W, SWITCH_A
+
+# Uncomment fo Automation2040W Mini and comment out above import
+# from automation import Automation2040WMini, SWITCH_A
 
 """
 Shows how to read the 3 Input terminals of Automation 2040 W.
@@ -12,6 +15,8 @@ INPUT_NAMES = ("I1", "I2", "I3", "I4")  # The friendly names to give each digita
 
 # Create a new Automation2040W
 board = Automation2040W()
+# Uncomment fo Automation2040W Mini
+# board = Automation2040WMini()
 
 # Enable the LED of the switch used to exit the loop
 board.switch_led(SWITCH_A, 50)  # Half Brightness
@@ -20,7 +25,7 @@ board.switch_led(SWITCH_A, 50)  # Half Brightness
 while not board.switch_pressed(SWITCH_A):
 
     # Read each input in turn and print its value
-    for i in range(NUM_INPUTS):
+    for i in range(board.NUM_INPUTS):
         value = board.read_input(i)
         print(INPUT_NAMES[i], " = ", value, sep="", end=", ")
 

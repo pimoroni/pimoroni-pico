@@ -23,14 +23,20 @@ index = 0
 while not board.switch_pressed(SWITCH_A):
 
     # Toggle an output
-    board.output(index, toggle)
+    for output_percentage in range(101):
 
-    # Print the state of all outputs
-    for i in range(board.NUM_OUTPUTS):
-        print(OUTPUT_NAMES[i], " = ", bool(board.output(i)), sep="", end=", ")
+        if toggle is True:
+            board.output(index, output_percentage)
+        else:
+            board.output(index, 100.0 - output_percentage)
 
-    # Print a new line
-    print()
+        # Print the state of all outputs
+        for i in range(board.NUM_OUTPUTS):
+            print(OUTPUT_NAMES[i], " = ", board.output_percent(i), sep="", end=", ")
+
+        # Print a new line
+        print()
+        time.sleep(0.01)
 
     index += 1                  # Move on to the next output
     if index >= board.NUM_OUTPUTS:
