@@ -13,8 +13,8 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   private:
-    static const uint8_t ROWS = 128;
-    static const uint8_t COLS = 64;
+    static const uint8_t ROWS = 64;
+    static const uint8_t COLS = 128;
     static const uint8_t PAGESIZE = 128;
 
     //--------------------------------------------------

@@ -6,6 +6,17 @@
 #include "hardware/dma.h"
 #include "hardware/pwm.h"
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0') 
+
 namespace pimoroni {
 
   enum reg : uint8_t {
@@ -130,6 +141,42 @@ namespace pimoroni {
   void ST7567::update(PicoGraphics *graphics) {
     
     uint8_t *fb = (uint8_t *)graphics->frame_buffer;
+    uint8_t *page_p = (uint8_t *)graphics->frame_buffer;
+    uint8_t *byte_p = page_p;
+    uint8_t page_buffer[128];
+    for (int i=0 ; i < 128 ; i++){
+      page_buffer[i] = i;
+    }
+    uint8_t col_byte = 0;
+    /*
+    1111111111
+    0000000000
+    1111111111
+    0000000000
+    to
+    1010101010
+    1010101010
+    1010101010
+    1010101010
+    */
+
+
+    //0b00000011 = 0b000000001 0b00000001
+    
+    
+  /*
+  for (uint8_t pb_col_byte_index=0; pb_col_byte_index < 128; pb_col_byte_index++ ){
+
+    for (uint8_t fb_row_bit_index=0; fb_row_bit_index < 8; fb_row_bit_index++ ){
+      byte_p = byte_p + ((16 * fb_row_bit_index) + (pb_col_byte_index / 8));
+      page_buffer[pb_col_byte_index] =  (*byte_p) & (1 << fb_row_bit_index);  
+
+
+    }
+
+  }
+  */
+    
     
 
     if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
@@ -140,14 +187,16 @@ namespace pimoroni {
         command(reg::SETCOLH);
         gpio_put(dc, 1); // data mode
         gpio_put(cs, 0);
-        spi_write_blocking(spi, fb, PAGESIZE/8 );
+        spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
         fb += (PAGESIZE);
         gpio_put(cs, 1);
         gpio_put(dc, 0); // Back to command mode
         
       }
 
-    } /*else {
+    } 
+    
+    /*else {
       command(reg::ENTER_RMWMODE);
       gpio_put(dc, 1); // data mode
       gpio_put(cs, 0);
