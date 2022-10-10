@@ -27,7 +27,7 @@ LNG = -1.4239983439328177
 TIMEZONE = "auto"  # determines time zone from lat/long
 
 URL = "https://api.open-meteo.com/v1/forecast?latitude=" + str(LAT) + "&longitude=" + str(LNG) + "&current_weather=true&timezone=" + TIMEZONE
-UPDATE_INTERVAL = 300  # refresh interval in secs. Be nice to free APIs!
+UPDATE_INTERVAL = 900  # refresh interval in secs. Be nice to free APIs!
 
 # Weather codes from https://open-meteo.com/en/docs#:~:text=WMO%20Weather%20interpretation%20codes%20(WW)
 WEATHERCODES = {
@@ -98,10 +98,9 @@ def get_data():
     weathercode = current["weathercode"]
     datetime_arr = current["time"].split("T")
 
-    print(f"""
-    Temperature = {temperature}°C
-    Conditions = {WEATHERCODES[weathercode]}
-    Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
+    print(f"""Temperature = {temperature}°C
+Conditions = {WEATHERCODES[weathercode]}
+Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
 
 
@@ -123,9 +122,14 @@ def move_to_target():
 
 
 def clear():
-    # nice sunny yellow
-    for i in range(NUM_LEDS):
-        target_leds[i] = [242, 237, 80]
+    if weathercode == 0:  # clear
+        # nice sunny yellow
+        for i in range(NUM_LEDS):
+            target_leds[i] = [randrange(220, 260), randrange(220, 260), randrange(60, 100)]
+    if weathercode == 1:  # mostly clear
+        # sky blues
+        for i in range(NUM_LEDS):
+            target_leds[i] = [randrange(0, 40), randrange(150, 190), randrange(180, 220)]
 
 
 def clouds():
@@ -206,7 +210,7 @@ def snow():
 
 
 # some variables we'll use for animations
-ANIMATION_SPEED = 2  # higher number gets from current to target colour faster
+ANIMATION_SPEED = 1  # higher number gets from current to target colour faster
 
 # Create an list of [r, g, b] values that will hold current LED colours, for display
 current_leds = [[0] * 3 for i in range(NUM_LEDS)]
