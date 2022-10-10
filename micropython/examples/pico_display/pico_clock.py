@@ -62,7 +62,7 @@ def showTime():
     display.text(
         "{:02}:{:02}".format(
             currentTimeHours,
-            currentTimeMinutes), int(WIDTH/3.5), int(HEIGHT/3), 240, 4)
+            currentTimeMinutes), int(WIDTH / 3.5), int(HEIGHT / 3), 240, 4)
     display.update()
 
 
@@ -76,7 +76,7 @@ while True:
         incrementMinutes()
     elif button_y.read():
         decrementMinutes()
-    if lastAdjustment is None or time.time()-lastAdjustment >= 59:
+    if lastAdjustment is None or time.time() - lastAdjustment >= 59:
         if currentTimeMinutes != 59:
             incrementMinutes()
         else:
