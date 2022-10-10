@@ -163,19 +163,21 @@ namespace pimoroni {
 
     //0b00000011 = 0b000000001 0b00000001
     
+  uint8_t row_offset=0
+  
+  for (uint8_t fb_byte_index=0; fb_byte_index < 16; fb_byte_index ++ ){
+
+    uint8_t new_loc = fb_byte_index * 8
+
     
-  /*
-  for (uint8_t pb_col_byte_index=0; pb_col_byte_index < 128; pb_col_byte_index++ ){
-
-    for (uint8_t fb_row_bit_index=0; fb_row_bit_index < 8; fb_row_bit_index++ ){
-      byte_p = byte_p + ((16 * fb_row_bit_index) + (pb_col_byte_index / 8));
-      page_buffer[pb_col_byte_index] =  (*byte_p) & (1 << fb_row_bit_index);  
 
 
-    }
+
 
   }
-  */
+
+  
+  
     
     
 
