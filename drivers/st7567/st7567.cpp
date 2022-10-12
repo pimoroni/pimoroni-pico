@@ -141,41 +141,37 @@ namespace pimoroni {
   void ST7567::update(PicoGraphics *graphics) {
     
     uint8_t *fb = (uint8_t *)graphics->frame_buffer;
-    uint8_t *page_p = (uint8_t *)graphics->frame_buffer;
-    uint8_t *byte_p = page_p;
     uint8_t page_buffer[128];
+    uint8_t page_byte_selector;
+    uint8_t page_bit_selector;
+    // clear page buffer
     for (int i=0 ; i < 128 ; i++){
-      page_buffer[i] = i;
+      page_buffer[i] = 0;
     }
-    uint8_t col_byte = 0;
-    /*
-    1111111111
-    0000000000
-    1111111111
-    0000000000
-    to
-    1010101010
-    1010101010
-    1010101010
-    1010101010
-    */
 
+    for (uint16_t pixel_index=0 ; pixel_index < (128 * 8) ; pixel_index++){
+      page_byte_selector = ((pixel_index % 128)) ;
+      page_bit_selector = (pixel_index / 128);
 
-    //0b00000011 = 0b000000001 0b00000001
-    
-  uint8_t row_offset=0
-  
-  for (uint8_t fb_byte_index=0; fb_byte_index < 16; fb_byte_index ++ ){
+     // printf ("fb byte %d fb bit %d  set to %d\n", page_byte_selector, page_bit_selector, *fb & (1 << (pixel_index % 8)));
+     
 
-    uint8_t new_loc = fb_byte_index * 8
+      if (*fb & (0b10000000 >> (pixel_index % 8))){ // check selected pixel is present
+        page_buffer[page_byte_selector] |= (1 << page_bit_selector);
+      }
+      else{
+        page_buffer[page_byte_selector] &=  ~( 1 << page_bit_selector);
+      }
 
     
+      if ((pixel_index % 8) >= 7 ){ //increment fb pointer at end of byte
 
+        
+        fb++;
+        
+      }
 
-
-
-  }
-
+    }
   
   
     
