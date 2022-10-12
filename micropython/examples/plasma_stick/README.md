@@ -1,7 +1,7 @@
 # Plasma Stick MicroPython Examples <!-- omit in toc -->
 
 - [About Plasma Stick](#about-plasma-stick)
-- [Plasma](#plasma)
+- [Plasma Library](#plasma-library)
 - [Using Breakouts](#using-breakouts)
 - [Basic Examples](#basic-examples)
   - [Alternating Blinkies](#alternating-blinkies)
@@ -21,15 +21,17 @@
 
 ## About Plasma Stick
 
-Plasma Stick 2040 W is a compact little controller for WS2812 strip, powered by Raspberry Pi Pico W and perfect for easy, seasonal lighting. It has built in ✨wireless connectivity✨, courtesy of the onboard Pico W. [store link coming soon]
+Plasma Stick 2040 W is a compact little controller for WS2812 strip, powered by Raspberry Pi Pico W and perfect for easy, seasonal lighting. It has built in ✨wireless connectivity✨, courtesy of the onboard Pico W.
 
-If you're after buttons, current sensing, APA102 support or USB-C, you might prefer [Plasma 2040](https://shop.pimoroni.com/products/plasma-2040)
+[store link coming soon]
+
+If you're after buttons, current sensing, APA102 support or USB-C, you might prefer [Plasma 2040](https://shop.pimoroni.com/products/plasma-2040).
 
 Plasma Stick ships without firmware, so you'll need to download the latest `pimoroni-picow` build from the link below.
 
 - [MicroPython releases](https://github.com/pimoroni/pimoroni-pico/releases)
 
-## Plasma
+## Plasma Library
 
 You can control your WS2812 / NeoPixel™ strip using our MicroPython Plasma library.
 
@@ -126,12 +128,12 @@ The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `c
 [cheerlights.py](cheerlights.py)
 
 Sets your LED strip to the current #cheerlights colour.
-Find out more about the Cheerlights API at https://cheerlights.com/
+Find out more about the Cheerlights API at [https://cheerlights.com/].
 
 ### Weather
 [weather.py](weather.py)
 
 This Plasma Stick example connects to Open Meteo to access the current weather conditions.
 It then does some cool weather appropriate stuff with LEDs.
-Find out more about the Open Meteo API at https://open-meteo.com
+Find out more about the Open Meteo API at [https://open-meteo.com].
 
