@@ -8,6 +8,8 @@
 
 namespace pimoroni {
 
+  
+
   class ST7567 : public DisplayDriver {
     //--------------------------------------------------
     // Constants
@@ -43,11 +45,14 @@ namespace pimoroni {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
+    SPIPins gfx_pack_pins = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 16, SPI_BG_FRONT_PWM};
+
     ST7567(uint16_t width, uint16_t height, SPIPins pins) :
       DisplayDriver(width, height, ROTATE_0),
       spi(pins.spi), cs(pins.cs), dc(pins.dc), sck(pins.sck), mosi(pins.mosi), bl(pins.bl) {
         init();
       }
+      
 
     //--------------------------------------------------
     // Methods

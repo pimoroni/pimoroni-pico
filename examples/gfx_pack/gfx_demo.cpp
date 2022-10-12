@@ -11,8 +11,8 @@
 #include "drivers/button/button.hpp"
 
 using namespace pimoroni;
-
-ST7567 st7567(128, 64, {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 16, SPI_BG_FRONT_PWM});
+SPIPins pins = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 16, SPI_BG_FRONT_PWM};
+ST7567 st7567(128, 64, pins);
 PicoGraphics_Pen1Bit graphics(st7567.width, st7567.height, nullptr);
 
 
@@ -105,9 +105,6 @@ int main() {
       graphics.circle(Point(shape.x, shape.y), shape.r);
 
     }
-
-   
-
 
     graphics.set_pen(15);
     graphics.text("Hello World", text_location, 320);

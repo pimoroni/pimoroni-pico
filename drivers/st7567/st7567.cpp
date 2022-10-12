@@ -144,6 +144,7 @@ namespace pimoroni {
     uint8_t page_buffer[PAGESIZE];
     uint8_t page_byte_selector;
     uint8_t page_bit_selector;
+
   for (uint8_t page=0; page < 8 ; page++){ //select page
 
     for (uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8) ; pixel_index++){  //cycle through a page worth of bits from the fb
@@ -176,6 +177,9 @@ namespace pimoroni {
         gpio_put(cs, 1);
         gpio_put(dc, 0); // Back to command mode
     } 
+    else{ //other pen types incompatable
+      return;
+    }
     }
       gpio_put(cs, 1);
     
