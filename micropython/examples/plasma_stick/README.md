@@ -1,0 +1,137 @@
+# Plasma Stick MicroPython Examples <!-- omit in toc -->
+
+- [About Plasma Stick](#about-plasma-stick)
+- [Plasma](#plasma)
+- [Using Breakouts](#using-breakouts)
+- [Basic Examples](#basic-examples)
+  - [Alternating Blinkies](#alternating-blinkies)
+  - [Fire](#fire)
+  - [Moon](#moon)
+  - [Rainbows](#rainbows)
+  - [Thermometer](#thermometer)
+- [Advanced Examples](#advanced-examples)
+  - [CO2](#co2)
+  - [Encoder](#encoder)
+  - [Moon (RTC)](#moon-rtc)
+  - [PIR](#pir)
+  - [Thermometer (BME280)](#thermometer-bme280)
+- [Wireless Examples](#wireless-examples)
+  - [Cheerlights](#cheerlights)
+  - [Weather](#weather)
+
+## About Plasma Stick
+
+Plasma Stick 2040 W is a compact little controller for WS2812 strip, powered by Raspberry Pi Pico W and perfect for easy, seasonal lighting. It has built in ✨wireless connectivity✨, courtesy of the Pico W. [store link coming soon]
+
+If you're after buttons, current sensing, APA102 support or USB-C, you might prefer Plasma 2040 - [[store link]](https://shop.pimoroni.com/products/plasma-2040)
+
+Plasma Stick ships without firmware, you'll need to download the latest `pimoroni-picow` build from the link below.
+
+- [MicroPython releases](https://github.com/pimoroni/pimoroni-pico/releases)
+
+## Plasma
+
+We recommend using our MicroPython Plasma library for controlling your WS2812 / NeoPixel™ strip:
+
+- [PicoGraphics MicroPython function reference](../../modules/plasma)
+
+## Using Breakouts
+
+Plasma Stick has a Qw/ST (Qwiic/STEMMA QT) connector for plugging in I2C breakouts. Breakouts with QW/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can also connect any I2C Breakout Garden breakout using a JST-SH to JST-SH cable coupled with a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter?variant=39308432703571).
+
+- [Breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
+
+Plasma Stick uses GP4 and GP5 for its I2C interface. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
+
+```python
+from pimoroni_i2c import PimoroniI2C
+from pimoroni import PINS_BREAKOUT_GARDEN
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+```
+
+Alternatively, you can specify the pin numbers directly:
+
+```python
+from pimoroni_i2c import PimoroniI2C
+
+i2c = PimoroniI2C(sda=(4), scl=(5))
+```
+
+## Basic Examples
+
+### Alternating Blinkies
+[alternating-blinkies.py](alternating-blinkies.py)
+
+A simple example with two alternating colours, great for festive lights!
+
+### Fire
+[fire.py](fire.py)
+
+A simple fire effect example. 🔥🤘
+
+### Moon
+[moon.py](moon.py)
+
+Spooky moon simulator - the LEDs will get brighter as midnight approaches!
+Needs to be run from Thonny to get the correct time.
+
+### Rainbows
+[rainbows.py](rainbows.py)
+
+Some good old fashioned rainbows!
+
+### Thermometer
+[thermometer_pico.py](thermometer_pico.py)
+
+Reads the temperature from the Pico W's internal temperature sensor and changes the LED strip an appropriate colour.
+
+## Advanced Examples
+
+These examples require additional hardware.
+
+### CO2
+[co2.py](co2.py)
+
+Reads CO2 level from an [SCD41 CO2 breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) and turns the LED strip an appropriate colour.
+
+### Encoder
+[encoder.py](encoder.py)
+
+Change the colour of your LEDs easily with an [RGB Encoder breakout](https://shop.pimoroni.com/products/rgb-encoder-breakout?variant=32236590399571).
+
+### Moon (RTC)
+[moon_rtc.py](moon_rtc.py)
+
+Spooky moon simulator - the LEDs will get brighter as midnight approaches!
+Gets the time from a [RV3028 RTC breakout](https://shop.pimoroni.com/products/rv3028-real-time-clock-rtc-breakout)
+
+### PIR
+[pir.py](pir.py)
+
+Connect a PIR motion sensor and trigger some ominous effects. We like [these ones](https://shop.pimoroni.com/products/micro-pir-motion-sensor-2-pcs) - we connected ours to the QwST connector using [this cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609846355) and some [socket to socket](https://shop.pimoroni.com/products/jumper-jerky-junior?variant=1076482185) jumper jerky.
+
+### Thermometer (BME280)
+[thermometer_bme280.py](thermometer_bme280.py)
+
+Reads the temperature from a [BME280 breakout](https://shop.pimoroni.com/products/bme280-breakout) and changes the LED strip an appropriate colour.
+
+## Wireless Examples
+
+The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+
+- [micropython/examples/common](../../examples/common)
+
+### Cheerlights
+[cheerlights.py](cheerlights.py)
+
+Sets your LED strip to the current #cheerlights colour.
+Find out more about the Cheerlights API at https://cheerlights.com/
+
+### Weather
+[weather.py](weather.py)
+
+This Plasma Stick example connects to Open Meteo to access the current weather conditions.
+It then does some cool weather appropriate stuff with LEDs.
+Find out more about the Open Meteo API at https://open-meteo.com
+
