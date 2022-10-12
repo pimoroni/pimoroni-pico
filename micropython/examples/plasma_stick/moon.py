@@ -51,6 +51,6 @@ while True:
     # gets brighter as witching hour approacheth
     brightness = max(0, (COUNT_FROM - total_seconds) / COUNT_FROM)
     for i in range(NUM_LEDS):
-        led_strip.set_hsv(i, HUE/365.0, SATURATION, brightness)
+        led_strip.set_hsv(i, HUE / 360.0, SATURATION, brightness)
     print(f'Brightness - {brightness * 100} %')
     time.sleep(10.0)
