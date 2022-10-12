@@ -21,25 +21,25 @@
 
 ## About Plasma Stick
 
-Plasma Stick 2040 W is a compact little controller for WS2812 strip, powered by Raspberry Pi Pico W and perfect for easy, seasonal lighting. It has built in ✨wireless connectivity✨, courtesy of the Pico W. [store link coming soon]
+Plasma Stick 2040 W is a compact little controller for WS2812 strip, powered by Raspberry Pi Pico W and perfect for easy, seasonal lighting. It has built in ✨wireless connectivity✨, courtesy of the onboard Pico W. [store link coming soon]
 
-If you're after buttons, current sensing, APA102 support or USB-C, you might prefer Plasma 2040 - [[store link]](https://shop.pimoroni.com/products/plasma-2040)
+If you're after buttons, current sensing, APA102 support or USB-C, you might prefer [Plasma 2040](https://shop.pimoroni.com/products/plasma-2040)
 
-Plasma Stick ships without firmware, you'll need to download the latest `pimoroni-picow` build from the link below.
+Plasma Stick ships without firmware, so you'll need to download the latest `pimoroni-picow` build from the link below.
 
 - [MicroPython releases](https://github.com/pimoroni/pimoroni-pico/releases)
 
 ## Plasma
 
-We recommend using our MicroPython Plasma library for controlling your WS2812 / NeoPixel™ strip:
+You can control your WS2812 / NeoPixel™ strip using our MicroPython Plasma library.
 
 - [PicoGraphics MicroPython function reference](../../modules/plasma)
 
 ## Using Breakouts
 
-Plasma Stick has a Qw/ST (Qwiic/STEMMA QT) connector for plugging in I2C breakouts. Breakouts with QW/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can also connect any I2C Breakout Garden breakout using a JST-SH to JST-SH cable coupled with a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter?variant=39308432703571).
+Plasma Stick has a Qw/ST (Qwiic/STEMMA QT) connector. Breakouts with Qw/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can also connect any I2C Breakout Garden breakout using a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) coupled with a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
 
-- [Breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
+- [List of breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
 
 Plasma Stick uses GP4 and GP5 for its I2C interface. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
 
@@ -68,7 +68,7 @@ A simple example with two alternating colours, great for festive lights!
 ### Fire
 [fire.py](fire.py)
 
-A simple fire effect example. 🔥🤘
+A simple 🔥 fire effect example 🤘 (warning, flashy). 
 
 ### Moon
 [moon.py](moon.py)
@@ -93,18 +93,18 @@ These examples require additional hardware.
 ### CO2
 [co2.py](co2.py)
 
-Reads CO2 level from an [SCD41 CO2 breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) and turns the LED strip an appropriate colour.
+Reads CO2 level from a [SCD41 CO2 breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) and turns the LED strip an appropriate colour.
 
 ### Encoder
 [encoder.py](encoder.py)
 
-Change the colour of your LEDs easily with an [RGB Encoder breakout](https://shop.pimoroni.com/products/rgb-encoder-breakout?variant=32236590399571).
+Adjust the colour of your LEDs easily with an [RGB Encoder breakout](https://shop.pimoroni.com/products/rgb-encoder-breakout?variant=32236590399571).
 
 ### Moon (RTC)
 [moon_rtc.py](moon_rtc.py)
 
 Spooky moon simulator - the LEDs will get brighter as midnight approaches!
-Gets the time from a [RV3028 RTC breakout](https://shop.pimoroni.com/products/rv3028-real-time-clock-rtc-breakout)
+Gets the time from a [RV3028 RTC breakout](https://shop.pimoroni.com/products/rv3028-real-time-clock-rtc-breakout).
 
 ### PIR
 [pir.py](pir.py)
