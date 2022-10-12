@@ -34,7 +34,7 @@ namespace pimoroni {
     uint bl;
     uint reset_pin=21;
 
-    uint32_t spi_baud = 500000;
+    uint32_t spi_baud = 10000000; //10Mhz
 
     uint8_t offset_cols = 0;
     uint8_t offset_rows = 0;

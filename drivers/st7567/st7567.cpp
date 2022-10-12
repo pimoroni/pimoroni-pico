@@ -141,19 +141,14 @@ namespace pimoroni {
   void ST7567::update(PicoGraphics *graphics) {
     
     uint8_t *fb = (uint8_t *)graphics->frame_buffer;
-    uint8_t page_buffer[128];
+    uint8_t page_buffer[PAGESIZE];
     uint8_t page_byte_selector;
     uint8_t page_bit_selector;
-    // clear page buffer
-    for (int i=0 ; i < 128 ; i++){
-      page_buffer[i] = 0;
-    }
+  for (uint8_t page=0; page < 8 ; page++){ //select page
 
-    for (uint16_t pixel_index=0 ; pixel_index < (128 * 8) ; pixel_index++){
-      page_byte_selector = ((pixel_index % 128)) ;
+    for (uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8) ; pixel_index++){  //cycle through a page worth of bits from the fb
+      page_byte_selector = ((pixel_index % 128)); 
       page_bit_selector = (pixel_index / 128);
-
-     // printf ("fb byte %d fb bit %d  set to %d\n", page_byte_selector, page_bit_selector, *fb & (1 << (pixel_index % 8)));
      
 
       if (*fb & (0b10000000 >> (pixel_index % 8))){ // check selected pixel is present
@@ -162,58 +157,26 @@ namespace pimoroni {
       else{
         page_buffer[page_byte_selector] &=  ~( 1 << page_bit_selector);
       }
-
-    
-      if ((pixel_index % 8) >= 7 ){ //increment fb pointer at end of byte
-
-        
-        fb++;
-        
+   
+      if ((pixel_index % 8) >= 7 ){ //increment fb pointer at end of byte        
+        fb++;       
       }
-
     }
   
   
-    
-    
-
     if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
       command(reg::ENTER_RMWMODE);
-      for (uint8_t page=0; page < 8 ; page++){
+      
         command(reg::SETPAGESTART | page);
         command(reg::SETCOLL);
         command(reg::SETCOLH);
         gpio_put(dc, 1); // data mode
         gpio_put(cs, 0);
         spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
-        fb += (PAGESIZE);
         gpio_put(cs, 1);
         gpio_put(dc, 0); // Back to command mode
-        
-      }
-
     } 
-    
-    /*else {
-      command(reg::ENTER_RMWMODE);
-      gpio_put(dc, 1); // data mode
-      gpio_put(cs, 0);
-
-      graphics->frame_convert(PicoGraphics::PEN_1BIT, [this](void *data, size_t length) {
-        if (length > 0) {
-          for (uint8_t page=0; page < 8 ; page++){
-            
-            command(reg::SETPAGESTART | page);
-            command(reg::SETCOLL);
-            command(reg::SETCOLH);
-            gpio_put(dc, 1); // data mode
-            gpio_put(cs, 0);
-            spi_write_blocking(spi, fb, PAGESIZE / 8);
-            fb += PAGESIZE / 8;
-            gpio_put(cs, 1);
-        }
-      };
-*/
+    }
       gpio_put(cs, 1);
     
   }
