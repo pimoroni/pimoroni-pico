@@ -49,7 +49,7 @@ while True:
     temperature_array[n] = temperature
     n += 1
 
-    temperature_average = sum(temperature_array)/len(temperature_array)
+    temperature_average = sum(temperature_array) / len(temperature_array)
     print(f"""
     Average temperature: {temperature_average:.2f} °C
     """)
