@@ -551,8 +551,8 @@ namespace pimoroni {
   /*********************************
   0 = Switchover disabled
   1 = Direct Switching Mode
-  2 = Standby Mode
-  3 = Level Switching Mode
+  2 = Level Switching Mode
+  3 = Switchover disabled
   *********************************/
   bool RV3032::set_backup_switchover_mode(uint8_t val) {
     if(val > 3)
@@ -566,7 +566,7 @@ namespace pimoroni {
       success = false;
 
     // Ensure FEDE Bit is set to 1
-    eeprom_backup |= 1 << RV3032_EEPROMBackup_FEDE_BIT;
+    //eeprom_backup |= 1 << RV3032_EEPROMBackup_FEDE_BIT;
 
     // Set BSM Bits (Backup Switchover Mode)
     eeprom_backup &= RV3032_EEPROMBackup_BSM_CLEAR;         // Clear BSM Bits of EEPROM Backup Register

@@ -164,11 +164,11 @@ Distributed as-is; no warranty is given.
 // Bits in EEPROM Backup Register
 #define RV3032_EEPROMBackup_TCE_BIT     5           // Trickle Charge Enable Bit
 #define RV3032_EEPROMBackup_FEDE_BIT    4           // Fast Edge Detection Enable Bit (for Backup Switchover Mode)
-#define RV3032_EEPROMBackup_BSM_SHIFT   2           // Backup Switchover Mode shift
-#define RV3032_EEPROMBackup_TCR_SHIFT   0           // Trickle Charge Resistor shift
+#define RV3032_EEPROMBackup_BSM_SHIFT   4           // Backup Switchover Mode shift
+#define RV3032_EEPROMBackup_TCR_SHIFT   2           // Trickle Charge Resistor shift
 
-#define RV3032_EEPROMBackup_BSM_CLEAR   0b11110011  // Backup Switchover Mode clear
-#define RV3032_EEPROMBackup_TCR_CLEAR   0b11111100  // Trickle Charge Resistor clear
+#define RV3032_EEPROMBackup_BSM_CLEAR   0b11001111  // Backup Switchover Mode clear
+#define RV3032_EEPROMBackup_TCR_CLEAR   0b11110011  // Trickle Charge Resistor clear
 #define RV3032_TCR_3K                   0b00        // Trickle Charge Resistor 3kOhm
 #define RV3032_TCR_5K                   0b01        // Trickle Charge Resistor 5kOhm
 #define RV3032_TCR_9K                   0b10        // Trickle Charge Resistor 9kOhm
