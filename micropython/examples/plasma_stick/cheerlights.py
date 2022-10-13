@@ -6,10 +6,10 @@ import time
 import plasma
 from plasma import plasma2040
 
-"""
+'''
 This Plasma Stick example sets your LED strip to the current #cheerlights colour.
 Find out more about the Cheerlights API at https://cheerlights.com/
-"""
+'''
 
 URL = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
 UPDATE_INTERVAL = 120  # refresh interval in secs. Be nice to free APIs!
@@ -30,15 +30,15 @@ def status_handler(mode, status, ip):
         led_strip.set_rgb(i, 0, 0, 0)
     if status is not None:
         if status:
-            print('Connection successful!')
+            print('Wifi connection successful!')
         else:
-            print('Connection failed!')
+            print('Wifi connection failed!')
             # if no wifi connection, you get spooky rainbows. Bwahahaha!
             spooky_rainbows()
 
 
 def spooky_rainbows():
-    print("SPOOKY RAINBOWS!")
+    print('SPOOKY RAINBOWS!')
     HUE_START = 30  # orange
     HUE_END = 140  # green
     SPEED = 0.3  # bigger = faster (harder, stronger)
@@ -77,20 +77,25 @@ led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
 led_strip.start()
 
 # set up wifi
-network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+try:
+    network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
+    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+except Exception as e:
+    print(f'Wifi connection failed! {e}')
+    # if no wifi, then you get...
+    spooky_rainbows()
 
 while True:
     # open the json file
-    print(f"Requesting URL: {URL}")
+    print(f'Requesting URL: {URL}')
     r = urequests.get(URL)
     # open the json data
     j = r.json()
-    print("Data obtained!")
+    print('Data obtained!')
     r.close()
 
     # extract hex colour from the data
-    hex = j["field2"]
+    hex = j['field2']
 
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)
@@ -98,9 +103,8 @@ while True:
     # light up the LEDs
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, r, g, b)
-    print(f"LEDs set to {hex}")
+    print(f'LEDs set to {hex}')
 
     # sleep
-    print(f"""Sleeping for {UPDATE_INTERVAL} seconds.
-        """)
+    print(f'Sleeping for {UPDATE_INTERVAL} seconds.')
     time.sleep(UPDATE_INTERVAL)
