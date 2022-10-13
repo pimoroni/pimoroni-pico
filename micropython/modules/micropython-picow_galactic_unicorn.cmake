@@ -45,19 +45,7 @@ include(pcf85063a/micropython)
 include(adcfft/micropython)
 
 # LEDs & Matrices
-include(plasma/micropython)
-include(hub75/micropython)
-
-# Packs
-include(pico_unicorn/micropython)
-include(pico_scroll/micropython)
-include(pico_rgb_keypad/micropython)
-
-# Servos & Motors
-include(pwm/micropython)
-include(servo/micropython)
-include(encoder/micropython)
-include(motor/micropython)
+include(galactic_unicorn/micropython)
 
 # include(micropython-common)
 
