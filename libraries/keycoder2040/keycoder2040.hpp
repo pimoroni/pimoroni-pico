@@ -1,9 +1,10 @@
 #pragma once
 #include "pico/stdlib.h"
-
-#include "encoder.hpp"
+#include "keycoder.pio.h"
+#include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
+
   namespace keycoder2040 {
 
 
@@ -29,17 +30,48 @@ namespace pimoroni {
     const pin_pair ENCODER_ROW4(ENCODER_ROW4_B, ENCODER_ROW4_A);
     
     // The counts per revolution of the motor's output shaft
-    constexpr float COUNTS_PER_REV = 24;
+    constexpr float COUNTS_PER_REV = 96;
 
     // The direction to spin the motor in. NORMAL_DIR (0), REVERSED_DIR (1)
     const Direction DIRECTION = NORMAL_DIR;
 
-    Encoder enc0 = Encoder(pio0, 0, ENCODER_ROW1, ENCODER_COL1, DIRECTION, COUNTS_PER_REV, true);
-    Encoder enc1 = Encoder(pio0, 1, ENCODER_ROW1, ENCODER_COL1, DIRECTION, COUNTS_PER_REV, true);
-    
-    const uint NUM_ENCODERS = 12;
 
     const uint USER_SW = 23;
+
+    class interface {
+      
+      private:
+        static const uint32_t COL_1_MASK = 0xFF000000;
+        static const uint32_t COL_2_MASK = 0x00FF0000;
+        static const uint32_t COL_3_MASK = 0x0000FF00;
+        static const uint32_t COL_4_MASK = 0x000000FF;
+        static const uint8_t  COL_1_LSHFT = 24;
+        static const uint8_t  COL_2_LSHFT = 16;
+        static const uint8_t  COL_3_LSHFT = 8;
+        static const uint8_t  COL_4_LSHFT = 0;
+
+        enum StepDir {
+          NO_DIR    = 0,
+          INCREASING = 1,
+          DECREASING = -1,
+        };
+
+        enum MicroStep : uint8_t {
+          MICROSTEP_0 = 0b00,
+          MICROSTEP_1 = 0b10,
+          MICROSTEP_2 = 0b11,
+          MICROSTEP_3 = 0b01,
+        };
+
+
+      
+      public:
+        uint32_t last_state = 0x00;
+        uint32_t new_state = 0x00;
+
+
+
+    }
 
 
   }

@@ -1,0 +1,57 @@
+.define IO_SET_CYCLES 31
+.define DEBOUNCE_DELAY_CYCLES 31
+.define DELAY_LABEL del3 
+
+.program keycoder
+
+.side_set 4 opt ; need to use 4 delay bits for the side set control
+
+.wrap_target
+loop:
+; read all 8 input pins into ISR
+; #1 Sets column IO high 
+; #2 delays for IO to settle for IO_SET_CYCLES  
+; #3 Shifts encoder lines into ISR
+; #4 repeats for all 4 columns 
+; #5 copies ISR contents to X reg 
+
+    set y, IO_SET_CYCLES     side 1 ;set column 1 high
+col1_loop:    
+    jmp y-- col1_loop
+    in pins 8
+
+    set y, IO_SET_CYCLES     side 2 ;set column 2 high
+col2_loop:    
+    jmp y-- col2_loop
+    in pins 8               
+
+    set y, IO_SET_CYCLES     side 4 ;set column 2 high
+col3_loop:    
+    jmp y-- col3_loop
+    in pins 8 
+
+    set y, IO_SET_CYCLES     side 8 ;set column 2 high
+col4_loop:    
+    jmp y-- col4_loop
+    in pins 8 
+
+    mov x, isr ; Copy all the ISR into X 
+    mov y, osr ; Copy the last state out of the OSR
+
+    jmp x!=y state_changed ; Compares x to y to see if encoder state has changed
+
+.wrap
+
+state_changed:
+    push noblock    ; this also clears isr
+    mov osr, x
+    set y , DEBOUNCE_DELAY_CYCLES
+del3:
+    nop
+del2:
+    nop
+del1:
+    nop
+    jmp y-- DELAY_LABEL
+    jmp loop
+    

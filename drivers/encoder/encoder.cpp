@@ -4,7 +4,7 @@
 #include "hardware/irq.h"
 #include "hardware/clocks.h"
 #include "encoder.hpp"
-#include "encoder.pio.h"
+#include "encoder.pio.h"-
 
 #define LAST_STATE(state)  ((state) & 0b0011)
 #define CURR_STATE(state)  (((state) & 0b1100) >> 2)
