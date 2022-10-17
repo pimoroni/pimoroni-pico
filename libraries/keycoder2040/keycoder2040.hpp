@@ -5,8 +5,10 @@
 
 namespace pimoroni {
 
-  namespace keycoder2040 {
+  class keycoder2040 {
 
+    static constexpr float ROTARY_CPR = 24.0f;
+    // Constants
 
     const uint ENCODER_ROW1_A = 8;
     const uint ENCODER_ROW1_B = 9;
@@ -22,15 +24,15 @@ namespace pimoroni {
     const uint ENCODER_COL3 = 18;
     const uint ENCODER_COL4 = 19;
 
+    static constexpr float DEFAULT_COUNTS_PER_REV   = ROTARY_CPR;
+    static const bool DEFAULT_COUNT_MICROSTEPS      = false;
+    static const uint16_t DEFAULT_FREQ_DIVIDER      = 1;
+
     
 
-    const pin_pair ENCODER_ROW1(ENCODER_ROW1_B, ENCODER_ROW1_A);
-    const pin_pair ENCODER_ROW2(ENCODER_ROW2_B, ENCODER_ROW2_A);
-    const pin_pair ENCODER_ROW3(ENCODER_ROW3_B, ENCODER_ROW3_A);
-    const pin_pair ENCODER_ROW4(ENCODER_ROW4_B, ENCODER_ROW4_A);
     
     // The counts per revolution of the motor's output shaft
-    constexpr float COUNTS_PER_REV = 96;
+    static const float COUNTS_PER_REV = 96.0;
 
     // The direction to spin the motor in. NORMAL_DIR (0), REVERSED_DIR (1)
     const Direction DIRECTION = NORMAL_DIR;
@@ -38,7 +40,7 @@ namespace pimoroni {
 
     const uint USER_SW = 23;
 
-    class interface {
+    
       
       private:
         static const uint32_t COL_1_MASK = 0xFF000000;
@@ -63,16 +65,35 @@ namespace pimoroni {
           MICROSTEP_3 = 0b01,
         };
 
+      private:
+        PIO pio;
+        uint sm;
+        Direction enc_direction;
+        float enc_counts_per_rev;
+
+        const bool count_microsteps;
+        const uint16_t freq_divider;
+        const float clocks_per_time;
+
+
 
       
       public:
         uint32_t last_state = 0x00;
         uint32_t new_state = 0x00;
 
+      public:
+        void Interface(PIO pio, uint sm,  Direction direction = NORMAL_DIR,
+            float counts_per_rev = DEFAULT_COUNTS_PER_REV, bool count_microsteps = DEFAULT_COUNT_MICROSTEPS,
+            uint16_t freq_divider = DEFAULT_FREQ_DIVIDER);
+        
+
+        void process_steps();
 
 
-    }
+
+    
 
 
-  }
+  };
 }

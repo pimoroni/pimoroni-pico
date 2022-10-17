@@ -14,11 +14,17 @@ namespace pimoroni{
 
     namespace keycoder2040{
 
-        namespace interface{
+        
 
-            void Interface::init(){
+            keycoder2040::Interface(PIO pio, uint sm, Direction direction, float counts_per_rev, bool count_microsteps, uint16_t freq_divider)
+                : pio(pio)
+                , sm(sm)
+                , enc_direction(direction)
+                , enc_counts_per_rev(MAX(counts_per_rev, FLT_EPSILON))
+                , count_microsteps(count_microsteps)
+                , freq_divider(freq_divider) {}
 
-                uint pio_idx = pio_get_index(pio); //
+            bool Interface::init(){
 
                 pio_sm_claim(pio, sm);
                 uint pio_idx = pio_get_index(pio);
@@ -69,26 +75,44 @@ namespace pimoroni{
                 // Set sm running
                 pio_sm_set_enabled(pio, sm, true);
 
+                return true;
+
             }
 
-            void interface::pio_interrupt_handler(uint pio_idx) {
+            void Interface::pio_interrupt_handler(uint pio_idx) {
                 // Go through each SM on the PIO to see which triggered this interrupt,
                 // and if there's an associated encoder, have it update its state
-                for(uint8_t sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
-                    if(encoders[pio_idx][sm] != nullptr) {
-                    encoders[pio_idx][sm]->process_steps();
-                    }
+                process_steps();
                 }
-                }
+                
 
-                void Encoder::pio0_interrupt_handler() {
-                pio_interrupt_handler(0);
-                }
+            void Interface::pio0_interrupt_handler() {
+            pio_interrupt_handler(0);
+            }
 
-                void Encoder::pio1_interrupt_handler() {
-                pio_interrupt_handler(1);
-                }
-                        }
+            void Interface::pio1_interrupt_handler() {
+            pio_interrupt_handler(1);
+            }
+
+            void Interface::process_steps(){
+
+                new_state = pio_sm_get_blocking(pio, sm);
+
+                // TODO check which encoder moved and update steps
+
+                last_state = new_state;
+
+
+            }
+
+            uint32_t Interface::get_last_state(){
+                return last_state;
+            }
+
+        
+        }
+
+                    
 
 
 
