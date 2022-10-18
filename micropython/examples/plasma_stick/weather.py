@@ -100,7 +100,7 @@ def get_data():
 Conditions = {WEATHERCODES[weathercode]}
 Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
-    
+
     # flash the onboard LED after getting data
     pico_led.value(True)
     time.sleep(0.2)
@@ -257,4 +257,3 @@ while True:
 
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip
-
