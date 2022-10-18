@@ -7,7 +7,7 @@ import plasma
 from plasma import plasma_stick
 # Random functions! randrange is for picking integers from a range, and uniform is for floats.
 from random import randrange, uniform
-from machine import Timer
+from machine import Timer, Pin
 import gc
 
 """
@@ -15,7 +15,7 @@ Weather in a bottle!
 This Plasma Stick example connects to Open Meteo to access the current weather conditions.
 It then does some cool weather appropriate stuff with LEDs.
 Find out more about the Open Meteo API at https://open-meteo.com
-Based on original code by AxWax <3 https://github.com/axwax/Open-Meteo-Inky-Pack
+Based on original code by AxWax: https://github.com/axwax/Open-Meteo-Inky-Pack
 """
 
 # Set how many LEDs you have
@@ -102,6 +102,11 @@ def get_data():
 Conditions = {WEATHERCODES[weathercode]}
 Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
+
+    # flash the onboard LED after getting data
+    pico_led.value(True)
+    time.sleep(0.2)
+    pico_led.value(False)
 
 
 # the rest of our functions are for animations!
@@ -216,6 +221,9 @@ ANIMATION_SPEED = 1  # higher number gets from current to target colour faster
 current_leds = [[0] * 3 for i in range(NUM_LEDS)]
 # Create an list of [r, g, b] values that will hold target LED colours, to move towards
 target_leds = [[0] * 3 for i in range(NUM_LEDS)]
+
+# set up the Pico W's onboard LED
+pico_led = Pin('LED', Pin.OUT)
 
 # set up the WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)

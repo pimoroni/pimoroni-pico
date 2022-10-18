@@ -5,6 +5,7 @@ import urequests
 import time
 import plasma
 from plasma import plasma_stick
+from machine import Pin
 
 '''
 This Plasma Stick example sets your LED strip to the current #cheerlights colour.
@@ -70,6 +71,9 @@ def hex_to_rgb(hex):
     return r, g, b
 
 
+# set up the Pico W's onboard LED
+pico_led = Pin('LED', Pin.OUT)
+
 # set up the WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
@@ -93,6 +97,11 @@ while True:
     j = r.json()
     print('Data obtained!')
     r.close()
+
+    # flash the onboard LED after getting data
+    pico_led.value(True)
+    time.sleep(0.2)
+    pico_led.value(False)
 
     # extract hex colour from the data
     hex = j['field2']
