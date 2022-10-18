@@ -1,7 +1,7 @@
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder import BreakoutEncoder
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 
 """
 Change the colour of your LEDs easily by hooking up an RGB Encoder Breakout!
@@ -13,9 +13,7 @@ NUM_LEDS = 50
 # make this number bigger for more precise colour adjustments
 STEPS_PER_REV = 24
 
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(plasma_stick.SDA, plasma_stick.SCL)
 enc = BreakoutEncoder(i2c)
 
 enc.set_brightness(1.0)
@@ -58,7 +56,7 @@ def count_changed(count):
 
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # Start updating the LED strip
 led_strip.start()

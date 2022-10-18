@@ -4,7 +4,7 @@ import uasyncio
 import urequests
 import time
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 # Random functions! randrange is for picking integers from a range, and uniform is for floats.
 from random import randrange, uniform
 from machine import Timer
@@ -218,7 +218,7 @@ current_leds = [[0] * 3 for i in range(NUM_LEDS)]
 target_leds = [[0] * 3 for i in range(NUM_LEDS)]
 
 # set up the WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # start updating the LED strip
 led_strip.start()

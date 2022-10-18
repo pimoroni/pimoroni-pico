@@ -1,5 +1,5 @@
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 import breakout_scd41 as scd
 from pimoroni_i2c import PimoroniI2C
 
@@ -25,14 +25,13 @@ HUE_START = 100  # green
 HUE_END = 0  # red
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # Start updating the LED strip
 led_strip.start()
 
 # set up I2C
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(plasma_stick.SDA, plasma_stick.SCL)
 
 # set up SCD41 breakout
 scd.init(i2c)

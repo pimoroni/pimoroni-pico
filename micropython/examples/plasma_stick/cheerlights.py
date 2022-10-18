@@ -4,7 +4,7 @@ import uasyncio
 import urequests
 import time
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 
 '''
 This Plasma Stick example sets your LED strip to the current #cheerlights colour.
@@ -71,7 +71,7 @@ def hex_to_rgb(hex):
 
 
 # set up the WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # start updating the LED strip
 led_strip.start()

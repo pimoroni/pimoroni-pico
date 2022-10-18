@@ -1,5 +1,5 @@
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 import machine
 import time
 
@@ -23,7 +23,7 @@ HUE_START = 230  # blue
 HUE_END = 359  # red
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # Start updating the LED strip
 led_strip.start()

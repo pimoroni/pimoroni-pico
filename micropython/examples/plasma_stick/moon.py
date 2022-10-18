@@ -1,6 +1,6 @@
 import time
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 from machine import RTC
 
 """
@@ -23,7 +23,7 @@ SATURATION = 0.2  # increase this for a more colourful moon (max 1.0)
 COUNT_FROM = 14400
 
 # set up the WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # start updating the LED strip
 led_strip.start()

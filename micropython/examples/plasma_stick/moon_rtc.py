@@ -1,6 +1,6 @@
 import time
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 from machine import RTC
 
 """
@@ -33,8 +33,7 @@ def set_pico_time():
     from machine import RTC
 
     # set up I2C
-    PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}  # i2c pins 4, 5 for Breakout Garden
-    i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+    i2c = PimoroniI2C(plasma_stick.SDA, plasma_stick.SCL)
 
     # set up the RTC breakout
     RV3028 = BreakoutRTC(i2c)
@@ -48,7 +47,7 @@ def set_pico_time():
 
 
 # set up the WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # start updating the LED strip
 led_strip.start()

@@ -1,5 +1,5 @@
 import plasma
-from plasma import plasma2040
+from plasma import plasma_stick
 from machine import Pin
 import time
 from random import random, uniform, choice
@@ -70,11 +70,11 @@ def all_on():
 
 # set up the hardware
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma2040.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
 
 # the pin the signal line of our PIR sensor is connected to
-# if you're using one of our qw/st > DuPont cables the blue wire is GP4 and the yellow wire is GP5
-pir = Pin(5, Pin.IN, Pin.PULL_UP)
+# if you're using one of our qw/st > DuPont cables the blue wire is SDA (GP4) and the yellow wire is SCL (GP5)
+pir = Pin(plasma_stick.SCL, Pin.IN, Pin.PULL_UP)
 
 # Start updating the LED strip
 led_strip.start()
