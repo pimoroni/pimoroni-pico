@@ -8,14 +8,13 @@ from plasma import plasma_stick
 # Random functions! randrange is for picking integers from a range, and uniform is for floats.
 from random import randrange, uniform
 from machine import Timer, Pin
-import gc
 
 """
 Weather in a bottle!
 This Plasma Stick example connects to Open Meteo to access the current weather conditions.
 It then does some cool weather appropriate stuff with LEDs.
 Find out more about the Open Meteo API at https://open-meteo.com
-Based on original code by AxWax: https://github.com/axwax/Open-Meteo-Inky-Pack
+Based on original code by AxWax <3 https://github.com/axwax/Open-Meteo-Inky-Pack
 """
 
 # Set how many LEDs you have
@@ -90,7 +89,6 @@ def get_data():
     j = r.json()
     print("Data obtained!")
     r.close()
-    gc.collect()  # protecc the RAM
 
     # parse relevant data from JSON
     current = j["current_weather"]
@@ -102,7 +100,7 @@ def get_data():
 Conditions = {WEATHERCODES[weathercode]}
 Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
-
+    
     # flash the onboard LED after getting data
     pico_led.value(True)
     time.sleep(0.2)
@@ -260,4 +258,3 @@ while True:
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip
 
-    gc.collect()  # try and conserve RAM
