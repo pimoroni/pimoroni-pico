@@ -25,7 +25,7 @@ HUE_START = 230  # blue
 HUE_END = 359  # red
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
 
 # Start updating the LED strip
 led_strip.start()

@@ -20,7 +20,7 @@ BRIGHTNESS = 0.5
 SPEED = 1
 
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
 
 # Start updating the LED strip
 led_strip.start()

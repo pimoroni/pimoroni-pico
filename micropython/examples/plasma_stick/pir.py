@@ -70,7 +70,7 @@ def all_on():
 
 # set up the hardware
 # WS2812 / NeoPixel™ LEDs
-led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT)
+led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
 
 # the pin the signal line of our PIR sensor is connected to
 # if you're using one of our qw/st > DuPont cables the blue wire is SDA (GP4) and the yellow wire is SCL (GP5)
