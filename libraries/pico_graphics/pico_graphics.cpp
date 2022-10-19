@@ -276,8 +276,6 @@ namespace pimoroni {
   void PicoGraphics::line(Point p1, Point p2) {
     // fast horizontal line
     if(p1.y == p2.y) {
-      p1 = p1.clamp(clip);
-      p2 = p2.clamp(clip);
       int32_t start = std::min(p1.x, p2.x);
       int32_t end   = std::max(p1.x, p2.x);
       pixel_span(Point(start, p1.y), end - start);
@@ -286,13 +284,11 @@ namespace pimoroni {
 
     // fast vertical line
     if(p1.x == p2.x) {
-      p1 = p1.clamp(clip);
-      p2 = p2.clamp(clip);
       int32_t start  = std::min(p1.y, p2.y);
       int32_t length = std::max(p1.y, p2.y) - start;
       Point dest(p1.x, start);
       while(length--) {
-        set_pixel(dest);
+        pixel(dest);
         dest.y++;
       }
       return;
@@ -314,7 +310,7 @@ namespace pimoroni {
       int32_t y = p1.y << 16;
       while(s--) {
         Point p(x, y >> 16);
-        if(clip.contains(p)) set_pixel(p);
+        pixel(p);
         y += sy;
         x += sx;
       }
@@ -327,7 +323,7 @@ namespace pimoroni {
       int32_t x = p1.x << 16;
       while(s--) {
         Point p(x >> 16, y);
-        if(clip.contains(p)) set_pixel(p);
+        pixel(p);
         y += sy;
         x += sx;
       }
