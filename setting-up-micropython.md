@@ -1,8 +1,15 @@
-# Installing MicroPython
+# Installing MicroPython  <!-- omit in toc -->
+
+- [Which file to download?](#which-file-to-download)
+- [Entering DFU/bootloader mode](#entering-dfubootloader-mode)
+  - [If you have a board with a reset button:](#if-you-have-a-board-with-a-reset-button)
+  - [If you have a board without a reset button:](#if-you-have-a-board-without-a-reset-button)
+- [Copying the firmware to your board](#copying-the-firmware-to-your-board)
+- [Where are the examples?](#where-are-the-examples)
 
 We provide pre-built MicroPython images which include all the drivers that include all the libraries and drivers you'll need to use our [supported products](https://github.com/pimoroni/pimoroni-pico#supported-products) To install MicroPython, you'll need to **copy the appropriate .uf2 file from the releases page to your device while it's in DFU/bootloader mode.**
 
-## Which file do I need to download?
+## Which file to download?
 
 On the releases page you'll find a bunch of different .uf2 files for use on different RP2040 boards (if you can't see them, click on the arrow next to 'assets' to expand the list).
 
@@ -31,7 +38,7 @@ Lucky you! With your board plugged into your computer, just **hold down the BOOT
 
 Here's what the 'RPI-RP2' drive looks like in Windows:
 
-![](dfu_mode.png)
+![Screenshot showing the RPI-RP2 drive](dfu_mode.png)
 
 ## Copying the firmware to your board
 
