@@ -42,7 +42,7 @@ Here's what the 'RPI-RP2' drive looks like in Windows:
 
 ## Copying the firmware to your board
 
-**Copy the downloaded firmware image across to the 'RPI-RP2' drive**. Once it has finished uploading (which takes a few seconds) the Pico will restart itself.
+**Copy the downloaded firmware image across to the 'RPI-RP2' drive**. Once it has finished uploading (which takes a few seconds) the board will restart itself.
 
 ⚠ Note that once your board restarts running MicroPython it will no longer show up as a drive. To program it and to transfer files to and from it you'll need to use an interpreter, such as Thonny or Mu.
 
