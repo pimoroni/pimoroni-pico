@@ -1,6 +1,8 @@
 # Plasma <!-- omit in toc -->
 
-The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel™ LEDs on the Plasma 2040 board, though it can be used with your own custom pins/wiring.
+The Plasma library is intended to drive APA102 / DotStar™ or WS2812 / NeoPixel™ LEDs on our [Plasma 2040](https://shop.pimoroni.com/products/plasma-2040) board, though it can also be used with your own custom pins/wiring.
+
+It can also be used to drive WS2812 / NeoPixel™ LEDs from [Plasma Stick](https://shop.pimoroni.com/products/plasma-stick-2040-w). Note that APA102 compatibility, user buttons, RGB LED and current sensing functions are not present on Plasma Stick.
 
 - [Notes On PIO Limitations](#notes-on-pio-limitations)
 - [WS2812](#ws2812)
@@ -33,6 +35,8 @@ In most cases you'll use `0` for PIO and `0` for PIO state-machine, but you shou
 
 Construct a new `WS2812` instance, specifying the number of LEDs, PIO, PIO state-machine and GPIO pin.
 
+For Plasma 2040:
+
 ```python
 import plasma
 from plasma import plasma2040
@@ -41,6 +45,18 @@ LEDS = 30
 FPS = 60
 
 led_strip = plasma.WS2812(LEDS, 0, 0, plasma2040.DAT)
+```
+
+For Plasma Stick:
+
+```python
+import plasma
+from plasma import plasma_stick
+
+LEDS = 30
+FPS = 60
+
+led_strip = plasma.WS2812(LEDS, 0, 0, plasma_stick.DAT)
 ```
 
 Start the LED strip by calling `start`. This sets up a timer which tells the RP2040 to DMA the pixel data into the PIO (a fast, asyncronous memory->peripheral copy) at the specified framerate.
@@ -54,12 +70,6 @@ led_strip.start(FPS)
 Some WS2812-style LED strips have varying colour orders and support an additional white element. Two keyword arguments are supplied to configure this:
 
 ```python
-import plasma
-from plasma import plasma2040
-
-LEDS = 30
-FPS = 60
-
 led_strip = plasma.WS2812(LEDS, 0, 0, plasma2040.DAT, rgbw=True, color_order=plasma.COLOR_ORDER_GRB)
 ```
 
@@ -212,7 +222,7 @@ led.set_rgb(0, 0, 255)  # Full blue
 
 ## Measuring LED Strip Current Draw
 
-Plasma 2040 feasures low-side current sensing, letting you measure how much current a strip of LEDs is drawing. This could be used just for monitoring, or as a way to reduce the maximum brightness of a strip to keep its current draw within the range of the USB port or power supply being used.
+Plasma 2040 features low-side current sensing, letting you measure how much current a strip of LEDs is drawing. This could be used just for monitoring, or as a way to reduce the maximum brightness of a strip to keep its current draw within the range of the USB port or power supply being used.
 
 The `pimoroni` module contains an `Analog` class to simplify the reading of this current draw.
 
