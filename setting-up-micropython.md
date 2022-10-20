@@ -30,6 +30,8 @@ On the releases page you'll find a bunch of different .uf2 files for use on diff
 
 Lucky you! With your board plugged into your computer, just **hold down the BOOTSEL button and tap RESET**. A  new drive should pop up on your computer called 'RPI_RP2'. 
 
+If your board has a power on/off button instead of a reset button, you'll need to hold down BOOTSEL and press the power button twice to cut the power, and then turn it on again.
+
 ### If you have a board without a reset button:
 
 - **Disconnect the USB cable from your board.**
