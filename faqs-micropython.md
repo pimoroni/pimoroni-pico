@@ -57,7 +57,7 @@ This error can also happen if you're trying to run code with Thonny's built in P
 
 ### 'MicroPython - Raspberry Pi Pico' doesn't show up as an interpreter option
 
-Check you're running a recent version of Thonny - very old versions won't know what a Pico is. If you're using a Linux computer, bear in mind that some package managers don't install the most recent versions, best to download it from the (Thonny website)[https://thonny.org/].
+Check you're running a recent version of Thonny - very old versions won't know what a Pico is. If you're using a Linux computer, bear in mind that some package managers don't install the most recent versions, best to download it from the [Thonny website](https://thonny.org/).
 
 ### Couldn't find the device automatically?
 
