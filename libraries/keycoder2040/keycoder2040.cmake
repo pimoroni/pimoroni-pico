@@ -15,7 +15,7 @@ target_link_libraries(keycoder2040 INTERFACE
                         pico_stdlib 
                         hardware_i2c
                         hardware_pio
-                        pimoroni_common
+                        pimoroni_i2c
 
                         )
 

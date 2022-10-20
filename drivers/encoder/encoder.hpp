@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cfloat>
 #include "hardware/pio.h"
 #include "common/pimoroni_common.hpp"
 

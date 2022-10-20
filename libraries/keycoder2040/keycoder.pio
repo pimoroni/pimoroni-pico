@@ -1,12 +1,12 @@
-.define IO_SET_CYCLES 31
+.define IO_SET_CYCLES 25
 .define DEBOUNCE_DELAY_CYCLES 31
 .define DELAY_LABEL del3 
 
 .program keycoder
 
-.side_set 4 opt ; need to use 4 delay bits for the side set control
-
+;.side_set 4  ; need to use 4 delay bits for the side set control
 .wrap_target
+    set pindirs, 0b01111 ; change setpins direction to output
 loop:
 ; read all 8 input pins into ISR
 ; #1 Sets column IO high 
@@ -15,43 +15,48 @@ loop:
 ; #4 repeats for all 4 columns 
 ; #5 copies ISR contents to X reg 
 
-    set y, IO_SET_CYCLES     side 1 ;set column 1 high
-col1_loop:    
-    jmp y-- col1_loop
-    in pins 8
+    set y, IO_SET_CYCLES
+    set pins 0b0001     ;set column 1 high
+col1_loop:                   
+    jmp y-- col1_loop      ; side 0b0001
+    in pins 8               ;side 0b0001
 
-    set y, IO_SET_CYCLES     side 2 ;set column 2 high
+    set y, IO_SET_CYCLES    ;side 0b0010 ;set column 2 high
+    set pins 0b0010     ;set column 1 high
 col2_loop:    
-    jmp y-- col2_loop
-    in pins 8               
+    jmp y-- col2_loop       ;side 0b0010
+    in pins 8               ;side 0b0010
 
-    set y, IO_SET_CYCLES     side 4 ;set column 2 high
+    set pins 0b0100     ;set column 1 high
+    set y, IO_SET_CYCLES    ;side 0b0100 ;set column 2 high
+    
 col3_loop:    
-    jmp y-- col3_loop
-    in pins 8 
+    jmp y-- col3_loop       ;side 0b0100
+    in pins 8               ;side 0b0100
 
-    set y, IO_SET_CYCLES     side 8 ;set column 2 high
+    set pins 0b1000     ;set column 1 high
+    set y, IO_SET_CYCLES    ;side 0b1000 ;set column 2 high
 col4_loop:    
-    jmp y-- col4_loop
-    in pins 8 
+    jmp y-- col4_loop       ;side 0b1000
+    in pins 8               ;side 0b1000
 
-    mov x, isr ; Copy all the ISR into X 
-    mov y, osr ; Copy the last state out of the OSR
-
-    jmp x!=y state_changed ; Compares x to y to see if encoder state has changed
+    mov x, isr              ;side 0b0000 ; Copy all the ISR into X 
+    mov y, osr              ;side 0b0000 ; Copy the last state out of the OSR
+    ;push noblock 
+    jmp x!=y state_changed  ;side 0b0000 ; Compares x to y to see if encoder state has changed
 
 .wrap
 
 state_changed:
-    push noblock    ; this also clears isr
-    mov osr, x
-    set y , DEBOUNCE_DELAY_CYCLES
+    push noblock            ;side 0b0000    ; this also clears isr
+    mov osr, x              ;side 0b0000
+    set y , DEBOUNCE_DELAY_CYCLES ;side 0b0000
 del3:
-    nop
+    nop                     ;side 0b0000
 del2:
-    nop
+    nop                     ;side 0b0000
 del1:
-    nop
-    jmp y-- DELAY_LABEL
-    jmp loop
+    nop                     ;side 0b0000
+    jmp y-- DELAY_LABEL     ;side 0b0000
+    jmp loop                ;side 0b0000
     
