@@ -16,6 +16,6 @@ target_link_libraries(keycoder2040 INTERFACE
                         hardware_i2c
                         hardware_pio
                         pimoroni_i2c
-
+                        is31fl3731
                         )
 

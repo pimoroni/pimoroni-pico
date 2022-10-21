@@ -1,10 +1,12 @@
-.define IO_SET_CYCLES 25
-.define DEBOUNCE_DELAY_CYCLES 31
-.define DELAY_LABEL del3 
+; Debounce Constants
+; --------------------------------------------------
+.define SET_CYCLES                  2
+.define ITERATIONS                  2
+.define JMP_CYCLES                  2
+.define public ENC_DEBOUNCE_CYCLES  (SET_CYCLES + (JMP_CYCLES * ITERATIONS))
 
 .program keycoder
 
-;.side_set 4  ; need to use 4 delay bits for the side set control
 .wrap_target
     set pindirs, 0b01111 ; change setpins direction to output
 loop:
@@ -14,49 +16,40 @@ loop:
 ; #3 Shifts encoder lines into ISR
 ; #4 repeats for all 4 columns 
 ; #5 copies ISR contents to X reg 
-
-    set y, IO_SET_CYCLES
-    set pins 0b0001     ;set column 1 high
+ 
+    set pins 0b1000         ;set column 1 high only
+    set y,  (ITERATIONS - 1) [SET_CYCLES - 1]
 col1_loop:                   
-    jmp y-- col1_loop      ; side 0b0001
-    in pins 8               ;side 0b0001
-
-    set y, IO_SET_CYCLES    ;side 0b0010 ;set column 2 high
-    set pins 0b0010     ;set column 1 high
-col2_loop:    
-    jmp y-- col2_loop       ;side 0b0010
-    in pins 8               ;side 0b0010
-
-    set pins 0b0100     ;set column 1 high
-    set y, IO_SET_CYCLES    ;side 0b0100 ;set column 2 high
+    jmp y-- col1_loop       [JMP_CYCLES - 1]
+    in pins 8              
     
+    set pins 0b0100         ;set column 2 high only
+    set y,  (ITERATIONS - 1) [SET_CYCLES - 1]     
+col2_loop:    
+    jmp y-- col2_loop       [JMP_CYCLES - 1]
+    in pins 8              
+
+    set pins 0b0010         ;set column 3 high only
+    set y,  (ITERATIONS - 1) [SET_CYCLES - 1]
 col3_loop:    
-    jmp y-- col3_loop       ;side 0b0100
-    in pins 8               ;side 0b0100
+    jmp y-- col3_loop     [JMP_CYCLES - 1]
+    in pins 8            
 
-    set pins 0b1000     ;set column 1 high
-    set y, IO_SET_CYCLES    ;side 0b1000 ;set column 2 high
+    set pins 0b0001         ;set column 4 high only
+    set y,  (ITERATIONS - 1) [SET_CYCLES - 1]
 col4_loop:    
-    jmp y-- col4_loop       ;side 0b1000
-    in pins 8               ;side 0b1000
-
-    mov x, isr              ;side 0b0000 ; Copy all the ISR into X 
-    mov y, osr              ;side 0b0000 ; Copy the last state out of the OSR
-    ;push noblock 
-    jmp x!=y state_changed  ;side 0b0000 ; Compares x to y to see if encoder state has changed
-
+    jmp y-- col4_loop      [JMP_CYCLES - 1] 
+    in pins 8               
+    mov x, isr              
+    mov y, osr              
+    jmp x!=y state_changed  ; Compares x to y to see if encoder state has changed
 .wrap
 
 state_changed:
-    push noblock            ;side 0b0000    ; this also clears isr
-    mov osr, x              ;side 0b0000
-    set y , DEBOUNCE_DELAY_CYCLES ;side 0b0000
-del3:
-    nop                     ;side 0b0000
-del2:
-    nop                     ;side 0b0000
-del1:
-    nop                     ;side 0b0000
-    jmp y-- DELAY_LABEL     ;side 0b0000
-    jmp loop                ;side 0b0000
+    push noblock            ; this also clears isr
+    mov osr, x             
+    set y, (ITERATIONS - 1) [SET_CYCLES - 1]
+debounce_loop:
+    jmp y-- debounce_loop [JMP_CYCLES - 1]
+    jmp loop               
     
