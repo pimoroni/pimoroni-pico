@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html>
+<!-- HTML Codes by Quackit.com -->
+
+<title>
+</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<head>
+	
+<style>
+body {background-color:#050505;background-repeat:no-repeat;background-position:top left;background-attachment:fixed;}
+h1{font-family:Arial, sans-serif;color:#ffffff;}
+h2{font-family:Arial, sans-serif;color:#ffffff;}
+p {font-family:Arial, serif;font-size:16px;font-style:normal;font-weight:normal;color:#ffffff}
+table.GeneratedTable {
+  width: 100%;
+  background-color: #ffffff;
+  border-collapse: collapse;
+  border-width: 2px;
+  border-color: #8f8f8f;
+  border-style: solid;
+  color: #000000;
+}
+
+table.GeneratedTable td, table.GeneratedTable th {
+  border-width: 2px;
+  border-color: #8f8f8f;
+  border-style: solid;
+  padding: 3px;
+  width: 50%;
+}
+
+table.GeneratedTable thead {
+  background-color: #fafafa;
+}
+</style>
+</head>
+<body>
+<h1>Automation 2040 W Mini IO Interface</h1>
+<p>This displays the status of all the Automation 2040 W Mini inputs and outputs.</p>
+
+<p id="LedOn" ></p>
+
+
+<h2>ADC Readings</h2>
+<table class="GeneratedTable">
+    <thead>
+      <tr>
+        <th>IO</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>ADC1</td>
+        <td id="ADC1"></td>        
+      </tr>
+      <tr>
+        <td>ADC2</td>
+        <td id="ADC2"></td>
+        
+      </tr>
+      <tr>
+        <td>ADC3</td>
+        <td id="ADC3"></td>
+        
+      </tr>
+    </tbody>
+  </table>
+
+<h2>Input Readings</h2>
+<table class="GeneratedTable">
+    <thead>
+      <tr>
+        <th>IO</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>INPUT1</td>
+        <td id="INPUT1"></td>        
+      </tr>
+      <tr>
+        <td>INPUT2</td>
+        <td id="INPUT2"></td>
+      </tr>
+    </tbody>
+  </table>
+  <h2>Button Readings</h2>
+  <table class="GeneratedTable">
+      <thead>
+        <tr>
+          <th>IO</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Button A</td>
+          <td id="SW_A"></td>        
+        </tr>
+        <tr>
+          <td>Button B</td>
+          <td id="SW_B"></td>
+        </tr>
+      </tbody>
+    </table>
+<h2>Outputs</h2>
+<table class="GeneratedTable">
+    <thead>
+      <tr>
+        <th>IO</th>
+        <th>Status</th>
+        <th>Toggle</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>OUT1</td>
+        <td id="OUT1"></td>  
+        <td><input type="button" onclick="toggleOutput('one')" value="Toggle"></input></td>      
+      </tr>
+      <tr>
+        <td>OUT2</td>
+        <td id="OUT2"></td>
+        <td><input type="button" onclick="toggleOutput('two')" value="Toggle"></input></td>   
+      </tr>
+    </tbody>
+  </table>
+  <h2>Relays</h2>
+  <table class="GeneratedTable">
+    <thead>
+      <tr>
+        <th>IO</th>
+        <th>Status</th>
+        <th>Toggle</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>RELAY1</td>
+        <td id="RELAY1"></td>  
+        <td><input type="button" onclick="toggleRelay('one')" value="Toggle"></input></td>      
+      </tr>
+    </tbody>
+  </table>
+<!-- Javascripts-->
+<script>
+
+var getUrl = window.location;
+var baseUrl = getUrl .protocol + "//" + getUrl.host;
+
+
+//prototype arrays for holding current state information
+var outputState;
+var relayState;
+var ADCState;
+var inputState;
+var buttonState;
+var LEDState;
+
+
+
+//functions for updating current states
+function updateOutputStates(){
+fetch(baseUrl+ '/outputs')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    outputState = data;  
+    console.log('outputs', outputState);
+
+})
+}
+function updateRelayStates(){
+fetch(baseUrl+ '/relays')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    relayState = data;
+    console.log('relays', relayState);
+
+})
+}
+function updateInputStates(){
+fetch(baseUrl+ '/inputs')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    inputState = data;
+    console.log('inputs', inputState);
+})
+}
+function updateADCStates(){
+fetch(baseUrl+ '/adcs')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    ADCState = data;
+    console.log('ADCs', ADCState);
+})
+}
+function updateLEDStates(){
+fetch(baseUrl+ '/leds')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    LEDState = data;
+    console.log('LEDs', LEDState);
+})
+}
+
+function updateButtonStates(){
+fetch(baseUrl+ '/buttons')
+.then((Response) => {
+    return Response.json()
+})
+.then((data) =>{
+    buttonState = data;
+    console.log('Buttons', buttonState);
+})
+}
+
+function getCurrentStates(){
+    updateOutputStates()
+    updateRelayStates()
+    updateInputStates()
+    updateADCStates()
+    updateButtonStates()
+}
+
+setInterval(getCurrentStates, 3000);
+
+setInterval(displayADCValues, 1000);
+setInterval(displayButtonValues, 1000);
+setInterval(displayOutputValues, 1000);
+setInterval(displayInputValues, 1000);
+setInterval(displayRelayValues, 1000);
+
+
+
+function displayADCValues(){
+    document.getElementById('ADC1').innerHTML = ADCState['one'] 
+    document.getElementById('ADC2').innerHTML = ADCState['two'] 
+    document.getElementById('ADC3').innerHTML = ADCState['three']   
+}
+function displayInputValues(){
+    document.getElementById('INPUT1').innerHTML = inputState['one'] 
+    document.getElementById('INPUT2').innerHTML = inputState['two'] 
+}
+function displayButtonValues(){
+    document.getElementById('SW_A').innerHTML = buttonState['SW_A'] 
+    document.getElementById('SW_B').innerHTML = buttonState['SW_B'] 
+}
+function displayOutputValues(){
+    document.getElementById('OUT1').innerHTML = outputState['one'] 
+    document.getElementById('OUT2').innerHTML = outputState['two'] 
+}
+function displayRelayValues(){
+    document.getElementById('RELAY1').innerHTML = relayState['one']
+}
+//output Handlers
+
+function updateRemote(funct, attribute, value ){    
+
+    fetch(baseUrl+"/"+funct+"?"+attribute+"="+value)
+  .then(response => {
+    // indicates whether the response is successful (status code 200-299) or not
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${reponse.status}`)
+    }
+    return response.json()
+  })
+  .then(data => {
+    console.log(data)
+    
+  })
+  .catch(error => console.log(error))
+
+}
+
+function toggleOutput(outNumb){
+    var newState = '0'
+    var currentOutputState = outputState[outNumb]
+    if (currentOutputState == newState){
+        newState = '1';
+    }
+    else{
+        newState = '0' 
+    }
+    updateRemote('outputs', outNumb, newState )
+    updateOutputStates()
+    
+
+    
+}
+function toggleRelay(outNumb){
+    var newState = '0'
+    var currentRelayState = relayState[outNumb]
+    if (currentRelayState == newState){
+        newState = '1';
+    }
+    else{
+        newState = '0' 
+    }
+    updateRemote('relays', outNumb, newState )
+    updateRelayStates()
+    
+}
+
+updateOutputStates()
+updateRelayStates()
+
+</script>
+</body>
+</html> 
