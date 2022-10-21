@@ -17,8 +17,8 @@ const uint NUM_LEDS = 50;
 // Make this number bigger for more precise colour adjustments
 const uint STEPS_PER_REV = 24;
 
-// WS28X-style LEDs with a single signal line. AKA NeoPixel
-WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT);
+// Set up the WS2812 / NeoPixel™ LEDs, with RGB color order to work with the LED wire that comes with Skully
+WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT, WS2812::DEFAULT_SERIAL_FREQ, false, WS2812::COLOR_ORDER::RGB);
 
 I2C i2c(BOARD::PLASMA_STICK);
 BreakoutEncoder enc(&i2c);
