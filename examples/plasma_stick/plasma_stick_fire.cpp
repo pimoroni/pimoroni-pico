@@ -12,8 +12,8 @@ using namespace plasma;
 // Set how many LEDs you have
 const uint NUM_LEDS = 50;
 
-// WS2812 / NeoPixel™ LEDs
-WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT);
+// Set up the WS2812 / NeoPixel™ LEDs, with RGB color order to work with the LED wire that comes with Skully
+WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT, WS2812::DEFAULT_SERIAL_FREQ, false, WS2812::COLOR_ORDER::RGB);
 
 // Maps a value from one range to another
 float map(float x, float in_min, float in_max, float out_min, float out_max) {

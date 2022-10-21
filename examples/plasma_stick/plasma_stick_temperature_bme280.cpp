@@ -28,8 +28,8 @@ const uint MAX = 30;
 const uint HUE_START = 230; // blue
 const uint HUE_END = 359;  // red
 
-// WS28X-style LEDs with a single signal line. AKA NeoPixel
-WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT);
+// Set up the WS2812 / NeoPixel™ LEDs, with RGB color order to work with the LED wire that comes with Skully
+WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT, WS2812::DEFAULT_SERIAL_FREQ, false, WS2812::COLOR_ORDER::RGB);
 
 I2C i2c(BOARD::PLASMA_STICK);
 BME280 bme(&i2c);
@@ -54,6 +54,8 @@ int main() {
       for(auto i = 0u; i < NUM_LEDS; i++) {
         led_strip.set_hsv(i, hue / 360.0f, 1.0, BRIGHTNESS);
       }
+
+      sleep_ms(500);
     }
   }
   else {

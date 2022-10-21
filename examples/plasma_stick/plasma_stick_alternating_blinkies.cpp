@@ -22,8 +22,8 @@ constexpr float BRIGHTNESS = 0.5f;
 // Set up speed (wait time between colour changes, in seconds)
 constexpr float SPEED = 1.0f;
 
-// WS2812 / NeoPixel™ LEDs
-WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT);
+// Set up the WS2812 / NeoPixel™ LEDs, with RGB color order to work with the LED wire that comes with Skully
+WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT, WS2812::DEFAULT_SERIAL_FREQ, false, WS2812::COLOR_ORDER::RGB);
 
 
 int main() {

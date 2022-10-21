@@ -18,8 +18,8 @@ const uint SPEED = 20;
 // How many times the LEDs will be updated per second
 const uint UPDATES = 60;
 
-// WS2812 / NeoPixel™ LEDs
-WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT);
+// Set up the WS2812 / NeoPixel™ LEDs, with RGB color order to work with the LED wire that comes with Skully
+WS2812 led_strip(NUM_LEDS, pio0, 0, plasma_stick::DAT, WS2812::DEFAULT_SERIAL_FREQ, false, WS2812::COLOR_ORDER::RGB);
 
 
 int main() {
