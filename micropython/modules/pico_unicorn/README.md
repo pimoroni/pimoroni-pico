@@ -2,7 +2,7 @@
 
 Our Pico Unicorn Pack offers 7x17 bright RGB LEDs driven by Pico's PIO.
 
-We've included helper functions to handle every aspect of drawing to the display and interfacing with the buttons. See the [function reference](#function-reference) for details.
+We've included helper functions for lighting up the LEDs and interfacing with the buttons. See the [function reference](#function-reference) for details.
 
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
@@ -11,10 +11,11 @@ We've included helper functions to handle every aspect of drawing to the display
   - [set_pixel_value](#set_pixel_value)
   - [is_pressed](#is_pressed)
   - [get_width / get_height](#get_width--get_height)
+  - [clear](#clear)
 
 ## Example Program
 
-The following example sets up Pico Unicorn, displays some basic demo text and graphics and will illuminate the RGB LED green if the A button is presse
+The following example sets up Pico Unicorn, displays a rainbow across the LEDs and turns them all off when a button is pressed.
 
 ```python
 import math
@@ -61,9 +62,7 @@ while not picounicorn.is_pressed(picounicorn.BUTTON_A):  # Wait for Button A to 
     pass
 
 # Clear the display
-for x in range(w):
-    for y in range(h):
-        picounicorn.set_pixel(x, y, 0, 0, 0)
+picounicorn.clear()
 
 print("Button A pressed!")
 ```
@@ -122,3 +121,11 @@ height = picounicorn.get_height()
 ```
 
 This is useful where you're looping through the rows and columns to display a pattern- such as a rainbow using `hsv_to_rgb`.
+
+### clear
+
+Turn off all the LEDs:
+```python
+picounicorn.clear()
+```
+
