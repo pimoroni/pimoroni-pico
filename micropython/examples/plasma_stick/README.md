@@ -39,6 +39,8 @@ You can control your WS2812 / NeoPixel™ strip using our handy MicroPython Plas
 
 - [PicoGraphics MicroPython function reference](../../modules/plasma)
 
+Note that the examples in this directory default to a RGB colour order to match the LEDs in the Wireless Plasma Kit. If you're using different LEDs you may need to adjust the colour order in your code - most of the other addressible LEDs we sell are GRB.
+
 ## Using Breakouts
 
 Plasma Stick has a Qw/ST (Qwiic/STEMMA QT) connector. Breakouts with Qw/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
