@@ -39,7 +39,7 @@ You can control your WS2812 / NeoPixel™ strip using our handy MicroPython Plas
 
 - [PicoGraphics MicroPython function reference](../../modules/plasma)
 
-Note that the examples in this directory default to a RGB colour order to match the LEDs in the Wireless Plasma Kit. If you're using different LEDs you may need to adjust the colour order in your code - most of the other addressible LEDs we sell are GRB.
+Note that the examples in this directory default to a RGB colour order to match the LEDs in the Wireless Plasma Kit. If you're using different LEDs you may need to adjust the colour order in your code - most of the other addressable LEDs we sell are GRB.
 
 ## Using Breakouts
 
