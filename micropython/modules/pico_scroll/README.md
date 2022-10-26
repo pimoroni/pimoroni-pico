@@ -12,7 +12,7 @@ We've included helper functions to handle every aspect of drawing to the matrix 
   - [set_pixel](#set_pixel)
   - [set_pixels](#set_pixels)
   - [show_text](#show_text)
-  - [scroll_texr](#scroll_text)
+  - [scroll_text](#scroll_text)
   - [show_bitmap_1d](#show_bitmap_1d)
   - [update](#update)
   - [clear](#clear)
