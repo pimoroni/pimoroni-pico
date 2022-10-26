@@ -110,8 +110,8 @@ The full 256 characters can be displayed with:
 ```python
 b = bytearray(range(256))
 for j in range(256*6):
-    scroll.show_text(b, 8, j)
-    scroll.update()
+    picoscroll.show_text(b, 8, j)
+    picoscroll.update()
     time.sleep(0.1)
 ```
 
@@ -129,7 +129,7 @@ The full 256 characters can be displayed with:
 
 ```python
 b = bytearray(range(256))
-scroll.scroll_text(b, 8, 100)
+picoscroll.scroll_text(b, 8, 100)
 ```
 
 ### show_bitmap_1d
