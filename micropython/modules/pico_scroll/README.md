@@ -100,8 +100,8 @@ phrase across the entire display involves offsets from -17 pixels to
 word = "Hello, world!"
 l = len(word) * 6
 for j in range(-17, l):
-    scroll.show_text(word, 8, j)
-    scroll.update()
+    picoscroll.show_text(word, 8, j)
+    picoscroll.update()
     time.sleep(0.1)
 ```
 
