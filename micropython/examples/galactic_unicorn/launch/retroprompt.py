@@ -1,9 +1,7 @@
 import time
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
-gu = GalacticUnicorn()
-graphics = PicoGraphics(DISPLAY)
+graphics = None
+palette = None
 
 
 c64 = [
@@ -60,8 +58,28 @@ PROMPT_BBC_MICRO = 2
 prompt = 0
 
 
+def init():
+    pass
+
+
 @micropython.native  # noqa: F821
-def draw(image, fg, bg, time_ms):
+def draw():
+    time_ms = time.ticks_ms()
+    prompt = (time_ms // 3000) % 3
+
+    if prompt == PROMPT_C64:
+        image = c64
+        fg = FOREGROUND_C64
+        bg = BACKGROUND_C64
+    elif prompt == PROMPT_SPECTRUM:
+        image = spectrum
+        fg = FOREGROUND_SPECTRUM
+        bg = BACKGROUND_SPECTRUM
+    elif prompt == PROMPT_BBC_MICRO:
+        image = bbc_micro
+        fg = FOREGROUND_BBC_MICRO
+        bg = BACKGROUND_BBC_MICRO
+
     fg_pen = graphics.create_pen(fg[0], fg[1], fg[2])
     bg_pen = graphics.create_pen(bg[0], bg[1], bg[2])
     for y in range(len(image)):
@@ -80,35 +98,3 @@ def draw(image, fg, bg, time_ms):
                 graphics.set_pen(bg_pen)
 
             graphics.pixel(x, y)
-
-    gu.update(graphics)
-
-
-gu.set_brightness(0.5)
-
-while True:
-
-    time_ms = time.ticks_ms()
-    prompt = (time_ms // 3000) % 3
-
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
-
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
-
-    start = time.ticks_ms()
-
-    if prompt == PROMPT_C64:
-        draw(c64, FOREGROUND_C64, BACKGROUND_C64, time_ms)
-
-    elif prompt == PROMPT_SPECTRUM:
-        draw(spectrum, FOREGROUND_SPECTRUM, BACKGROUND_SPECTRUM, time_ms)
-
-    elif prompt == PROMPT_BBC_MICRO:
-        draw(bbc_micro, FOREGROUND_BBC_MICRO, BACKGROUND_BBC_MICRO, time_ms)
-
-    # pause for a moment (important or the USB serial device will fail)
-    time.sleep(0.001)
-
-    print("total took: {} ms".format(time.ticks_ms() - start))
