@@ -23,6 +23,7 @@ def init():
         graphics.create_pen(255, 255, 180)
     ]
 
+
 # returns the palette entry for a given heat value
 @micropython.native  # noqa: F821
 def pen_from_value(value):
