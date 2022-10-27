@@ -1,10 +1,14 @@
 #include "wakeup.h"
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_gpio_state_obj, Wakeup_get_gpio_state);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_wake_reason_obj, Wakeup_get_wake_reason);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(Wakeup_set_wake_reason_obj, Wakeup_set_wake_reason);
 
 STATIC const mp_map_elem_t wakeup_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_wakeup) },
-    { MP_ROM_QSTR(MP_QSTR_get_gpio_state), MP_ROM_PTR(&Wakeup_get_gpio_state_obj) }
+    { MP_ROM_QSTR(MP_QSTR_get_gpio_state), MP_ROM_PTR(&Wakeup_get_gpio_state_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_wake_reason), MP_ROM_PTR(&Wakeup_get_wake_reason_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_wake_reason), MP_ROM_PTR(&Wakeup_set_wake_reason_obj) }
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_wakeup_globals, wakeup_globals_table);
 
