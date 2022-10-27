@@ -1,16 +1,11 @@
-import time
-import random
+import time, random
 from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
-gu = GalacticUnicorn()
-graphics = PicoGraphics(DISPLAY)
+graphics = None
 
 colour = (230, 150, 0)
 
-
-@micropython.native  # noqa: F821
-def setup():
+def init():
     global width, height, lifetime, age
     width = GalacticUnicorn.WIDTH
     height = GalacticUnicorn.HEIGHT
@@ -21,9 +16,16 @@ def setup():
             lifetime[x][y] = 1.0 + random.uniform(0.0, 0.1)
             age[x][y] = random.uniform(0.0, 1.0) * lifetime[x][y]
 
-
 @micropython.native  # noqa: F821
 def draw():
+    for y in range(height):
+        for x in range(width):
+            if age[x][y] >= lifetime[x][y]:
+                age[x][y] = 0.0
+                lifetime[x][y] = 1.0 + random.uniform(0.0, 0.1)
+
+            age[x][y] += 0.025
+            
     for y in range(height):
         for x in range(width):
             if age[x][y] < lifetime[x][y] * 0.3:
@@ -34,39 +36,3 @@ def draw():
             else:
                 graphics.set_pen(0)
             graphics.pixel(x, y)
-
-    gu.update(graphics)
-
-
-@micropython.native  # noqa: F821
-def update():
-    for y in range(height):
-        for x in range(width):
-            if age[x][y] >= lifetime[x][y]:
-                age[x][y] = 0.0
-                lifetime[x][y] = 1.0 + random.uniform(0.0, 0.1)
-
-            age[x][y] += 0.025
-
-
-setup()
-
-gu.set_brightness(0.5)
-
-while True:
-
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
-
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
-
-    start = time.ticks_ms()
-
-    draw()
-    update()
-    
-    # pause for a moment (important or the USB serial device will fail)
-    time.sleep(0.001)
-
-    print("total took: {} ms".format(time.ticks_ms() - start))

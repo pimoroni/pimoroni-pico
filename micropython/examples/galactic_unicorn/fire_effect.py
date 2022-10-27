@@ -131,5 +131,8 @@ while True:
         draw_landscape()
     else:
         draw_portrait()
+        
+    # pause for a moment (important or the USB serial device will fail)
+    time.sleep(0.001)
 
     print("total took: {} ms".format(time.ticks_ms() - start))
