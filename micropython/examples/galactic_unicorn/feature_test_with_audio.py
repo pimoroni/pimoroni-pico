@@ -47,6 +47,7 @@ bass_notes = (
 notes = [melody_notes, rhythm_notes, drum_beats, hi_hat, bass_notes]
 channels = [gu.synth_channel(i) for i in range(len(notes))]
 
+
 def gradient(r, g, b):
     for y in range(0, height):
         for x in range(0, width):
@@ -86,6 +87,7 @@ def outline_text(text):
 
     graphics.set_pen(graphics.create_pen(v, v, v))
     graphics.text(text, x, y, -1, 1)
+
 
 gu.set_brightness(0.5)
 
@@ -134,41 +136,41 @@ while True:
         if not was_a_pressed:
             # Configure the synth to play our notes
             channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
-                               attack=0.016,
-                               decay=0.168,
-                               sustain=0xafff / 65535,
-                               release=0.168,
-                               volume=10000 / 65535)
+                                  attack=0.016,
+                                  decay=0.168,
+                                  sustain=0xafff / 65535,
+                                  release=0.168,
+                                  volume=10000 / 65535)
             channels[1].configure(waveforms=Channel.SINE + Channel.SQUARE,
-                               attack=0.038,
-                               decay=0.300,
-                               sustain=0,
-                               release=0,
-                               volume=12000 / 65535)
+                                  attack=0.038,
+                                  decay=0.300,
+                                  sustain=0,
+                                  release=0,
+                                  volume=12000 / 65535)
             channels[2].configure(waveforms=Channel.NOISE,
-                               attack=0.005,
-                               decay=0.010,
-                               sustain=16000 / 65535,
-                               release=0.100,
-                               volume=18000 / 65535)
+                                  attack=0.005,
+                                  decay=0.010,
+                                  sustain=16000 / 65535,
+                                  release=0.100,
+                                  volume=18000 / 65535)
             channels[3].configure(waveforms=Channel.NOISE,
-                               attack=0.005,
-                               decay=0.005,
-                               sustain=8000 / 65535,
-                               release=0.040,
-                               volume=8000 / 65535)
+                                  attack=0.005,
+                                  decay=0.005,
+                                  sustain=8000 / 65535,
+                                  release=0.040,
+                                  volume=8000 / 65535)
             channels[4].configure(waveforms=Channel.SQUARE,
-                               attack=0.010,
-                               decay=0.100,
-                               sustain=0,
-                               release=0.500,
-                               volume=12000 / 65535)
-            
+                                  attack=0.010,
+                                  decay=0.100,
+                                  sustain=0,
+                                  release=0.500,
+                                  volume=12000 / 65535)
+
             # If the synth is not already playing, init the first beat
             if not synthing:
                 beat = 0
                 next_beat()
-            
+
             gu.play_synth()
             synthing = True
             timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
@@ -181,44 +183,44 @@ while True:
         if not was_b_pressed:
             # Configure the synth to play our notes, but with only one channel audable
             channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
-                               attack=0.016,
-                               decay=0.168,
-                               sustain=0,
-                               release=0.168,
-                               volume=0)
+                                  attack=0.016,
+                                  decay=0.168,
+                                  sustain=0,
+                                  release=0.168,
+                                  volume=0)
             channels[1].configure(waveforms=Channel.SINE + Channel.SQUARE,
-                               attack=0.038,
-                               decay=0.300,
-                               sustain=0,
-                               release=0,
-                               volume=12000 / 65535)
+                                  attack=0.038,
+                                  decay=0.300,
+                                  sustain=0,
+                                  release=0,
+                                  volume=12000 / 65535)
             channels[2].configure(waveforms=Channel.NOISE,
-                               attack=0.005,
-                               decay=0.010,
-                               sustain=16000 / 65535,
-                               release=0.100,
-                               volume=0)
+                                  attack=0.005,
+                                  decay=0.010,
+                                  sustain=16000 / 65535,
+                                  release=0.100,
+                                  volume=0)
             channels[3].configure(waveforms=Channel.NOISE,
-                               attack=0.005,
-                               decay=0.005,
-                               sustain=8000 / 65535,
-                               release=0.040,
-                               volume=0)
+                                  attack=0.005,
+                                  decay=0.005,
+                                  sustain=8000 / 65535,
+                                  release=0.040,
+                                  volume=0)
             channels[4].configure(waveforms=Channel.SQUARE,
-                               attack=0.010,
-                               decay=0.100,
-                               sustain=0,
-                               release=0.500,
-                               volume=0)
-            
+                                  attack=0.010,
+                                  decay=0.100,
+                                  sustain=0,
+                                  release=0.500,
+                                  volume=0)
+
             # If the synth is not already playing, init the first beat
             if not synthing:
                 beat = 0
                 next_beat()
-            
+
             gu.play_synth()
             synthing = True
-            timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)    
+            timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
 
         was_b_pressed = True
     else:
@@ -226,14 +228,14 @@ while True:
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_C):
         if not was_c_pressed:
-             # Stop synth (if running) and play Tone A
+            # Stop synth (if running) and play Tone A
             timer.deinit()
             tone_a = 400
             channels[0].play_tone(tone_a, 0.06)
 
             gu.play_synth()
             synthing = False
-            
+
         was_c_pressed = True
     else:
         was_c_pressed = False
@@ -247,8 +249,8 @@ while True:
             channels[1].play_tone(tone_b, 0.06, attack=0.5)
 
             gu.play_synth()
-            synthing = False         
-        
+            synthing = False
+
         was_d_pressed = True
     else:
         was_d_pressed = False
@@ -285,7 +287,7 @@ while True:
             gu.stop_playing()
             timer.deinit()
             synthing = False
-            
+
         was_z_pressed = True
     else:
         was_z_pressed = False
@@ -341,6 +343,6 @@ while True:
     outline_text(text)
 
     gu.update(graphics)
-    
+
     # pause for a moment (important or the USB serial device will fail
     time.sleep(0.001)

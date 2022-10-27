@@ -65,7 +65,7 @@ while True:
 
     draw()
     update()
-    
+
     # pause for a moment (important or the USB serial device will fail)
     time.sleep(0.001)
 

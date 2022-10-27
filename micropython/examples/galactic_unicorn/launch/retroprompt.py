@@ -1,5 +1,4 @@
-import time, random, math
-from galactic import GalacticUnicorn
+import time
 
 graphics = None
 palette = None
@@ -58,13 +57,13 @@ PROMPT_SPECTRUM = 1
 PROMPT_BBC_MICRO = 2
 prompt = 0
 
+
 def init():
     pass
 
 
 @micropython.native  # noqa: F821
 def draw():
-    
     time_ms = time.ticks_ms()
     prompt = (time_ms // 3000) % 3
 
@@ -80,8 +79,7 @@ def draw():
         image = bbc_micro
         fg = FOREGROUND_BBC_MICRO
         bg = BACKGROUND_BBC_MICRO
-       
-        
+
     fg_pen = graphics.create_pen(fg[0], fg[1], fg[2])
     bg_pen = graphics.create_pen(bg[0], bg[1], bg[2])
     for y in range(len(image)):

@@ -1,4 +1,5 @@
-import machine, time
+import time
+import machine
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
@@ -8,6 +9,7 @@ machine.freq(200000000)
 # create galactic object and graphics surface for drawing
 galactic = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
+
 
 # returns the id of the button that is currently pressed or
 # None if none are
@@ -21,6 +23,7 @@ def pressed():
     if galactic.is_pressed(GalacticUnicorn.SWITCH_D):
         return GalacticUnicorn.SWITCH_D
     return None
+
 
 graphics.set_font("bitmap6")
 graphics.set_pen(graphics.create_pen(0, 0, 0))
@@ -36,44 +39,43 @@ while True:
         import fire as effect
         break
     if pressed() == GalacticUnicorn.SWITCH_B:
-        import supercomputer as effect
+        import supercomputer as effect  # noqa: F811
         break
     if pressed() == GalacticUnicorn.SWITCH_C:
-        import rainbow as effect
+        import rainbow as effect        # noqa: F811
         break
     if pressed() == GalacticUnicorn.SWITCH_D:
-        import retroprompt as effect
+        import retroprompt as effect    # noqa: F811
         break
-    
+
 # wait until all buttons are released
-while pressed() != None:
+while pressed() is not None:
     time.sleep(0.1)
-    
+
 effect.graphics = graphics
 effect.init()
 
 brightness = 0.5
 sleep = False
 was_sleep_pressed = False
-   
+
 
 # wait
 while True:
     # if A, B, C, or D are pressed then reset
-    if pressed() != None:
+    if pressed() is not None:
         machine.reset()
-    
+
     sleep_pressed = galactic.is_pressed(GalacticUnicorn.SWITCH_SLEEP)
     if sleep_pressed and not was_sleep_pressed:
         sleep = not sleep
-        
+
     was_sleep_pressed = sleep_pressed
-    
 
     if sleep:
         # fade out if screen not off
         galactic.set_brightness(galactic.get_brightness() - 0.05)
-        
+
         if galactic.get_brightness() > 0.0:
             effect.draw()
 
@@ -81,18 +83,17 @@ while True:
         galactic.update(graphics)
     else:
         effect.draw()
-        
+
         # update the display
         galactic.update(graphics)
-            
+
         # brightness up/down
         if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
             brightness += 0.05
         if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
             brightness -= 0.05
-            
+
         galactic.set_brightness(brightness)
-        
+
     # pause for a moment (important or the USB serial device will fail
     time.sleep(0.001)
-

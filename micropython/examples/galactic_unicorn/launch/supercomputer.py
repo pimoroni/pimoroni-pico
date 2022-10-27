@@ -1,9 +1,10 @@
-import time, random
+import random
 from galactic import GalacticUnicorn
 
 graphics = None
 
 colour = (230, 150, 0)
+
 
 def init():
     global width, height, lifetime, age
@@ -16,6 +17,7 @@ def init():
             lifetime[x][y] = 1.0 + random.uniform(0.0, 0.1)
             age[x][y] = random.uniform(0.0, 1.0) * lifetime[x][y]
 
+
 @micropython.native  # noqa: F821
 def draw():
     for y in range(height):
@@ -25,7 +27,7 @@ def draw():
                 lifetime[x][y] = 1.0 + random.uniform(0.0, 0.1)
 
             age[x][y] += 0.025
-            
+
     for y in range(height):
         for x in range(width):
             if age[x][y] < lifetime[x][y] * 0.3:
