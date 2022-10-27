@@ -71,7 +71,7 @@ jobs:
         - name: picow_enviro
           board: PICO_W_ENVIRO
         - name: picow_galactic_unicorn
-          board: PICO_W
+          board: PICO_W_GALACTIC_UNICORN
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
