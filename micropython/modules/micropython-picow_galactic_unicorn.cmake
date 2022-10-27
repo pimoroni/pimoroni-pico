@@ -43,6 +43,7 @@ include(pcf85063a/micropython)
 
 # Utility
 include(adcfft/micropython)
+include(wakeup/micropython)
 
 # LEDs & Matrices
 include(galactic_unicorn/micropython)
