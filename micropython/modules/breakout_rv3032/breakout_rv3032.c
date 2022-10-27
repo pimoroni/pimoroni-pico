@@ -129,9 +129,9 @@ STATIC const mp_rom_map_elem_t BreakoutRV3032_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutRV3032_locals_dict, BreakoutRV3032_locals_dict_table);
 
 /***** Class Definition *****/
-const mp_obj_type_t breakout_rtc_BreakoutRV3032_type = {
+const mp_obj_type_t breakout_rtc_Breakoutrv3032_type = {
     { &mp_type_type },
-    .name = MP_QSTR_BreakoutRTC,
+    .name = MP_QSTR_BreakoutRV3032,
     .make_new = BreakoutRV3032_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutRV3032_locals_dict,
 };
@@ -142,8 +142,8 @@ const mp_obj_type_t breakout_rtc_BreakoutRV3032_type = {
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t breakout_rtc_globals_table[] = {
-    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_rtc) },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutRTC), (mp_obj_t)&breakout_rtc_BreakoutRV3032_type },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_rv3032) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Breakout_RV3032), (mp_obj_t)&breakout_rtc_Breakoutrv3032_type },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_rtc_globals, breakout_rtc_globals_table);
 
@@ -155,9 +155,9 @@ const mp_obj_module_t breakout_rtc_user_cmodule = {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if MICROPY_VERSION <= 70144
-MP_REGISTER_MODULE(MP_QSTR_breakout_rtc, breakout_rtc_user_cmodule, MODULE_BREAKOUT_RTC_ENABLED);
+MP_REGISTER_MODULE(MP_QSTR_breakout_rv3032, breakout_rtc_user_cmodule, MODULE_BREAKOUT_RTC_ENABLED);
 #else
-MP_REGISTER_MODULE(MP_QSTR_breakout_rtc, breakout_rtc_user_cmodule);
+MP_REGISTER_MODULE(MP_QSTR_breakout_rv3032, breakout_rtc_user_cmodule);
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,7 @@ extern mp_obj_t BreakoutRV3032_set_weekday(mp_obj_t self_in, mp_obj_t weekday_in
 extern mp_obj_t BreakoutRV3032_set_date(mp_obj_t self_in, mp_obj_t date_in);
 extern mp_obj_t BreakoutRV3032_set_month(mp_obj_t self_in, mp_obj_t month_in);
 extern mp_obj_t BreakoutRV3032_set_year(mp_obj_t self_in, mp_obj_t year_in);
-extern mp_obj_t BreakoutRV3032_et_to_compiler_time(mp_obj_t self_in);
+extern mp_obj_t BreakoutRV3032_set_to_compiler_time(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_update_time(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_string_date_usa(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_string_date(mp_obj_t self_in);

@@ -34,11 +34,11 @@ mp_obj_t BreakoutRV3032_make_new(const mp_obj_type_t *type, size_t n_args, size_
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     self = m_new_obj(breakout_rtc_BreakoutRV3032_obj_t);
-    self->base.type = &breakout_rtc_BreakoutRV3032_type;
+    self->base.type = &breakout_rtc_Breakoutrv3032_type;
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    self->breakout = m_new_class(BreakoutRV3032, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
+    self->breakout = m_new_class(RV3032, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutRV3032: breakout not found when initialising");
@@ -475,7 +475,7 @@ mp_obj_t BreakoutRV3032_enable_trickle_charge(size_t n_args, const mp_obj_t *pos
     enum { ARG_self, ARG_tcr };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_tcr, MP_ARG_INT, {.u_int = TCR_15K} },
+        { MP_QSTR_tcr, MP_ARG_INT, {.u_int = RV3032_TCR_15K} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
