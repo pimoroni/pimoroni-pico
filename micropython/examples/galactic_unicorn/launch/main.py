@@ -10,6 +10,8 @@ machine.freq(200000000)
 galactic = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
+brightness = 0.5
+
 
 # returns the id of the button that is currently pressed or
 # None if none are
@@ -25,16 +27,25 @@ def pressed():
     return None
 
 
-graphics.set_font("bitmap6")
-graphics.set_pen(graphics.create_pen(0, 0, 0))
-graphics.clear()
-graphics.set_pen(graphics.create_pen(155, 155, 155))
-graphics.text("PRESS", 12, -1, -1, 1)
-graphics.text("A B C OR D!", 2, 5, -1, 1)
-galactic.update(graphics)
-
 # wait for a button to be pressed and load that effect
 while True:
+    graphics.set_font("bitmap6")
+    graphics.set_pen(graphics.create_pen(0, 0, 0))
+    graphics.clear()
+    graphics.set_pen(graphics.create_pen(155, 155, 155))
+    graphics.text("PRESS", 12, -1, -1, 1)
+    graphics.text("A B C OR D!", 2, 5, -1, 1)
+
+    # brightness up/down
+    if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+        brightness += 0.01
+    if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        brightness -= 0.01
+    brightness = max(min(brightness, 1.0), 0.0)
+
+    galactic.set_brightness(brightness)
+    galactic.update(graphics)
+
     if pressed() == GalacticUnicorn.SWITCH_A:
         import fire as effect
         break
@@ -48,6 +59,9 @@ while True:
         import retroprompt as effect    # noqa: F811
         break
 
+    # pause for a moment
+    time.sleep(0.01)
+
 # wait until all buttons are released
 while pressed() is not None:
     time.sleep(0.1)
@@ -55,7 +69,6 @@ while pressed() is not None:
 effect.graphics = graphics
 effect.init()
 
-brightness = 0.5
 sleep = False
 was_sleep_pressed = False
 
@@ -74,7 +87,7 @@ while True:
 
     if sleep:
         # fade out if screen not off
-        galactic.set_brightness(galactic.get_brightness() - 0.05)
+        galactic.set_brightness(galactic.get_brightness() - 0.01)
 
         if galactic.get_brightness() > 0.0:
             effect.draw()
@@ -89,9 +102,10 @@ while True:
 
         # brightness up/down
         if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-            brightness += 0.05
+            brightness += 0.01
         if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-            brightness -= 0.05
+            brightness -= 0.01
+        brightness = max(min(brightness, 1.0), 0.0)
 
         galactic.set_brightness(brightness)
 
