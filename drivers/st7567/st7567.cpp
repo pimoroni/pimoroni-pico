@@ -147,7 +147,7 @@ namespace pimoroni {
 
   for (uint8_t page=0; page < 8 ; page++){ //select page
 
-    for (uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8) ; pixel_index++){  //cycle through a page worth of bits from the fb
+    for (uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8)  ; pixel_index++){  //cycle through a page worth of bits from the fb
       page_byte_selector = ((pixel_index % 128)); 
       page_bit_selector = (pixel_index / 128);
      
@@ -167,22 +167,21 @@ namespace pimoroni {
   
     if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
       command(reg::ENTER_RMWMODE);
-      
-        command(reg::SETPAGESTART | page);
-        command(reg::SETCOLL);
-        command(reg::SETCOLH);
-        gpio_put(dc, 1); // data mode
-        gpio_put(cs, 0);
-        spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
-        gpio_put(cs, 1);
-        gpio_put(dc, 0); // Back to command mode
+      command(reg::SETPAGESTART | page);
+      command(reg::SETCOLL);
+      command(reg::SETCOLH);
+      gpio_put(dc, 1); // data mode
+      gpio_put(cs, 0);
+      spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
+      gpio_put(cs, 1);
+      gpio_put(dc, 0); // Back to command mode
     } 
     else{ //other pen types incompatable
       return;
     }
     }
       gpio_put(cs, 1);
-    
+
   }
 
   void ST7567::set_backlight(uint8_t brightness) {

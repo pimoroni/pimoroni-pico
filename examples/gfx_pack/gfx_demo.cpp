@@ -9,18 +9,19 @@
 #include "libraries/gfx_pack/gfx_pack.hpp"
 #include "drivers/st7567/st7567.hpp"
 #include "drivers/button/button.hpp"
+#include "drivers/rgbled/rgbled.hpp"
 
 using namespace pimoroni;
-SPIPins pins = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 16, SPI_BG_FRONT_PWM};
-ST7567 st7567(128, 64, pins);
+
+ST7567 st7567(128, 64, gfx_pack_pins);
 PicoGraphics_Pen1Bit graphics(st7567.width, st7567.height, nullptr);
+RGBLED backlight_rgb(GfxPack::BL_R, GfxPack::BL_G, GfxPack::BL_B, Polarity::ACTIVE_HIGH);
 
-
-
-Button button_a(gfx_pack::A);
-Button button_b(gfx_pack::B);
-Button button_x(gfx_pack::X);
-Button button_y(gfx_pack::Y);
+Button button_a(GfxPack::A);
+Button button_b(GfxPack::B);
+Button button_c(GfxPack::C);
+Button button_d(GfxPack::D);
+Button button_e(GfxPack::E);
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
 // Outputs are rgb in the range 0-255 for each channel
@@ -43,6 +44,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
+
   st7567.set_backlight(255);
 
   struct pt {
@@ -68,15 +70,17 @@ int main() {
 
   Point text_location(0, 0);
 
-  //Pen BG = graphics.create_pen(120, 40, 60);
-  //Pen WHITE = graphics.create_pen(255, 255, 255);
-
+float hue = 0.0;
   while(true) {
     if(button_a.raw()) text_location.x -= 1;
     if(button_b.raw()) text_location.x += 1;
 
-    if(button_x.raw()) text_location.y -= 1;
-    if(button_y.raw()) text_location.y += 1;
+    if(button_c.raw()) text_location.y -= 1;
+    if(button_d.raw()) text_location.y += 1;
+
+    if(button_e.raw()){
+      text_location.x = 0;
+      text_location.y = 0;}
   
     graphics.set_pen(0);
     graphics.clear();
@@ -110,6 +114,8 @@ int main() {
     graphics.text("Hello World", text_location, 320);
 
     // update screen
+    backlight_rgb.set_hsv(hue, 0.0f, 1.0f);
+    hue += 0.002;
     st7567.update(&graphics);
     sleep_ms(1000/15);
   }
