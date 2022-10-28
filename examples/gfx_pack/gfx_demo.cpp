@@ -45,7 +45,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 
 int main() {
 
-  st7567.set_backlight(255);
+  st7567.set_backlight(50);
 
   struct pt {
     float      x;
@@ -114,7 +114,7 @@ float hue = 0.0;
     graphics.text("Hello World", text_location, 320);
 
     // update screen
-    backlight_rgb.set_hsv(hue, 0.0f, 1.0f);
+    backlight_rgb.set_hsv(hue, 1.0f, 1.0f);
     hue += 0.002;
     st7567.update(&graphics);
     sleep_ms(1000/15);
