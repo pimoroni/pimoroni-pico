@@ -75,13 +75,7 @@ def gradient_background(start_hue, start_sat, start_val, end_hue, end_sat, end_v
 
 
 # function for drawing outlined text
-def outline_text(text):
-    graphics.set_font("bitmap8")
-    w = graphics.measure_text(text, 1)
-
-    x = int(width / 2 - w / 2 + 1)
-    y = 2
-
+def outline_text(text, x, y):
     graphics.set_pen(BLACK)
     graphics.text(text, x - 1, y - 1, -1, 1)
     graphics.text(text, x, y - 1, -1, 1)
@@ -124,7 +118,16 @@ while True:
                             hue + HUE_OFFSET, sat, val)
 
         clock = "{:02}:{:02}:{:02}".format(hour, minute, second)
-        outline_text(clock)
+
+        # set the font
+        graphics.set_font("bitmap8")
+
+        # calculate text position so that it is centred
+        w = graphics.measure_text(clock, 1)
+        x = int(width / 2 - w / 2 + 1)
+        y = 2
+
+        outline_text(clock, x, y)
 
         last_second = second
 
