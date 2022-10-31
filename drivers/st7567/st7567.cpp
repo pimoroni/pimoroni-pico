@@ -62,6 +62,7 @@ namespace pimoroni {
   void ST7567::reset() {
     if(reset_pin == PIN_UNUSED) return;
     gpio_put(reset_pin, 0); sleep_ms(10);
+    sleep_ms(100);
     gpio_put(reset_pin, 1); sleep_ms(10);
     sleep_ms(100);
   }
@@ -93,7 +94,6 @@ namespace pimoroni {
     }
 
     //reset display
-
     reset();
 
 

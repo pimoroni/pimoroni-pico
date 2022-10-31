@@ -16,7 +16,6 @@ using namespace pimoroni;
 ST7567 st7567(128, 64, gfx_pack_pins);
 PicoGraphics_Pen1Bit graphics(st7567.width, st7567.height, nullptr);
 RGBLED backlight_rgb(GfxPack::BL_R, GfxPack::BL_G, GfxPack::BL_B, Polarity::ACTIVE_HIGH);
-
 Button button_a(GfxPack::A);
 Button button_b(GfxPack::B);
 Button button_c(GfxPack::C);
@@ -44,6 +43,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
+  sleep_ms(100);
 
   st7567.set_backlight(50);
 

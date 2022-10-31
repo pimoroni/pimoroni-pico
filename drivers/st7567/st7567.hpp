@@ -34,7 +34,7 @@ namespace pimoroni {
     uint sck;
     uint mosi;
     uint bl;
-    uint reset_pin;
+    uint reset_pin=21;
 
     uint32_t spi_baud = 10000000; //10Mhz
 
