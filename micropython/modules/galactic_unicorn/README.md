@@ -2,6 +2,8 @@
 
 Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
 
+You can buy one here: https://shop.pimoroni.com/products/galactic-unicorn
+
 ## These are not your everyday RGB LEDs!
 
 Internally Galactic Unicorn applies gamma correction to the supplied image data and updates the display with 14-bit precision resulting in extremely linear visual output - including at the low end.
@@ -38,6 +40,7 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
     - [`stop_playing()`](#stop_playing)
   - [Constants](#constants)
     - [`WIDTH` & `HEIGHT`](#width--height)
+  - [Using Breakouts](#using-breakouts)
 
 # Example Program
 
@@ -250,4 +253,27 @@ For example:
 ```python
 num_pixels = gu.WIDTH * gu.HEIGHT
 print(num_pixels)
+```
+
+## Using Breakouts
+
+Galactic Unicorn has two Qw/ST (Qwiic/STEMMA QT) connectors. Breakouts with Qw/ST connectors, can be plugged straight in with a :link:[JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a :link:[JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a :link:[Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
+
+- [List of breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
+
+Galactic Unicorn uses GP4 and GP5 for its I2C interface. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
+
+```python
+from pimoroni_i2c import PimoroniI2C
+from pimoroni import PINS_BREAKOUT_GARDEN
+
+i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+```
+
+Alternatively, you can specify the pin numbers directly:
+
+```python
+from pimoroni_i2c import PimoroniI2C
+
+i2c = PimoroniI2C(sda=(4), scl=(5))
 ```
