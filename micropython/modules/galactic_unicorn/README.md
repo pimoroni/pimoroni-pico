@@ -211,7 +211,7 @@ while gu.is_pressed(gu.SWITCH_A):
 
 The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied.
 
-For example (assuming you've set up your Galactic Unicorn and PicoGraphics objects up as ![we did above](#imports-and-objects):
+For example (assuming you've set up your Galactic Unicorn and PicoGraphics objects up as [we did above](#imports-and-objects):
 
 ```python
   gu.update(graphics)
