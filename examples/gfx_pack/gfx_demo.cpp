@@ -5,15 +5,11 @@
 #include <cstdio>
 
 #include "pico/stdlib.h"
-#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "libraries/gfx_pack/gfx_pack.hpp"
-#include "drivers/st7567/st7567.hpp"
-#include "drivers/button/button.hpp"
-#include "drivers/rgbled/rgbled.hpp"
 
 using namespace pimoroni;
 
-ST7567 st7567(128, 64, gfx_pack_pins);
+ST7567 st7567(128, 64, GfxPack::gfx_pack_pins);
 PicoGraphics_Pen1Bit graphics(st7567.width, st7567.height, nullptr);
 RGBLED backlight_rgb(GfxPack::BL_R, GfxPack::BL_G, GfxPack::BL_B, Polarity::ACTIVE_HIGH);
 Button button_a(GfxPack::A);
