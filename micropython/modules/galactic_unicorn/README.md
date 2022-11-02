@@ -217,7 +217,7 @@ For example (assuming you've set up your Galactic Unicorn and PicoGraphics objec
   gu.update(graphics)
 ```
 
-⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently  (here's it's a Galactic Unicorn function to which you need to pass a PicoGraphics object).
+⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently  (here it's a Galactic Unicorn function to which you need to pass a PicoGraphics object).
 
 ## Audio
 
