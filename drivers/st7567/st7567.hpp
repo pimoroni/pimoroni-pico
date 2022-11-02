@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hardware/spi.h"
+#include "hardware/pwm.h"
 #include "hardware/gpio.h"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
