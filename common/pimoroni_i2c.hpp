@@ -29,9 +29,15 @@ namespace pimoroni {
               scl = I2C_DEFAULT_SCL;
               interrupt = I2C_DEFAULT_INT;
               break;
+            case PLASMA_STICK:
+              sda = I2C_BG_SDA;
+              scl = I2C_BG_SCL;
+              interrupt = PIN_UNUSED;
+              break;
             case PLASMA_2040:
             case INTERSTATE_75:
             case SERVO_2040:
+            case MOTOR_2040:
               sda = I2C_HEADER_SDA;
               scl = I2C_HEADER_SCL;
               interrupt = I2C_HEADER_INT;

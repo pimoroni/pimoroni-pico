@@ -42,10 +42,12 @@ namespace pimoroni {
       CLEAN = 7
     };
 
-    UC8159(uint16_t width, uint16_t height) : UC8159(width, height, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED}) {};
+    UC8159(uint16_t width, uint16_t height) : UC8159(width, height, ROTATE_0, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED}) {};
 
-    UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=PIN_UNUSED, uint reset=27) :
-      DisplayDriver(width, height, ROTATE_0),
+    UC8159(uint16_t width, uint16_t height, SPIPins pins, uint busy=PIN_UNUSED, uint reset=27) : UC8159(width, height, ROTATE_0, pins, busy, reset) {};
+
+    UC8159(uint16_t width, uint16_t height, Rotation rotation, SPIPins pins, uint busy=PIN_UNUSED, uint reset=27) :
+      DisplayDriver(width, height, rotation),
       spi(pins.spi),
       CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), BUSY(busy), RESET(reset) {
         init();

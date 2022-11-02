@@ -89,14 +89,26 @@ namespace pimoroni {
     I2C i2c;
     PCF85063A rtc;
 
+    int width;
+    int height;
+
+    [[deprecated("Use instance variable width.")]] 
     static const int WIDTH = 600;
+    [[deprecated("Use instance variable height.")]]
     static const int HEIGHT = 448;
 
-    InkyFrame() :
-      PicoGraphics_Pen3Bit(WIDTH, HEIGHT, nullptr),
-      uc8159(WIDTH, HEIGHT, {spi0, EINK_CS, CLK, MOSI, PIN_UNUSED, EINK_DC, PIN_UNUSED}),
+    // Default 5.7" constructor
+    InkyFrame() : InkyFrame(600, 448) {};
+
+    // 600x448 for 5.7"
+    // 640x400 for 4.0"
+    InkyFrame(int width, int height) :
+      PicoGraphics_Pen3Bit(width, height, nullptr),
+      uc8159(width, height, {spi0, EINK_CS, CLK, MOSI, PIN_UNUSED, EINK_DC, PIN_UNUSED}),
       i2c(4, 5),
-      rtc(&i2c) {
+      rtc(&i2c),
+      width(width),
+      height(height) {
     }
 
     void init();

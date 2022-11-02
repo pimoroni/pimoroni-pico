@@ -50,9 +50,11 @@ namespace pimoroni {
     enum BOARD {
       BREAKOUT_GARDEN,
       PICO_EXPLORER,
+      PLASMA_STICK,
       PLASMA_2040,
       INTERSTATE_75,
-      SERVO_2040
+      SERVO_2040,
+      MOTOR_2040
     };
   
     enum Rotation {

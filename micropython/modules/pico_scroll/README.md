@@ -12,7 +12,7 @@ We've included helper functions to handle every aspect of drawing to the matrix 
   - [set_pixel](#set_pixel)
   - [set_pixels](#set_pixels)
   - [show_text](#show_text)
-  - [scroll_texr](#scroll_text)
+  - [scroll_text](#scroll_text)
   - [show_bitmap_1d](#show_bitmap_1d)
   - [update](#update)
   - [clear](#clear)
@@ -100,8 +100,8 @@ phrase across the entire display involves offsets from -17 pixels to
 word = "Hello, world!"
 l = len(word) * 6
 for j in range(-17, l):
-    scroll.show_text(word, 8, j)
-    scroll.update()
+    picoscroll.show_text(word, 8, j)
+    picoscroll.update()
     time.sleep(0.1)
 ```
 
@@ -110,8 +110,8 @@ The full 256 characters can be displayed with:
 ```python
 b = bytearray(range(256))
 for j in range(256*6):
-    scroll.show_text(b, 8, j)
-    scroll.update()
+    picoscroll.show_text(b, 8, j)
+    picoscroll.update()
     time.sleep(0.1)
 ```
 
@@ -129,7 +129,7 @@ The full 256 characters can be displayed with:
 
 ```python
 b = bytearray(range(256))
-scroll.scroll_text(b, 8, 100)
+picoscroll.scroll_text(b, 8, 100)
 ```
 
 ### show_bitmap_1d

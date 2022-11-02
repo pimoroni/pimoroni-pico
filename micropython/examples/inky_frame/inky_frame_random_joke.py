@@ -6,7 +6,8 @@ import jpegdec
 import WIFI_CONFIG
 import uasyncio
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 from urllib import urequest
 
 
@@ -27,7 +28,7 @@ WIDTH, HEIGHT = graphics.get_bounds()
 FILENAME = "/sd/random-joke.jpg"
 
 JOKE_IDS = "https://pimoroni.github.io/feed2image/jokeapi-ids.txt"
-JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-600x448.jpg"
+JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-{}x{}.jpg"
 
 import sdcard  # noqa: E402 - putting this at the top causes an MBEDTLS OOM error!?
 sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
@@ -59,7 +60,7 @@ socket.close()
 
 print("Random joke ID: {}".format(random_joke_id))
 
-url = JOKE_IMG.format(random_joke_id)
+url = JOKE_IMG.format(random_joke_id, WIDTH, HEIGHT)
 
 socket = urequest.urlopen(url)
 

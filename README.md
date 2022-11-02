@@ -16,6 +16,11 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
   - [C++ Examples](#c-examples)
   - [Boilerplate for C++ Projects](#boilerplate-for-c-projects)
 - [Supported Products](#supported-products)
+  - [Packs and Bases](#packs-and-bases)
+  - [SHIMs](#shims)
+  - [RP2040 Boards](#rp2040-boards)
+  - [Pico W Aboard](#pico-w-aboard)
+  - [Breakouts](#breakouts)
 - [Tutorials & Guides](#tutorials--guides)
 
 # MicroPython
@@ -27,7 +32,8 @@ The easiest way to get started. If you're new to Pico, we recommend you read our
 New releases are issued regularly with new libraries, bug fixes to our existing libraries and new features inherited from MicroPython upstream. Be sure to check back!
 
 * :link: [Tutorial: Getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
-* [Readme: Instructions for setting up MicroPython](setting-up-micropython.md)
+* [Readme: Instructions for installing MicroPython](setting-up-micropython.md)
+* [Readme: Frequently Asked Questions](faqs-micropython.md)
 * [Pimoroni Pico MicroPython + Drivers Releases](https://github.com/pimoroni/pimoroni-pico/releases)
 * [Readme: PicoGraphics](micropython/modules/picographics)
 

@@ -105,6 +105,21 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_P4;
             break;
+        case DISPLAY_INKY_FRAME_4:
+            width = 640;
+            height = 400;
+            bus_type = BUS_SPI;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_P4;
+            break;
+        case DISPLAY_GALACTIC_UNICORN:
+            width = 53;
+            height = 11;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -125,6 +140,8 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
             return PicoGraphics_PenRGB332::buffer_size(width, height);
         case PEN_RGB565:
             return PicoGraphics_PenRGB565::buffer_size(width, height);
+        case PEN_RGB888:
+            return PicoGraphics_PenRGB888::buffer_size(width, height);
         default:
             return 0;
     }
@@ -187,7 +204,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             self->i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(PimoroniI2C_make_new(&PimoroniI2C_type, 0, 0, nullptr));
             i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
         } else if (bus_type == BUS_SPI) {
-            if(display == DISPLAY_INKY_FRAME) {
+            if(display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED};
             } else if (display == DISPLAY_INKY_PACK) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
@@ -196,10 +213,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     }
 
     // Try to create an appropriate display driver
-    if (display == DISPLAY_INKY_FRAME) {
+    if (display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4) {
         pen_type = PEN_3BIT; // FORCE to 3BIT
         // TODO grab BUSY and RESET from ARG_extra_pins
-        self->display = m_new_class(UC8159, width, height, spi_bus);
+        self->display = m_new_class(UC8159, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_TUFTY_2040) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
@@ -216,7 +233,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     } else if (display == DISPLAY_INKY_PACK) {
         self->display = m_new_class(UC8151, width, height, (Rotation)rotate, spi_bus);
 
-    } else {
+    } else if (display == DISPLAY_GALACTIC_UNICORN) {
+        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
+    }
+    else {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, spi_bus);
     }
 
@@ -260,6 +280,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         case PEN_RGB565:
             self->graphics = m_new_class(PicoGraphics_PenRGB565, self->display->width, self->display->height, self->buffer);
             break;
+        case PEN_RGB888:
+            self->graphics = m_new_class(PicoGraphics_PenRGB888, self->display->width, self->display->height, self->buffer);
+            break;
         default:
             break;
     }
@@ -273,7 +296,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->graphics->clear();
 
     // Update the LCD from the graphics library
-    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_PACK) {
+    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK) {
         self->display->update(self->graphics);
     }
 

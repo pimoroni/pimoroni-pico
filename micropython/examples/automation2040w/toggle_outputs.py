@@ -1,5 +1,8 @@
 import time
-from automation import Automation2040W, SWITCH_A, NUM_OUTPUTS
+from automation import Automation2040W, SWITCH_A
+
+# Uncomment for Automation2040W Mini and comment out above import
+# from automation import Automation2040WMini, SWITCH_A
 
 """
 Demonstrates how to toggle each of Automation 2040 W's output terminals.
@@ -12,6 +15,8 @@ OUTPUT_NAMES = ("O1", "O2", "O3")   # The friendly names to give each digital ou
 
 # Create a new Automation2040W
 board = Automation2040W()
+# Uncomment for Automation2040W Mini
+# board = Automation2040WMini()
 
 # Enable the LED of the switch used to exit the loop
 board.switch_led(SWITCH_A, 50)  # Half Brightness
@@ -26,14 +31,14 @@ while not board.switch_pressed(SWITCH_A):
     board.output(index, toggle)
 
     # Print the state of all outputs
-    for i in range(NUM_OUTPUTS):
-        print(OUTPUT_NAMES[i], " = ", board.output(i), sep="", end=", ")
+    for i in range(board.NUM_OUTPUTS):
+        print(OUTPUT_NAMES[i], " = ", bool(board.output(i)), sep="", end=", ")
 
     # Print a new line
     print()
 
     index += 1                  # Move on to the next output
-    if index >= NUM_OUTPUTS:
+    if index >= board.NUM_OUTPUTS:
         index = 0               # Go back to the first output
         toggle = not toggle     # Invert the toggle value
 

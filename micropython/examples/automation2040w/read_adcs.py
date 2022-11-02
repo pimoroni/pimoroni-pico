@@ -1,5 +1,5 @@
 import time
-from automation import Automation2040W, SWITCH_A, NUM_ADCS
+from automation import Automation2040W, SWITCH_A
 
 """
 Shows how to read the 3 ADC terminals of Automation 2040 W.
@@ -20,7 +20,7 @@ board.switch_led(SWITCH_A, 50)  # Half Brightness
 while not board.switch_pressed(SWITCH_A):
 
     # Read each ADC in turn and print its voltage
-    for i in range(NUM_ADCS):
+    for i in range(board.NUM_ADCS):
         voltage = board.read_adc(i)
         print(ADC_NAMES[i], " = ", round(voltage, 3), sep="", end=", ")
 

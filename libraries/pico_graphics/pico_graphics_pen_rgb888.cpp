@@ -9,10 +9,11 @@ namespace pimoroni {
         }
     }
     void PicoGraphics_PenRGB888::set_pen(uint c) {
-        color = RGB(c, c, c).to_rgb888();
+        color = c;
     }
     void PicoGraphics_PenRGB888::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-        color = RGB(r, g, b).to_rgb888();
+        src_color = {r, g, b};
+        color = src_color.to_rgb888();
     }
     int PicoGraphics_PenRGB888::create_pen(uint8_t r, uint8_t g, uint8_t b) {
         return RGB(r, g, b).to_rgb888();

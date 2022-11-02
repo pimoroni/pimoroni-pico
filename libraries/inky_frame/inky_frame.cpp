@@ -142,7 +142,7 @@ namespace pimoroni {
 
   // Display an image that fills the screen (286*128)
   void InkyFrame::image(const uint8_t* data) {
-    image(data, WIDTH, 0, 0, WIDTH, HEIGHT, 0, 0);
+    image(data, width, 0, 0, width, height, 0, 0);
   }
 
   // Display an image smaller than the screen (sw*sh) at dx, dy

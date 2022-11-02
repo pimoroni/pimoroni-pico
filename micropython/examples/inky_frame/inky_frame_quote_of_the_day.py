@@ -5,7 +5,8 @@ import uasyncio
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 
 
 ENDPOINT = "https://en.wikiquote.org/w/api.php?format=json&action=expandtemplates&prop=wikitext&text={{{{Wikiquote:Quote%20of%20the%20day/{3}%20{2},%20{0}}}}}"
@@ -31,7 +32,7 @@ def status_handler(mode, status, ip):
 network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
 gc.collect()
-graphics = PicoGraphics(DISPLAY_INKY_FRAME)
+graphics = PicoGraphics(DISPLAY)
 WIDTH, HEIGHT = graphics.get_bounds()
 graphics.set_font("bitmap8")
 gc.collect()
