@@ -1,11 +1,12 @@
 import time
 import random
-from picographics import PicoGraphics, DISPLAY_GFX_PACK, PEN_P8
+from picographics import PicoGraphics, DISPLAY_GFX_PACK
 
 display = PicoGraphics(display=DISPLAY_GFX_PACK)
 display.set_backlight(1.0)
 
 WIDTH, HEIGHT = display.get_bounds()
+
 
 class Ball:
     def __init__(self, x, y, r, dx, dy, pen):
@@ -31,7 +32,6 @@ for i in range(0, 10):
             random.randint(0, 15),
         )
     )
-
 
 
 while True:
