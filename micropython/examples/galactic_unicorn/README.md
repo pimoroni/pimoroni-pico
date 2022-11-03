@@ -33,8 +33,8 @@ Galactic Unicorn ships with MicroPython firmware pre-loaded, but you can downloa
 
 The easiest way to start displaying cool stuff on Galactic Unicorn is using our Galactic Unicorn module (which contains a bunch of helpful functions for interacting with the buttons, adjusting brightness and suchlike) and our PicoGraphics library, which is chock full of useful functions for drawing on the LED matrix.
 
-- [Galactic Unicorn function reference](../../modules/picographics/README.md)
-- [PicoGraphics function reference](../../modules/galactic_unicorn/README.md)
+- [Galactic Unicorn function reference](../../modules/galactic_unicorn/README.md)
+- [PicoGraphics function reference](../../modules/picographics/README.md)
 
 ## Examples
 
