@@ -14,8 +14,8 @@
   - [Scrolling Text](#scrolling-text)
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights History](#cheerlights-history)
-- [Other Examples](#other-examples)
   - [Galactic Paint](#galactic-paint)
+- [Other Examples](#other-examples)
   - [Launch (Demo Reel)](#launch-demo-reel)
 
 ## About Galactic Unicorn
@@ -94,7 +94,7 @@ Display scrolling wisdom, quotes or greetz.
 
 ## Wireless Examples
 
-This example needs `network_manager.py` and `WIFI_CONFIG.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+These examples need `WIFI_CONFIG.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
 - [micropython/examples/common](../../examples/common)
 
@@ -104,15 +104,17 @@ This example needs `network_manager.py` and `WIFI_CONFIG.py` (from the `common` 
 
 Updates one pixel every five minutes to display the most recent #Cheerlights colour. Discover the most popular colours over time, or use it as an avant garde (but colourful) 53 hour clock! Find out more about the Cheerlights API at https://cheerlights.com/
 
-## Other Examples
+Requires `WIFI_CONFIG.py` and `network_manager.py` from the `common` directory.
 
 ### Galactic Paint
 
 [galactic_paint](galactic_paint)
 
-Draw on your Galactic Unicorn from another device in real time!
+Draw on your Galactic Unicorn from another device in real time, over wifi!
 
-- [Galactic Paint readme](galactic_paint/README.md)
+Requires `WIFI_CONFIG.py` from the `common` directory plus `micropython-phew` and `microdot` (install these libraries through Thonny's 'Tools > Manage Packages).
+
+## Other Examples
 
 ### Launch (Demo Reel)
 
