@@ -14,7 +14,8 @@ enum PicoGraphicsDisplay {
     DISPLAY_INKY_PACK,
     DISPLAY_INKY_FRAME,
     DISPLAY_INKY_FRAME_4,
-    DISPLAY_GALACTIC_UNICORN
+    DISPLAY_GALACTIC_UNICORN,
+    DISPLAY_GFX_PACK
 };
 
 enum PicoGraphicsPenType {
