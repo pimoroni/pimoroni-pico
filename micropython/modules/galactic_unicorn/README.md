@@ -257,7 +257,7 @@ print(num_pixels)
 
 ## Using Breakouts
 
-Galactic Unicorn has two Qw/ST (Qwiic/STEMMA QT) connectors. Breakouts with Qw/ST connectors, can be plugged straight in with a :link:[JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a :link:[JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a :link:[Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
+Galactic Unicorn has two Qw/ST (Qwiic/STEMMA QT) connectors. Breakouts with Qw/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
 
 - [List of breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
 
