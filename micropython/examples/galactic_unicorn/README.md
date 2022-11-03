@@ -112,7 +112,7 @@ Requires `WIFI_CONFIG.py` and `network_manager.py` from the `common` directory.
 
 Draw on your Galactic Unicorn from another device in real time, over wifi!
 
-Requires `WIFI_CONFIG.py` from the `common` directory plus `micropython-phew` and `microdot` (install these libraries through Thonny's 'Tools > Manage Packages).
+Requires `WIFI_CONFIG.py` from the `common` directory. It also needs the `micropython-phew` and `microdot` libraries (you can install these using Thonny's 'Tools > Manage Packages').
 
 ## Other Examples
 
