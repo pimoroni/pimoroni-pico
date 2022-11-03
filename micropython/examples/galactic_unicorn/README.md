@@ -1,14 +1,6 @@
 # Galactic Unicorn MicroPython Examples <!-- omit in toc -->
-
-Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
-
-- :link: [Galactic Unicorn store page](https://shop.pimoroni.com/products/galactic-unicorn)
-
-Galactic Unicorn ships with MicroPython firmware pre-loaded, but you can download the most recent version at the link below (you'll want the  `galactic-unicorn` image).
-
-- [MicroPython releases](https://github.com/pimoroni/pimoroni-pico/releases)
-- [Installing MicroPython](../../../setting-up-micropython.md)
-  
+ 
+- [About Galactic Unicorn](#about-galactic-unicorn)
 - [Galactic Unicorn and PicoGraphics](#galactic-unicorn-and-picographics)
 - [Examples](#examples)
   - [Clock](#clock)
@@ -22,8 +14,20 @@ Galactic Unicorn ships with MicroPython firmware pre-loaded, but you can downloa
   - [Scrolling Text](#scrolling-text)
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights History](#cheerlights-history)
+- [Other Examples](#other-examples)
   - [Galactic Paint](#galactic-paint)
-- [Factory reset](#factory-reset)
+  - [Launch (Demo Reel)](#launch-demo-reel)
+
+## About Galactic Unicorn
+
+Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
+
+- :link: [Galactic Unicorn store page](https://shop.pimoroni.com/products/galactic-unicorn)
+
+Galactic Unicorn ships with MicroPython firmware pre-loaded, but you can download the most recent version at the link below (you'll want the  `galactic-unicorn` image).
+
+- [MicroPython releases](https://github.com/pimoroni/pimoroni-pico/releases)
+- [Installing MicroPython](../../../setting-up-micropython.md)
 
 ## Galactic Unicorn and PicoGraphics
 
@@ -90,15 +94,17 @@ Display scrolling wisdom, quotes or greetz.
 
 ## Wireless Examples
 
+This example needs `network_manager.py` and `WIFI_CONFIG.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+
+- [micropython/examples/common](../../examples/common)
+
 ### Cheerlights History
 
 [cheerlights_history.py](cheerlights_history.py)
 
 Updates one pixel every five minutes to display the most recent #Cheerlights colour. Discover the most popular colours over time, or use it as an avant garde (but colourful) 53 hour clock! Find out more about the Cheerlights API at https://cheerlights.com/
 
-This example needs `network_manager.py` and `WIFI_CONFIG.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
-
-- [micropython/examples/common](../../examples/common)
+## Other Examples
 
 ### Galactic Paint
 
@@ -108,9 +114,9 @@ Draw on your Galactic Unicorn from another device in real time!
 
 - [Galactic Paint readme](galactic_paint/README.md)
 
-## Factory reset
+### Launch (Demo Reel)
 
 [launch](launch)
 
-If you want to get the demo reel back, copy the contents of this `launch` folder to your Pico W.
+If you want to get the demo reel that Galactic Unicorn ships with back, copy the contents of this `launch` folder to your Pico W.
 
