@@ -40,7 +40,6 @@ def hex_to_rgb(hex):
 
 
 def get_data():
-    global n
     # open the json file
     print(f'Requesting URL: {URL}')
     r = urequests.get(URL)
