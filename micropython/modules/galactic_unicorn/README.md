@@ -16,13 +16,13 @@ No strobing or brightness stepping here folks - it's the perfect backdrop for yo
 
 The Galactic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
 
-Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
+Drawing is primarily handled via our [PicoGraphics]https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
 
 - [Example Program](#example-program)
-- [Interleaved framebuffer](#interleaved-framebuffer)
+- [Interleaved Framebuffer](#interleaved-framebuffer)
 - [Function Reference](#function-reference)
-  - [Imports and objects](#imports-and-objects)
-  - [System state](#system-state)
+  - [Imports and Objects](#imports-and-objects)
+  - [System State](#system-state)
     - [`set_brightness(value)`](#set_brightnessvalue)
     - [`get_brightness()`](#get_brightness)
     - [`adjust_brightness(delta)`](#adjust_brightnessdelta)
@@ -33,11 +33,13 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
     - [`is_pressed(button)`](#is_pressedbutton)
   - [Drawing](#drawing)
     - [`update(PicoGraphics)`](#updatepicographics)
+    - [`clear()`](#clear)
   - [Audio](#audio)
     - [`play_sample(data, length)`](#play_sampledata-length)
     - [`synth_channel(channel)`](#synth_channelchannel)
     - [`play_synth()`](#play_synth)
     - [`stop_playing()`](#stop_playing)
+    - [Channel Function Reference](#channel_function_reference)
   - [Constants](#constants)
     - [`WIDTH` & `HEIGHT`](#width--height)
   - [Using Breakouts](#using-breakouts)
@@ -58,7 +60,7 @@ graphics = PicoGraphics(display=DISPLAY_GALACTIC_UNICORN)
 gu = GalacticUnicorn()
 
 # start position for scrolling (off the side of the display)
-scroll = -53.0
+scroll = float(-GalacticUnicorn.WIDTH)
 
 # message to scroll
 MESSAGE = "Pirate. Monkey. Robot. Ninja."
@@ -72,7 +74,7 @@ while True:
     width = graphics.measure_text(MESSAGE, 1)
     scroll += 0.25
     if scroll > width:
-      scroll = -53.0
+      scroll = float(-GalacticUnicorn.WIDTH)
 
     # clear the graphics object
     graphics.set_pen(BLACK)
@@ -88,7 +90,7 @@ while True:
     time.sleep(0.02)
 ```
 
-# Interleaved framebuffer
+# Interleaved Framebuffer
 
 Galactic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
 
@@ -112,7 +114,7 @@ If you're working with our library then you don't need to worry about any of the
 
 # Function Reference
 
-## Imports and objects
+## Imports and Objects
 
 To access these functions, you'll need to first `import` the relevant libraries and then set up a Galactic Unicorn object:
 
@@ -132,19 +134,19 @@ gu = GalacticUnicorn()
 graphics = PicoGraphics(display=DISPLAY_GALACTIC_UNICORN)
 ```
 
-## System state
+## System State
 
 ### `set_brightness(value)`
 
-Set the brightness - `value` is supplied as a floating point value between `0..1`.
+Set the brightness - `value` is supplied as a floating point value between `0.0` and `1.0`.
 
 ### `get_brightness()`
 
-Returns the current brightness as a value between `0..1`.
+Returns the current brightness as a value between `0.0` and `1.0`.
 
 ### `adjust_brightness(delta)`
 
-Adjust the brightness of the display - `delta` is supplied as a floating point value and will be added to the current brightness (and then clamped to the range `0..1`).
+Adjust the brightness of the display - `delta` is supplied as a floating point value and will be added to the current brightness (and then clamped to the range `0.0` to `1.0`).
 
 For example:
 
@@ -157,15 +159,15 @@ gu.adjust_brightness(-0.2)  # brightness is now 0.8
 
 ### `set_volume(value)`
 
-Set the volume - `value` is supplied as a floating point value between `0..1`.
+Set the volume - `value` is supplied as a floating point value between `0.0` and `1.0`.
 
 ### `get_volume()`
 
-Returns the current volume as a value between `0..1`.
+Returns the current volume as a value between `0.0` and `1.0`.
 
 ### `adjust_volume(delta)`
 
-Adjust the volume - `delta` is supplied as a floating point value and will be added to the current volume (and then clamped to the range `0..1`).
+Adjust the volume - `delta` is supplied as a floating point value and will be added to the current volume (and then clamped to the range `0.0` to `1.0`).
 
 For example:
 
@@ -178,7 +180,7 @@ gu.adjust_volume(-0.2)  # volume is now 0.8
 
 ### `light()`
 
-Get the current value seen by the onboard light sensor as a value between `0...4096`.
+Get the current value seen by the onboard light sensor as a value between `0` and `4095`.
 
 ### `is_pressed(button)`
 
@@ -201,38 +203,44 @@ SWITCH_BRIGHTNESS_DOWN = 26
 For example:
 
 ```python
-while gu.is_pressed(gu.SWITCH_A):
+while not gu.is_pressed(GalacticUnicorn.SWITCH_A):
     # wait for switch A to be pressed
-    print("We did it! We pressed switch A! Heck yeah!")
+    pass
+
+print("We did it! We pressed switch A! Heck yeah!")
 ```
 
 ## Drawing
 
 ### `update(PicoGraphics)`
 
-**This is our recommended way to update the image on Galactic Unicorn.** The PicoGraphics library provides a collection of powerful drawing methods to make things simple.
+The PicoGraphics library provides a collection of powerful drawing methods to make things simple.
 
 The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied.
 
-For example (assuming you've set up your Galactic Unicorn and PicoGraphics objects up as [we did above](#imports-and-objects)):
+For example (assuming you've set up your Galactic Unicorn and PicoGraphics objects up [as we did above](#imports-and-objects)):
 
 ```python
-  gu.update(graphics)
+gu.update(graphics)
 ```
 
-⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently  (here it's a Galactic Unicorn function to which you need to pass a PicoGraphics object).
+⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently. Here it's a Galactic Unicorn function to which you need to pass a PicoGraphics object to.
+
+### `void clear()`
+
+Clear the contents of the interleaved framebuffer. This will make your Galactic Unicorn display turn off. To show an image again, call the `update()` function as described above.
 
 ## Audio
 
-Audio functionality is supported by our [PicoSynth library](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_synth) which allows you to create multiple voice channels with ADSR envelopes. It provides a similar set of functionality to the classic SID chip in the Commodore 64.
+Audio functionality is supported by our [PicoSynth library](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_synth) which allows you to create multiple voice channels with ADSR (attack decay sustain release) envelopes. It provides a similar set of functionality to the classic SID chip in the Commodore 64.
 
-### `play_sample(data, length)`
+### `play_sample(data)`
 
-Play the provided 16-bit audio sample. `data` must point to a buffer that contains 16-bit PCM data and `length` must be the number of samples.
+Play the provided 16-bit audio sample. `data` must point to a `bytearray` that contains 16-bit PCM data. The number of samples is retrieved from the array's length.
 
 ### `synth_channel(channel)`
 
-Gets an `AudioChannel` object which can then be configured with voice, ADSR envelope, etc.
+Gets a `Channel` object which can then be configured with voice, ADSR envelope, etc.
 
 ### `play_synth()`
 
@@ -241,6 +249,34 @@ Start the synth playing.
 ### `stop_playing()`
 
 Stops any currently playing audio.
+
+### Channel Function Reference
+
+```python
+configure(waveforms=None, frequency=None, volume=None,
+          attack=None, decay=None, sustain=None,
+          release=None, pulse_width=None)
+restore()
+waveforms()
+waveforms(waveforms)
+frequency()
+frequency(frequency)
+volume()
+volume(volume)
+attack_duration()
+attack_duration(duration)
+decay_duration()
+decay_duration(duration)
+sustain_level()
+sustain_level(level)
+release_duration()
+release_duration(duration)
+pulse_width()
+pulse_width(width)
+trigger_attack() # start the channel playing
+trigger_release() # stop the channel playing
+play_tone(frequency, volume=None, attack=None, release=None)
+```
 
 ## Constants
 
@@ -251,7 +287,7 @@ The width and height of Galactic Unicorn are available in constants `WIDTH` and 
 For example:
 
 ```python
-num_pixels = gu.WIDTH * gu.HEIGHT
+num_pixels = GalacticUnicorn.WIDTH * GalacticUnicorn.HEIGHT
 print(num_pixels)
 ```
 
@@ -275,5 +311,5 @@ Alternatively, you can specify the pin numbers directly:
 ```python
 from pimoroni_i2c import PimoroniI2C
 
-i2c = PimoroniI2C(sda=(4), scl=(5))
+i2c = PimoroniI2C(sda=4, scl=5)
 ```

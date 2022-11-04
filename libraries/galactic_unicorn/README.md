@@ -1,6 +1,8 @@
-# Galactic Unicorn <!-- omit in toc -->
+# Galactic Unicorn (C/C++)<!-- omit in toc -->
 
 Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
+
+You can buy one here: https://shop.pimoroni.com/products/galactic-unicorn
 
 ## These are not your everyday RGB LEDs!
 
@@ -17,9 +19,9 @@ The Galactic Unicorn library provides a collection of methods that allow you to 
 Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_graphics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
 
 - [Example Program](#example-program)
-- [Interleaved framebuffer](#interleaved-framebuffer)
+- [Interleaved Framebuffer](#interleaved-framebuffer)
 - [Function Reference](#function-reference)
-  - [System state](#system-state)
+  - [System State](#system-state)
     - [`void init()`](#void-init)
     - [`void set_brightness(float value)`](#void-set_brightnessfloat-value)
     - [`float get_brightness()`](#float-get_brightness)
@@ -55,7 +57,7 @@ The following example shows how to scroll a simple message across the display.
 using namespace pimoroni;
 
 // create a PicoGraphics framebuffer to draw into
-PicoGraphics_PenRGB888 graphics(53, 11, nullptr);
+PicoGraphics_PenRGB888 graphics(GalacticUnicorn::WIDTH, GalacticUnicorn::HEIGHT, nullptr);
 
 // create our GalacticUnicorn object
 GalacticUnicorn galactic_unicorn;
@@ -71,14 +73,14 @@ int main() {
   galactic_unicorn.init();
 
   // start position for scrolling (off the side of the display)
-  float scroll = -53.0f;
+  float scroll = -(float)GalacticUnicorn::WIDTH;
 
   while(true) {
     // determine the scroll position of the text
     int width = graphics.measure_text(message, 1);
     scroll += 0.25f;
     if(scroll > width) {
-      scroll = -53.0f;
+      scroll = -(float)GalacticUnicorn::WIDTH;
     }
 
     // clear the graphics object
@@ -99,7 +101,7 @@ int main() {
 }
 ```
 
-# Interleaved framebuffer
+# Interleaved Framebuffer
 
 Galactic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
 
@@ -123,7 +125,7 @@ If you're working with our library then you don't need to worry about any of the
 
 # Function Reference
 
-## System state
+## System State
 
 ### `void init()`
 
@@ -131,15 +133,15 @@ Initialise the Galactic Unicorn hardware, interleaved framebuffer, and PIO progr
 
 ### `void set_brightness(float value)`
 
-Set the brightness - `value` is supplied as a floating point value between `0..1`.
+Set the brightness - `value` is supplied as a floating point value between `0.0` and `1.0`.
 
 ### `float get_brightness()`
 
-Returns the current brightness as a value between `0..1`.
+Returns the current brightness as a value between `0.0` to `1.0`.
 
 ### `void adjust_brightness(float delta)`
 
-Adjust the brightness of the display - `delta` is supplied as a floating point value and will be added to the current brightness (and then clamped to the range `0..1`).
+Adjust the brightness of the display - `delta` is supplied as a floating point value and will be added to the current brightness (and then clamped to the range `0.0` to `1.0`).
 
 For example:
 
@@ -152,15 +154,15 @@ galactic.adjust_brightness(-0.2f); // brightness is now 0.8
 
 ### `void set_volume(float value)`
 
-Set the volume - `value` is supplied as a floating point value between `0..1`.
+Set the volume - `value` is supplied as a floating point value between `0.0` and `1.0`.
 
 ### `float get_volume()`
 
-Returns the current volume as a value between `0..1`.
+Returns the current volume as a value between `0.0` and `1.0`.
 
 ### `void adjust_volume(float delta)`
 
-Adjust the volume - `delta` is supplied as a floating point value and will be added to the current volume (and then clamped to the range `0..1`).
+Adjust the volume - `delta` is supplied as a floating point value and will be added to the current volume (and then clamped to the range `0.0` to `1.0`).
 
 For example:
 
@@ -173,7 +175,7 @@ galactic.adjust_volume(-0.2f); // volume is now 0.8
 
 ### `uint16_t light()`
 
-Get the current value seen by the onboard light sensor as a value between `0...4096`.
+Get the current value seen by the onboard light sensor as a value between `0` and `4095`.
 
 ### `bool is_pressed(uint8_t button)`
 
@@ -196,7 +198,7 @@ static const uint8_t SWITCH_BRIGHTNESS_DOWN = 26;
 For example:
 
 ```c++
-while(!galactic.is_pressed(GalacticUnicorn.SWITCH_A)) {
+while(!galactic.is_pressed(GalacticUnicorn::SWITCH_A)) {
   // wait for switch A to be pressed
 }
 printf("We did it! We pressed switch A! Heck yeah!");
@@ -208,21 +210,25 @@ printf("We did it! We pressed switch A! Heck yeah!");
 
 **This is our recommended way to update the image on Galactic Unicorn.** The PicoGraphics library provides a collection of powerful drawing methods to make things simple.
 
-The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied.
+The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied. This lets you have multiple PicoGraphics objects on the go at once and switch between them by changing which gets passed into this function.
 
-If however you'd rather twiddle individual pixels (for example you're producing some sort of algorithmic output) then you can simply use the `clear()` and `update()` methods mentioned below.
+If however you'd rather twiddle individual pixels (for example you're producing some sort of algorithmic output) then you can simply use the `clear()` and `set_pixel()` methods mentioned below.
 
 ### `void clear()`
 
-Clear the contents of the interleaved framebuffer. If you're using PicoGraphics to build your image (recommended!) then you won't need to call this method as you'll overwrite the entire dispaly when you call `update()` anyway.
+Clear the contents of the interleaved framebuffer. This will make your Galactic Unicorn display turn off when the next frame is displayed.
+
+If you're using PicoGraphics to build your image (recommended!) then you won't need to call this method as you'll overwrite the entire display when you call `update()` anyway.
 
 ### `void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b)`
 
-Set a single pixel to the specified colour. Pixel coordinates go from `0..52` along the `x` axis and from `0..10` on the `y` axis. Colour values are specified as a `0..255` RGB triplet - the supplied colour will be gamma corrected automatically.
+Set a single pixel to the specified colour. The newly set colour will be shown at the next frame. Pixel coordinates go from `0` to `52` along the `x` axis and from `0` to `10` on the `y` axis. Colour values are specified as a `0` to `255` RGB triplet - the supplied colour will be gamma corrected automatically.
+
+ When drawing a full image it's recommended that you keep the time between each `set_pixel` call short to ensure your image gets displayed on the next frame. Otherwise you can get scanning-like visual artefacts (unless that is your intention of course!)
 
 ## Audio
 
-Audio functionality is supported by our [PicoSynth library](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_synth) which allows you to create multiple voice channels with ADSR envelopes. It provides a similar set of functionality to the classic SID chip in the Commodore 64.
+Audio functionality is supported by our [PicoSynth library](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_synth) which allows you to create multiple voice channels with ADSR (attack decay sustain release) envelopes. It provides a similar set of functionality to the classic SID chip in the Commodore 64.
 
 ### `void play_sample(uint8_t *data, uint32_t length)`
 
@@ -240,7 +246,6 @@ Start the synth playing.
 
 Stops any currently playing audio.
 
-
 ## Constants
 
 ### `WIDTH` & `HEIGHT`
@@ -250,5 +255,5 @@ The width and height of Galactic Unicorn are available in constants `WIDTH` and 
 For example:
 
 ```c++
-int num_pixels = GalacticUnicorn.WIDTH * GalacticUnicorn.HEIGHT;
+int num_pixels = GalacticUnicorn::WIDTH * GalacticUnicorn::HEIGHT;
 ```

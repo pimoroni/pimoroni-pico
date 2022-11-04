@@ -104,9 +104,7 @@ namespace pimoroni {
     float get_volume();
     void adjust_volume(float delta);
 
-  private:
     void set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b);
-  public:
 
     uint16_t light();
 
