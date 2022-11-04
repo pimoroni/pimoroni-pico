@@ -39,7 +39,7 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
     - [`synth_channel(channel)`](#synth_channelchannel)
     - [`play_synth()`](#play_synth)
     - [`stop_playing()`](#stop_playing)
-    - [Channel Reference](#channel_reference)
+    - [Channel Reference](#channel-reference)
   - [Constants](#constants)
     - [`WIDTH` & `HEIGHT`](#width--height)
   - [Using Breakouts](#using-breakouts)
