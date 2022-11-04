@@ -21,7 +21,8 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
   - [RP2040 Boards](#rp2040-boards)
   - [Pico W Aboard](#pico-w-aboard)
   - [Breakouts](#breakouts)
-- [Tutorials & Guides](#tutorials--guides)
+  - [Kits](#kits)
+- [Tutorials and Guides](#tutorials-and-guides)
 
 # MicroPython
 
@@ -31,7 +32,7 @@ The easiest way to get started. If you're new to Pico, we recommend you read our
 
 New releases are issued regularly with new libraries, bug fixes to our existing libraries and new features inherited from MicroPython upstream. Be sure to check back!
 
-* :link: [Tutorial: Getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
+* :link: [Learn: Getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 * [Readme: Instructions for installing MicroPython](setting-up-micropython.md)
 * [Readme: Frequently Asked Questions](faqs-micropython.md)
 * [Pimoroni Pico MicroPython + Drivers Releases](https://github.com/pimoroni/pimoroni-pico/releases)
@@ -45,9 +46,9 @@ You can find MicroPython examples for supported sensors, packs and bases in the 
 
 # C/C++
 
-For more advanced users that want to unleash the full power of Pico, you can use our C++ libraries. If you know what you're doing and want to build your own Pimoroni Pico project then start with the [Pimoroni Pico SDK Boilerplate](https://github.com/pimoroni/pico-boilerplate).
+Advanced users that want to unleash the full power of Pico can use our C++ libraries. If you know what you're doing and want to build your own Pimoroni Pico project then start with the [Pimoroni Pico SDK Boilerplate](https://github.com/pimoroni/pico-boilerplate).
 
-* :link: [Tutorial: Pico C++ Development on Windows](https://learn.pimoroni.com/article/pico-development-using-wsl)
+* :link: [Learn: Pico C++ Development on Windows](https://learn.pimoroni.com/article/pico-development-using-wsl)
 * [Readme: Instructions for setting up the C/C++ SDK](setting-up-the-pico-sdk.md)
 
 ## C++ Examples
@@ -98,6 +99,9 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Automation 2040 W (inputs, outputs and relays, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w
 * Inventor 2040 W (motors, servos, noise) - https://shop.pimoroni.com/products/inventor-2040-w
 * Inky Frame 5.7" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-5-7
+* Automation 2040 W Mini (inputs, outputs and a relay, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w-mini
+* Plasma Stick 2040 W (bijou LED strip controller) - https://shop.pimoroni.com/products/plasma-stick-2040-w
+* Galactic Unicorn (dazzling 53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
 
 ## Breakouts
 
@@ -130,14 +134,20 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
 
+## Kits
 
-# Tutorials & Guides
+* Wireless Plasma Kit (Plasma Stick + LED wire + bottle!) - https://shop.pimoroni.com/products/wireless-plasma-kit
 
-- :link: [Getting started with (MicroPython on) Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
-- :link: [Pico C++ Development on Windows / WSL](https://learn.pimoroni.com/article/pico-development-using-wsl)
+# Tutorials and Guides
+
+- :link: [Getting Started with (MicroPython on) Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
+- :link: [Pico C/C++ Development on Windows / WSL](https://learn.pimoroni.com/article/pico-development-using-wsl)
 - :link: [Getting Started with Interstate 75](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
 - :link: [Getting Started with Plasma 2040](https://learn.pimoroni.com/article/plasma-2040)
 - :link: [Assembling Keybow 2040](https://learn.pimoroni.com/article/assembling-keybow-2040)
 - :link: [Getting Started with Badger 2040](https://learn.pimoroni.com/article/getting-started-with-badger-2040)
 - :link: [MicroPython and VL53L5CX](https://learn.pimoroni.com/article/micropython-and-vl53l5cx)
 - :link: [Getting Started with Tufty 2040](https://learn.pimoroni.com/article/getting-started-with-tufty-2040)
+- :link: [Getting Started with Inky Frame](https://learn.pimoroni.com/article/getting-started-with-inky-frame)
+- :link: [Getting Started with Automation 2040 W (and Mini)](https://learn.pimoroni.com/article/getting-started-with-automation-2040-w)
+- :link: [Assembling Wireless Plasma Kit](https://learn.pimoroni.com/article/assembling-wireless-plasma-kit)

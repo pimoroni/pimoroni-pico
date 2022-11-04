@@ -3,6 +3,13 @@ import random
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+A pretty, procedural fire effect.
+
+Switch between landscape fire and vertical fire using the A and B buttons!
+You can adjust the brightness with LUX + and -.
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 

@@ -3,6 +3,13 @@ import random
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+Random LEDs blink on and off mimicing the look of a movie
+super computer doing its work in the eighties.
+
+You can adjust the brightness with LUX + and -.
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 

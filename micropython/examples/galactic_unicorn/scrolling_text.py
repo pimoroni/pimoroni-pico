@@ -2,6 +2,12 @@ import time
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+Display scrolling wisdom, quotes or greetz.
+
+You can adjust the brightness with LUX + and -.
+'''
+
 # constants for controlling scrolling text
 PADDING = 5
 MESSAGE_COLOUR = (255, 255, 255)
