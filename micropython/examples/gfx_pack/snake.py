@@ -49,16 +49,16 @@ def game_over():
 def check_button():
     global next_move, ate_apple
     if gp.switch_a.is_pressed:
-        if(next_move != MOVE_DOWN):
+        if (next_move != MOVE_DOWN):
             next_move = MOVE_UP
     elif gp.switch_b.is_pressed:
-        if(next_move != MOVE_UP):
+        if (next_move != MOVE_UP):
             next_move = MOVE_DOWN
     elif gp.switch_d.is_pressed:
-        if(next_move != MOVE_RIGHT):
+        if (next_move != MOVE_RIGHT):
             next_move = MOVE_LEFT
     elif gp.switch_e.is_pressed:
-        if(next_move != MOVE_LEFT):
+        if (next_move != MOVE_LEFT):
             next_move = MOVE_RIGHT
     elif gp.switch_c.is_pressed:
         game_over()
@@ -94,11 +94,11 @@ def move():
 
     if (next_move == MOVE_UP):
         head_y -= 1
-    elif(next_move == MOVE_DOWN):
+    elif (next_move == MOVE_DOWN):
         head_y += 1
-    elif(next_move == MOVE_LEFT):
+    elif (next_move == MOVE_LEFT):
         head_x -= 1
-    elif(next_move == MOVE_RIGHT):
+    elif (next_move == MOVE_RIGHT):
         head_x += 1
 
     head_possition = (head_x, head_y)

@@ -67,7 +67,7 @@ while True:
     if (temperature < lower_temp_bound):
         r = 0
         b = 255
-    elif(temperature > upper_temp_bound):
+    elif (temperature > upper_temp_bound):
         r = 255
         b = 0
     else:
