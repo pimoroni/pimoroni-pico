@@ -42,55 +42,60 @@ The easiest way to start displaying cool stuff on Galactic Unicorn is using our 
 
 [clock.py](clock.py)
 
-Clock example with (optional) NTP synchronization.
+Clock example with (optional) NTP synchronization. You can adjust the brightness with LUX + and -, and resync the time by pressing A.
 
 ### Eighties Super Computer
 
 [eighties_super_computer.py](eighties_super_computer.py)
 
-Random LEDs blink on and off mimicing the look of a movie super computer doing its work in the eighties.
+Random LEDs blink on and off mimicing the look of a movie super computer doing its work in the eighties. You can adjust the brightness with LUX + and -.
 
 ### Feature Test
 
 [feature_test.py](feature_test.py)
 
-Displays some text, gradients and colours and demonstrates button use.
+Displays some text, gradients and colours and demonstrates button use. You can adjust the brightness with LUX + and -.
 
 ### Feature Test With Audio
 
 [feature_test_with_audio.py](feature_test_with_audio.py)
 
 Displays some text, gradients and colours and demonstrates button use. Also demonstrates some of the audio / synth features.
+- Button A plays a synth tune
+- Button B plays a solo channel of the synth tune
+- Button C plays a sinewave (it's frequency can be adjusted with VOL + and -)
+- Button D plays a second sinewave (it's frequency can be adjusted with LUX + and -)
+- Sleep button stops the sounds
 
 ### Fire Effect
 
 [fire_effect.py](fire_effect.py)
 
-A pretty, procedural fire effect. Switch `landscape = False` for vertical fire!
+A pretty, procedural fire effect. Switch between landscape fire and vertical fire using the A and B buttons! You can adjust the brightness with LUX + and -.
 
 ### Lava Lamp
 
 [lava_lamp.py](lava_lamp.py)
 
-A 70s-tastic, procedural rainbow lava lamp.
+A 70s-tastic, procedural rainbow lava lamp. You can adjust the brightness with LUX + and -.
 
 ### Nostalgia Prompt
 
 [nostalgia_prompt.py](nostalgia_prompt.py)
 
-A collection of copies of classic terminal styles including C64, MS-DOS, Spectrum, and more. Images and text are drawn pixel by pixel from a pattern of Os and Xs.
+A collection of copies of classic terminal styles including C64, MS-DOS, Spectrum, and more. Images and text are drawn pixel by pixel from a pattern of Os and Xs. You can adjust the brightness with LUX + and -.
 
 ### Rainbow
 
 [rainbow.py](rainbow.py)
 
-Some good old fashioned rainbows! You can adjust the cycling speed with VOL + and - and the brightness with LUX + and -.
+Some good old fashioned rainbows! You can adjust the cycling speed with A and B, stripe width with C and D, hue with VOL + and -, and the brightness with LUX + and -. The sleep button stops the animation (can be started again with A or B).
 
 ### Scrolling Text
 
 [scrolling_text.py](scrolling_text.py)
 
-Display scrolling wisdom, quotes or greetz.
+Display scrolling wisdom, quotes or greetz. You can adjust the brightness with LUX + and -.
 
 ## Wireless Examples
 
@@ -105,6 +110,8 @@ These examples need `WIFI_CONFIG.py` (from the `common` directory) to be saved t
 Updates one pixel every five minutes to display the most recent #Cheerlights colour. Discover the most popular colours over time, or use it as an avant garde (but colourful) 53 hour clock! Find out more about the Cheerlights API at https://cheerlights.com/
 
 Requires `WIFI_CONFIG.py` and `network_manager.py` from the `common` directory.
+
+You can adjust the brightness with LUX + and -.
 
 ### Galactic Paint
 

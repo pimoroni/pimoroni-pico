@@ -2,6 +2,14 @@ import time
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+A collection of copies of classic terminal styles including
+C64, MS-DOS, Spectrum, and more. Images and text are drawn
+pixel by pixel from a pattern of Os and Xs.
+
+You can adjust the brightness with LUX + and -.
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 

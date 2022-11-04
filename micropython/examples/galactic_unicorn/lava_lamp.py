@@ -4,6 +4,12 @@ import math
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+A 70s-tastic, procedural rainbow lava lamp.
+
+You can adjust the brightness with LUX + and -.
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 

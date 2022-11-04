@@ -3,6 +3,15 @@ import math
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+Some good old fashioned rainbows!
+
+You can adjust the cycling speed with A and B,
+stripe width with C and D, hue with VOL + and -,
+and the brightness with LUX + and -.
+The sleep button stops the animation (can be started again with A or B).
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
