@@ -18,7 +18,7 @@ target_link_libraries(usermod INTERFACE usermod_modules_py)
 # .py files to copy from modules_py to ports/rp2/modules
 #copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/picosystem.py picosystem)
 copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/pimoroni.py pimoroni)
-
+copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/gfx_pack.py gfx_pack)
 if(PICO_BOARD STREQUAL "pico_w")
     copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/automation.py automation)
     copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/inventor.py inventor)
