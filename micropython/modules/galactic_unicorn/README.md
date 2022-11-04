@@ -16,7 +16,7 @@ No strobing or brightness stepping here folks - it's the perfect backdrop for yo
 
 The Galactic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
 
-Drawing is primarily handled via our [PicoGraphics]https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
+Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
 
 - [Example Program](#example-program)
 - [Interleaved Framebuffer](#interleaved-framebuffer)
@@ -35,11 +35,11 @@ Drawing is primarily handled via our [PicoGraphics]https://github.com/pimoroni/p
     - [`update(PicoGraphics)`](#updatepicographics)
     - [`clear()`](#clear)
   - [Audio](#audio)
-    - [`play_sample(data, length)`](#play_sampledata-length)
+    - [`play_sample(data)`](#play_sampledata)
     - [`synth_channel(channel)`](#synth_channelchannel)
     - [`play_synth()`](#play_synth)
     - [`stop_playing()`](#stop_playing)
-    - [Channel Function Reference](#channel_function_reference)
+    - [Channel Reference](#channel_reference)
   - [Constants](#constants)
     - [`WIDTH` & `HEIGHT`](#width--height)
   - [Using Breakouts](#using-breakouts)
@@ -226,7 +226,7 @@ gu.update(graphics)
 
 ⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently. Here it's a Galactic Unicorn function to which you need to pass a PicoGraphics object to.
 
-### `void clear()`
+### `clear()`
 
 Clear the contents of the interleaved framebuffer. This will make your Galactic Unicorn display turn off. To show an image again, call the `update()` function as described above.
 
@@ -250,7 +250,7 @@ Start the synth playing.
 
 Stops any currently playing audio.
 
-### Channel Function Reference
+### Channel Reference
 
 ```python
 configure(waveforms=None, frequency=None, volume=None,
