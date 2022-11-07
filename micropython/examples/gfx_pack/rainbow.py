@@ -2,14 +2,15 @@
 # If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
 
 import time
-from picographics import PicoGraphics, DISPLAY_GFX_PACK
 from gfx_pack import GfxPack
 
-display = PicoGraphics(display=DISPLAY_GFX_PACK, rotate=0)
+gp = GfxPack()
+display = gp.display
 
 WIDTH, HEIGHT = display.get_bounds()
+display.set_backlight(0)  # turn off the white component of the backlight
 
-gp = GfxPack()
+DANCE_TIME = 1.0
 
 
 # From CPython Lib/colorsys.py
@@ -36,18 +37,35 @@ def hsv_to_rgb(h, s, v):
         return v, p, q
 
 
+# some variables to keep track of rainbows and dancing
 h = 0
+dancing = True
+last_time = time.ticks_ms()
+
 display.set_font("bitmap8")
 
 while True:
+    time_ms = time.ticks_ms()
+
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
-    gp.set_backlight(r, g, b, 0)  # Set backlight to a converted HSV value
-    display.set_pen(15)           # Set pen to black
-    display.clear()
+    gp.set_backlight(r, g, b)     # Set backlight to a converted HSV value
     display.set_pen(0)            # Set pen to white
-    display.text("pico disco!", 18, 5, WIDTH, 2)   # Add some text
-    display.text("\\o/ \\o/ \\o/", 14, 25, WIDTH, 2)  # and some more text
-    display.text("\\o/ \\o/ \\o/", 14, 45, WIDTH, 2)  # and a bit more text
-    display.update()              # Update the display
+    display.clear()
+    display.set_pen(15)           # Set pen to black
+    # draw text and mans
+    if dancing:
+        display.text("pico!", 9, 5, WIDTH, 2)
+        display.text("\\o\\ \\o\\ \\o\\ ", 7, 25, WIDTH, 2)
+        display.text("\\o\\ \\o\\ \\o\\ ", 7, 45, WIDTH, 2)
+    else:
+        display.text("disco!", 69, 5, WIDTH, 2)
+        display.text("/o/ /o/ /o/ ", 21, 25, WIDTH, 2)
+        display.text("/o/ /o/ /o/ ", 21, 45, WIDTH, 2)
+    # our main loop is faster than our dancing loop
+    # this 'if' checks when it's time to dance
+    if time_ms - last_time > DANCE_TIME * 1000:
+        dancing = not dancing
+        last_time = time_ms
+    display.update()
     time.sleep(1.0 / 60)
