@@ -6,7 +6,9 @@ This library offers convenient functions for interacting with [Pico GFX Pack](ht
 - [Table of Content](#table-of-content)
 - [GFX Pack Class](#gfx-pack-class)
   - [Switches](#switches)
-  - [RGB Backlight](#rgb-backlight)
+  - [RGBW Backlight](#rgbw-backlight)
+- [Display](#display)
+  - [Backlight](#backlight)
 
 
 ## GFX Pack Class
@@ -19,53 +21,71 @@ import gfx_pack
 board = gfx_pack.GfxPack()
 ```
 
+From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
 
 ### Switches
 
-The GFX Pack has 5 user switchs located just under the display labeled A to E. The names of these switches in the class are:
+GFX Pack has five switches just below the display. To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
 
-`.switch_a`
+To read a specific input, the `gfx_pack` module contains these handy constants:
 
-`.switch_b`
-
-`.switch_c`
-
-`.switch_d`
-
-`.switch_e`
-
-These can be read with the `.is_pressed` method.
+* `SWITCH_A` = `0`
+* `SWITCH_B` = `1`
+* `SWITCH_C` = `2`
+* `SWITCH_D` = `3`
+* `SWITCH_E` = `4`
 
 ```python
+if board.switch_pressed(SWITCH_A):
+  # Do something interesting here!
 
-if (board.switch_a.is_pressed):
-    print('You pressed Switch A')
-
-if (board.switch_b.is_pressed):
-    print('You pressed Switch B')
+if board.switch_pressed(SWITCH_B):
+  # Do something else even more interesting here!
 ```
 
 
-
-### RGB Backlight
+### RGBW Backlight
 
 The GFX has an RGB backlight as well as the regular Matrix display backlight to change the colour of the backlight. This is accessed via the following method.
 
 
-`.rgb.set_rgb(r, g, b)`
+`.set_backlight(r, g, b, w=None)`
 
-Where r, g, b are values between 0 and 255
+Where r, g, b and w are values between 0 and 255
 
 
 example:
 
+```python
+board.set_backlight(255, 0, 0)  # Makes the Backlight Red
+board.set_backlight(0, 255, 0)  # Makes the Backlight Blue
+board.set_backlight(0, 0, 255)  # Makes the Backlight Green
+board.set_backlight(0, 0, 0, 255)  # Makes the Backlight White
+```
+
+## Display
+
+The display is all handled by our custom picographics drivers the can be accessed via `.display`.
+
+example:
 
 ```python
+display = board.display()
+display.text("Hello World!", 0, 0)
+display.line(0, 0, 128, 64) 
+display.update()  # Update display with the above items
+```
+All the picographics functions can be found [Here](../modules/picographics/README.md)
 
-board.rgb.set_rgb(255, 0, 0)  # Makes the Backlight Red
+### Backlight
 
-board.rgb.set_rgb(0, 255, 0)  # Makes the Backlight Blue
+Included in the picographics display drivers is a function for controling the displays white backlight only which is accessed via `.set_backlight()`.
 
-board.rgb.set_rgb(0, 0, 255)  # Makes the Backlight Green
+This funstion takes a floating point value between `0.0` and `1.0`
 
+```python
+display = board.display()
+display.set_backlight(0.0)  # Backlight is off
+display.set_backlight(0.5)  # Backlight is 50%
+display.set_backlight(1.0)  # Backlight is 100%
 ```
