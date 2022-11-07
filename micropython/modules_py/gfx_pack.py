@@ -13,7 +13,7 @@ SWITCH_E = 4
 class GfxPack:
     I2C_SDA_PIN = 4
     I2C_SCL_PIN = 5
-    SWITCh_PINS = (12, 13, 14, 15, 22)
+    SWITCH_PINS = (12, 13, 14, 15, 22)
     LED_R_PIN = 6
     LED_G_PIN = 7
     LED_B_PIN = 8
@@ -37,9 +37,9 @@ class GfxPack:
     def switch_pressed(self, switch):
         if switch < 0 or switch >= self.NUM_SWITCHES:
             raise ValueError("switch out of range. Expected SWITCH_A (0), SWITCH_B (1),  SWITCH_C (2),  SWITCH_D (3), or  SWITCH_E (4)")
-        return not self.__switches[switch].value()
+        return self.__switches[switch].is_pressed
 
     def set_backlight(self, r, g, b, w=None):
         self.__rgb.set_rgb(r, g, b)
         if w is not None:
-            self.display.set_backlight(w)
+            self.display.set_backlight(w / 255)

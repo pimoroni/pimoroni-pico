@@ -3,7 +3,9 @@ import random
 from gfx_pack import GfxPack
 
 """
-Add something here Gee
+Bouncing Ball demo
+10 balls of different shades will be bouncing around your display.
+Funky...
 """
 
 gp = GfxPack()

@@ -25,9 +25,8 @@ gp.set_backlight(0, 0, 0)  # turn the RGB backlight off
 display = gp.display
 display.set_backlight(0.4)  # set the white to a low value
 
-bmp = BreakoutBME68X(gp.i2c)
-# If this gives an error, try the alternative address
-# bmp = BreakoutBME68X(gp.i2c, 0x77)
+if use_bme68x_breakout:
+    bmp = BreakoutBME68X(gp.i2c)
 
 display.set_pen(0)
 display.clear()
