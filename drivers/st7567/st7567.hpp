@@ -2,15 +2,10 @@
 
 #include "hardware/spi.h"
 #include "hardware/pwm.h"
-#include "hardware/gpio.h"
-#include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 namespace pimoroni {
-
-  
-
   class ST7567 : public DisplayDriver {
     //--------------------------------------------------
     // Constants
@@ -24,8 +19,7 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-
-        spi_inst_t *spi = spi0;
+    spi_inst_t *spi = spi0;
 
     uint32_t dma_channel;
 
@@ -50,8 +44,8 @@ namespace pimoroni {
     ST7567(uint16_t width, uint16_t height, SPIPins pins) :
       DisplayDriver(width, height, ROTATE_0),
       spi(pins.spi), cs(pins.cs), dc(pins.dc), sck(pins.sck), mosi(pins.mosi), bl(pins.bl) {
-        init();
-      }
+      init();
+    }
       
 
     //--------------------------------------------------

@@ -1,9 +1,14 @@
 import time
 import random
-from picographics import PicoGraphics, DISPLAY_GFX_PACK
+from gfx_pack import GfxPack
 
-display = PicoGraphics(display=DISPLAY_GFX_PACK)
-display.set_backlight(1.0)
+"""
+Add something here Gee
+"""
+
+gp = GfxPack()
+gp.set_backlight(0, 0, 0, 255)
+display = gp.display
 
 WIDTH, HEIGHT = display.get_bounds()
 

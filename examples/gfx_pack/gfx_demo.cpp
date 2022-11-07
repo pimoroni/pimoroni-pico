@@ -1,10 +1,5 @@
-#include <math.h>
-#include <cstdlib>
-#include <string.h>
-#include <time.h>
-#include <cstdio>
-
 #include "pico/stdlib.h"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "libraries/gfx_pack/gfx_pack.hpp"
 
 using namespace pimoroni;
@@ -41,7 +36,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 int main() {
   sleep_ms(100);
 
-  st7567.set_backlight(50);
+  st7567.set_backlight(64); // 0 to 255
 
   struct pt {
     float      x;
@@ -66,17 +61,26 @@ int main() {
 
   Point text_location(0, 0);
 
-float hue = 0.0;
+  float hue = 0.0f;
   while(true) {
-    if(button_a.raw()) text_location.x -= 1;
-    if(button_b.raw()) text_location.x += 1;
+    if(button_a.raw()) {
+      text_location.x -= 1;
+    }
+    if(button_b.raw()) {
+      text_location.x += 1;
+    }
 
-    if(button_c.raw()) text_location.y -= 1;
-    if(button_d.raw()) text_location.y += 1;
+    if(button_c.raw()) {
+      text_location.y -= 1;
+    }
+    if(button_d.raw()) {
+      text_location.y += 1;
+    }
 
-    if(button_e.raw()){
+    if(button_e.raw()) {
       text_location.x = 0;
-      text_location.y = 0;}
+      text_location.y = 0;
+    }
   
     graphics.set_pen(0);
     graphics.clear();
@@ -116,5 +120,5 @@ float hue = 0.0;
     sleep_ms(1000/15);
   }
 
-    return 0;
+  return 0;
 }

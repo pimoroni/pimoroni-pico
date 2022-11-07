@@ -1,6 +1,4 @@
 #include "st7567.hpp"
-#include "hardware/pwm.h"
-#include <cstdlib>
 #include <math.h>
 
 
@@ -58,7 +56,9 @@ namespace pimoroni {
   };
 
   void ST7567::reset() {
-    if(reset_pin == PIN_UNUSED) return;
+    if(reset_pin == PIN_UNUSED)
+      return;
+
     gpio_put(reset_pin, 0); sleep_ms(10);
     sleep_ms(100);
     gpio_put(reset_pin, 1); sleep_ms(10);
@@ -95,11 +95,9 @@ namespace pimoroni {
     reset();
 
 
-
     // if auto_init_sequence then send initialisation sequence
     // for our standard displays based on the width and height
     if(auto_init_sequence) {
-
       command(reg::BIAS_1_7);
       command(reg::SEG_DIR_NORMAL);
       command(reg::SETCOMREVERSE);
@@ -130,56 +128,49 @@ namespace pimoroni {
       gpio_put(dc, 1); // data mode
       spi_write_blocking(spi, (const uint8_t*)data, len);
       gpio_put(cs, 1);
-    }
-
-    
+    }    
   }
 
   // Native 16-bit framebuffer update
   void ST7567::update(PicoGraphics *graphics) {
-    
     uint8_t *fb = (uint8_t *)graphics->frame_buffer;
     uint8_t page_buffer[PAGESIZE];
     uint8_t page_byte_selector;
     uint8_t page_bit_selector;
 
-  for (uint8_t page=0; page < 8 ; page++){ //select page
+    for(uint8_t page=0; page < 8 ; page++) { //select page
+      for(uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8)  ; pixel_index++) {  //cycle through a page worth of bits from the fb
+        page_byte_selector = ((pixel_index % 128)); 
+        page_bit_selector = (pixel_index / 128);
 
-    for (uint16_t pixel_index=0 ; pixel_index < (PAGESIZE * 8)  ; pixel_index++){  //cycle through a page worth of bits from the fb
-      page_byte_selector = ((pixel_index % 128)); 
-      page_bit_selector = (pixel_index / 128);
-     
-
-      if (*fb & (0b10000000 >> (pixel_index % 8))){ // check selected pixel is present
-        page_buffer[page_byte_selector] |= (1 << page_bit_selector);
+        if(*fb & (0b10000000 >> (pixel_index % 8))) { // check selected pixel is present
+          page_buffer[page_byte_selector] |= (1 << page_bit_selector);
+        }
+        else {
+          page_buffer[page_byte_selector] &=  ~( 1 << page_bit_selector);
+        }
+    
+        if((pixel_index % 8) >= 7) { //increment fb pointer at end of byte        
+          fb++;       
+        }
       }
-      else{
-        page_buffer[page_byte_selector] &=  ~( 1 << page_bit_selector);
-      }
-   
-      if ((pixel_index % 8) >= 7 ){ //increment fb pointer at end of byte        
-        fb++;       
-      }
-    }
   
-  
-    if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
-      command(reg::ENTER_RMWMODE);
-      command(reg::SETPAGESTART | page);
-      command(reg::SETCOLL);
-      command(reg::SETCOLH);
-      gpio_put(dc, 1); // data mode
-      gpio_put(cs, 0);
-      spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
-      gpio_put(cs, 1);
-      gpio_put(dc, 0); // Back to command mode
-    } 
-    else{ //other pen types incompatable
-      return;
+      if(graphics->pen_type == PicoGraphics::PEN_1BIT) {
+        command(reg::ENTER_RMWMODE);
+        command(reg::SETPAGESTART | page);
+        command(reg::SETCOLL);
+        command(reg::SETCOLH);
+        gpio_put(dc, 1); // data mode
+        gpio_put(cs, 0);
+        spi_write_blocking(spi, &page_buffer[0], PAGESIZE );
+        gpio_put(cs, 1);
+        gpio_put(dc, 0); // Back to command mode
+      } 
+      else { //other pen types incompatable
+        return;
+      }
     }
-    }
-      gpio_put(cs, 1);
-
+    gpio_put(cs, 1);
   }
 
   void ST7567::set_backlight(uint8_t brightness) {

@@ -1,46 +1,47 @@
+import time
+import random
+from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E
+
 """
 Basic Snake demo for GFX Pack
 Feel free to add your own improvements :)
+
 A = up
 B = down
 C = reset
 D = left
 E = right
 """
-from picographics import PicoGraphics, DISPLAY_GFX_PACK
-from gfx_pack import GfxPack
-import time
-import random
 
 MOVE_UP = 0
 MOVE_DOWN = 1
 MOVE_LEFT = 2
 MOVE_RIGHT = 3
+
 next_move = MOVE_RIGHT
 score = 0
-head_possition = (30, 30)
-segments = [head_possition]
+head_position = (30, 30)
+segments = [head_position]
 ate_apple = False
-apple_possition = None
-
-display = PicoGraphics(display=DISPLAY_GFX_PACK)
-display.set_backlight(1.0)
+apple_position = None
 
 gp = GfxPack()
+gp.set_backlight(0, 0, 0, 255)
+display = gp.display
 
 WIDTH, HEIGHT = display.get_bounds()
 
 
 def set_new_apple():
-    global apple_possition
-    apple_possition = (random.randint(0, WIDTH), random.randint(30, HEIGHT))
+    global apple_position
+    apple_position = random.randint(0, WIDTH), random.randint(30, HEIGHT)
 
 
 def game_over():
-    global score, segments, head_possition, ate_apple
+    global score, segments, head_position, ate_apple
     score = 0
-    head_possition = (30, 30)
-    segments = [head_possition]
+    head_position = (30, 30)
+    segments = [head_position]
     ate_apple = False
     set_new_apple()
     pass
@@ -48,25 +49,25 @@ def game_over():
 
 def check_button():
     global next_move, ate_apple
-    if gp.switch_a.is_pressed:
-        if (next_move != MOVE_DOWN):
+    if gp.switch_pressed(SWITCH_A):
+        if next_move != MOVE_DOWN:
             next_move = MOVE_UP
-    elif gp.switch_b.is_pressed:
-        if (next_move != MOVE_UP):
+    elif gp.switch_pressed(SWITCH_B):
+        if next_move != MOVE_UP:
             next_move = MOVE_DOWN
-    elif gp.switch_d.is_pressed:
-        if (next_move != MOVE_RIGHT):
+    elif gp.switch_pressed(SWITCH_C):
+        if next_move != MOVE_RIGHT:
             next_move = MOVE_LEFT
-    elif gp.switch_e.is_pressed:
-        if (next_move != MOVE_LEFT):
+    elif gp.switch_pressed(SWITCH_D):
+        if next_move != MOVE_LEFT:
             next_move = MOVE_RIGHT
-    elif gp.switch_c.is_pressed:
+    elif gp.switch_pressed(SWITCH_E):
         game_over()
 
 
 def check_eaten():
-    global ate_apple, head_possition, apple_possition, score
-    if (head_possition == apple_possition):
+    global ate_apple, head_position, apple_position, score
+    if head_position == apple_position:
         ate_apple = True
         score += 1
         set_new_apple()
@@ -74,37 +75,37 @@ def check_eaten():
 
 def check_collision():
     for index in range(len(segments) - 1):
-        if (head_possition == segments[index]):
+        if head_position == segments[index]:
             game_over()
             return
-    if (head_possition[0] >= WIDTH):
+    if head_position[0] >= WIDTH:
         game_over()
-    if (head_possition[0] <= 0):
+    if head_position[0] <= 0:
         game_over()
-    if (head_possition[1] >= HEIGHT):
+    if head_position[1] >= HEIGHT:
         game_over()
-    if (head_possition[1] <= 20):
+    if head_position[1] <= 20:
         game_over()
 
 
 def move():
-    global head_possition, segments, ate_apple
+    global head_position, segments, ate_apple
 
-    head_x, head_y = head_possition
+    head_x, head_y = head_position
 
-    if (next_move == MOVE_UP):
+    if next_move == MOVE_UP:
         head_y -= 1
-    elif (next_move == MOVE_DOWN):
+    elif next_move == MOVE_DOWN:
         head_y += 1
-    elif (next_move == MOVE_LEFT):
+    elif next_move == MOVE_LEFT:
         head_x -= 1
-    elif (next_move == MOVE_RIGHT):
+    elif next_move == MOVE_RIGHT:
         head_x += 1
 
-    head_possition = (head_x, head_y)
-    segments.append(head_possition)
+    head_position = (head_x, head_y)
+    segments.append(head_position)
 
-    if (ate_apple):
+    if ate_apple:
         ate_apple = False
     else:
         segments.pop(0)
@@ -120,7 +121,7 @@ def draw():
     display.line(0, 63, 0, 20)
     display.line(128, 63, 127, 20)
     # Draw apple
-    display.pixel(apple_possition[0], apple_possition[1])
+    display.pixel(apple_position[0], apple_position[1])
 
     # Drawing snake
     for segment in segments:
@@ -131,10 +132,11 @@ def draw():
 
 game_over()
 
-while 1:
+while True:
     check_button()
     check_eaten()
     move()
     check_collision()
     draw()
+
     time.sleep(0.2)
