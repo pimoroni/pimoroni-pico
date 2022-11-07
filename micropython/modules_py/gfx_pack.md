@@ -1,6 +1,6 @@
 # GFX Pack (MicroPython) <!-- omit in toc -->
 
-This library offers convenient functions for interacting with [Pico GFX Pack](https://shop.pimoroni.com/products/gfxpack) - The Pico GFX Pack adds a 128x64 LCD Matrix display to your headered Raspberry Pi Pico or PicoW, with RGBW backlight and 5 input buttons for all your display anc control needs.
+This library offers convenient functions for interacting with [Pico GFX Pack](https://shop.pimoroni.com/products/gfxpack) - The Pico GFX Pack adds a 128x64 LCD Matrix display to your headered Raspberry Pi Pico or PicoW, with RGBW backlight and 5 input buttons for all your display and control needs.
 
 ## Table of Content
 - [Table of Content](#table-of-content)
@@ -13,7 +13,7 @@ This library offers convenient functions for interacting with [Pico GFX Pack](ht
 
 ## GFX Pack Class
 
-The `GfxPack` class deals with RGB backlight and buttons on the GFX Pack. To create one, import the `gfx_pack` module, then define a new `board` variable:
+The `GfxPack` class deals with RGBW backlight and buttons on the GFX Pack. To create one, import the `gfx_pack` module, then define a new `board` variable:
 
 ```python
 import gfx_pack
@@ -70,7 +70,7 @@ The display is all handled by our custom picographics drivers the can be accesse
 example:
 
 ```python
-display = board.display()
+display = board.display
 display.text("Hello World!", 0, 0)
 display.line(0, 0, 128, 64) 
 display.update()  # Update display with the above items
@@ -81,10 +81,10 @@ All the picographics functions can be found [Here](../modules/picographics/READM
 
 Included in the picographics display drivers is a function for controling the displays white backlight only which is accessed via `.set_backlight()`.
 
-This funstion takes a floating point value between `0.0` and `1.0`
+This function takes a floating point value between `0.0` and `1.0`
 
 ```python
-display = board.display()
+display = board.display
 display.set_backlight(0.0)  # Backlight is off
 display.set_backlight(0.5)  # Backlight is 50%
 display.set_backlight(1.0)  # Backlight is 100%
