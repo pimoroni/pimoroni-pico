@@ -1,6 +1,6 @@
-# Pico GFX Pack <!-- omit in toc -->
+# Pico GFX Pack (C++) <!-- omit in toc -->
 
-Our Pico GFX Pack offers 2.15" (128x64) LCD matrix display for your Raspberry Pi Pico it also includes five switches and an RGBW Backlight!
+This library offers convenient functions for interacting with [Pico GFX Pack](https://shop.pimoroni.com/products/gfxpack) - The Pico GFX Pack adds a 128x64 LCD Matrix display to your headered Raspberry Pi Pico or PicoW, with RGBW backlight and 5 input buttons for all your display and control needs.
 
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)
@@ -12,7 +12,7 @@ Our Pico GFX Pack offers 2.15" (128x64) LCD matrix display for your Raspberry Pi
 The following example sets up Pico Display, displays some basic demo text and graphics and will illuminate the backlight green if the A button is pressed.
 
 ```c++
-#include "gxf_pack.hpp"
+#include "gfx_pack.hpp"
 #include "drivers/st7567/st7576.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "rgbled.hpp"
@@ -36,7 +36,7 @@ Button button_e(GfxPack::E);
 
 
 // RGB LED
-RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
+RGBLED led(GfxPack::LED_R, GfxPack::LED_G, GfxPack::LED_B);
 
 int main() {
 

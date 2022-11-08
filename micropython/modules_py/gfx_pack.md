@@ -1,4 +1,4 @@
-# GFX Pack (MicroPython) <!-- omit in toc -->
+# Pico GFX Pack (MicroPython) <!-- omit in toc -->
 
 This library offers convenient functions for interacting with [Pico GFX Pack](https://shop.pimoroni.com/products/gfxpack) - The Pico GFX Pack adds a 128x64 LCD Matrix display to your headered Raspberry Pi Pico or PicoW, with RGBW backlight and 5 input buttons for all your display and control needs.
 
