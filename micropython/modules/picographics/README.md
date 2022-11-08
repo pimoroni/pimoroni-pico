@@ -63,6 +63,7 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * 128x128 I2C OLED - `DISPLAY_I2C_OLED_128X128`
 * Pico Inky Pack - 296x128 mono e-ink - `DISPLAY_INKY_PACK`
 * Inky Frame - 600x447 7-colour e-ink - `DISPLAY_INKY_FRAME`
+* Pico GFX Pack - 128x64 mono LCD Matrix - `DISPLAY_GFX_PACK`
 * Galactic Unicorn - 53x11 LED Matrix - `DISPLAY_GALACTIC_UNICORN`
 
 ### Supported Graphics Modes (Pen Type)

@@ -3,6 +3,7 @@
 #include "drivers/sh1107/sh1107.hpp"
 #include "drivers/uc8151/uc8151.hpp"
 #include "drivers/uc8159/uc8159.hpp"
+#include "drivers/st7567/st7567.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
@@ -120,6 +121,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_GFX_PACK:
+            width = 128;
+            height = 64;
+            bus_type = BUS_SPI;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_1BIT;
+            break;
         default:
             return false;
     }
@@ -178,7 +186,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     PicoGraphicsBusType bus_type = BUS_SPI;
     if(!get_display_settings(display, width, height, rotate, pen_type, bus_type)) mp_raise_ValueError("Unsupported display!");
     if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
-
+    
     pimoroni::SPIPins spi_bus = get_spi_pins(BG_SPI_FRONT);
     pimoroni::ParallelPins parallel_bus = {10, 11, 12, 13, 14, 2}; // Default for Tufty 2040 parallel
     pimoroni::I2C *i2c_bus = nullptr;
@@ -208,6 +216,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED};
             } else if (display == DISPLAY_INKY_PACK) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
+            } else if (display == DISPLAY_GFX_PACK) {
+                spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, 9};
             }
         }
     }
@@ -235,8 +245,11 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     } else if (display == DISPLAY_GALACTIC_UNICORN) {
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
-    }
-    else {
+    
+    } else if (display == DISPLAY_GFX_PACK) {
+        self->display = m_new_class(ST7567, width, height, spi_bus);
+
+    } else {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, spi_bus);
     }
 
