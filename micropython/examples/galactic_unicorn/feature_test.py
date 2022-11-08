@@ -3,6 +3,12 @@ import math
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+Displays some text, gradients and colours and demonstrates button use.
+
+You can adjust the brightness with LUX + and -.
+'''
+
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
 

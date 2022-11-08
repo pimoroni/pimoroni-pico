@@ -5,6 +5,17 @@ from machine import Timer
 from galactic import GalacticUnicorn, Channel
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
+'''
+Displays some text, gradients and colours and demonstrates button use.
+Also demonstrates some of the audio / synth features.
+
+- Button A plays a synth tune
+- Button B plays a solo channel of the synth tune
+- Button C plays a sinewave (it's frequency can be adjusted with VOL + and -)
+- Button D plays a second sinewave (it's frequency can be adjusted with LUX + and -)
+- Sleep button stops the sounds
+'''
+
 gc.collect()
 
 gu = GalacticUnicorn()
