@@ -112,7 +112,7 @@ while True:
         # draw the text
         display.text("CO2", 0, 0, scale=2)
         display.text(f"Temp {temperature:.0f}°c", 0, 16, scale=1)
-        display.text(f"Low {lowest:.0f}ppm", 0, HEIGHT - 8,  scale=1)
+        display.text(f"Low {lowest:.0f}ppm", 0, HEIGHT - 8, scale=1)
         # measure the rest of the text before drawing so that we can right align it
         text_width = display.measure_text(f"{co2:.0f}ppm", scale=2)
         display.text(f"{co2:.0f}ppm", WIDTH - text_width, 0, scale=2)
