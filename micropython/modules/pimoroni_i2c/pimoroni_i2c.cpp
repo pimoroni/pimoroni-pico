@@ -14,7 +14,7 @@ extern "C" {
 _PimoroniI2C_obj_t*  PimoroniI2C_from_machine_i2c_or_native(mp_obj_t i2c_obj) {
     if(MP_OBJ_IS_TYPE(i2c_obj, &PimoroniI2C_type)) {
         return (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(i2c_obj);
-    } else if(MP_OBJ_IS_TYPE(i2c_obj, &machine_hw_i2c_type)) {
+    } else if(MP_OBJ_IS_TYPE(i2c_obj, &machine_i2c_type)) {
         _PimoroniI2C_obj_t *pimoroni_i2c = m_new_obj(_PimoroniI2C_obj_t);
         machine_i2c_obj_t *machine_i2c = (machine_i2c_obj_t *)MP_OBJ_TO_PTR(i2c_obj);
         pimoroni_i2c = m_new_obj(_PimoroniI2C_obj_t);
