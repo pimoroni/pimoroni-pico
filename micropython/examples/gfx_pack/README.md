@@ -65,11 +65,11 @@ Basic Snake demo for GFX Pack.
 
 These examples require additional hardware. We connected our breakouts using a JST-SH to JST-SH cable:
 
-- :link: [Qw/ST cable store page](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609846355)
+- :link: [Qw/ST cable store page](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587)
 
 ### CO2
 
-[co2](co2.py)
+[co2.py](co2.py)
 
 Add a SCD41 sensor breakout to your GFX Pack to make a handy CO2 detector!
 Press A to reset the high/low values.
