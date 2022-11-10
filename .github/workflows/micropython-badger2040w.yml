@@ -1,0 +1,172 @@
+name: MicroPython for Badger2040W
+
+on:
+  push:
+  pull_request:
+  release:
+    types: [created]
+
+env:
+  MICROPYTHON_VERSION: eefd946e60aba3ac61c7bfbd0272d07be289e3f3
+  BOARD_TYPE: PIMORONI_BADGER2040W
+  # MicroPython version will be contained in github.event.release.tag_name for releases
+  RELEASE_FILE: pimoroni-badger2040w-${{github.event.release.tag_name || github.sha}}-micropython
+
+jobs:
+  deps:
+    runs-on: ubuntu-20.04
+    name: Dependencies
+    steps:
+    - name: Workspace Cache
+      id: cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        restore-keys: |
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+
+    # Check out MicroPython
+    - name: Checkout MicroPython
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v2
+      with:
+        repository: micropython/micropython
+        ref: ${{env.MICROPYTHON_VERSION}}
+        submodules: false  # MicroPython submodules are hideously broken
+        path: micropython
+
+    - name: Fetch base MicroPython submodules
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython
+      run: git submodule update --init
+
+    - name: Fetch Pico SDK submodules
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython/lib/pico-sdk
+      run: git submodule update --init
+
+    - name: Build mpy-cross
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      working-directory: micropython/mpy-cross
+      run: make
+
+  build:
+    needs: deps
+    name: Build Badger 2040W
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Compiler Cache
+      uses: actions/cache@v2
+      with:
+        path: /home/runner/.ccache
+        key: ccache-micropython-badger2040w-${{github.ref}}-${{github.sha}}
+        restore-keys: |
+          ccache-micropython-badger2040w-${{github.ref}}
+          ccache-micropython-badger2040w-
+  
+    - name: Workspace Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{runner.workspace}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        restore-keys: |
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+        path: pimoroni-pico-${{ github.sha }}
+
+    - name: "HACK: MicroPython Board Fixups"
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board/board-fixup.sh badger2040w ${{env.BOARD_TYPE}} ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board
+
+    # Linux deps
+    - name: Install Compiler & CCache
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+        python3 -m pip install pillow
+
+    # Build without BadgerOS
+    - name: Configure MicroPython (No BadgerOS)
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        cmake -S . -B build-${{env.BOARD_TYPE}}-without-badger-os -DBADGER2040_NO_MODULES=1 -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-badger2040w.cmake -DMICROPY_BOARD=${{env.BOARD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Build MicroPython (No BadgerOS)
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        ccache --zero-stats || true
+        cmake --build build-${{env.BOARD_TYPE}}-without-badger-os -j 2
+        ccache --show-stats || true
+
+    - name: Rename .uf2 for artifact (No BadgerOS)
+      shell: bash
+      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os
+      run: |
+        cp firmware.uf2 ${{env.RELEASE_FILE}}-without-badger-os.uf2
+
+    - name: Store .uf2 as artifact (No BadgerOS)
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.RELEASE_FILE}}-without-badger-os.uf2
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os/${{env.RELEASE_FILE}}-without-badger-os.uf2
+
+    - name: Upload .uf2 (No BadgerOS)
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os/${{env.RELEASE_FILE}}-without-badger-os.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: ${{env.RELEASE_FILE}}-without-badger-os.uf2
+        asset_content_type: application/octet-stream
+
+    # Build with BadgerOS
+    - name: Configure MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        cmake -S . -B build-${{env.BOARD_TYPE}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-badger2040w.cmake -DMICROPY_BOARD=${{env.BOARD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+    - name: Build MicroPython
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        ccache --zero-stats || true
+        cmake --build build-${{env.BOARD_TYPE}} -j 2
+        ccache --show-stats || true
+
+    - name: Rename .uf2 for artifact
+      shell: bash
+      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}
+      run: |
+        cp firmware.uf2 ${{env.RELEASE_FILE}}.uf2
+
+    - name: Store .uf2 as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.RELEASE_FILE}}.uf2
+        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}.uf2
+
+    - name: Upload .uf2
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      with:
+        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}.uf2
+        upload_url: ${{github.event.release.upload_url}}
+        asset_name: ${{env.RELEASE_FILE}}.uf2
+        asset_content_type: application/octet-stream
