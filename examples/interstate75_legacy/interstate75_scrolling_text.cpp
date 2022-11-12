@@ -8,7 +8,6 @@
 #include  "hardware/vreg.h"
 
 #include "common/pimoroni_common.hpp"
-#include "libraries/pico_graphics/pico_graphics.hpp"
 
 #include "hub75.hpp"
 #include "font_outline_10x14.hpp"
@@ -19,31 +18,12 @@ using namespace pimoroni;
 // Should be either 64x64 or 32x32 but perhaps 64x32 an other sizes will work.
 // Note: this example uses only 5 address lines so it's limited to 64 pixel high displays (32*2).
 const uint8_t WIDTH = 64;
-const uint8_t HEIGHT = 32;
+const uint8_t HEIGHT = 64;
 
 Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_GENERIC, true);
-PicoGraphics_PenRGB888 graphics(64, 32, nullptr);
 
 void __isr dma_complete() {
     hub75.dma_complete();
-}
-
-void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
-  float i = floor(h * 6.0f);
-  float f = h * 6.0f - i;
-  v *= 255.0f;
-  uint8_t p = v * (1.0f - s);
-  uint8_t q = v * (1.0f - f * s);
-  uint8_t t = v * (1.0f - (1.0f - f) * s);
-
-  switch (int(i) % 6) {
-    case 0: r = v; g = t; b = p; break;
-    case 1: r = q; g = v; b = p; break;
-    case 2: r = p; g = v; b = t; break;
-    case 3: r = p; g = q; b = v; break;
-    case 4: r = t; g = p; b = v; break;
-    case 5: r = v; g = p; b = q; break;
-  }
 }
 
 void scroll_text(std::string_view text, uint y, float t, Pixel color) {
@@ -75,8 +55,6 @@ void scroll_text(std::string_view text, uint y, float t, Pixel color) {
 }
 
 int main() {
-    graphics.set_pen(0, 0, 100);
-    graphics.clear();
     vreg_set_voltage(VREG_VOLTAGE_1_20);
     sleep_us(100);
     set_sys_clock_khz(266000, true);
@@ -87,22 +65,15 @@ int main() {
 
     // Basic loop to draw something to the screen.
     // This gets the distance from the middle of the display and uses it to paint a circular colour cycle.
-   
     while (true) {
-        graphics.set_pen(0, 0, 100);
-        graphics.clear();
-        //hub75.background = hsv_to_rgb(millis() / 10000.0f, 1.0f, 0.5f);
-        graphics.set_pen(200, 0, 0);
-        graphics.text("Hello World", Point(0, 0), true);
-        graphics.line(Point(0, 0), Point(WIDTH, HEIGHT));
-        graphics.line(Point(0, HEIGHT), Point(WIDTH, 0));
-        hub75.update(&graphics);
-        // Shadow
-        //scroll_text(text, HEIGHT / 2 - letter_height / 2 + 1, (millis() + 50) / 50.0f, Pixel(0, 0, 0));
-        // Text
-        //scroll_text(text, HEIGHT / 2 - letter_height / 2, millis() / 50.0f, Pixel(255, 255, 255));
+        hub75.background = hsv_to_rgb(millis() / 10000.0f, 1.0f, 0.5f);
 
-        //hub75.flip(true); // Flip and clear to the background colour
+        // Shadow
+        scroll_text(text, HEIGHT / 2 - letter_height / 2 + 1, (millis() + 50) / 50.0f, Pixel(0, 0, 0));
+        // Text
+        scroll_text(text, HEIGHT / 2 - letter_height / 2, millis() / 50.0f, Pixel(255, 255, 255));
+
+        hub75.flip(false); // Flip and clear to the background colour
         sleep_ms(1000 / 60);
     }
 }

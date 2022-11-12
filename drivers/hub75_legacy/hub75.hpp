@@ -4,10 +4,8 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
-#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "hub75.pio.h"
 
-namespace pimoroni {
 const uint DATA_BASE_PIN = 0;
 const uint DATA_N_PINS = 6;
 const uint ROWSEL_BASE_PIN = 6;
@@ -128,6 +126,4 @@ class Hub75 {
     void stop(irq_handler_t handler);
     void flip(bool copybuffer=true);
     void dma_complete();
-    void update(PicoGraphics *graphics);
 };
-}
