@@ -1,17 +1,20 @@
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
-#include <vector>
-#include <cstdlib>
-
+#include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/hub75/hub75.hpp"
+#include "okcolor.hpp"
 
 using namespace pimoroni;
 
+
+// Display size in pixels
+// Should be either 64x64 or 32x32 but perhaps 64x32 an other sizes will work.
+// Note: this example uses only 5 address lines so it's limited to 32*2 pixels.
 const uint8_t WIDTH = 64;
 const uint8_t HEIGHT = 32;
-const uint8_t QTY_BALLS = 15;
 
 //If the display looks streaky or corrupted then uncomment one of the other initalisers
 
@@ -29,10 +32,6 @@ Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, false);
 
 PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
-// Callback for the dma interrupt (required)
-void __isr dma_complete() {
-    hub75.dma_complete();
-}
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
 // Outputs are rgb in the range 0-255 for each channel
@@ -54,76 +53,71 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
   }
 }
 
+void text(std::string t, Point p, float s = 1.0f, float a = 1.0f) {
+  int w = graphics.measure_text(t, s);
+  p.x += (hub75.width / 2) - (w / 2);
+  p.y += (hub75.height / 2);
+  graphics.text(t, Point(p.x, p.y), -1, s, a);
+  graphics.text(t, Point(p.x + 1, p.y), -1, s, a);
+  graphics.text(t, Point(p.x + 1, p.y + 1), -1, s, a);
+  graphics.text(t, Point(p.x, p.y + 1), -1, s, a);
+}
+
+// Interrupt callback required function 
+void __isr dma_complete() {
+    hub75.dma_complete();
+}
+
 int main() {
+  //Start hub75 driver
   hub75.start(dma_complete);
 
-  struct pt {
-    float      x;
-    float      y;
-    uint8_t    r;
-    float     dx;
-    float     dy;
-    Pen pen;
-  };
-
-  std::vector<pt> shapes;
-  for(uint8_t i = 0; i < QTY_BALLS; i++) {
-    pt shape;
-    shape.x = rand() % graphics.bounds.w;
-    shape.y = rand() % graphics.bounds.h;
-    shape.r = (rand() % 5) + 2;
-    shape.dx = float(rand() % 255) / 128.0f;
-    shape.dy = float(rand() % 255) / 128.0f;
-    shape.pen = graphics.create_pen(rand() % 255, rand() % 255, rand() % 255);
-    shapes.push_back(shape);
+  uint8_t hue_map[hub75.width][3];
+  for(int i = 0; i < (int)hub75.width; i++) {
+    from_hsv(i / (float)hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
   }
 
-  Point text_location(0, 0);
 
-  Pen BG = graphics.create_pen(120, 40, 60);
-  Pen WHITE = graphics.create_pen(200, 200, 200);
+
+  graphics.set_font("sans");
+  uint i = 0;
 
   while(true) {
 
-  
-    graphics.set_pen(BG);
+    i++;
+    graphics.set_pen(0, 0, 0);
     graphics.clear();
 
-    for(auto &shape : shapes) {
-      shape.x += shape.dx;
-      shape.y += shape.dy;
-      if((shape.x - shape.r) < 0) {
-        shape.dx *= -1;
-        shape.x = shape.r;
-      }
-      if((shape.x + shape.r) >= graphics.bounds.w) {
-        shape.dx *= -1;
-        shape.x = graphics.bounds.w - shape.r;
-      }
-      if((shape.y - shape.r) < 0) {
-        shape.dy *= -1;
-        shape.y = shape.r;
-      }
-      if((shape.y + shape.r) >= graphics.bounds.h) {
-        shape.dy *= -1;
-        shape.y = graphics.bounds.h - shape.r;
+    float s = 0.8f;//0.65f + (sin(i / 25.0f) * 0.15f);
+    float a = 2.0f;// (sin(i / 25.0f) * 100.0f);
+
+    float x = (sin((i) / 50.0f) * 190.0f);
+    float y = (cos((i) / 30.0f) * 10.0f - 10.0f);
+    graphics.set_pen(255, 255, 255);
+    text("Interstate 75 HUB75 display driver", Point(x, y), s, a);
+
+    uint8_t *p = (uint8_t *)graphics.frame_buffer;
+    for(size_t i = 0; i < hub75.width * hub75.height; i++) {
+      int x = i % hub75.width;
+      int y = i / hub75.width;
+      uint r = *p++;
+      uint g = *p++;
+      uint b = *p++;
+      p++;
+
+      if(r > 0) {
+        r = hue_map[x][0];
+        g = hue_map[x][1];
+        b = hue_map[x][2]; 
       }
 
-      graphics.set_pen(shape.pen);
-      graphics.circle(Point(shape.x, shape.y), shape.r);
-
+      graphics.set_pen(r, g, b);
+      graphics.pixel(Point(x, y));
     }
-
-
-
-
-    graphics.set_pen(WHITE);
-    graphics.text("Hello World", text_location, false, 1.0f);
-
-    // update screen
     hub75.update(&graphics);
-    sleep_ms(1000/30);
   }
 
-    return 0;
+  printf("done\n");
+
+  return 0;
 }

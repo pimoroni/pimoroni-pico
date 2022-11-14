@@ -1,4 +1,4 @@
-include(interstate75_hello_world.cmake)
-include(interstate75_pio_dma.cmake)
 include(interstate75_scrolling_text.cmake)
 include(interstate75_balls_demo.cmake)
+include(interstate75_rainbow_text.cmake)
+include(interstate75_fire_effect.cmake)

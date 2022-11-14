@@ -21,7 +21,7 @@ using namespace pimoroni;
 const uint8_t WIDTH = 64;
 const uint8_t HEIGHT = 32;
 
-Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_GENERIC, true);
+Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, true);
 PicoGraphics_PenRGB888 graphics(64, 32, nullptr);
 
 void __isr dma_complete() {
@@ -91,18 +91,12 @@ int main() {
     while (true) {
         graphics.set_pen(0, 0, 100);
         graphics.clear();
-        //hub75.background = hsv_to_rgb(millis() / 10000.0f, 1.0f, 0.5f);
+
         graphics.set_pen(200, 0, 0);
         graphics.text("Hello World", Point(0, 0), true);
-        graphics.line(Point(0, 0), Point(WIDTH, HEIGHT));
-        graphics.line(Point(0, HEIGHT), Point(WIDTH, 0));
-        hub75.update(&graphics);
-        // Shadow
-        //scroll_text(text, HEIGHT / 2 - letter_height / 2 + 1, (millis() + 50) / 50.0f, Pixel(0, 0, 0));
-        // Text
-        //scroll_text(text, HEIGHT / 2 - letter_height / 2, millis() / 50.0f, Pixel(255, 255, 255));
 
-        //hub75.flip(true); // Flip and clear to the background colour
+        hub75.update(&graphics);
+
         sleep_ms(1000 / 60);
     }
 }
