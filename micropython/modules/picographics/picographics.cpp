@@ -4,6 +4,7 @@
 #include "drivers/uc8151/uc8151.hpp"
 #include "drivers/uc8159/uc8159.hpp"
 #include "drivers/st7567/st7567.hpp"
+#include "drivers/hub75/hub75.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
@@ -128,6 +129,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_1BIT;
             break;
+        case DISPLAY_INTERSTATE75:
+            width = 32;
+            height = 32;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -248,6 +257,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     
     } else if (display == DISPLAY_GFX_PACK) {
         self->display = m_new_class(ST7567, width, height, spi_bus);
+
+    } else if (display == DISPLAY_INTERSTATE75) {
+        self->display = m_new_class(Hub75, width, height);
 
     } else {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, round, spi_bus);
