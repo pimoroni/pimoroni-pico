@@ -6,6 +6,7 @@
   - [If you have a board without a reset button:](#if-you-have-a-board-without-a-reset-button)
 - [Copying the firmware to your board](#copying-the-firmware-to-your-board)
 - [Where are the examples?](#where-are-the-examples)
+- [Troubleshooting](#troubleshooting)
 
 We provide pre-built MicroPython images which include all the drivers that include all the libraries and drivers you'll need to use our [supported products](https://github.com/pimoroni/pimoroni-pico#supported-products) To install MicroPython, you'll need to **copy the appropriate .uf2 file from the releases page to your device while it's in DFU/bootloader mode.**
 
@@ -60,3 +61,9 @@ You can also transfer files to boards running MicroPython using command line too
 Note that most of our MicroPython images don't include examples, so you'll need to copy across the ones you want using Thonny. You can find all our MicroPython examples at the link below.
 
 - [MicroPython examples](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/examples)
+
+## Troubleshooting
+
+Having trouble getting started? Check out the link below:
+
+- [MicroPython FAQs](faqs-micropython.md)

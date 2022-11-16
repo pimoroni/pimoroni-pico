@@ -301,9 +301,9 @@ Galactic Unicorn uses GP4 and GP5 for its I2C interface. You can use the constan
 
 ```python
 from pimoroni_i2c import PimoroniI2C
-from pimoroni import PINS_BREAKOUT_GARDEN
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS
 
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 ```
 
 Alternatively, you can specify the pin numbers directly:
