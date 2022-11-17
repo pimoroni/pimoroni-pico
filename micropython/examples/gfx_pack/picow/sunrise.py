@@ -1,8 +1,9 @@
 '''
 sunrise.py
-This Example is for the Pico W with GFX Pack
-This displays onformation from the sunrise-sunset API
-Also Shows how to use a 16x16 animated sprite
+This example is for the Pico W with GFX Pack.
+This displays information from the Sunrise Sunset API:
+Find out more here - https://sunrise-sunset.org/api
+Also shows how to use a 16x16 animated sprite.
 '''
 import WIFI_CONFIG
 import time
@@ -16,8 +17,8 @@ import uasyncio
 import machine
 
 
-# Helper class so that the different formats if time can be converted into one comparable format
-# Makes up for the lack of a datetime module in Micropython
+# Helper class so that the different formats of time can be converted into one comparable format
+# Makes up for the lack of a datetime module in MicroPython
 class TimeObj:
     def __init__(self):
         self.secs = 0
@@ -55,7 +56,7 @@ class TimeObj:
     def get_total_secs(self):
         seconds = 0
         if self.PM:
-            seconds += 43200  # seconds in the frist 12 hours
+            seconds += 43200  # seconds in the first 12 hours
         seconds += (self.hours * 3600)
         seconds += (self.mins * 60)
         seconds += self.secs
@@ -67,10 +68,10 @@ sunrise_obj = TimeObj()
 sunset_obj = TimeObj()
 currenttime = TimeObj()
 
-# Cooridantes for Sheffield UK
+# Coordinates for Sheffield-on-Sea, UK
 lng = -1.4659
 lat = 53.3829
-# Cooridantes for LA , USA
+# Coordinates for LA, USA
 # lng = -118.2437
 # lat = 34.0522
 URL = 'https://api.sunrise-sunset.org/json?lat={0}&lng={1}&date=today'.format(lat, lng)
@@ -82,12 +83,12 @@ sys_status = "Starting"
 WIDTH, HEIGHT = display.get_bounds()
 display.set_backlight(1)  # turn on the white component of the backlight
 
-# Generate hills heights
+# Generate hill heights
 hills1 = [randint(10, 18), randint(10, 18), randint(10, 18), randint(10, 18), randint(10, 18)]
 hills2 = [randint(10, 18), randint(10, 18)]
 hills3 = [randint(10, 18), randint(10, 18)]
 
-# Sprite information for Sun icon
+# Sprite information for sun icon
 sun = [
     [
         0b0000000100000000,
@@ -199,7 +200,7 @@ def calc_circle_points(ori_x, ori_y, r, deg):
 def to_seconds(hour, mins, secs, isPM=False):
     seconds = 0
     if isPM:
-        seconds += 43200  # Seconds in the frist 12 hours
+        seconds += 43200  # Seconds in the first 12 hours
     seconds += (hour * 3600)
     seconds += (mins * 60)
     seconds += secs
@@ -261,7 +262,8 @@ currenttime.parse_localtime(time.localtime())
 
 count = 0  # Counter for animation
 display.set_backlight(0.5)  # Dim white backlight to help colours show
-while 1:
+
+while True:
     # Update current time class instance from RTC
     currenttime.parse_localtime(time.localtime())
     count += 1

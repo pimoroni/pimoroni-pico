@@ -1,12 +1,14 @@
 '''
 zoo_facts.py
-This Example is for the Pico W with GFX Pack
-This uses the Zoo animals API to download a list of 5 animals
-Then diplays them on the GFX Pack
+This example is for the Pico W with GFX Pack.
+It uses the Zoo Animal API to download a list of 5 animals,
+then displays them on the GFX Pack
 A = Next animal
 B = Last animal
 D = Show stats
 E = Fetch a different 5 animals
+Find out more about Zoo Animal API here:
+https://zoo-animal-api.herokuapp.com/
 '''
 import WIFI_CONFIG
 import time
@@ -28,7 +30,7 @@ stat_page = False
 sys_status = "STATUS"
 
 
-# Data calss for containing the animal facts
+# Data class for containing the animal facts
 class Animal:
     def __init__(self):
         self.name = ""
@@ -102,7 +104,7 @@ def status_handler(mode, status, ip):
 
 
 def display_animal(animal, stat_page):
-    display.set_pen(0)            # Set pen to white
+    display.set_pen(0)  # Set pen to white
     display.clear()
     display.set_pen(15)
     if stat_page is False:
