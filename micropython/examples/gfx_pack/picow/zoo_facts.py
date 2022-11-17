@@ -117,7 +117,7 @@ def display_animal(animal, stat_page):
 
     else:
         display.text('Animal Stats {0}'.format(animal_number), 0, 0, WIDTH, 1)
-        display.text('Max Length:{0}'.format(animal.length_max), 0, 10, WIDTH, 1)
+        display.text('Max Length: {0}'.format(animal.length_max), 0, 10, WIDTH, 1)
         display.text('Max Weight: {0}'.format(animal.weight_max), 0, 20, WIDTH, 1)
         display.text('Lifespan: {0}'.format(animal.lifespan), 0, 30, WIDTH, 1)
     display.update()
