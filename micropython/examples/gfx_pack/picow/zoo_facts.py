@@ -1,18 +1,19 @@
-# This Example is for the Pico W with GFX Pack
-# This uses the Zoo animals API to download a list of 5 animals
-# Then diplays them on the GFX Pack
-# A = Next animal
-# B = Last animal
-# D = Show stats
-# E = Fetch a different 5 animals
-
+'''
+zoo_facts.py
+This Example is for the Pico W with GFX Pack
+This uses the Zoo animals API to download a list of 5 animals
+Then diplays them on the GFX Pack
+A = Next animal
+B = Last animal
+D = Show stats
+E = Fetch a different 5 animals
+'''
 import WIFI_CONFIG
 import time
-from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E 
+from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_D, SWITCH_E
 from network_manager import NetworkManager
 import urequests
 import uasyncio
-import json
 
 URL = 'https://zoo-animal-api.herokuapp.com/animals/rand/5'
 
@@ -21,7 +22,7 @@ display = gp.display
 
 WIDTH, HEIGHT = display.get_bounds()
 display.set_backlight(0.5)  # turn off the white component of the backlight
-animals =[]
+animals = []
 animal_number = 0
 stat_page = False
 sys_status = "STATUS"
@@ -38,9 +39,8 @@ class Animal:
         self.length_max = ""
         self.weight_max = ""
         self.lifespan = ""
-        
-        
-    def process_json(self,json):
+
+    def process_json(self, json):
         print(json['name'])
         self.name = json['name']
         self.latin_name = json['latin_name']
@@ -50,7 +50,7 @@ class Animal:
         self.length_max = json['length_max']
         self.weight_max = json['weight_max']
         self.lifespan = json['lifespan']
-    
+
 
 def get_data():
     # open the json file
@@ -61,6 +61,7 @@ def get_data():
     print('Data obtained!')
     r.close()
     return j
+
 
 def get_animals():
     global sys_status
@@ -73,17 +74,17 @@ def get_animals():
         new_animal = Animal()
         new_animal.process_json(json_data[index])
         animals.append(new_animal)
-    print(animals)
     return animals
+
 
 def display_status():
     global sys_status
-    display.set_pen(0)            # Set pen to white
+    display.set_pen(0)  # Set pen to white
     display.clear()
     display.set_pen(15)
     display.text(sys_status, 0, 0, WIDTH, 1)
     display.update()
-    
+
 
 def status_handler(mode, status, ip):
     # reports wifi connection status
@@ -99,31 +100,34 @@ def status_handler(mode, status, ip):
         else:
             print('Wifi connection failed!')
 
+
 def display_animal(animal, stat_page):
     display.set_pen(0)            # Set pen to white
     display.clear()
     display.set_pen(15)
-    if stat_page == False:
+    if stat_page is False:
         display.text('Animal Info {0}'.format(animal_number), 0, 0, WIDTH, 1)
         display.text('Name: {0}'.format(animal.name[:19]), 0, 10, WIDTH, 1)
         display.text('Latin: {0}'.format(animal.latin_name[:19]), 0, 20, WIDTH, 1)
         display.text('Type: {0}'.format(animal.animal_type[:19]), 0, 30, WIDTH, 1)
         display.text('Habitat: {0}'.format(animal.habitat[:19]), 0, 40, WIDTH, 1)
         display.text('Diet: {0}'.format(animal.diet[:19]), 0, 50, WIDTH, 1)
-        
+
     else:
         display.text('Animal Stats {0}'.format(animal_number), 0, 0, WIDTH, 1)
         display.text('Max Length:{0}'.format(animal.length_max), 0, 10, WIDTH, 1)
         display.text('Max Weight: {0}'.format(animal.weight_max), 0, 20, WIDTH, 1)
         display.text('Lifespan: {0}'.format(animal.lifespan), 0, 30, WIDTH, 1)
     display.update()
-        
+
 
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 except Exception as e:
-    print(f'Wifi connection failed! {e}')            
+    print(f'Wifi connection failed! {e}')
+
+
 # From CPython Lib/colorsys.py
 def hsv_to_rgb(h, s, v):
     if s == 0.0:
@@ -148,46 +152,43 @@ def hsv_to_rgb(h, s, v):
         return v, p, q
 
 
-# some variables to keep track of rainbows and dancing
+# some variables to keep track of rainbow background
 h = 0
 
 display.set_font("bitmap8")
 
 animals = get_animals()
-display.set_backlight(0)  
+display.set_backlight(0)
 while True:
-    
 
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
-    gp.set_backlight(r, g, b)     # Set backlight to a converted HSV value
-    display.set_pen(0)            # Set pen to white
+    gp.set_backlight(r, g, b)  # Set backlight to a converted HSV value
+    display.set_pen(0)  # Set pen to white
     display.clear()
-    display.set_pen(15)           # Set pen to black
-    # draw text and mans
+    display.set_pen(15)  # Set pen to black
+    # Draw text
     display_animal(animals[animal_number], stat_page)
 
-    
     if gp.switch_pressed(SWITCH_B):
         animal_number += 1
         if animal_number > 4:
             animal_number = 0
         display_animal(animals[animal_number], stat_page)
         time.sleep(0.4)
-        
+
     elif gp.switch_pressed(SWITCH_A):
         animal_number -= 1
         if animal_number < 0:
             animal_number = 4
         display_animal(animals[animal_number], stat_page)
         time.sleep(0.4)
-            
+
     elif gp.switch_pressed(SWITCH_D):
         stat_page = not stat_page
         display_animal(animals[animal_number], stat_page)
         time.sleep(0.4)
-        
+
     elif gp.switch_pressed(SWITCH_E):
         animals = get_animals()
         display_animal(animals[animal_number], stat_page)
-        
