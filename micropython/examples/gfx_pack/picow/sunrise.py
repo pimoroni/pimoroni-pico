@@ -233,12 +233,12 @@ def draw_sun(sunrise, sunset, time, cycle):
     display.set_pen(15)
     if angle > 180:
         gp.set_backlight(0, 0, 255)
-    elif(angle < 90):
+    elif angle < 90:
         r = 255
         g = ((angle / 100) * 90)
         b = 0
         gp.set_backlight(r, g, b)
-    elif (angle > 90):
+    elif angle > 90:
         r = 255
         g = 100 - (((angle - 90) / 100) * 90)
         b = 0
