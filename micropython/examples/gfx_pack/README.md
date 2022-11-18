@@ -5,11 +5,15 @@
 - [Basic Examples](#basic-examples)
   - [Balls Demo](#balls-demo)
   - [Button Test](#button-test)
+  - [Calc](#calc)
   - [Rainbow](#rainbow)
   - [Snake](#snake)
 - [Advanced Examples](#advanced-examples)
   - [CO2](#co2)
   - [Thermometer](#thermometer)
+- [Wireless Examples](#wireless-examples)
+  - [Sunrise / Sunset](#sunrise--sunset)
+  - [Zoo Facts](#zoo-facts)
 
 ## About Pico GFX Pack
 
@@ -42,6 +46,12 @@ LCD demo with a bunch of bouncy balls!
 [button_test.py](button_test.py)
 
 Shows how to read the buttons, display text and change the colour of the RGBW backlight.
+
+### Calc
+
+[calc.py](calc.py)
+
+This example draws a nice sine wave on the display, reminiscent of the graphical calculators from the 90s.
 
 ### Rainbow
 
@@ -86,3 +96,30 @@ To use the Pico's internal temperature sensor in place of the BME68x breakout, j
 
 - :link: [BME680 breakout store page](https://shop.pimoroni.com/products/bme680-breakout)
 - :link: [BME688 breakout store page](https://shop.pimoroni.com/products/bme688-breakout)
+
+## Wireless Examples
+
+These wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+
+- [micropython/examples/common](../../examples/common)
+
+### Sunrise / Sunset
+
+[sunrise.py](sunrise.py)
+
+This sunrise / sunset simulator displays information from the Sunrise Sunset API, and also shows how to use a 16x16 animated sprite.
+Find out more about Sunrise Sunset API here:  https://sunrise-sunset.org/api
+
+### Zoo Facts
+
+[zoo_facts.py](zoo_facts.py)
+
+Downloads a list of five zoo animals and displays their vital statistics.
+Find out more about Zoo Animal API here: https://zoo-animal-api.herokuapp.com/
+
+- A = Next animal
+- B = Last animal
+- D = Show stats
+- E = Fetch a different 5 animals
+
+
