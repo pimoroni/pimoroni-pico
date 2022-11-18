@@ -36,7 +36,7 @@ class TimeObj:
     # Returns time variables as a single string
     def get_str(self):
         h, m, s = self.get_time()
-        return "{0}:{1}:{2:2}".format(h, m, s)
+        return "{0:02d}:{1:02d}:{2:02d}".format(h, m, s)
 
     # Set time variables from the sunrise-sunset API
     def parse_api(self, apiStr):
