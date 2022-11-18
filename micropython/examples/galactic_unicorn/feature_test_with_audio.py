@@ -346,7 +346,7 @@ while True:
         text = "Raise B"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        text = "Power B"
+        text = "Lower B"
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
         text = "Stop"
