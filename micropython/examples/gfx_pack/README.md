@@ -107,8 +107,8 @@ These wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the 
 
 [sunrise.py](sunrise.py)
 
-This Pico W example displays information from the Sunrise Sunset API -  https://sunrise-sunset.org/api
-Also shows how to use a 16x16 animated sprite!
+This sunrise / sunset simulator displays information from the Sunrise Sunset API, and also shows how to use a 16x16 animated sprite.
+Find out more about Sunrise Sunset API here:  https://sunrise-sunset.org/api
 
 ### Zoo Facts
 
