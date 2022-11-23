@@ -26,7 +26,7 @@ def draw_axis():
 def draw_sine(offset=0, vlines=False):
     for x in range(128):
         angle = 720 / 128 * x
-        y = int((sin(radians(angle + offset)) * 24) + 32)
+        y = int(32 - (sin(radians(angle + offset)) * 24))
         display.pixel(x, y)
         if vlines:
             if x % 2 == 0:
@@ -35,7 +35,10 @@ def draw_sine(offset=0, vlines=False):
 
 def draw_text():
     display.text("Remember A-Level Maths!", 0, 0, WIDTH, 1)
-    display.text("y=sin(x)           x=(-360:360)", 0, 58, WIDTH, 1)
+    display.text("y = sin(x)", 0, HEIGHT - 6, scale=1)
+    # measure this text so we can right orientate it
+    textwidth = display.measure_text("x = -360°:360°", scale=1)
+    display.text("x = -360°:360°", WIDTH - textwidth, HEIGHT - 6, scale=1)
 
 
 # Clear display
