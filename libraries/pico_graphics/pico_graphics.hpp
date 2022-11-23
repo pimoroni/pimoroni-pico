@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <cstdint>
+#include <cmath>
 #include <algorithm>
 #include <vector>
 #include <functional>
@@ -251,11 +252,13 @@ namespace pimoroni {
     void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
     int32_t measure_text(const std::string &t, float s = 2.0f, uint8_t letter_spacing = 1);
     void polygon(const std::vector<Point> &points);
+    void arc(const Point &center, const Point &start, float degrees, float w = 1.0f);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
+    std::vector<Point> arc_points(const Point &center, const Point &start, float degrees);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
