@@ -39,13 +39,13 @@ namespace pimoroni {
     }
 
     void ICP10125::reset() {
-        uint16_t command = __bswap16(SOFT_RESET);
+        uint16_t command = __builtin_bswap16(SOFT_RESET);
         i2c->write_blocking(address, (uint8_t *)&command, 2, false);
         sleep_ms(10); // Soft reset time is 170us but you can never be too sure...
     }
 
     ICP10125::reading ICP10125::measure(meas_command cmd) {
-        uint16_t command = __bswap16(cmd);
+        uint16_t command = __builtin_bswap16(cmd);
         reading result = {0.0f, 0.0f, OK};
         uint16_result results[3];
 
@@ -74,9 +74,9 @@ namespace pimoroni {
         if(results[1].crc8 != crc8((uint8_t *)&results[1].data, 2)) {result.status = CRC_FAIL; return result;};
         if(results[2].crc8 != crc8((uint8_t *)&results[2].data, 2)) {result.status = CRC_FAIL; return result;};
 
-        int temperature = __bswap16(results[0].data);
+        int temperature = __builtin_bswap16(results[0].data);
         // Due to all the byte swapping nonsense I'm not sure if I've discarded the LLSB or LMSB here...
-        int pressure = ((int32_t)__bswap16(results[1].data) << 8) | (__bswap16(results[2].data >> 8)); // LLSB is discarded
+        int pressure = ((int32_t)__builtin_bswap16(results[1].data) << 8) | (__builtin_bswap16(results[2].data >> 8)); // LLSB is discarded
 
         process_data(pressure, temperature, &result.pressure, &result.temperature);
         return result;
@@ -84,7 +84,7 @@ namespace pimoroni {
 
     int ICP10125::chip_id() {
         uint16_result result;
-        uint16_t command = __bswap16(READ_ID);
+        uint16_t command = __builtin_bswap16(READ_ID);
 
         i2c->write_blocking(address, (uint8_t *)&command, 2, true);
         i2c->read_blocking(address, (uint8_t *)&result, 3, false);
@@ -93,12 +93,12 @@ namespace pimoroni {
             return -1;
         }
 
-        return __bswap16(result.data) & 0x3f;
+        return __builtin_bswap16(result.data) & 0x3f;
     }
 
     bool ICP10125::read_otp() {
         uint16_result result[4];
-        uint16_t command = __bswap16(READ_OTP);
+        uint16_t command = __builtin_bswap16(READ_OTP);
         uint8_t move_address_ptr[] = {
             MOVE_ADDRESS_PTR >> 8, MOVE_ADDRESS_PTR & 0xff,
             0x00,
@@ -114,7 +114,7 @@ namespace pimoroni {
             if(result[x].crc8 != crc8((uint8_t *)&result[x].data, 2)) {
                 return false;
             }
-            sensor_constants[x] = (float)__bswap16(result[x].data);
+            sensor_constants[x] = (float)__builtin_bswap16(result[x].data);
         }
 
         return true;
