@@ -205,7 +205,7 @@ namespace pimoroni {
     i2c->read_blocking(address, (uint8_t *)&value, 2, false);
 
     // TODO do we need to bswap this return value?
-    return __bswap16(value);
+    return __builtin_bswap16(value);
   }
 
   // Read a 32-bit register
