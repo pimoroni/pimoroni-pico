@@ -137,4 +137,6 @@ Here are some cool Galactic Unicorn community projects and resources that you mi
 - :link: [Galactic Unicorn MQTT scroller (and 3D printed case)](https://github.com/ucl-casa-ce/Galactic-Unicorn-MQTT-Scroller)
 - :link: [Compiling custom pimoroni-pico MicroPython (with ulab)](https://medium.com/@iestynlloyd/galactic-unicorns-and-custom-pimoroni-pico-firmware-38dd7c5913b8)
 - :link: [Galactic Unicorn Graphical Workout](https://www.instructables.com/Galactic-Unicorn-Graphical-Workout/)
+- :link: [Galactic Unicorn Bounce - Simple GFX Demo](https://www.instructables.com/Galactic-Unicorn-Bounce-Simple-GFX-Demo/)
 - :link: [Cheerlights + Galactic Unicorn + MicroPython (beginner-friendly tutorial)](https://cheerlights.com/cheerlights-raspberry-pi-pico-w-micropython/)
+- :link: [CheerClock (plus laser-cut templates for a fancy case/diffuser)](https://github.com/seanosteen/CheerClock)
