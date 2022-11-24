@@ -8,7 +8,7 @@
 
 using namespace pimoroni;
 
-InkyFrame inky(640, 400);
+InkyFrame inky(800, 480);
 datetime_t now;
 datetime_t today;
 
