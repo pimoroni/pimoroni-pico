@@ -1,1 +1,3 @@
-main.py
+*.py
+lib/*.py
+lib/urllib/*.py
