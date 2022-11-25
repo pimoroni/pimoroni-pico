@@ -285,8 +285,7 @@ namespace pimoroni {
       }
     } else {
       // Polygon impl
-      int16_t theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
-      theta = -theta + 90; // This fixes the bug... but I have no idea why it works
+      int16_t theta = this->rad_to_deg(std::atan2(start.y - center.y, start.x - center.x));
       float r = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
 
       if (r < 1) {
@@ -311,7 +310,7 @@ namespace pimoroni {
     if (degrees >= 360) degrees = 359;
     if (degrees <= -360) degrees = -359;
 
-    uint16_t start_theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
+    uint16_t start_theta = this->rad_to_deg(std::atan2(start.y - center.y, start.x - center.x));
     // Pythagoras
     float radius = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2));
 
