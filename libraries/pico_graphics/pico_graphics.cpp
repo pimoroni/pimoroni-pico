@@ -308,7 +308,7 @@ namespace pimoroni {
 
     std::vector<Point> points;
     for (float rads = 0; rads <= span_rads; rads += step_size) {
-        float theta = start_theta - rads;
+        float theta = start_theta + rads;
         points.emplace_back(Point(std::cos(theta) * radius + center.x, std::sin(theta) * radius + center.y));
     }
     return points;
