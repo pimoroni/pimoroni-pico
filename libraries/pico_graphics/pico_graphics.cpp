@@ -1,7 +1,6 @@
 #include "pico_graphics.hpp"
 
 #define TAU (6.2831853)
-#define ARC_STEPS (1 * TAU / 360)
 
 namespace pimoroni {
 
