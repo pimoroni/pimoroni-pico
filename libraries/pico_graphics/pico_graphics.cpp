@@ -289,12 +289,18 @@ namespace pimoroni {
       theta = -theta + 90; // This fixes the bug... but I have no idea why it works
       float r = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
 
-      Point inner_start(this->fast_cos(theta) * r + center.x, this->fast_sin(theta) * r + center.y);
-      std::vector<Point> inner = this->arc_points(center, inner_start, degrees);
-      // Reverse push inner arc so the outline is a continuous set of points
-      while (!inner.empty()) {
+      if (r < 1) {
+        // Optimized alternative path:
+        // if it's a slice of a pie use the center point to finish the polygon
+        points.push_back(center);
+      } else {
+        Point inner_start(this->fast_cos(theta) * r + center.x, this->fast_sin(theta) * r + center.y);
+        std::vector<Point> inner = this->arc_points(center, inner_start, degrees);
+        // Reverse push inner arc so the outline is a continuous set of points
+        while (!inner.empty()) {
           points.push_back(inner.back());
           inner.pop_back();
+        }
       }
 
       this->polygon(points);
