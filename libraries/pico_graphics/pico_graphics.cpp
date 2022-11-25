@@ -1,6 +1,7 @@
 #include "pico_graphics.hpp"
 
-#define ARC_STEPS (1 * 3.14159 / 180)
+#define TAU (6.2831853)
+#define ARC_STEPS (1 * TAU / 360)
 
 namespace pimoroni {
 
@@ -275,7 +276,7 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::arc(const Point &center, const Point &start, float degrees, float w) {
+  void PicoGraphics::arc(const Point &center, const Point &start, uint16_t degrees, float w) {
     std::vector<Point> points = this->arc_points(center, start, degrees);
     if (w <= 1) {
       // Lines impl
@@ -284,9 +285,11 @@ namespace pimoroni {
       }
     } else {
       // Polygon impl
-      float theta = std::atan2(start.x - center.x, start.y - center.y);
-      float inner_radius = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
-      Point inner_start(std::cos(theta) * inner_radius + center.x, std::sin(theta) * inner_radius + center.y);
+      int theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
+      theta = -theta + 90; // This fixes the bug but I have no idea why it works
+      float r = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
+
+      Point inner_start(this->fast_cos(theta) * r + center.x, this->fast_sin(theta) * r + center.y);
       std::vector<Point> inner = this->arc_points(center, inner_start, degrees);
       while (!inner.empty()) {
           points.push_back(inner.back());
@@ -297,21 +300,37 @@ namespace pimoroni {
     }
   }
 
-  std::vector<Point> PicoGraphics::arc_points(const Point &center, const Point &start, float degrees) {
+  std::vector<Point> PicoGraphics::arc_points(const Point &center, const Point &start, uint16_t degrees) {
     if (degrees > 360) degrees = 360;
 
-    float span_rads = degrees * 3.14159 / 180;
-    float step_size = span_rads / std::ceil(span_rads / ARC_STEPS);
-    float start_theta = std::atan2(start.x - center.x, start.y - center.y);
+    int start_theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
     // Pythagoras
     float radius = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2));
 
     std::vector<Point> points;
-    for (float rads = 0; rads <= span_rads; rads += step_size) {
-        float theta = start_theta + rads;
-        points.emplace_back(Point(std::cos(theta) * radius + center.x, std::sin(theta) * radius + center.y));
+    for (float step = 0; step <= degrees; step += 1) {
+        float theta = start_theta - step;
+        points.emplace_back(Point(this->fast_cos(theta) * radius + center.x, this->fast_sin(theta) * radius + center.y));
     }
     return points;
+  }
+
+  int PicoGraphics::rad_to_deg(float rad) {
+    return std::round(rad * 360 / TAU);
+  }
+
+  float PicoGraphics::deg_to_rad(int deg) {
+    return ((float) deg) / 360 * TAU;
+  }
+
+  float PicoGraphics::fast_sin(int deg) {
+    while (deg < 0) {
+      deg += 360;
+    }
+
+    deg %= 360;
+
+    return this->sin_degs_lut[deg];
   }
 
   void PicoGraphics::line(Point p1, Point p2) {
