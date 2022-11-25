@@ -276,7 +276,7 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::arc(const Point &center, const Point &start, uint16_t degrees, float w) {
+  void PicoGraphics::arc(const Point &center, const Point &start, int16_t degrees, float w) {
     std::vector<Point> points = this->arc_points(center, start, degrees);
     if (w <= 1) {
       // Lines impl
@@ -285,7 +285,7 @@ namespace pimoroni {
       }
     } else {
       // Polygon impl
-      int theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
+      int16_t theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
       theta = -theta + 90; // This fixes the bug... but I have no idea why it works
       float r = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
 
@@ -301,30 +301,31 @@ namespace pimoroni {
     }
   }
 
-  std::vector<Point> PicoGraphics::arc_points(const Point &center, const Point &start, uint16_t degrees) {
-    if (degrees > 360) degrees = 360;
+  std::vector<Point> PicoGraphics::arc_points(const Point &center, const Point &start, int16_t degrees) {
+    if (degrees >= 360) degrees = 359;
+    if (degrees <= -360) degrees = -359;
 
-    int start_theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
+    uint16_t start_theta = this->rad_to_deg(std::atan2(start.x - center.x, start.y - center.y));
     // Pythagoras
     float radius = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2));
 
     std::vector<Point> points;
-    for (float step = 0; step <= degrees; step += 1) {
-        float theta = start_theta - step;
+    for (uint16_t step = 0; step <= std::abs(degrees); step += 1) {
+        int16_t theta = start_theta + (degrees > 0 ? -step : step);
         points.emplace_back(Point(this->fast_cos(theta) * radius + center.x, this->fast_sin(theta) * radius + center.y));
     }
     return points;
   }
 
-  int PicoGraphics::rad_to_deg(float rad) {
+  int16_t PicoGraphics::rad_to_deg(float rad) {
     return std::round(rad * 360 / TAU);
   }
 
-  float PicoGraphics::deg_to_rad(int deg) {
+  float PicoGraphics::deg_to_rad(int16_t deg) {
     return ((float) deg) / 360 * TAU;
   }
 
-  float PicoGraphics::fast_sin(int deg) {
+  float PicoGraphics::fast_sin(int16_t deg) {
     while (deg < 0) {
       deg += 360;
     }

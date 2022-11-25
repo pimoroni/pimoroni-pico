@@ -252,20 +252,20 @@ namespace pimoroni {
     void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
     int32_t measure_text(const std::string &t, float s = 2.0f, uint8_t letter_spacing = 1);
     void polygon(const std::vector<Point> &points);
-    void arc(const Point &center, const Point &start, uint16_t degrees, float w = 1.0f);
+    void arc(const Point &center, const Point &start, int16_t degrees, float w = 1.0f);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
 
-    float deg_to_rad(int deg);
-    int rad_to_deg(float rad);
+    float deg_to_rad(int16_t deg);
+    int16_t rad_to_deg(float rad);
 
-    float fast_sin(int deg);
-    float fast_cos(int deg) {
+    float fast_sin(int16_t deg);
+    float fast_cos(int16_t deg) {
       return this->fast_sin(deg + 90);
     };
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
-    std::vector<Point> arc_points(const Point &center, const Point &start, uint16_t degrees);
+    std::vector<Point> arc_points(const Point &center, const Point &start, int16_t degrees);
 
     constexpr static const float sin_degs_lut[360] = {
         0, 0.017452406, 0.034899497, 0.052335956, 0.069756474, 0.087155743, 0.104528463, 0.121869343, 0.139173101,
