@@ -68,7 +68,7 @@ jobs:
         restore-keys: |
           ccache-micropython-badger2040w-${{github.ref}}
           ccache-micropython-badger2040w-
-  
+
     - name: Workspace Cache
       uses: actions/cache@v2
       with:
@@ -81,6 +81,13 @@ jobs:
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
+
+    # Check out dir2u2f
+    - uses: actions/checkout@v2
+      with:
+        repository: gadgetoid/dir2uf2
+        ref: v0.0.1
+        path: dir2uf2
 
     - name: "HACK: MicroPython Board Fixups"
       shell: bash
@@ -95,45 +102,7 @@ jobs:
         sudo apt update && sudo apt install ccache gcc-arm-none-eabi
         python3 -m pip install pillow
 
-    # Build without BadgerOS
-    - name: Configure MicroPython (No BadgerOS)
-      shell: bash
-      working-directory: micropython/ports/rp2
-      run: |
-        cmake -S . -B build-${{env.BOARD_TYPE}}-without-badger-os -DBADGER2040_NO_MODULES=1 -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-badger2040w.cmake -DMICROPY_BOARD=${{env.BOARD_TYPE}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-    - name: Build MicroPython (No BadgerOS)
-      shell: bash
-      working-directory: micropython/ports/rp2
-      run: |
-        ccache --zero-stats || true
-        cmake --build build-${{env.BOARD_TYPE}}-without-badger-os -j 2
-        ccache --show-stats || true
-
-    - name: Rename .uf2 for artifact (No BadgerOS)
-      shell: bash
-      working-directory: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os
-      run: |
-        cp firmware.uf2 ${{env.RELEASE_FILE}}-without-badger-os.uf2
-
-    - name: Store .uf2 as artifact (No BadgerOS)
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{env.RELEASE_FILE}}-without-badger-os.uf2
-        path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os/${{env.RELEASE_FILE}}-without-badger-os.uf2
-
-    - name: Upload .uf2 (No BadgerOS)
-      if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      with:
-        asset_path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os/${{env.RELEASE_FILE}}-without-badger-os.uf2
-        upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}-without-badger-os.uf2
-        asset_content_type: application/octet-stream
-
-    # Build with BadgerOS
+    # Build firmware
     - name: Configure MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
@@ -154,11 +123,23 @@ jobs:
       run: |
         cp firmware.uf2 ${{env.RELEASE_FILE}}.uf2
 
+    - name: Append Filesystem
+      shell: bash
+      run: |
+        python3 -m pip install littlefs-python
+        ./dir2uf2/dir2uf2 --append-to micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}.uf2 --manifest pimoroni-pico-${{ github.sha }}/micropython/examples/badger2040w/uf2-manifest.txt --filename with-examples.uf2 pimoroni-pico-${{ github.sha }}/micropython/examples/badger2040w/
+
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{env.RELEASE_FILE}}.uf2
         path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}.uf2
+
+    - name: Store .uf2 + examples as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{env.RELEASE_FILE}}-with-examples.uf2
+        path: ${{env.RELEASE_FILE}}-with-examples.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
