@@ -275,7 +275,7 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::arc(const Point &center, const Point &start, float degrees, float w = 1.0f) {
+  void PicoGraphics::arc(const Point &center, const Point &start, float degrees, float w) {
     std::vector<Point> points = this->arc_points(center, start, degrees);
     if (w <= 1) {
       // Lines impl
