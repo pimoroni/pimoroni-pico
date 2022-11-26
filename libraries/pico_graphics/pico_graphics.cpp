@@ -279,7 +279,7 @@ namespace pimoroni {
     std::vector<Point> points = this->arc_points(center, start, degrees);
     if (w <= 1) {
       // Lines impl
-      for (auto i = 1; i < points.size(); i++) {
+      for (unsigned int i = 1; i < points.size(); i++) {
           this->line(points[i - 1], points[i]);
       }
     } else {
