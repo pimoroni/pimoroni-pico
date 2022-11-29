@@ -1,5 +1,6 @@
 #include <cstdio>
 #include "drivers/hub75/hub75.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "pico/multicore.h"
 
 #include "micropython/modules/util.hpp"
@@ -111,6 +112,15 @@ void Hub75_display_update() {
     if(hub75_obj) {
         hub75_obj->hub75->start(nullptr);
     }
+}
+
+extern mp_obj_t Hub75_update(mp_obj_t self_in, mp_obj_t graphics_in) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+    ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
+
+    self->galactic->update(picographics->graphics);
+
+    return mp_const_none;
 }
 
 mp_obj_t Hub75_start(mp_obj_t self_in) {

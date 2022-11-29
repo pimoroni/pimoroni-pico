@@ -1,5 +1,6 @@
 import hub75
 import time
+import math
 from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
 WIDTH, HEIGHT = 32, 32
 
@@ -57,7 +58,6 @@ animate = True
 stripe_width = 3.0
 speed = 1.0
 
-gu.set_brightness(0.5)
 
 phase = 0
 while True:
