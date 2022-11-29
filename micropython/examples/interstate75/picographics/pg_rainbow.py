@@ -65,21 +65,7 @@ while True:
     if animate:
         phase += speed
 
-
     start = time.ticks_ms()
-
     draw()
 
     print("total took: {} ms".format(time.ticks_ms() - start))
-
-
-
-
-
-
-
-
-
-
-
-
