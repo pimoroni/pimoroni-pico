@@ -12,6 +12,7 @@ extern "C" {
 #include "hub75.h"
 #include "py/builtin.h"
 #include "py/mpthread.h"
+#include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
 
 typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
@@ -128,7 +129,7 @@ extern mp_obj_t Hub75_update(mp_obj_t self_in, mp_obj_t graphics_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
 
-    self->galactic->update(picographics->graphics);
+    self->hub75->update(picographics->graphics);
 
     return mp_const_none;
 }
