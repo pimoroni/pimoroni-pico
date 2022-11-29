@@ -64,7 +64,9 @@ cd ../../../
 git clone https://github.com/pimoroni/pimoroni-pico.git
 cd pimoroni-pico
 git submodule update --init
-mkdir build
+mkdir build && cd build
+cmake ..
+make
 ```
 
 And you're done. Everything is installed and ready to go.
