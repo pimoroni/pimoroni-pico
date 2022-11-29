@@ -13,6 +13,16 @@ extern "C" {
 #include "py/builtin.h"
 #include "py/mpthread.h"
 
+typedef struct _ModPicoGraphics_obj_t {
+    mp_obj_base_t base;
+    PicoGraphics *graphics;
+    DisplayDriver *display;
+    void *spritedata;
+    void *buffer;
+    _PimoroniI2C_obj_t *i2c;
+    //mp_obj_t scanline_callback; // Not really feasible in MicroPython
+} ModPicoGraphics_obj_t;
+
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
