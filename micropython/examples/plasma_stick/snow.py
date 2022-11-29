@@ -10,7 +10,7 @@ Adjust SNOW_INTENSITY for more snow.
 # Set how many LEDs you have
 NUM_LEDS = 50
 
-# How much snow? [bigger number = more snowflakes] 
+# How much snow? [bigger number = more snowflakes]
 SNOW_INTENSITY = 0.0002
 
 # Change RGB colours here (RGB colour picker: https://g.co/kgs/k2Egjk )
@@ -26,6 +26,7 @@ def display_current():
     # paint our current LED colours to the strip
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, current_leds[i][0], current_leds[i][1], current_leds[i][2])
+
 
 def move_to_target():
     # nudge our current colours closer to the target colours
@@ -51,11 +52,11 @@ led_strip.start()
 while True:
     for i in range(NUM_LEDS):
         # randomly add snow
-        if SNOW_INTENSITY > uniform(0, 1): 
+        if SNOW_INTENSITY > uniform(0, 1):
             # set a target to start a snowflake
             target_leds[i] = SNOW_COLOUR
         # slowly reset snowflake to background
         if current_leds[i] == target_leds[i]:
-             target_leds[i] = BACKGROUND_COLOUR       
+            target_leds[i] = BACKGROUND_COLOUR
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip

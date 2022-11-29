@@ -26,6 +26,7 @@ def display_current():
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, current_leds[i][0], current_leds[i][1], current_leds[i][2])
 
+
 def move_to_target():
     # nudge our current colours closer to the target colours
     for i in range(NUM_LEDS):
@@ -50,11 +51,11 @@ led_strip.start()
 while True:
     for i in range(NUM_LEDS):
         # randomly add sparkles
-        if SPARKLE_INTENSITY > uniform(0, 1): 
+        if SPARKLE_INTENSITY > uniform(0, 1):
             # set a target to start a sparkle
             target_leds[i] = SPARKLE_COLOUR
         # for any sparkles that have achieved max sparkliness, reset them to background
         if current_leds[i] == target_leds[i]:
-             target_leds[i] = BACKGROUND_COLOUR       
+            target_leds[i] = BACKGROUND_COLOUR
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip

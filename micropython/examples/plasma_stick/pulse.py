@@ -1,4 +1,3 @@
-import time
 import plasma
 from plasma import plasma_stick
 from math import sin
@@ -27,16 +26,14 @@ while True:
     for i in range(NUM_LEDS):
         led_strip.set_hsv(i, COLOUR, 1.0, sin(offset))
     offset += 0.002
-    
+
 #     # our sine wave goes between -1.0 and 1.0 - this means the LEDs will be off half the time
 #     # this formula forces the brightness to be between 0.0 and 1.0
 #     for i in range(NUM_LEDS):
 #         led_strip.set_hsv(i, COLOUR, 1.0, (1 + sin(offset)) / 2)
 #     offset += 0.002
-    
+
 #     # adjust the saturation instead of the brightness/value
 #     for i in range(NUM_LEDS):
 #         led_strip.set_hsv(i, COLOUR, (1 + sin(offset)) / 2, 0.8)
 #     offset += 0.002
-
-
