@@ -49,14 +49,15 @@ def draw():
             graphics.pixel(x, y)
 
     hub.update(graphics)
+    #hub.start()
 
 
-hue_map = [from_hsv(x / width, 1.0, 1.0) for x in range(width)]
+hue_map = [from_hsv(x / width, 1.0, 0.5) for x in range(width)]
 hue_offset = 0.0
 
 animate = True
 stripe_width = 3.0
-speed = 1.0
+speed = 5.0
 
 
 phase = 0
@@ -66,6 +67,7 @@ while True:
         phase += speed
 
     start = time.ticks_ms()
+    time.sleep(0.2)
     draw()
 
-    print("total took: {} ms".format(time.ticks_ms() - start))
+    #print("total took: {} ms".format(time.ticks_ms() - start))
