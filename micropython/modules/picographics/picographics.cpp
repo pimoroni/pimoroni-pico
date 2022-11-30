@@ -274,7 +274,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     } else if (display == DISPLAY_GFX_PACK) {
         self->display = m_new_class(ST7567, width, height, spi_bus);
 
-    } else if (display == DISPLAY_INTERSTATE75) {
+    } else if (display == DISPLAY_INTERSTATE75_32X32 || display == DISPLAY_INTERSTATE75_64X64 || display == DISPLAY_INTERSTATE75_64X32) {
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
     } else {
