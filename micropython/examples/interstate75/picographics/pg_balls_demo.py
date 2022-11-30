@@ -1,6 +1,5 @@
 import hub75
 import time
-import math
 import random
 from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
 WIDTH, HEIGHT = 32, 32
@@ -11,6 +10,7 @@ hub.start()
 
 width = WIDTH
 height = HEIGHT
+
 
 class Ball:
     def __init__(self, x, y, r, dx, dy, pen):
@@ -63,7 +63,3 @@ while True:
 
     hub.update(graphics)
     time.sleep(0.025)
-
-
-
-

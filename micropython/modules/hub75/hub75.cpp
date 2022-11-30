@@ -146,30 +146,6 @@ mp_obj_t Hub75_stop(mp_obj_t self_in) {
     return mp_const_none;
 }
 
-mp_obj_t Hub75_set_color(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_color };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_color, MP_ARG_REQUIRED | MP_ARG_INT },
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    Pixel c;
-    c.color = args[ARG_color].u_int;
-
-    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Hub75_obj_t);
-    self->hub75->set_color(x, y, c);
-
-    return mp_const_none;
-}
-
 mp_obj_t Hub75_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_x, ARG_y, ARG_r, ARG_g, ARG_b };
     static const mp_arg_t allowed_args[] = {

@@ -49,7 +49,6 @@ def draw():
             graphics.pixel(x, y)
 
     hub.update(graphics)
-    #hub.start()
 
 
 hue_map = [from_hsv(x / width, 1.0, 0.5) for x in range(width)]
@@ -70,4 +69,4 @@ while True:
     time.sleep(0.2)
     draw()
 
-    #print("total took: {} ms".format(time.ticks_ms() - start))
+    print("total took: {} ms".format(time.ticks_ms() - start))

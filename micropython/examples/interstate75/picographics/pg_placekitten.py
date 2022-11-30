@@ -1,7 +1,5 @@
 import gc
-import uos
 import random
-import machine
 import jpegdec
 import uasyncio
 import WIFI_CONFIG

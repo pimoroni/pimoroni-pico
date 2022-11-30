@@ -131,7 +131,6 @@ def sync_time():
         time.sleep(0.2)
 
         redraw_display_if_reqd()
-        #hub.update(graphics)
 
     if max_wait > 0:
         print("Connected")
@@ -152,9 +151,6 @@ def sync_time():
 # We use the IRQ method to detect the button presses to avoid incrementing/decrementing
 # multiple times when the button is held.
 utc_offset = 0
-
-
-
 
 year, month, day, wd, hour, minute, second, _ = rtc.datetime()
 
@@ -189,23 +185,19 @@ def redraw_display_if_reqd():
         w = graphics.measure_text(clock, 1)
         x = int(width / 2 - w / 2 + 1)
         y = 11
-        
 
         outline_text(clock, x, y)
 
         last_second = second
 
 
-
-
 sync_time()
 
 while True:
 
-
     redraw_display_if_reqd()
 
-    # update the display
+    # Update the display
     hub.update(graphics)
 
     time.sleep(0.01)
