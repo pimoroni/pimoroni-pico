@@ -250,6 +250,22 @@ void Hub75::dma_complete() {
         set_pixel(x, y, r, g, b);
     }
     }
+    esle if(graphics->pen_type == PicoGraphics::PEN_RGB888M) {
+    uint32_t *p = (uint32_t *)graphics->frame_buffer;
+    for(size_t j = 0; j < width * height; j++) {
+
+        int width_for_x_units =  width / units_x // Calacuted the number of lines per display unit
+        int height_for_y_units =  height / units_y
+        int x = j % (width * height_for_y_units);
+        int y = j / (width * height_for_Y_units);
+        uint32_t col = *p;
+        uint8_t r = (col & 0xff0000) >> 16;
+        uint8_t g = (col & 0x00ff00) >>  8;
+        uint8_t b = (col & 0x0000ff) >>  0;
+        p++;
+        set_pixel(x, y, r, g, b);
+    }
+    }
     else if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
     uint16_t *p = (uint16_t *)graphics->frame_buffer;
     for(size_t j = 0; j < width * height; j++) {

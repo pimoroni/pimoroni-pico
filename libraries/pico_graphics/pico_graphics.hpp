@@ -88,6 +88,7 @@ namespace pimoroni {
     constexpr RGB888 to_rgb888() {
       return (r << 16) | (g << 8) | (b << 0);
     }
+
   };
 
   typedef int Pen;
@@ -163,6 +164,7 @@ namespace pimoroni {
       PEN_RGB332,
       PEN_RGB565,
       PEN_RGB888,
+      PEN_RGB888M
     };
 
     void *frame_buffer;
@@ -444,6 +446,24 @@ namespace pimoroni {
         return w * h * sizeof(uint32_t);
       }
   };
+
+  class PicoGraphics_PenRGB888M : public PicoGraphics {
+    public:
+      RGB src_color;
+      RGB888 color;
+      uint8_t units_x;
+      uint8_t units_y;
+      PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      static size_t buffer_size(uint w, uint h) {
+        return w * units_x * h *units_y * sizeof(uint32_t);
+      }
+  };
+
 
 
   class DisplayDriver {

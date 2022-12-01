@@ -54,6 +54,8 @@ class Hub75 {
     public:
     uint width;
     uint height;
+    uint units_x = 1;
+    uint units_y = 1;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
@@ -111,8 +113,8 @@ class Hub75 {
 
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false, units_x, units_y) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint units_x, uint units_y){units_x(units_x); units_y(units_y)};
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);

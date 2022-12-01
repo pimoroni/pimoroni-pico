@@ -5,7 +5,7 @@ import uasyncio
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INTERSTATE75_64X64 as DISPLAY
 import hub75
 
 """
@@ -25,10 +25,11 @@ def status_handler(mode, status, ip):
 network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
-WIDTH, HEIGHT = 64, 64
+graphics = PicoGraphics(DISPLAY)
+WIDTH, HEIGHT = graphics.get_bounds()
 
 hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_FM6126A)
-graphics = PicoGraphics(DISPLAY)
+
 hub.start()
 
 WIDTH, HEIGHT = graphics.get_bounds()
