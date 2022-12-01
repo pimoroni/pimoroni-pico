@@ -15,7 +15,7 @@ import machine
 import network
 import ntptime
 import hub75
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INTERSTATE75_64X32 as DISPLAY
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD
@@ -35,11 +35,11 @@ MIDNIGHT_SATURATION = 1.0
 
 MIDDAY_VALUE = 0.8
 MIDNIGHT_VALUE = 0.3
-
-WIDTH, HEIGHT = 32, 32
+graphics = PicoGraphics(DISPLAY)
+WIDTH, HEIGHT = graphics.get_bounds()
 
 hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_GENERIC)
-graphics = PicoGraphics(DISPLAY)
+
 hub.start()
 # create the rtc object
 rtc = machine.RTC()

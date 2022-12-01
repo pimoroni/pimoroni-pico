@@ -87,12 +87,14 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     enum { 
         ARG_width,
         ARG_height,
+        ARG_buffer,
         ARG_panel_type,
         ARG_stb_invert
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_panel_type, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_stb_invert, MP_ARG_INT, {.u_int = 0} },
     };
@@ -106,9 +108,23 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     PanelType paneltype = (PanelType)args[ARG_panel_type].u_int;
     bool stb_invert = args[ARG_stb_invert].u_int;
 
+    Pixel *buffer = nullptr;
+
+    if (args[ARG_buffer].u_obj) {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
+        buffer = (Pixel *)bufinfo.buf;
+        if(bufinfo.len < (size_t)(width * height * sizeof(Pixel))) {
+            mp_raise_ValueError("Supplied buffer is too small!");
+        }
+    } else {
+        buffer = m_new(Pixel, width * height );
+    }
+
     hub75_obj = m_new_obj_with_finaliser(_Hub75_obj_t);
     hub75_obj->base.type = &Hub75_type;
-    hub75_obj->hub75 = m_new_class(Hub75, width, height, paneltype, stb_invert);
+    hub75_obj->buf = buffer;
+    hub75_obj->hub75 = m_new_class(Hub75, width, height, buffer, paneltype, stb_invert);
 
     return MP_OBJ_FROM_PTR(hub75_obj);
 }

@@ -6,7 +6,7 @@
 
 namespace pimoroni {
 
-Hub75::Hub75(uint width, uint height, PanelType panel_type, bool inverted_stb)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
     // Set up allllll the GPIO
@@ -29,9 +29,13 @@ Hub75::Hub75(uint width, uint height, PanelType panel_type, bool inverted_stb)
     gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
 
 
-    back_buffer = new Pixel[width * height];
-    managed_buffer = true;
-
+    if (buffer == nullptr) {
+        back_buffer = new Pixel[width * height];
+        managed_buffer = true;
+    } else {
+        back_buffer = buffer;
+        managed_buffer = false;
+    }
 
     if (brightness == 0) {
         if (width >= 64) brightness = 6;

@@ -109,9 +109,10 @@ class Hub75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    Hub75(uint width, uint height) : Hub75(width, height, PANEL_GENERIC, false) {};
-    Hub75(uint width, uint height, PanelType panel_type) : Hub75(width, height, panel_type, false) {};
-    Hub75(uint width, uint height, PanelType panel_type, bool inverted_stb);
+    Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
+    Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
