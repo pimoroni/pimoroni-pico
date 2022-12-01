@@ -1,7 +1,7 @@
 # BME280 <!-- omit in toc -->
 
 - [Getting Started](#getting-started)
-- [Reading Temperature, Pressure \& Humidity](#reading-temperature-pressure--humidity)
+- [Reading Temperature, Pressure and Humidity](#reading-temperature-pressure-and-humidity)
 - [Configuring The Sensor](#configuring-the-sensor)
   - [Filter Settings](#filter-settings)
   - [Oversampling Settings](#oversampling-settings)
@@ -24,7 +24,7 @@ i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 bme = BreakoutBME280(i2c)
 ```
 
-## Reading Temperature, Pressure & Humidity
+## Reading Temperature, Pressure and Humidity
 
 The `read` method will return a tuple containing Temperature (degrees C), Pressure (Pa) and Humidity (RH %) values:
 
