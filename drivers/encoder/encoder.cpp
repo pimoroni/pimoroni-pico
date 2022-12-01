@@ -301,7 +301,7 @@ Encoder::Capture Encoder::capture() {
 
   // Calculate the average frequency of steps
   float frequency = 0.0f;
-  if(change != 0 && cumulative_time != 0 && cumulative_time != INT32_MAX) {
+  if(change != 0 &&  cumulative_time != 0 && cumulative_time != INT32_MAX) {
     frequency = (clocks_per_time * (float)change) / (float)cumulative_time;
   }
 
