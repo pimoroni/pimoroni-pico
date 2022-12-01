@@ -37,6 +37,7 @@ const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
 typedef struct _Hub75_obj_t {
     mp_obj_base_t base;
     Hub75* hub75;
+    void *buf;
 } _Hub75_obj_t;
 
 _Hub75_obj_t *hub75_obj;
