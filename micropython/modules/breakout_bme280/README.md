@@ -1,7 +1,7 @@
 # BME280 <!-- omit in toc -->
 
 - [Getting Started](#getting-started)
-- [Reading Temperature, Pressure & Humidity](#reading-temperature-pressure--humidity)
+- [Reading Temperature, Pressure \& Humidity](#reading-temperature-pressure--humidity)
 - [Configuring The Sensor](#configuring-the-sensor)
   - [Filter Settings](#filter-settings)
   - [Oversampling Settings](#oversampling-settings)
@@ -37,7 +37,7 @@ temperature, pressure, humidity = bme.read()
 The `configure` method allows you to set up the oversampling, filtering and operation mode.
 
 ```python
-bmp.configure(filter, standby_time, os_pressure, os_humidity, os_temp, mode)
+bme.configure(filter, standby_time, os_pressure, os_humidity, os_temp, mode)
 ```
 
 The `breakout_bme280` module includes constants for these:
