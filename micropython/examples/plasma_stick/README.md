@@ -7,8 +7,12 @@
   - [Alternating Blinkies](#alternating-blinkies)
   - [Fire](#fire)
   - [Moon](#moon)
+  - [Pulse](#pulse)
   - [Rainbows](#rainbows)
+  - [Snow](#snow)
+  - [Sparkles](#sparkles)
   - [Thermometer](#thermometer)
+  - [Tree](#tree)
 - [Advanced Examples](#advanced-examples)
   - [CO2](#co2)
   - [Encoder](#encoder)
@@ -86,17 +90,41 @@ A simple 🔥 fire effect example 🤘 (warning, flashy).
 Spooky moon simulator - the LEDs will get brighter as midnight approaches!
 Needs to be run from Thonny to get the correct time.
 
+### Pulse
+
+[pulse.py](pulse.py)
+
+Adjust the brightness or saturation of the LEDs using a sine wave.
+
 ### Rainbows
 
 [rainbows.py](rainbows.py)
 
 Some good old fashioned rainbows!
 
+### Snow
+
+[snow.py](snow.py)
+
+Snow in a bottle!
+
+### Sparkles
+
+[sparkles.py](sparkles.py)
+
+A festive, customisable sparkly effect.
+
 ### Thermometer
 
 [thermometer_pico.py](thermometer_pico.py)
 
 Reads the temperature from the Pico W's internal temperature sensor and changes the LED strip an appropriate colour.
+
+### Tree
+
+[tree.py](tree.py)
+
+A Christmas tree simulator.
 
 ## Advanced Examples
 

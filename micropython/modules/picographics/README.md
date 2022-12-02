@@ -13,11 +13,11 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
     - [I2C](#i2c)
 - [Function Reference](#function-reference)
   - [General](#general)
-    - [Creating & Setting Pens](#creating--setting-pens)
+    - [Creating and Setting Pens](#creating-and-setting-pens)
       - [RGB888, RGB565, RGB332, P8 and P4 modes](#rgb888-rgb565-rgb332-p8-and-p4-modes)
       - [Monochrome Modes](#monochrome-modes)
       - [Inky Frame](#inky-frame)
-    - [Controlling The Backlight](#controlling-the-backlight)
+    - [Controlling the Backlight](#controlling-the-backlight)
     - [Clipping](#clipping)
     - [Clear](#clear)
     - [Update](#update)
@@ -136,7 +136,7 @@ display = PicoGraphics(display=DISPLAY_I2C_OLED_128X128, bus=i2cbus)
 
 ### General
 
-#### Creating & Setting Pens
+#### Creating and Setting Pens
 
 ##### RGB888, RGB565, RGB332, P8 and P4 modes
 
@@ -198,7 +198,7 @@ These are:
 * `ORANGE` = 6
 * `TAUPE` = 7
 
-#### Controlling The Backlight
+#### Controlling the Backlight
 
 You can set the display backlight brightness between `0.0` and `1.0`:
 
@@ -228,7 +228,7 @@ Clear the display to the current pen colour:
 display.clear()
 ```
 
-This is equivilent to:
+This is equivalent to:
 
 ```python
 w, h = display.get_bounds()
@@ -302,7 +302,6 @@ For example:
 display.set_font("bitmap8")
 display.text("Hello World", 0, 0, scale=2)
 ```
-
 Draws "Hello World" in a 16px tall, 2x scaled version of the `bitmap8` font.
 
 Sometimes you might want to measure a text string for centering or alignment on screen, you can do this with:
@@ -319,6 +318,15 @@ Write a single character:
 display.character(char, x, y, scale)
 ```
 
+Specify `char` using a [decimal ASCII code](https://www.ascii-code.com/). Note not all characters are supported.
+
+For example:
+```python
+display.set_font("bitmap8")
+display.character(38, 0, 0, scale=2)
+```
+Draws an ampersand in a 16px tall, 2x scaled version of the 'bitmap8' font.
+
 ### Basic Shapes
 
 #### Line
@@ -329,7 +337,7 @@ To draw a line:
 display.line(x1, y1, x2, y2)
 ```
 
-The X1/Y1 and X2/Y2 coordinates describe the start and end of the line repsectively. 
+The X1/Y1 and X2/Y2 coordinates describe the start and end of the line respectively. 
 
 #### Circle
 
