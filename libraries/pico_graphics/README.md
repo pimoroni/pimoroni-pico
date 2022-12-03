@@ -129,6 +129,28 @@ Rect b(15, 10, 10, 10);
 a.intersects(b) == true
 ```
 
+##### Rect.equals
+
+```c++
+bool Rect::equals(const Rect &r);
+```
+
+`equals` allows you to check if a `Rect` is equal to another `Rect`, so the rectangles are the same:
+
+```c++
+Rect a(10, 10, 10, 10);
+Rect b(30, 10, 10, 10);
+a.equals(b) == false
+```
+
+And these do:
+
+```c++
+Rect a(10, 10, 10, 10);
+Rect b(10, 10, 10, 10);
+a.equals(b) == true
+```
+
 ##### Rect.intersection
 
 ```c++
