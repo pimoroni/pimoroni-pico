@@ -199,7 +199,7 @@ namespace pimoroni {
     void configure_display(Rotation rotate);
     void write_blocking_dma(const uint8_t *src, size_t len);
     void write_blocking_parallel(const uint8_t *src, size_t len);
-    void command(uint8_t command, size_t len = 0, const char *data = NULL, bool bDataDma = false);
+    void command(uint8_t command, size_t len = 0, const char *data = NULL, bool use_async_dma = false);
 		void setup_dma_control_if_needed();
 		void enable_dma_control(bool enable);
 		void start_dma_control();

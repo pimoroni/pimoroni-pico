@@ -277,7 +277,7 @@ namespace pimoroni {
     }*/
   }
 
-  void ST7789::command(uint8_t command, size_t len, const char *data) {
+  void ST7789::command(uint8_t command, size_t len, const char *data, bool use_async_dma) {
     gpio_put(dc, 0); // command mode
 
     gpio_put(cs, 0);
@@ -291,7 +291,7 @@ namespace pimoroni {
     if(data) {
       gpio_put(dc, 1); // data mode
       if(spi) {
-				if(bDataDma) {
+				if(use_async_dma) {
          	write_blocking_dma((const uint8_t*)data, len);
 				}
 				else {
@@ -302,7 +302,7 @@ namespace pimoroni {
       }
     }
 
-		if(!bDataDma)
+		if(!use_async_dma)
 			gpio_put(cs, 1);    
   }
   
