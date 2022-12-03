@@ -18,6 +18,7 @@
 
 namespace pimoroni {
 
+
   class ST7789 : public DisplayDriver {
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
   
@@ -40,20 +41,40 @@ namespace pimoroni {
     uint parallel_sm;
     PIO parallel_pio;
     uint parallel_offset;
-    uint st_dma;
-
+    uint st_dma_data;
 
     // The ST7789 requires 16 ns between SPI rising edges.
     // 16 ns = 62,500,000 Hz
     static const uint32_t SPI_BAUD = 62'500'000;
 
+		// current update rect and full screen rect
+		Rect								full_screen_region;
+		Rect								current_update_region;
+
+	  // dma control blocks used for async partial updates
+		struct DMAControlBlock
+		{
+			uint32_t len; 
+			uint8_t* data;
+		};
+
+		uint 								st_dma_control_chain;
+		DMAControlBlock* 		dma_control_chain_blocks = nullptr;
+		dma_channel_config 	dma_data_config;
+		dma_channel_config  dma_control_config;
+		bool 								use_async_dma = false;
+		bool								dma_control_chain_is_enabled = false;
+
+		// sanity flag for dma updates
+		bool								in_dma_update = false;
+
 
   public:
     // Parallel init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, ParallelPins pins) :
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, ParallelPins pins, bool use_async_dma = false) :
       DisplayDriver(width, height, rotation),
       spi(nullptr), round(false),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl), use_async_dma(use_async_dma) {
 
       parallel_pio = pio1;
       parallel_sm = pio_claim_unused_sm(parallel_pio, true);
@@ -94,23 +115,25 @@ namespace pimoroni {
       pio_sm_set_enabled(parallel_pio, parallel_sm, true);
 
 
-      st_dma = dma_claim_unused_channel(true);
-      dma_channel_config config = dma_channel_get_default_config(st_dma);
-      channel_config_set_transfer_data_size(&config, DMA_SIZE_8);
-      channel_config_set_bswap(&config, false);
-      channel_config_set_dreq(&config, pio_get_dreq(parallel_pio, parallel_sm, true));
-      dma_channel_configure(st_dma, &config, &parallel_pio->txf[parallel_sm], NULL, 0, false);
+      st_dma_data = dma_claim_unused_channel(true);
+      dma_data_config = dma_channel_get_default_config(st_dma_data);
+      channel_config_set_transfer_data_size(&dma_data_config, DMA_SIZE_8);
+      channel_config_set_bswap(&dma_data_config, false);
+      channel_config_set_dreq(&dma_data_config, pio_get_dreq(parallel_pio, parallel_sm, true));
+      dma_channel_configure(st_dma_data, &dma_data_config, &parallel_pio->txf[parallel_sm], NULL, 0, false);
   
       gpio_put(rd_sck, 1);
+
+			setup_dma_control_if_needed();
 
       common_init();
     }
 
     // Serial init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins) :
+    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins, bool use_async_dma = false) :
       DisplayDriver(width, height, rotation),
       spi(pins.spi), round(round),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), use_async_dma(use_async_dma) {
 
       // configure spi interface and pins
       spi_init(spi, SPI_BAUD);
@@ -118,26 +141,69 @@ namespace pimoroni {
       gpio_set_function(wr_sck, GPIO_FUNC_SPI);
       gpio_set_function(d0, GPIO_FUNC_SPI);
 
-      st_dma = dma_claim_unused_channel(true);
-      dma_channel_config config = dma_channel_get_default_config(st_dma);
-      channel_config_set_transfer_data_size(&config, DMA_SIZE_8);
-      channel_config_set_bswap(&config, false);
-      channel_config_set_dreq(&config, spi_get_dreq(spi, true));
-      dma_channel_configure(st_dma, &config, &spi_get_hw(spi)->dr, NULL, 0, false);
-  
+      st_dma_data = dma_claim_unused_channel(true);
+      dma_data_config = dma_channel_get_default_config(st_dma_data);
+      channel_config_set_transfer_data_size(&dma_data_config, DMA_SIZE_8);
+      channel_config_set_bswap(&dma_data_config, false);
+      channel_config_set_dreq(&dma_data_config, spi_get_dreq(spi, true));
+      dma_channel_configure(st_dma_data, &dma_data_config, &spi_get_hw(spi)->dr, NULL, 0, false);
+
+			setup_dma_control_if_needed();
+
       common_init();
     }
+	
+		virtual ~ST7789()
+		{
+			cleanup();
+		}
 
     void cleanup() override;
     void update(PicoGraphics *graphics) override;
+		void partial_update(PicoGraphics *display, Rect region) override;
     void set_backlight(uint8_t brightness) override;
+
+		bool is_busy() override
+		{
+			if(use_async_dma && dma_control_chain_is_enabled) {
+				return !(dma_hw->intr & 1u << st_dma_data);
+			}
+			else {
+				return dma_channel_is_busy(st_dma_data);
+			}
+		}
+
+		void waitForUpdateToFinish()
+		{
+			if(use_async_dma && dma_control_chain_is_enabled) {
+				while (!(dma_hw->intr & 1u << st_dma_data)) {
+        	tight_loop_contents();
+				}
+
+				// disable control chain dma
+				enable_dma_control(false);
+			}
+			else {
+				dma_channel_wait_for_finish_blocking(st_dma_data);
+			}
+
+			// deselect 
+			gpio_put(cs, 1);
+
+			// set sanity flag
+			in_dma_update = false;
+		}
 
   private:
     void common_init();
     void configure_display(Rotation rotate);
     void write_blocking_dma(const uint8_t *src, size_t len);
     void write_blocking_parallel(const uint8_t *src, size_t len);
-    void command(uint8_t command, size_t len = 0, const char *data = NULL);
+    void command(uint8_t command, size_t len = 0, const char *data = NULL, bool bDataDma = false);
+		void setup_dma_control_if_needed();
+		void enable_dma_control(bool enable);
+		void start_dma_control();
+		bool set_update_region(Rect& update_rect);
   };
 
 }
