@@ -222,7 +222,8 @@ namespace pimoroni {
 
 		virtual ~PicoGraphics() 
 		{
-			delete (uint8_t*)frame_buffer;
+			if(owned_frame_buffer)
+				delete (uint8_t*)frame_buffer;
 		};
 
     virtual void set_pen(uint c) = 0;
