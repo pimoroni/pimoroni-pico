@@ -309,7 +309,7 @@ namespace pimoroni {
 	void ST7789::partial_update(PicoGraphics *display, Rect region) {
 		// check sanity flag
 		if(in_dma_update) {
-			panic("When use_async_dma is set you must call waitForUpdateToFinish() between updates");
+			panic("When use_async_dma is set you must call wait_for_update_to_finish() between updates");
 		}
 		else {
 			in_dma_update = use_async_dma;
@@ -377,7 +377,7 @@ namespace pimoroni {
   void ST7789::update(PicoGraphics *graphics) {
 		// check sanity flag
 		if(in_dma_update) {
-			panic("When use_async_dma is set you must call waitForUpdateToFinish() between updates");
+			panic("When use_async_dma is set you must call wait_for_update_to_finish() between updates");
 		}
 		else {
 			in_dma_update = use_async_dma;

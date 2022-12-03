@@ -173,7 +173,7 @@ namespace pimoroni {
 			}
 		}
 
-		void waitForUpdateToFinish()
+		void wait_for_update_to_finish()
 		{
 			if(use_async_dma && dma_control_chain_is_enabled) {
 				while (!(dma_hw->intr & 1u << st_dma_data)) {

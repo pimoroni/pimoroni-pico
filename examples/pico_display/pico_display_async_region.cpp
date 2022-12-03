@@ -239,7 +239,7 @@ int main() {
 
 		// if async wait for last update to finish before rendering
 		if(use_async_dma) {
-			st7789->waitForUpdateToFinish();
+			st7789->wait_for_update_to_finish();
 		}
 
 		dma_time = timer.elapsed();
