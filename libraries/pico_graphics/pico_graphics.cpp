@@ -330,11 +330,11 @@ namespace pimoroni {
   }
 
   float PicoGraphics::fast_sin(int16_t deg) {
-    while (deg < 0) {
+    deg %= 360;
+
+    if (deg < 0) {
       deg += 360;
     }
-
-    deg %= 360;
 
     return this->sin_degs_lut[deg];
   }
