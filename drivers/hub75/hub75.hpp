@@ -54,8 +54,10 @@ class Hub75 {
     public:
     uint width;
     uint height;
-    uint units_x = 1;
-    uint units_y = 1;
+    uint units_x;
+    uint units_y;
+    uint width_bb;
+    uint height_bb;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
@@ -113,8 +115,52 @@ class Hub75 {
 
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false, units_x, units_y) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint units_x, uint units_y){units_x(units_x); units_y(units_y)};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb) : Hub75(width, height, buffer, panel_type, false, 1, 1){};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint units_x, uint units_y) {
+    
+
+    // Set up allllll the GPIO
+    gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
+    gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true); gpio_put(pin_g0, 0);
+    gpio_init(pin_b0); gpio_set_function(pin_b0, GPIO_FUNC_SIO); gpio_set_dir(pin_b0, true); gpio_put(pin_b0, 0);
+
+    gpio_init(pin_r1); gpio_set_function(pin_r1, GPIO_FUNC_SIO); gpio_set_dir(pin_r1, true); gpio_put(pin_r1, 0);
+    gpio_init(pin_g1); gpio_set_function(pin_g1, GPIO_FUNC_SIO); gpio_set_dir(pin_g1, true); gpio_put(pin_g1, 0);
+    gpio_init(pin_b1); gpio_set_function(pin_b1, GPIO_FUNC_SIO); gpio_set_dir(pin_b1, true); gpio_put(pin_b1, 0);
+
+    gpio_init(pin_row_a); gpio_set_function(pin_row_a, GPIO_FUNC_SIO); gpio_set_dir(pin_row_a, true); gpio_put(pin_row_a, 0);
+    gpio_init(pin_row_b); gpio_set_function(pin_row_b, GPIO_FUNC_SIO); gpio_set_dir(pin_row_b, true); gpio_put(pin_row_b, 0);
+    gpio_init(pin_row_c); gpio_set_function(pin_row_c, GPIO_FUNC_SIO); gpio_set_dir(pin_row_c, true); gpio_put(pin_row_c, 0);
+    gpio_init(pin_row_d); gpio_set_function(pin_row_d, GPIO_FUNC_SIO); gpio_set_dir(pin_row_d, true); gpio_put(pin_row_d, 0);
+    gpio_init(pin_row_e); gpio_set_function(pin_row_e, GPIO_FUNC_SIO); gpio_set_dir(pin_row_e, true); gpio_put(pin_row_e, 0);
+
+    gpio_init(pin_clk); gpio_set_function(pin_clk, GPIO_FUNC_SIO); gpio_set_dir(pin_clk, true); gpio_put(pin_clk, !clk_polarity);
+    gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
+    gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
+
+    width_bb = width * units_x * units_y;
+    height_bb = height ;
+
+
+    this->height = height;
+    this->width = width;
+
+    if (buffer == nullptr) {
+        back_buffer = new Pixel[width_bb * height];
+        managed_buffer = true;
+    } else {
+        back_buffer = buffer;
+        managed_buffer = false;
+    }
+
+    if (brightness == 0) {
+        if (width >= 64) brightness = 6;
+        if (width >= 96) brightness = 3;
+        if (width >= 128) brightness = 2;
+        if (width >= 160) brightness = 1;
+    }
+    };
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);

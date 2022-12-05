@@ -453,14 +453,14 @@ namespace pimoroni {
       RGB888 color;
       uint8_t units_x;
       uint8_t units_y;
-      PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenRGB888M(uint16_t width, uint16_t height, void *frame_buffer, uint8_t units_x, uint8_t units_y);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       static size_t buffer_size(uint w, uint h) {
-        return w * units_x * h *units_y * sizeof(uint32_t);
+        return w * h * sizeof(uint32_t);
       }
   };
 

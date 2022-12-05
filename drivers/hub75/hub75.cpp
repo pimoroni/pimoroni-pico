@@ -5,9 +5,9 @@
 #include "hub75.hpp"
 
 namespace pimoroni {
-
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
- : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
+/*
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint units_x, uint units_y)
+ : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), units_x(units_x), units_y(units_y)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -30,7 +30,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 
     if (buffer == nullptr) {
-        back_buffer = new Pixel[width * height];
+        back_buffer = new Pixel[width * units_x * height * units_y];
         managed_buffer = true;
     } else {
         back_buffer = buffer;
@@ -44,16 +44,17 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
         if (width >= 160) brightness = 1;
     }
 }
+*/
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
-    if(x >= width || y >= height) return;
+    if(x >= width_bb || y >= height) return;
     if(y >= height / 2) {
         y -= height / 2;
-        offset = (y * width + x) * 2;
+        offset = (y * width_bb + x) * 2;
         offset += 1;
     } else {
-        offset = (y * width + x) * 2;
+        offset = (y * width_bb + x) * 2;
     }
     back_buffer[offset] = c; 
 }
@@ -238,9 +239,18 @@ void Hub75::dma_complete() {
 
     if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
     uint32_t *p = (uint32_t *)graphics->frame_buffer;
-    for(size_t j = 0; j < width * height; j++) {
-        int x = j % width;
-        int y = j / width;
+    int x;
+    int y;
+    for(size_t j = 0; j < width * height ; j++) {
+        if (j < (width * height)){
+            x = j % (width);
+            y = j / (width);
+        }
+        else{
+            x = (j % width) + (width * ((j / (width * height))));
+            y = (j / width) % height;
+        }
+
 
         uint32_t col = *p;
         uint8_t r = (col & 0xff0000) >> 16;
@@ -250,14 +260,12 @@ void Hub75::dma_complete() {
         set_pixel(x, y, r, g, b);
     }
     }
-    esle if(graphics->pen_type == PicoGraphics::PEN_RGB888M) {
+    else if(graphics->pen_type == PicoGraphics::PEN_RGB888M) {
     uint32_t *p = (uint32_t *)graphics->frame_buffer;
-    for(size_t j = 0; j < width * height; j++) {
+    for(size_t j = 0; j < width *  height; j++) {
+        int x = j % width;
+        int y = j / width;
 
-        int width_for_x_units =  width / units_x // Calacuted the number of lines per display unit
-        int height_for_y_units =  height / units_y
-        int x = j % (width * height_for_y_units);
-        int y = j / (width * height_for_Y_units);
         uint32_t col = *p;
         uint8_t r = (col & 0xff0000) >> 16;
         uint8_t g = (col & 0x00ff00) >>  8;

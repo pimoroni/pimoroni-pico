@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-const uint8_t WIDTH = 64;
+const uint8_t WIDTH = 32;
 const uint8_t HEIGHT = 32;
 const uint8_t QTY_BALLS = 15;
 
@@ -20,15 +20,15 @@ const uint8_t QTY_BALLS = 15;
 
 //Works with our 32x32 large pixel panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
 //and 64x32 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=42312764298
-Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, false);
+Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_FM6126A, false, 2, 1);
 
 //Works with our 64x64 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=3029531983882
 //Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, false);
 
 //Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, true);
 
-PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
-
+//PicoGraphics_PenRGB888M graphics(hub75.width, hub75.height, nullptr, 1, 1);
+PicoGraphics_PenRGB888 graphics(hub75.width * 2, hub75.height * 1, nullptr);
 // Callback for the dma interrupt (required)
 void __isr dma_complete() {
     hub75.dma_complete();
@@ -122,7 +122,7 @@ int main() {
 
     // update screen
     hub75.update(&graphics);
-    sleep_ms(1000/30);
+    sleep_ms(1000/10);
   }
 
     return 0;
