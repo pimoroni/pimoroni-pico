@@ -20,7 +20,7 @@ const uint8_t QTY_BALLS = 15;
 
 //Works with our 32x32 large pixel panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
 //and 64x32 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=42312764298
-Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, false);
+Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_GENERIC, false);
 
 //Works with our 64x64 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=3029531983882
 //Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, false);
