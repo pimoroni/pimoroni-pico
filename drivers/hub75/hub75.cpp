@@ -247,8 +247,8 @@ void Hub75::dma_complete() {
         }
         else{
             int panel_offset_y = (j / width) / height;
-            x = j % width + (panel_offset_y * width);
-            y = j / width - (panel_offset_y * height);
+            x = (j % width) + (panel_offset_y * width);
+            y = (j / width) - (panel_offset_y * height);
             
         }
 
