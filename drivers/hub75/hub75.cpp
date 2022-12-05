@@ -6,8 +6,8 @@
 
 namespace pimoroni {
 
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
- : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint panels_x, uint panels_y)
+ : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), panels_x(panels_x), panels_y(panels_y)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -30,7 +30,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 
     if (buffer == nullptr) {
-        back_buffer = new Pixel[width * height];
+        back_buffer = new Pixel[width * panels_x * height * panels_y];
         managed_buffer = true;
     } else {
         back_buffer = buffer;
@@ -47,13 +47,13 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
-    if(x >= width || y >= height) return;
+    if(x >= width * panels_x * panels_y || y >= height) return;
     if(y >= height / 2) {
         y -= height / 2;
-        offset = (y * width + x) * 2;
+        offset = (y * width * panels_x * panels_y + x) * 2;
         offset += 1;
     } else {
-        offset = (y * width + x) * 2;
+        offset = (y * width * panels_x * panels_y + x) * 2;
     }
     back_buffer[offset] = c; 
 }
@@ -144,7 +144,7 @@ void Hub75::start(irq_handler_t handler) {
         bit = 0;
 
         hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
-        dma_channel_set_trans_count(dma_channel, width * 2, false);
+        dma_channel_set_trans_count(dma_channel, width * panels_x *2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
     }
 }
@@ -230,17 +230,27 @@ void Hub75::dma_complete() {
             hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
         }
 
-        dma_channel_set_trans_count(dma_channel, width * 2, false);
-        dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
+        dma_channel_set_trans_count(dma_channel, width * panels_x * 2, false);
+        dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * panels_x * panels_y * 2], true);
     }   
 }
   void Hub75::update(PicoGraphics *graphics) {
 
     if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
     uint32_t *p = (uint32_t *)graphics->frame_buffer;
-    for(size_t j = 0; j < width * height; j++) {
-        int x = j % width;
-        int y = j / width;
+    int x;
+    int y;
+    for(size_t j = 0; j < width * panels_x * height * panels_y; j++) {
+        if (j < height * width * panels_x){
+            x = j % width * panels_x;
+            y = j / width * panels_x;
+        }
+        else{
+            int panel_offset_y = (j / width) / height;
+            x = j % width + (panel_offset_y * width);
+            y = j / width - (panel_offset_y * height);
+            
+        }
 
         uint32_t col = *p;
         uint8_t r = (col & 0xff0000) >> 16;

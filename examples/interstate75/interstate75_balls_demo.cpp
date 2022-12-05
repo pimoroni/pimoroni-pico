@@ -27,7 +27,7 @@ Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_GENERIC, false);
 
 //Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, true);
 
-PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
+PicoGraphics_PenRGB888 graphics(32, 64, nullptr);
 
 // Callback for the dma interrupt (required)
 void __isr dma_complete() {

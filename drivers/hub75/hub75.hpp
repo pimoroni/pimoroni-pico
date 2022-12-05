@@ -59,6 +59,8 @@ class Hub75 {
     PanelType panel_type;
     bool inverted_stb = false;
     Pixel background = 0;
+    uint panels_x;
+    uint panels_y;
 
     // DMA & PIO
     uint dma_channel = 0;
@@ -112,7 +114,8 @@ class Hub75 {
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb) : Hub75(width, height, buffer, panel_type, inverted_stb, 1, 1) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, uint panels_x, uint panels_y);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
