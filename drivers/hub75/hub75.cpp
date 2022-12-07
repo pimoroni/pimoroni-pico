@@ -11,7 +11,17 @@ namespace pimoroni {
 Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
-
+    // cases of using a single pannel
+    if (panel.y == 0){
+        panel.x = width;
+        panel.y = height;
+        bb_width = width;
+        bb_height = height;
+    }
+    else {
+        bb_width = width + (height / panel.y) * width;
+        bb_height =  panel.y;
+    }
 
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -34,7 +44,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 
     if (buffer == nullptr) {
-        back_buffer = new Pixel[width * height ];
+        back_buffer = new Pixel[bb_width * bb_height ];
         managed_buffer = true;
     } else {
         back_buffer = buffer;
@@ -51,13 +61,13 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
-    if(x >= width  || y >= height) return;
-    if(y >= height / 2) {
-        y -= height / 2;
-        offset = (y * width  + x) * 2;
+    if(x >= bb_width  || y >= bb_height) return;
+    if(y >= bb_height / 2) {
+        y -= bb_height / 2;
+        offset = (y * bb_width  + x) * 2;
         offset += 1;
     } else {
-        offset = (y * width + x) * 2;
+        offset = (y * bb_width + x) * 2;
     }
     back_buffer[offset] = c; 
 }
@@ -67,7 +77,7 @@ void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void Hub75::set_buffer(uint x, uint y, uint8_t r, uint8_t g, uint8_t b){
-    if (y > panel.y){
+    if (y < panel.y){
         set_color(x , y , Pixel(r, g, b));
     }
     else{
@@ -256,10 +266,10 @@ void Hub75::update(PicoGraphics *graphics) {
             int x = j % width;
             int y = j / width;
 
-            uint16_t col = __builtin_bswap16(*p);
-            uint8_t r = (col & 0b1111100000000000) >> 8;
-            uint8_t g = (col & 0b0000011111100000) >> 3;
-            uint8_t b = (col & 0b0000000000011111) << 3;
+            uint32_t col = *p;
+            uint8_t r = (col & 0xff0000) >> 16;
+            uint8_t g = (col & 0x00ff00) >>  8;
+            uint8_t b = (col & 0x0000ff) >>  0;
             p++;
 
             set_pixel(x, y, r, g, b);
@@ -270,11 +280,13 @@ void Hub75::update(PicoGraphics *graphics) {
             int x = j % width;
             int y = j / width;
 
-            uint16_t col = __builtin_bswap16(*p);
-            uint8_t r = (col & 0b1111100000000000) >> 8;
-            uint8_t g = (col & 0b0000011111100000) >> 3;
-            uint8_t b = (col & 0b0000000000011111) << 3;
+
+            uint32_t col = *p;
+            uint8_t r = (col & 0xff0000) >> 16;
+            uint8_t g = (col & 0x00ff00) >>  8;
+            uint8_t b = (col & 0x0000ff) >>  0;
             p++;
+
 
             set_buffer(x, y, r, g, b);
         }

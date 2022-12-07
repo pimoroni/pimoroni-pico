@@ -67,6 +67,8 @@ class Hub75 {
     public:
     uint width;
     uint height;
+    uint bb_width;
+    uint bb_height;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;

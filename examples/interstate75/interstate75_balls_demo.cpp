@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-const uint8_t WIDTH = 64;
+const uint8_t WIDTH = 32;
 const uint8_t HEIGHT = 64;
 const uint8_t QTY_BALLS = 3;
 
@@ -27,7 +27,7 @@ Hub75 hub75(WIDTH, HEIGHT, nullptr, PANEL_32_X_32);
 
 //Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, true);
 
-PicoGraphics_PenRGB888 graphics(64, 64, nullptr);
+PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
 // Callback for the dma interrupt (required)
 void __isr dma_complete() {
