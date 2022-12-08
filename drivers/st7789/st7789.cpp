@@ -119,6 +119,8 @@ namespace pimoroni {
       dma_channel_abort(st_dma_control_chain);
       dma_channel_unclaim(st_dma_control_chain);
     }
+
+		delete[] dma_control_chain_blocks;
 		
     if(spi) return; // SPI mode needs no further tear down
 
