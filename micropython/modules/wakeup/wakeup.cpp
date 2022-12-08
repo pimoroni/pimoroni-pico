@@ -6,6 +6,8 @@ extern uint32_t runtime_wakeup_gpio_state;
 namespace {
     struct Wakeup {
         public:
+            uint8_t shift_register_state = 0b0;
+
             Wakeup() {
                 // Assert wakeup pins (indicator LEDs, VSYS hold etc)
                 //gpio_init_mask(WAKEUP_PIN_MASK);
@@ -30,6 +32,23 @@ namespace {
                 gpio_init(WAKEUP_RTC_SDA);
                 gpio_init(WAKEUP_RTC_SCL);
 #endif
+
+#if WAKEUP_HAS_SHIFT_REGISTER==1
+                // Assert shift register pins (indicator LEDs, VSYS hold etc)
+                gpio_init_mask(WAKEUP_SHIFT_REG_PIN_MASK);
+                gpio_set_dir_masked(WAKEUP_SHIFT_REG_PIN_MASK, WAKEUP_SHIFT_REG_PIN_DIR);
+                gpio_put_masked(WAKEUP_SHIFT_REG_PIN_MASK, WAKEUP_SHIFT_REG_PIN_VALUE);
+
+                uint8_t state = 0u;
+                for(auto i = 0u; i < 8; i++) {
+                    if(gpio_get(WAKEUP_SHIFT_REG_DATA)) {
+                        state |= (0b1 << i);
+                    }
+                    gpio_put(WAKEUP_SHIFT_REG_CLK, true);
+                    gpio_put(WAKEUP_SHIFT_REG_CLK, false);
+                }
+                shift_register_state = state;
+#endif
             }
     };
 
@@ -42,5 +61,11 @@ extern "C" {
 mp_obj_t Wakeup_get_gpio_state() {
     return mp_obj_new_int(runtime_wakeup_gpio_state);
 }
+
+#if WAKEUP_HAS_SHIFT_REGISTER==1
+mp_obj_t Wakeup_get_shift_state() {
+    return mp_obj_new_int(wakeup.shift_register_state);
+}
+#endif
 
 }
