@@ -16,7 +16,7 @@
 #endif
 
 #ifndef WAKEUP_HAS_RTC
-#define WAKEUP_HAS_RTC (1)
+#define WAKEUP_HAS_RTC (0)
 #endif
 
 #ifndef WAKEUP_HAS_SHIFT_REGISTER

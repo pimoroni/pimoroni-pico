@@ -1,16 +1,12 @@
 #include "wakeup.h"
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_gpio_state_obj, Wakeup_get_gpio_state);
-#if WAKEUP_HAS_SHIFT_REGISTER==1
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_shift_state_obj, Wakeup_get_shift_state);
-#endif
 
 STATIC const mp_map_elem_t wakeup_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_wakeup) },
     { MP_ROM_QSTR(MP_QSTR_get_gpio_state), MP_ROM_PTR(&Wakeup_get_gpio_state_obj) },
-#if WAKEUP_HAS_SHIFT_REGISTER==1
     { MP_ROM_QSTR(MP_QSTR_get_shift_state), MP_ROM_PTR(&Wakeup_get_shift_state_obj) }
-#endif
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_wakeup_globals, wakeup_globals_table);
 
