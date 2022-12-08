@@ -32,7 +32,7 @@
 //  What is happening is that the display is now being updated via DMA
 //  So now we are doing our cacluations whilst this is happening.
 //  D is now set to .92ms, this is the time remaining till the display is ready (not using the dma)
-//  if we add C, D and U we get 9.86ms which is the time taken when without async we were blocked updateing the display. 
+//  if we add C, D and U we get 9.86ms which is the time taken when without async we were blocked updating the display. 
 //  so now with Async on we can use that previously blocked time for our calculations.
 // We can see the total time drop from 26.46ms to 17.52ms, a nice little speedup.
 //
