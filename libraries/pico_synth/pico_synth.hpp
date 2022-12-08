@@ -106,7 +106,7 @@ namespace pimoroni {
 
   class PicoSynth {
   public:
-    const uint16_t volume = 0x2fff;
+    uint16_t volume = 0x2fff;
 
     static const uint CHANNEL_COUNT = 8;
     AudioChannel channels[CHANNEL_COUNT];
