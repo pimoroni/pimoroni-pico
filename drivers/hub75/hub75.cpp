@@ -12,14 +12,14 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
     // cases of using a single pannel
-    if (panel.y == 0){
+    if (panel.y < height){
         panel.x = width;
         panel.y = height;
         bb_width = width;
         bb_height = height;
     }
     else {
-        bb_width = width + (height / panel.y) * width;
+        bb_width = width + ((height / panel.y) * width);
         bb_height =  panel.y;
     }
 
@@ -61,13 +61,13 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
-    if(x >= bb_width  || y >= bb_height) return;
-    if(y >= bb_height / 2) {
-        y -= bb_height / 2;
-        offset = (y * bb_width  + x) * 2;
+    if(x >= width  || y >= height) return;
+    if(y >= height / 2) {
+        y -= height / 2;
+        offset = (y * width  + x) * 2;
         offset += 1;
     } else {
-        offset = (y * bb_width + x) * 2;
+        offset = (y * width + x) * 2;
     }
     back_buffer[offset] = c; 
 }
@@ -77,12 +77,9 @@ void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void Hub75::set_buffer(uint x, uint y, uint8_t r, uint8_t g, uint8_t b){
-    if (y < panel.y){
-        set_color(x , y , Pixel(r, g, b));
-    }
-    else{
-        set_color(x + ((y / height)*height), y % panel.y, Pixel(r, g, b));
-    }
+
+    set_color(x + ((y / bb_height) * bb_height), y % bb_height , Pixel(r, g, b));
+ 
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
@@ -166,7 +163,7 @@ void Hub75::start(irq_handler_t handler) {
         bit = 0;
 
         hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
-        dma_channel_set_trans_count(dma_channel, width  *2, false);
+        dma_channel_set_trans_count(dma_channel, bb_width  *2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
     }
 }
@@ -243,7 +240,7 @@ void Hub75::dma_complete() {
 
         row++;
 
-        if(row == height / 2) {
+        if(row == bb_height / 2) {
             row = 0;
             bit++;
             if (bit == BIT_DEPTH) {
@@ -252,8 +249,8 @@ void Hub75::dma_complete() {
             hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
         }
 
-        dma_channel_set_trans_count(dma_channel, width * 2, false);
-        dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
+        dma_channel_set_trans_count(dma_channel, bb_width * 2, false);
+        dma_channel_set_read_addr(dma_channel, &back_buffer[row * bb_width * 2], true);
     }   
 }
 

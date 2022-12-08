@@ -80,7 +80,7 @@ int main() {
 
   Point text_location(0, 0);
 
-  Pen BG = graphics.create_pen(120, 40, 60);
+  Pen BG = graphics.create_pen(0, 0, 0);
   Pen WHITE = graphics.create_pen(200, 200, 200);
 
   while(true) {
