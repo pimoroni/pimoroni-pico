@@ -93,6 +93,18 @@ namespace pimoroni {
     }
   }
 
+  void PicoGraphics::rectangle_frame(const Rect &r) {
+		Point tl(r.x, 			r.y);
+		Point tr(r.x+r.w-1, r.y);
+		Point bl(r.x, 			r.y+r.h-1);
+		Point br(r.x+r.w-1, r.y+r.h-1);
+
+		line(tl, tr);
+		line(tl, bl);
+		line(bl, br);
+		line(tr, br);
+  }
+
   void PicoGraphics::circle(const Point &p, int32_t radius) {
     // circle in screen bounds?
     Rect bounds = Rect(p.x - radius, p.y - radius, radius * 2, radius * 2);

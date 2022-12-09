@@ -258,6 +258,7 @@ namespace pimoroni {
     void pixel(const Point &p);
     void pixel_span(const Point &p, int32_t l);
     void rectangle(const Rect &r);
+    void rectangle_frame(const Rect &r);
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, float s = 2.0f, float a = 0.0f);
     void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
@@ -487,4 +488,63 @@ namespace pimoroni {
       virtual void cleanup() {};
   };
 
+
+  class TouchDriver {
+    public:
+      TouchDriver(uint16_t width, uint16_t height, Rotation rotation)
+       	: width(width), height(height), rotation(rotation) {
+			 	}
+
+			virtual ~TouchDriver() {
+				cleanup();
+			}
+
+			virtual void update(uint16_t average_samples = 16) = 0;
+      virtual void cleanup() {};
+
+			bool is_touched() {
+				return touch_down;
+			}
+
+			Point get_touch() {
+				return touch;
+			}
+
+			Point get_raw_touch() {
+				return raw_touch;
+			}
+
+			Rotation get_rotation() {
+				return rotation;
+			}
+
+			void calibrate_touchscreen(Point top_left, Point bottom_right, uint16_t pixel_inset) {
+				uint16_t dx = bottom_right.x - top_left.x;
+				uint16_t dy = bottom_right.y - top_left.y;
+				uint16_t dx_pixel = width - (pixel_inset * 2);
+				uint16_t dy_pixel = height - (pixel_inset * 2);
+
+				float touch_px  = (float)dx / dx_pixel;
+				float touch_py  = (float)dy / dy_pixel;
+
+				uint16_t x_inset = touch_px * (pixel_inset);
+				uint16_t y_inset = touch_py * (pixel_inset);
+				
+				raw_min.x = top_left.x - x_inset;
+				raw_min.y = top_left.y - y_inset;
+				
+				raw_max.x = bottom_right.x + x_inset;
+				raw_max.y = bottom_right.y + y_inset;
+			}
+
+		protected:
+      uint16_t  width;
+      uint16_t  height;
+      Rotation  rotation;
+			bool			touch_down = false;
+			Point			raw_min = {0, 0};
+			Point			raw_max = {0, 0};
+			Point			raw_touch = {0, 0};
+			Point			touch = {0, 0};
+  };
 }
