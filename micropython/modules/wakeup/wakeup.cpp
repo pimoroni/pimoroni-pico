@@ -41,10 +41,10 @@ namespace {
 
                 uint8_t state = 0u;
                 for(auto i = 0u; i < 8; i++) {
+                    gpio_put(WAKEUP_SHIFT_REG_CLK, true);
                     if(gpio_get(WAKEUP_SHIFT_REG_DATA)) {
                         state |= (0b1 << i);
                     }
-                    gpio_put(WAKEUP_SHIFT_REG_CLK, true);
                     gpio_put(WAKEUP_SHIFT_REG_CLK, false);
                 }
                 shift_register_state = state;
