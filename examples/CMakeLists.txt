@@ -58,3 +58,5 @@ add_subdirectory(inventor2040w)
 add_subdirectory(encoder)
 add_subdirectory(galactic_unicorn)
 add_subdirectory(gfx_pack)
+
+add_subdirectory(ili9341_xpt2046)
