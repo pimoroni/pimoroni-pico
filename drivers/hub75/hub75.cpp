@@ -12,7 +12,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
     // cases of using a single pannel
-    if (panel.y < height){
+    if (panel.y <= height){
         panel.x = width;
         panel.y = height;
         bb_width = width;
