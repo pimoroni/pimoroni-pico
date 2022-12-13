@@ -4,10 +4,16 @@
 #include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
-#include "hub75.hpp"
+#include "libraries/interstate75/interstate75.hpp"
 #include "okcolor.hpp"
 
 using namespace pimoroni;
+
+RGBLED backlight_rgb(interstate75::LED_R, interstate75::LED_G, interstate75::LED_B, Polarity::ACTIVE_HIGH);
+Button button_a(interstate75::A);
+Button button_b(interstate75::B);
+
+
 
 //If the display looks streaky or corrupted then uncomment one of the other initalisers
 
@@ -92,8 +98,8 @@ int main() {
   stdio_init_all();
 
   uint8_t hue_map[53][3];
-  for(int i = 0; i < 53; i++) {
-    from_hsv(i / 53.0f, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
+  for(int i = 0; i < hub75.width; i++) {
+    from_hsv(i / hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
   }
 
   star_t stars[100];
@@ -142,19 +148,19 @@ int main() {
     }
 
 
-    if(hub75.is_pressed(hub75.SWITCH_A)) {
+    if(button_a.raw()) {
       speed += 0.05f;
       speed = speed >= 10.0f ? 10.0f : speed;
       animate = true;
     }
-    if(hub75.is_pressed(hub75.SWITCH_B)) {
+    if(button_b.raw()) {
       speed -= 0.05f;
       speed = speed <= 0.0f ? 0.0f : speed;
       animate = true;
     }
 
-    for(int x = 0; x < 53; x++) {
-      for(int y = 0; y < 11; y++) {
+    for(int x = 0; x < hub75.width; x++) {
+      for(int y = 0; y < hub75.height; y++) {
         int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / 11.0f) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
 
         uint8_t r = (hue_map[x][0] * v) / 256;
@@ -167,7 +173,7 @@ int main() {
     }
     hub75.update(&graphics);
 
-    printf("%d\n", hub75.light());
+
     sleep_ms(20);
   }
 
