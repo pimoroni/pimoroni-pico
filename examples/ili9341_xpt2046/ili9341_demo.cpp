@@ -28,9 +28,9 @@ Rotation rotation = ROTATE_270;
 #define USE_TOUCHSCREEN 1
 
 #if USE_TOUCHSCREEN
-	#define XPT2046_WIDTH (320)
-	#define XPT2046_HEIGHT (240)
-	#define XPT2046_ROTATION_OFFSET (90)
+	#define XPT2046_WIDTH (240)
+	#define XPT2046_HEIGHT (320)
+	#define XPT2046_ROTATION_OFFSET (0)
 	#define XPT2046_CS (14)
 	#define XPT2046_SCK (10)
 	#define XPT2046_MOSI (11)
@@ -77,7 +77,7 @@ int main() {
 		#if USE_TOUCHSCREEN
 			xpt2046.update();
 			if(xpt2046.is_touched()) {
-				text_location = xpt2046.get_touch();
+				text_location = xpt2046.get_point();
 
 				int32_t text_width = graphics.measure_text(msg);
 

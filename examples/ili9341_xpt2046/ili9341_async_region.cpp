@@ -25,18 +25,18 @@
 // Async updates also work for region updates using 565.
 //
 // So when this example first starts dma is off, in a release build here we see these timings:
-//  c=12.09, d=0.00, r=11.86, u=20.90, t=44.86
+//  c=9.06, d=0.00, r=10.43, u=20.89, t=40.38
 // If we turn Async DMA on with the X button we see:
-//  c=12.09, d=7.56, r=11.78, u=0.01, t=31.46
+//  c=9.05, d=10.60, r=10.43, u=0.00, t=30.09
 //
 // So we can see the time we take to do the calculations (C) stays the same.
 // The time to render stays (R) the same
-// The time to update the display has dropped from 20.90ms to 0.01ms though
+// The time to update the display has dropped from 20.89ms to 0.00ms though
 //  What is happening is that the display is now being updated via DMA
 //  So now we are doing our cacluations whilst this is happening.
 //  so now with Async on we can use that previously blocked time for our calculations.
-// We can see the total time drop from 44.86ms to 31.46ms, a nice little speedup. 
-// And there is another 7.56ms available if we had more calculations
+// We can see the total time drop from 40.38ms to 30.09ms, a nice little speedup. 
+// And there is another 10.60ms available if we had more calculations
 //
 // Partial Updates
 // ===============
@@ -68,13 +68,13 @@
 using namespace pimoroni;
 
 
-#define NUM_PIXELS (4000)
+#define NUM_PIXELS (3000)
 #define BUTTON_HEIGHT (32)
 #define ILI941_WIDTH (240)
 #define ILI941_HEIGHT (320)
-#define XPT2046_WIDTH (320)
-#define XPT2046_HEIGHT (240)
-#define XPT2046_ROTATION_OFFSET (90)
+#define XPT2046_WIDTH (240)
+#define XPT2046_HEIGHT (320)
+#define XPT2046_ROTATION_OFFSET (0)
 
 enum UsePen{up565, up332, up8, up4, upCount};
 enum UseRegion {urNone, urHalf, urBounce, urFull, urCount};
@@ -150,7 +150,7 @@ int main() {
 		{
 			last_touch_state = touch_state;
 			if(touch_state) {
-				Point touch = xpt2046->get_touch();
+				TouchPoint touch = xpt2046->get_touch();
 
 				if(touch.y > graphics->bounds.h - BUTTON_HEIGHT) {
 					btn = (Button)(1+(touch.x/(graphics->bounds.w/5)));
@@ -308,11 +308,10 @@ int main() {
 
 		if (xpt2046->is_touched())
 		{
-			printf("Touch %ld, %ld\n", xpt2046->get_touch().x, xpt2046->get_touch().y);
-			uint16_t uX = MAX(xpt2046->get_touch().x, 10);
-			uint16_t uY = MAX(xpt2046->get_touch().y, 10);
+			TouchPoint touch = xpt2046->get_touch();
+			printf("Touch %ld, %ld, %ld\n", touch.x, touch.y, touch.z);
 			graphics->set_pen(white_pen);
-			graphics->rectangle(Rect(uX - 10, uY - 10, 20, 20));
+			graphics->circle(Point(touch.x, touch.y), 1+(touch.z/5));
 		}
 
 		// menu
