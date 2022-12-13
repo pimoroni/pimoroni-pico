@@ -25,7 +25,7 @@ LAT = 53.38609085276884
 LNG = -1.4239983439328177
 TIMEZONE = "auto"  # determines time zone from lat/long
 
-URL = "https://api.open-meteo.com/v1/forecast?latitude=" + str(LAT) + "&longitude=" + str(LNG) + "&current_weather=true&timezone=" + TIMEZONE
+URL = "http://api.open-meteo.com/v1/forecast?latitude=" + str(LAT) + "&longitude=" + str(LNG) + "&current_weather=true&timezone=" + TIMEZONE
 UPDATE_INTERVAL = 900  # refresh interval in secs. Be nice to free APIs!
 
 # Weather codes from https://open-meteo.com/en/docs#:~:text=WMO%20Weather%20interpretation%20codes%20(WW)
