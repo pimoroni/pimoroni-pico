@@ -88,7 +88,6 @@ def get_data():
     # open the json data
     j = r.json()
     print("Data obtained!")
-    r.close()
 
     # parse relevant data from JSON
     current = j["current_weather"]
@@ -100,6 +99,8 @@ def get_data():
 Conditions = {WEATHERCODES[weathercode]}
 Last Open-Meteo update: {datetime_arr[0]}, {datetime_arr[1]}
     """)
+
+    r.close()
 
     # flash the onboard LED after getting data
     pico_led.value(True)
