@@ -137,6 +137,9 @@ MICROPY_EVENT_POLL_HOOK
                         // Dithered output to RGB332
                         current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
                     }
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_RGB888) {
+                    current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb888());
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                 } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 || current_graphics->pen_type == PicoGraphics::PEN_P4 || current_graphics->pen_type == PicoGraphics::PEN_3BIT) {
                     current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                 } else {
