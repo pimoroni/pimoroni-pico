@@ -21,7 +21,8 @@ namespace pimoroni {
   private:
 		uint cs;
 		uint irq;
-
+		uint16_t transfer_16(uint8_t cmd);
+	
   public:
     XPT2046(uint16_t width, uint16_t height, Rotation rotation, SPIPins pins, uint irq_pin, uint baud_rate = 2500000) :
       TouchDriver(width, height, rotation),
@@ -43,7 +44,7 @@ namespace pimoroni {
 			gpio_pull_down(irq);
 
 			// calibrate touchscreen roughly to known values
-			calibrate_touchscreen(Point(4988, 4323), Point(29847, 28443), 20);
+			calibrate_touchscreen(TouchPoint(612, 636), TouchPoint(3594, 3685), 6428, 15688, 20);
     }
 	
 		virtual ~XPT2046()
@@ -51,6 +52,7 @@ namespace pimoroni {
 		}
 
 		void update(uint16_t average_samples = 16) override;
+
 		void cleanup() override;
   };
 }
