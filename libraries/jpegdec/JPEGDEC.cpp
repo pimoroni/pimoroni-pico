@@ -142,6 +142,22 @@ int JPEGDEC::open(const char *szFilename, JPEG_OPEN_CALLBACK *pfnOpen, JPEG_CLOS
 
 } /* open() */
 
+//
+// data stream initialization
+//
+int JPEGDEC::open(void *fHandle, int iDataSize, JPEG_CLOSE_CALLBACK *pfnClose, JPEG_READ_CALLBACK *pfnRead, JPEG_SEEK_CALLBACK *pfnSeek, JPEG_DRAW_CALLBACK *pfnDraw)
+{
+    memset(&_jpeg, 0, sizeof(JPEGIMAGE));
+    _jpeg.pfnRead = pfnRead;
+    _jpeg.pfnSeek = pfnSeek;
+    _jpeg.pfnDraw = pfnDraw;
+    _jpeg.pfnClose = pfnClose;
+    _jpeg.iMaxMCUs = 1000; // set to an unnaturally high value to start
+    _jpeg.JPEGFile.iSize = iDataSize;
+    _jpeg.JPEGFile.fHandle = fHandle;
+    return JPEGInit(&_jpeg);
+} /* open() */
+
 #ifdef FS_H
 static int32_t FileRead(JPEGFILE *handle, uint8_t *buffer, int32_t length)
 {
@@ -191,6 +207,13 @@ int JPEGDEC::decode(int x, int y, int iOptions)
     _jpeg.pDitherBuffer = nullptr;
     return DecodeJPEG(&_jpeg);
 } /* decode() */
+//
+// set draw callback user pointer variable
+//
+void JPEGDEC::setUserPointer(void *p)
+{
+    _jpeg.pUser = p;
+}
 
 // TODO PR these tweaks to https://github.com/bitbank2/JPEGDEC
 int JPEGDEC::decodeDither(int x, int y, uint8_t *pDither, int iOptions)

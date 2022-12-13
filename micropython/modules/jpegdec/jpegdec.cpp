@@ -29,7 +29,6 @@ typedef struct _JPEG_obj_t {
 } _JPEG_obj_t;
 
 
-PicoGraphics *current_graphics = nullptr;
 uint8_t current_flags = 0;
 
 enum FLAGS : uint8_t {
@@ -88,6 +87,7 @@ int JPEGDraw(JPEGDRAW *pDraw) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
+    PicoGraphics *current_graphics = (PicoGraphics *)pDraw->pUser;
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw jpeg data out of the framebuffer..
     // Can we clip beforehand and make this faster?
@@ -267,12 +267,10 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     }
 
     // We need to store a pointer to the PicoGraphics surface
-    // since the JPEGDRAW struct has no userdata
-    current_graphics = self->graphics->graphics;
+    self->jpeg->setUserPointer((void *)self->graphics->graphics);
 
     result = self->jpeg->decode(x, y, f);
 
-    current_graphics = nullptr;
     current_flags = 0;
 
     // Close the file since we've opened it on-demand
