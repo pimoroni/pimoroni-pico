@@ -13,6 +13,6 @@ namespace pimoroni {
 		private:
 			static void draw_cross(PicoGraphics* graphics, uint x, uint y, uint size);
 			static void draw_calibrate_background(PicoGraphics* graphics, const char* str);
-			static Point get_raw_touch(XPT2046* xpt2046);
+			static TouchPoint get_raw_touch(XPT2046* xpt2046);
 	};
 }

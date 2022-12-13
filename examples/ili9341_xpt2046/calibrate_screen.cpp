@@ -7,7 +7,10 @@
 
 using namespace pimoroni;
 
+#include <numeric> 
+
 // Simple calibrate screen
+// First press against screen varying pressure multiple times till countdown hits 0
 // Displays a cross, tap on the center
 // Displays another cross, tap on the center.
 // Then test the screen.
@@ -16,14 +19,17 @@ using namespace pimoroni;
 
 void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoGraphics* graphics) 
 {
-	enum CalibrateState {csTopLeft, csTopLeftScan, csBottomRight, csBottomRightScan, csTest, csTestCountdown, csAllOk, csExit};
+	enum CalibrateState {csPressure, csTopLeft, csTopLeftScan, csBottomRight, csBottomRightScan, csTest, csTestCountdown, csAllOk, csExit};
 
-	CalibrateState state = csTopLeft;
+	CalibrateState state = csPressure;
 
-	Point top_left;
-	Point bottom_right;
-
+	TouchPoint top_left;
+	TouchPoint bottom_right;
+	uint16_t min_pressure = 0xffff;
+	uint16_t max_pressure = 0;
+	
 	uint s = 20;
+	uint count_pressure_readings = 100;
 
 	ElapsedUs countdown_timer;
 
@@ -37,15 +43,47 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 		xpt2046->update();
 		switch(state)
 		{
+			case csPressure: {
+				
+				// disable z handling
+				xpt2046->set_z_enabled(false);
+
+				sprintf(log_buffer, "Vary pressure (%u)", count_pressure_readings);
+				draw_calibrate_background(graphics, log_buffer);
+				if(xpt2046->is_touched())	{
+					count_pressure_readings--;
+					TouchPoint tp = xpt2046->get_raw_touch();
+					
+					if(tp.z < min_pressure) {
+						min_pressure = tp.z;
+					}
+					
+					if(tp.z > max_pressure) {
+						max_pressure = tp.z;
+					}
+				}
+
+				if(count_pressure_readings == 0) {
+					// Calibrate Z
+					xpt2046->calibrate_z(min_pressure, max_pressure);
+
+					// enable z handling
+					xpt2046->set_z_enabled(true);
+
+					state = csTopLeft;
+				}
+				break;
+			}
+
 			case csTopLeft: {
-				draw_calibrate_background(graphics, "Touch center of cross");
+				draw_calibrate_background(graphics, "Touch cross");
 
 				switch(xpt2046->get_rotation())
 				{
-					case ROTATE_0   : draw_cross(graphics,s, s, s); break;
-					case ROTATE_90  : draw_cross(graphics,s,graphics->bounds.h-s-1,s); break;
-					case ROTATE_180 : draw_cross(graphics,graphics->bounds.w-1-s, graphics->bounds.h-1-s,s); break;
-					case ROTATE_270 : draw_cross(graphics,graphics->bounds.w-1-s, s, 20); break;
+					case ROTATE_0   : draw_cross(graphics,s,graphics->bounds.h-s-1,s); break;
+					case ROTATE_90  : draw_cross(graphics,graphics->bounds.w-1-s, graphics->bounds.h-1-s,s); break;
+					case ROTATE_180 : draw_cross(graphics,graphics->bounds.w-1-s, s, 20); break;
+					case ROTATE_270 : draw_cross(graphics,s, s, s); break;
 				}
 				state = csTopLeftScan;
 				break;
@@ -58,14 +96,14 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 			}
 
 			case csBottomRight: {
-				draw_calibrate_background(graphics, "Touch center of cross");
+				draw_calibrate_background(graphics, "Touch cross");
 
 				switch(xpt2046->get_rotation())
 				{
-					case ROTATE_0   : draw_cross(graphics, graphics->bounds.w-1-s, graphics->bounds.h-1-s,s); break;
-					case ROTATE_90  : draw_cross(graphics, graphics->bounds.w-1-s, s, 20); break;
-					case ROTATE_180 : draw_cross(graphics, s, s, s); break;
-					case ROTATE_270 : draw_cross(graphics, s,graphics->bounds.h-s-1,s); break;
+					case ROTATE_0   : draw_cross(graphics, graphics->bounds.w-1-s, s, 20); break;
+					case ROTATE_90  : draw_cross(graphics, s, s, s); break;
+					case ROTATE_180 : draw_cross(graphics, s,graphics->bounds.h-s-1,s); break;
+					case ROTATE_270 : draw_cross(graphics, graphics->bounds.w-1-s, graphics->bounds.h-1-s,s); break;
 				}
 				state = csBottomRightScan;
 				break;
@@ -73,20 +111,21 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 
 			case csBottomRightScan: {
 				bottom_right = get_raw_touch(xpt2046);
-				printf("xpt2046->calibrate_touchscreen(Point(%lu, %lu), Point(%lu, %lu). %u)\n", top_left.x, top_left.y, bottom_right.x, bottom_right.y, s);
-				xpt2046->calibrate_touchscreen(top_left, bottom_right, s);
+				printf("calibrate_touchscreen(TouchPoint(%lu, %lu), TouchPoint(%lu, %lu), %u, %u, %u);\n", top_left.x, top_left.y, bottom_right.x, bottom_right.y, min_pressure, max_pressure,  s);
+				xpt2046->calibrate_touchscreen(top_left, bottom_right, min_pressure, max_pressure, s);
 				state = csTest;
 				break;
 			}
 
 			case csTest: {
 
-				draw_calibrate_background(graphics, "Test screen please");
+				draw_calibrate_background(graphics, "Test screen");
 
 				if(xpt2046->is_touched()) {
-					Point p = xpt2046->get_touch();
+					TouchPoint p = xpt2046->get_touch();
 					graphics->line(Point(p.x, 0), Point(p.x, graphics->bounds.h));
 					graphics->line(Point(0, p.y), Point(graphics->bounds.w, p.y));
+					graphics->circle(Point(p.x, p.y), 1+(p.z/5));
 				}
 				else {
 					countdown_timer.reset();
@@ -104,7 +143,7 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 				else {
 					uint secs_remaining = 3 - (countdown_timer.elapsed(false) / 1000000);
 					if(secs_remaining != 0) {
-						sprintf(log_buffer, "Test Screen Please (%x)", secs_remaining);
+						sprintf(log_buffer, "Test Screen Please (%u)", secs_remaining);
 						draw_calibrate_background(graphics, log_buffer);
 					}
 					else {
@@ -119,7 +158,7 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 			case csAllOk: {
 				uint secs_remaining = 3 - (countdown_timer.elapsed(false) / 1000000);
 				if(secs_remaining != 0) {
-					sprintf(log_buffer, "Everying Ok? (%x)", secs_remaining);
+					sprintf(log_buffer, "Everying Ok? (%u)", secs_remaining);
 					draw_calibrate_background(graphics, log_buffer);
 
 					uint button_width  = graphics->bounds.w-1;
@@ -135,7 +174,7 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 					graphics->text(str, Point(r.x+offset, r.y+8), r.x+button_width, 2);
 
 					if(xpt2046->is_touched()) {
-						Point p = xpt2046->get_touch();
+						TouchPoint p = xpt2046->get_touch();
 
 						if(p.y > graphics->bounds.h - BUTTON_HEIGHT) {
 								state = csExit;
@@ -143,7 +182,8 @@ void Calibrate_Screen::run_calibration(ILI9341* ili9341, XPT2046* xpt2046, PicoG
 					}
 				}
 				else {
-					state = csTopLeft;
+					count_pressure_readings = 100;
+					state = csPressure;
 				}
 				break;
 			}
@@ -176,22 +216,22 @@ void Calibrate_Screen::draw_calibrate_background(PicoGraphics* graphics, const c
 }
 
 // Gets a raw touch for the calibration process
-Point Calibrate_Screen::get_raw_touch(XPT2046* xpt2046) {
-	Point result;
+TouchPoint Calibrate_Screen::get_raw_touch(XPT2046* xpt2046) {
+	TouchPoint result;
 
 	// wait for any touch to finish
 	while(xpt2046->is_touched()) {
-		xpt2046->update();
+		xpt2046->update(256);
 	}
 
 	// wait for touch down
 	while(!xpt2046->is_touched()) {
-		xpt2046->update();
+		xpt2046->update(256);
 	}
 
 	// wait for touch up
 	while(xpt2046->is_touched()) {
-		xpt2046->update();
+		xpt2046->update(256);
 	}
 
 	result = xpt2046->get_raw_touch();	
