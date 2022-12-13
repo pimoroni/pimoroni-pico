@@ -1,5 +1,5 @@
-set(OUTPUT_NAME interstate75_scrolling_text)
-add_executable(${OUTPUT_NAME} interstate75_scrolling_text.cpp)
+set(OUTPUT_NAME interstate75_rainbow)
+add_executable(${OUTPUT_NAME} interstate75_rainbow.cpp)
 
 # enable usb output
 pico_enable_stdio_usb(${OUTPUT_NAME} 1)

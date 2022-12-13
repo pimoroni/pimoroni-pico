@@ -11,18 +11,6 @@ namespace pimoroni {
 Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
-    // cases of using a single pannel
-    if (panel.y <= height){
-        panel.x = width;
-        panel.y = height;
-        bb_width = width;
-        bb_height = height;
-    }
-    else {
-        bb_width = width + ((height / panel.y) * width);
-        bb_height =  panel.y;
-    }
-
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
     gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true); gpio_put(pin_g0, 0);
@@ -44,7 +32,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 
     if (buffer == nullptr) {
-        back_buffer = new Pixel[bb_width * bb_height ];
+        back_buffer = new Pixel[width * height ];
         managed_buffer = true;
     } else {
         back_buffer = buffer;
@@ -74,12 +62,6 @@ void Hub75::set_color(uint x, uint y, Pixel c) {
 
 void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
     set_color(x, y, Pixel(r, g, b));
-}
-
-void Hub75::set_buffer(uint x, uint y, uint8_t r, uint8_t g, uint8_t b){
-
-    set_color(x + ((y / bb_height) * bb_height), y % bb_height , Pixel(r, g, b));
- 
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
@@ -163,7 +145,7 @@ void Hub75::start(irq_handler_t handler) {
         bit = 0;
 
         hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
-        dma_channel_set_trans_count(dma_channel, bb_width  *2, false);
+        dma_channel_set_trans_count(dma_channel, width  *2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
     }
 }
@@ -240,7 +222,7 @@ void Hub75::dma_complete() {
 
         row++;
 
-        if(row == bb_height / 2) {
+        if(row == height / 2) {
             row = 0;
             bit++;
             if (bit == BIT_DEPTH) {
@@ -249,77 +231,37 @@ void Hub75::dma_complete() {
             hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
         }
 
-        dma_channel_set_trans_count(dma_channel, bb_width * 2, false);
-        dma_channel_set_read_addr(dma_channel, &back_buffer[row * bb_width * 2], true);
+        dma_channel_set_trans_count(dma_channel, width * 2, false);
+        dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
     }   
 }
-
 void Hub75::update(PicoGraphics *graphics) {
 
     if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
-    uint32_t *p = (uint32_t *)graphics->frame_buffer;
-    if (panel.x == 0){
-        for(size_t j = 0; j < width * height; j++) {
-            int x = j % width;
-            int y = j / width;
-
-            uint32_t col = *p;
-            uint8_t r = (col & 0xff0000) >> 16;
-            uint8_t g = (col & 0x00ff00) >>  8;
-            uint8_t b = (col & 0x0000ff) >>  0;
-            p++;
-
-            set_pixel(x, y, r, g, b);
+        uint32_t *p = (uint32_t *)graphics->frame_buffer;
+        for(uint y = 0; y < height; y++) {
+            for(uint x = 0; x < width; x++) {
+                uint32_t col = *p;
+                uint8_t r = (col & 0xff0000) >> 16;
+                uint8_t g = (col & 0x00ff00) >>  8;
+                uint8_t b = (col & 0x0000ff) >>  0;
+                set_pixel(x, y, r, g, b);
+                p++;
+            }
         }
-    }
-    else{
-        for(size_t j = 0; j < width * height; j++) {
-            int x = j % width;
-            int y = j / width;
-
-
-            uint32_t col = *p;
-            uint8_t r = (col & 0xff0000) >> 16;
-            uint8_t g = (col & 0x00ff00) >>  8;
-            uint8_t b = (col & 0x0000ff) >>  0;
-            p++;
-
-
-            set_buffer(x, y, r, g, b);
-        }
-    }
     }
     else if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
-    uint16_t *p = (uint16_t *)graphics->frame_buffer;
-    if (panel.x == 0){
-        for(size_t j = 0; j < width * height; j++) {
-            int x = j % width;
-            int y = j / width;
-
-            uint16_t col = __builtin_bswap16(*p);
-            uint8_t r = (col & 0b1111100000000000) >> 8;
-            uint8_t g = (col & 0b0000011111100000) >> 3;
-            uint8_t b = (col & 0b0000000000011111) << 3;
-            p++;
-
-            set_pixel(x, y, r, g, b);
+        uint16_t *p = (uint16_t *)graphics->frame_buffer;
+        for(uint y = 0; y < height; y++) {
+            for(uint x = 0; x < width; x++) {
+                uint16_t col = __builtin_bswap16(*p);
+                uint8_t r = (col & 0b1111100000000000) >> 8;
+                uint8_t g = (col & 0b0000011111100000) >> 3;
+                uint8_t b = (col & 0b0000000000011111) << 3;
+                set_pixel(x, y, r, g, b);
+                p++;
+            }
         }
     }
-    else{
-        for(size_t j = 0; j < width * height; j++) {
-            int x = j % width;
-            int y = j / width;
-
-            uint16_t col = __builtin_bswap16(*p);
-            uint8_t r = (col & 0b1111100000000000) >> 8;
-            uint8_t g = (col & 0b0000011111100000) >> 3;
-            uint8_t b = (col & 0b0000000000011111) << 3;
-            p++;
-
-            set_buffer(x, y, r, g, b);
-        }
-    }
-
-  }
 }
 }

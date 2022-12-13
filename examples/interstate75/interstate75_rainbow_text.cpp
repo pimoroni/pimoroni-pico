@@ -13,22 +13,22 @@ using namespace pimoroni;
 // Display size in pixels
 // Should be either 64x64 or 32x32 but perhaps 64x32 an other sizes will work.
 // Note: this example uses only 5 address lines so it's limited to 32*2 pixels.
-const uint8_t WIDTH = 64;
-const uint8_t HEIGHT = 32;
-
 //If the display looks streaky or corrupted then uncomment one of the other initalisers
 
-//Works with our 32x32 small pixel panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=35962488650
-//Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, true);
+//Works with our 32x32 panels https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=35962488650 https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
+Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
+//or using 2 of these panels
+//Hub75 hub75(64, 32, nullptr, PANEL_GENERIC, false);
 
-//Works with our 32x32 large pixel panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
 //and 64x32 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=42312764298
-Hub75 hub75(WIDTH, HEIGHT, PANEL_GENERIC, false);
+//Hub75 hub75(64, 32, nullptr, PANEL_GENERIC, false);
+//or using 2 of these panels
+//Hub75 hub75(128, 32, nullptr, PANEL_GENERIC, false);
 
 //Works with our 64x64 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=3029531983882
-//Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, false);
-
-//Hub75 hub75(WIDTH, HEIGHT, PANEL_FM6126A, true);
+//Hub75 hub75(64, 64, nullptr, PANEL_GENERIC, false);
+//or using 2 of these panels
+//Hub75 hub75(128, 64, nullptr, PANEL_GENERIC, false);
 
 PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 

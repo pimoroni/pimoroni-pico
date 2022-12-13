@@ -48,31 +48,15 @@ enum PanelType {
     PANEL_FM6126A,
 };
 
-struct PanelUnit {
-    uint x;
-    uint y;
-    PanelType type;
-    bool inverted_stb;
-};
-
-const PanelUnit PANEL_32_X_32{32, 32, PANEL_GENERIC, false};
-const PanelUnit PANEL_64_X_64{64, 64, PANEL_FM6126A, false};
-const PanelUnit PANEL_64_X_32{64, 32, PANEL_GENERIC, false};
-const PanelUnit PANEL_NULL{0, 0, PANEL_GENERIC, false}; // For cases where the panel is unset ie operating as a single panel
-
-
 Pixel hsv_to_rgb(float h, float s, float v);
 
 class Hub75 {
     public:
     uint width;
     uint height;
-    uint bb_width;
-    uint bb_height;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
-    PanelUnit panel = PANEL_NULL;
     bool inverted_stb = false;
     Pixel background = 0;
 
@@ -128,7 +112,6 @@ class Hub75 {
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelUnit panel) : Hub75(width, height, buffer, panel.type, panel.inverted_stb) {this->panel = panel;};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
     ~Hub75();
 
@@ -143,8 +126,5 @@ class Hub75 {
     void stop(irq_handler_t handler);
     void dma_complete();
     void update(PicoGraphics *graphics);
-
-    private:
-    void set_buffer(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
-};
+    };
 }
