@@ -3454,10 +3454,13 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
             if (xoff == iPitch || x == cx-1) // time to draw
             {
                 xoff = 0;
-                jd.iWidth = iPitch; // width of each LCD block group
+                jd.iWidth = jd.iWidthUsed = iPitch; // width of each LCD block group
                 jd.pUser = pJPEG->pUser;
                 if (pJPEG->ucPixelType > EIGHT_BIT_GRAYSCALE) // dither to 4/2/1 bits
                     JPEGDither(pJPEG, cx * mcuCX, mcuCY);
+                if ((x+1)*mcuCX > pJPEG->iWidth) { // right edge has clipped pixels
+                   jd.iWidthUsed = iPitch - (cx*mcuCX - pJPEG->iWidth);
+                }
                 if ((jd.y - pJPEG->iYOffset + mcuCY) > (pJPEG->iHeight>>iScaleShift)) { // last row needs to be trimmed
                    jd.iHeight = (pJPEG->iHeight>>iScaleShift) - (jd.y - pJPEG->iYOffset);
                 }

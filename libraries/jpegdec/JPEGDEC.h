@@ -108,6 +108,7 @@ typedef struct jpeg_draw_tag
 {
     int x, y; // upper left corner of current MCU
     int iWidth, iHeight; // size of this MCU
+    int iWidthUsed; // clipped size for odd/edges
     int iBpp; // bit depth of the pixels (8 or 16)
     uint16_t *pPixels; // 16-bit pixels
     void *pUser;

@@ -95,6 +95,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixel = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 current_graphics->set_pen((uint8_t)(*pixel >> 4));
                 current_graphics->set_pixel({pDraw->x + x, pDraw->y + y});
                 pixel++;
@@ -104,6 +105,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 uint8_t p = pixels[i / 2];
                 p >>= (i & 0b1) ? 0 : 4;
@@ -116,6 +118,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 uint8_t p = pixels[i / 8];
                 p >>= 7 - (i & 0b111);
@@ -127,6 +130,7 @@ MICROPY_EVENT_POLL_HOOK
     } else {
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
                     if (current_flags & FLAG_NO_DITHER) {
