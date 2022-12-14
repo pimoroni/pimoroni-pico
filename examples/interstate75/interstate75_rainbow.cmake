@@ -10,5 +10,7 @@ target_link_libraries(${OUTPUT_NAME}
     pico_stdlib
     pico_multicore
     hardware_vreg
+    hardware_pwm
     hub75
+    interstate75
 )

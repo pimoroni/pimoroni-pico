@@ -137,6 +137,30 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_INTERSTATE75_64X32:
+            width = 64;
+            height = 32;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
+        case DISPLAY_INTERSTATE75_96X32:
+            width = 96;
+            height = 32;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
+        case DISPLAY_INTERSTATE75_128X32:
+            width = 128;
+            height = 32;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         case DISPLAY_INTERSTATE75_64X64:
             width = 64;
             height = 64;
@@ -145,9 +169,25 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
-        case DISPLAY_INTERSTATE75_64X32:
-            width = 64;
-            height = 32;
+        case DISPLAY_INTERSTATE75_128X64:
+            width = 128;
+            height = 64;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
+        case DISPLAY_INTERSTATE75_192X64:
+            width = 192;
+            height = 64;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
+        case DISPLAY_INTERSTATE75_256X64:
+            width = 256;
+            height = 64;
             bus_type = BUS_PIO;
             // Portrait to match labelling
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;

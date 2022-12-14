@@ -9,7 +9,7 @@
 
 using namespace pimoroni;
 
-RGBLED backlight_rgb(interstate75::LED_R, interstate75::LED_G, interstate75::LED_B, Polarity::ACTIVE_HIGH);
+RGBLED led_rgb(interstate75::LED_R, interstate75::LED_G, interstate75::LED_B, Polarity::ACTIVE_HIGH);
 Button button_a(interstate75::A);
 Button button_b(interstate75::B);
 
@@ -54,92 +54,30 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
   }
 }
 
-void text(std::string t, Point p, float s = 1.0f, float a = 1.0f) {
-  int w = graphics.measure_text(t, s);
-  p.x += (hub75.width / 2) - (w / 2);
-  p.y += (hub75.height / 2);
-  graphics.text(t, Point(p.x, p.y), -1, s, a);
-  //graphics.text(t, Point(p.x + 1, p.y), -1, s, a);
-  //graphics.text(t, Point(p.x + 1, p.y + 1), -1, s, a);
-  //graphics.text(t, Point(p.x, p.y + 1), -1, s, a);
+
+// Interrupt callback required function 
+void __isr dma_complete() {
+    hub75.dma_complete();
 }
-
-struct star_t {
-  float dx, dy, x, y, a;
-
-  uint8_t brightness() {
-    int b = a / 5;
-    return b > 15 ? 15 : b;
-  }
-};
-
-void init_star(star_t &s) {
-  s.x = ((rand() % 100) / 5.0f) - 10.0f;
-  s.y = ((rand() % 100) / 10.0f) - 5.0f;
-
-  s.dx = s.x / 10.0f;
-  s.dy = s.y / 10.0f;
-  s.a = 0;
-}
-
-void step_star(star_t &s) {
-  s.x += s.dx;
-  s.y += s.dy;
-  s.a++;
-
-  if(s.a > 100) {
-    init_star(s);
-  }
-}
-
 
 int main() {
 
   stdio_init_all();
 
-  uint8_t hue_map[53][3];
-  for(int i = 0; i < hub75.width; i++) {
-    from_hsv(i / hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
+  uint8_t hue_map[hub75.width][3];
+  for(uint i = 0; i < hub75.width; i++) {
+    from_hsv(i / (float) hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
   }
 
-  star_t stars[100];
-  for(int i = 0; i < 100; i++) {
-    init_star(stars[i]);
-    stars[i].a = i;
-  }
-
-  gpio_set_function(28, GPIO_FUNC_SIO);
-  gpio_set_dir(28, GPIO_OUT);
-
-  for(int i = 0; i < 10; i++) {
-    gpio_put(28, !gpio_get(28));
-    sleep_ms(100);
-  }
-  sleep_ms(1000);
-
-  gpio_put(28,true);
-
-  hub75.init();
-
-/*
-  bool a_pressed = false;
-  bool b_pressed = false;
-  bool x_pressed = false;
-  bool y_pressed = false;
-*/
+  hub75.start(dma_complete);
   graphics.set_font("bitmap8");
 
-
-
   float i = 0;
-
-  float hue_offset = 0.0f;
-
   bool animate = true;
-
   float stripe_width = 3.0f;
-  float speed = 1.0f;
+  float speed = 5.0f;
   float curve = 0.0f;
+  float led_h = 0.0f;
 
   while(true) {
 
@@ -159,9 +97,9 @@ int main() {
       animate = true;
     }
 
-    for(int x = 0; x < hub75.width; x++) {
-      for(int y = 0; y < hub75.height; y++) {
-        int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / 11.0f) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
+    for(uint x = 0; x < hub75.width; x++) {
+      for(uint y = 0; y < hub75.height; y++) {
+        int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / (float)hub75.width) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
 
         uint8_t r = (hue_map[x][0] * v) / 256;
         uint8_t g = (hue_map[x][1] * v) / 256;
@@ -172,6 +110,9 @@ int main() {
       }
     }
     hub75.update(&graphics);
+
+    led_rgb.set_hsv(led_h, 1.0f, 1.0f);
+    led_h += 0.01;
 
 
     sleep_ms(20);
