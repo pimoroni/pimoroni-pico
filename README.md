@@ -79,6 +79,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Pico Display 2.0 - https://shop.pimoroni.com/products/pico-display-pack-2-0
 * Pico Enviro+ Pack - https://shop.pimoroni.com/products/pico-enviro-pack
 * Pico Inky Pack - https://shop.pimoroni.com/products/pico-inky-pack
+* Pico GFX Pack - https://shop.pimoroni.com/products/pico-gfx-pack
 
 ## SHIMs
 

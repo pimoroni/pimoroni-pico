@@ -6,7 +6,10 @@ import time
 badger = badger2040.Badger2040()
 
 while True:
-    badger.led(255)
-    time.sleep(1)
-    badger.led(0)
-    time.sleep(1)
+    # increase badger.led brightness from 0 to 255 and back down to zero
+    for i in range(0, 255):
+        badger.led(i)
+        time.sleep_ms(10)
+    for i in range(255, 0, -1):
+        badger.led(i)
+        time.sleep_ms(10)

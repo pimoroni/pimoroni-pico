@@ -7,8 +7,12 @@
   - [Alternating Blinkies](#alternating-blinkies)
   - [Fire](#fire)
   - [Moon](#moon)
+  - [Pulse](#pulse)
   - [Rainbows](#rainbows)
+  - [Snow](#snow)
+  - [Sparkles](#sparkles)
   - [Thermometer](#thermometer)
+  - [Tree](#tree)
 - [Advanced Examples](#advanced-examples)
   - [CO2](#co2)
   - [Encoder](#encoder)
@@ -18,6 +22,7 @@
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights](#cheerlights)
   - [Weather](#weather)
+- [Other Resources](#other-resources)
 
 ## About Plasma Stick
 
@@ -51,9 +56,9 @@ Plasma Stick uses GP4 and GP5 for its I2C interface. You can use the constants i
 
 ```python
 from pimoroni_i2c import PimoroniI2C
-from pimoroni import PINS_BREAKOUT_GARDEN
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS
 
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 ```
 
 Alternatively, you can specify the pin numbers directly:
@@ -85,17 +90,41 @@ A simple 🔥 fire effect example 🤘 (warning, flashy).
 Spooky moon simulator - the LEDs will get brighter as midnight approaches!
 Needs to be run from Thonny to get the correct time.
 
+### Pulse
+
+[pulse.py](pulse.py)
+
+Adjust the brightness or saturation of the LEDs using a sine wave.
+
 ### Rainbows
 
 [rainbows.py](rainbows.py)
 
 Some good old fashioned rainbows!
 
+### Snow
+
+[snow.py](snow.py)
+
+Snow in a bottle!
+
+### Sparkles
+
+[sparkles.py](sparkles.py)
+
+A festive, customisable sparkly effect.
+
 ### Thermometer
 
 [thermometer_pico.py](thermometer_pico.py)
 
 Reads the temperature from the Pico W's internal temperature sensor and changes the LED strip an appropriate colour.
+
+### Tree
+
+[tree.py](tree.py)
+
+A Christmas tree simulator.
 
 ## Advanced Examples
 
@@ -152,3 +181,9 @@ Find out more about the Cheerlights API at [https://cheerlights.com/].
 This Plasma Stick example connects to Open Meteo to access the current weather conditions.
 It then does some cool weather appropriate stuff with LEDs.
 Find out more about the Open Meteo API at [https://open-meteo.com].
+
+## Other Resources
+
+Here are some Plasma Stick community projects and resources that you might find useful! Note that code at the links below has not been tested by us and we're not able to offer support with it.
+
+- :link: [MQTT Script for Plasma Stick](https://github.com/digitalurban/MQTT-Plasma-Stick-2040W)
