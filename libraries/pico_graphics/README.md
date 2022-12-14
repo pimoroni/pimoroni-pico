@@ -49,7 +49,8 @@ A monochrome OLED display can currently only work with `1Bit` type buffers, and 
 * `P4` - 4-bit packed, with an 8 colour palette. This is commonly used for 7/8-colour e-ink displays or driving large displays with few colours.
 * `P8` - 8-bit, with a 256 colour palette. Great balance of memory usage versus available colours. You can replace palette entries on the fly.
 * `RGB332` - 8-bit, with a fixed 256 colour RGB332 palette. Great for quickly porting an RGB565 app to use less RAM. Limits your colour choices, but is easier to grok.
-* `RGB565` - 16-bit, 65K "True Colour." Great for rainbows, gradients and images but comes at the cost of RAM!
+* `RGB565` - 16-bit, 65K "High Colour." Great for rainbows, gradients and images but comes at the cost of RAM!
+* `RGB888` - 24-bit, 16M "True Colour." Lists every color possible to be seem by the human eye but comes at double the cost of RAM compared to `RGB565`.
 
 ### Creating A Pico Graphics Instance
 
@@ -63,6 +64,7 @@ PicoGraphics_PenP4 graphics(WIDTH, HEIGHT, nullptr);     // For colour LCDs such
 PicoGraphics_PenP8 graphics(WIDTH, HEIGHT, nullptr);     // ditto- uses 2x the RAM of P4
 PicoGraphics_PenRGB332 graphics(WIDTH, HEIGHT, nullptr); // ditto
 PicoGraphics_PenRGB565 graphics(WIDTH, HEIGHT, nullptr); // For 16-bit colour LCDs. Uses 2x the RAM of P8 or RGB332 but permits 65K colour.
+PicoGraphics_PenRGB888 graphics(WIDTH, HEIGHT, nullptr); // For 32-bit colour devices. Uses 4x the RAM of P8 or RGB332 but permits 16M colour.
 ```
 
 To draw something to a display you should create a display driver instance, eg:
