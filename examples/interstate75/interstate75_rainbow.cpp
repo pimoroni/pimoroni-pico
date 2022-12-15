@@ -6,9 +6,9 @@
 
 using namespace pimoroni;
 
-RGBLED led_rgb(interstate75::LED_R, interstate75::LED_G, interstate75::LED_B, Polarity::ACTIVE_HIGH);
-Button button_a(interstate75::A);
-Button button_b(interstate75::B);
+RGBLED led_rgb(Interstate75::LED_R, Interstate75::LED_G, Interstate75::LED_B, Polarity::ACTIVE_LOW);
+Button button_a(Interstate75::A);
+Button button_b(Interstate75::B);
 
 
 

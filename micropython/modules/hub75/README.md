@@ -9,9 +9,6 @@ It can, in theory, be used with your own custom wiring, though custom pin assign
   - [FM6216A Panels](#fm6216a-panels)
 - [Quick Reference](#quick-reference)
   - [Set A Pixel](#set-a-pixel)
-    - [Color](#color)
-    - [RGB](#rgb)
-    - [HSV](#hsv)
   - [Update The Display](#update-the-display)
 
 ## Notes On PIO & DMA Limitations
@@ -51,53 +48,19 @@ import hub75
 WIDTH = 64
 HEIGHT = 64
 
-matrix = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_FM6126A)
+matrix = hub75.Hub75(WIDTH, HEIGHT,panel_type=hub75.PANEL_FM6126A)
 ```
 
 ## Quick Reference
 
 ### Set A Pixel
 
-You can set the colour of an pixel in either the RGB colourspace, or HSV (Hue, Saturation, Value). HSV is useful for creating rainbow patterns.
-
-#### Color
-
-Set the top left-most LED - `0, 0` - to a pre-calculated colour.
-
-```python
-matrix.set_color(0, 0, color)
-```
-
-There are a couple of functions for generating colours, which take your red, green and blue values, gamma correct them and pack them into a single number. By converting a colour and saving this value you can pay the cost of conversion up-front and drawing pixels in that colour will be faster:
-
-```python
-red = hub75.color(255, 0, 0)
-red = hub75.color_hsv(1.0, 0, 0)
-```
-
-Eg:
-
-```python
-red = hub75.color(255, 0, 0)
-
-for x in range(32):
-    matrix.set_color(0, 0, red)
-```
-
-#### RGB
+You can set the colour of a pixel using RGB values.
 
 Set the top left-most LED - `0, 0` - to Purple `255, 0, 255`:
 
 ```python
-matrix.set_rgb(0, 0, 255, 0, 255)
-```
-
-#### HSV
-
-Set the top left-most LED - `0, o` - to Red `0.0`:
-
-```python
-matrix.set_hsv(0, 0, 0.0, 1.0, 1.0)
+matrix.set_pixel(0, 0, 255, 0, 255)
 ```
 
 ### Update The Display

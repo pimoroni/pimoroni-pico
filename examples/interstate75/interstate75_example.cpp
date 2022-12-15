@@ -1,17 +1,3 @@
-# Interstate 75 (C++) <!-- omit in toc -->
-
-This library offers convenient functions for interacting with [Interstate75](https://shop.pimoroni.com/products/interstate-75) and [Interstate75W](https://shop.pimoroni.com/products/interstate-75-w) - Interstate75 and Interstate75W offer an convenient way and 2 input buttons for all your display and control needs.
-
-- [Example Program](#example-program)
-- [Function Reference](#function-reference)
-  - [PicoGraphics](#picographics)
-  - [HUB75](#hub75)
-
-## Example Program
-
-The following example sets up Pico Display, displays some basic demo text and graphics and will illuminate the LED green if the A button is pressed.
-
-```c++
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "libraries/interstate75/interstate75.hpp"
 #include "rgbled.hpp"
@@ -71,14 +57,3 @@ int main() {
         hub75.update(&graphics);
     }
 }
-```
-
-## Function Reference
-
-### PicoGraphics
-
-Pico GFX Pack uses our Pico Graphics library to draw graphics and text. For more information [read the Pico Graphics function reference.](../pico_graphics/README.md#function-reference).
-
-### HUB75
-
-Pico Display uses the HUB75 display driver to handle the led matrix. For more information [read the HUB75 README.](../../drivers/hub75/README.md).

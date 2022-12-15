@@ -1,24 +1,39 @@
 # Interstate75 (MicroPython) <!-- omit in toc -->
 
-This library offers convenient functions for interacting with [Interstate75](https://shop.pimoroni.com/products/interstate75) and [Interstate75W](https://shop.pimoroni.com/products/interstate75w)- Interstate75 and Interstate75W offer an convenient way  and 2 input buttons for all your display and control needs.
+This library offers convenient functions for interacting with [Interstate75](https://shop.pimoroni.com/products/interstate-75) and [Interstate75W](https://shop.pimoroni.com/products/interstate-75-w) - Interstate75 and Interstate75W offer an convenient way and 2 input buttons for all your display and control needs.
 
 ## Table of Content
 - [Table of Content](#table-of-content)
-- [Interstate75 Module](#gfx-pack-class)
+- [Interstate75 Module](#interstate75-class)
   - [Switches](#switches)
-  - [RGBW Backlight](#rgbw-backlight)
-- [Display](#display)
-  - [Backlight](#backlight)
+  - [RGB LED](#rgb-led)
+
 
 
 ## Interstate75 Class
 
-The `GfxPack` class deals with RGBW backlight and buttons on the GFX Pack. To create one, import the `gfx_pack` module, then define a new `board` variable:
+The `Interstate75` class deals with RGB LED and buttons on the Interstate75 and 75W. To create one, import the `interstate75` module, then define a new `board` variable.
+
+This is where you define your HUB75 matrix display size that you wish to use by defining `display=`
+
+```python
+DISPLAY_INTERSTATE75_32X32
+DISPLAY_INTERSTATE75_64X32
+DISPLAY_INTERSTATE75_96X32
+DISPLAY_INTERSTATE75_128X32
+DISPLAY_INTERSTATE75_64X64
+DISPLAY_INTERSTATE75_128X64
+DISPLAY_INTERSTATE75_192X64
+DISPLAY_INTERSTATE75_256X64
+```
+
 
 ```python
 import interstate75
 
-board = interstate75.Interstate75(display=DISPLAY_INTERSTATE75_32X32)
+display = interstate75.DISPLAY_INTERSTATE75_32X32
+
+board = interstate75.Interstate75(display=display)
 ```
 
 From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
@@ -41,23 +56,22 @@ if board.switch_pressed(SWITCH_B):
 ```
 
 
-### RGBW Backlight
+### RGB LED
 
-The GFX has an RGB backlight as well as the regular Matrix display backlight to change the colour of the backlight. This is accessed via the following method.
+The Interstate has an RGB LED. This is accessed via the following method.
 
 
-`.set_backlight(r, g, b)`
+`.set_led(r, g, b)`
 
-Where r, g, b and w are values between 0 and 255
+Where r, g, b are values between 0 and 255
 
 
 example:
 
 ```python
-board.set_backlight(255, 0, 0)  # Makes the Backlight Red
-board.set_backlight(0, 255, 0)  # Makes the Backlight Blue
-board.set_backlight(0, 0, 255)  # Makes the Backlight Green
-board.set_backlight(0, 0, 0, 255)  # Makes the Backlight White
+board.set_led(255, 0, 0)  # Makes the LED Red
+board.set_led(0, 255, 0)  # Makes the LED Blue
+board.set_led(0, 0, 255)  # Makes the LED Green
 ```
 
 ## Display
@@ -70,19 +84,6 @@ example:
 display = board.display
 display.text("Hello World!", 0, 0)
 display.line(0, 0, 128, 64) 
-display.update()  # Update display with the above items
+board.update()  # Update display with the above items
 ```
 All the picographics functions can be found [Here](../modules/picographics/README.md)
-
-### Backlight
-
-Included in the picographics display drivers is a function for controling the displays white backlight only which is accessed via `.set_backlight()`.
-
-This function takes a floating point value between `0.0` and `1.0`
-
-```python
-display = board.display
-display.set_backlight(0.0)  # Backlight is off
-display.set_backlight(0.5)  # Backlight is 50%
-display.set_backlight(1.0)  # Backlight is 100%
-```

@@ -6,7 +6,7 @@
 
 namespace pimoroni {
 
-  namespace interstate75{
+  namespace Interstate75{
     static const uint8_t A = 14;
     static const uint8_t B = 15;
     static const uint8_t LED_R = 16;
