@@ -1,5 +1,5 @@
 '''
-non_pg_set_pixel.py
+raw_set_pixel.py
 This example shows how to set the pixels on the display individually without having to use pico graphics.
 This method can be used to save on memory usage.
 '''

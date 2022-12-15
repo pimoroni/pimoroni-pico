@@ -1,21 +1,24 @@
 # Clock example with NTP synchronization
 #
 # Create a secrets.py with your Wifi details to be able to get the time
-# when the Galactic Unicorn isn't connected to Thonny.
+# when the Interstate75W isn't connected to Thonny.
 #
 # secrets.py should contain:
 # WIFI_SSID = "Your WiFi SSID"
 # WIFI_PASSWORD = "Your WiFi password"
-#
-# Clock synchronizes time on start, and resynchronizes if you press the A button
 
 import time
 import math
 import machine
 import network
 import ntptime
-import hub75
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75_64X32 as DISPLAY
+from interstate75 import Interstate75, DISPLAY_INTERSTATE75_32X32
+
+i75 = Interstate75(display=DISPLAY_INTERSTATE75_32X32)
+graphics = i75.display
+
+width = i75.width
+height = i75.height
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD
@@ -35,17 +38,10 @@ MIDNIGHT_SATURATION = 1.0
 
 MIDDAY_VALUE = 0.8
 MIDNIGHT_VALUE = 0.3
-graphics = PicoGraphics(DISPLAY)
-WIDTH, HEIGHT = graphics.get_bounds()
 
-hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_GENERIC)
-
-hub.start()
 # create the rtc object
 rtc = machine.RTC()
 
-width = WIDTH
-height = HEIGHT
 
 # set up some pens to use later
 WHITE = graphics.create_pen(255, 255, 255)
@@ -146,10 +142,7 @@ def sync_time():
 
 
 # NTP synchronizes the time to UTC, this allows you to adjust the displayed time
-# by one hour increments from UTC by pressing the volume up/down buttons
-#
-# We use the IRQ method to detect the button presses to avoid incrementing/decrementing
-# multiple times when the button is held.
+
 utc_offset = 0
 
 year, month, day, wd, hour, minute, second, _ = rtc.datetime()
@@ -198,6 +191,6 @@ while True:
     redraw_display_if_reqd()
 
     # Update the display
-    hub.update(graphics)
+    i75.update()
 
     time.sleep(0.01)
