@@ -1,7 +1,7 @@
 import hub75
 import time
 import math
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32 as DISPLAY
 WIDTH, HEIGHT = 32, 32
 
 hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_GENERIC)

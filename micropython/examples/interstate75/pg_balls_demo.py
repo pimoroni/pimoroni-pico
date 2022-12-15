@@ -1,15 +1,12 @@
-import hub75
 import time
 import random
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
-WIDTH, HEIGHT = 32, 32
+from interstate75 import Interstate75, DISPLAY_INTERSTATE75_32X32
 
-hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_GENERIC)
-graphics = PicoGraphics(DISPLAY)
-hub.start()
+i75 = Interstate75(display=DISPLAY_INTERSTATE75_32X32)
+graphics = i75.display
 
-width = WIDTH
-height = HEIGHT
+width = i75.width
+height = i75.height
 
 
 class Ball:
@@ -28,8 +25,8 @@ for i in range(0, 10):
     r = random.randint(0, 3) + 3
     balls.append(
         Ball(
-            random.randint(r, r + (WIDTH - 2 * r)),
-            random.randint(r, r + (HEIGHT - 2 * r)),
+            random.randint(r, r + (width - 2 * r)),
+            random.randint(r, r + (height - 2 * r)),
             r,
             (7 - r) / 4,
             (7 - r) / 4,
@@ -47,9 +44,9 @@ while True:
         ball.x += ball.dx
         ball.y += ball.dy
 
-        xmax = WIDTH - ball.r
+        xmax = width - ball.r
         xmin = ball.r
-        ymax = HEIGHT - ball.r
+        ymax = height - ball.r
         ymin = ball.r
 
         if ball.x < xmin or ball.x > xmax:
@@ -61,5 +58,5 @@ while True:
         graphics.set_pen(ball.pen)
         graphics.circle(int(ball.x), int(ball.y), int(ball.r))
 
-    hub.update(graphics)
+    i75.update()
     time.sleep(0.025)
