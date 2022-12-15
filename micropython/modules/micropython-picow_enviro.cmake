@@ -47,7 +47,6 @@ include(wakeup/micropython)
 
 # LEDs & Matrices
 include(plasma/micropython)
-include(hub75/micropython)
 
 # Servos & Motors
 include(pwm/micropython)

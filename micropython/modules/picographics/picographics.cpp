@@ -4,7 +4,6 @@
 #include "drivers/uc8151/uc8151.hpp"
 #include "drivers/uc8159/uc8159.hpp"
 #include "drivers/st7567/st7567.hpp"
-#include "drivers/hub75/hub75.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"

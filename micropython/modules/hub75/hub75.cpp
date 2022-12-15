@@ -58,17 +58,12 @@ void Hub75_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind
     mp_print_str(print, " x ");
     mp_obj_print_helper(print, mp_obj_new_int(self->hub75->height), PRINT_REPR);
 
-    //p_print_str(print, ", addr = front: ");
-    //mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->front_buffer[0]), PRINT_REPR);
-    //mp_print_str(print, " back: ");
-    //mp_obj_print_helper(print, mp_obj_new_int((uint32_t)&self->hub75->back_buffer[0]), PRINT_REPR);
-
     switch(self->hub75->panel_type) {
         case PANEL_GENERIC:
             mp_print_str(print, ", panel: generic ");
             break;
         case PANEL_FM6126A:
-            mp_print_str(print, ", panel: generic ");
+            mp_print_str(print, ", panel: fm6126a ");
             break;
     }
 
@@ -119,7 +114,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
             mp_raise_ValueError("Supplied buffer is too small!");
         }
     } else {
-        buffer = m_new(Pixel, width * height );
+        buffer = m_new(Pixel, width * height);
     }
 
     hub75_obj = m_new_obj_with_finaliser(_Hub75_obj_t);
@@ -189,4 +184,5 @@ mp_obj_t Hub75_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
 
     return mp_const_none;
 }
+
 }

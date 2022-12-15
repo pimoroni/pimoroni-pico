@@ -59,6 +59,6 @@ include(servo/micropython)
 include(encoder/micropython)
 include(motor/micropython)
 
-#include(micropython-common)
+# include(micropython-common)
 
 include(modules_py/modules_py)
