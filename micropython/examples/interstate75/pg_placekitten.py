@@ -5,7 +5,7 @@ import uasyncio
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75 as DISPLAY
+from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32 as DISPLAY
 import hub75
 
 """

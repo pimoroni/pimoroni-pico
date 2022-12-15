@@ -50,7 +50,7 @@ A monochrome OLED display can currently only work with `1Bit` type buffers, and 
 * `P8` - 8-bit, with a 256 colour palette. Great balance of memory usage versus available colours. You can replace palette entries on the fly.
 * `RGB332` - 8-bit, with a fixed 256 colour RGB332 palette. Great for quickly porting an RGB565 app to use less RAM. Limits your colour choices, but is easier to grok.
 * `RGB565` - 16-bit, 65K "High Colour." Great for rainbows, gradients and images but comes at the cost of RAM!
-* `RGB888` - 24-bit, 16M "True Colour." Lists every color possible to be seem by the human eye but comes at double the cost of RAM compared to `RGB565`.
+* `RGB888` - 24-bit, 16M "True Colour." Lists every color possible to be seen by the human eye but comes at double the cost of RAM compared to `RGB565`.
 
 ### Creating A Pico Graphics Instance
 
