@@ -30,9 +30,8 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
     gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
     gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
 
-
     if (buffer == nullptr) {
-        back_buffer = new Pixel[width * height ];
+        back_buffer = new Pixel[width * height];
         managed_buffer = true;
     } else {
         back_buffer = buffer;
@@ -49,15 +48,15 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
     int offset = 0;
-    if(x >= width  || y >= height) return;
+    if(x >= width || y >= height) return;
     if(y >= height / 2) {
         y -= height / 2;
-        offset = (y * width  + x) * 2;
+        offset = (y * width + x) * 2;
         offset += 1;
     } else {
         offset = (y * width + x) * 2;
     }
-    back_buffer[offset] = c; 
+    back_buffer[offset] = c;
 }
 
 void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
@@ -145,7 +144,7 @@ void Hub75::start(irq_handler_t handler) {
         bit = 0;
 
         hub75_data_rgb888_set_shift(pio, sm_data, data_prog_offs, bit);
-        dma_channel_set_trans_count(dma_channel, width  *2, false);
+        dma_channel_set_trans_count(dma_channel, width * 2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer, true);
     }
 }
@@ -233,10 +232,10 @@ void Hub75::dma_complete() {
 
         dma_channel_set_trans_count(dma_channel, width * 2, false);
         dma_channel_set_read_addr(dma_channel, &back_buffer[row * width * 2], true);
-    }   
+    }
 }
-void Hub75::update(PicoGraphics *graphics) {
 
+void Hub75::update(PicoGraphics *graphics) {
     if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
         uint32_t *p = (uint32_t *)graphics->frame_buffer;
         for(uint y = 0; y < height; y++) {
