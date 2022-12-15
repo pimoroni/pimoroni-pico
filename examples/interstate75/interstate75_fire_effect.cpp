@@ -1,12 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
 #include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/hub75/hub75.hpp"
-#include "okcolor.hpp"
 
 using namespace pimoroni;
 
@@ -58,7 +53,7 @@ float get(int x, int y) {
 
 // Interrupt callback required function 
 void __isr dma_complete() {
-    hub75.dma_complete();
+  hub75.dma_complete();
 }
 
 
@@ -80,17 +75,21 @@ int main() {
         graphics.set_pen(0, 0, 0);
         if(value > 0.5f) {
           graphics.set_pen(255, 255, 180);
-        }else if(value > 0.4f) {
+        }
+        else if(value > 0.4f) {
           graphics.set_pen(220, 160, 0);
-        }else if(value > 0.3f) {
+        }
+        else if(value > 0.3f) {
           graphics.set_pen(180, 30, 0);
-        }else if(value > 0.22f) {
+        }
+        else if(value > 0.22f) {
           graphics.set_pen(20, 20, 20);
         }
 
         if(landscape) {
           graphics.pixel(Point(x, y));
-        }else{
+        }
+        else{
           graphics.pixel(Point(y, x));
         }
 

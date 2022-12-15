@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/hub75/hub75.hpp"
-#include "okcolor.hpp"
 
 using namespace pimoroni;
 
@@ -65,7 +62,7 @@ void text(std::string t, Point p, float s = 1.0f, float a = 1.0f) {
 
 // Interrupt callback required function 
 void __isr dma_complete() {
-    hub75.dma_complete();
+  hub75.dma_complete();
 }
 
 int main() {
@@ -77,13 +74,10 @@ int main() {
     from_hsv(i / (float)hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
   }
 
-
-
   graphics.set_font("sans");
   uint i = 0;
 
   while(true) {
-
     i++;
     graphics.set_pen(0, 0, 0);
     graphics.clear();

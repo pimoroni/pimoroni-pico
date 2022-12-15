@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <math.h>
 #include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "libraries/interstate75/interstate75.hpp"
-#include "okcolor.hpp"
 
 using namespace pimoroni;
 
@@ -57,7 +54,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 
 // Interrupt callback required function 
 void __isr dma_complete() {
-    hub75.dma_complete();
+  hub75.dma_complete();
 }
 
 int main() {
@@ -84,7 +81,6 @@ int main() {
     if(animate) {
       i += speed;
     }
-
 
     if(button_a.raw()) {
       speed += 0.05f;
@@ -117,8 +113,6 @@ int main() {
 
     sleep_ms(20);
   }
-
-
 
   printf("done\n");
 

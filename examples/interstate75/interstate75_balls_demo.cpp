@@ -1,8 +1,5 @@
-#include <string.h>
 #include <math.h>
-#include <vector>
-#include <cstdlib>
-
+#include "pico/stdlib.h"
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "drivers/hub75/hub75.hpp"
@@ -34,7 +31,7 @@ PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
 // Callback for the dma interrupt (required)
 void __isr dma_complete() {
-    hub75.dma_complete();
+  hub75.dma_complete();
 }
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
@@ -87,8 +84,6 @@ int main() {
   Pen WHITE = graphics.create_pen(200, 200, 200);
 
   while(true) {
-
-  
     graphics.set_pen(BG);
     graphics.clear();
 
@@ -117,16 +112,13 @@ int main() {
 
     }
 
-
-
-
     graphics.set_pen(WHITE);
     graphics.text("Hello World", text_location, false, 1.0f);
 
     // update screen
     hub75.update(&graphics);
-    sleep_ms(1000/30);
+    sleep_ms(1000 / 30);
   }
 
-    return 0;
+  return 0;
 }
