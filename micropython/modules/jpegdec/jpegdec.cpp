@@ -29,7 +29,6 @@ typedef struct _JPEG_obj_t {
 } _JPEG_obj_t;
 
 
-PicoGraphics *current_graphics = nullptr;
 uint8_t current_flags = 0;
 
 enum FLAGS : uint8_t {
@@ -88,6 +87,7 @@ int JPEGDraw(JPEGDRAW *pDraw) {
 #ifdef MICROPY_EVENT_POLL_HOOK
 MICROPY_EVENT_POLL_HOOK
 #endif
+    PicoGraphics *current_graphics = (PicoGraphics *)pDraw->pUser;
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw jpeg data out of the framebuffer..
     // Can we clip beforehand and make this faster?
@@ -95,6 +95,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixel = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 current_graphics->set_pen((uint8_t)(*pixel >> 4));
                 current_graphics->set_pixel({pDraw->x + x, pDraw->y + y});
                 pixel++;
@@ -104,6 +105,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 uint8_t p = pixels[i / 2];
                 p >>= (i & 0b1) ? 0 : 4;
@@ -116,6 +118,7 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixels = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 uint8_t p = pixels[i / 8];
                 p >>= 7 - (i & 0b111);
@@ -127,6 +130,7 @@ MICROPY_EVENT_POLL_HOOK
     } else {
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
+                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
                 int i = y * pDraw->iWidth + x;
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
                     if (current_flags & FLAG_NO_DITHER) {
@@ -137,6 +141,9 @@ MICROPY_EVENT_POLL_HOOK
                         // Dithered output to RGB332
                         current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
                     }
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_RGB888) {
+                    current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb888());
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                 } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 || current_graphics->pen_type == PicoGraphics::PEN_P4 || current_graphics->pen_type == PicoGraphics::PEN_3BIT) {
                     current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                 } else {
@@ -264,12 +271,10 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     }
 
     // We need to store a pointer to the PicoGraphics surface
-    // since the JPEGDRAW struct has no userdata
-    current_graphics = self->graphics->graphics;
+    self->jpeg->setUserPointer((void *)self->graphics->graphics);
 
     result = self->jpeg->decode(x, y, f);
 
-    current_graphics = nullptr;
     current_flags = 0;
 
     // Close the file since we've opened it on-demand
