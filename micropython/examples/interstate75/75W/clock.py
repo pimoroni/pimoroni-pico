@@ -192,5 +192,3 @@ while True:
 
     # Update the display
     i75.update()
-
-    time.sleep(0.01)

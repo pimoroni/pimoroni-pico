@@ -3,7 +3,6 @@ buttons.py
 Push either switch A or switch B to change the display
 '''
 import interstate75
-import time
 
 i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32)
 graphics = i75.display
@@ -45,5 +44,3 @@ while 1:
         display_a()
     if i75.switch_pressed(interstate75.SWITCH_B):
         display_b()
-
-    #time.sleep(0.01)

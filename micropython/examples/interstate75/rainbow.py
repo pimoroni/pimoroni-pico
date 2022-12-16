@@ -1,4 +1,3 @@
-import hub75
 import time
 import math
 import interstate75
@@ -8,6 +7,7 @@ graphics = i75.display
 
 width = i75.width
 height = i75.height
+
 
 @micropython.native  # noqa: F821
 def from_hsv(h, s, v):
