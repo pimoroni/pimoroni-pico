@@ -23,4 +23,5 @@ copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/interstate75.py interst
 if(PICO_BOARD STREQUAL "pico_w")
     copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/automation.py automation)
     copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/inventor.py inventor)
+    copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/inky_frame.py inky_frame)
 endif()
