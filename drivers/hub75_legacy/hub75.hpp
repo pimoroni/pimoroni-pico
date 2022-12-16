@@ -4,10 +4,8 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
-#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "hub75.pio.h"
 
-namespace pimoroni {
 const uint DATA_BASE_PIN = 0;
 const uint DATA_N_PINS = 6;
 const uint ROWSEL_BASE_PIN = 6;
@@ -54,6 +52,7 @@ class Hub75 {
     public:
     uint width;
     uint height;
+    Pixel *front_buffer;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
@@ -62,6 +61,8 @@ class Hub75 {
 
     // DMA & PIO
     uint dma_channel = 0;
+    uint dma_flip_channel = 1;
+    volatile bool do_flip = false;
     uint bit = 0;
     uint row = 0;
 
@@ -109,8 +110,7 @@ class Hub75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
-    Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
+    Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC, false) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
     ~Hub75();
@@ -118,13 +118,12 @@ class Hub75 {
     void FM6126A_write_register(uint16_t value, uint8_t position);
     void FM6126A_setup();
     void set_color(uint x, uint y, Pixel c);
-
-    void set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
+    void set_rgb(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
+    void set_hsv(uint x, uint y, float r, float g, float b);
     void display_update();
     void clear();
     void start(irq_handler_t handler);
     void stop(irq_handler_t handler);
+    void flip(bool copybuffer=true);
     void dma_complete();
-    void update(PicoGraphics *graphics);
-    };
-}
+};

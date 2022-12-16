@@ -65,6 +65,22 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * Inky Frame - 600x447 7-colour e-ink - `DISPLAY_INKY_FRAME`
 * Pico GFX Pack - 128x64 mono LCD Matrix - `DISPLAY_GFX_PACK`
 * Galactic Unicorn - 53x11 LED Matrix - `DISPLAY_GALACTIC_UNICORN`
+* Interstate75 and 75W - HUB75 Matrix driver - `DISPLAY_INTERSTATE75_SIZEOFMATRIX` please read below!
+
+#### Interstate75 and Interstate75W Display modes
+
+Both the Interstate75 and Interstate75W support lots of different sizes of HUB75 matrix displays.
+
+The available display ssettings are listed here:
+
+* 32 x 32 Matrix - `DISPLAY_INTERSTATE75_32X32`
+* 64 x 32 Matrix - `DISPLAY_INTERSTATE75_64X32`
+* 96 x 32 Matrix - `DISPLAY_INTERSTATE75_96X32`
+* 128 x 32 Matrix - `DISPLAY_INTERSTATE75_128X32`
+* 64 x 64 Matrix - `DISPLAY_INTERSTATE75_64X64`
+* 128 x 64 Matrix - `DISPLAY_INTERSTATE75_128X64`
+* 192 x 64 Matrix - `DISPLAY_INTERSTATE75_192X64`
+* 256 x 64 Matrix - `DISPLAY_INTERSTATE75_256X64`
 
 ### Supported Graphics Modes (Pen Type)
 
