@@ -1,6 +1,6 @@
 # Interstate75 (MicroPython) <!-- omit in toc -->
 
-This library offers convenient functions for interacting with [Interstate75](https://shop.pimoroni.com/products/interstate-75) and [Interstate75W](https://shop.pimoroni.com/products/interstate-75-w) - Interstate75 and Interstate75W offer an convenient way and 2 input buttons for all your display and control needs.
+This library offers convenient functions for interacting with [Interstate75](https://shop.pimoroni.com/products/interstate-75) and [Interstate75W](https://shop.pimoroni.com/products/interstate-75-w) - Interstate75 and Interstate75W offer a convenient way and 2 input buttons for all your display and control needs.
 
 ## Table of Content
 - [Table of Content](#table-of-content)
@@ -14,7 +14,7 @@ This library offers convenient functions for interacting with [Interstate75](htt
 
 The `Interstate75` class deals with RGB LED and buttons on the Interstate75 and 75W. To create one, import the `interstate75` module, then define a new `board` variable.
 
-This is where you define your HUB75 matrix display size that you wish to use by defining `display=`
+This is where you define the HUB75 matrix display size that you wish to use by defining `display=`
 
 ```python
 DISPLAY_INTERSTATE75_32X32
@@ -40,7 +40,7 @@ From here, all features can be accessed by calling functions on `board`. In addi
 
 ### Switches
 
-Interstate75 and 75W have two switches in the font of the board. To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
+Interstate75 and 75W have two switches in the front of the board. To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
 
 To read a specific input, the `interstate75` module contains these handy constants:
 
@@ -76,7 +76,7 @@ board.set_led(0, 0, 255)  # Makes the LED Green
 
 ## Display
 
-The display is all handled by our custom picographics drivers the can be accessed via `.display`.
+The display is all handled by our custom picographics drivers they can be accessed via `.display`.
 
 example:
 

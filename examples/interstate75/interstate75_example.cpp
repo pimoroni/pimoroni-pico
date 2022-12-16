@@ -16,7 +16,7 @@ Button button_a(Interstate75::A);
 Button button_b(Interstate75::B);
 
 // RGB LED
-RGBLED led(Interstate75::LED_R, Interstate75::LED_G, Interstate75::LED_B);
+RGBLED led(Interstate75::LED_R, Interstate75::LED_G, Interstate75::LED_B, ACTIVE_LOW);
 
 // Interrupt callback required function 
 void __isr dma_complete() {
@@ -25,7 +25,7 @@ void __isr dma_complete() {
 
 int main() {
     hub75.start(dma_complete);
-
+    led.set_rgb(0,0,0);
     while(true) {
         // detect if the A button is pressed (could be A, B, C, D or E)
         if(button_a.raw()) {

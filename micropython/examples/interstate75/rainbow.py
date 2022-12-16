@@ -1,16 +1,13 @@
 import hub75
 import time
 import math
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32 as DISPLAY
-WIDTH, HEIGHT = 32, 32
+import interstate75
 
-hub = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_GENERIC)
-graphics = PicoGraphics(DISPLAY)
-hub.start()
+i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32)
+graphics = i75.display
 
-width = WIDTH
-height = HEIGHT
-
+width = i75.width
+height = i75.height
 
 @micropython.native  # noqa: F821
 def from_hsv(h, s, v):
@@ -48,7 +45,7 @@ def draw():
             graphics.set_pen(graphics.create_pen(int(colour[0] * v), int(colour[1] * v), int(colour[2] * v)))
             graphics.pixel(x, y)
 
-    hub.update(graphics)
+    i75.update(graphics)
 
 
 hue_map = [from_hsv(x / width, 1.0, 0.5) for x in range(width)]
@@ -66,7 +63,6 @@ while True:
         phase += speed
 
     start = time.ticks_ms()
-    time.sleep(0.2)
     draw()
 
     print("total took: {} ms".format(time.ticks_ms() - start))

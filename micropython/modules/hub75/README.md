@@ -1,8 +1,8 @@
-# Interstate 75 <!-- omit in toc -->
+# HUB75 <!-- omit in toc -->
 
-This library bypasses the use of picographics an can be used for situation where RAM is constrained or custom display configurations like 2x2 HUB75 panels.
+This library can be used with the Interstate 75 and 75W bypasses the use of picographics and can be used for situations where RAM is constrained or for custom display configurations like 2x2 HUB75 panels.
 
-For most cases we recommend using the picographics based module for Interstate 75 and 75W as i t contain alot of helper functions to draw text and shapes, further information on its usage can be found here: [Interstate75](../../modules_py/interstate75.md) 
+For most cases we recommend using the picographics based module for Interstate 75 and 75W as it contains a lot of helper functions to draw text and shapes, further information on its usage can be found here: [Interstate75](../../modules_py/interstate75.md) 
 
 The Interstate 75 library is intended for the Interstate 75 and Interstate 75 W "HUB75" matrix panel driver board.
 
@@ -23,7 +23,7 @@ It also uses two DMA channels, one to copy pixel data from the back buffer back 
 
 ## Getting Started
 
-Contruct a new `Hub75` instance, specifying the width/height of the display and any additional options.
+Construct a new `Hub75` instance, specifying the width/height of the display and any additional options.
 
 ```python
 import hub75
@@ -36,9 +36,15 @@ matrix = hub75.Hub75(WIDTH, HEIGHT, stb_invert=True)
 
 Use `stb_invert` if you see a missing middle row corruption on the top row.
 
+Start the matrix strip by calling start. This sets up DMA and PIO to drive your panel, pulling rows from the back buffer and refreshing as fast as it can.
+
+```python
+matrix.start()
+```
+
 ### FM6216A Panels
 
-Some panels - based on the FM6126A chips - require a couple of register settings in order for them to display anything at all. Interstate 75 will set these for you if you specify `panel_type=hub75.PANEL_FM6126A`. Eg:
+Some panels - based on the FM6126A chips - require a couple of register settings for them to display anything at all. Interstate 75 will set these for you if you specify `panel_type=hub75.PANEL_FM6126A`. Eg:
 
 ```python
 import hub75
@@ -49,11 +55,12 @@ HEIGHT = 64
 matrix = hub75.Hub75(WIDTH, HEIGHT,panel_type=hub75.PANEL_FM6126A)
 ```
 
+
 ## Quick Reference
 
 ### Set A Pixel
 
-You can set the colour of a pixel using RGB values. This will instanly update the pixel on the matrix display.
+You can set the colour of a pixel using RGB values. This will instantly update the pixel on the matrix display.
 
 Set the top left-most LED - `0, 0` - to Purple `255, 0, 255`:
 
@@ -63,9 +70,8 @@ matrix.set_pixel(0, 0, 255, 0, 255)
 
 ### Clear the display
 
-Calling `.clear()` this will clear the whole contents of the display
+Calling `.clear()` will clear the whole contents of the display
 
 ```python
-
 matrix.clear()
 ```

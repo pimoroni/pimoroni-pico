@@ -11,7 +11,7 @@ const uint8_t QTY_BALLS = 10;
 //If the display looks streaky or corrupted then uncomment one of the other initalisers
 
 //Works with our 32x32 panels https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=35962488650 https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
-Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
+//Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
 //or using 2 of these panels
 //Hub75 hub75(64, 32, nullptr, PANEL_GENERIC, false);
 
@@ -21,7 +21,7 @@ Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
 //Hub75 hub75(128, 32, nullptr, PANEL_GENERIC, false);
 
 //Works with our 64x64 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=3029531983882
-//Hub75 hub75(64, 64, nullptr, PANEL_GENERIC, false);
+Hub75 hub75(64, 64, nullptr, PANEL_FM6126A, false);
 //or using 2 of these panels
 //Hub75 hub75(128, 64, nullptr, PANEL_GENERIC, false);
 

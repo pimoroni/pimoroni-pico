@@ -46,4 +46,4 @@ while 1:
     if i75.switch_pressed(interstate75.SWITCH_B):
         display_b()
 
-    time.sleep(0.5)
+    #time.sleep(0.01)
