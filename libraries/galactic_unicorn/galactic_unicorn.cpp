@@ -517,6 +517,7 @@ namespace pimoroni {
     value = value < 0.0f ? 0.0f : value;
     value = value > 1.0f ? 1.0f : value;
     this->volume = floor(value * 255.0f);
+    this->synth.volume = this->volume * 255.0f;
   }
 
   float GalacticUnicorn::get_volume() {
