@@ -138,7 +138,7 @@ def draw():
 
         # Title
         graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
-        
+
         graphics.set_pen(4)
         graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < 600 else 2)
         graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < 600 else 2)

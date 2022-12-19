@@ -7,8 +7,8 @@ graphics = None
 
 rtc = machine.RTC()
 time_string = None
-words = ["it", "d", "is", "m", "about", "l", "half", "c", "quarter", "b", "to", "u", "past", "n", "one", 
-        "two", "three", "four", "five", "six", "eleven", "ten", "nine", "eight", "seven", "rm", "twelve",  "rt", "O'Clock", "q"]
+words = ["it", "d", "is", "m", "about", "l", "half", "c", "quarter", "b", "to", "u", "past", "n", "one",
+         "two", "three", "four", "five", "six", "eleven", "ten", "nine", "eight", "seven", "rm", "twelve", "rt", "O'Clock", "q"]
 
 
 def approx_time(hours, minutes):
