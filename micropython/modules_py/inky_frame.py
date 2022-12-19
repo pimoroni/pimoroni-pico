@@ -1,6 +1,6 @@
 from pimoroni import ShiftRegister
 from machine import Pin
-from wakeup import get_shift_state
+from wakeup import get_shift_state, reset_shift_state
 import time
 
 
@@ -15,6 +15,8 @@ LED_D = 14
 LED_E = 15
 
 SHIFT_STATE = get_shift_state()
+
+reset_shift_state()
 
 
 class Button:
