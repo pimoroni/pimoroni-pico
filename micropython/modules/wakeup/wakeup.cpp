@@ -62,11 +62,25 @@ mp_obj_t Wakeup_get_gpio_state() {
     return mp_obj_new_int(runtime_wakeup_gpio_state);
 }
 
+void err_no_sr() {
+    mp_raise_msg(&mp_type_RuntimeError, "Wakeup_get_shift_state: board does not have a shift register.");
+}
+
+mp_obj_t Wakeup_reset_shift_state() {
+    #if WAKEUP_HAS_SHIFT_REGISTER==1
+    wakeup.shift_register_state = 0;
+    return mp_const_none;
+    #endif
+    err_no_sr();
+    return mp_const_none;
+}
+
 mp_obj_t Wakeup_get_shift_state() {
     #if WAKEUP_HAS_SHIFT_REGISTER==1
     return mp_obj_new_int(wakeup.shift_register_state);
     #endif
-    mp_raise_msg(&mp_type_RuntimeError, "Wakeup_get_shift_state: board does not have a shift register.");
+    err_no_sr();
+    return mp_const_none;
 }
 
 }
