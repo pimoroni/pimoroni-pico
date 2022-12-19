@@ -24,7 +24,7 @@ def approx_time(hours, minutes):
     elif minutes >= 8 and minutes < 23:
         return "it is about quarter past " + nums[hours]
     elif minutes >= 23 and minutes < 38:
-        return "Tit is about half past " + nums[hours]
+        return "it is about half past " + nums[hours]
     elif minutes >= 38 and minutes < 53:
         return "it is about quarter to " + nums[hours + 1]
     else:
