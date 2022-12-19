@@ -65,17 +65,17 @@ def display_quote(text, ox, oy, scale, wordwrap):
 
 def update():
     global text
-
     gc.collect()
 
-    # Grab the data
-    socket = urequest.urlopen(URL)
-    j = ujson.load(socket)
-    socket.close()
-
-    text = [j['activity'], j['type'], j['participants']]
-
-    gc.collect()
+    try:
+        # Grab the data
+        socket = urequest.urlopen(URL)
+        j = ujson.load(socket)
+        socket.close()
+        text = [j['activity'], j['type'], j['participants']]
+        gc.collect()
+    except OSError:
+        pass
 
 
 def draw():
@@ -108,13 +108,18 @@ def draw():
     graphics.text("Activity Idea", 55, 30, WIDTH - 20, 2)
     graphics.set_pen(0)
     graphics.set_font("bitmap8")
-    display_quote(text[0], 55, 170, 5, WIDTH - 20)
 
-    gc.collect()
-
-    graphics.set_pen(2)
-    graphics.text("Activity Type: " + text[1], 55, HEIGHT - 45, WIDTH - 20, 2)
-    graphics.text("Participants: " + str(text[2]), 400, HEIGHT - 45, WIDTH - 20, 2)
+    if text:
+        display_quote(text[0], 55, 170, 5, WIDTH - 20)
+        gc.collect()
+        graphics.set_pen(2)
+        graphics.text("Activity Type: " + text[1], 55, HEIGHT - 45, WIDTH - 20, 2)
+        graphics.text("Participants: " + str(text[2]), 400, HEIGHT - 45, WIDTH - 20, 2)
+    else:
+        graphics.set_pen(4)
+        graphics.rectangle(0, 175, 640, 25)
+        graphics.set_pen(1)
+        graphics.text("Unable to get data! Check your network settings in secrets.py", 5, 180, 600, 2)
 
     graphics.update()
 

@@ -133,11 +133,12 @@ def draw():
     graphics.clear()
     graphics.set_pen(0)
 
-    # Title
-    graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
-
     # Draws 2 articles from the feed if they're available.
     if feed:
+
+        # Title
+        graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
+        
         graphics.set_pen(4)
         graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < 600 else 2)
         graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < 600 else 2)
@@ -155,6 +156,8 @@ def draw():
 
     else:
         graphics.set_pen(4)
-        graphics.text("Error: Unable to get feed :(", 10, 40, WIDTH - 150, 4)
+        graphics.rectangle(0, 170, 640, 25)
+        graphics.set_pen(1)
+        graphics.text("Unable to display news! Check your network settings in secrets.py", 5, 175, 600, 2)
 
     graphics.update()
