@@ -15,6 +15,8 @@ FILENAME = "random-joke.jpg"
 JOKE_IDS = "https://pimoroni.github.io/feed2image/jokeapi-ids.txt"
 JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-{}x{}.jpg"
 
+UPDATE_INTERVAL = 60
+
 gc.collect()  # Claw back some RAM!
 
 
