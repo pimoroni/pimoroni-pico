@@ -1,7 +1,7 @@
 #include <math.h>
 #include "pico/stdlib.h"
 
-#include "libraries/pico_graphics/pico_graphics.hpp"
+//#include "libraries/pico_graphics/pico_graphics.hpp"
 #include "libraries/interstate75/interstate75.hpp"
 
 using namespace pimoroni;
@@ -33,6 +33,7 @@ PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
 // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
 // Outputs are rgb in the range 0-255 for each channel
+/*
 void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
   float i = floor(h * 6.0f);
   float f = h * 6.0f - i;
@@ -50,7 +51,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
     case 5: r = v; g = p; b = q; break;
   }
 }
-
+*/
 
 // Interrupt callback required function 
 void __isr dma_complete() {
@@ -61,9 +62,9 @@ int main() {
 
   stdio_init_all();
 
-  uint8_t hue_map[hub75.width][3];
+  Pen hue_map[hub75.width];
   for(uint i = 0; i < hub75.width; i++) {
-    from_hsv(i / (float) hub75.width, 1.0f, 1.0f, hue_map[i][0], hue_map[i][1], hue_map[i][2]);
+    hue_map[i] =  graphics.create_pen_hsv(i / (float) hub75.width, 1.0f, 1.0f);
   }
 
   hub75.start(dma_complete);
@@ -96,12 +97,8 @@ int main() {
     for(uint x = 0; x < hub75.width; x++) {
       for(uint y = 0; y < hub75.height; y++) {
         int v = ((sin((x + y) / stripe_width + (sin((y * 3.1415927f * 2.0f) / (float)hub75.width) * curve) + i / 15.0f) + 1.5f) / 2.5f) * 255.0f;
-
-        uint8_t r = (hue_map[x][0] * v) / 256;
-        uint8_t g = (hue_map[x][1] * v) / 256;
-        uint8_t b = (hue_map[x][2] * v) / 256;
-
-        graphics.set_pen(r, g, b);
+        Pen rainbow_pen = (hue_map[x] * v) / 256;
+        graphics.set_pen(rainbow_pen);
         graphics.pixel(Point(x, y));
       }
     }

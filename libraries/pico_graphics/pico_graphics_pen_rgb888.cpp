@@ -15,8 +15,17 @@ namespace pimoroni {
         src_color = {r, g, b};
         color = src_color.to_rgb888();
     }
+    void PicoGraphics_PenRGB888::set_pen_hsv(float h, float s, float v){
+        // HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
+        src_color = from_hsv(h, s, v);
+        color = src_color.to_rgb888();
+    }
     int PicoGraphics_PenRGB888::create_pen(uint8_t r, uint8_t g, uint8_t b) {
         return RGB(r, g, b).to_rgb888();
+    }
+    int PicoGraphics_PenRGB888::create_pen_hsv(float h, float s, float v) {
+        src_color = from_hsv(h, s, v);
+        return src_color.to_rgb888();
     }
     void PicoGraphics_PenRGB888::set_pixel(const Point &p) {
         uint32_t *buf = (uint32_t *)frame_buffer;
