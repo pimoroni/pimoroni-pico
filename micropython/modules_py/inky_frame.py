@@ -31,6 +31,10 @@ class Button:
         self._last_value = None
 
     def read(self):
+        if self.startup_state:
+            self.startup_state = False
+            return True
+
         value = self.raw()
         if value != self._last_value and time.ticks_ms() - self._changed > self._debounce_time:
             self._last_value = value
