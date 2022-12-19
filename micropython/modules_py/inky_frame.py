@@ -30,6 +30,12 @@ class Button:
         self._changed = time.ticks_ms()
         self._last_value = None
 
+    def led_on(self):
+        self.led.on()
+
+    def led_off(self):
+        self.led.off()
+
     def read(self):
         if self.startup_state:
             self.startup_state = False
