@@ -27,7 +27,7 @@ jobs:
 
     steps:
     - name: Compiler Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /home/runner/.ccache
         key: ccache-cmake-${{github.ref}}-${{github.sha}}
@@ -35,13 +35,13 @@ jobs:
           ccache-cmake-${{github.ref}}
           ccache-cmake
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     # Check out the Pico SDK
     - name: Checkout Pico SDK
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: raspberrypi/pico-sdk
         path: pico-sdk
@@ -49,7 +49,7 @@ jobs:
 
     # Check out the Pico Extras
     - name: Checkout Pico Extras
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: raspberrypi/pico-extras
         path: pico-extras
