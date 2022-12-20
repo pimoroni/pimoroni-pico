@@ -72,27 +72,27 @@ def launcher():
 
     while True:
         if ih.inky_frame.button_a.read():
-            ih.button_a_led.on()
+            ih.inky_frame.button_a.led_on()
             ih.update_state("nasa_apod")
             time.sleep(0.5)
             reset()
         if ih.inky_frame.button_b.read():
-            ih.button_b_led.on()
+            ih.inky_frame.button_b.led_on()
             ih.update_state("word_clock")
             time.sleep(0.5)
             reset()
         if ih.inky_frame.button_c.read():
-            ih.button_c_led.on()
+            ih.inky_frame.button_c.led_on()
             ih.update_state("daily_activity")
             time.sleep(0.5)
             reset()
         if ih.inky_frame.button_d.read():
-            ih.button_d_led.on()
+            ih.inky_frame.button_d.led_on()
             ih.update_state("news_headlines")
             time.sleep(0.5)
             reset()
         if ih.inky_frame.button_e.read():
-            ih.button_e_led.on()
+            ih.inky_frame.button_e.led_on()
             ih.update_state("random_joke")
             time.sleep(0.5)
             reset()

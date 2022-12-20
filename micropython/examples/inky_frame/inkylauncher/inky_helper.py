@@ -18,12 +18,6 @@ I2C_SCL_PIN = 5
 i2c = PimoroniI2C(I2C_SDA_PIN, I2C_SCL_PIN, 100000)
 rtc = PCF85063A(i2c)
 
-# set up the button LEDs
-button_a_led = Pin(11, Pin.OUT)
-button_b_led = Pin(12, Pin.OUT)
-button_c_led = Pin(13, Pin.OUT)
-button_d_led = Pin(14, Pin.OUT)
-button_e_led = Pin(15, Pin.OUT)
 led_warn = Pin(6, Pin.OUT)
 
 # set up for the network LED
@@ -65,23 +59,6 @@ def stop_network_led():
     network_led_timer.deinit()
     network_led_pwm.duty_u16(0)
 
-
-# returns the id of the button that is currently pressed or
-# None if none are
-def pressed():
-    if inky_frame.button_a.read():
-        return inky_frame.button_a
-    if inky_frame.button_b.read():
-        return inky_frame.button_b
-    if inky_frame.button_c.read():
-        return inky_frame.button_c
-    if inky_frame.button_d.read():
-        return inky_frame.button_d
-    if inky_frame.button_e.read():
-        return inky_frame.button_e
-    return None
-
-
 def sleep(t):
     # Time to have a little nap until the next update
     rtc.clear_timer_flag()
@@ -98,12 +75,11 @@ def sleep(t):
 
 # Turns off the button LEDs
 def clear_button_leds():
-    button_a_led.off()
-    button_b_led.off()
-    button_c_led.off()
-    button_d_led.off()
-    button_e_led.off()
-
+    inky_frame.button_a.led_off()
+    inky_frame.button_b.led_off()
+    inky_frame.button_c.led_off()
+    inky_frame.button_d.led_off()
+    inky_frame.button_e.led_off()
 
 def network_connect(SSID, PSK):
     # Enable the Wireless
