@@ -10,6 +10,9 @@ import inky_helper as ih
 # WIFI_SSID = "Your WiFi SSID"
 # WIFI_PASSWORD = "Your WiFi password"
 
+# A short delay to give USB chance to initialise
+time.sleep(0.1)
+
 # Setup for the display.
 graphics = PicoGraphics(DISPLAY)
 WIDTH, HEIGHT = graphics.get_bounds()
@@ -140,5 +143,7 @@ print(file)
 
 while True:
     ih.app.update()
+    ih.led_warn.on()
     ih.app.draw()
+    ih.led_warn.off()
     ih.sleep(ih.app.UPDATE_INTERVAL)
