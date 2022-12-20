@@ -99,9 +99,4 @@
 #define CYW43_WL_GPIO_LED_PIN 0
 #endif
 
-#ifdef WAKEUP_HAS_SHIFT_REGISTER
-#undef WAKEUP_HAS_SHIFT_REGISTER
-#endif
-#define WAKEUP_HAS_SHIFT_REGISTER (1)
-
 #endif

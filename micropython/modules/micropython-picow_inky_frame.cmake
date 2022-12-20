@@ -47,6 +47,7 @@ include(wakeup/micropython)
 
 # Configure wakeup for Inky Frame
 target_compile_definitions(usermod_wakeup INTERFACE
+    -DWAKEUP_HAS_RTC=1
     -DWAKEUP_HAS_SHIFT_REGISTER=1
 )
 
