@@ -99,7 +99,7 @@ def launcher():
 ih.clear_button_leds()
 ih.led_warn.off()
 
-if ih.pressed() == ih.inky_frame.button_e:
+if ih.inky_frame.button_a.read() and ih.inky_frame.button_e.read():
     launcher()
 
 ih.clear_button_leds()
