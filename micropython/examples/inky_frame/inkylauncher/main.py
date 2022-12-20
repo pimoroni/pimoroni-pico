@@ -33,7 +33,7 @@ def launcher():
     graphics.set_pen(4)
     graphics.rectangle(30, 60, WIDTH - 100, 50)
     graphics.set_pen(1)
-    graphics.text("A. NASA Picture Of the Day", 35, 75, 600, 3)
+    graphics.text("A. NASA Picture of the Day", 35, 75, 600, 3)
 
     graphics.set_pen(6)
     graphics.rectangle(30, 120, WIDTH - 150, 50)
