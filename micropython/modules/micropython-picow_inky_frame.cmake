@@ -45,9 +45,10 @@ include(pcf85063a/micropython)
 include(adcfft/micropython)
 include(wakeup/micropython)
 
-# Configure wakeup for Enviro
+# Configure wakeup for Inky Frame
 target_compile_definitions(usermod_wakeup INTERFACE
     -DWAKEUP_HAS_RTC=1
+    -DWAKEUP_HAS_SHIFT_REGISTER=1
 )
 
 # LEDs & Matrices
@@ -62,3 +63,4 @@ include(motor/micropython)
 # include(micropython-common)
 
 include(modules_py/modules_py)
+
