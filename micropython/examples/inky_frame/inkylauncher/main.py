@@ -22,14 +22,42 @@ def launcher():
     graphics.clear()
     graphics.set_pen(0)
 
-    graphics.text("Inky Launcher", 5, 5, 350, 5)
-    graphics.text("Menu", 5, 50, 350, 3)
+    graphics.set_pen(5)
+    graphics.rectangle(0, 20, WIDTH, 50)
+    graphics.set_pen(0)
+    graphics.text("Launcher", 245, 30, WIDTH, 4)
 
-    graphics.text("A. NASA Picture Of the Day", 5, 90, 350, 3)
-    graphics.text("B. Word Clock", 5, 130, 350, 3)
-    graphics.text("C. Daily Activity", 5, 170, 350, 3)
-    graphics.text("D. Headlines", 5, 210, 350, 3)
-    graphics.text("E. Random Joke", 5, 250, 350, 3)
+    graphics.set_pen(4)
+    graphics.rectangle(30, 80, WIDTH - 100, 50)
+    graphics.set_pen(1)
+    graphics.text("A. NASA Picture Of the Day", 35, 95, 600, 3)
+
+    graphics.set_pen(6)
+    graphics.rectangle(30, 140, WIDTH - 150, 50)
+    graphics.set_pen(1)
+    graphics.text("B. Word Clock", 35, 155, 600, 3)
+
+    graphics.set_pen(2)
+    graphics.rectangle(30, 200, WIDTH - 200, 50)
+    graphics.set_pen(1)
+    graphics.text("C. Daily Activity", 35, 215, 600, 3)
+
+    graphics.set_pen(3)
+    graphics.rectangle(30, 260, WIDTH - 250, 50)
+    graphics.set_pen(1)
+    graphics.text("D. Headlines", 35, 275, 600, 3)
+
+    graphics.set_pen(0)
+    graphics.rectangle(30, 320, WIDTH - 300, 50)
+    graphics.set_pen(1)
+    graphics.text("E. Random Joke", 35, 335, 600, 3)
+
+    graphics.set_pen(7)
+    graphics.rectangle(WIDTH - 100, 80, 70, 50)
+    graphics.rectangle(WIDTH - 150, 140, 120, 50)
+    graphics.rectangle(WIDTH - 200, 200, 170, 50)
+    graphics.rectangle(WIDTH - 250, 260, 220, 50)
+    graphics.rectangle(WIDTH - 300, 320, 270, 50)
 
     graphics.update()
 
