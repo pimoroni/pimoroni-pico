@@ -62,7 +62,9 @@ def launcher():
     graphics.set_pen(0)
     graphics.text("Hold A + E, then press Reset, to return to the Launcher", 65, 370, 600, 2)
 
+    ih.led_warn.on()
     graphics.update()
+    ih.led_warn.off()
 
     # Now we've drawn the menu to the screen, we wait here for the user to select an app.
     # Then once an app is selected, we set that as the current app and reset the device and load into it.
