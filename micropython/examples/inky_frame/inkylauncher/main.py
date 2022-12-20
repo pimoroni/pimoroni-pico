@@ -25,7 +25,7 @@ def launcher():
     graphics.set_pen(5)
     graphics.rectangle(0, 0, WIDTH, 50)
     graphics.set_pen(0)
-    graphics.text("Launcher", 225, 10, WIDTH, 4)
+    graphics.text("Launcher", 245, 10, WIDTH, 4)
 
     graphics.set_pen(4)
     graphics.rectangle(30, 60, WIDTH - 100, 50)
