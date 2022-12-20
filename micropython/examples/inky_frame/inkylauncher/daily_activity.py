@@ -4,7 +4,7 @@ from urllib import urequest
 
 # Length of time between updates in Seconds.
 # Frequent updates will reduce battery life!
-UPDATE_INTERVAL = 2
+UPDATE_INTERVAL = 240
 
 # API URL
 URL = "https://www.boredapi.com/api/activity"

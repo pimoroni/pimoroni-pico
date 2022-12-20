@@ -16,7 +16,7 @@ API_URL = "https://api.nasa.gov/planetary/apod?api_key=CgQGiTiyzQWEfkPgZ4btNM1FT
 
 # Length of time between updates in minutes.
 # Frequent updates will reduce battery life!
-UPDATE_INTERVAL = 1
+UPDATE_INTERVAL = 240
 
 # Variable for storing the NASA APOD Title
 apod_title = None

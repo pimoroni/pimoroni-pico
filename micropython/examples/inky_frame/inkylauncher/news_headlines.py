@@ -9,7 +9,7 @@ URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
 
 # Length of time between updates in minutes.
 # Frequent updates will reduce battery life!
-UPDATE_INTERVAL = 30
+UPDATE_INTERVAL = 90
 
 graphics = None
 code = qrcode.QRCode()
