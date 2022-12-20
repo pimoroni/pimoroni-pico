@@ -59,6 +59,7 @@ def stop_network_led():
     network_led_timer.deinit()
     network_led_pwm.duty_u16(0)
 
+
 def sleep(t):
     # Time to have a little nap until the next update
     rtc.clear_timer_flag()
@@ -80,6 +81,7 @@ def clear_button_leds():
     inky_frame.button_c.led_off()
     inky_frame.button_d.led_off()
     inky_frame.button_e.led_off()
+
 
 def network_connect(SSID, PSK):
     # Enable the Wireless
