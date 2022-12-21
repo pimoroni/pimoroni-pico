@@ -11,7 +11,7 @@ import inky_helper as ih
 # WIFI_PASSWORD = "Your WiFi password"
 
 # A short delay to give USB chance to initialise
-time.sleep(0.1)
+time.sleep(0.5)
 
 # Setup for the display.
 graphics = PicoGraphics(DISPLAY)
