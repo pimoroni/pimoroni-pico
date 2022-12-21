@@ -15,13 +15,6 @@ namespace pimoroni {
         src_color = {r, g, b};
         color = src_color.to_rgb565(); 
     }
-    void PicoGraphics_PenRGB565::set_pen_hsv(float h, float s, float v){
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        from_hsv(h, s, v, r, g, b);
-        color = RGB(r, g, b).to_rgb565();
-    }
     int PicoGraphics_PenRGB565::create_pen(uint8_t r, uint8_t g, uint8_t b) {
         return RGB(r, g, b).to_rgb565();
     }
