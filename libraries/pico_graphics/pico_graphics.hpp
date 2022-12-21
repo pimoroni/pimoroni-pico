@@ -26,6 +26,8 @@ namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
   typedef uint32_t RGB888;
+
+
   struct RGB {
     int16_t r, g, b;
 
@@ -91,7 +93,7 @@ namespace pimoroni {
     }
   };
 
-  RGB from_hsv(float h, float s, float v);
+
 
   typedef int Pen;
 
@@ -174,6 +176,9 @@ namespace pimoroni {
     Rect bounds;
     Rect clip;
 
+
+    void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
+
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
     //typedef std::function<void(int y)> scanline_interrupt_func;
@@ -221,7 +226,7 @@ namespace pimoroni {
 
     virtual void set_pen(uint c) = 0;
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
-    virtual void set_pen_hsv(float h, float s, float v);
+    virtual void set_pen_hsv(float h, float s, float v) = 0;
     virtual void set_pixel(const Point &p) = 0;
     virtual void set_pixel_span(const Point &p, uint l) = 0;
 
@@ -259,6 +264,7 @@ namespace pimoroni {
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
+    void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);

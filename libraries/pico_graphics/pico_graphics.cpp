@@ -4,10 +4,7 @@ namespace pimoroni {
 
   const uint8_t dither16_pattern[16] = {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
 
-  RGB from_hsv(float h, float s, float v) {
-      uint8_t r = 0;
-      uint8_t g = 0;
-      uint8_t b = 0;
+  void PicoGraphics::from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
       float i = floor(h * 6.0f);
       float f = h * 6.0f - i;
       v *= 255.0f;
@@ -23,9 +20,6 @@ namespace pimoroni {
         case 4: r = t; g = p; b = v; break;
         case 5: r = v; g = p; b = q; break;
       }
-
-      RGB src_color(r, g, b);
-      return src_color;
   }
 
   int PicoGraphics::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {return -1;};

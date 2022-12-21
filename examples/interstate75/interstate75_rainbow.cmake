@@ -11,6 +11,7 @@ target_link_libraries(${OUTPUT_NAME}
     pico_multicore
     hardware_vreg
     hardware_pwm
+    pico_graphics
     hub75
     interstate75
 )
