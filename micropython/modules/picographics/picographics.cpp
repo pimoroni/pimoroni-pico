@@ -702,9 +702,9 @@ mp_obj_t ModPicoGraphics_create_pen(size_t n_args, const mp_obj_t *args) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
     int result = self->graphics->create_pen_hsv(
-        mp_obj_get_float(args[ARG_h]) % 1.0f,
-        mp_obj_get_float(args[ARG_s]) % 1.0f,
-        mp_obj_get_float(args[ARG_v]) % 1.0f
+        mp_obj_get_float(args[ARG_h]),
+        mp_obj_get_float(args[ARG_s]),
+        mp_obj_get_float(args[ARG_v])
     );
 
     if (result == -1) mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
