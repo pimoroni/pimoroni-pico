@@ -363,7 +363,6 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      int create_pen_hsv(float h, float s, float v) override;
       int reset_pen(uint8_t i) override;
 
       void set_pixel(const Point &p) override;
@@ -393,7 +392,6 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      int create_pen_hsv(float h, float s, float v) override;
       int reset_pen(uint8_t i) override;
 
       void set_pixel(const Point &p) override;
@@ -413,9 +411,7 @@ namespace pimoroni {
       PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_pen_hsv(float h, float s, float v) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       void set_pixel_dither(const Point &p, const RGB &c) override;
