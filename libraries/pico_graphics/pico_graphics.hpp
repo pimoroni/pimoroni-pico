@@ -231,7 +231,7 @@ namespace pimoroni {
     virtual void set_pixel_span(const Point &p, uint l) = 0;
 
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
-    virtual int create_pen_hsv(float h, float s, float v) = 0;
+    virtual int create_pen_hsv(float h, float s, float v);
     virtual int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
     virtual int reset_pen(uint8_t i);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
