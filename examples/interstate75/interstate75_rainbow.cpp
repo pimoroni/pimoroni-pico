@@ -15,7 +15,7 @@ Button button_b(Interstate75::B);
 //If the display looks streaky or corrupted then uncomment one of the other initalisers
 
 //Works with our 32x32 panels https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=35962488650 https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=19321740999
-//Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
+Hub75 hub75(32, 32, nullptr, PANEL_GENERIC, false);
 //or using 2 of these panels
 //Hub75 hub75(64, 32, nullptr, PANEL_GENERIC, false);
 
@@ -25,7 +25,7 @@ Button button_b(Interstate75::B);
 //Hub75 hub75(128, 32, nullptr, PANEL_GENERIC, false);
 
 //Works with our 64x64 panel https://shop.pimoroni.com/products/rgb-led-matrix-panel?variant=3029531983882
-Hub75 hub75(64, 64, nullptr, PANEL_GENERIC, true);
+//Hub75 hub75(64, 64, nullptr, PANEL_GENERIC, true);
 //or using 2 of these panels
 //Hub75 hub75(128, 64, nullptr, PANEL_GENERIC, false);
 
@@ -42,10 +42,10 @@ int main() {
 
   uint8_t hue_map[hub75.width][3];
   for(uint i = 0; i < hub75.width; i++) {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-    graphics.to_hsv(i / (float) hub75.width, 1.0f, 1.0f, r, g, g);
+    uint8_t r=0;
+    uint8_t g=0;
+    uint8_t b=0;
+    graphics.from_hsv(i / (float) hub75.width, 1.0f, 0.7f, r, g, b);
     hue_map[i][0] =  r;
     hue_map[i][1] =  g;
     hue_map[i][2] =  b;
@@ -68,12 +68,12 @@ int main() {
     }
 
     if(button_a.raw()) {
-      speed += 0.05f;
+      speed += 0.1f;
       speed = speed >= 10.0f ? 10.0f : speed;
       animate = true;
     }
     if(button_b.raw()) {
-      speed -= 0.05f;
+      speed -= 0.1f;
       speed = speed <= 0.0f ? 0.0f : speed;
       animate = true;
     }
@@ -89,16 +89,16 @@ int main() {
         graphics.set_pen(r, g, b);
         graphics.pixel(Point(x, y));
     }
+    }
     hub75.update(&graphics);
 
     led_rgb.set_hsv(led_h, 1.0f, 1.0f);
     led_h += 0.01;
 
 
-    sleep_ms(5);
+    //sleep_ms(5);
   }
 
-  printf("done\n");
 
-  return 0;
 }
+

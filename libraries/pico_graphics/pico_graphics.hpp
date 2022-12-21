@@ -177,7 +177,7 @@ namespace pimoroni {
     Rect clip;
 
 
-    void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
+
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
