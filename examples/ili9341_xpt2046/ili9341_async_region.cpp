@@ -113,7 +113,7 @@ char  log_buffer[64];
 uint8_t framebuffer[ILI941_WIDTH*ILI941_HEIGHT*2];
 
 int main() {
-	stdio_init_all();
+  stdio_init_all();
 
   struct pt {
     float      x;
@@ -124,115 +124,115 @@ int main() {
   };
 
   
-	std::vector<pt> pixels(NUM_PIXELS);
-	uint update_time = 0;
-	uint calc_time = 0;
-	uint dma_time = 0;
-	uint render_time = 0;
-	uint total_time = 0;
-		
-	bool last_touch_state = false;
-	
+  std::vector<pt> pixels(NUM_PIXELS);
+  uint update_time = 0;
+  uint calc_time = 0;
+  uint dma_time = 0;
+  uint render_time = 0;
+  uint total_time = 0;
+    
+  bool last_touch_state = false;
+  
   while(true) {
-		ElapsedUs total_timer;
-		ElapsedUs timer;
+    ElapsedUs total_timer;
+    ElapsedUs timer;
 
-		// check buttons
-		enum Button { btNone, btRotate, btPen, btAsync, btRegion, btCalibrate };
-		Button btn = btNone;
+    // check buttons
+    enum Button { btNone, btRotate, btPen, btAsync, btRegion, btCalibrate };
+    Button btn = btNone;
 
-		if(xpt2046)	{
-			xpt2046->update();
-		}
+    if(xpt2046)	{
+      xpt2046->update();
+    }
 
-		bool touch_state = xpt2046->is_touched();
-		if(touch_state != last_touch_state)
-		{
-			last_touch_state = touch_state;
-			if(touch_state) {
-				TouchPoint touch = xpt2046->get_touch();
+    bool touch_state = xpt2046->is_touched();
+    if(touch_state != last_touch_state)
+    {
+      last_touch_state = touch_state;
+      if(touch_state) {
+        TouchPoint touch = xpt2046->get_touch();
 
-				if(touch.y > graphics->bounds.h - BUTTON_HEIGHT) {
-					btn = (Button)(1+(touch.x/(graphics->bounds.w/5)));
-				}
-			}
-		}
+        if(touch.y > graphics->bounds.h - BUTTON_HEIGHT) {
+          btn = (Button)(1+(touch.x/(graphics->bounds.w/5)));
+        }
+      }
+    }
 
-		if(btn == btCalibrate) {
-			Calibrate_Screen::run_calibration(ili9341, xpt2046, graphics);
-		}
+    if(btn == btCalibrate) {
+      Calibrate_Screen::run_calibration(ili9341, xpt2046, graphics);
+    }
 
-		// cycle around regions
-		if(btn == btRegion){
-			use_region = (UseRegion)((use_region+1) % urCount);
-		}
+    // cycle around regions
+    if(btn == btRegion){
+      use_region = (UseRegion)((use_region+1) % urCount);
+    }
 
-		if(ili9341 == nullptr || btn == btRotate || btn == btPen || btn == btAsync) {
-			// switch async DMA mode
-			if(btn == btAsync) {
-				use_async_dma = ! use_async_dma;
-				delete ili9341;
-				ili9341 = nullptr;
-			}
+    if(ili9341 == nullptr || btn == btRotate || btn == btPen || btn == btAsync) {
+      // switch async DMA mode
+      if(btn == btAsync) {
+        use_async_dma = ! use_async_dma;
+        delete ili9341;
+        ili9341 = nullptr;
+      }
 
-			// cycle around rotations
-			if(btn == btRotate) {
-				rotation = (Rotation)((rotation + 90) % 360);
-				delete ili9341;
-				ili9341 = nullptr;
-				delete xpt2046;
-				xpt2046 = nullptr;
-			}
+      // cycle around rotations
+      if(btn == btRotate) {
+        rotation = (Rotation)((rotation + 90) % 360);
+        delete ili9341;
+        ili9341 = nullptr;
+        delete xpt2046;
+        xpt2046 = nullptr;
+      }
 
-			// cycle around pens (graphics mode)
-			if(btn == btPen) {
-				use_pen = (UsePen)((use_pen + 1) % upCount);
-			}
+      // cycle around pens (graphics mode)
+      if(btn == btPen) {
+        use_pen = (UsePen)((use_pen + 1) % upCount);
+      }
 
-			SPIPins spi_pins = get_spi_pins(BG_SPI_FRONT);
-			if(ili9341 == nullptr) {
-				ili9341  = new ILI9341(ILI941_WIDTH, ILI941_HEIGHT, rotation, false, spi_pins, 21, 62500000, use_async_dma);
-				xpt2046 = new XPT2046(XPT2046_WIDTH, XPT2046_HEIGHT, (Rotation)((rotation+XPT2046_ROTATION_OFFSET)%360), touch_spi, 15);
-			  ili9341->set_backlight(255);
-			}
+      SPIPins spi_pins = get_spi_pins(BG_SPI_FRONT);
+      if(ili9341 == nullptr) {
+        ili9341  = new ILI9341(ILI941_WIDTH, ILI941_HEIGHT, rotation, false, spi_pins, 21, 62500000, use_async_dma);
+        xpt2046 = new XPT2046(XPT2046_WIDTH, XPT2046_HEIGHT, (Rotation)((rotation+XPT2046_ROTATION_OFFSET)%360), touch_spi, 15);
+        ili9341->set_backlight(255);
+      }
 
-			delete graphics;
-			switch(use_pen)
-			{
-				case up565 : 	graphics = new PicoGraphics_PenRGB565(ili9341->width, ili9341->height, framebuffer); break;
-				case up332 : 	graphics = new PicoGraphics_PenRGB332(ili9341->width, ili9341->height, framebuffer); break;
-				case up4   : 	graphics = new PicoGraphics_PenP4(ili9341->width, ili9341->height, framebuffer); break;
-				case up8  : 	graphics = new PicoGraphics_PenP8(ili9341->width, ili9341->height, framebuffer); break;
-				default: break;
-			}
+      delete graphics;
+      switch(use_pen)
+      {
+        case up565 : 	graphics = new PicoGraphics_PenRGB565(ili9341->width, ili9341->height, framebuffer); break;
+        case up332 : 	graphics = new PicoGraphics_PenRGB332(ili9341->width, ili9341->height, framebuffer); break;
+        case up4   : 	graphics = new PicoGraphics_PenP4(ili9341->width, ili9341->height, framebuffer); break;
+        case up8  : 	graphics = new PicoGraphics_PenP8(ili9341->width, ili9341->height, framebuffer); break;
+        default: break;
+      }
 
 
-		  black_pen = graphics->create_pen(0, 0, 0);
-			white_pen = graphics->create_pen(255, 255, 255);
+      black_pen = graphics->create_pen(0, 0, 0);
+      white_pen = graphics->create_pen(255, 255, 255);
 
-			graphics->set_font("bitmap8");
+      graphics->set_font("bitmap8");
 
-			pixels.clear();
-			for(int i = 0; i < NUM_PIXELS; i++) {
-				pt pixel;
-				pixel.x = rand() % graphics->bounds.w;
-				pixel.y = rand() % graphics->bounds.h - BUTTON_HEIGHT;
-				pixel.dx = float(rand() % 255) / 128.0f;
-				pixel.dy = float(rand() % 255) / 128.0f;
-				pixel.use_pen = graphics->create_pen(rand() % 255, rand() % 255, rand() % 255);
-				pixels.push_back(pixel);
-			}
-		}
+      pixels.clear();
+      for(int i = 0; i < NUM_PIXELS; i++) {
+        pt pixel;
+        pixel.x = rand() % graphics->bounds.w;
+        pixel.y = rand() % graphics->bounds.h - BUTTON_HEIGHT;
+        pixel.dx = float(rand() % 255) / 128.0f;
+        pixel.dy = float(rand() % 255) / 128.0f;
+        pixel.use_pen = graphics->create_pen(rand() % 255, rand() % 255, rand() % 255);
+        pixels.push_back(pixel);
+      }
+    }
 
-		switch (use_region)
-		{
-			case urFull   : region = Rect(0, 0, ili9341->width, ili9341->height); break;
-			case urHalf   : region = Rect(0, 0, ili9341->width / 2, ili9341->height); break;
-			case urBounce : region = Rect(bounce.x - (ili9341->width / 4), bounce.y - (ili9341->height / 4), ili9341->width / 2, ili9341->height / 2); break;
-			default: break;
-		}
+    switch (use_region)
+    {
+      case urFull   : region = Rect(0, 0, ili9341->width, ili9341->height); break;
+      case urHalf   : region = Rect(0, 0, ili9341->width / 2, ili9341->height); break;
+      case urBounce : region = Rect(bounce.x - (ili9341->width / 4), bounce.y - (ili9341->height / 4), ili9341->width / 2, ili9341->height / 2); break;
+      default: break;
+    }
 
-		// update data
+    // update data
     for(auto &pixel : pixels) {
       pixel.x += pixel.dx;
       pixel.y += pixel.dy;
@@ -242,106 +242,106 @@ int main() {
       if(pixel.y >= graphics->bounds.h - BUTTON_HEIGHT) pixel.dy *= -1;
     }
 
-		bounce.x += bounce_inc.x;
-		bounce.y += bounce_inc.y;
-		if(bounce.x < 0) bounce_inc.x = 1;
-		if(bounce.x >= graphics->bounds.w) bounce_inc.x = -1;
-		if(bounce.y < 0) bounce_inc.y = 1;
-		if(bounce.y >= graphics->bounds.h) bounce_inc.y = -1;
-		
+    bounce.x += bounce_inc.x;
+    bounce.y += bounce_inc.y;
+    if(bounce.x < 0) bounce_inc.x = 1;
+    if(bounce.x >= graphics->bounds.w) bounce_inc.x = -1;
+    if(bounce.y < 0) bounce_inc.y = 1;
+    if(bounce.y >= graphics->bounds.h) bounce_inc.y = -1;
+    
    
-		calc_time = timer.elapsed();
+    calc_time = timer.elapsed();
 
-		// if async wait for last update to finish before rendering
-		if(use_async_dma) {
-			ili9341->wait_for_update_to_finish();
-		}
+    // if async wait for last update to finish before rendering
+    if(use_async_dma) {
+      ili9341->wait_for_update_to_finish();
+    }
 
-		dma_time = timer.elapsed();
+    dma_time = timer.elapsed();
 
-		// render
+    // render
     graphics->set_pen(black_pen);
     graphics->clear();
 
     for(auto &pixel : pixels) {
       graphics->set_pen(pixel.use_pen);
-			graphics->pixel(Point(pixel.x, pixel.y));
+      graphics->pixel(Point(pixel.x, pixel.y));
     }
 
-		graphics->set_pen(white_pen);
-		graphics->rectangle_frame(graphics->bounds);
+    graphics->set_pen(white_pen);
+    graphics->rectangle_frame(graphics->bounds);
 
-		uint spacing = 20;
-		float scale = 2;
-		int y = -(spacing/2);
-		sprintf(log_buffer,"p=%s, %s, %s", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region]);
-		printf("%s, ", log_buffer);
+    uint spacing = 20;
+    float scale = 2;
+    int y = -(spacing/2);
+    sprintf(log_buffer,"p=%s, %s, %s", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region]);
+    printf("%s, ", log_buffer);
 
-		sprintf(log_buffer,"c=%u.%.2u", calc_time/1000, (calc_time - ((calc_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"c=%u.%.2u", calc_time/1000, (calc_time - ((calc_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"d=%u.%.2u", dma_time/1000, (dma_time - ((dma_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"d=%u.%.2u", dma_time/1000, (dma_time - ((dma_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"r=%u.%.2u", render_time/1000, (render_time - ((render_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"r=%u.%.2u", render_time/1000, (render_time - ((render_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"u=%u.%.2u", update_time/1000, (update_time - ((update_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"u=%u.%.2u", update_time/1000, (update_time - ((update_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"t=%u.%.2u", total_time/1000, (total_time - ((total_time/1000)*1000)) / 10);
-		printf("%s\n", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"t=%u.%.2u", total_time/1000, (total_time - ((total_time/1000)*1000)) / 10);
+    printf("%s\n", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		if(use_region == urBounce)
-		{
-			graphics->set_pen(white_pen);
-			graphics->line(Point(region.x+1, region.y+1), Point(region.x+1+region.w-3, region.y+1));
-			graphics->line(Point(region.x+1+region.w-3, region.y+1), Point(region.x+1+region.w-3, region.y+1+region.h-3));
-			graphics->line(Point(region.x+1+region.w-3, region.y+1+region.h-3), Point(region.x+1, region.y+1+region.h-3));
-			graphics->line(Point(region.x+1, region.y+1+region.h-3), Point(region.x+1, region.y+1));
-		}
+    if(use_region == urBounce)
+    {
+      graphics->set_pen(white_pen);
+      graphics->line(Point(region.x+1, region.y+1), Point(region.x+1+region.w-3, region.y+1));
+      graphics->line(Point(region.x+1+region.w-3, region.y+1), Point(region.x+1+region.w-3, region.y+1+region.h-3));
+      graphics->line(Point(region.x+1+region.w-3, region.y+1+region.h-3), Point(region.x+1, region.y+1+region.h-3));
+      graphics->line(Point(region.x+1, region.y+1+region.h-3), Point(region.x+1, region.y+1));
+    }
 
-		if (xpt2046->is_touched())
-		{
-			TouchPoint touch = xpt2046->get_touch();
-			printf("Touch %ld, %ld, %ld\n", touch.x, touch.y, touch.z);
-			graphics->set_pen(white_pen);
-			graphics->circle(Point(touch.x, touch.y), 1+(touch.z/5));
-		}
+    if (xpt2046->is_touched())
+    {
+      TouchPoint touch = xpt2046->get_touch();
+      printf("Touch %ld, %ld, %ld\n", touch.x, touch.y, touch.z);
+      graphics->set_pen(white_pen);
+      graphics->circle(Point(touch.x, touch.y), 1+(touch.z/5));
+    }
 
-		// menu
-		uint button_width  = graphics->bounds.w/5;
-		uint button_height = BUTTON_HEIGHT;
-		uint y1 = graphics->bounds.h - button_height;
+    // menu
+    uint button_width  = graphics->bounds.w/5;
+    uint button_height = BUTTON_HEIGHT;
+    uint y1 = graphics->bounds.h - button_height;
 
-		const char *strs[] = { "Rot", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region], "Cali" };
+    const char *strs[] = { "Rot", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region], "Cali" };
 
-		for(uint b = 0; b < 5; b++) {
-			Rect r(b * button_width, y1, button_width, button_height);
-			graphics->rectangle_frame(r);
-			int32_t text_width = graphics->measure_text(strs[b]);
-			uint offset = (button_width - text_width)/2;
-			graphics->text(strs[b], Point(r.x+offset, r.y+8), r.x+button_width, scale);
+    for(uint b = 0; b < 5; b++) {
+      Rect r(b * button_width, y1, button_width, button_height);
+      graphics->rectangle_frame(r);
+      int32_t text_width = graphics->measure_text(strs[b]);
+      uint offset = (button_width - text_width)/2;
+      graphics->text(strs[b], Point(r.x+offset, r.y+8), r.x+button_width, scale);
 
-		}
-		
-		render_time = timer.elapsed();
+    }
+    
+    render_time = timer.elapsed();
 
-		// now update the display
-		if(use_region != urNone){
-	    ili9341->partial_update(graphics, region);
-		}
-		else {
-    	ili9341->update(graphics);
-		}
+    // now update the display
+    if(use_region != urNone){
+      ili9341->partial_update(graphics, region);
+    }
+    else {
+      ili9341->update(graphics);
+    }
 
-		update_time = timer.elapsed();
-		total_time  = total_timer.elapsed();
+    update_time = timer.elapsed();
+    total_time  = total_timer.elapsed();
   }
 
   return 0;

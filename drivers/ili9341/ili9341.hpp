@@ -39,26 +39,26 @@ namespace pimoroni {
     uint rst;
     uint st_dma_data;
 
-		// current update rect and full screen rect
-		Rect								full_screen_region;
-		Rect								current_update_region;
+    // current update rect and full screen rect
+    Rect								full_screen_region;
+    Rect								current_update_region;
 
-	  // dma control blocks used for async partial updates
-		struct DMAControlBlock
-		{
-			uint32_t len; 
-			uint8_t* data;
-		};
+    // dma control blocks used for async partial updates
+    struct DMAControlBlock
+    {
+      uint32_t len; 
+      uint8_t* data;
+    };
 
-		uint 								st_dma_control_chain;
-		DMAControlBlock* 		dma_control_chain_blocks = nullptr;
-		dma_channel_config 	dma_data_config;
-		dma_channel_config  dma_control_config;
-		bool 								use_async_dma = false;
-		bool								dma_control_chain_is_enabled = false;
+    uint 								st_dma_control_chain;
+    DMAControlBlock* 		dma_control_chain_blocks = nullptr;
+    dma_channel_config 	dma_data_config;
+    dma_channel_config  dma_control_config;
+    bool 								use_async_dma = false;
+    bool								dma_control_chain_is_enabled = false;
 
-		// sanity flag for dma updates
-		bool								in_dma_update = false;
+    // sanity flag for dma updates
+    bool								in_dma_update = false;
 
 
   public:
@@ -80,54 +80,54 @@ namespace pimoroni {
       channel_config_set_dreq(&dma_data_config, spi_get_dreq(spi, true));
       dma_channel_configure(st_dma_data, &dma_data_config, &spi_get_hw(spi)->dr, NULL, 0, false);
 
-			setup_dma_control_if_needed();
+      setup_dma_control_if_needed();
 
       common_init();
     }
-	
-		virtual ~ILI9341()
-		{
-			cleanup();
-		}
+  
+    virtual ~ILI9341()
+    {
+      cleanup();
+    }
 
     void cleanup() override;
     void update(PicoGraphics *graphics) override;
-		void partial_update(PicoGraphics *display, Rect region) override;
+    void partial_update(PicoGraphics *display, Rect region) override;
     void set_backlight(uint8_t brightness) override;
 
-		bool is_busy() override
-		{
-			if(use_async_dma && dma_control_chain_is_enabled) {
-				return !(dma_hw->intr & 1u << st_dma_data);
-			}
-			else {
-				return dma_channel_is_busy(st_dma_data);
-			}
-		}
+    bool is_busy() override
+    {
+      if(use_async_dma && dma_control_chain_is_enabled) {
+        return !(dma_hw->intr & 1u << st_dma_data);
+      }
+      else {
+        return dma_channel_is_busy(st_dma_data);
+      }
+    }
 
-		bool is_using_async_dma() {
-			return use_async_dma;
-		}
-		void wait_for_update_to_finish()
-		{
-			if(use_async_dma && dma_control_chain_is_enabled) {
-				while (!(dma_hw->intr & 1u << st_dma_data)) {
-        	tight_loop_contents();
-				}
+    bool is_using_async_dma() {
+      return use_async_dma;
+    }
+    void wait_for_update_to_finish()
+    {
+      if(use_async_dma && dma_control_chain_is_enabled) {
+        while (!(dma_hw->intr & 1u << st_dma_data)) {
+          tight_loop_contents();
+        }
 
-				// disable control chain dma
-				enable_dma_control(false);
-			}
-			else {
-				dma_channel_wait_for_finish_blocking(st_dma_data);
-			}
+        // disable control chain dma
+        enable_dma_control(false);
+      }
+      else {
+        dma_channel_wait_for_finish_blocking(st_dma_data);
+      }
 
-			// deselect 
-			gpio_put(cs, 1);
+      // deselect 
+      gpio_put(cs, 1);
 
-			// set sanity flag
-			in_dma_update = false;
-		}
+      // set sanity flag
+      in_dma_update = false;
+    }
 
 
   private:
@@ -135,12 +135,12 @@ namespace pimoroni {
     void configure_display(Rotation rotate);
     void write_blocking_dma(const uint8_t *src, size_t len);
     void command(uint8_t command, size_t len = 0, const char *data = NULL, bool bDataDma = false);
-		void setup_dma_control_if_needed();
-		void enable_dma_control(bool enable);
-		void start_dma_control();
-		bool set_update_region(Rect& update_rect);
-		void set_addr_window(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
-		void reset();
+    void setup_dma_control_if_needed();
+    void enable_dma_control(bool enable);
+    void start_dma_control();
+    bool set_update_region(Rect& update_rect);
+    void set_addr_window(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void reset();
 
   };
 }

@@ -125,7 +125,7 @@ namespace pimoroni {
     bool contains(const Point &p) const;
     bool contains(const Rect &p) const;
     bool intersects(const Rect &r) const;
-		bool equals(const Rect &r) const;
+    bool equals(const Rect &r) const;
     Rect intersection(const Rect &r) const;
 
     void inflate(int32_t v);
@@ -183,7 +183,7 @@ namespace pimoroni {
     const bitmap::font_t *bitmap_font;
     const hershey::font_t *hershey_font;
 
-		bool owned_frame_buffer = false;
+    bool owned_frame_buffer = false;
 
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return RGB(r, g, b).to_rgb332();
@@ -220,11 +220,11 @@ namespace pimoroni {
       set_font(&font6);
     };
 
-		virtual ~PicoGraphics() 
-		{
-			if(owned_frame_buffer)
-				delete (uint8_t*)frame_buffer;
-		};
+    virtual ~PicoGraphics() 
+    {
+      if(owned_frame_buffer)
+        delete (uint8_t*)frame_buffer;
+    };
 
     virtual void set_pen(uint c) = 0;
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
@@ -270,7 +270,7 @@ namespace pimoroni {
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
     void rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline);
-		void create_owned_frame_buffer(size_t size_in_bytes);
+    void create_owned_frame_buffer(size_t size_in_bytes);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
@@ -474,10 +474,10 @@ namespace pimoroni {
       DisplayDriver(uint16_t width, uint16_t height, Rotation rotation)
        : width(width), height(height), rotation(rotation) {};
 
-			virtual ~DisplayDriver()
-			{
-				cleanup();
-			}
+      virtual ~DisplayDriver()
+      {
+        cleanup();
+      }
 
       virtual void update(PicoGraphics *display) {};
       virtual void partial_update(PicoGraphics *display, Rect region) {};
@@ -488,7 +488,7 @@ namespace pimoroni {
       virtual void cleanup() {};
   };
 
-	struct TouchPoint {
+  struct TouchPoint {
     int32_t x = 0, y = 0, z = 0;
 
     TouchPoint() = default;
@@ -498,80 +498,80 @@ namespace pimoroni {
   class TouchDriver {
     public:
       TouchDriver(uint16_t width, uint16_t height, Rotation rotation)
-       	: width(width), height(height), rotation(rotation) {
-			 	}
+         : width(width), height(height), rotation(rotation) {
+         }
 
-			virtual ~TouchDriver() {
-				cleanup();
-			}
+      virtual ~TouchDriver() {
+        cleanup();
+      }
 
-			virtual void update(uint16_t average_samples = 16) = 0;
+      virtual void update(uint16_t average_samples = 16) = 0;
       virtual void cleanup() {};
 
-			bool is_touched() {
-				return touch_down;
-			}
+      bool is_touched() {
+        return touch_down;
+      }
 
-			TouchPoint get_touch() {
-				return touch;
-			}
+      TouchPoint get_touch() {
+        return touch;
+      }
 
-			TouchPoint get_raw_touch() {
-				return raw_touch;
-			}
+      TouchPoint get_raw_touch() {
+        return raw_touch;
+      }
 
-			Point get_point() {
-				return Point(touch.x, touch.y);
-			}
+      Point get_point() {
+        return Point(touch.x, touch.y);
+      }
 
-			Rotation get_rotation() {
-				return rotation;
-			}
+      Rotation get_rotation() {
+        return rotation;
+      }
 
-			void set_z_enabled(bool enabled) {
-				z_enabled = enabled;
-			}
-			
-			void calibrate_z(uint16_t min_pressure, uint16_t max_pressure) {
-				raw_min.z = min_pressure;
-				raw_max.z = max_pressure;
-			}
+      void set_z_enabled(bool enabled) {
+        z_enabled = enabled;
+      }
+      
+      void calibrate_z(uint16_t min_pressure, uint16_t max_pressure) {
+        raw_min.z = min_pressure;
+        raw_max.z = max_pressure;
+      }
 
-			void calibrate_xy(TouchPoint top_left, TouchPoint bottom_right, uint16_t pixel_inset) {
-				uint16_t dx = bottom_right.x - top_left.x;
-				uint16_t dy = bottom_right.y - top_left.y;
-				uint16_t dx_pixel = width - (pixel_inset * 2);
-				uint16_t dy_pixel = height - (pixel_inset * 2);
+      void calibrate_xy(TouchPoint top_left, TouchPoint bottom_right, uint16_t pixel_inset) {
+        uint16_t dx = bottom_right.x - top_left.x;
+        uint16_t dy = bottom_right.y - top_left.y;
+        uint16_t dx_pixel = width - (pixel_inset * 2);
+        uint16_t dy_pixel = height - (pixel_inset * 2);
 
-				float touch_px  = (float)dx / dx_pixel;
-				float touch_py  = (float)dy / dy_pixel;
+        float touch_px  = (float)dx / dx_pixel;
+        float touch_py  = (float)dy / dy_pixel;
 
-				uint16_t x_inset = touch_px * (pixel_inset);
-				uint16_t y_inset = touch_py * (pixel_inset);
-				
-				raw_min.x = top_left.x - x_inset;
-				raw_min.y = top_left.y - y_inset;
+        uint16_t x_inset = touch_px * (pixel_inset);
+        uint16_t y_inset = touch_py * (pixel_inset);
+        
+        raw_min.x = top_left.x - x_inset;
+        raw_min.y = top_left.y - y_inset;
 
-				raw_max.x = bottom_right.x + x_inset;
-				raw_max.y = bottom_right.y + y_inset;
-			}
+        raw_max.x = bottom_right.x + x_inset;
+        raw_max.y = bottom_right.y + y_inset;
+      }
 
-			void calibrate_touchscreen(TouchPoint top_left, TouchPoint bottom_right, uint16_t min_pressure, uint16_t max_pressure, uint16_t pixel_inset) {
-				calibrate_xy(top_left, bottom_right, pixel_inset);
-				calibrate_z(min_pressure, max_pressure);
-			}
+      void calibrate_touchscreen(TouchPoint top_left, TouchPoint bottom_right, uint16_t min_pressure, uint16_t max_pressure, uint16_t pixel_inset) {
+        calibrate_xy(top_left, bottom_right, pixel_inset);
+        calibrate_z(min_pressure, max_pressure);
+      }
 
-		protected:
+    protected:
       uint16_t  width;
       uint16_t  height;
       Rotation  rotation;
-			bool			touch_down = false;
-			bool			z_enabled  = true;
+      bool			touch_down = false;
+      bool			z_enabled  = true;
 
-			TouchPoint			raw_min = {0, 0, 0};
-			TouchPoint			raw_max = {0, 0, 0};
-			TouchPoint			raw_touch = {0, 0, 0};
-			TouchPoint			touch = {0, 0, 0};
-			uint16_t				median;
+      TouchPoint			raw_min = {0, 0, 0};
+      TouchPoint			raw_max = {0, 0, 0};
+      TouchPoint			raw_touch = {0, 0, 0};
+      TouchPoint			touch = {0, 0, 0};
+      uint16_t				median;
   };
 }

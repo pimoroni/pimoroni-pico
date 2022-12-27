@@ -94,15 +94,15 @@ namespace pimoroni {
   }
 
   void PicoGraphics::rectangle_frame(const Rect &r) {
-		Point tl(r.x, 			r.y);
-		Point tr(r.x+r.w-1, r.y);
-		Point bl(r.x, 			r.y+r.h-1);
-		Point br(r.x+r.w-1, r.y+r.h-1);
+    Point tl(r.x, 			r.y);
+    Point tr(r.x+r.w-1, r.y);
+    Point bl(r.x, 			r.y+r.h-1);
+    Point br(r.x+r.w-1, r.y+r.h-1);
 
-		line(tl, tr);
-		line(tl, bl);
-		line(bl, br);
-		line(tr, br);
+    line(tl, tr);
+    line(tl, bl);
+    line(bl, br);
+    line(tr, br);
   }
 
   void PicoGraphics::circle(const Point &p, int32_t radius) {
@@ -373,27 +373,27 @@ namespace pimoroni {
     callback(row_buf[buf_idx], 0);
   }
 
-	void PicoGraphics::rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline)
+  void PicoGraphics::rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline)
   {
     // Allocate two temporary buffers, as the callback may transfer by DMA
     // while we're preparing the next part of the row
     uint16_t row_buf[2][rect.w];
     int buf_idx = 0;
     for(auto i = 0; i < rect.h; i++) {
-			get_next_scanline(row_buf[buf_idx]);
+      get_next_scanline(row_buf[buf_idx]);
 
-			// Transfer a filled buffer and swap to the next one
-			callback(row_buf[buf_idx], rect.w * sizeof(RGB565));
-			buf_idx ^= 1;
+      // Transfer a filled buffer and swap to the next one
+      callback(row_buf[buf_idx], rect.w * sizeof(RGB565));
+      buf_idx ^= 1;
     }
 
     // Callback with zero length to ensure previous buffer is fully written
     callback(row_buf[buf_idx], 0);
   }
 
-	void PicoGraphics::create_owned_frame_buffer(size_t size_in_bytes) {
-		frame_buffer = (void*)new uint8_t[size_in_bytes];
-		owned_frame_buffer = true;
-	}
+  void PicoGraphics::create_owned_frame_buffer(size_t size_in_bytes) {
+    frame_buffer = (void*)new uint8_t[size_in_bytes];
+    owned_frame_buffer = true;
+  }
 
 }

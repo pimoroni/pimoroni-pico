@@ -118,6 +118,6 @@ namespace pimoroni {
             }
         }
     }
-		void PicoGraphics_Pen3Bit::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {
-		};
+    void PicoGraphics_Pen3Bit::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {
+    };
 }

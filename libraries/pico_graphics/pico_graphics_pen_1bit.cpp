@@ -6,7 +6,7 @@ namespace pimoroni {
     : PicoGraphics(width, height, frame_buffer) {
     this->pen_type = PEN_1BIT;
     if(this->frame_buffer == nullptr) {
-			create_owned_frame_buffer(buffer_size(width, height));
+      create_owned_frame_buffer(buffer_size(width, height));
     }
   }
 

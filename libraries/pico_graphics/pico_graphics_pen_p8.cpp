@@ -124,14 +124,14 @@ namespace pimoroni {
             }
 
             // Treat our void* frame_buffer as uint8_t
-   					uint8_t *src = (uint8_t *)frame_buffer + rect.x + (rect.y * bounds.w);
-						rect_convert_rgb565(rect, callback, [&](RGB565 *data) {
-								for(int32_t i= 0; i < rect.w; i++) {
-									data[i] = cache[*src++]; 
-								}
-								src+=bounds.w - rect.w;
+             uint8_t *src = (uint8_t *)frame_buffer + rect.x + (rect.y * bounds.w);
+            rect_convert_rgb565(rect, callback, [&](RGB565 *data) {
+                for(int32_t i= 0; i < rect.w; i++) {
+                  data[i] = cache[*src++]; 
+                }
+                src+=bounds.w - rect.w;
             });
         }
     }
-		
+    
 }

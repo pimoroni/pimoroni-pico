@@ -13,7 +13,7 @@ pico_add_extra_outputs(ili9341_demo)
 add_executable(
   ili9341_async_region
   ili9341_async_region.cpp
-	calibrate_screen.cpp
+  calibrate_screen.cpp
 )
 
 # Pull in pico libraries that we need

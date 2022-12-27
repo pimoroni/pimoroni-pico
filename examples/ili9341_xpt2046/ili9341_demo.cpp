@@ -28,17 +28,17 @@ Rotation rotation = ROTATE_270;
 #define USE_TOUCHSCREEN 1
 
 #if USE_TOUCHSCREEN
-	#define XPT2046_WIDTH (240)
-	#define XPT2046_HEIGHT (320)
-	#define XPT2046_ROTATION_OFFSET (0)
-	#define XPT2046_CS (14)
-	#define XPT2046_SCK (10)
-	#define XPT2046_MOSI (11)
-	#define XPT2046_MISO (8)
-	#define XPT2046_IRQ (15)
+  #define XPT2046_WIDTH (240)
+  #define XPT2046_HEIGHT (320)
+  #define XPT2046_ROTATION_OFFSET (0)
+  #define XPT2046_CS (14)
+  #define XPT2046_SCK (10)
+  #define XPT2046_MOSI (11)
+  #define XPT2046_MISO (8)
+  #define XPT2046_IRQ (15)
 
-	SPIPins touch_spi = {spi1, XPT2046_CS, XPT2046_SCK, XPT2046_MOSI, XPT2046_MISO, PIN_UNUSED, PIN_UNUSED};
-	XPT2046	xpt2046(XPT2046_WIDTH, XPT2046_HEIGHT, (Rotation)((rotation+XPT2046_ROTATION_OFFSET)%360), touch_spi, XPT2046_IRQ);
+  SPIPins touch_spi = {spi1, XPT2046_CS, XPT2046_SCK, XPT2046_MOSI, XPT2046_MISO, PIN_UNUSED, PIN_UNUSED};
+  XPT2046	xpt2046(XPT2046_WIDTH, XPT2046_HEIGHT, (Rotation)((rotation+XPT2046_ROTATION_OFFSET)%360), touch_spi, XPT2046_IRQ);
 #endif
  
 ILI9341 ili9341(ILI941_WIDTH, ILI941_HEIGHT, rotation, false, get_spi_pins(BG_SPI_FRONT), ILI941_RESET_PIN, ILI941_BAUD_RATE);
@@ -74,17 +74,17 @@ int main() {
   Pen WHITE = graphics.create_pen(255, 255, 255);
 
   while(true) {  
-		#if USE_TOUCHSCREEN
-			xpt2046.update();
-			if(xpt2046.is_touched()) {
-				text_location = xpt2046.get_point();
+    #if USE_TOUCHSCREEN
+      xpt2046.update();
+      if(xpt2046.is_touched()) {
+        text_location = xpt2046.get_point();
 
-				int32_t text_width = graphics.measure_text(msg);
+        int32_t text_width = graphics.measure_text(msg);
 
-				text_location.x -= text_width/2;
-				text_location.y -= 8;
-			}
-		#endif
+        text_location.x -= text_width/2;
+        text_location.y -= 8;
+      }
+    #endif
 
     graphics.set_pen(BG);
     graphics.clear();

@@ -154,30 +154,30 @@ namespace pimoroni {
     }
     void PicoGraphics_PenP4::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {
         if(type == PEN_RGB565) {
-						// Cache the RGB888 palette as RGB565
-						RGB565 cache[palette_size];
-						for(auto i = 0u; i < palette_size; i++) {
-								cache[i] = palette[i].to_rgb565();
-						}
+            // Cache the RGB888 palette as RGB565
+            RGB565 cache[palette_size];
+            for(auto i = 0u; i < palette_size; i++) {
+                cache[i] = palette[i].to_rgb565();
+            }
 
-						uint scan_line = 0;
-						rect_convert_rgb565(rect, callback, [&](RGB565 *data) {
-								uint8_t *src = (uint8_t *)frame_buffer + (rect.x + ((rect.y + scan_line) * bounds.w)) / 2;
-								uint8_t o = (rect.x % 2 == 1) ? 0 : 4;
+            uint scan_line = 0;
+            rect_convert_rgb565(rect, callback, [&](RGB565 *data) {
+                uint8_t *src = (uint8_t *)frame_buffer + (rect.x + ((rect.y + scan_line) * bounds.w)) / 2;
+                uint8_t o = (rect.x % 2 == 1) ? 0 : 4;
 
-								for(int32_t i= 0; i < rect.w; i++) {
-										uint8_t c = *src;
-										uint8_t b = (c >> o) & 0xf; // bit value shifted to position
-										
-										// Increment to next 4-bit entry 
-										o ^= 4;
-										if (o != 0) ++src;
-										
-										data[i] = cache[b];
-								}
-								
-								scan_line++;
-						});
+                for(int32_t i= 0; i < rect.w; i++) {
+                    uint8_t c = *src;
+                    uint8_t b = (c >> o) & 0xf; // bit value shifted to position
+                    
+                    // Increment to next 4-bit entry 
+                    o ^= 4;
+                    if (o != 0) ++src;
+                    
+                    data[i] = cache[b];
+                }
+                
+                scan_line++;
+            });
         }
     }
 }

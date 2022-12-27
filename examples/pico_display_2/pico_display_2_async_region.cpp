@@ -68,21 +68,21 @@
 class ElapsedUs
 {
 public:
-	ElapsedUs()
-	{
-		last_time = time_us_64();
-	}
+  ElapsedUs()
+  {
+    last_time = time_us_64();
+  }
 
-	uint64_t elapsed(void)
-	{
-		uint64_t time_now = time_us_64();
-		uint64_t elapsed = time_now - last_time;
-		last_time = time_now;
-		return elapsed;
-	}
+  uint64_t elapsed(void)
+  {
+    uint64_t time_now = time_us_64();
+    uint64_t elapsed = time_now - last_time;
+    last_time = time_now;
+    return elapsed;
+  }
 
 private:
-	uint64_t last_time;
+  uint64_t last_time;
 };
 
 using namespace pimoroni;
@@ -105,32 +105,32 @@ uint8_t framebuffer[PicoDisplay2::WIDTH * PicoDisplay2::HEIGHT * 2];
 
 
 int main() {
-	stdio_init_all();
+  stdio_init_all();
 
-	// default to async dma off
-	bool use_async_dma = false;
+  // default to async dma off
+  bool use_async_dma = false;
 
-	// default to no rotation
-	Rotation rotation = ROTATE_0;
+  // default to no rotation
+  Rotation rotation = ROTATE_0;
 
-	// default to 565
-	UsePen use_pen = up565;
+  // default to 565
+  UsePen use_pen = up565;
 
-	// default to no region
-	UseRegion use_region = urNone;
-	Rect region;
-	Point bounce = {0, 0};
-	Point bounce_inc = {1, 1};
+  // default to no region
+  UseRegion use_region = urNone;
+  Rect region;
+  Point bounce = {0, 0};
+  Point bounce_inc = {1, 1};
 
 
-	ST7789* st7789 = nullptr;
-	PicoGraphics* graphics = nullptr;
+  ST7789* st7789 = nullptr;
+  PicoGraphics* graphics = nullptr;
 
-	char  log_buffer[64];
+  char  log_buffer[64];
 
-	// turn the led off
-	RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
-	led.set_rgb(0, 0, 0);
+  // turn the led off
+  RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
+  led.set_rgb(0, 0, 0);
 
 
   struct pt {
@@ -142,90 +142,90 @@ int main() {
   };
 
   
-	Pen black_pen, white_pen;
+  Pen black_pen, white_pen;
 
-	std::vector<pt> pixels(NUM_PIXELS);
-	uint update_time = 0;
-	uint calc_time = 0;
-	uint dma_time = 0;
-	uint render_time = 0;
-	uint total_time = 0;
-		
-	
+  std::vector<pt> pixels(NUM_PIXELS);
+  uint update_time = 0;
+  uint calc_time = 0;
+  uint dma_time = 0;
+  uint render_time = 0;
+  uint total_time = 0;
+    
+  
   while(true) {
-		ElapsedUs total_timer;
-		ElapsedUs timer;
+    ElapsedUs total_timer;
+    ElapsedUs timer;
 
-		bool change_rotation = button_a.read();
-		bool change_pen = button_b.read();
-		bool change_async = button_x.read();
-		bool change_region = button_y.read();
+    bool change_rotation = button_a.read();
+    bool change_pen = button_b.read();
+    bool change_async = button_x.read();
+    bool change_region = button_y.read();
 
-		// cycle arounf regions
-		if(change_region){
-			use_region = (UseRegion)((use_region+1) % urCount);
-		}
+    // cycle arounf regions
+    if(change_region){
+      use_region = (UseRegion)((use_region+1) % urCount);
+    }
 
-		if(st7789 == nullptr || change_rotation || change_pen || change_async) {
-			// switch async DMA mode
-			if(change_async) {
-				use_async_dma = ! use_async_dma;
-				delete st7789;
-				st7789 = nullptr;
-			}
+    if(st7789 == nullptr || change_rotation || change_pen || change_async) {
+      // switch async DMA mode
+      if(change_async) {
+        use_async_dma = ! use_async_dma;
+        delete st7789;
+        st7789 = nullptr;
+      }
 
-			// cycle around rotations
-			if(change_rotation) {
-				rotation = (Rotation)((rotation + 90) % 360);
-				delete st7789;
-				st7789 = nullptr;
-			}
+      // cycle around rotations
+      if(change_rotation) {
+        rotation = (Rotation)((rotation + 90) % 360);
+        delete st7789;
+        st7789 = nullptr;
+      }
 
-			// cycle around pens (graphics mode)
-			if(change_pen) {
-				use_pen = (UsePen)((use_pen + 1) % upCount);
-			}
+      // cycle around pens (graphics mode)
+      if(change_pen) {
+        use_pen = (UsePen)((use_pen + 1) % upCount);
+      }
 
-			if(st7789 == nullptr)
-				st7789 = new ST7789(PicoDisplay2::WIDTH, PicoDisplay2::HEIGHT, rotation, false, get_spi_pins(BG_SPI_FRONT), use_async_dma);
+      if(st7789 == nullptr)
+        st7789 = new ST7789(PicoDisplay2::WIDTH, PicoDisplay2::HEIGHT, rotation, false, get_spi_pins(BG_SPI_FRONT), use_async_dma);
 
-			delete graphics;
-			switch(use_pen)
-			{
-				case up565 : 	graphics = new PicoGraphics_PenRGB565(st7789->width, st7789->height, framebuffer); break;
-				case up332 : 	graphics = new PicoGraphics_PenRGB332(st7789->width, st7789->height, framebuffer); break;
-				case up8  : 	graphics = new PicoGraphics_PenP8(st7789->width, st7789->height, framebuffer); break;
-				case up4   : 	graphics = new PicoGraphics_PenP4(st7789->width, st7789->height, framebuffer); break;
-				default: break;
-			}
+      delete graphics;
+      switch(use_pen)
+      {
+        case up565 : 	graphics = new PicoGraphics_PenRGB565(st7789->width, st7789->height, framebuffer); break;
+        case up332 : 	graphics = new PicoGraphics_PenRGB332(st7789->width, st7789->height, framebuffer); break;
+        case up8  : 	graphics = new PicoGraphics_PenP8(st7789->width, st7789->height, framebuffer); break;
+        case up4   : 	graphics = new PicoGraphics_PenP4(st7789->width, st7789->height, framebuffer); break;
+        default: break;
+      }
 
-		  st7789->set_backlight(150);
-		  black_pen = graphics->create_pen(0, 0, 0);
-			white_pen = graphics->create_pen(255, 255, 255);
+      st7789->set_backlight(150);
+      black_pen = graphics->create_pen(0, 0, 0);
+      white_pen = graphics->create_pen(255, 255, 255);
 
-			graphics->set_font("bitmap8");
+      graphics->set_font("bitmap8");
 
-			pixels.clear();
-			for(int i = 0; i < 3000; i++) {
-				pt pixel;
-				pixel.x = rand() % graphics->bounds.w;
-				pixel.y = rand() % graphics->bounds.h;
-				pixel.dx = float(rand() % 255) / 128.0f;
-				pixel.dy = float(rand() % 255) / 128.0f;
-				pixel.use_pen = graphics->create_pen(rand() % 255, rand() % 255, rand() % 255);
-				pixels.push_back(pixel);
-			}
-		}
+      pixels.clear();
+      for(int i = 0; i < 3000; i++) {
+        pt pixel;
+        pixel.x = rand() % graphics->bounds.w;
+        pixel.y = rand() % graphics->bounds.h;
+        pixel.dx = float(rand() % 255) / 128.0f;
+        pixel.dy = float(rand() % 255) / 128.0f;
+        pixel.use_pen = graphics->create_pen(rand() % 255, rand() % 255, rand() % 255);
+        pixels.push_back(pixel);
+      }
+    }
 
-		switch (use_region)
-		{
-			case urFull   : region = Rect(0, 0, st7789->width, st7789->height); break;
-			case urHalf   : region = Rect(0, 0, st7789->width / 2, st7789->height); break;
-			case urBounce : region = Rect(bounce.x - (st7789->width / 4), bounce.y - (st7789->height / 4), st7789->width / 2, st7789->height / 2); break;
-			default: break;
-		}
+    switch (use_region)
+    {
+      case urFull   : region = Rect(0, 0, st7789->width, st7789->height); break;
+      case urHalf   : region = Rect(0, 0, st7789->width / 2, st7789->height); break;
+      case urBounce : region = Rect(bounce.x - (st7789->width / 4), bounce.y - (st7789->height / 4), st7789->width / 2, st7789->height / 2); break;
+      default: break;
+    }
 
-		// update data
+    // update data
     for(auto &pixel : pixels) {
       pixel.x += pixel.dx;
       pixel.y += pixel.dy;
@@ -235,90 +235,90 @@ int main() {
       if(pixel.y >= graphics->bounds.h) pixel.dy *= -1;
     }
 
-		bounce.x += bounce_inc.x;
-		bounce.y += bounce_inc.y;
-		if(bounce.x < 0) bounce_inc.x = 1;
-		if(bounce.x >= graphics->bounds.w) bounce_inc.x = -1;
-		if(bounce.y < 0) bounce_inc.y = 1;
-		if(bounce.y >= graphics->bounds.h) bounce_inc.y = -1;
-		
+    bounce.x += bounce_inc.x;
+    bounce.y += bounce_inc.y;
+    if(bounce.x < 0) bounce_inc.x = 1;
+    if(bounce.x >= graphics->bounds.w) bounce_inc.x = -1;
+    if(bounce.y < 0) bounce_inc.y = 1;
+    if(bounce.y >= graphics->bounds.h) bounce_inc.y = -1;
+    
    
-		calc_time = timer.elapsed();
+    calc_time = timer.elapsed();
 
-		// if async wait for last update to finish before rendering
-		if(use_async_dma) {
-			st7789->wait_for_update_to_finish();
-		}
+    // if async wait for last update to finish before rendering
+    if(use_async_dma) {
+      st7789->wait_for_update_to_finish();
+    }
 
-		dma_time = timer.elapsed();
+    dma_time = timer.elapsed();
 
-		// render
+    // render
     graphics->set_pen(black_pen);
     graphics->clear();
 
     for(auto &pixel : pixels) {
       graphics->set_pen(pixel.use_pen);
-			graphics->pixel(Point(pixel.x, pixel.y));
+      graphics->pixel(Point(pixel.x, pixel.y));
     }
 
-		graphics->set_pen(white_pen);
+    graphics->set_pen(white_pen);
 
-		graphics->line(Point(0,0), Point(graphics->bounds.w-1, 0));
-		graphics->line(Point(0,0), Point(0, graphics->bounds.h-1));
+    graphics->line(Point(0,0), Point(graphics->bounds.w-1, 0));
+    graphics->line(Point(0,0), Point(0, graphics->bounds.h-1));
 
-		graphics->line(Point(graphics->bounds.w-1,0), Point(graphics->bounds.w-1, graphics->bounds.h-1));
-		graphics->line(Point(0,graphics->bounds.h-1), Point(graphics->bounds.w-1, graphics->bounds.h-1));
+    graphics->line(Point(graphics->bounds.w-1,0), Point(graphics->bounds.w-1, graphics->bounds.h-1));
+    graphics->line(Point(0,graphics->bounds.h-1), Point(graphics->bounds.w-1, graphics->bounds.h-1));
 
-		graphics->set_pen(white_pen);
+    graphics->set_pen(white_pen);
 
-		uint spacing = 20;
-		float scale = 2;
-		int y = -(spacing/2);
-		sprintf(log_buffer,"I=%s, %s, %s", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region]);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    uint spacing = 20;
+    float scale = 2;
+    int y = -(spacing/2);
+    sprintf(log_buffer,"I=%s, %s, %s", pen_strings[use_pen], use_async_dma ? "A" : "S", region_strings[use_region]);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"C=%u.%.2u", calc_time/1000, (calc_time - ((calc_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"C=%u.%.2u", calc_time/1000, (calc_time - ((calc_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"D=%u.%.2u", dma_time/1000, (dma_time - ((dma_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"D=%u.%.2u", dma_time/1000, (dma_time - ((dma_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"R=%u.%.2u", render_time/1000, (render_time - ((render_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"R=%u.%.2u", render_time/1000, (render_time - ((render_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"U=%u.%.2u", update_time/1000, (update_time - ((update_time/1000)*1000)) / 10);
-		printf("%s, ", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"U=%u.%.2u", update_time/1000, (update_time - ((update_time/1000)*1000)) / 10);
+    printf("%s, ", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		sprintf(log_buffer,"T=%u.%.2u", total_time/1000, (total_time - ((total_time/1000)*1000)) / 10);
-		printf("%s\n", log_buffer);
-		graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
+    sprintf(log_buffer,"T=%u.%.2u", total_time/1000, (total_time - ((total_time/1000)*1000)) / 10);
+    printf("%s\n", log_buffer);
+    graphics->text(std::string(log_buffer), Point(10, y+=spacing), graphics->bounds.w, scale);
 
-		if(use_region == urBounce)
-		{
-			graphics->set_pen(white_pen);
-			graphics->line(Point(region.x+1, region.y+1), Point(region.x+1+region.w-3, region.y+1));
-			graphics->line(Point(region.x+1+region.w-3, region.y+1), Point(region.x+1+region.w-3, region.y+1+region.h-3));
-			graphics->line(Point(region.x+1+region.w-3, region.y+1+region.h-3), Point(region.x+1, region.y+1+region.h-3));
-			graphics->line(Point(region.x+1, region.y+1+region.h-3), Point(region.x+1, region.y+1));
-		}
+    if(use_region == urBounce)
+    {
+      graphics->set_pen(white_pen);
+      graphics->line(Point(region.x+1, region.y+1), Point(region.x+1+region.w-3, region.y+1));
+      graphics->line(Point(region.x+1+region.w-3, region.y+1), Point(region.x+1+region.w-3, region.y+1+region.h-3));
+      graphics->line(Point(region.x+1+region.w-3, region.y+1+region.h-3), Point(region.x+1, region.y+1+region.h-3));
+      graphics->line(Point(region.x+1, region.y+1+region.h-3), Point(region.x+1, region.y+1));
+    }
 
-		render_time = timer.elapsed();
+    render_time = timer.elapsed();
 
-		// now update the display
-		if(use_region != urNone){
-	    st7789->partial_update(graphics, region);
-		}
-		else {
-    	st7789->update(graphics);
-		}
+    // now update the display
+    if(use_region != urNone){
+      st7789->partial_update(graphics, region);
+    }
+    else {
+      st7789->update(graphics);
+    }
 
-		update_time = timer.elapsed();
-		total_time  = total_timer.elapsed();
+    update_time = timer.elapsed();
+    total_time  = total_timer.elapsed();
 
   }
 
