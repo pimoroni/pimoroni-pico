@@ -197,7 +197,7 @@ namespace pimoroni {
     gpio_put(dc, 0); // command mode
 
     gpio_put(cs, 0);
-     spi_set_format(spi, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
+    spi_set_format(spi, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
     spi_write_blocking(spi, &command, 1);
     
     if(data) {
