@@ -488,6 +488,13 @@ namespace pimoroni {
       virtual void cleanup() {};
   };
 
+  template<typename T> class IDirectDisplayDriver {
+    public:
+      virtual void write_pixel(const Point &p, T colour) = 0;
+      virtual void write_pixel_span(const Point &p, uint l, T colour) = 0;
+      virtual void write_pixel_rect(const Rect &r, T colour) = 0;
+  };
+
   struct TouchPoint {
     int32_t x = 0, y = 0, z = 0;
 
@@ -573,5 +580,22 @@ namespace pimoroni {
       TouchPoint			raw_touch = {0, 0, 0};
       TouchPoint			touch = {0, 0, 0};
       uint16_t				median;
+  };
+
+  class PicoGraphics_PenRGB565_direct : public PicoGraphics {
+    public:
+      RGB src_color;
+      RGB565 color;
+      IDirectDisplayDriver<uint16_t> &driver;
+
+      PicoGraphics_PenRGB565_direct(uint16_t width, uint16_t height, IDirectDisplayDriver<uint16_t> &direct_display_driver);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      static size_t buffer_size(uint w, uint h) {
+        return w * h * sizeof(RGB565);
+      }
   };
 }
