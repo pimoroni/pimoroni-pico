@@ -1,4 +1,4 @@
-set(OUTPUT_NAME mlx90460_rgbmatrix)
+set(OUTPUT_NAME mlx90640_rgbmatrix)
 
 add_executable(
   ${OUTPUT_NAME}
