@@ -53,8 +53,8 @@ namespace pimoroni {
 #endif
                 return INVALID_FPS;
         }
-        //MLX90640_SetChessMode(i2c_address);
-        MLX90640_SetInterleavedMode(i2c_address);
+        MLX90640_SetChessMode(i2c_address);
+        //MLX90640_SetInterleavedMode(i2c_address);
         //MLX90640_SetResolution(i2c_address, 0);
         MLX90640_DumpEE(i2c_address, eeMLX90640);
         MLX90640_ExtractParameters(eeMLX90640, &mlx90640);
