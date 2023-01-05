@@ -35,9 +35,9 @@ def launcher():
     graphics.clear()
     graphics.set_pen(0)
 
-    graphics.set_pen(0)
-    graphics.rectangle(0, 0, WIDTH, 50)
     graphics.set_pen(5)
+    graphics.rectangle(0, 0, WIDTH, 50)
+    graphics.set_pen(0)
     len = graphics.measure_text("Launcher", 4) // 2
     graphics.text("Launcher", (WIDTH // 2 - len), 10, WIDTH, 4)
 
