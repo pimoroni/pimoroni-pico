@@ -1,12 +1,14 @@
 #include "wakeup.h"
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_gpio_state_obj, Wakeup_get_gpio_state);
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_vsys_voltage_obj, Wakeup_get_vsys_voltage);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_get_shift_state_obj, Wakeup_get_shift_state);
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(Wakeup_reset_shift_state_obj, Wakeup_reset_shift_state);
 
 STATIC const mp_map_elem_t wakeup_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_wakeup) },
     { MP_ROM_QSTR(MP_QSTR_get_gpio_state), MP_ROM_PTR(&Wakeup_get_gpio_state_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_vsys_voltage), MP_ROM_PTR(&Wakeup_get_vsys_voltage_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_shift_state), MP_ROM_PTR(&Wakeup_get_shift_state_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset_shift_state), MP_ROM_PTR(&Wakeup_reset_shift_state_obj) }
 };

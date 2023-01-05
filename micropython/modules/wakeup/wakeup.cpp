@@ -2,6 +2,7 @@
 #include "wakeup.config.hpp"
 
 extern uint32_t runtime_wakeup_gpio_state;
+extern uint16_t runtime_wakeup_vsys_voltage;
 
 namespace {
     struct Wakeup {
@@ -62,6 +63,9 @@ mp_obj_t Wakeup_get_gpio_state() {
     return mp_obj_new_int(runtime_wakeup_gpio_state);
 }
 
+mp_obj_t Wakeup_get_vsys_voltage() {
+    return mp_obj_new_float((runtime_wakeup_vsys_voltage * 3.0f * 3.3f) / 65535.0f);
+}
 void err_no_sr() {
     mp_raise_msg(&mp_type_RuntimeError, "Wakeup_get_shift_state: board does not have a shift register.");
 }
