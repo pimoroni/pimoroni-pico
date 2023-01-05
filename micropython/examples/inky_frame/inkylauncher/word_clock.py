@@ -56,8 +56,20 @@ def draw():
     graphics.clear()
     graphics.set_pen(6)
 
-    x = 10
-    y = 10
+    # Values for the layout and spacing
+    if WIDTH == 640:  # Inky Frame 4.0"
+        default_x = 5
+        x = default_x
+        y = 10
+        line_space = 70
+        letter_space = 40
+    else:  # Inky Frame 5.7"
+        default_x = 20
+        x = default_x
+        y = 40
+        line_space = 65
+        letter_space = 35
+
     scale = 5
     spacing = 2
 
@@ -71,10 +83,10 @@ def draw():
         for letter in word:
             text_length = graphics.measure_text(letter, scale, spacing)
             if not x + text_length <= WIDTH:
-                y += 70
-                x = 5
+                y += line_space
+                x = default_x
 
             graphics.text(letter.upper(), x, y, 640, scale, spacing)
-            x += 40
+            x += letter_space
 
     graphics.update()
