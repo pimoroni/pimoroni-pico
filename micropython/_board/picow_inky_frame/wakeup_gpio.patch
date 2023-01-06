@@ -1,7 +1,7 @@
-diff --git a/src/rp2_common/pico_runtime/runtime.c b/src/rp2_common/pico_runtime/runtime.c
+diff --git a/lib/pico-sdk/src/rp2_common/pico_runtime/runtime.c b/lib/pico-sdk/src/rp2_common/pico_runtime/runtime.c
 index 70dd3bb..b8c1ed0 100644
---- a/src/rp2_common/pico_runtime/runtime.c
-+++ b/src/rp2_common/pico_runtime/runtime.c
+--- a/lib/pico-sdk/src/rp2_common/pico_runtime/runtime.c
++++ b/lib/pico-sdk/src/rp2_common/pico_runtime/runtime.c
 @@ -17,6 +17,7 @@
  #include "hardware/clocks.h"
  #include "hardware/irq.h"
@@ -62,10 +62,10 @@ index 70dd3bb..b8c1ed0 100644
      // pre-init runs really early since we need it even for memcpy and divide!
      // (basically anything in aeabi that uses bootrom)
  
-diff --git a/src/rp2_common/pico_standard_link/crt0.S b/src/rp2_common/pico_standard_link/crt0.S
+diff --git a/lib/pico-sdk/src/rp2_common/pico_standard_link/crt0.S b/lib/pico-sdk/src/rp2_common/pico_standard_link/crt0.S
 index b2992f6..6091e70 100644
---- a/src/rp2_common/pico_standard_link/crt0.S
-+++ b/src/rp2_common/pico_standard_link/crt0.S
+--- a/lib/pico-sdk/src/rp2_common/pico_standard_link/crt0.S
++++ b/lib/pico-sdk/src/rp2_common/pico_standard_link/crt0.S
 @@ -9,6 +9,8 @@
  #include "hardware/regs/addressmap.h"
  #include "hardware/regs/sio.h"
