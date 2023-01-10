@@ -1,6 +1,7 @@
 # A retro badge with photo and QR code.
 # Copy your image to your Tufty alongside this example - it should be a 120 x 120 jpg.
 
+from machine import ADC, Pin
 from picographics import PicoGraphics, DISPLAY_TUFTY_2040
 from pimoroni import Button
 import time
@@ -9,6 +10,9 @@ import qrcode
 
 display = PicoGraphics(display=DISPLAY_TUFTY_2040)
 button_c = Button(9, invert=False)
+lux_pwr = Pin(27, Pin.OUT)
+lux_pwr.value(1)
+lux = ADC(26)
 
 WIDTH, HEIGHT = display.get_bounds()
 
@@ -46,6 +50,18 @@ IMAGE_NAME = "squirrel.jpg"
 BORDER_SIZE = 4
 PADDING = 10
 COMPANY_HEIGHT = 40
+
+# Constants for automatic brightness adjustment.
+# Below about 3/8ths, the backlight is entirely off. The top of the range is OK.
+BACKLIGHT_LOW = 0.375
+BACKLIGHT_HIGH = 1.0
+# The luminance sensor seems to cover the whole 16-bit range pretty well from
+# buried in shadow to bright phone torch in its face, but setting a lower high
+# point will make it generally bias brighter in calm room lighting, and a higher
+# low will use the darkest backlight without needing to completely hard-mask the
+# sensor in complete darkness.
+LUMINANCE_LOW = 256.0
+LUMINANCE_HIGH = 2048.0  # 65535.0 to use the full range.
 
 
 def draw_badge():
@@ -132,6 +148,14 @@ def show_qr():
     draw_qr_code(left, top, HEIGHT, code)
 
 
+def auto_brightness():
+    luminance = lux.read_u16()
+    luminance_frac = max(0.0, luminance - LUMINANCE_LOW)
+    luminance_frac = min(1.0, luminance_frac / (LUMINANCE_HIGH - LUMINANCE_LOW))
+    display.set_backlight(
+        BACKLIGHT_LOW + (luminance_frac * (BACKLIGHT_HIGH - BACKLIGHT_LOW)))
+
+
 # draw the badge for the first time
 badge_mode = "photo"
 draw_badge()
@@ -139,6 +163,7 @@ show_photo()
 display.update()
 
 while True:
+    auto_brightness()
     if button_c.is_pressed:
         if badge_mode == "photo":
             badge_mode = "qr"
