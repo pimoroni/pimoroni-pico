@@ -187,3 +187,4 @@ Find out more about the Open Meteo API at [https://open-meteo.com].
 Here are some Plasma Stick community projects and resources that you might find useful! Note that code at the links below has not been tested by us and we're not able to offer support with it.
 
 - :link: [MQTT Script for Plasma Stick](https://github.com/digitalurban/MQTT-Plasma-Stick-2040W)
+- :link: [Pimoroni Wireless Plasma Kit - Server](https://github.com/brunon/Starlight)
