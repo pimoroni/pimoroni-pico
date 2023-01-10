@@ -13,6 +13,9 @@ button_c = Button(9, invert=False)
 lux_pwr = Pin(27, Pin.OUT)
 lux_pwr.value(1)
 lux = ADC(26)
+vbat_adc = ADC(29)
+vref_adc = ADC(28)
+usb_power = Pin(24, Pin.IN)
 
 WIDTH, HEIGHT = display.get_bounds()
 
@@ -63,6 +66,11 @@ BACKLIGHT_HIGH = 1.0
 LUMINANCE_LOW = 256.0
 LUMINANCE_HIGH = 2048.0  # 65535.0 to use the full range.
 
+# If on battery, and the supply voltage drops below this, force minimum
+# backlight brightness. Set to zero to not even measure voltage.
+# The bottom of the Tufty2040 input range is 3.0v, so values below that likely
+# will not trigger before it cuts out.
+LOW_BATTERY_VOLTAGE = 3.1
 
 def draw_badge():
     # draw border
@@ -156,14 +164,36 @@ def auto_brightness():
         (luminance_frac * (BACKLIGHT_HIGH - BACKLIGHT_LOW)))
 
 
+def battery_is_low():
+    if LOW_BATTERY_VOLTAGE == 0.0:
+        return False  # Don't even measure; assume the battery is good.
+    if usb_power.value():
+        return False  # We have LIMITLESS POWER from USB!
+    # See the battery.py example for how this works.
+    # We *don't* toggle VREF power since it shares a pin with enabling the LUX
+    # sensor, so it's always on.
+    vdd = 1.24 * (65535 / vref_adc.read_u16())
+    vbat = ((vbat_adc.read_u16() / 65535) * 3 * vdd)
+    return vbat < LOW_BATTERY_VOLTAGE
+
+
 # draw the badge for the first time
 badge_mode = "photo"
 draw_badge()
 show_photo()
 display.update()
+brightness_reduced = False
 
 while True:
-    auto_brightness()
+    if battery_is_low():
+        # Once it's low, this assumes it stays low, and avoids repeatedly
+        # resetting the backlight. If you have an inline charging circuit, you
+        # could remove brightness_reduced.
+        if not brightness_reduced:
+            display.set_backlight(BACKLIGHT_LOW)
+            brightness_reduced = True
+    else:
+        auto_brightness()
     if button_c.is_pressed:
         if badge_mode == "photo":
             badge_mode = "qr"
