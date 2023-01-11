@@ -93,6 +93,10 @@ def network_connect(SSID, PSK):
 
     # Sets the Wireless LED pulsing and attempts to connect to your local network.
     pulse_network_led()
+    
+    # to handle joining some (slow) wifi APs. set power mode to get WiFi power-saving off
+    wlan.config(pm = 0xa11140)
+    
     wlan.connect(SSID, PSK)
 
     while max_wait > 0:
