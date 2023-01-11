@@ -23,6 +23,9 @@ class NetworkManager:
         return self._sta_if.isconnected() or self._ap_if.isconnected()
 
     def config(self, var):
+        # to handle joining some (slow) wifi APs. set power mode to get WiFi power-saving off
+        self._sta_if.config(pm = 0xa11140)
+
         if self._sta_if.active():
             return self._sta_if.config(var)
         else:
