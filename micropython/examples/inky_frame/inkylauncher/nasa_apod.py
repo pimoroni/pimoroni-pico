@@ -83,9 +83,10 @@ def draw():
         jpeg.decode()
     except OSError:
         graphics.set_pen(4)
-        graphics.rectangle(0, HEIGHT // 2, WIDTH, 25)
+        graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
         graphics.set_pen(1)
-        graphics.text("Unable to display image! Check your network settings in secrets.py", 5, (HEIGHT // 2) + 5, WIDTH, 2)
+        graphics.text("Unable to display image!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
+        graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
 
     graphics.set_pen(0)
     graphics.rectangle(0, HEIGHT - 25, WIDTH, 25)
