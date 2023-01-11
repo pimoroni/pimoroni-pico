@@ -20,6 +20,16 @@ STATIC const mp_rom_map_elem_t JPEG_locals_dict_table[] = {
 
 STATIC MP_DEFINE_CONST_DICT(JPEG_locals_dict, JPEG_locals_dict_table);
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    JPEG_type,
+    MP_QSTR_jpegdec,
+    MP_TYPE_FLAG_NONE,
+    make_new, _JPEG_make_new,
+    //print, _JPEG_print,
+    locals_dict, (mp_obj_dict_t*)&JPEG_locals_dict
+);
+#else
 const mp_obj_type_t JPEG_type = {
     { &mp_type_type },
     .name = MP_QSTR_jpegdec,
@@ -27,6 +37,7 @@ const mp_obj_type_t JPEG_type = {
     .make_new = _JPEG_make_new,
     .locals_dict = (mp_obj_dict_t*)&JPEG_locals_dict,
 };
+#endif
 
 // module
 STATIC const mp_map_elem_t JPEG_globals_table[] = {

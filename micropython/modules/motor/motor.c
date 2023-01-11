@@ -128,6 +128,16 @@ STATIC MP_DEFINE_CONST_DICT(Motor_locals_dict, Motor_locals_dict_table);
 STATIC MP_DEFINE_CONST_DICT(MotorCluster_locals_dict, MotorCluster_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Motor_type,
+    MP_QSTR_motor,
+    MP_TYPE_FLAG_NONE,
+    make_new, Motor_make_new,
+    print, Motor_print,
+    locals_dict, (mp_obj_dict_t*)&Motor_locals_dict
+);
+#else
 const mp_obj_type_t Motor_type = {
     { &mp_type_type },
     .name = MP_QSTR_motor,
@@ -135,7 +145,18 @@ const mp_obj_type_t Motor_type = {
     .make_new = Motor_make_new,
     .locals_dict = (mp_obj_dict_t*)&Motor_locals_dict,
 };
+#endif
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    MotorCluster_type,
+    MP_QSTR_motor_cluster,
+    MP_TYPE_FLAG_NONE,
+    make_new, MotorCluster_make_new,
+    print, MotorCluster_print,
+    locals_dict, (mp_obj_dict_t*)&MotorCluster_locals_dict
+);
+#else
 const mp_obj_type_t MotorCluster_type = {
     { &mp_type_type },
     .name = MP_QSTR_motor_cluster,
@@ -143,6 +164,7 @@ const mp_obj_type_t MotorCluster_type = {
     .make_new = MotorCluster_make_new,
     .locals_dict = (mp_obj_dict_t*)&MotorCluster_locals_dict,
 };
+#endif
 
 
 /***** Module Constants *****/

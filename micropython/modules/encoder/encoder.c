@@ -40,6 +40,16 @@ STATIC const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(Encoder_locals_dict, Encoder_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Encoder_type,
+    MP_QSTR_encoder,
+    MP_TYPE_FLAG_NONE,
+    make_new, Encoder_make_new,
+    print, Encoder_print,
+    locals_dict, (mp_obj_dict_t*)&Encoder_locals_dict
+);
+#else
 const mp_obj_type_t Encoder_type = {
     { &mp_type_type },
     .name = MP_QSTR_encoder,
@@ -47,6 +57,7 @@ const mp_obj_type_t Encoder_type = {
     .make_new = Encoder_make_new,
     .locals_dict = (mp_obj_dict_t*)&Encoder_locals_dict,
 };
+#endif
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t encoder_globals_table[] = {

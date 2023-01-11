@@ -94,6 +94,25 @@ STATIC MP_DEFINE_CONST_DICT(Channel_locals_dict, Channel_locals_dict_table);
 STATIC MP_DEFINE_CONST_DICT(GalacticUnicorn_locals_dict, GalacticUnicorn_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Channel_type,
+    MP_QSTR_Channel,
+    MP_TYPE_FLAG_NONE,
+    make_new, Channel_make_new,
+    print, Channel_print,
+    locals_dict, (mp_obj_dict_t*)&Channel_locals_dict
+);
+
+MP_DEFINE_CONST_OBJ_TYPE(
+    GalacticUnicorn_type,
+    MP_QSTR_GalacticUnicorn,
+    MP_TYPE_FLAG_NONE,
+    make_new, GalacticUnicorn_make_new,
+    print, GalacticUnicorn_print,
+    locals_dict, (mp_obj_dict_t*)&GalacticUnicorn_locals_dict
+);
+#else
 const mp_obj_type_t Channel_type = {
     { &mp_type_type },
     .name = MP_QSTR_Channel,
@@ -109,6 +128,7 @@ const mp_obj_type_t GalacticUnicorn_type = {
     .make_new = GalacticUnicorn_make_new,
     .locals_dict = (mp_obj_dict_t*)&GalacticUnicorn_locals_dict,
 };
+#endif
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t galactic_globals_table[] = {

@@ -17,6 +17,7 @@
 [submodule "micropython/modules/qrcode"]
 	path = micropython/modules/qrcode
 	url = https://github.com/pimoroni/QR-Code-Generator
+	branch = micropython/mp_obj_type_t_upgrade
 [submodule "drivers/vl53l5cx/src"]
 	path = drivers/vl53l5cx/src
 	url = https://github.com/ST-mirror/VL53L5CX_ULD_driver

@@ -32,6 +32,16 @@ STATIC const mp_rom_map_elem_t BreakoutPMW3901_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutPMW3901_locals_dict, BreakoutPMW3901_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_pmw3901_BreakoutPMW3901_type,
+    MP_QSTR_BreakoutPMW3901,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutPMW3901_make_new,
+    print, BreakoutPMW3901_print,
+    locals_dict, (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict
+);
+#else
 const mp_obj_type_t breakout_pmw3901_BreakoutPMW3901_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutPMW3901,
@@ -39,6 +49,7 @@ const mp_obj_type_t breakout_pmw3901_BreakoutPMW3901_type = {
     .make_new = BreakoutPMW3901_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutPMW3901_locals_dict,
 };
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_pmw3901 Module

@@ -64,12 +64,22 @@ STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(PCF85063A_locals_dict, PCF85063A_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    pcf85063a_PCF85063A_type,
+    MP_QSTR_pcf85063a,
+    MP_TYPE_FLAG_NONE,
+    make_new, PCF85063A_make_new,
+    locals_dict, (mp_obj_dict_t*)&PCF85063A_locals_dict
+);
+#else
 const mp_obj_type_t pcf85063a_PCF85063A_type = {
     { &mp_type_type },
     .name = MP_QSTR_pcf85063a,
     .make_new = PCF85063A_make_new,
     .locals_dict = (mp_obj_dict_t*)&PCF85063A_locals_dict,
 };
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // pcf85063a Module

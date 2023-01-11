@@ -265,7 +265,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         _PimoroniBus_obj_t *bus = (_PimoroniBus_obj_t *)MP_OBJ_TO_PTR(args[ARG_bus].u_obj);
         parallel_bus = *(ParallelPins *)(bus->pins);
 
-    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type) || MP_OBJ_IS_TYPE(args[ARG_bus].u_obj, &machine_hw_i2c_type)) {
+    } else if (mp_obj_is_type(args[ARG_bus].u_obj, &PimoroniI2C_type) || MP_OBJ_IS_TYPE(args[ARG_bus].u_obj, &machine_i2c_type)) {
         if(bus_type != BUS_I2C) mp_raise_ValueError("unexpected I2C bus!");
         self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_bus].u_obj);
         i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);

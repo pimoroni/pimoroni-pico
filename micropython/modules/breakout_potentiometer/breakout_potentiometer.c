@@ -32,12 +32,22 @@ STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutPotentiometer_locals_dict, BreakoutPotentiometer_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_potentiometer_BreakoutPotentiometer_type,
+    MP_QSTR_BreakoutPotentiometer,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutPotentiometer_make_new,
+    locals_dict, (mp_obj_dict_t*)&BreakoutPotentiometer_locals_dict
+);
+#else
 const mp_obj_type_t breakout_potentiometer_BreakoutPotentiometer_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutPotentiometer,
     .make_new = BreakoutPotentiometer_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutPotentiometer_locals_dict,
 };
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
