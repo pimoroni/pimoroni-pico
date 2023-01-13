@@ -1,9 +1,12 @@
 import gc
+import os
 import time
 import math
 import badger2040w as badger2040
-import launchericons
 import badger_os
+import jpegdec
+
+APP_DIR = "/examples"
 
 # Reduce clock speed to 48MHz
 badger2040.system_speed(badger2040.SYSTEM_NORMAL)
@@ -27,6 +30,8 @@ display = badger2040.Badger2040W()
 display.set_font("bitmap8")
 display.led(128)
 
+jpeg = jpegdec.JPEG(display.display)
+
 state = {
     "page": 0,
     "font_size": 1,
@@ -38,20 +43,7 @@ badger_os.state_load("launcher", state)
 
 display.invert(state["inverted"])
 
-icons = bytearray(launchericons.data())
-icons_width = 576
-
-examples = [
-    ("_clock", 0),
-    ("_fonts", 1),
-    ("_ebook", 2),
-    ("_image", 3),
-    ("_list", 4),
-    ("_badge", 5),
-    ("_qrgen", 8),
-    ("_info", 6),
-    ("_help", 7),
-]
+examples = [x[:-3] for x in os.listdir("/examples") if x.endswith(".py")]
 
 font_sizes = (0.5, 0.7, 0.9)
 
@@ -129,10 +121,12 @@ def render():
 
     for i in range(max_icons):
         x = centers[i]
-        label, icon = examples[i + (state["page"] * 3)]
-        label = label[1:].replace("_", " ")
+        label = examples[i + (state["page"] * 3)]
+        icon = f"{APP_DIR}/icon-{label}.jpg"
+        label = label.replace("_", " ")
+        jpeg.open_file(icon)
+        jpeg.decode(x - 32, 24)
         display.set_pen(0)
-        display.icon(icons, icon, icons_width, 64, x - 32, 24)
         w = display.measure_text(label, font_sizes[state["font_size"]])
         display.text(label, int(x - (w / 2)), 16 + 80, WIDTH, font_sizes[state["font_size"]])
 
@@ -166,7 +160,8 @@ def wait_for_user_to_release_buttons():
 def launch_example(index):
     wait_for_user_to_release_buttons()
 
-    file = examples[(state["page"] * 3) + index][0]
+    file = examples[(state["page"] * 3) + index]
+    file = f"{APP_DIR}/{file}"
 
     for k in locals().keys():
         if k not in ("gc", "file", "badger_os"):
