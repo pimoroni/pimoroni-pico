@@ -67,7 +67,7 @@ def state_set_running(app):
 def state_launch():
     app = state_running()
     if app is not None and app != "launcher":
-        launch("_" + app)
+        launch(app)
 
 
 def state_delete(app):
@@ -127,10 +127,7 @@ def launch(file):
     button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
 
     try:
-        try:
-            __import__(file[1:])  # Try to import _[file] (drop underscore prefix)
-        except ImportError:
-            __import__(file)      # Failover to importing [_file]
+         __import__(file)
 
     except ImportError:
         # If the app doesn't exist, notify the user
