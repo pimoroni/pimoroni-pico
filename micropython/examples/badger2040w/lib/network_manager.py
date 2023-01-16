@@ -75,6 +75,7 @@ class NetworkManager:
 
         self._sta_if.active(True)
         self._sta_if.connect(ssid, psk)
+        self._sta_if.config(pm=0xa11140)
 
         try:
             await uasyncio.wait_for(self.wait(network.STA_IF), self._client_timeout)

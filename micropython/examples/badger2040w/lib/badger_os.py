@@ -112,7 +112,7 @@ def state_load(app, defaults):
 
 
 def launch(file):
-    state_set_running(file[1:])
+    state_set_running(file)
 
     gc.collect()
 
@@ -131,7 +131,7 @@ def launch(file):
 
     except ImportError:
         # If the app doesn't exist, notify the user
-        warning(None, "Could not launch: " + file[1:])
+        warning(None, f"Could not launch: {file}")
         time.sleep(4.0)
     except Exception as e:
         # If the app throws an error, catch it and display!

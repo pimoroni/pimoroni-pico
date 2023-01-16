@@ -9,7 +9,7 @@ import jpegdec
 APP_DIR = "/examples"
 
 # Reduce clock speed to 48MHz
-badger2040.system_speed(badger2040.SYSTEM_NORMAL)
+badger2040.system_speed(badger2040.SYSTEM_TURBO)
 
 changed = False
 exited_to_launcher = False
