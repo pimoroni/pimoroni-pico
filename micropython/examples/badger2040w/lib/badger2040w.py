@@ -1,4 +1,5 @@
 import machine
+import micropython
 from picographics import PicoGraphics, DISPLAY_INKY_PACK
 from network_manager import NetworkManager
 import WIFI_CONFIG
@@ -86,10 +87,10 @@ class Badger2040W():
 
     def thickness(self, thickness):
         print("Thickness!")
-    
+
     def halt(self):
         pass
-        
+
     def pressed(self, button):
         return BUTTONS[button].value() == 1
 
@@ -97,14 +98,14 @@ class Badger2040W():
     def icon(self, data, index, data_w, icon_size, x, y):
         s_x = (index * icon_size) % data_w
         s_y = int((index * icon_size) / data_w)
-    
+
         for o_y in range(icon_size):
             for o_x in range(icon_size):
                 o = ((o_y + s_y) * data_w) + (o_x + s_x)
                 bm = 0b10000000 >> (o & 0b111)
                 if data[o >> 3] & bm:
                     self.display.pixel(x + o_x, y + o_y)
-    
+
     def image(self, data, w, h, x, y):
         for oy in range(h):
             row = data[oy]
@@ -112,7 +113,6 @@ class Badger2040W():
                 if row & 0b1 == 0:
                     self.display.pixel(x + ox, y + oy)
                 row >>= 1
-                
 
     def status_handler(self, mode, status, ip):
         print(mode, status, ip)
