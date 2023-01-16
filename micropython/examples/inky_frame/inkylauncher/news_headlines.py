@@ -12,6 +12,8 @@ URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
 UPDATE_INTERVAL = 90
 
 graphics = None
+WIDTH = None
+HEIGHT = None
 code = qrcode.QRCode()
 
 
@@ -125,7 +127,6 @@ def update():
 
 def draw():
     global feed
-    WIDTH, HEIGHT = graphics.get_bounds()
     graphics.set_font("bitmap8")
 
     # Clear the screen
@@ -140,24 +141,25 @@ def draw():
         graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
 
         graphics.set_pen(4)
-        graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < 600 else 2)
-        graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < 600 else 2)
+        graphics.text(feed[0]["title"], 10, 70, WIDTH - 150, 3 if graphics.measure_text(feed[0]["title"]) < WIDTH else 2)
+        graphics.text(feed[1]["title"], 130, 260, WIDTH - 140, 3 if graphics.measure_text(feed[1]["title"]) < WIDTH else 2)
 
         graphics.set_pen(3)
         graphics.text(feed[0]["description"], 10, 135 if graphics.measure_text(feed[0]["title"]) < 650 else 90, WIDTH - 150, 2)
         graphics.text(feed[1]["description"], 130, 320 if graphics.measure_text(feed[1]["title"]) < 650 else 230, WIDTH - 145, 2)
 
-        graphics.line(10, 215, 620, 215)
+        graphics.line(10, 215, WIDTH - 10, 215)
 
         code.set_text(feed[0]["guid"])
-        draw_qr_code(530, 65, 100, code)
+        draw_qr_code(WIDTH - 110, 65, 100, code)
         code.set_text(feed[1]["guid"])
         draw_qr_code(10, 265, 100, code)
 
     else:
         graphics.set_pen(4)
-        graphics.rectangle(0, 170, 640, 25)
+        graphics.rectangle(0, (HEIGHT // 2) - 20, WIDTH, 40)
         graphics.set_pen(1)
-        graphics.text("Unable to display news! Check your network settings in secrets.py", 5, 175, 600, 2)
+        graphics.text("Unable to display news feed!", 5, (HEIGHT // 2) - 15, WIDTH, 2)
+        graphics.text("Check your network settings in secrets.py", 5, (HEIGHT // 2) + 2, WIDTH, 2)
 
     graphics.update()
