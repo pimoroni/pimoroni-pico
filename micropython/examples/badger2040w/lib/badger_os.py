@@ -127,7 +127,7 @@ def launch(file):
     button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=quit_to_launcher)
 
     try:
-         __import__(file)
+        __import__(file)
 
     except ImportError:
         # If the app doesn't exist, notify the user

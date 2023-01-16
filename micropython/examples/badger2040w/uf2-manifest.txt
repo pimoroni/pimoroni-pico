@@ -1,5 +1,4 @@
 *.py
 lib/*.py
-lib/urllib/*.py
 examples/*.jpg
 examples/*.py
