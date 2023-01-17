@@ -5,15 +5,17 @@ import badger2040w
 
 
 display = badger2040w.Badger2040W()
+display.set_update_speed(3)
 
 WIDTH, HEIGHT = display.get_bounds()
 
-display.connect()
+try:
+    display.connect()
+    if display.isconnected():
+        ntptime.settime()
+except RuntimeError:
+    pass  # no WiFI
 
-# We're going to keep the badger on, so slow down the system clock if on battery
-display.set_update_speed(3)
-
-ntptime.settime()
 rtc = machine.RTC()
 
 display.set_font("gothic")

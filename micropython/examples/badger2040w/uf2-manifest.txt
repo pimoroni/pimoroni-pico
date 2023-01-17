@@ -2,3 +2,5 @@
 lib/*.py
 examples/*.jpg
 examples/*.py
+images/*.jpg
+images/*.txt
