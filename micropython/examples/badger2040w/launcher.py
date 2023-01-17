@@ -7,6 +7,7 @@ import badger_os
 import jpegdec
 
 APP_DIR = "/examples"
+FONT_SIZE = 2
 
 # Reduce clock speed to 48MHz
 badger2040.system_speed(badger2040.SYSTEM_TURBO)
@@ -34,18 +35,12 @@ jpeg = jpegdec.JPEG(display.display)
 
 state = {
     "page": 0,
-    "font_size": 1,
-    "inverted": False,
     "running": "launcher"
 }
 
 badger_os.state_load("launcher", state)
 
-display.invert(state["inverted"])
-
 examples = [x[:-3] for x in os.listdir("/examples") if x.endswith(".py")]
-
-font_sizes = (0.5, 0.7, 0.9)
 
 # Approximate center lines for buttons A, B and C
 centers = (41, 147, 253)
@@ -127,8 +122,8 @@ def render():
         jpeg.open_file(icon)
         jpeg.decode(x - 32, 24)
         display.set_pen(0)
-        w = display.measure_text(label, font_sizes[state["font_size"]])
-        display.text(label, int(x - (w / 2)), 16 + 80, WIDTH, font_sizes[state["font_size"]])
+        w = display.measure_text(label, FONT_SIZE)
+        display.text(label, int(x - (w / 2)), 16 + 80, WIDTH, FONT_SIZE)
 
     for i in range(MAX_PAGE):
         x = 286
@@ -193,19 +188,11 @@ def button(pin):
             render()
     else:  # User button IS held down
         if pin == badger2040.BUTTON_UP:
-            state["font_size"] += 1
-            if state["font_size"] == len(font_sizes):
-                state["font_size"] = 0
-            render()
+            pass
         if pin == badger2040.BUTTON_DOWN:
-            state["font_size"] -= 1
-            if state["font_size"] < 0:
-                state["font_size"] = 0
-            render()
+            pass
         if pin == badger2040.BUTTON_A:
-            state["inverted"] = not state["inverted"]
-            display.invert(state["inverted"])
-            render()
+            pass
 
 
 if exited_to_launcher or not woken_by_button:
