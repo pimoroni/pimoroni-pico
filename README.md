@@ -4,9 +4,9 @@ Welcome to the brave new world of Pico!
 
 This repository contains the C/C++ and MicroPython libraries for our range of RP2040-based boards, Raspberry Pi Pico addons & [supported Breakout Garden sensors](#breakouts).
 
-[![CMake Build Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/CMake?label=C%2B%2B)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/cmake.yml)
-[![MicroPython Build Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/MicroPython?label=MicroPython)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython.yml)
-[![MicroPython+Blinka Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/MicroPython+Blinka?label=MicroPython%2BBlinka)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython-with-blinka.yml)
+[![CMake Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/cmake.yml?branch=main&label=CMake)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/cmake.yml)
+[![MicroPython Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/micropython.yml?branch=main&label=MicroPython)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython.yml)
+[![MicroPython PicoW Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/micropython-picow.yml?branch=main&label=MicroPython%20PicoW)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython-picow.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/pimoroni/pimoroni-pico)](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
 
 
