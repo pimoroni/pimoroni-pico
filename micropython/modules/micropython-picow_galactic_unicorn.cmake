@@ -46,6 +46,7 @@ include(adcfft/micropython)
 
 # LEDs & Matrices
 include(galactic_unicorn/micropython)
+include(cosmic_unicorn/micropython)
 
 # include(micropython-common)
 
