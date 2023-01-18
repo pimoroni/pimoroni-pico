@@ -440,7 +440,7 @@ You have a 16-color and 256-color palette respectively.
 Set n elements in the palette from a list of RGB tuples:
 
 ```python
-set_palette([
+display.set_palette([
   (r, g, b),
   (r, g, b),
   (r, g, b)
