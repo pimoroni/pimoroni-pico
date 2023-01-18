@@ -23,7 +23,7 @@ def free(full=False):
     if not full:
         return P
     else:
-        return (f"Total RAM \n{T} KB \nUnused RAM \n{F} KB \n({P} free)")
+        return (f"Total RAM \n{T} bytes \nUnused RAM \n{F} bytes \n({P} free)")
 
 
 def hsv_to_rgb(h, s, v):
