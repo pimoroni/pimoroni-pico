@@ -72,12 +72,7 @@ class Badger2040W():
 
     def __getattr__(self, item):
         # Glue to redirect calls to PicoGraphics
-        if item in dir(self.display):
-            return getattr(self.display, item)
-        elif item in self.__dict__.keys():
-            return getattr(self, item)
-        else:
-            raise AttributeError(f"No attribute '{item}'")
+        return getattr(self.display, item)
 
     def led(self, brightness):
         pass
