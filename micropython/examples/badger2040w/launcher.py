@@ -9,9 +9,6 @@ import jpegdec
 APP_DIR = "/examples"
 FONT_SIZE = 2
 
-# Reduce clock speed to 48MHz
-badger2040.system_speed(badger2040.SYSTEM_TURBO)
-
 changed = False
 exited_to_launcher = False
 woken_by_button = badger2040.woken_by_button()  # Must be done before we clear_pressed_to_wake
