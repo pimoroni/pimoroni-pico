@@ -89,7 +89,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 ## RP2040 Boards
 
 * Plasma 2040 (LED strip driver) - https://shop.pimoroni.com/products/plasma-2040
-* Interstate 75 (HUB75 driver) - https://shop.pimoroni.com/products/interstate-75
+* Interstate 75 (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75
 * Badger 2040 (E Ink badge) - https://shop.pimoroni.com/products/badger-2040
 * Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
 * Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
@@ -103,6 +103,8 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Automation 2040 W Mini (inputs, outputs and a relay, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w-mini
 * Plasma Stick 2040 W (bijou LED strip controller) - https://shop.pimoroni.com/products/plasma-stick-2040-w
 * Galactic Unicorn (dazzling 53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
+* Interstate 75 W (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75-w
+* Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
 
 ## Breakouts
 
