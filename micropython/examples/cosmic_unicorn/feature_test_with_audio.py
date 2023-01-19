@@ -2,8 +2,8 @@ import gc
 import time
 import math
 from machine import Timer
-from galactic import GalacticUnicorn, Channel
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn, Channel
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 '''
 Displays some text, gradients and colours and demonstrates button use.
@@ -18,11 +18,11 @@ Also demonstrates some of the audio / synth features.
 
 gc.collect()
 
-gu = GalacticUnicorn()
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-width = GalacticUnicorn.WIDTH
-height = GalacticUnicorn.HEIGHT
+width = CosmicUnicorn.WIDTH
+height = CosmicUnicorn.HEIGHT
 
 SONG_LENGTH = 384
 HAT = 20000
@@ -83,8 +83,8 @@ def outline_text(text):
     v = int((math.sin(ms / 100.0) + 1.0) * 127.0)
     w = graphics.measure_text(text, 1)
 
-    x = int(53 / 2 - w / 2 + 1)
-    y = 2
+    x = int(32 / 2 - w / 2 + 1)
+    y = 12
 
     graphics.set_pen(0)
     graphics.text(text, x - 1, y - 1, -1, 1)
@@ -143,7 +143,7 @@ while True:
     time_ms = time.ticks_ms()
     test = (time_ms // 1000) % 5
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
         if not was_a_pressed:
             # Configure the synth to play our notes
             channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
@@ -190,7 +190,7 @@ while True:
     else:
         was_a_pressed = False
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_B):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
         if not was_b_pressed:
             # Configure the synth to play our notes, but with only one channel audable
             channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
@@ -237,7 +237,7 @@ while True:
     else:
         was_b_pressed = False
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_C):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
         if not was_c_pressed:
             # Stop synth (if running) and play Tone A
             timer.deinit()
@@ -251,7 +251,7 @@ while True:
     else:
         was_c_pressed = False
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_D):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
         if not was_c_pressed:
             # Stop synth (if running) and play Tone B
             timer.deinit()
@@ -266,31 +266,31 @@ while True:
     else:
         was_d_pressed = False
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         if tone_b > 0:  # Zero means tone not playing
             # Increase Tone B
             tone_b = min(tone_b + 10, 20000)
             channels[1].frequency(tone_b)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         if tone_b > 0:  # Zero means tone not playing
             # Decrease Tone B
             tone_b = max(tone_b - 10, 10)
             channels[1].frequency(max(tone_b, 10))
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         if tone_a > 0:  # Zero means tone not playing
             # Increase Tone A
             tone_a = min(tone_a + 10, 20000)
             channels[0].frequency(tone_a)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         if tone_a > 0:  # Zero means tone not playing
             # Decrease Tone A
             tone_a = max(tone_a - 10, 10)
             channels[0].frequency(tone_a)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         if not was_d_pressed:
             # Stop synth and both tones
             tone_a = 0
@@ -324,31 +324,31 @@ while True:
 
     text = ""
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
-        text = "Play Synth"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+        text = "PlaySyn"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_B):
-        text = "Solo Synth"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
+        text = "SoloSyn"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_C):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
         text = "Tone A"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_D):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
         text = "Tone B"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
-        text = "Raise A"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
+        text = "RaiseA"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
-        text = "Lower A"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
+        text = "LowerA"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
-        text = "Raise B"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        text = "RaiseB"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        text = "Lower B"
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        text = "LowerB"
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_SLEEP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         text = "Stop"
 
     outline_text(text)

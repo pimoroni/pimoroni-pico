@@ -12,8 +12,8 @@ You can adjust the brightness with LUX + and -.
 gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-width = 32#CosmicUnicorn.WIDTH
-height = 32#CosmicUnicorn.HEIGHT
+width = CosmicUnicorn.WIDTH
+height = CosmicUnicorn.HEIGHT
 
 
 def gradient(r, g, b):
