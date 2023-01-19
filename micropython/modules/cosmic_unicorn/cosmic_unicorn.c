@@ -76,8 +76,8 @@ STATIC const mp_rom_map_elem_t CosmicUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_stop_playing), MP_ROM_PTR(&CosmicUnicorn_stop_playing_obj) },
     { MP_ROM_QSTR(MP_QSTR_synth_channel), MP_ROM_PTR(&CosmicUnicorn_synth_channel_obj) },
 
-    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(53) },
-    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(11) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(32) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(32) },
 
     { MP_ROM_QSTR(MP_QSTR_SWITCH_A), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_SWITCH_B), MP_ROM_INT(1) },
@@ -144,7 +144,7 @@ const mp_obj_module_t Cosmic_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_Cosmic_globals,
 };
 #if MICROPY_VERSION <= 70144
-MP_REGISTER_MODULE(MP_QSTR_Cosmic, Cosmic_user_cmodule, MODULE_Cosmic_ENABLED);
+MP_REGISTER_MODULE(MP_QSTR_cosmic, Cosmic_user_cmodule, MODULE_Cosmic_ENABLED);
 #else
-MP_REGISTER_MODULE(MP_QSTR_Cosmic, Cosmic_user_cmodule);
+MP_REGISTER_MODULE(MP_QSTR_cosmic, Cosmic_user_cmodule);
 #endif

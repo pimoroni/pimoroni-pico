@@ -12,14 +12,14 @@ You can adjust the brightness with LUX + and -.
 gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-width = CosmicUnicorn.WIDTH
-height = CosmicUnicorn.HEIGHT
+width = 32#CosmicUnicorn.WIDTH
+height = 32#CosmicUnicorn.HEIGHT
 
 
 def gradient(r, g, b):
     for y in range(0, height):
         for x in range(0, width):
-            graphics.set_pen(graphics.create_pen(int((r * x) / 52), int((g * x) / 52), int((b * x) / 52)))
+            graphics.set_pen(graphics.create_pen(int((r * x) / 32), int((g * x) / 32), int((b * x) / 32)))
             graphics.pixel(x, y)
 
 
@@ -40,8 +40,8 @@ def outline_text(text):
     v = int((math.sin(ms / 100.0) + 1.0) * 127.0)
     w = graphics.measure_text(text, 1)
 
-    x = int(53 / 2 - w / 2 + 1)
-    y = 2
+    x = int(32 / 2 - w / 2 + 1)
+    y = 12
 
     graphics.set_pen(0)
     graphics.text(text, x - 1, y - 1, -1, 1)
