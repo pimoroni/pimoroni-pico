@@ -132,7 +132,7 @@ const mp_obj_type_t CosmicUnicorn_type = {
 
 /***** Globals Table *****/
 STATIC const mp_map_elem_t Cosmic_globals_table[] = {
-    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_Cosmic) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_cosmic) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Channel), (mp_obj_t)&Channel_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_CosmicUnicorn), (mp_obj_t)&CosmicUnicorn_type },
 };
