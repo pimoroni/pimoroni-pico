@@ -192,7 +192,7 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
-        case DISPLAY_GALACTIC_UNICORN:
+        case DISPLAY_COSMIC_UNICORN:
             width = 32;
             height = 32;
             bus_type = BUS_PIO;
@@ -322,6 +322,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         self->display = m_new_class(ST7567, width, height, spi_bus);
 
     } else if (display == DISPLAY_INTERSTATE75_32X32 || display == DISPLAY_INTERSTATE75_64X64 || display == DISPLAY_INTERSTATE75_64X32) {
+        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
+    
+    } else if (display == DISPLAY_COSMIC_UNICORN) {
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
     } else {
