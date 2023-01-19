@@ -28,6 +28,9 @@ UPDATE_MEDIUM = 1
 UPDATE_FAST = 2
 UPDATE_TURBO = 3
 
+LED = 22
+ENABLE_3V3 = 10
+
 WIDTH = 296
 HEIGHT = 128
 
@@ -69,25 +72,38 @@ def system_speed(speed):
 class Badger2040W():
     def __init__(self):
         self.display = PicoGraphics(DISPLAY_INKY_PACK)
+        self._led = machine.PWM(machine.Pin(LED))
+        self._led.freq(1000)
+        self._led.duty_u16(0)
 
     def __getattr__(self, item):
         # Glue to redirect calls to PicoGraphics
         return getattr(self.display, item)
 
     def led(self, brightness):
-        pass
+        brightness = max(0, min(255, brightness))
+        self._led.duty_u16(int(brightness * 256))
 
     def invert(self, invert):
-        pass
+        raise RuntimeError("Display invert not supported in PicoGraphics.")
 
     def thickness(self, thickness):
-        print("Thickness!")
+        raise RuntimeError("Thickness not supported in PicoGraphics.")
 
     def halt(self):
-        pass
+        enable = machine.Pin(ENABLE_3V3, machine.Pin.OUT)
+        enable.off()
+        while not self.pressed_any():
+            pass
 
     def pressed(self, button):
         return BUTTONS[button].value() == 1
+
+    def pressed_any(self):
+        for button in BUTTONS.values():
+            if button.value():
+                return True
+        return False
 
     @micropython.native
     def icon(self, data, index, data_w, icon_size, x, y):
