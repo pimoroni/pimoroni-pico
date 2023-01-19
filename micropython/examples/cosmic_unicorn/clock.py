@@ -1,7 +1,7 @@
 # Clock example with NTP synchronization
 #
 # Create a secrets.py with your Wifi details to be able to get the time
-# when the Galactic Unicorn isn't connected to Thonny.
+# when the Cosmic Unicorn isn't connected to Thonny.
 #
 # secrets.py should contain:
 # WIFI_SSID = "Your WiFi SSID"
@@ -14,8 +14,8 @@ import math
 import machine
 import network
 import ntptime
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD
@@ -38,14 +38,14 @@ MIDNIGHT_VALUE = 0.3
 
 
 # create galactic object and graphics surface for drawing
-gu = GalacticUnicorn()
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 # create the rtc object
 rtc = machine.RTC()
 
-width = GalacticUnicorn.WIDTH
-height = GalacticUnicorn.HEIGHT
+width = CosmicUnicorn.WIDTH
+height = CosmicUnicorn.HEIGHT
 
 # set up some pens to use later
 WHITE = graphics.create_pen(255, 255, 255)
@@ -153,8 +153,8 @@ def sync_time():
 # multiple times when the button is held.
 utc_offset = 0
 
-up_button = machine.Pin(GalacticUnicorn.SWITCH_VOLUME_UP, machine.Pin.IN, machine.Pin.PULL_UP)
-down_button = machine.Pin(GalacticUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, machine.Pin.PULL_UP)
+up_button = machine.Pin(CosmicUnicorn.SWITCH_VOLUME_UP, machine.Pin.IN, machine.Pin.PULL_UP)
+down_button = machine.Pin(CosmicUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, machine.Pin.PULL_UP)
 
 
 def adjust_utc_offset(pin):
@@ -201,7 +201,7 @@ def redraw_display_if_reqd():
         # calculate text position so that it is centred
         w = graphics.measure_text(clock, 1)
         x = int(width / 2 - w / 2 + 1)
-        y = 2
+        y = 12
 
         outline_text(clock, x, y)
 
@@ -213,13 +213,13 @@ gu.set_brightness(0.5)
 sync_time()
 
 while True:
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
         sync_time()
 
     redraw_display_if_reqd()

@@ -1,7 +1,7 @@
 import time
 import random
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 '''
 Random LEDs blink on and off mimicing the look of a movie
@@ -10,7 +10,7 @@ super computer doing its work in the eighties.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = GalacticUnicorn()
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 colour = (230, 150, 0)
@@ -19,8 +19,8 @@ colour = (230, 150, 0)
 @micropython.native  # noqa: F821
 def setup():
     global width, height, lifetime, age
-    width = GalacticUnicorn.WIDTH
-    height = GalacticUnicorn.HEIGHT
+    width = CosmicUnicorn.WIDTH
+    height = CosmicUnicorn.HEIGHT
     lifetime = [[0.0 for y in range(height)] for x in range(width)]
     age = [[0.0 for y in range(height)] for x in range(width)]
     for y in range(height):
@@ -62,10 +62,10 @@ gu.set_brightness(0.5)
 
 while True:
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
     start = time.ticks_ms()

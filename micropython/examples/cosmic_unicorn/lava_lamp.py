@@ -1,8 +1,8 @@
 import time
 import random
 import math
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 '''
 A 70s-tastic, procedural rainbow lava lamp.
@@ -10,7 +10,7 @@ A 70s-tastic, procedural rainbow lava lamp.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = GalacticUnicorn()
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 blob_count = 10
@@ -28,8 +28,8 @@ class Blob():
 @micropython.native  # noqa: F821
 def setup_portrait():
     global width, height, liquid, blobs
-    width = GalacticUnicorn.HEIGHT
-    height = GalacticUnicorn.WIDTH
+    width = CosmicUnicorn.HEIGHT
+    height = CosmicUnicorn.WIDTH
     liquid = [[0.0 for y in range(height)] for x in range(width)]
     blobs = [Blob() for i in range(blob_count)]
 
@@ -130,13 +130,13 @@ gu.set_brightness(0.5)
 
 while True:
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
         setup_portrait()
 
     start = time.ticks_ms()

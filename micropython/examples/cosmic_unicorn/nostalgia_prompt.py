@@ -1,6 +1,6 @@
 import time
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 '''
 A collection of copies of classic terminal styles including
@@ -10,7 +10,7 @@ pixel by pixel from a pattern of Os and Xs.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = GalacticUnicorn()
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 
@@ -99,10 +99,10 @@ while True:
     time_ms = time.ticks_ms()
     prompt = (time_ms // 3000) % 3
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
     start = time.ticks_ms()
