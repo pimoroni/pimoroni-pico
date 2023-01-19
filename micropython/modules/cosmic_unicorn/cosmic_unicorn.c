@@ -1,4 +1,4 @@
-#include "Cosmic_unicorn.h"
+#include "cosmic_unicorn.h"
 
 
 /***** Methods *****/

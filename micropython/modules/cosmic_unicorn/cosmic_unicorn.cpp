@@ -1,4 +1,4 @@
-#include "libraries/Cosmic_unicorn/cosmic_unicorn.hpp"
+#include "libraries/cosmic_unicorn/cosmic_unicorn.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "micropython/modules/util.hpp"
 #include <cstdio>
