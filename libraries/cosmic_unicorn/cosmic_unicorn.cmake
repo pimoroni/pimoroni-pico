@@ -1,7 +1,7 @@
 add_library(cosmic_unicorn INTERFACE)
 
 pico_generate_pio_header(cosmic_unicorn ${CMAKE_CURRENT_LIST_DIR}/cosmic_unicorn.pio)
-#pico_generate_pio_header(cosmic_unicorn ${CMAKE_CURRENT_LIST_DIR}/audio_i2s.pio) already available from glactic unicorn
+pico_generate_pio_header(cosmic_unicorn ${CMAKE_CURRENT_LIST_DIR}/audio_i2s.pio) already available from glactic unicorn
 
 
 target_sources(cosmic_unicorn INTERFACE
