@@ -17,7 +17,7 @@ from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 URL = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
 
-UPDATE_INTERVAL =  113 # refresh interval in secs. Be nice to free APIs!
+UPDATE_INTERVAL = 113  # refresh interval in secs. Be nice to free APIs!
 # this esoteric number is used so that a column of LEDs equates (approximately) to an hour
 
 
@@ -71,7 +71,7 @@ def update_leds():
     i = 0
     for x in range(width):
         for y in range(height):
-            r ,g ,b= hex_to_rgb(colour_array[i])
+            r, g, b = hex_to_rgb(colour_array[i])
 
             current_colour = graphics.create_pen(r, g, b)
             graphics.set_pen(current_colour)
