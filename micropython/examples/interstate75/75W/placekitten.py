@@ -9,6 +9,9 @@ import random
 """
 Grab a random image from PlaceKitten.com
 and display it on Interstate 75 W.
+
+To run this example you'll need WIFI_CONFIG.py and network_manager.py from
+the pimoroni-pico micropython/examples/common folder.
 """
 
 i75 = Interstate75(display=DISPLAY_INTERSTATE75_128X64)
