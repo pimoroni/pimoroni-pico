@@ -4,6 +4,7 @@ from picographics import PicoGraphics, DISPLAY_INKY_PACK
 from network_manager import NetworkManager
 import WIFI_CONFIG
 import uasyncio
+import time
 import gc
 import wakeup
 
@@ -75,10 +76,25 @@ class Badger2040W():
         self._led = machine.PWM(machine.Pin(LED))
         self._led.freq(1000)
         self._led.duty_u16(0)
+        self._update_speed = 0
 
     def __getattr__(self, item):
         # Glue to redirect calls to PicoGraphics
         return getattr(self.display, item)
+
+    def update(self):
+        t_start = time.ticks_ms()
+        self.display.update()
+        t_elapsed = time.ticks_ms() - t_start
+
+        delay_ms = [4700, 2600, 900, 250][self._update_speed]
+
+        if t_elapsed < delay_ms:
+            time.sleep((delay_ms - t_elapsed) / 1000)
+
+    def set_update_speed(self, speed):
+        self.display.set_update_speed(speed)
+        self._update_speed = speed
 
     def led(self, brightness):
         brightness = max(0, min(255, brightness))
