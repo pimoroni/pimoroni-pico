@@ -20,6 +20,7 @@ else:
     # Otherwise restore previously running app
     badger_os.state_launch()
 
+
 display = badger2040.Badger2040W()
 display.set_font("bitmap8")
 display.led(128)
@@ -139,28 +140,20 @@ def button(pin):
     global changed
     changed = True
 
-    if not display.pressed(badger2040.BUTTON_USER):  # User button is NOT held down
-        if pin == badger2040.BUTTON_A:
-            launch_example(0)
-        if pin == badger2040.BUTTON_B:
-            launch_example(1)
-        if pin == badger2040.BUTTON_C:
-            launch_example(2)
-        if pin == badger2040.BUTTON_UP:
-            if state["page"] > 0:
-                state["page"] -= 1
-            render()
-        if pin == badger2040.BUTTON_DOWN:
-            if state["page"] < MAX_PAGE - 1:
-                state["page"] += 1
-            render()
-    else:  # User button IS held down
-        if pin == badger2040.BUTTON_UP:
-            pass
-        if pin == badger2040.BUTTON_DOWN:
-            pass
-        if pin == badger2040.BUTTON_A:
-            pass
+    if pin == badger2040.BUTTON_A:
+        launch_example(0)
+    if pin == badger2040.BUTTON_B:
+        launch_example(1)
+    if pin == badger2040.BUTTON_C:
+        launch_example(2)
+    if pin == badger2040.BUTTON_UP:
+        if state["page"] > 0:
+            state["page"] -= 1
+        render()
+    if pin == badger2040.BUTTON_DOWN:
+        if state["page"] < MAX_PAGE - 1:
+            state["page"] += 1
+        render()
 
 
 if exited_to_launcher or not woken_by_button:
