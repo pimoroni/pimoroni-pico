@@ -8,12 +8,12 @@ import gc
 import wakeup
 
 
-BUTTON_UP = 15
 BUTTON_DOWN = 11
 BUTTON_A = 12
 BUTTON_B = 13
 BUTTON_C = 14
-BUTTON_USER = 23
+BUTTON_UP = 15
+BUTTON_USER = None  # User button not available on W
 
 BUTTON_MASK = 0b11111 << 11
 
@@ -30,6 +30,7 @@ UPDATE_TURBO = 3
 
 LED = 22
 ENABLE_3V3 = 10
+BUSY = 26
 
 WIDTH = 296
 HEIGHT = 128
@@ -45,12 +46,11 @@ SYSTEM_FREQS = [
 WAKEUP_GPIO_STATE = wakeup.get_gpio_state()
 
 BUTTONS = {
-    11: machine.Pin(11),
-    12: machine.Pin(12),
-    13: machine.Pin(13),
-    14: machine.Pin(14),
-    15: machine.Pin(15),
-    23: machine.Pin(23)
+    BUTTON_DOWN: machine.Pin(BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN),
+    BUTTON_A: machine.Pin(BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN),
+    BUTTON_B: machine.Pin(BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN),
+    BUTTON_C: machine.Pin(BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN),
+    BUTTON_UP: machine.Pin(BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN),
 }
 
 
