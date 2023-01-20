@@ -1,5 +1,4 @@
 import time
-import math
 import interstate75
 
 i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_64X64, stb_invert=True)
@@ -8,24 +7,18 @@ graphics = i75.display
 width = i75.width
 height = i75.height
 
-devs = 1.0/ height
-
+devs = 1.0 / height
 
 
 @micropython.native  # noqa: F821
 def draw(offset):
-    global hue_offset, phase
-    phase_percent = phase / 15
     for x in range(width):
-        graphics.set_pen(graphics.create_pen_hsv(devs*x + offset , 1.0 , 0.5))
+        graphics.set_pen(graphics.create_pen_hsv(devs * x + offset, 1.0, 0.5))
         for y in range(height):
 
-            
             graphics.pixel(x, y)
 
     i75.update(graphics)
-
-
 
 
 animate = True
