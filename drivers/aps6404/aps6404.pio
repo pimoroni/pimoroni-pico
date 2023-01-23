@@ -1,0 +1,114 @@
+; Pins:
+; - CSn is side-set 0
+; - SCK is side-set 1
+; - MOSI is OUT pin 0
+; - MISO is IN pin 0
+;
+; DMA is 32 bit.  Stream takes form:
+; 1 bit cmd (1 = write, 0 = read)
+; 31 bits length of read/write in bits, minus 1, plus 32 for writes (length must be a multiple of 32)
+; 8 bits AP6404 cmd (0b = read, 02 = write)
+; 24 bits address
+; For write, length * 32 bits data
+
+.program sram
+.side_set 2
+.wrap_target
+top:
+  out x, 1          side 0b01
+  out y, 31         side 0b01
+  pull              side 0b01
+  jmp !x, do_read   side 0b01
+
+; Write command, followed by data
+wr_lp:
+  out pins, 1       side 0b00
+  jmp y--, wr_lp    side 0b10
+  jmp top           side 0b01
+
+; Read command
+do_read:
+  set x, 31         side 0b01
+rcmd_lp:
+  out pins, 1       side 0b00
+  jmp x--, rcmd_lp  side 0b10
+
+; Wait for 8 clocks
+  set x, 7          side 0b00
+rwt_lp:
+  nop               side 0b10
+  jmp x-- rwt_lp    side 0b00
+
+; Now wait 2 more clocks before we start reading due to latencies
+; in the RP2040 outputs and inputs
+  jmp y--, rd_next  side 0b10
+rd_next:
+  set x, 2          side 0b00
+  jmp y--, rd_next2 side 0b10
+rd_next2:
+  jmp y--, rd_lp    side 0b00
+rd_lp:
+  in pins, 1        side 0b10
+  jmp y--, rd_lp    side 0b00
+
+; Read the remaining 3 bits, but no more clocks so we don't read beyond
+; the requested length from the SRAM.
+rd_rem:
+  in pins, 1        side 0b01
+  jmp x--, rd_rem   side 0b01
+.wrap
+
+; Write only program that writes a short (<32 bit) command, 
+; ignoring the rest of the 32 bit input word.
+; This is used to write the reset command.
+.program sram_reset
+.side_set 2
+.wrap_target
+  out y, 32         side 0b01
+  pull              side 0b01
+wr_lp:
+  out pins, 1       side 0b00
+  jmp y--, wr_lp    side 0b10
+  out null, 32      side 0b01
+.wrap
+
+
+% c-sdk {
+void aps6404_reset_program_init(PIO pio, uint sm, uint offset, uint csn, uint mosi, uint miso) {
+	pio_gpio_init(pio, csn);
+	pio_gpio_init(pio, csn + 1);
+	pio_gpio_init(pio, mosi);
+        pio_sm_set_consecutive_pindirs(pio, sm, csn, 2, true);
+        pio_sm_set_consecutive_pindirs(pio, sm, mosi, 1, true);
+        pio_sm_set_consecutive_pindirs(pio, sm, miso, 1, false);
+
+        pio_sm_config c = sram_reset_program_get_default_config(offset);
+        sm_config_set_in_pins(&c, miso);
+        sm_config_set_in_shift(&c, false, true, 32);
+	sm_config_set_out_pins(&c, mosi, 1);
+	sm_config_set_out_shift(&c, false, true, 32);
+	sm_config_set_sideset_pins(&c, csn);
+	sm_config_set_clkdiv(&c, 4.f);
+
+        pio_sm_init(pio, sm, offset, &c);
+        pio_sm_set_enabled(pio, sm, true);
+}
+void aps6404_program_init(PIO pio, uint sm, uint offset, uint csn, uint mosi, uint miso) {
+	pio_gpio_init(pio, csn);
+	pio_gpio_init(pio, csn + 1);
+	pio_gpio_init(pio, mosi);
+        pio_sm_set_consecutive_pindirs(pio, sm, csn, 2, true);
+        pio_sm_set_consecutive_pindirs(pio, sm, mosi, 1, true);
+        pio_sm_set_consecutive_pindirs(pio, sm, miso, 1, false);
+
+        pio_sm_config c = sram_program_get_default_config(offset);
+        sm_config_set_in_pins(&c, miso);
+        sm_config_set_in_shift(&c, false, true, 32);
+	sm_config_set_out_pins(&c, mosi, 1);
+	sm_config_set_out_shift(&c, false, true, 32);
+	sm_config_set_sideset_pins(&c, csn);
+
+        pio_sm_init(pio, sm, offset, &c);
+        pio_sm_set_enabled(pio, sm, true);
+}
+%}
