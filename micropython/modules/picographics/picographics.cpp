@@ -711,6 +711,18 @@ mp_obj_t ModPicoGraphics_create_pen_hsv(size_t n_args, const mp_obj_t *args) {
     return mp_obj_new_int(result);
 }
 
+mp_obj_t ModPicoGraphics_set_thickness(mp_obj_t self_in, mp_obj_t pen) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    if(self->graphics->pen_type != PicoGraphics::PEN_1BIT) {
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Thickness not supported!"));
+    }
+
+    self->graphics->set_thickness(mp_obj_get_int(pen));
+
+    return mp_const_none;
+}
+
 mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     size_t num_tuples = n_args - 1;
     const mp_obj_t *tuples = pos_args + 1;
