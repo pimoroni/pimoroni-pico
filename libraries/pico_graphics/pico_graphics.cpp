@@ -145,9 +145,15 @@ namespace pimoroni {
     }
 
     if (hershey_font) {
-      hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
-        line(Point(x1, y1), Point(x2, y2));
-      }, t, p.x, p.y, s, a);
+      if(thickness == 1) {
+        hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+          line(Point(x1, y1), Point(x2, y2));
+        }, t, p.x, p.y, s, a);
+      } else {
+        hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
+          thicc_line(Point(x1, y1), Point(x2, y2), thickness);
+        }, t, p.x, p.y, s, a);
+      }
       return;
     }
   }
@@ -269,6 +275,42 @@ namespace pimoroni {
 
       for (uint16_t i = 0; i < n; i += 2) {
         pixel_span(Point(nodes[i], p.y), nodes[i + 1] - nodes[i] + 1);
+      }
+    }
+  }
+
+  void PicoGraphics::thicc_line(Point p1, Point p2, uint thickness) {
+    // general purpose line
+    // lines are either "shallow" or "steep" based on whether the x delta
+    // is greater than the y delta
+    int32_t dx = p2.x - p1.x;
+    int32_t dy = p2.y - p1.y;
+    bool shallow = std::abs(dx) > std::abs(dy);
+    if(shallow) {
+      // shallow version
+      int32_t s = std::abs(dx);       // number of steps
+      int32_t sx = dx < 0 ? -1 : 1;   // x step value
+      int32_t sy = (dy << 16) / s;    // y step value in fixed 16:16
+      int32_t x = p1.x;
+      int32_t y = p1.y << 16;
+      while(s--) {
+        int32_t ht = thickness / 2;
+        rectangle({x - ht, (y >> 16) - ht, ht * 2, ht * 2});
+        y += sy;
+        x += sx;
+      }
+    }else{
+      // steep version
+      int32_t s = std::abs(dy);       // number of steps
+      int32_t sy = dy < 0 ? -1 : 1;   // y step value
+      int32_t sx = (dx << 16) / s;    // x step value in fixed 16:16
+      int32_t y = p1.y;
+      int32_t x = p1.x << 16;
+      while(s--) {
+        int32_t ht = thickness / 2;
+        rectangle({(x >> 16) - ht, y - ht, ht * 2, ht * 2});
+        y += sy;
+        x += sx;
       }
     }
   }

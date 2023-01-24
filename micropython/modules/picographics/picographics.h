@@ -70,6 +70,7 @@ extern mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_a
 // Pen
 extern mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen);
 extern mp_obj_t ModPicoGraphics_create_pen(size_t n_args, const mp_obj_t *args);
+extern mp_obj_t ModPicoGraphics_set_thickness(mp_obj_t self_in, mp_obj_t thickness);
 
 // Primitives
 extern mp_obj_t ModPicoGraphics_set_clip(size_t n_args, const mp_obj_t *args);
