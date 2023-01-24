@@ -1,6 +1,5 @@
 import badger2040w as badger2040
 from badger2040w import WIDTH
-import time
 import machine
 from urllib import urequest
 import gc
@@ -26,26 +25,12 @@ display = badger2040.Badger2040W()
 display.led(128)
 display.set_update_speed(2)
 
-
-# Button handler
-def button(pin):
-    time.sleep(0.01)
-    if not pin.value():
-        return
-
-    if button_a.value() and button_c.value():
-        machine.reset()
-
-
 # Setup buttons
 button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_b = machine.Pin(badger2040.BUTTON_B, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_down = machine.Pin(badger2040.BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN)
 button_up = machine.Pin(badger2040.BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN)
-
-button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 
 def read_until(stream, char):
