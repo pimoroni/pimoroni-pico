@@ -1,8 +1,6 @@
 import badger2040w as badger2040
 from badger2040w import WIDTH
-import time
 import network
-import machine
 
 TEXT_SIZE = 1
 LINE_HEIGHT = 16
@@ -10,24 +8,6 @@ LINE_HEIGHT = 16
 # Display Setup
 display = badger2040.Badger2040W()
 display.led(128)
-
-
-# Button handler
-def button(pin):
-
-    time.sleep(0.01)
-    if not pin.value():
-        return
-
-    if button_a.value() and button_c.value():
-        machine.reset()
-
-
-# Setup buttons
-button_a = machine.Pin(badger2040.BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_c = machine.Pin(badger2040.BUTTON_C, machine.Pin.IN, machine.Pin.PULL_DOWN)
-button_a.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
-button_c.irq(trigger=machine.Pin.IRQ_RISING, handler=button)
 
 # Connects to the wireless network. Ensure you have entered your details in WIFI_CONFIG.py :).
 display.connect()
