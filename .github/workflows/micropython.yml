@@ -113,10 +113,27 @@ jobs:
         restore-keys: |
           workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
-    - name: Install Compiler & CCache
+    - name: Install CCache
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+        sudo apt update && sudo apt install ccache
+
+    - name: Download Toolchain
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: build.yml
+        workflow_conclusion: success
+        branch: main
+        repo: gadgetoid/arm-gnu-toolchain-build
+        if_no_artifact_found: fail
+
+    - name: Unpack Toolchain & Add to PATH
+      run: |
+        tar xf */gcc-*.tar.bz2 -C .
+        cd gcc*/bin
+        pwd >> $GITHUB_PATH
   
     - uses: actions/checkout@v3
       with:

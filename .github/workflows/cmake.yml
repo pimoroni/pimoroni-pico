@@ -55,10 +55,28 @@ jobs:
         submodules: false  # lwip breaks audio submodule fetching
 
     # Linux deps
-    - name: Install deps
+    - name: Install CCache
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+        sudo apt update && sudo apt install ccache
+        python3 -m pip install pillow
+
+    - name: Download Toolchain
+      id: download-artifact
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        github_token: ${{secrets.GITHUB_TOKEN}}
+        workflow: build.yml
+        workflow_conclusion: success
+        branch: main
+        repo: gadgetoid/arm-gnu-toolchain-build
+        if_no_artifact_found: fail
+
+    - name: Unpack Toolchain & Add to PATH
+      run: |
+        tar xf */gcc-*.tar.bz2 -C .
+        cd gcc*/bin
+        pwd >> $GITHUB_PATH
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
