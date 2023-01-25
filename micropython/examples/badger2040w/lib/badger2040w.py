@@ -1,6 +1,7 @@
 import machine
 import micropython
 from picographics import PicoGraphics, DISPLAY_INKY_PACK
+import network
 from network_manager import NetworkManager
 import WIFI_CONFIG
 import uasyncio
@@ -153,7 +154,15 @@ class Badger2040W():
             self.display.text("Connecting...", 10, 10, 300, 0.5)
         self.display.update()
 
+    def isconnected(self):
+        return network.WLAN(network.STA_IF).isconnected()
+
+    def ip_address(self):
+        return network.WLAN(network.STA_IF).ifconfig()[0]
+
     def connect(self):
+        if WIFI_CONFIG.COUNTRY == "":
+            raise RuntimeError("You must populate WIFI_CONFIG for networking.")
         self.display.set_update_speed(2)
         network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=self.status_handler)
         uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))

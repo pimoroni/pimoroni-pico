@@ -6,6 +6,7 @@ import badger2040w
 
 display = badger2040w.Badger2040W()
 display.set_update_speed(3)
+display.set_thickness(4)
 
 WIDTH, HEIGHT = display.get_bounds()
 
