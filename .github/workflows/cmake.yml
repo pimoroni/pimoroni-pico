@@ -10,17 +10,15 @@ env:
 
 jobs:
   build:
-    name: ${{matrix.name}}
+    name: ${{matrix.name}} (C++)
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            name: Linux
-            cache-key: linux
-            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras'
-            apt-packages: ccache gcc-arm-none-eabi
-
-    runs-on: ${{matrix.os}}
+          - name: Pico
+            board: pico
+          - name: Pico W
+            board: pico_w
 
     env:
       PICO_SDK_PATH: $GITHUB_WORKSPACE/pico-sdk
@@ -59,7 +57,7 @@ jobs:
     - name: Install deps
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ${{matrix.apt-packages}}
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
@@ -67,7 +65,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{matrix.cmake-args}}
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras -DPICO_BOARD=${{matrix.board}}
 
     - name: Build
       working-directory: ${{runner.workspace}}/build
