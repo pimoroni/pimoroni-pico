@@ -21,8 +21,10 @@ int main() {
   uint16_t eCO2, TVOC;
   uint16_t rawCO2, rawTVOC;
 
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   stdio_init_all();
 
@@ -47,12 +49,14 @@ int main() {
   uint16_t j = 0;
   while(true) {
     j++;
+#ifdef PICO_DEFAULT_LED_PIN
     for(uint8_t i=0; i<prd; i++) {
       gpio_put(PICO_DEFAULT_LED_PIN, true);
       sleep_ms(50);
       gpio_put(PICO_DEFAULT_LED_PIN, false);
       sleep_ms(50);
     }
+#endif
     sleep_ms(1000 - (100 * prd));
     if(prd == 1) {
       sgp30.get_air_quality(&eCO2, &TVOC);

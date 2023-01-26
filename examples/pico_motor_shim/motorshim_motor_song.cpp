@@ -59,9 +59,11 @@ bool check_button_toggle() {
 int main() {
   stdio_init_all();
 
+#ifdef PICO_DEFAULT_LED_PIN
   //Initialise the LED. We use this to indicate that the sequence is running.
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   // Se the two motor's decay modes
   motor_1.decay_mode(DECAY_MODE);
@@ -76,8 +78,11 @@ int main() {
   while(true) {
     // Has the button been toggled?
     if(check_button_toggle()) {
+
+#ifdef PICO_DEFAULT_LED_PIN
       // Turn the Pico's LED on to show that the song has started
       gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
 
       // Play the song
       for(uint i = 0; i < SONG_LENGTH && check_button_toggle(); i++) {
@@ -117,7 +122,9 @@ int main() {
       button_toggle = false;
 
       // The song has finished, so turn off the Pico's LED and disable the motors
+#ifdef PICO_DEFAULT_LED_PIN
       gpio_put(PICO_DEFAULT_LED_PIN, false);
+#endif
       motor_1.disable();
       motor_2.disable();
     }

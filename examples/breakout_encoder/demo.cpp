@@ -42,8 +42,10 @@ void count_changed(int16_t count) {
 }
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   stdio_init_all();
 
@@ -57,7 +59,9 @@ int main() {
     enc.clear_interrupt_flag();
 
     while(true) {
+#ifdef PICO_DEFAULT_LED_PIN
       gpio_put(PICO_DEFAULT_LED_PIN, toggle);
+#endif
       toggle = !toggle;
 
       if(enc.get_interrupt_flag()) {
@@ -75,7 +79,9 @@ int main() {
   }
   else {
     printf("Encoder not found :'(\n");
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
   }
 
   return 0;

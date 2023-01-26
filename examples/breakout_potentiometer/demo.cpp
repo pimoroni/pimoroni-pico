@@ -32,8 +32,10 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 }
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   stdio_init_all();
 
@@ -43,7 +45,9 @@ int main() {
     //pot.set_direction(BreakoutPotentiometer::DIRECTION_CCW);    // Uncomment this to flip the direction
 
     while(true) {
+#ifdef PICO_DEFAULT_LED_PIN
       gpio_put(PICO_DEFAULT_LED_PIN, toggle);
+#endif
       toggle = !toggle;
 
       float percent = pot.read();
@@ -58,7 +62,9 @@ int main() {
   }
   else {
     printf("Potentiometer not found :'(\n");
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
   }
 
   return 0;
