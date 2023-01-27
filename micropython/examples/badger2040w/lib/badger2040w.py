@@ -152,7 +152,7 @@ class Badger2040W():
             self.display.text(ip, 10, 30, 300, 0.5)
         else:
             self.display.text("Connecting...", 10, 10, 300, 0.5)
-        self.display.update()
+        self.update()
 
     def isconnected(self):
         return network.WLAN(network.STA_IF).isconnected()
