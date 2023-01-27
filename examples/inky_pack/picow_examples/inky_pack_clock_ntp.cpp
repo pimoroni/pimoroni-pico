@@ -10,7 +10,7 @@
 #include "button.hpp"
 #include "hardware/rtc.h"
 #include "pico/util/datetime.h"
-#include "ntp_client.h"
+#include "ntp_client.hpp"
 
 
 #define CLOCK_RADIUS_PX 64

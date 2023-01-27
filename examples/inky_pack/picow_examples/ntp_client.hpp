@@ -35,7 +35,6 @@ typedef struct NTP_T_ {
 // Called with results of operation
 void ntp_result(NTP_T* state, int status, time_t *result);
 
-
 int64_t ntp_failed_handler(alarm_id_t id, void *user_data);
 
 // Make an NTP request

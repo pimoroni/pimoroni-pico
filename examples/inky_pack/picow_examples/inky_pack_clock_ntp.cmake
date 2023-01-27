@@ -1,7 +1,7 @@
 add_library(ntp_client
-        ${CMAKE_CURRENT_LIST_DIR}/ntp_client.c
+        ${CMAKE_CURRENT_LIST_DIR}/ntp_client.cpp
         )
-target_include_directories(ntp_client INTERFACE ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(ntp_client PRIVATE ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(ntp_client 
         pico_cyw43_arch_lwip_poll
@@ -11,7 +11,7 @@ target_link_libraries(ntp_client
 set(OUTPUT_NAME inky_pack_clock_ntp)
 add_executable(${OUTPUT_NAME} inky_pack_clock_ntp.cpp)
 
-target_link_libraries(${OUTPUT_NAME}
+target_link_libraries(${OUTPUT_NAME} PRIVATE
         ntp_client
         pico_stdlib 
         pico_cyw43_arch_lwip_poll

@@ -5,22 +5,8 @@
  */
 
 
-#include "ntp_client.h"
+#include "ntp_client.hpp"
 
-typedef struct NTP_T_ {
-    ip_addr_t ntp_server_address;
-    bool dns_request_sent;
-    struct udp_pcb *ntp_pcb;
-    absolute_time_t ntp_test_time;
-    alarm_id_t ntp_resend_alarm;
-} NTP_T;
-
-#define NTP_SERVER "pool.ntp.org"
-#define NTP_MSG_LEN 48
-#define NTP_PORT 123
-#define NTP_DELTA 2208988800 // seconds between 1 Jan 1900 and 1 Jan 1970
-#define NTP_TEST_TIME (30 * 1000)
-#define NTP_RESEND_TIME (10 * 1000)
 
 void ntp_result(NTP_T* state, int status, time_t *result) {
     if (status == 0 && result) {
@@ -99,8 +85,8 @@ void ntp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *a
 }
 
 // Perform initialisation
- NTP_T* ntp_init(void) {
-    NTP_T *state = calloc(1, sizeof(NTP_T));
+NTP_T* ntp_init(void) {
+    NTP_T *state = (NTP_T *)calloc(1, sizeof(NTP_T));
     if (!state) {
         printf("failed to allocate state\n");
         return NULL;
@@ -156,24 +142,3 @@ void run_ntp_test(void) {
     }
     free(state);
 }
-
-/*
-int main() {
-    stdio_init_all();
-
-    if (cyw43_arch_init()) {
-        printf("failed to initialise\n");
-        return 1;
-    }
-
-    cyw43_arch_enable_sta_mode();
-
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 10000)) {
-        printf("failed to connect\n");
-        return 1;
-    }
-    run_ntp_test();
-    cyw43_arch_deinit();
-   return 0;
-}
-*/
