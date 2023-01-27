@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: eefd946e60aba3ac61c7bfbd0272d07be289e3f3
+  MICROPYTHON_VERSION: 67fac4ebc53db6337008ba06df7932faec80f57c
   BOARD_TYPE: PIMORONI_BADGER2040W
   # MicroPython version will be contained in github.event.release.tag_name for releases
   RELEASE_FILE: pimoroni-badger2040w-${{github.event.release.tag_name || github.sha}}-micropython
