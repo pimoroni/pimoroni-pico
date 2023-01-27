@@ -72,15 +72,15 @@ def draw_page():
         # Weather codes from https://open-meteo.com/en/docs
         # Weather icons from https://fontawesome.com/
         if weathercode in [71, 73, 75, 77, 85, 86]:  # codes for snow
-            jpeg.open_file("examples/icon-snow.jpg")
+            jpeg.open_file("/icons/icon-snow.jpg")
         elif weathercode in [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]:  # codes for rain
-            jpeg.open_file("examples/icon-rain.jpg")
+            jpeg.open_file("/icons/icon-rain.jpg")
         elif weathercode in [1, 2, 3, 45, 48]:  # codes for cloud
-            jpeg.open_file("examples/icon-cloud.jpg")
+            jpeg.open_file("/icons/icon-cloud.jpg")
         elif weathercode in [0]:  # codes for sun
-            jpeg.open_file("examples/icon-sun.jpg")
+            jpeg.open_file("/icons/icon-sun.jpg")
         elif weathercode in [95, 96, 99]:  # codes for storm
-            jpeg.open_file("examples/icon-storm.jpg")
+            jpeg.open_file("/icons/icon-storm.jpg")
         jpeg.decode(13, 40, jpegdec.JPEG_SCALE_FULL)
         display.set_pen(0)
         display.text(f"Temperature: {temperature}°C", int(WIDTH / 3), 28, WIDTH - 105, 2)
