@@ -12,8 +12,10 @@ BreakoutIOExpander ioe(0x18);
 bool last_state = true;
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   stdio_init_all();
 
@@ -27,11 +29,15 @@ int main() {
       if(state != last_state) {
         if(state) {
           printf("Button has been released\n");
+#ifdef PICO_DEFAULT_LED_PIN
           gpio_put(PICO_DEFAULT_LED_PIN, false);
+#endif
         }
         else {
           printf("Button has been pressed\n");
+#ifdef PICO_DEFAULT_LED_PIN
           gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
         }
 
         last_state = state;
@@ -42,7 +48,9 @@ int main() {
   }
   else {
     printf("IOExpander not found :'(\n");
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
   }
 
   return 0;
