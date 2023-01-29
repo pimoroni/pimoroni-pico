@@ -1,5 +1,7 @@
 #include "pico_graphics.hpp"
 
+#define TAU (6.2831853)
+
 namespace pimoroni {
 
   const uint8_t dither16_pattern[16] = {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
@@ -271,6 +273,70 @@ namespace pimoroni {
         pixel_span(Point(nodes[i], p.y), nodes[i + 1] - nodes[i] + 1);
       }
     }
+  }
+
+  void PicoGraphics::arc(const Point &center, const Point &start, int16_t degrees, float w) {
+    std::vector<Point> points = this->arc_points(center, start, degrees);
+    if (w <= 1) {
+      // Lines impl
+      for (unsigned int i = 1; i < points.size(); i++) {
+          this->line(points[i - 1], points[i]);
+      }
+    } else {
+      // Polygon impl
+      int16_t theta = this->rad_to_deg(std::atan2(start.y - center.y, start.x - center.x));
+      float r = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2)) - w;
+
+      if (r < 1) {
+        // Optimized alternative path:
+        // if it's a slice of a pie use the center point to finish the polygon
+        points.push_back(center);
+      } else {
+        Point inner_start(this->fast_cos(theta) * r + center.x, this->fast_sin(theta) * r + center.y);
+        std::vector<Point> inner = this->arc_points(center, inner_start, degrees);
+        // Reverse push inner arc so the outline is a continuous set of points
+        while (!inner.empty()) {
+          points.push_back(inner.back());
+          inner.pop_back();
+        }
+      }
+
+      this->polygon(points);
+    }
+  }
+
+  std::vector<Point> PicoGraphics::arc_points(const Point &center, const Point &start, int16_t degrees) {
+    if (degrees >= 360) degrees = 359;
+    if (degrees <= -360) degrees = -359;
+
+    uint16_t start_theta = this->rad_to_deg(std::atan2(start.y - center.y, start.x - center.x));
+    // Pythagoras
+    float radius = std::sqrt(std::pow(start.x - center.x, 2) + std::pow(start.y - center.y, 2));
+
+    std::vector<Point> points;
+    for (uint16_t step = 0; step <= std::abs(degrees); step += 1) {
+        int16_t theta = start_theta + (degrees > 0 ? -step : step);
+        points.emplace_back(Point(this->fast_cos(theta) * radius + center.x, this->fast_sin(theta) * radius + center.y));
+    }
+    return points;
+  }
+
+  int16_t PicoGraphics::rad_to_deg(float rad) {
+    return std::round(rad * 360 / TAU);
+  }
+
+  float PicoGraphics::deg_to_rad(int16_t deg) {
+    return ((float) deg) / 360 * TAU;
+  }
+
+  float PicoGraphics::fast_sin(int16_t deg) {
+    deg %= 360;
+
+    if (deg < 0) {
+      deg += 360;
+    }
+
+    return this->sin_degs_lut[deg];
   }
 
   void PicoGraphics::line(Point p1, Point p2) {
