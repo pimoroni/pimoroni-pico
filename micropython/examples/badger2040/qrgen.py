@@ -49,6 +49,18 @@ state = {
     "current_qr": 0
 }
 
+def set_state_current_index_in_range():
+    badger_os.state_load("qrcodes", state)
+    
+    if state["current_qr"] >= len(CODES):
+        state["current_qr"] = len(CODES) - 1  # set to last index (zero-based). Note: will set to -1 if currently 0
+
+    # check that the index is not negative, thus still out of range
+    if state["current_qr"] < 0:
+        state["current_qr"] = 0
+        
+    badger_os.state_save("qrcodes", state)
+
 
 def measure_qr_code(size, code):
     w, h = code.get_size()
@@ -110,7 +122,7 @@ def draw_qr_file(n):
     display.update()
 
 
-badger_os.state_load("qrcodes", state)
+set_state_current_index_in_range()
 changed = not badger2040.woken_by_button()
 
 while True:
