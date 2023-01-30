@@ -42,7 +42,7 @@ def display_boot():
     graphics.set_pen(BOOT_COLOR)
     graphics.clear()
     graphics.set_pen(BOOT_TEXT)
-    graphics.text("BOOT", 0, 6, False, 3)
+    graphics.text("BOOT", 5, 11, False, 1)
     i75.update()
 
 
