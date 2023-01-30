@@ -47,11 +47,20 @@ To read a specific input, the `interstate75` module contains these handy constan
 * `SWITCH_A` = `0`
 * `SWITCH_B` = `1`
 
+The Interstate 75 (non W) uses the boot button instead of `SWITCH_B`
+
+* `SWITCH_BOOT` = `2`
+
 ```python
 if board.switch_pressed(SWITCH_A):
   # Do something interesting here!
 
+# Either for Interstate 75W
 if board.switch_pressed(SWITCH_B):
+  # Do something else even more interesting here!
+
+# Or for Interstate 75
+if board.switch_pressed(SWITCH_BOOT):
   # Do something else even more interesting here!
 ```
 
