@@ -10,12 +10,18 @@ try:
 except OSError:
     pass
 
-# Check that there is a qrcode.txt, if not preload
+# Load all available QR Code Files
 try:
-    text = open("qrcodes/qrcode.txt", "r")
+    CODES = [f for f in os.listdir("/qrcodes") if f.endswith(".txt")]
 except OSError:
-    text = open("qrcodes/qrcode.txt", "w")
-    text.write("""https://pimoroni.com/badger2040
+    CODES = []
+
+# create demo QR code file if no QR code files exist
+if len(CODES) == 0:
+    try:
+        newQRcodeFilename = "qrcode.txt"
+        text = open("qrcodes/{}".format(newQRcodeFilename), "w")
+        text.write("""https://pimoroni.com/badger2040
 Badger 2040
 * 296x128 1-bit e-ink
 * six user buttons
@@ -25,20 +31,16 @@ Badger 2040
 Scan this code to learn
 more about Badger 2040.
 """)
-    text.flush()
-    text.seek(0)
+        text.flush()
+        text.seek(0)
 
-# Load all available QR Code Files
-try:
-    CODES = [f for f in os.listdir("/qrcodes") if f.endswith(".txt")]
-    TOTAL_CODES = len(CODES)
-except OSError:
-    pass
+        # Set the CODES list to contain the newQRcodeFilename (created above)
+        CODES = [newQRcodeFilename]
 
+    except:
+        CODES = []
 
-print(f'There are {TOTAL_CODES} QR Codes available:')
-for codename in CODES:
-    print(f'File: {codename}')
+TOTAL_CODES = len(CODES)
 
 display = badger2040.Badger2040()
 
@@ -60,7 +62,7 @@ def set_state_current_index_in_range():
         state["current_qr"] = 0
         
     badger_os.state_save("qrcodes", state)
-
+    
 
 def measure_qr_code(size, code):
     w, h = code.get_size()
