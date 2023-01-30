@@ -6,12 +6,13 @@ import hub75
 # Index Constants
 SWITCH_A = 0
 SWITCH_B = 1
+SWITCH_BOOT = 2
 
 
 class Interstate75:
     I2C_SDA_PIN = 20
     I2C_SCL_PIN = 21
-    SWITCH_PINS = (14, 15)
+    SWITCH_PINS = (14, 15, 23)
     LED_R_PIN = 16
     LED_G_PIN = 17
     LED_B_PIN = 18
@@ -36,7 +37,7 @@ class Interstate75:
     COLOR_ORDER_BGR = hub75.COLOR_ORDER_BGR
 
     # Count Constants
-    NUM_SWITCHES = 2
+    NUM_SWITCHES = 3
 
     def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB):
         self.display = PicoGraphics(display=display)
@@ -61,7 +62,7 @@ class Interstate75:
 
     def switch_pressed(self, switch):
         if switch < 0 or switch >= self.NUM_SWITCHES:
-            raise ValueError("switch out of range. Expected SWITCH_A (0), SWITCH_B (1)")
+            raise ValueError("switch out of range. Expected SWITCH_A (0), SWITCH_B (1) SWITCH_BOOT (2)")
         return self.__switches[switch].is_pressed
 
     def set_led(self, r, g, b):
