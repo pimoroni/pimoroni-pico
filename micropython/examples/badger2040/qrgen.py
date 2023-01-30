@@ -32,7 +32,7 @@ Scan this code to learn
 more about Badger 2040.
 """)
         text.flush()
-        text.seek(0)
+        text.close()
 
         # Set the CODES list to contain the newQRcodeFilename (created above)
         CODES = [newQRcodeFilename]
@@ -84,9 +84,16 @@ def draw_qr_code(ox, oy, size, code):
 def draw_qr_file(n):
     display.led(128)
     file = CODES[n]
-    codetext = open("qrcodes/{}".format(file), "r")
 
-    lines = codetext.read().strip().split("\n")
+    try:
+        codetext = open("qrcodes/{}".format(file), "r")
+
+        lines = codetext.read().strip().split("\n")
+        
+        codetext.close()
+    except:
+        lines = ["", "", "", "", "", "", "", "", "", ""]
+
     code_text = lines.pop(0)
     title_text = lines.pop(0)
     detail_text = lines
