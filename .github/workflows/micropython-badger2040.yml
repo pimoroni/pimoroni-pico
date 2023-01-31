@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 9dfabcd6d3d080aced888e8474e921f11dc979bb
+  MICROPYTHON_VERSION: 67fac4ebc53db6337008ba06df7932faec80f57c
   BOARD_TYPE: PIMORONI_BADGER2040
   # MicroPython version will be contained in github.event.release.tag_name for releases
   RELEASE_FILE: pimoroni-badger2040-${{github.event.release.tag_name || github.sha}}-micropython
@@ -19,7 +19,7 @@ jobs:
     steps:
     - name: Workspace Cache
       id: cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
         key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
@@ -29,7 +29,7 @@ jobs:
     # Check out MicroPython
     - name: Checkout MicroPython
       if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: micropython/micropython
         ref: ${{env.MICROPYTHON_VERSION}}
@@ -61,7 +61,7 @@ jobs:
 
     steps:
     - name: Compiler Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /home/runner/.ccache
         key: ccache-micropython-badger2040-${{github.ref}}-${{github.sha}}
@@ -70,14 +70,14 @@ jobs:
           ccache-micropython-badger2040-
   
     - name: Workspace Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
         key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
         restore-keys: |
           workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
@@ -117,7 +117,7 @@ jobs:
         cp firmware.uf2 ${{env.RELEASE_FILE}}-without-badger-os.uf2
 
     - name: Store .uf2 as artifact (No BadgerOS)
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{env.RELEASE_FILE}}-without-badger-os.uf2
         path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}-without-badger-os/${{env.RELEASE_FILE}}-without-badger-os.uf2
@@ -155,7 +155,7 @@ jobs:
         cp firmware.uf2 ${{env.RELEASE_FILE}}.uf2
 
     - name: Store .uf2 as artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{env.RELEASE_FILE}}.uf2
         path: micropython/ports/rp2/build-${{env.BOARD_TYPE}}/${{env.RELEASE_FILE}}.uf2

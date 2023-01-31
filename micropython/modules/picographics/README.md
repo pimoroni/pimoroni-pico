@@ -6,6 +6,7 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
 
 - [Setting up Pico Graphics](#setting-up-pico-graphics)
   - [Supported Displays](#supported-displays)
+    - [Interstate75 and Interstate75W Display modes](#interstate75-and-interstate75w-display-modes)
   - [Supported Graphics Modes (Pen Type)](#supported-graphics-modes-pen-type)
   - [Supported Rotations](#supported-rotations)
   - [Custom Pins](#custom-pins)
@@ -21,6 +22,7 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
     - [Clipping](#clipping)
     - [Clear](#clear)
     - [Update](#update)
+    - [Get Bounds](#get-bounds)
   - [Text](#text)
     - [Changing The Font](#changing-the-font)
     - [Drawing Text](#drawing-text)
@@ -61,10 +63,27 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * 240x240 Square SPI LCD Breakout - `DISPLAY_LCD_240X240`
 * 160x80 SPI LCD Breakout - `DISPLAY_LCD_160X80`
 * 128x128 I2C OLED - `DISPLAY_I2C_OLED_128X128`
-* Pico Inky Pack - 296x128 mono e-ink - `DISPLAY_INKY_PACK`
-* Inky Frame - 600x447 7-colour e-ink - `DISPLAY_INKY_FRAME`
+* Pico Inky Pack - 296x128 mono E ink - `DISPLAY_INKY_PACK`
+* Inky Frame 5.7" - 600x448 7-colour E ink - `DISPLAY_INKY_FRAME`
+* Inky Frame 4.0" - 640x400 7-colour E ink - `DISPLAY_INKY_FRAME_4`
 * Pico GFX Pack - 128x64 mono LCD Matrix - `DISPLAY_GFX_PACK`
 * Galactic Unicorn - 53x11 LED Matrix - `DISPLAY_GALACTIC_UNICORN`
+* Interstate75 and 75W - HUB75 Matrix driver - `DISPLAY_INTERSTATE75_SIZEOFMATRIX` please read below!
+
+#### Interstate75 and Interstate75W Display modes
+
+Both the Interstate75 and Interstate75W support lots of different sizes of HUB75 matrix displays.
+
+The available display settings are listed here:
+
+* 32 x 32 Matrix - `DISPLAY_INTERSTATE75_32X32`
+* 64 x 32 Matrix - `DISPLAY_INTERSTATE75_64X32`
+* 96 x 32 Matrix - `DISPLAY_INTERSTATE75_96X32`
+* 128 x 32 Matrix - `DISPLAY_INTERSTATE75_128X32`
+* 64 x 64 Matrix - `DISPLAY_INTERSTATE75_64X64`
+* 128 x 64 Matrix - `DISPLAY_INTERSTATE75_128X64`
+* 192 x 64 Matrix - `DISPLAY_INTERSTATE75_192X64`
+* 256 x 64 Matrix - `DISPLAY_INTERSTATE75_256X64`
 
 ### Supported Graphics Modes (Pen Type)
 
@@ -251,6 +270,14 @@ If you are using a Galactic Unicorn, then the process for updating the display i
 galactic_unicorn.update(display)
 ```
 
+#### Get Bounds
+
+You can use `get_bounds()` to get the width and height of the display - useful for writing code that's portable across different displays.
+
+```python
+WIDTH, HEIGHT = display.get_bounds()
+```
+
 ### Text
 
 #### Changing The Font
@@ -268,8 +295,8 @@ These are aligned from their top-left corner.
 * `bitmap8`
 * `bitmap14_outline`
 
-Vector (Hershey) fonts.
-These are aligned to their midline.
+Vector (Hershey) fonts. 
+These are aligned horizontally (x) to their left edge, but vertically (y) to their midline excluding descenders [i.e., aligned at top edge of lower case letter m]. At `scale=1`, the top edge of upper case letters is 10 pixels above the specified `y`, text baseline is 10 pixels below the specified `y`, and descenders go down to 20 pixels below the specified `y`.
 
 * `sans`
 * `gothic`
@@ -331,7 +358,7 @@ Draws an ampersand in a 16px tall, 2x scaled version of the 'bitmap8' font.
 
 #### Line
 
-To draw a line:
+To draw a straight line at any angle between two specified points:
 
 ```python
 display.line(x1, y1, x2, y2)
@@ -396,11 +423,13 @@ Setting individual pixels is slow, but you can do it with:
 display.pixel(x, y)
 ```
 
-You can set a horiontal span of pixels a little faster with:
+You can draw a horizontal span of pixels a little faster with:
 
 ```python
-pixel_span(x, y, length)
+display.pixel_span(x, y, length)
 ```
+
+(use `display.line()` instead if you want to draw a straight line at any angle)
 
 ### Palette Management
 
@@ -411,7 +440,7 @@ You have a 16-color and 256-color palette respectively.
 Set n elements in the palette from a list of RGB tuples:
 
 ```python
-set_palette([
+display.set_palette([
   (r, g, b),
   (r, g, b),
   (r, g, b)
@@ -421,7 +450,7 @@ set_palette([
 Update an entry in the P4 or P8 palette with the given colour.
 
 ```python
-update_pen(index, r, g, b)
+display.update_pen(index, r, g, b)
 ```
 
 This is stored internally as RGB and converted to whatever format your screen requires when displayed.
@@ -429,7 +458,7 @@ This is stored internally as RGB and converted to whatever format your screen re
 Reset a pen back to its default value (black, marked unused):
 
 ```python
-reset_pen(index)
+display.reset_pen(index)
 ```
 
 #### Utility Functions

@@ -41,7 +41,7 @@ VEL_KD = 0.4                            # Velocity derivative (D) gain
 
 
 # Create a new Inventor2040W and get a motor and encoder from it
-board = Inventor2040W(motor_rear_ratio=GEAR_RATIO)
+board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
 m = board.motors[MOTOR_A]
 enc = board.encoders[MOTOR_A]
 

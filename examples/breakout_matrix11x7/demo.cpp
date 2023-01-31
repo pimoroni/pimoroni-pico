@@ -8,8 +8,10 @@ I2C i2c(BOARD::BREAKOUT_GARDEN);
 BreakoutMatrix11x7 matrix11x7(&i2c, 0x75);
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   matrix11x7.init();
 
@@ -20,7 +22,9 @@ int main() {
       }
     }
     matrix11x7.update(0);
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
     sleep_ms(1000);
     for(auto x = 0; x < matrix11x7.WIDTH; x++) {
       for(auto y = 0; y < matrix11x7.HEIGHT; y++) {
@@ -28,7 +32,9 @@ int main() {
       }
     }
     matrix11x7.update(0);
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, false);
+#endif
     sleep_ms(1000);
   }
 

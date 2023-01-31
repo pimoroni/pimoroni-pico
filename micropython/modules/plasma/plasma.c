@@ -44,6 +44,16 @@ STATIC MP_DEFINE_CONST_DICT(PlasmaAPA102_locals_dict, PlasmaAPA102_locals_dict_t
 STATIC MP_DEFINE_CONST_DICT(PlasmaWS2812_locals_dict, PlasmaWS2812_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    PlasmaAPA102_type,
+    MP_QSTR_plasma_apa102,
+    MP_TYPE_FLAG_NONE,
+    make_new, PlasmaAPA102_make_new,
+    print, PlasmaAPA102_print,
+    locals_dict, (mp_obj_dict_t*)&PlasmaAPA102_locals_dict
+);
+#else
 const mp_obj_type_t PlasmaAPA102_type = {
     { &mp_type_type },
     .name = MP_QSTR_plasma_apa102,
@@ -51,7 +61,18 @@ const mp_obj_type_t PlasmaAPA102_type = {
     .make_new = PlasmaAPA102_make_new,
     .locals_dict = (mp_obj_dict_t*)&PlasmaAPA102_locals_dict,
 };
+#endif
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    PlasmaWS2812_type,
+    MP_QSTR_plasma_ws2812,
+    MP_TYPE_FLAG_NONE,
+    make_new, PlasmaWS2812_make_new,
+    print, PlasmaWS2812_print,
+    locals_dict, (mp_obj_dict_t*)&PlasmaWS2812_locals_dict
+);
+#else
 const mp_obj_type_t PlasmaWS2812_type = {
     { &mp_type_type },
     .name = MP_QSTR_plasma_ws2812,
@@ -59,6 +80,7 @@ const mp_obj_type_t PlasmaWS2812_type = {
     .make_new = PlasmaWS2812_make_new,
     .locals_dict = (mp_obj_dict_t*)&PlasmaWS2812_locals_dict,
 };
+#endif
 
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;

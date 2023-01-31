@@ -93,6 +93,16 @@ STATIC const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(ModPicoGraphics_locals_dict, ModPicoGraphics_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    ModPicoGraphics_type,
+    MP_QSTR_picographics,
+    MP_TYPE_FLAG_NONE,
+    make_new, ModPicoGraphics_make_new,
+    buffer, ModPicoGraphics_get_framebuffer,
+    locals_dict, (mp_obj_dict_t*)&ModPicoGraphics_locals_dict
+);
+#else
 const mp_obj_type_t ModPicoGraphics_type = {
     { &mp_type_type },
     .name = MP_QSTR_picographics,
@@ -100,6 +110,7 @@ const mp_obj_type_t ModPicoGraphics_type = {
     .buffer_p = { .get_buffer = ModPicoGraphics_get_framebuffer },
     .locals_dict = (mp_obj_dict_t*)&ModPicoGraphics_locals_dict,
 };
+#endif
 
 /***** Module Globals *****/
 STATIC const mp_map_elem_t picographics_globals_table[] = {
@@ -126,7 +137,16 @@ STATIC const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_INKY_FRAME), MP_ROM_INT(DISPLAY_INKY_FRAME) },
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_INKY_FRAME_4), MP_ROM_INT(DISPLAY_INKY_FRAME_4) },
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_GALACTIC_UNICORN), MP_ROM_INT(DISPLAY_GALACTIC_UNICORN) },
-      { MP_ROM_QSTR(MP_QSTR_DISPLAY_GFX_PACK), MP_ROM_INT(DISPLAY_GFX_PACK) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_GFX_PACK), MP_ROM_INT(DISPLAY_GFX_PACK) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_32X32), MP_ROM_INT(DISPLAY_INTERSTATE75_32X32) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_64X32), MP_ROM_INT(DISPLAY_INTERSTATE75_64X32) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_96X32), MP_ROM_INT(DISPLAY_INTERSTATE75_96X32) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_128X32), MP_ROM_INT(DISPLAY_INTERSTATE75_128X32) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_64X64), MP_ROM_INT(DISPLAY_INTERSTATE75_64X64) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_128X64), MP_ROM_INT(DISPLAY_INTERSTATE75_128X64) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_192X64), MP_ROM_INT(DISPLAY_INTERSTATE75_192X64) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_INTERSTATE75_256X64), MP_ROM_INT(DISPLAY_INTERSTATE75_256X64) },
+
 
     { MP_ROM_QSTR(MP_QSTR_PEN_1BIT), MP_ROM_INT(PEN_1BIT) },
     { MP_ROM_QSTR(MP_QSTR_PEN_P4), MP_ROM_INT(PEN_P4) },

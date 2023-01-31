@@ -46,7 +46,7 @@ An example of drawing text and graphics and using the buttons.
 
 Create your own name badge! This application looks for two files on your MicroPython drive:
 * `badge.txt` - A text file containing 6 lines, corresponding to the 6 different pieces of text on the badge
-* `badge-image.bin` - A 108x128px 1-bit colour depth image to display alongside the text. You can use `examples/badger2040/image_converter/convert.py` to convert them:
+* `badge-image.bin` - A 104x128px 1-bit colour depth image to display alongside the text. You can use `examples/badger2040/image_converter/convert.py` to convert them:
 
 ```shell
 python3 convert.py --binary --resize image_file_1.png image_file_2.png image_file_3.png

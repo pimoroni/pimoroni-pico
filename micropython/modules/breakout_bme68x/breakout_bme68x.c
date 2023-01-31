@@ -11,17 +11,27 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBME68X_configure_obj, 1, BreakoutBME68X_confi
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutBME68X_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutBME68X_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_configure), MP_ROM_PTR(&BreakoutBME68X_configure_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutBME68X_locals_dict, BreakoutBME68X_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_bme68x_BreakoutBME68X_type,
+    MP_QSTR_BreakoutBME68X,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutBME68X_make_new,
+    locals_dict, (mp_obj_dict_t*)&BreakoutBME68X_locals_dict
+);
+#else
 const mp_obj_type_t breakout_bme68x_BreakoutBME68X_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutBME68X,
     .make_new = BreakoutBME68X_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutBME68X_locals_dict,
 };
-
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_bme68x Module

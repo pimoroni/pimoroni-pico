@@ -15,13 +15,18 @@ uint8_t values[HALF_WIDTH] = { 0, 0, 0, 0, 0 };
 uint8_t next_value = 0;
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   display.init();
 
   while(true) {
+
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
 
     absolute_time_t at = get_absolute_time();
     uint64_t t = to_us_since_boot(at) / 1000000;
@@ -49,7 +54,9 @@ int main() {
 
     display.show();
 
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, false);
+#endif
 
     sleep_ms(1000 / HEIGHT);
   }
