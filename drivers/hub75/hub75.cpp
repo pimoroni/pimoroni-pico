@@ -6,11 +6,48 @@
 
 namespace pimoroni {
 
+void Hub75::swap_pin(unsigned int &pin_a, unsigned int &pin_b) {
+    unsigned int swap;
+    swap = pin_a;
+    pin_a = pin_b;
+    pin_b = swap;
+}
 
-
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
  {
+    // If the colour order is not RGB, swap the colour pins.
+    switch(color_order) {
+        case COLOR_ORDER::RBG:
+            swap_pin(pin_g0, pin_b0);
+            swap_pin(pin_g1, pin_b1);
+            break;
+        case COLOR_ORDER::GRB:
+            swap_pin(pin_r0, pin_g0);
+            swap_pin(pin_r1, pin_g1);
+            break;
+        case COLOR_ORDER::GBR:
+            swap_pin(pin_r0, pin_g0);
+            swap_pin(pin_r1, pin_g1);
+
+            swap_pin(pin_r0, pin_b0);
+            swap_pin(pin_r1, pin_b1);
+            break;
+        case COLOR_ORDER::BRG:
+            swap_pin(pin_r0, pin_b0);
+            swap_pin(pin_r1, pin_b1);
+
+            swap_pin(pin_r0, pin_g0);
+            swap_pin(pin_r1, pin_g1);
+            break;
+        case COLOR_ORDER::BGR:
+            swap_pin(pin_r0, pin_b0);
+            swap_pin(pin_r1, pin_b1);
+            break;
+        default:
+            break;
+    }
+
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
     gpio_init(pin_g0); gpio_set_function(pin_g0, GPIO_FUNC_SIO); gpio_set_dir(pin_g0, true); gpio_put(pin_g0, 0);
