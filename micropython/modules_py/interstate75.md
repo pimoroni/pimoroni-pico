@@ -27,6 +27,7 @@ DISPLAY_INTERSTATE75_192X64
 DISPLAY_INTERSTATE75_256X64
 ```
 
+You are able to set which version of the Interstate75 that you are using with the `interstate75w=` as default this value is set to `False` to use the Interstate75 button layout by setting it to `True` the module will use the Intersate75W button layout. If you are using an Interstate75W it is important to set this value to `interstate75w=True`, otherwise this could disable the wifi in your project.
 
 ```python
 import interstate75
@@ -34,6 +35,16 @@ import interstate75
 display = interstate75.DISPLAY_INTERSTATE75_32X32
 
 board = interstate75.Interstate75(display=display)
+```
+
+Or for an Interstate75W.
+
+```python
+import interstate75
+
+display = interstate75.DISPLAY_INTERSTATE75_32X32
+
+board = interstate75.Interstate75(display=display, interstate75w=True)
 ```
 
 From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
@@ -47,9 +58,10 @@ To read a specific input, the `interstate75` module contains these handy constan
 * `SWITCH_A` = `0`
 * `SWITCH_B` = `1`
 
-The Interstate 75 (non W) uses the boot button instead of `SWITCH_B`
+The Interstate75 (non W) uses the boot button instead of `SWITCH_B`
 
-* `SWITCH_BOOT` = `2`
+* `SWITCH_A` = `0`
+* `SWITCH_BOOT` = `1`
 
 ```python
 if board.switch_pressed(SWITCH_A):

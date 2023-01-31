@@ -6,13 +6,14 @@ import hub75
 # Index Constants
 SWITCH_A = 0
 SWITCH_B = 1
-SWITCH_BOOT = 2
+SWITCH_BOOT = 1
 
 
 class Interstate75:
     I2C_SDA_PIN = 20
     I2C_SCL_PIN = 21
-    SWITCH_PINS = (14, 15, 23)
+    SWITCH_PINS = (14, 23)
+    SWITCH_PINS_W = (14, 15)
     LED_R_PIN = 16
     LED_G_PIN = 17
     LED_B_PIN = 18
@@ -37,18 +38,22 @@ class Interstate75:
     COLOR_ORDER_BGR = hub75.COLOR_ORDER_BGR
 
     # Count Constants
-    NUM_SWITCHES = 3
+    NUM_SWITCHES = 2
 
-    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB):
+    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB, interstate75w=False):
         self.display = PicoGraphics(display=display)
         self.width, self.height = self.display.get_bounds()
         self.hub75 = hub75.Hub75(self.width, self.height, panel_type=panel_type, stb_invert=stb_invert, color_order=color_order)
         self.hub75.start()
+        if interstate75w:
+            self._switch_pins = self.SWITCH_PINS_W
+        else:
+            self._switch_pins = self.SWITCH_PINS
 
         # Set up the user switches
         self.__switches = []
         for i in range(self.NUM_SWITCHES):
-            self.__switches.append(Button(self.SWITCH_PINS[i]))
+            self.__switches.append(Button(self._switch_pins[i]))
 
         self.__rgb = RGBLED(Interstate75.LED_R_PIN, Interstate75.LED_G_PIN, Interstate75.LED_B_PIN, invert=True)
 
