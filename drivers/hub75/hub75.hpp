@@ -66,6 +66,7 @@ class Hub75 {
     bool managed_buffer = false;
     PanelType panel_type;
     bool inverted_stb = false;
+    COLOR_ORDER color_order;
     Pixel background = 0;
 
     // DMA & PIO
@@ -134,7 +135,5 @@ class Hub75 {
     void stop(irq_handler_t handler);
     void dma_complete();
     void update(PicoGraphics *graphics);
-    private:
-    void swap_pin(unsigned int &pin_a, unsigned int &pin_b);
     };
 }
