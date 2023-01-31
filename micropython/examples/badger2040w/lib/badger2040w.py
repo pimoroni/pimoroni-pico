@@ -45,8 +45,6 @@ SYSTEM_FREQS = [
     250000000
 ]
 
-WAKEUP_GPIO_STATE = wakeup.get_gpio_state()
-
 BUTTONS = {
     BUTTON_DOWN: machine.Pin(BUTTON_DOWN, machine.Pin.IN, machine.Pin.PULL_DOWN),
     BUTTON_A: machine.Pin(BUTTON_A, machine.Pin.IN, machine.Pin.PULL_DOWN),
@@ -55,13 +53,26 @@ BUTTONS = {
     BUTTON_UP: machine.Pin(BUTTON_UP, machine.Pin.IN, machine.Pin.PULL_DOWN),
 }
 
+WAKEUP_MASK = 0
+
 
 def woken_by_button():
-    return WAKEUP_GPIO_STATE & BUTTON_MASK > 0
+    return wakeup.get_gpio_state() & BUTTON_MASK > 0
 
 
 def pressed_to_wake(button):
-    return WAKEUP_GPIO_STATE & (1 << button) > 0
+    return wakeup.get_gpio_state() & (1 << button) > 0
+
+
+def reset_pressed_to_wake():
+    wakeup.reset_gpio_state()
+
+
+def pressed_to_wake_get_once(button):
+    global WAKEUP_MASK
+    result = (wakeup.get_gpio_state() & ~WAKEUP_MASK & (1 << button)) > 0
+    WAKEUP_MASK |= (1 << button)
+    return result
 
 
 def system_speed(speed):
@@ -114,7 +125,7 @@ class Badger2040W():
             pass
 
     def pressed(self, button):
-        return BUTTONS[button].value() == 1
+        return BUTTONS[button].value() == 1 or pressed_to_wake_get_once(button)
 
     def pressed_any(self):
         for button in BUTTONS.values():

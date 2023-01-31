@@ -16,6 +16,7 @@ woken_by_button = badger2040.woken_by_button()  # Must be done before we clear_p
 if badger2040.pressed_to_wake(badger2040.BUTTON_A) and badger2040.pressed_to_wake(badger2040.BUTTON_C):
     # Pressing A and C together at start quits app
     exited_to_launcher = badger_os.state_clear_running()
+    badger2040.reset_pressed_to_wake()
 else:
     # Otherwise restore previously running app
     badger_os.state_launch()
@@ -116,8 +117,7 @@ def render():
 
 
 def wait_for_user_to_release_buttons():
-    pr = display.pressed
-    while pr(badger2040.BUTTON_A) or pr(badger2040.BUTTON_B) or pr(badger2040.BUTTON_C) or pr(badger2040.BUTTON_UP) or pr(badger2040.BUTTON_DOWN):
+    while display.pressed_any():
         time.sleep(0.01)
 
 
