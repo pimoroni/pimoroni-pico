@@ -14,7 +14,7 @@ import network
 import ntptime
 from interstate75 import Interstate75, DISPLAY_INTERSTATE75_32X32
 
-i75 = Interstate75(display=DISPLAY_INTERSTATE75_32X32)
+i75 = Interstate75(display=DISPLAY_INTERSTATE75_32X32, interstate75w=True)
 graphics = i75.display
 
 width = i75.width

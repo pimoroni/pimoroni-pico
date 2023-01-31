@@ -4,7 +4,7 @@ Push either switch A, switch B or the BOOT switch (in the case of the non-w vers
 '''
 import interstate75
 
-i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32)
+i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32, interstate75w=True)
 graphics = i75.display
 
 width = i75.width
@@ -30,11 +30,11 @@ def display_a():
     i75.update()
 
 
-def display_boot():
-    graphics.set_pen(BOOT_COLOR)
+def display_b():
+    graphics.set_pen(B_COLOR)
     graphics.clear()
-    graphics.set_pen(BOOT_TEXT)
-    graphics.text("BOOT", 5, 11, False, 1)
+    graphics.set_pen(B_TEXT)
+    graphics.text("B", 8, 6, False, 3)
     i75.update()
 
 
@@ -45,5 +45,5 @@ i75.update()
 while 1:
     if i75.switch_pressed(interstate75.SWITCH_A):
         display_a()
-    if i75.switch_pressed(interstate75.SWITCH_BOOT):
-        display_boot()
+    if i75.switch_pressed(interstate75.SWITCH_B):
+        display_b()
