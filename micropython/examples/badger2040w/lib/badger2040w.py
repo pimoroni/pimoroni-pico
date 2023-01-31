@@ -119,6 +119,7 @@ class Badger2040W():
         raise RuntimeError("Thickness not supported in PicoGraphics.")
 
     def halt(self):
+        time.sleep(0.05)
         enable = machine.Pin(ENABLE_3V3, machine.Pin.OUT)
         enable.off()
         while not self.pressed_any():
