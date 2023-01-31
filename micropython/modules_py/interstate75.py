@@ -32,10 +32,10 @@ class Interstate75:
     # Count Constants
     NUM_SWITCHES = 2
 
-    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False):
+    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB):
         self.display = PicoGraphics(display=display)
         self.width, self.height = self.display.get_bounds()
-        self.hub75 = hub75.Hub75(self.width, self.height, panel_type=panel_type, stb_invert=stb_invert)
+        self.hub75 = hub75.Hub75(self.width, self.height, panel_type=panel_type, stb_invert=stb_invert, color_order=color_order)
         self.hub75.start()
 
         # Set up the user switches
