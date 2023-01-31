@@ -19,9 +19,9 @@ except OSError:
 # create demo QR code file if no QR code files exist
 if len(CODES) == 0:
     try:
-        newQRcodeFilename = "qrcode.txt"
-        text = open("qrcodes/{}".format(newQRcodeFilename), "w")
-        text.write("""https://pimoroni.com/badger2040
+        new_qr_code_filename = "qrcode.txt"
+        with open(f"/qrcodes/{new_qr_code_filename}", "w") as text:
+            text.write("""https://pimoroni.com/badger2040
 Badger 2040
 * 296x128 1-bit e-ink
 * six user buttons
@@ -31,13 +31,12 @@ Badger 2040
 Scan this code to learn
 more about Badger 2040.
 """)
-        text.flush()
-        text.close()
+            text.flush()
 
-        # Set the CODES list to contain the newQRcodeFilename (created above)
-        CODES = [newQRcodeFilename]
+        # Set the CODES list to contain the new_qr_code_filename (created above)
+        CODES = [new_qr_code_filename]
 
-    except:
+    except OSError:
         CODES = []
 
 TOTAL_CODES = len(CODES)
@@ -51,18 +50,15 @@ state = {
     "current_qr": 0
 }
 
+
 def set_state_current_index_in_range():
     badger_os.state_load("qrcodes", state)
-    
     if state["current_qr"] >= len(CODES):
         state["current_qr"] = len(CODES) - 1  # set to last index (zero-based). Note: will set to -1 if currently 0
-
-    # check that the index is not negative, thus still out of range
-    if state["current_qr"] < 0:
+    if state["current_qr"] < 0:  # check that the index is not negative, thus still out of range
         state["current_qr"] = 0
-        
     badger_os.state_save("qrcodes", state)
-    
+
 
 def measure_qr_code(size, code):
     w, h = code.get_size()
@@ -86,12 +82,9 @@ def draw_qr_file(n):
     file = CODES[n]
 
     try:
-        codetext = open("qrcodes/{}".format(file), "r")
-
-        lines = codetext.read().strip().split("\n")
-        
-        codetext.close()
-    except:
+        with open(f"/qrcodes/{file}", "r") as codetext:
+            lines = codetext.read().strip().split("\n")
+    except OSError:
         lines = ["", "", "", "", "", "", "", "", "", ""]
 
     code_text = lines.pop(0)
