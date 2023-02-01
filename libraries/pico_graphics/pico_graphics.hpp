@@ -168,6 +168,7 @@ namespace pimoroni {
       PEN_RGB332,
       PEN_RGB565,
       PEN_RGB888,
+      PEN_INKY7
     };
 
     void *frame_buffer;
@@ -486,4 +487,32 @@ namespace pimoroni {
       virtual void cleanup() {};
   };
 
+  template<typename T> class IDirectDisplayDriver {
+     public:
+       virtual void write_pixel(const Point &p, T colour) = 0;
+       virtual void write_pixel_span(const Point &p, uint l, T colour) = 0;
+
+       virtual void read_pixel(const Point &p, T &data) {};
+       virtual void read_pixel_span(const Point &p, uint l, T *data) {};
+   };
+
+
+  class PicoGraphics_PenInky7 : public PicoGraphics {
+    public:
+      RGB src_color;
+      RGB565 color;
+      IDirectDisplayDriver<uint8_t> &driver;
+
+      PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      void set_thickness(uint t) override {};
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      void frame_convert(PenType type, conversion_callback_func callback) override;
+      static size_t buffer_size(uint w, uint h) {
+        return w * h;
+      }
+  };
 }

@@ -1,0 +1,1 @@
+include(uc8159_inky7.cmake)
