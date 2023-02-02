@@ -459,8 +459,6 @@ namespace pimoroni {
   }
 
   void CosmicUnicorn::set_pixel(int x, int y, uint8_t r, uint8_t g, uint8_t b) {
-    if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
-
     x = (WIDTH - 1) - x;
     y = (HEIGHT - 1) - y;
 
@@ -540,32 +538,31 @@ namespace pimoroni {
     if(unicorn == this) {
       if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
         uint32_t *p = (uint32_t *)graphics->frame_buffer;
-        for(size_t j = 0; j < 32 * 32; j++) {
-          int x = j % 32;
-          int y = j / 32;
 
-          uint32_t col = *p;
-          uint8_t r = (col & 0xff0000) >> 16;
-          uint8_t g = (col & 0x00ff00) >>  8;
-          uint8_t b = (col & 0x0000ff) >>  0;
-          p++;
+        for(int y = 0; y < 32; y++) {
+          for(int x = 0; x < 32; x++) {
+            uint32_t col = *p;
+            uint8_t r = (col & 0xff0000) >> 16;
+            uint8_t g = (col & 0x00ff00) >>  8;
+            uint8_t b = (col & 0x0000ff) >>  0;
+            p++;
 
-          set_pixel(x, y, r, g, b);
+            set_pixel(x, y, r, g, b);
+          }
         }
       }
       else if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
         uint16_t *p = (uint16_t *)graphics->frame_buffer;
-        for(size_t j = 0; j < 32 * 32; j++) {
-          int x = j % 32;
-          int y = j / 32;
+        for(int y = 0; y < 32; y++) {
+          for(int x = 0; x < 32; x++) {
+            uint16_t col = __builtin_bswap16(*p);
+            uint8_t r = (col & 0b1111100000000000) >> 8;
+            uint8_t g = (col & 0b0000011111100000) >> 3;
+            uint8_t b = (col & 0b0000000000011111) << 3;
+            p++;
 
-          uint16_t col = __builtin_bswap16(*p);
-          uint8_t r = (col & 0b1111100000000000) >> 8;
-          uint8_t g = (col & 0b0000011111100000) >> 3;
-          uint8_t b = (col & 0b0000000000011111) << 3;
-          p++;
-
-          set_pixel(x, y, r, g, b);
+            set_pixel(x, y, r, g, b);
+          }
         }
       }
     }
