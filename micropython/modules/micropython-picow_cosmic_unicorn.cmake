@@ -47,6 +47,8 @@ include(adcfft/micropython)
 # LEDs & Matrices
 include(cosmic_unicorn/micropython)
 
-# include(micropython-common)
+# ULAB
+include(micropython-common-ulab)
+enable_ulab()
 
 include(modules_py/modules_py)
