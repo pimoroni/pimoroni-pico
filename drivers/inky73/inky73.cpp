@@ -44,18 +44,10 @@ namespace pimoroni {
   };
 
   bool UC8159Inky7::is_busy() {
-    if(BUSY == PIN_UNUSED) {
-      if(absolute_time_diff_us(get_absolute_time(), timeout) > 0) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-    return !gpio_get(BUSY);
+    return !(sr.read() & 128);
   }
   
-  void UC8159Inky7::busy_wait(uint minimum_wait_ms) {
-    timeout = make_timeout_time_ms(minimum_wait_ms);
+  void UC8159Inky7::busy_wait() {
     while(is_busy()) {
       tight_loop_contents();
     }
@@ -81,10 +73,6 @@ namespace pimoroni {
     gpio_set_function(RESET, GPIO_FUNC_SIO);
     gpio_set_dir(RESET, GPIO_OUT);
     gpio_put(RESET, 1);
-
-    gpio_set_function(BUSY, GPIO_FUNC_SIO);
-    gpio_set_dir(BUSY, GPIO_IN);
-    gpio_set_pulls(BUSY, true, false);
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
@@ -189,18 +177,20 @@ namespace pimoroni {
     busy_wait();
 
     command(PON, {0}); // turn on
-    busy_wait(200);
+    busy_wait();
 
     command(DRF, {0}); // start display refresh
-    busy_wait(200);
+    busy_wait();
 
     if(blocking) {
-      busy_wait(32 * 1000);
+      busy_wait();
 
       command(POF); // turn off
-    } else {
-      timeout = make_timeout_time_ms(32 * 1000);
     }
+  }
+
+  bool UC8159Inky7::is_pressed(Button button) {
+    return sr.read() & button;
   }
 
 }
