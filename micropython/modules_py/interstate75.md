@@ -44,7 +44,7 @@ import interstate75
 
 display = interstate75.DISPLAY_INTERSTATE75_32X32
 
-board = interstate75.Interstate75(display=display, interstate75w=False)  #This is th e setup to be able to access the both A and BOOT on the Interstate75 (non W)
+board = interstate75.Interstate75(display=display, interstate75w=False)  # This is the setup to be able to access the both A and BOOT on the Interstate75 (non W)
 ```
 
 From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
