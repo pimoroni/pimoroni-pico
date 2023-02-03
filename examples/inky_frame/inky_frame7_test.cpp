@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "drivers/psram_display/psram_display.hpp"
-#include "drivers/uc8159_inky7/uc8159_inky7.hpp"
+#include "drivers/inky73/inky73.hpp"
 
 using namespace pimoroni;
 

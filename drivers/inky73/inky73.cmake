@@ -1,4 +1,4 @@
-set(DRIVER_NAME uc8159_inky7)
+set(DRIVER_NAME inky73)
 add_library(${DRIVER_NAME} INTERFACE)
 
 target_sources(${DRIVER_NAME} INTERFACE

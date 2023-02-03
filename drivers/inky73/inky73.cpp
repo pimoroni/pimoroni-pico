@@ -1,4 +1,4 @@
-#include "uc8159_inky7.hpp"
+#include "inky73.hpp"
 
 #include <cstdlib>
 #include <math.h>
