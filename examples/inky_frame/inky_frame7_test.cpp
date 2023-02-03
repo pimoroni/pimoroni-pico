@@ -18,10 +18,10 @@ int main() {
 
   PSRamDisplay ramDisplay(800, 480);
   PicoGraphics_PenInky7 graphics(800, 480, ramDisplay);
-  UC8159Inky7 inky7(800,400);
+  Inky73 inky7(800,400);
 
   while (true) {
-    while(!inky7.is_pressed(UC8159Inky7::BUTTON_A)) {
+    while(!inky7.is_pressed(Inky73::BUTTON_A)) {
       sleep_ms(10);
     }
     graphics.set_pen(1);

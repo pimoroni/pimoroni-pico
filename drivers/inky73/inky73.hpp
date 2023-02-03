@@ -12,7 +12,7 @@
 
 namespace pimoroni {
 
-  class UC8159Inky7 : public DisplayDriver {
+  class Inky73 : public DisplayDriver {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
@@ -54,11 +54,11 @@ namespace pimoroni {
       CLEAN = 7
     };
 
-    UC8159Inky7(uint16_t width, uint16_t height) : UC8159Inky7(width, height, ROTATE_0, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED}) {};
+    Inky73(uint16_t width, uint16_t height) : Inky73(width, height, ROTATE_0, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED}) {};
 
-    UC8159Inky7(uint16_t width, uint16_t height, SPIPins pins, uint reset=27) : UC8159Inky7(width, height, ROTATE_0, pins, reset) {};
+    Inky73(uint16_t width, uint16_t height, SPIPins pins, uint reset=27) : Inky73(width, height, ROTATE_0, pins, reset) {};
 
-    UC8159Inky7(uint16_t width, uint16_t height, Rotation rotation, SPIPins pins, uint reset=27) :
+    Inky73(uint16_t width, uint16_t height, Rotation rotation, SPIPins pins, uint reset=27) :
       DisplayDriver(width, height, rotation),
       spi(pins.spi),
       CS(pins.cs), DC(pins.dc), SCK(pins.sck), MOSI(pins.mosi), RESET(reset) {

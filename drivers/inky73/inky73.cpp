@@ -43,23 +43,23 @@ namespace pimoroni {
     TSSET = 0xE6 // E5 or E6
   };
 
-  bool UC8159Inky7::is_busy() {
+  bool Inky73::is_busy() {
     return !(sr.read() & 128);
   }
   
-  void UC8159Inky7::busy_wait() {
+  void Inky73::busy_wait() {
     while(is_busy()) {
       tight_loop_contents();
     }
   }
 
-  void UC8159Inky7::reset() {
+  void Inky73::reset() {
     gpio_put(RESET, 0); sleep_ms(10);
     gpio_put(RESET, 1); sleep_ms(10);
     busy_wait();
   }
    
-  void UC8159Inky7::init() {
+  void Inky73::init() {
     // configure spi interface and pins
     spi_init(spi, 20'000'000);
 
@@ -78,7 +78,7 @@ namespace pimoroni {
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
   };
 
-  void UC8159Inky7::setup() {
+  void Inky73::setup() {
     reset();
     busy_wait();
 
@@ -108,16 +108,16 @@ namespace pimoroni {
     command(TSSET, {0x00});
   }
 
-  void UC8159Inky7::set_blocking(bool blocking) {
+  void Inky73::set_blocking(bool blocking) {
     this->blocking = blocking;
   }
 
-  void UC8159Inky7::power_off() {
+  void Inky73::power_off() {
     busy_wait();
     command(POF); // turn off
   }
 
-  void UC8159Inky7::command(uint8_t reg, size_t len, const uint8_t *data) {
+  void Inky73::command(uint8_t reg, size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
 
     gpio_put(DC, 0); // command mode
@@ -131,18 +131,18 @@ namespace pimoroni {
     gpio_put(CS, 1);
   }
 
-  void UC8159Inky7::data(size_t len, const uint8_t *data) {
+  void Inky73::data(size_t len, const uint8_t *data) {
     gpio_put(CS, 0);
     gpio_put(DC, 1); // data mode
     spi_write_blocking(spi, (const uint8_t*)data, len);
     gpio_put(CS, 1);
   }
 
-  void UC8159Inky7::command(uint8_t reg, std::initializer_list<uint8_t> values) {
+  void Inky73::command(uint8_t reg, std::initializer_list<uint8_t> values) {
     command(reg, values.size(), (uint8_t *)values.begin());
   }
 
-  void UC8159Inky7::update(PicoGraphics *graphics) {
+  void Inky73::update(PicoGraphics *graphics) {
     if(graphics->pen_type != PicoGraphics::PEN_INKY7) return; // Incompatible buffer
 
     if(blocking) {
@@ -189,7 +189,7 @@ namespace pimoroni {
     }
   }
 
-  bool UC8159Inky7::is_pressed(Button button) {
+  bool Inky73::is_pressed(Button button) {
     return sr.read() & button;
   }
 
