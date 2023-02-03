@@ -67,7 +67,7 @@ class Interstate75:
 
     def switch_pressed(self, switch):
         if switch < 0 or switch >= self.NUM_SWITCHES:
-            raise ValueError("switch out of range. Expected SWITCH_A (0), SWITCH_B (1) SWITCH_BOOT (2)")
+            raise ValueError("switch out of range. Expected SWITCH_A (0), SWITCH_B/BOOT (1)")
         return self.__switches[switch].is_pressed
 
     def set_led(self, r, g, b):

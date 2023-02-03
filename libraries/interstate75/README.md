@@ -27,6 +27,9 @@ PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
 // And each button
 Button button_a(Interstate75::A);
+// For the Interstate75
+Button button_b(Interstate75::BOOT);
+// Or for the Interstate75W
 Button button_b(Interstate75::B);
 
 // RGB LED
