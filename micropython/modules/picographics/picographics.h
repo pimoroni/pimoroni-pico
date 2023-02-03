@@ -23,7 +23,8 @@ enum PicoGraphicsDisplay {
     DISPLAY_INTERSTATE75_64X64,
     DISPLAY_INTERSTATE75_128X64,
     DISPLAY_INTERSTATE75_192X64,
-    DISPLAY_INTERSTATE75_256X64, 
+    DISPLAY_INTERSTATE75_256X64,
+    DISPLAY_INKY_FRAME_7,
 };
 
 enum PicoGraphicsPenType {
@@ -34,7 +35,8 @@ enum PicoGraphicsPenType {
     PEN_P8,
     PEN_RGB332,
     PEN_RGB565,
-    PEN_RGB888
+    PEN_RGB888,
+    PEN_INKY7,
 };
 
 enum PicoGraphicsBusType {

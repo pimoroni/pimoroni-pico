@@ -4,6 +4,8 @@
 #include "drivers/uc8151/uc8151.hpp"
 #include "drivers/uc8159/uc8159.hpp"
 #include "drivers/st7567/st7567.hpp"
+#include "drivers/inky73/inky73.hpp"
+#include "drivers/psram_display/psram_display.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
@@ -192,6 +194,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_INKY_FRAME_7:
+            width = 800;
+            height = 480;
+            bus_type = BUS_SPI;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_INKY7;
+            break;
         default:
             return false;
     }
@@ -214,6 +224,8 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
             return PicoGraphics_PenRGB565::buffer_size(width, height);
         case PEN_RGB888:
             return PicoGraphics_PenRGB888::buffer_size(width, height);
+        case PEN_INKY7:
+            return PicoGraphics_PenInky7::buffer_size(width, height);
         default:
             return 0;
     }
@@ -276,7 +288,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             self->i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(PimoroniI2C_make_new(&PimoroniI2C_type, 0, 0, nullptr));
             i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
         } else if (bus_type == BUS_SPI) {
-            if(display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4) {
+            if(display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4 || display == DISPLAY_INKY_FRAME_7) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED};
             } else if (display == DISPLAY_INKY_PACK) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
@@ -291,6 +303,11 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         pen_type = PEN_3BIT; // FORCE to 3BIT
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(UC8159, width, height, (Rotation)rotate, spi_bus);
+
+    } else if (display == DISPLAY_INKY_FRAME_7) {
+        pen_type = PEN_INKY7;
+        // TODO grab BUSY and RESET from ARG_extra_pins
+        self->display = m_new_class(Inky73, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_TUFTY_2040) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
@@ -324,15 +341,19 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
-    if (args[ARG_buffer].u_obj != mp_const_none) {
-        mp_buffer_info_t bufinfo;
-        mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
-        self->buffer = bufinfo.buf;
-        if(bufinfo.len < (size_t)(required_size)) {
-            mp_raise_ValueError("Supplied buffer is too small!");
-        }
+    if(pen_type == PEN_INKY7) {
+        self->buffer = m_new_class(PSRamDisplay, width, height);
     } else {
-        self->buffer = m_new(uint8_t, required_size);
+        if (args[ARG_buffer].u_obj != mp_const_none) {
+            mp_buffer_info_t bufinfo;
+            mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
+            self->buffer = bufinfo.buf;
+            if(bufinfo.len < (size_t)(required_size)) {
+                mp_raise_ValueError("Supplied buffer is too small!");
+            }
+        } else {
+            self->buffer = m_new(uint8_t, required_size);
+        }
     }
 
     // Create an instance of the graphics library
@@ -363,6 +384,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         case PEN_RGB888:
             self->graphics = m_new_class(PicoGraphics_PenRGB888, self->display->width, self->display->height, self->buffer);
             break;
+        case PEN_INKY7:
+            self->graphics = m_new_class(PicoGraphics_PenInky7, self->display->width, self->display->height, *(IDirectDisplayDriver<uint8_t> *)self->buffer);
+            break;
         default:
             break;
     }
@@ -376,7 +400,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->graphics->clear();
 
     // Update the LCD from the graphics library
-    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK) {
+    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7) {
         self->display->update(self->graphics);
     }
 

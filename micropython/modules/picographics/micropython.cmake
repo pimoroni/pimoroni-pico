@@ -11,6 +11,9 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8151/uc8151.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8159/uc8159.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/st7567/st7567.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/inky73/inky73.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/shiftregister/shiftregister.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/psram_display/psram_display.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bitY.cpp
@@ -20,6 +23,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb332.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb565.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb888.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_inky7.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/types.cpp
 )
 
