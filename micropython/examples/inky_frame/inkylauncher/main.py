@@ -6,7 +6,7 @@ import inky_helper as ih
 # Uncomment the line for your Inky Frame display size
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 4.0"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.0"
 
 # Create a secrets.py with your Wifi details to be able to get the time
 #
