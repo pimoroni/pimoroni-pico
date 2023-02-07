@@ -1,8 +1,9 @@
 # This example shows you a simple, non-interrupt way of reading Inky Frame's buttons with a loop that checks to see if buttons are pressed.
 
 from pimoroni import ShiftRegister
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.0"
 from machine import Pin
 
 display = PicoGraphics(display=DISPLAY)
