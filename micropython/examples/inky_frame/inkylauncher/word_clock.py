@@ -63,6 +63,12 @@ def draw():
         y = 10
         line_space = 70
         letter_space = 40
+    elif WIDTH == 800:
+        default_x = 5
+        x = default_x
+        y = 70
+        line_space = 60
+        letter_space = 50
     else:  # Inky Frame 5.7"
         default_x = 20
         x = default_x
