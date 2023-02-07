@@ -7,8 +7,8 @@ import qrcode
 import badger_os
 
 # URLS to use (Entertainment, Science and Technology)
-URL = ["http://feeds.bbci.co.uk/news/video_and_audio/entertainment_and_arts/rss.xml",
-       "http://feeds.bbci.co.uk/news/video_and_audio/science_and_environment/rss.xml",
+URL = ["http://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml",
+       "http://feeds.bbci.co.uk/news/science_and_environment/rss.xml",
        "http://feeds.bbci.co.uk/news/technology/rss.xml"]
 
 code = qrcode.QRCode()
@@ -161,7 +161,7 @@ def draw_page():
     if feed:
         page = state["current_page"]
         display.set_pen(0)
-        display.text(feed[page]["title"], 2, 40, WIDTH - 105, 2)
+        display.text(feed[page]["title"], 2, 30, WIDTH - 130, 2)
         code.set_text(feed[page]["guid"])
         draw_qr_code(WIDTH - 100, 25, 100, code)
 
