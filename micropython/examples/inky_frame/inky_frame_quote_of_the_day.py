@@ -5,8 +5,9 @@ import uasyncio
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.0"
 
 
 ENDPOINT = "https://en.wikiquote.org/w/api.php?format=json&action=expandtemplates&prop=wikitext&text={{{{Wikiquote:Quote%20of%20the%20day/{3}%20{2},%20{0}}}}}"

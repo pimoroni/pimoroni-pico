@@ -8,8 +8,9 @@ import sdcard
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.0"
 
 """
 random placekitten (from a very small set)
