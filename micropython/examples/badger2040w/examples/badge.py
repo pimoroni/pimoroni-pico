@@ -119,6 +119,7 @@ def draw_badge():
 display = badger2040w.Badger2040W()
 display.led(128)
 display.set_update_speed(badger2040w.UPDATE_NORMAL)
+display.set_thickness(2)
 
 jpeg = jpegdec.JPEG(display.display)
 

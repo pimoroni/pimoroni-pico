@@ -145,7 +145,7 @@ def launch(file):
 
 
 # Draw an overlay box with a given message within it
-def warning(display, message, width=badger2040.WIDTH - 40, height=badger2040.HEIGHT - 40, line_spacing=20, text_size=0.6):
+def warning(display, message, width=badger2040.WIDTH - 20, height=badger2040.HEIGHT - 20, line_spacing=20, text_size=0.6):
     print(message)
 
     if display is None:
@@ -154,6 +154,12 @@ def warning(display, message, width=badger2040.WIDTH - 40, height=badger2040.HEI
 
     # Draw a light grey background
     display.set_pen(12)
+    display.rectangle((badger2040.WIDTH - width) // 2, (badger2040.HEIGHT - height) // 2, width, height)
+
+    width -= 20
+    height -= 20
+
+    display.set_pen(15)
     display.rectangle((badger2040.WIDTH - width) // 2, (badger2040.HEIGHT - height) // 2, width, height)
 
     # Take the provided message and split it up into

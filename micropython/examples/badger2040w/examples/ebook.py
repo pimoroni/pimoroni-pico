@@ -20,6 +20,7 @@ TEXT_PADDING = 4
 TEXT_WIDTH = WIDTH - TEXT_PADDING - TEXT_PADDING - ARROW_WIDTH
 
 FONTS = ["sans", "gothic", "cursive", "serif"]
+THICKNESSES = [2, 1, 1, 2]
 # ------------------------------
 #      Drawing functions
 # ------------------------------
@@ -91,6 +92,7 @@ def render_page():
     next_pos = pos
     add_newline = False
     display.set_font(FONTS[state["font_idx"]])
+    display.set_thickness(THICKNESSES[state["font_idx"]])
 
     while True:
         # Read a full line and split it into words

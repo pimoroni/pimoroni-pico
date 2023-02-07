@@ -181,6 +181,7 @@ items_per_page = 0
 display = badger2040w.Badger2040W()
 display.led(128)
 display.set_font("sans")
+display.set_thickness(2)
 if changed:
     display.set_update_speed(badger2040w.UPDATE_FAST)
 else:

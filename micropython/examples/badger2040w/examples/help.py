@@ -6,6 +6,7 @@ LINE_HEIGHT = 20
 
 display = badger2040w.Badger2040W()
 display.led(128)
+display.set_thickness(2)
 
 # Clear to white
 display.set_pen(15)
