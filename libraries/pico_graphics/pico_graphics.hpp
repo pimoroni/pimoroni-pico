@@ -181,6 +181,7 @@ namespace pimoroni {
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
+    typedef std::function<RGB888()> next_pixel_func_rgb888;
     //typedef std::function<void(int y)> scanline_interrupt_func;
 
     //scanline_interrupt_func scanline_interrupt = nullptr;
@@ -267,6 +268,7 @@ namespace pimoroni {
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
+    void frame_convert_rgb888(conversion_callback_func callback, next_pixel_func_rgb888 get_next_pixel);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
