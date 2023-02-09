@@ -696,6 +696,21 @@ mp_obj_t ModPicoGraphics_create_pen(size_t n_args, const mp_obj_t *args) {
     return mp_obj_new_int(result);
 }
 
+mp_obj_t ModPicoGraphics_create_pen_hsv(size_t n_args, const mp_obj_t *args) {
+    enum { ARG_self, ARG_h, ARG_s, ARG_v };
+
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
+    int result = self->graphics->create_pen_hsv(
+        mp_obj_get_float(args[ARG_h]),
+        mp_obj_get_float(args[ARG_s]),
+        mp_obj_get_float(args[ARG_v])
+    );
+
+    if (result == -1) mp_raise_ValueError("create_pen failed. No matching colour or space in palette!");
+
+    return mp_obj_new_int(result);
+}
+
 mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     size_t num_tuples = n_args - 1;
     const mp_obj_t *tuples = pos_args + 1;

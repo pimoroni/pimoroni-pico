@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
+#include <math.h>
 
 #include "libraries/hershey_fonts/hershey_fonts.hpp"
 #include "libraries/bitmap_fonts/bitmap_fonts.hpp"
@@ -25,6 +26,8 @@ namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
   typedef uint32_t RGB888;
+
+
   struct RGB {
     int16_t r, g, b;
 
@@ -89,6 +92,8 @@ namespace pimoroni {
       return (r << 16) | (g << 8) | (b << 0);
     }
   };
+
+
 
   typedef int Pen;
 
@@ -171,6 +176,9 @@ namespace pimoroni {
     Rect bounds;
     Rect clip;
 
+
+
+
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
     //typedef std::function<void(int y)> scanline_interrupt_func;
@@ -183,6 +191,7 @@ namespace pimoroni {
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return RGB(r, g, b).to_rgb332();
     }
+
 
     static constexpr RGB565 rgb332_to_rgb565(RGB332 c) {
       uint16_t p = ((c & 0b11100000) << 8) |
@@ -221,6 +230,7 @@ namespace pimoroni {
     virtual void set_pixel_span(const Point &p, uint l) = 0;
 
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
+    virtual int create_pen_hsv(float h, float s, float v);
     virtual int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b);
     virtual int reset_pen(uint8_t i);
     virtual void set_pixel_dither(const Point &p, const RGB &c);
@@ -253,6 +263,7 @@ namespace pimoroni {
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
+    void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
@@ -400,7 +411,6 @@ namespace pimoroni {
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
-
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       void set_pixel_dither(const Point &p, const RGB &c) override;
@@ -422,6 +432,7 @@ namespace pimoroni {
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       static size_t buffer_size(uint w, uint h) {
@@ -429,7 +440,6 @@ namespace pimoroni {
       }
   };
 
-  
   class PicoGraphics_PenRGB888 : public PicoGraphics {
     public:
       RGB src_color;
@@ -438,6 +448,7 @@ namespace pimoroni {
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       static size_t buffer_size(uint w, uint h) {
