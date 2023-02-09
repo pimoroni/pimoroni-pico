@@ -112,6 +112,13 @@ namespace pimoroni {
             frame_convert_rgb565(callback, [&]() {
                 return cache[*src++];
             });
+        } else if (type == PEN_RGB888) {
+            // Treat our void* frame_buffer as uint8_t
+            uint8_t *src = (uint8_t *)frame_buffer;
+
+            frame_convert_rgb888(callback, [&]() {
+                return palette[*src++].to_rgb888();
+            });
         }
     }
 }

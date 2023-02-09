@@ -567,16 +567,16 @@ namespace pimoroni {
       }
       else if(graphics->pen_type == PicoGraphics::PEN_P8 || graphics->pen_type == PicoGraphics::PEN_P4) {
         int offset = 0;
-        graphics->frame_convert(PicoGraphics::PEN_RGB565, [this, offset](void *data, size_t length) mutable {
-          uint16_t *p = (uint16_t *)data;
-          for(auto i = 0u; i < length / 2; i++) {
+        graphics->frame_convert(PicoGraphics::PEN_RGB888, [this, offset](void *data, size_t length) mutable {
+          uint32_t *p = (uint32_t *)data;
+          for(auto i = 0u; i < length / 4; i++) {
             int x = offset % 32;
             int y = offset / 32;
 
-            uint16_t col = __builtin_bswap16(*p);
-            uint8_t r = (col & 0b1111100000000000) >> 8;
-            uint8_t g = (col & 0b0000011111100000) >> 3;
-            uint8_t b = (col & 0b0000000000011111) << 3;
+            uint32_t col = *p;
+            uint8_t r = (col & 0xff0000) >> 16;
+            uint8_t g = (col & 0x00ff00) >>  8;
+            uint8_t b = (col & 0x0000ff) >>  0;
 
             set_pixel(x, y, r, g, b);
             offset++;
