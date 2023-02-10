@@ -33,6 +33,7 @@
 
 ; loop over row pixels
   out y, 8                        ; get row pixel count (minus 1 because test is pre decrement)
+  out pins, 8                     ; output row select
 pixels:
     
     ; red bit
@@ -63,15 +64,14 @@ pixels:
 
   jmp y-- pixels
 
-  out null, 16                    ; discard dummy bytes
+  out null, 8                    ; discard dummy bytes
 
-  out pins, 8                     ; output row select
 
   set pins, 0b110 [5]             ; latch high, blank high
   set pins, 0b000                 ; blank low (enable output)
 
 ; loop over bcd delay period
-  out y, 24                       ; get bcd delay counter value
+  out y, 32                       ; get bcd delay counter value
 bcd_delay:
   jmp y-- bcd_delay         
 
