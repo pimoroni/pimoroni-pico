@@ -52,12 +52,21 @@ Pixel hsv_to_rgb(float h, float s, float v);
 
 class Hub75 {
     public:
+    enum class COLOR_ORDER {
+        RGB,
+        RBG,
+        GRB,
+        GBR,
+        BRG,
+        BGR
+    };
     uint width;
     uint height;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
     bool inverted_stb = false;
+    COLOR_ORDER color_order;
     Pixel background = 0;
 
     // DMA & PIO
@@ -112,7 +121,7 @@ class Hub75 {
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb);
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);

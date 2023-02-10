@@ -6,10 +6,8 @@
 
 namespace pimoroni {
 
-
-
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb)
- : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order)
+ : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -60,7 +58,26 @@ void Hub75::set_color(uint x, uint y, Pixel c) {
 }
 
 void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
-    set_color(x, y, Pixel(r, g, b));
+    switch(color_order) {
+        case COLOR_ORDER::RGB:
+            set_color(x, y, Pixel(r, g, b));
+            break;
+        case COLOR_ORDER::RBG:
+            set_color(x, y, Pixel(r, b, g));
+            break;
+        case COLOR_ORDER::GRB:
+            set_color(x, y, Pixel(g, r, b));
+            break;
+        case COLOR_ORDER::GBR:
+            set_color(x, y, Pixel(g, b, r));
+            break;
+        case COLOR_ORDER::BRG:
+            set_color(x, y, Pixel(b, r, g));
+            break;
+        case COLOR_ORDER::BGR:
+            set_color(x, y, Pixel(b, g, r));
+            break;
+    }
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
