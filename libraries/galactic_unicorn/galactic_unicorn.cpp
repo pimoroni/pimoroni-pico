@@ -154,13 +154,14 @@ namespace pimoroni {
         uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
         p[ 0] = WIDTH - 1;               // row pixel count
-        p[56] = row;                     // row select
+        p[ 1] = row;                     // row select
 
         // set the number of bcd ticks for this frame
         uint32_t bcd_ticks = (1 << frame);
-        p[57] = (bcd_ticks &     0xff) >>  0;
-        p[58] = (bcd_ticks &   0xff00) >>  8;
-        p[59] = (bcd_ticks & 0xff0000) >> 16;
+        p[56] = (bcd_ticks &       0xff) >>  0;
+        p[57] = (bcd_ticks &     0xff00) >>  8;
+        p[58] = (bcd_ticks &   0xff0000) >> 16;
+        p[59] = (bcd_ticks & 0xff000000) >> 24;
       }
     }
 
@@ -485,7 +486,7 @@ namespace pimoroni {
 
     // set the appropriate bits in the separate bcd frames
     for(uint8_t frame = 0; frame < BCD_FRAME_COUNT; frame++) {
-      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 1 + x];
+      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 2 + x];
 
       uint8_t red_bit = gamma_r & 0b1;
       uint8_t green_bit = gamma_g & 0b1;
