@@ -1,13 +1,13 @@
-from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_RGB332
-from os import listdir
-import time
+# Tufty2040 boot menu/loader.
+
 import gc
+import time
+from os import listdir
+from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_RGB332
 from pimoroni import Button
 
-display = PicoGraphics(display=DISPLAY_TUFTY_2040, pen_type=PEN_RGB332, rotate=180)
 
-
-def hsv_to_rgb(h, s, v):
+def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
     if s == 0.0:
         return v, v, v
     i = int(h * 6.0)
@@ -34,7 +34,7 @@ def hsv_to_rgb(h, s, v):
         return v, p, q
 
 
-def get_applications():
+def get_applications() -> list[dict[str, str]]:
     # fetch a list of the applications that are stored in the filesystem
     applications = []
     for file in listdir():
@@ -54,98 +54,102 @@ def get_applications():
     return sorted(applications, key=lambda x: x["title"])
 
 
-def launch_application(application):
+def prepare_for_launch() -> None:
     for k in locals().keys():
-        if k not in ("gc", "file", "badger_os"):
+        if k not in ("__name__",
+                     "application_file_to_launch",
+                     "gc"):
             del locals()[k]
-
     gc.collect()
 
-    __import__(application["file"])
+
+def menu() -> str:
+    applications = get_applications()
+
+    button_up = Button(22, invert=False)
+    button_down = Button(6, invert=False)
+    button_a = Button(7, invert=False)
+
+    display = PicoGraphics(display=DISPLAY_TUFTY_2040, pen_type=PEN_RGB332)
+    display.set_backlight(1.0)
+
+    selected_item = 2
+    scroll_position = 2
+    target_scroll_position = 2
+
+    selected_pen = display.create_pen(255, 255, 255)
+    unselected_pen = display.create_pen(80, 80, 100)
+    background_pen = display.create_pen(50, 50, 70)
+    shadow_pen = display.create_pen(0, 0, 0)
+
+    while True:
+        t = time.ticks_ms() / 1000.0
+
+        if button_up.read():
+            target_scroll_position -= 1
+            target_scroll_position = target_scroll_position if target_scroll_position >= 0 else len(applications) - 1
+
+        if button_down.read():
+            target_scroll_position += 1
+            target_scroll_position = target_scroll_position if target_scroll_position < len(applications) else 0
+
+        if button_a.read():
+            # Wait for the button to be released.
+            while button_a.is_pressed:
+                time.sleep(0.01)
+
+            return applications[selected_item]["file"]
+
+        display.set_pen(background_pen)
+        display.clear()
+
+        scroll_position += (target_scroll_position - scroll_position) / 5
+
+        grid_size = 40
+        for y in range(0, 240 // grid_size):
+            for x in range(0, 320 // grid_size):
+                h = x + y + int(t * 5)
+                h = h / 50.0
+                r, g, b = hsv_to_rgb(h, 0.5, 1)
+
+                display.set_pen(display.create_pen(r, g, b))
+                display.rectangle(x * grid_size, y * grid_size, grid_size, grid_size)
+
+        # work out which item is selected (closest to the current scroll position)
+        selected_item = round(target_scroll_position)
+
+        for list_index, application in enumerate(applications):
+            distance = list_index - scroll_position
+
+            text_size = 4 if selected_item == list_index else 3
+
+            # center text horixontally
+            title_width = display.measure_text(application["title"], text_size)
+            text_x = int(160 - title_width / 2)
+
+            row_height = text_size * 5 + 20
+
+            # center list items vertically
+            text_y = int(120 + distance * row_height - (row_height / 2))
+
+            # draw the text, selected item brightest and with shadow
+            if selected_item == list_index:
+                display.set_pen(shadow_pen)
+                display.text(application["title"], text_x + 1, text_y + 1, -1, text_size)
+
+            text_pen = selected_pen if selected_item == list_index else unselected_pen
+            display.set_pen(text_pen)
+            display.text(application["title"], text_x, text_y, -1, text_size)
+
+        display.update()
 
 
-applications = get_applications()
+# The application we will be launching. This should be ouronly global, so we can
+# drop everything else.
+application_file_to_launch = menu()
 
-button_up = Button(22, invert=False)
-button_down = Button(6, invert=False)
-button_a = Button(7, invert=False)
-
-display.set_backlight(1.0)
-
-WHITE = display.create_pen(255, 255, 255)
-BLACK = display.create_pen(0, 0, 0)
-RED = display.create_pen(200, 0, 0)
-
-
-def text(text, x, y, pen, s):
-    display.set_pen(pen)
-    display.text(text, x, y, -1, s)
-
-
-selected_item = 2
-scroll_position = 2
-target_scroll_position = 2
-
-selected_pen = display.create_pen(255, 255, 255)
-unselected_pen = display.create_pen(80, 80, 100)
-background_pen = display.create_pen(50, 50, 70)
-shadow_pen = display.create_pen(0, 0, 0)
-
-while True:
-    t = time.ticks_ms() / 1000.0
-
-    if button_up.read():
-        target_scroll_position -= 1
-        target_scroll_position = target_scroll_position if target_scroll_position >= 0 else len(applications) - 1
-
-    if button_down.read():
-        target_scroll_position += 1
-        target_scroll_position = target_scroll_position if target_scroll_position < len(applications) else 0
-
-    if button_a.read():
-        launch_application(applications[selected_item])
-
-    display.set_pen(background_pen)
-    display.clear()
-
-    scroll_position += (target_scroll_position - scroll_position) / 5
-
-    grid_size = 40
-    for y in range(0, 240 / grid_size):
-        for x in range(0, 320 / grid_size):
-            h = x + y + int(t * 5)
-            h = h / 50.0
-            r, g, b = hsv_to_rgb(h, .5, 1)
-
-            display.set_pen(display.create_pen(r, g, b))
-            display.rectangle(x * grid_size, y * grid_size, grid_size, grid_size)
-
-    # work out which item is selected (closest to the current scroll position)
-    selected_item = round(target_scroll_position)
-
-    start = time.ticks_ms()
-
-    for list_index, application in enumerate(applications):
-        distance = list_index - scroll_position
-
-        text_size = 4 if selected_item == list_index else 3
-
-        # center text horixontally
-        title_width = display.measure_text(application["title"], text_size)
-        text_x = int(160 - title_width / 2)
-
-        row_height = text_size * 5 + 20
-
-        # center list items vertically
-        text_y = int(120 + distance * row_height - (row_height / 2))
-
-        # draw the text, selected item brightest and with shadow
-        if selected_item == list_index:
-            text(application["title"], text_x + 1, text_y + 1, shadow_pen, text_size)
-
-        text_pen = selected_pen if selected_item == list_index else unselected_pen
-        text(application["title"], text_x, text_y, text_pen, text_size)
-
-    start = time.ticks_ms()
-
-    display.update()
+# Run whatever we've set up to.
+# If this fails, we'll exit the script and drop to the REPL, which is
+# fairly reasonable.
+prepare_for_launch()
+__import__(application_file_to_launch)
