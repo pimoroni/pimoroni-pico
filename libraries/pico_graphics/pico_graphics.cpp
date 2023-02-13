@@ -4,9 +4,28 @@ namespace pimoroni {
 
   const uint8_t dither16_pattern[16] = {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
 
+  void PicoGraphics::from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
+      float i = floor(h * 6.0f);
+      float f = h * 6.0f - i;
+      v *= 255.0f;
+      uint8_t p = v * (1.0f - s);
+      uint8_t q = v * (1.0f - f * s);
+      uint8_t t = v * (1.0f - (1.0f - f) * s);
+
+      switch (int(i) % 6) {
+        case 0: r = v; g = t; b = p; break;
+        case 1: r = q; g = v; b = p; break;
+        case 2: r = p; g = v; b = t; break;
+        case 3: r = p; g = q; b = v; break;
+        case 4: r = t; g = p; b = v; break;
+        case 5: r = v; g = p; b = q; break;
+      }
+  }
+
   int PicoGraphics::update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {return -1;};
   int PicoGraphics::reset_pen(uint8_t i) {return -1;};
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
+  int PicoGraphics::create_pen_hsv(float h, float s, float v){return -1;};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const uint8_t &c) {};
@@ -354,6 +373,36 @@ namespace pimoroni {
     // Transfer any remaining pixels ( < BUF_LEN )
     if(buf_entry > 0) {
         callback(row_buf[buf_idx], buf_entry * sizeof(RGB565));
+    }
+
+    // Callback with zero length to ensure previous buffer is fully written
+    callback(row_buf[buf_idx], 0);
+  }
+
+  // Common function for frame buffer conversion to 565 pixel format
+  void PicoGraphics::frame_convert_rgb888(conversion_callback_func callback, next_pixel_func_rgb888 get_next_pixel)
+  {
+    // Allocate two temporary buffers, as the callback may transfer by DMA
+    // while we're preparing the next part of the row
+    const int BUF_LEN = 64;
+    RGB888 row_buf[2][BUF_LEN];
+    int buf_idx = 0;
+    int buf_entry = 0;
+    for(auto i = 0; i < bounds.w * bounds.h; i++) {
+      row_buf[buf_idx][buf_entry] = get_next_pixel();
+      buf_entry++;
+
+      // Transfer a filled buffer and swap to the next one
+      if (buf_entry == BUF_LEN) {
+          callback(row_buf[buf_idx], BUF_LEN * sizeof(RGB888));
+          buf_idx ^= 1;
+          buf_entry = 0;
+      }
+    }
+
+    // Transfer any remaining pixels ( < BUF_LEN )
+    if(buf_entry > 0) {
+        callback(row_buf[buf_idx], buf_entry * sizeof(RGB888));
     }
 
     // Callback with zero length to ensure previous buffer is fully written

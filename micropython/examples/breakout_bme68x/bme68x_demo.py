@@ -11,12 +11,12 @@ PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 
-bmp = BreakoutBME68X(i2c)
+bme = BreakoutBME68X(i2c)
 # If this gives an error, try the alternative address
-# bmp = BreakoutBME68X(i2c, 0x77)
+# bme = BreakoutBME68X(i2c, 0x77)
 
 while True:
-    temperature, pressure, humidity, gas, status, _, _ = bmp.read()
+    temperature, pressure, humidity, gas, status, _, _ = bme.read()
     heater = "Stable" if status & STATUS_HEATER_STABLE else "Unstable"
     print("{:0.2f}c, {:0.2f}Pa, {:0.2f}%, {:0.2f} Ohms, Heater: {}".format(
         temperature, pressure, humidity, gas, heater))

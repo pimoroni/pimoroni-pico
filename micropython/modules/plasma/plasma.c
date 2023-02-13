@@ -68,8 +68,8 @@ MP_DEFINE_CONST_OBJ_TYPE(
     PlasmaWS2812_type,
     MP_QSTR_plasma_ws2812,
     MP_TYPE_FLAG_NONE,
-    make_new, PlasmaWS2812_print,
-    print, PlasmaWS2812_make_new,
+    make_new, PlasmaWS2812_make_new,
+    print, PlasmaWS2812_print,
     locals_dict, (mp_obj_dict_t*)&PlasmaWS2812_locals_dict
 );
 #else

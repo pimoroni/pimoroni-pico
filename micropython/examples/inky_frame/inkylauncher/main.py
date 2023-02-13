@@ -1,8 +1,11 @@
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 import gc
 import time
 from machine import reset
 import inky_helper as ih
+
+# Uncomment the line for your Inky Frame display size
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 
 # Create a secrets.py with your Wifi details to be able to get the time
 #
@@ -20,6 +23,13 @@ graphics.set_font("bitmap8")
 
 
 def launcher():
+
+    # Apply an offset for the Inky Frame 5.7".
+    if HEIGHT == 448:
+        y_offset = 20
+    else:
+        y_offset = 0
+
     # Draws the menu
     graphics.set_pen(1)
     graphics.clear()
@@ -28,42 +38,43 @@ def launcher():
     graphics.set_pen(5)
     graphics.rectangle(0, 0, WIDTH, 50)
     graphics.set_pen(0)
-    graphics.text("Launcher", 245, 10, WIDTH, 4)
+    len = graphics.measure_text("Launcher", 4) // 2
+    graphics.text("Launcher", (WIDTH // 2 - len), 10, WIDTH, 4)
 
     graphics.set_pen(4)
-    graphics.rectangle(30, 60, WIDTH - 100, 50)
+    graphics.rectangle(30, HEIGHT - (340 + y_offset), WIDTH - 100, 50)
     graphics.set_pen(1)
-    graphics.text("A. NASA Picture of the Day", 35, 75, 600, 3)
+    graphics.text("A. NASA Picture of the Day", 35, HEIGHT - (325 + y_offset), 600, 3)
 
     graphics.set_pen(6)
-    graphics.rectangle(30, 120, WIDTH - 150, 50)
+    graphics.rectangle(30, HEIGHT - (280 + y_offset), WIDTH - 150, 50)
     graphics.set_pen(1)
-    graphics.text("B. Word Clock", 35, 135, 600, 3)
+    graphics.text("B. Word Clock", 35, HEIGHT - (265 + y_offset), 600, 3)
 
     graphics.set_pen(2)
-    graphics.rectangle(30, 180, WIDTH - 200, 50)
+    graphics.rectangle(30, HEIGHT - (220 + y_offset), WIDTH - 200, 50)
     graphics.set_pen(1)
-    graphics.text("C. Daily Activity", 35, 195, 600, 3)
+    graphics.text("C. Daily Activity", 35, HEIGHT - (205 + y_offset), 600, 3)
 
     graphics.set_pen(3)
-    graphics.rectangle(30, 240, WIDTH - 250, 50)
+    graphics.rectangle(30, HEIGHT - (160 + y_offset), WIDTH - 250, 50)
     graphics.set_pen(1)
-    graphics.text("D. Headlines", 35, 255, 600, 3)
+    graphics.text("D. Headlines", 35, HEIGHT - (145 + y_offset), 600, 3)
 
     graphics.set_pen(0)
-    graphics.rectangle(30, 300, WIDTH - 300, 50)
+    graphics.rectangle(30, HEIGHT - (100 + y_offset), WIDTH - 300, 50)
     graphics.set_pen(1)
-    graphics.text("E. Random Joke", 35, 315, 600, 3)
+    graphics.text("E. Random Joke", 35, HEIGHT - (85 + y_offset), 600, 3)
 
     graphics.set_pen(7)
-    graphics.rectangle(WIDTH - 100, 60, 70, 50)
-    graphics.rectangle(WIDTH - 150, 120, 120, 50)
-    graphics.rectangle(WIDTH - 200, 180, 170, 50)
-    graphics.rectangle(WIDTH - 250, 240, 220, 50)
-    graphics.rectangle(WIDTH - 300, 300, 270, 50)
+    graphics.rectangle(WIDTH - 100, HEIGHT - (340 + y_offset), 70, 50)
+    graphics.rectangle(WIDTH - 150, HEIGHT - (280 + y_offset), 120, 50)
+    graphics.rectangle(WIDTH - 200, HEIGHT - (220 + y_offset), 170, 50)
+    graphics.rectangle(WIDTH - 250, HEIGHT - (160 + y_offset), 220, 50)
+    graphics.rectangle(WIDTH - 300, HEIGHT - (100 + y_offset), 270, 50)
 
     graphics.set_pen(0)
-    graphics.text("Hold A + E, then press Reset, to return to the Launcher", 65, 370, 600, 2)
+    graphics.text("Hold A + E, then press Reset, to return to the Launcher", 65, HEIGHT - 30, 600, 2)
 
     ih.led_warn.on()
     graphics.update()

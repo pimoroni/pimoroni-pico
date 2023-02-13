@@ -67,10 +67,12 @@ extern mp_obj_t ModPicoGraphics_set_update_speed(mp_obj_t self_in, mp_obj_t upda
 extern mp_obj_t ModPicoGraphics_update_pen(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_reset_pen(mp_obj_t self_in, mp_obj_t pen);
 extern mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t ModPicoGraphics_hsv_to_rgb(size_t n_args, const mp_obj_t *args);
 
 // Pen
 extern mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen);
 extern mp_obj_t ModPicoGraphics_create_pen(size_t n_args, const mp_obj_t *args);
+extern mp_obj_t ModPicoGraphics_create_pen_hsv(size_t n_args, const mp_obj_t *args);
 
 // Primitives
 extern mp_obj_t ModPicoGraphics_set_clip(size_t n_args, const mp_obj_t *args);

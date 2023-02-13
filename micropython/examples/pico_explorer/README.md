@@ -12,6 +12,7 @@
   - [Weather Station (BME68X)](#weather-station-bme68x)
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights](#cheerlights)
+- [Other Resources](#other-resources)
 
 ## PicoGraphics
 
@@ -64,10 +65,17 @@ Plug a [BME680](https://shop.pimoroni.com/products/bme680-breakout) or [BME688](
 
 The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory  to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
-You'll also need to install the `micropython-urllib.urequest` library using Thonny's 'Tools' > 'Manage Packages'.
+You may also need to install the `micropython-urllib.urequest` library using Thonny's 'Tools' > 'Manage Packages'.
 
 ### Cheerlights
 [cheerlights.py](cheerlights.py)
 
 This Pico W example sets your Pico Explorer's screen (and optionally, a [RGB LED](https://shop.pimoroni.com/products/led-rgb-clear-common-cathode)) to the current #cheerlights colour.
+
+## Other Resources
+
+Here are some Pico Explorer community projects and resources that you might find useful! Note that code at the links below has not been tested by us and we're not able to offer support with it.
+
+- :link: [PicoGraphics Zoomable Mandelbrot](https://github.com/ExperiMentor/PicoGraphics_Zoomable_Mandelbrot)
+
 

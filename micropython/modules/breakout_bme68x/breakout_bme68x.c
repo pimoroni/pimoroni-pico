@@ -11,6 +11,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBME68X_configure_obj, 1, BreakoutBME68X_confi
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutBME68X_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutBME68X_read_obj) },
+    { MP_ROM_QSTR(MP_QSTR_configure), MP_ROM_PTR(&BreakoutBME68X_configure_obj) },
 };
 STATIC MP_DEFINE_CONST_DICT(BreakoutBME68X_locals_dict, BreakoutBME68X_locals_dict_table);
 

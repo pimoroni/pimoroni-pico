@@ -28,8 +28,10 @@ uint16_t durations[profile_length] = { 5, 2, 10, 30, 5, 5, 5, 5, 5, 5 };
 
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   stdio_init_all();
 

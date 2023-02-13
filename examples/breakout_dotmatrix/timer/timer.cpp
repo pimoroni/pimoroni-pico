@@ -11,8 +11,10 @@ BreakoutDotMatrix display(&i2c);
 bool led_toggle = false;
 
 int main() {
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   display.init();
   display.show();
@@ -37,7 +39,9 @@ int main() {
     display.set_character(5, right);
     display.show();
 
+#ifdef PICO_DEFAULT_LED_PIN
     gpio_put(PICO_DEFAULT_LED_PIN, led_toggle);
+#endif
     led_toggle = !led_toggle;
 
     sleep_ms(1000 / 60);

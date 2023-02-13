@@ -14,6 +14,7 @@
 - [Wireless Examples](#wireless-examples)
   - [Sunrise / Sunset](#sunrise--sunset)
   - [Zoo Facts](#zoo-facts)
+- [Other Resources](#other-resources)
 
 ## About Pico GFX Pack
 
@@ -121,5 +122,12 @@ Find out more about Zoo Animal API here: https://zoo-animal-api.herokuapp.com/
 - B = Last animal
 - D = Show stats
 - E = Fetch a different 5 animals
+
+## Other Resources
+
+Here are some GFX Pack community projects and resources that you might find useful! Note that code at the links below has not been tested by us and we're not able to offer support with it.
+
+- :link: [Octopus Energy Monitor](https://github.com/MaverickUK/OctopusEnergyMonitorPicoW)
+
 
 

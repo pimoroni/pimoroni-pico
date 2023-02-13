@@ -560,6 +560,21 @@ namespace pimoroni {
           set_pixel(x, y, r, g, b);
         }
       }
+      else if(graphics->pen_type == PicoGraphics::PEN_RGB332) {
+        uint8_t *p = (uint8_t *)graphics->frame_buffer;
+        for(size_t j = 0; j < 53 * 11; j++) {
+          int x = j % 53;
+          int y = j / 53;
+
+          uint8_t col = *p;
+          uint8_t r = (col & 0b11100000);
+          uint8_t g = (col & 0b00011100) << 3;
+          uint8_t b = (col & 0b00000011) << 6;
+          p++;
+
+          set_pixel(x, y, r, g, b);
+        }
+      }
     }
   }
 

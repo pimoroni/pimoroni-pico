@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 699477d12d1aa1cb57ff6cfc3f5dc5e97524dbe6
+  MICROPYTHON_VERSION: 67fac4ebc53db6337008ba06df7932faec80f57c
 
 jobs:
   deps:
@@ -71,6 +71,8 @@ jobs:
         - name: picow_enviro
           board: PICO_W_ENVIRO
         - name: picow_galactic_unicorn
+          board: PICO_W
+        - name: picow_cosmic_unicorn
           board: PICO_W
         - name: picow_inky_frame
           board: PICO_W_INKY

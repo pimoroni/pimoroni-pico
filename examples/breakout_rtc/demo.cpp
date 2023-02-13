@@ -10,8 +10,10 @@ BreakoutRTC rtc(&i2c);
 int main() {
   stdio_init_all();
 
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   if(!rtc.init()) {
     printf("Init failed! Check your connections and i2c pin choices.\n");
@@ -36,9 +38,13 @@ int main() {
       // Update the locally stored time from the RTC
       if(rtc.update_time()) {
         printf("Date: %s, Time: %s\n", rtc.string_date(), rtc.string_time());
+#ifdef PICO_DEFAULT_LED_PIN
         gpio_put(PICO_DEFAULT_LED_PIN, true);
+#endif
         sleep_ms(100);
+#ifdef PICO_DEFAULT_LED_PIN
         gpio_put(PICO_DEFAULT_LED_PIN, false);
+#endif
       }
     }
     sleep_ms(100);

@@ -10,8 +10,10 @@ BreakoutMICS6814 mics6814;
 int main() {
   stdio_init_all();
 
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   mics6814.init();
   mics6814.set_heater(true);
