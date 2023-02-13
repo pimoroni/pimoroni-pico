@@ -174,7 +174,7 @@ class Badger2040W():
 
     def connect(self):
         if WIFI_CONFIG.COUNTRY == "":
-            raise RuntimeError("You must populate WIFI_CONFIG for networking.")
+            raise RuntimeError("You must populate WIFI_CONFIG.py for networking.")
         self.display.set_update_speed(2)
         network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=self.status_handler)
         uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
