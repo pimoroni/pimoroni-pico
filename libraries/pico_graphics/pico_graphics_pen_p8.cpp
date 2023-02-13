@@ -39,6 +39,13 @@ namespace pimoroni {
         }
         return -1;
     }
+    int PicoGraphics_PenP8::create_pen_hsv(float h, float s, float v) {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        from_hsv(h, s, v, r, g, b);
+        return create_pen(r, g, b);
+    }
     int PicoGraphics_PenP8::reset_pen(uint8_t i) {
         palette[i] = {0, 0, 0};
         used[i] = false;
