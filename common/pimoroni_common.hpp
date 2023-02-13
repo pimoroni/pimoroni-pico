@@ -54,7 +54,8 @@ namespace pimoroni {
       PLASMA_2040,
       INTERSTATE_75,
       SERVO_2040,
-      MOTOR_2040
+      MOTOR_2040,
+      CAMERA_PACK
     };
   
     enum Rotation {

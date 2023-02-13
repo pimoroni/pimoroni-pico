@@ -1,0 +1,28 @@
+; TODO: Make the hsync and pclk pins configurable
+; Probably requires editing the program on the fly
+; For the moment you set the base data pin and hsync and pclk are
+; correct for the camera pack
+.program ov2640
+.wrap_target
+    wait 1 pin 18  ; wait for hsync
+    wait 1 pin 24  ; wait for rising pclk
+    in pins 8
+    wait 0 pin 24
+.wrap
+
+% c-sdk {
+void ov2640_program_init(PIO pio, uint sm, uint offset, uint pin_base) {
+    gpio_init(pin_base + 18);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_base, 8, false);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin_base + 18, 1, false);
+    pio_sm_set_consecutive_pindirs(pio, sm, (pin_base + 24) % 32, 1, false);
+
+    pio_sm_config c = ov2640_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, pin_base);
+    sm_config_set_in_shift(&c, false, true, 32);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

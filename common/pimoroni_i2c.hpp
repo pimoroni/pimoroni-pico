@@ -19,6 +19,7 @@ namespace pimoroni {
         I2C(BOARD board, uint32_t baudrate = I2C_DEFAULT_BAUDRATE) : baudrate(baudrate) {
           switch(board) {
             case BREAKOUT_GARDEN:
+            case CAMERA_PACK:
               sda = I2C_BG_SDA;
               scl = I2C_BG_SCL;
               interrupt = I2C_BG_INT;

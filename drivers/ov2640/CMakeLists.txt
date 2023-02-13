@@ -1,0 +1,1 @@
+include(ov2640.cmake)
