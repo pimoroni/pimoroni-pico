@@ -15,15 +15,16 @@ try:
     text = open("/qrcodes/qrcode.txt", "r")
 except OSError:
     text = open("/qrcodes/qrcode.txt", "w")
-    text.write("""https://pimoroni.com/badger2040
-Badger 2040
+    text.write("""https://pimoroni.com/badger2040w
+Badger 2040 W
 * 296x128 1-bit e-ink
-* six user buttons
+* 2.4GHz wireless
+* five user buttons
 * user LED
 * 2MB QSPI flash
 
 Scan this code to learn
-more about Badger 2040.
+more about Badger 2040 W.
 """)
     text.flush()
     text.seek(0)
@@ -125,7 +126,7 @@ while True:
     if display.pressed(badger2040w.BUTTON_B) or display.pressed(badger2040w.BUTTON_C):
         display.set_pen(15)
         display.clear()
-        badger_os.warning(display, "To add QR codes, connect Badger2040W to a PC, load up Thonny, and see qrgen.py.")
+        badger_os.warning(display, "To add QR codes, connect Badger 2040 W to a PC, load up Thonny, and add files to /qrcodes directory.")
         time.sleep(4)
         changed = True
 
