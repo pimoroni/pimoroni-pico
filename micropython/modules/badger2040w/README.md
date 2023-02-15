@@ -1,6 +1,6 @@
-# Badger 2040 WW <!-- omit in toc -->
+# Badger 2040 W <!-- omit in toc -->
 
-Badger 2040 WW is a Raspberry Pi Pico W powered E Ink badge.
+Badger 2040 W is a Raspberry Pi Pico W powered E Ink badge.
 
 - [Summary](#summary)
   - [Differences between Badger 2040 W and Badger 2040](#differences-between-badger-2040-w-and-badger-2040)
@@ -34,7 +34,7 @@ Badger 2040 WW is a Raspberry Pi Pico W powered E Ink badge.
 
 Badger 2040 W switches from the Badger-specific drawing library of Badger 2040, to our generic PicoGraphics library.
 
-PicoGraphics brings some great improvements, such as JPEG support with ditering and cross-compatibility between all of our other display products.
+PicoGraphics brings some great improvements, such as JPEG support with dithering and cross-compatibility between all of our other display products.
 
 We've tried to make the transition as simple as possible, but there are a few breaking changes you'll need to be aware of:
 
@@ -46,7 +46,7 @@ We've tried to make the transition as simple as possible, but there are a few br
 
 See the [PicoGraphics function reference](../picographics/README.md) for more information on how to draw to the display.
 
-Additionally Badger 2040 W does not have a "user" button since the bootsel (which originally doubled as "user") is aboard the attached Pico W.
+Additionally Badger 2040 W does not have a "user" button since the BOOTSEL button (which originally doubled as "user") is now aboard the attached Pico W.
 
 ## Getting Started
 
@@ -66,16 +66,20 @@ This will create a `Badger2040W` class called `badger` that will be used in the 
 Below is a list of other constants that have been made available, to help with the creation of more advanced programs.
 
 ### Screen Size
+
 * `WIDTH` = `296`
 * `HEIGHT` = `128`
 
 ### E Ink Pins
+
 * `BUSY` = `26`
 
 ### Power Pins
+
 * `ENABLE_3V3` = `10`
 
 ### Activity LED Pin
+
 * `LED` = `22`
 
 # Function Reference
@@ -88,7 +92,7 @@ Since Badger 2040 W is based upon PicoGraphics you should read the [PicoGraphics
 
 There are 16 pen colours - or "shades of grey" - to choose, from 0 (black) to 15 (white).
 
-Since Badger2040W cannot display colours other than black and white, any value from 1 to 14 will apply dithering when drawn, to simulate a shade of grey.
+Since Badger 2040 W cannot display colours other than black and white, any value from 1 to 14 will apply dithering when drawn, to simulate a shade of grey.
 
 ```python
 pen(
@@ -230,7 +234,6 @@ There are some useful functions to determine if Badger 2040 W has been woken by 
 
 Badger 2040 W includes a PCF85063a RTC which continues to run from battery when the Badger is off. It can be used to wake the Badger on a schedule.
 
-
 ## Update Speed
 
 The E Ink display on Badger 2040 W supports several update speeds. These can be set using `set_update_speed(speed)` where `speed` is a value from `0` to `3`. For convenience these speeds have been given the following constants:
@@ -252,7 +255,6 @@ The system clock speed of the RP2040 can be controlled, allowing power to be sav
 
 On USB, the system will not run slower than 48MHz, as that is the minimum clock speed required to keep the USB connection stable.
 
-It is best to set the clock speed as the first thing in your program, and you must not change it after initializing any drivers for any I2C hardware connected to the qwiic port.  To allow you to set the speed at the top of your program, this method is on the `badger2040w` module, rather than the `badger` instance, although we have made sure that it is safe to call it after creating a `badger` instance.
+It is best to set the clock speed as the first thing in your program, and you must not change it after initializing any drivers for any I2C hardware connected to the Qwiic port.  To allow you to set the speed at the top of your program, this method is on the `badger2040w` module, rather than the `badger` instance, although we have made sure that it is safe to call it after creating a `badger` instance.
 
 Note that `SYSTEM_TURBO` overclocks the RP2040 to 250MHz, and applies a small over voltage to ensure this is stable. We've found that every RP2040 we've tested is happy to run at this speed without any issues.
-
