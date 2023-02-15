@@ -1,0 +1,57 @@
+<http>
+<head>
+       <style>
+              h1 {
+              align-content: center;
+              color: rgb(192, 192, 214);
+              margin-left: 20px;
+              background-color: darkmagenta;
+              font-size: xxx-large;
+}
+       </style>
+       <script>
+              var getUrl = window.location;
+              var baseUrl = getUrl.protocol + "//" + getUrl.host;
+              var displayText
+
+              function updateCU(){
+
+                     displayText = document.getElementById('inputtxt').value
+                     fetch(baseUrl+"/text"+"?text"+"="+displayText)
+                     .then(response => {
+                     // indicates whether the response is successful (status code 200-299) or not
+                     if (!response.ok) {
+                     throw new Error(`Request failed with status ${reponse.status}`)
+                     }
+                     return response.json()
+                     })
+                     .then(data => {
+                     console.log(data)
+
+                     })
+                     .catch(error => console.log(error))
+              }
+
+       </script>
+</head>
+<body>
+<h1 id="title">Comic Unicorn Web Text</h1>
+<center>
+<label for="inputtxt"> Enter text to display(4 to 30 characters):</label>
+<br>
+
+<input type="text" id="inputtxt" name="inputtxt" required
+       minlength="4" maxlength="30" size="16">
+<br>
+<button class="favorite styled"
+       onclick="updateCU()"
+        type="button">
+    Update
+</button>
+<p>
+       Please type in what you wish to be displayed on the Cosmic Unicorn and whe you are ready hit update to update the display
+</p>
+
+</center>
+</body>
+</http>
