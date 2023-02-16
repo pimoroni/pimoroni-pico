@@ -170,7 +170,7 @@ namespace pimoroni {
         }, t, p.x, p.y, s, a);
       } else {
         hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
-          thicc_line(Point(x1, y1), Point(x2, y2), thickness);
+          thick_line(Point(x1, y1), Point(x2, y2), thickness);
         }, t, p.x, p.y, s, a);
       }
       return;
@@ -298,7 +298,7 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::thicc_line(Point p1, Point p2, uint thickness) {
+  void PicoGraphics::thick_line(Point p1, Point p2, uint thickness) {
     // general purpose line
     // lines are either "shallow" or "steep" based on whether the x delta
     // is greater than the y delta

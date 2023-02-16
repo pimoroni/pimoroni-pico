@@ -266,7 +266,7 @@ namespace pimoroni {
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
     void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
-    void thicc_line(Point p1, Point p2, uint thickness);
+    void thick_line(Point p1, Point p2, uint thickness);
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
