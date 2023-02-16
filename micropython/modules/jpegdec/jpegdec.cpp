@@ -95,9 +95,10 @@ MICROPY_EVENT_POLL_HOOK
         uint8_t *pixel = (uint8_t *)pDraw->pPixels;
         for(int y = 0; y < pDraw->iHeight; y++) {
             for(int x = 0; x < pDraw->iWidth; x++) {
-                if(x >= pDraw->iWidthUsed) break; // Clip to the used width
-                current_graphics->set_pen((uint8_t)(*pixel >> 4));
-                current_graphics->set_pixel({pDraw->x + x, pDraw->y + y});
+                if(x < pDraw->iWidthUsed) { // Clip to the used width
+                    current_graphics->set_pen((uint8_t)(*pixel >> 4));
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+                }
                 pixel++;
             }
         }

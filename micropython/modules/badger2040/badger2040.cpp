@@ -67,7 +67,7 @@ mp_obj_t Badger2040___del__(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
     // Try to ensure power is cut off when soft reset (IE: "Stop" in Thonny)
     self->badger2040->power_off();
-    delete self->badger2040;
+    //delete self->badger2040;
     return mp_const_none;
 }
 
@@ -101,7 +101,7 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
     badger2040_obj = m_new_obj_with_finaliser(_Badger2040_obj_t);
     badger2040_obj->base.type = &Badger2040_type;
     badger2040_obj->buf = buffer;
-    badger2040_obj->badger2040 = new pimoroni::Badger2040(buffer);
+    badger2040_obj->badger2040 = m_new_class(pimoroni::Badger2040, buffer);
     badger2040_obj->badger2040->init();
 
     return MP_OBJ_FROM_PTR(badger2040_obj);
