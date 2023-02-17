@@ -38,7 +38,7 @@ The easiest way to start displaying cool stuff on Badger is by using our `badger
 
 ## Examples
 
-Find out more about these examples in our Learn guide!
+Find out more about how to use these examples in our Learn guide:
 
 - [Getting Started with Badger 2040 W](https://learn.pimoroni.com/article/getting-started-with-badger-2040-w)
 
@@ -70,7 +70,7 @@ How to navigate the launcher.
 ### Image
 [image.py](examples/image.py)
 
-View (non-progressive) .jpegs on Badger.
+Display .jpegs on Badger.
 
 ### Info
 [info.py](examples/info.py)
