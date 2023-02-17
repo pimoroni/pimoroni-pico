@@ -105,6 +105,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Galactic Unicorn (dazzling 53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
 * Interstate 75 W (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75-w
 * Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
+* Badger 2040 W (E Ink badge) - https://shop.pimoroni.com/products/badger-2040-w
 
 ## Breakouts
 
@@ -145,7 +146,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 - :link: [Getting Started with (MicroPython on) Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 - :link: [Pico C/C++ Development on Windows / WSL](https://learn.pimoroni.com/article/pico-development-using-wsl)
-- :link: [Getting Started with Interstate 75](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
+- :link: [Getting Started with Interstate 75 (and W)](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
 - :link: [Getting Started with Plasma 2040](https://learn.pimoroni.com/article/plasma-2040)
 - :link: [Assembling Keybow 2040](https://learn.pimoroni.com/article/assembling-keybow-2040)
 - :link: [Getting Started with Badger 2040](https://learn.pimoroni.com/article/getting-started-with-badger-2040)
@@ -154,3 +155,4 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 - :link: [Getting Started with Inky Frame](https://learn.pimoroni.com/article/getting-started-with-inky-frame)
 - :link: [Getting Started with Automation 2040 W (and Mini)](https://learn.pimoroni.com/article/getting-started-with-automation-2040-w)
 - :link: [Assembling Wireless Plasma Kit](https://learn.pimoroni.com/article/assembling-wireless-plasma-kit)
+- :link: [Getting Started with Badger 2040 W](https://learn.pimoroni.com/article/getting-started-with-badger-2040-w)
