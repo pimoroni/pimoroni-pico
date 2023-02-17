@@ -1,11 +1,11 @@
 import math
-from galactic import GalacticUnicorn
+from cosmic import CosmicUnicorn
 
 graphics = None
 palette = None
 
-width = GalacticUnicorn.WIDTH
-height = GalacticUnicorn.HEIGHT
+width = CosmicUnicorn.WIDTH
+height = CosmicUnicorn.HEIGHT
 
 
 @micropython.native  # noqa: F821

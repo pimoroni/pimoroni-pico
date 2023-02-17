@@ -1,12 +1,12 @@
 import random
-from galactic import GalacticUnicorn
+from cosmic import CosmicUnicorn
 
 graphics = None
 palette = None
 
 # setup heat value buffer and fire parameters
-width = GalacticUnicorn.WIDTH + 2
-height = GalacticUnicorn.HEIGHT + 4
+width = CosmicUnicorn.WIDTH + 2
+height = CosmicUnicorn.HEIGHT + 4
 heat = [[0.0 for y in range(height)] for x in range(width)]
 fire_spawns = 5
 damping_factor = 0.97
@@ -70,8 +70,8 @@ def draw():
             heat[x][y] = average
 
     # render the heat values to the graphics buffer
-    for y in range(GalacticUnicorn.HEIGHT):
-        for x in range(GalacticUnicorn.WIDTH):
+    for y in range(CosmicUnicorn.HEIGHT):
+        for x in range(CosmicUnicorn.WIDTH):
             graphics.set_pen(pen_from_value(heat[x + 1][y]))
             graphics.pixel(x, y)
 

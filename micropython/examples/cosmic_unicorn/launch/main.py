@@ -1,13 +1,13 @@
 import time
 import machine
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 # overclock to 200Mhz
 machine.freq(200000000)
 
-# create galactic object and graphics surface for drawing
-galactic = GalacticUnicorn()
+# create cosmic object and graphics surface for drawing
+cosmic = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 brightness = 0.5
@@ -16,14 +16,14 @@ brightness = 0.5
 # returns the id of the button that is currently pressed or
 # None if none are
 def pressed():
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_A):
-        return GalacticUnicorn.SWITCH_A
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_B):
-        return GalacticUnicorn.SWITCH_B
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_C):
-        return GalacticUnicorn.SWITCH_C
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_D):
-        return GalacticUnicorn.SWITCH_D
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_A):
+        return CosmicUnicorn.SWITCH_A
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_B):
+        return CosmicUnicorn.SWITCH_B
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_C):
+        return CosmicUnicorn.SWITCH_C
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_D):
+        return CosmicUnicorn.SWITCH_D
     return None
 
 
@@ -33,30 +33,30 @@ while True:
     graphics.set_pen(graphics.create_pen(0, 0, 0))
     graphics.clear()
     graphics.set_pen(graphics.create_pen(155, 155, 155))
-    graphics.text("PRESS", 12, -1, -1, 1)
-    graphics.text("A B C OR D!", 2, 5, -1, 1)
+    graphics.text("PRESS", 3, 6, -1, 1)
+    graphics.text("A B C OR D!", 5, 14, 32, 1, 0)
 
     # brightness up/down
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         brightness += 0.01
-    if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if cosmic.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         brightness -= 0.01
     brightness = max(min(brightness, 1.0), 0.0)
 
-    galactic.set_brightness(brightness)
-    galactic.update(graphics)
+    cosmic.set_brightness(brightness)
+    cosmic.update(graphics)
 
-    if pressed() == GalacticUnicorn.SWITCH_A:
+    if pressed() == CosmicUnicorn.SWITCH_A:
         import fire as effect
         break
-    if pressed() == GalacticUnicorn.SWITCH_B:
+    if pressed() == CosmicUnicorn.SWITCH_B:
         import supercomputer as effect  # noqa: F811
         break
-    if pressed() == GalacticUnicorn.SWITCH_C:
+    if pressed() == CosmicUnicorn.SWITCH_C:
         import rainbow as effect        # noqa: F811
         break
-    if pressed() == GalacticUnicorn.SWITCH_D:
-        import retroprompt as effect    # noqa: F811
+    if pressed() == CosmicUnicorn.SWITCH_D:
+        import lava_lamp as effect    # noqa: F811
         break
 
     # pause for a moment
@@ -79,7 +79,7 @@ while True:
     if pressed() is not None:
         machine.reset()
 
-    sleep_pressed = galactic.is_pressed(GalacticUnicorn.SWITCH_SLEEP)
+    sleep_pressed = cosmic.is_pressed(CosmicUnicorn.SWITCH_SLEEP)
     if sleep_pressed and not was_sleep_pressed:
         sleep = not sleep
 
@@ -87,27 +87,27 @@ while True:
 
     if sleep:
         # fade out if screen not off
-        galactic.set_brightness(galactic.get_brightness() - 0.01)
+        cosmic.set_brightness(cosmic.get_brightness() - 0.01)
 
-        if galactic.get_brightness() > 0.0:
+        if cosmic.get_brightness() > 0.0:
             effect.draw()
 
         # update the display
-        galactic.update(graphics)
+        cosmic.update(graphics)
     else:
         effect.draw()
 
         # update the display
-        galactic.update(graphics)
+        cosmic.update(graphics)
 
         # brightness up/down
-        if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+        if cosmic.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
             brightness += 0.01
-        if galactic.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        if cosmic.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
             brightness -= 0.01
         brightness = max(min(brightness, 1.0), 0.0)
 
-        galactic.set_brightness(brightness)
+        cosmic.set_brightness(brightness)
 
     # pause for a moment (important or the USB serial device will fail
     time.sleep(0.001)
