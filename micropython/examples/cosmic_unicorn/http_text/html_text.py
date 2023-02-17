@@ -5,7 +5,6 @@ import WIFI_CONFIG
 from network_manager import NetworkManager
 import uasyncio as asyncio
 import uasyncio.core
-import gc
 
 
 '''
@@ -22,10 +21,11 @@ port = 80
 def convert_colour(colour_str):
     colour_str = colour_str.split(',')
     print(colour_str)
-    return colour_str[0],colour_str[1],colour_str[2]
+    return colour_str[0], colour_str[1], colour_str[2]
+
 
 class text:
-    
+
     def get(self, data):
         global MESSAGE, MESSAGE_COLOUR, BACKGROUND_COLOUR
         print(data)
@@ -42,7 +42,6 @@ class text:
         return {'message': 'text updated'}, 201
 
 
-
 def status_handler(mode, status, ip):
     global MESSAGE
     print("Network: {}".format(WIFI_CONFIG.SSID))
@@ -56,7 +55,8 @@ def status_handler(mode, status, ip):
     print(status_text)
     print("IP: {}".format(ip))
     MESSAGE = "{}".format(ip)
-    
+
+
 try:
     from tinyweb.server import webserver
 
@@ -79,7 +79,7 @@ html_file = open('index.html', 'r')
 
 # WIFI settings
 WIFI_COUNTRY = "GB"  # Changeme!
-    
+
 # Index page
 @app.route('/')
 async def index(request, response):
@@ -112,8 +112,6 @@ width = CosmicUnicorn.WIDTH
 height = CosmicUnicorn.HEIGHT
 
 
-
-
 # function for drawing outlined text
 def outline_text(text, x, y):
     graphics.set_pen(graphics.create_pen(int(OUTLINE_COLOUR[0]), int(OUTLINE_COLOUR[1]), int(OUTLINE_COLOUR[2])))
@@ -129,6 +127,7 @@ def outline_text(text, x, y):
     graphics.set_pen(graphics.create_pen(int(MESSAGE_COLOUR[0]), int(MESSAGE_COLOUR[1]), int(MESSAGE_COLOUR[2])))
     graphics.text(text, x, y, -1, 1)
 
+
 def run():
     # Setup wifi
     network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
@@ -143,17 +142,12 @@ def run():
 
 cu.set_brightness(0.5)
 
-# state constants
-
-
-
+# Start wifi connection
 run()
 
 
 async def message_update():
     global MESSAGE
-    
-    _message = MESSAGE
     last_time = time.ticks_ms()
     STATE_PRE_SCROLL = 0
     STATE_SCROLLING = 1
