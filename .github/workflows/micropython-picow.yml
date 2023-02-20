@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 67fac4ebc53db6337008ba06df7932faec80f57c
+  MICROPYTHON_VERSION: 294098d28e2bad0ac0aad0d72595d11a82798096
 
 jobs:
   deps:
