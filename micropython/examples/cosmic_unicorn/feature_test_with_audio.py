@@ -252,7 +252,7 @@ while True:
         was_c_pressed = False
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_D):
-        if not was_c_pressed:
+        if not was_d_pressed:
             # Stop synth (if running) and play Tone B
             timer.deinit()
             tone_b = 600
@@ -291,7 +291,7 @@ while True:
             channels[0].frequency(tone_a)
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
-        if not was_d_pressed:
+        if not was_z_pressed:
             # Stop synth and both tones
             tone_a = 0
             tone_b = 0
