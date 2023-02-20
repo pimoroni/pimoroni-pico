@@ -1,8 +1,8 @@
 diff --git a/src/rp2_common/pico_runtime/runtime.c b/src/rp2_common/pico_runtime/runtime.c
-index 70dd3bb..b8c1ed0 100644
+index f9018d0..ae8c479 100644
 --- a/src/rp2_common/pico_runtime/runtime.c
 +++ b/src/rp2_common/pico_runtime/runtime.c
-@@ -17,6 +17,7 @@
+@@ -20,6 +20,7 @@
  #include "hardware/clocks.h"
  #include "hardware/irq.h"
  #include "hardware/resets.h"
@@ -10,7 +10,7 @@ index 70dd3bb..b8c1ed0 100644
  
  #include "pico/mutex.h"
  #include "pico/time.h"
-@@ -32,6 +33,21 @@
+@@ -35,6 +36,21 @@
  #include "pico/bootrom.h"
  #endif
  
@@ -32,7 +32,7 @@ index 70dd3bb..b8c1ed0 100644
  extern char __StackLimit; /* Set by linker.  */
  
  uint32_t __attribute__((section(".ram_vector_table"))) ram_vector_table[48];
-@@ -61,11 +77,18 @@ void runtime_install_stack_guard(void *stack_bottom) {
+@@ -64,7 +80,13 @@ void runtime_install_stack_guard(void *stack_bottom) {
                     | 0x10000000; // XN = disable instruction fetch; no other bits means no permissions
  }
  
@@ -47,12 +47,7 @@ index 70dd3bb..b8c1ed0 100644
      // Reset all peripherals to put system into a known state,
      // - except for QSPI pads and the XIP IO bank, as this is fatal if running from flash
      // - and the PLLs, as this is fatal if clock muxing has not been reset on this boot
-     // - and USB, syscfg, as this disturbs USB-to-SWD on core 1
-+
-     reset_block(~(
-             RESETS_RESET_IO_QSPI_BITS |
-             RESETS_RESET_PADS_QSPI_BITS |
-@@ -86,7 +109,9 @@ void runtime_init(void) {
+@@ -89,7 +111,9 @@ void runtime_init(void) {
              RESETS_RESET_UART1_BITS |
              RESETS_RESET_USBCTRL_BITS
      ));
@@ -63,19 +58,19 @@ index 70dd3bb..b8c1ed0 100644
      // (basically anything in aeabi that uses bootrom)
  
 diff --git a/src/rp2_common/pico_standard_link/crt0.S b/src/rp2_common/pico_standard_link/crt0.S
-index b2992f6..6091e70 100644
+index d061108..e48d870 100644
 --- a/src/rp2_common/pico_standard_link/crt0.S
 +++ b/src/rp2_common/pico_standard_link/crt0.S
-@@ -9,6 +9,8 @@
- #include "hardware/regs/addressmap.h"
+@@ -10,6 +10,8 @@
  #include "hardware/regs/sio.h"
+ #include "pico/asm_helper.S"
  #include "pico/binary_info/defs.h"
 +#include "hardware/regs/resets.h"
 +#include "hardware/regs/rosc.h"
  
  #ifdef NDEBUG
  #ifndef COLLAPSE_IRQS
-@@ -225,6 +227,23 @@ _reset_handler:
+@@ -226,6 +228,23 @@ _reset_handler:
      cmp r0, #0
      bne hold_non_core0_in_bootrom
  
@@ -99,7 +94,7 @@ index b2992f6..6091e70 100644
      // In a NO_FLASH binary, don't perform .data copy, since it's loaded
      // in-place by the SRAM load. Still need to clear .bss
  #if !PICO_NO_FLASH
-@@ -251,6 +270,10 @@ bss_fill_test:
+@@ -252,6 +271,10 @@ bss_fill_test:
      cmp r1, r2
      bne bss_fill_loop
  
@@ -110,7 +105,7 @@ index b2992f6..6091e70 100644
  platform_entry: // symbol for stack traces
      // Use 32-bit jumps, in case these symbols are moved out of branch range
      // (e.g. if main is in SRAM and crt0 in flash)
-@@ -314,6 +337,19 @@ data_cpy_table:
+@@ -311,6 +334,19 @@ data_cpy_table:
  runtime_init:
      bx lr
  
@@ -130,7 +125,7 @@ index b2992f6..6091e70 100644
  // ----------------------------------------------------------------------------
  // If core 1 somehow gets into crt0 due to a spectacular VTOR mishap, we need to
  // catch it and send back to the sleep-and-launch code in the bootrom. Shouldn't
-@@ -345,3 +381,9 @@ __get_current_exception:
+@@ -335,3 +371,9 @@ hold_non_core0_in_bootrom:
  .align 2
      .equ HeapSize, PICO_HEAP_SIZE
  .space HeapSize
