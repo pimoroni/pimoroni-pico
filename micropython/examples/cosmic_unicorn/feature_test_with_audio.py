@@ -56,7 +56,43 @@ bass_notes = (
     SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0)
 
 notes = [melody_notes, rhythm_notes, drum_beats, hi_hat, bass_notes]
-channels = [gu.synth_channel(i) for i in range(len(notes))]
+channels = [gu.synth_channel(i) for i in range(len(notes) + 1)]  # Extra channel for tones
+
+# Configure the synth to play our notes
+channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
+                      attack=0.016,
+                      decay=0.168,
+                      sustain=0xafff / 65535,
+                      release=0.168,
+                      volume=10000 / 65535)
+
+channels[1].configure(waveforms=Channel.SINE + Channel.SQUARE,
+                      attack=0.038,
+                      decay=0.300,
+                      sustain=0,
+                      release=0,
+                      volume=12000 / 65535)
+
+channels[2].configure(waveforms=Channel.NOISE,
+                      attack=0.005,
+                      decay=0.010,
+                      sustain=16000 / 65535,
+                      release=0.100,
+                      volume=18000 / 65535)
+
+channels[3].configure(waveforms=Channel.NOISE,
+                      attack=0.005,
+                      decay=0.005,
+                      sustain=8000 / 65535,
+                      release=0.040,
+                      volume=8000 / 65535)
+
+channels[4].configure(waveforms=Channel.SQUARE,
+                      attack=0.010,
+                      decay=0.100,
+                      sustain=0,
+                      release=0.500,
+                      volume=12000 / 65535)
 
 
 def gradient(r, g, b):
@@ -116,6 +152,8 @@ tone_b = 0
 # The current synth beat
 beat = 0
 
+text = ""
+
 
 def next_beat():
     global beat
@@ -145,37 +183,12 @@ while True:
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_A):
         if not was_a_pressed:
-            # Configure the synth to play our notes
-            channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
-                                  attack=0.016,
-                                  decay=0.168,
-                                  sustain=0xafff / 65535,
-                                  release=0.168,
-                                  volume=10000 / 65535)
-            channels[1].configure(waveforms=Channel.SINE + Channel.SQUARE,
-                                  attack=0.038,
-                                  decay=0.300,
-                                  sustain=0,
-                                  release=0,
-                                  volume=12000 / 65535)
-            channels[2].configure(waveforms=Channel.NOISE,
-                                  attack=0.005,
-                                  decay=0.010,
-                                  sustain=16000 / 65535,
-                                  release=0.100,
-                                  volume=18000 / 65535)
-            channels[3].configure(waveforms=Channel.NOISE,
-                                  attack=0.005,
-                                  decay=0.005,
-                                  sustain=8000 / 65535,
-                                  release=0.040,
-                                  volume=8000 / 65535)
-            channels[4].configure(waveforms=Channel.SQUARE,
-                                  attack=0.010,
-                                  decay=0.100,
-                                  sustain=0,
-                                  release=0.500,
-                                  volume=12000 / 65535)
+            channels[0].volume(10000 / 65535)
+            channels[1].volume(12000 / 65535)
+            channels[2].volume(18000 / 65535)
+            channels[3].volume(8000 / 65535)
+            channels[4].volume(12000 / 65535)
+            channels[5].volume(0)
 
             # If the synth is not already playing, init the first beat
             if not synthing:
@@ -192,37 +205,12 @@ while True:
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_B):
         if not was_b_pressed:
-            # Configure the synth to play our notes, but with only one channel audable
-            channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
-                                  attack=0.016,
-                                  decay=0.168,
-                                  sustain=0,
-                                  release=0.168,
-                                  volume=0)
-            channels[1].configure(waveforms=Channel.SINE + Channel.SQUARE,
-                                  attack=0.038,
-                                  decay=0.300,
-                                  sustain=0,
-                                  release=0,
-                                  volume=12000 / 65535)
-            channels[2].configure(waveforms=Channel.NOISE,
-                                  attack=0.005,
-                                  decay=0.010,
-                                  sustain=16000 / 65535,
-                                  release=0.100,
-                                  volume=0)
-            channels[3].configure(waveforms=Channel.NOISE,
-                                  attack=0.005,
-                                  decay=0.005,
-                                  sustain=8000 / 65535,
-                                  release=0.040,
-                                  volume=0)
-            channels[4].configure(waveforms=Channel.SQUARE,
-                                  attack=0.010,
-                                  decay=0.100,
-                                  sustain=0,
-                                  release=0.500,
-                                  volume=0)
+            channels[0].volume(0)
+            channels[1].volume(12000 / 65535)
+            channels[2].volume(0)
+            channels[3].volume(0)
+            channels[4].volume(0)
+            channels[5].volume(0)
 
             # If the synth is not already playing, init the first beat
             if not synthing:
@@ -242,7 +230,8 @@ while True:
             # Stop synth (if running) and play Tone A
             timer.deinit()
             tone_a = 400
-            channels[0].play_tone(tone_a, 0.06)
+            channels[5].play_tone(tone_a, 0.06)
+            channels[5].volume(12000 / 65535)
 
             gu.play_synth()
             synthing = False
@@ -257,7 +246,8 @@ while True:
             timer.deinit()
             tone_b = 600
 
-            channels[1].play_tone(tone_b, 0.06, attack=0.5)
+            channels[5].play_tone(tone_b, 0.06, attack=0.5)
+            channels[5].volume(12000 / 65535)
 
             gu.play_synth()
             synthing = False
@@ -270,25 +260,25 @@ while True:
         if tone_b > 0:  # Zero means tone not playing
             # Increase Tone B
             tone_b = min(tone_b + 10, 20000)
-            channels[1].frequency(tone_b)
+            channels[5].frequency(tone_b)
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         if tone_b > 0:  # Zero means tone not playing
             # Decrease Tone B
             tone_b = max(tone_b - 10, 10)
-            channels[1].frequency(max(tone_b, 10))
+            channels[5].frequency(max(tone_b, 10))
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         if tone_a > 0:  # Zero means tone not playing
             # Increase Tone A
             tone_a = min(tone_a + 10, 20000)
-            channels[0].frequency(tone_a)
+            channels[5].frequency(tone_a)
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         if tone_a > 0:  # Zero means tone not playing
             # Decrease Tone A
             tone_a = max(tone_a - 10, 10)
-            channels[0].frequency(tone_a)
+            channels[5].frequency(tone_a)
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         if not was_z_pressed:
@@ -321,8 +311,6 @@ while True:
     elif test == 4:
         # print("white gradient")
         gradient(255, 255, 255)
-
-    text = ""
 
     if gu.is_pressed(CosmicUnicorn.SWITCH_A):
         text = "PlaySyn"
