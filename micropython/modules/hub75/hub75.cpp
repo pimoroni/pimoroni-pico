@@ -86,7 +86,8 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         ARG_buffer,
         ARG_panel_type,
         ARG_stb_invert,
-        ARG_color_order
+        ARG_color_order,
+	ARG_refresh_rate,
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -95,6 +96,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         { MP_QSTR_panel_type, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_stb_invert, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_color_order, MP_ARG_INT, {.u_int = (uint8_t)Hub75::COLOR_ORDER::RGB} },
+        { MP_QSTR_refresh_rate, MP_ARG_INT, {.u_int = 16} },
     };
 
     // Parse args.
