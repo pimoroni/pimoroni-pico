@@ -145,7 +145,10 @@ MICROPY_EVENT_POLL_HOOK
                 } else if (current_graphics->pen_type == PicoGraphics::PEN_RGB888) {
                     current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb888());
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});
-                } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 || current_graphics->pen_type == PicoGraphics::PEN_P4 || current_graphics->pen_type == PicoGraphics::PEN_3BIT) {
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 
+                || current_graphics->pen_type == PicoGraphics::PEN_P4
+                || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
                     current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
@@ -262,6 +265,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
         case PicoGraphics::PEN_P8:
         case PicoGraphics::PEN_P4:
         case PicoGraphics::PEN_3BIT:
+        case PicoGraphics::PEN_INKY7:
             self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
             break;
         // TODO 2-bit is currently unsupported

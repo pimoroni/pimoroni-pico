@@ -16,6 +16,6 @@ if [[ ! -d "$MPY_DIR/boards/$BOARD" ]] && [[ -d "$FIXUP_DIR/$NAME/$BOARD/" ]]; t
 fi
 
 if [[ -f "$FIXUP_DIR/$NAME/fixup.sh" ]]; then
-    echo "Running custom fixup[.sh"
+    echo "Running custom fixup.sh"
     bash "$FIXUP_DIR/$NAME/fixup.sh" "$FIXUP_DIR/$NAME" "$MPY_DIR"
 fi

@@ -14,6 +14,9 @@ LED_C = 13
 LED_D = 14
 LED_E = 15
 
+LED_BUSY = 6
+LED_WIFI = 7
+
 SHIFT_STATE = get_shift_state()
 
 reset_shift_state()
@@ -66,3 +69,6 @@ button_b = Button(sr, 6, LED_B)
 button_c = Button(sr, 5, LED_C)
 button_d = Button(sr, 4, LED_D)
 button_e = Button(sr, 3, LED_E)
+
+led_busy = Pin(LED_BUSY, Pin.OUT)
+led_wifi = Pin(LED_WIFI, Pin.OUT)
