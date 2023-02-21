@@ -130,6 +130,7 @@ namespace pimoroni {
     bool contains(const Point &p) const;
     bool contains(const Rect &p) const;
     bool intersects(const Rect &r) const;
+    bool equals(const Rect &r) const;
     Rect intersection(const Rect &r) const;
 
     void inflate(int32_t v);
@@ -182,12 +183,16 @@ namespace pimoroni {
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
+    typedef std::function<void(RGB565 *data)> next_scanline_func;
+
     //typedef std::function<void(int y)> scanline_interrupt_func;
 
     //scanline_interrupt_func scanline_interrupt = nullptr;
 
     const bitmap::font_t *bitmap_font;
     const hershey::font_t *hershey_font;
+
+    bool owned_frame_buffer = false;
 
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return RGB(r, g, b).to_rgb332();
@@ -225,6 +230,12 @@ namespace pimoroni {
       set_font(&font6);
     };
 
+    virtual ~PicoGraphics() 
+    {
+      if(owned_frame_buffer)
+        delete (uint8_t*)frame_buffer;
+    };
+
     virtual void set_pen(uint c) = 0;
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void set_pixel(const Point &p) = 0;
@@ -239,6 +250,7 @@ namespace pimoroni {
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void set_pixel_dither(const Point &p, const uint8_t &c);
     virtual void frame_convert(PenType type, conversion_callback_func callback);
+    virtual void rect_convert(PenType type, Rect rect, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
     void set_font(const bitmap::font_t *font);
@@ -258,6 +270,7 @@ namespace pimoroni {
     void pixel(const Point &p);
     void pixel_span(const Point &p, int32_t l);
     void rectangle(const Rect &r);
+    void rectangle_frame(const Rect &r);
     void circle(const Point &p, int32_t r);
     void character(const char c, const Point &p, float s = 2.0f, float a = 0.0f);
     void text(const std::string &t, const Point &p, int32_t wrap, float s = 2.0f, float a = 0.0f, uint8_t letter_spacing = 1);
@@ -270,12 +283,14 @@ namespace pimoroni {
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
+    void rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline);
+    void create_owned_frame_buffer(size_t size_in_bytes);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
     public:
       uint8_t color;
-    
+
       PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -347,6 +362,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return (w * h / 8) * 3;
       }
@@ -377,6 +393,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
       }
@@ -407,6 +424,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
@@ -428,6 +446,7 @@ namespace pimoroni {
       void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
@@ -477,6 +496,11 @@ namespace pimoroni {
       DisplayDriver(uint16_t width, uint16_t height, Rotation rotation)
        : width(width), height(height), rotation(rotation) {};
 
+      virtual ~DisplayDriver()
+      {
+        cleanup();
+      }
+
       virtual void update(PicoGraphics *display) {};
       virtual void partial_update(PicoGraphics *display, Rect region) {};
       virtual bool set_update_speed(int update_speed) {return false;};
@@ -486,4 +510,90 @@ namespace pimoroni {
       virtual void cleanup() {};
   };
 
+  struct TouchPoint {
+    int32_t x = 0, y = 0, z = 0;
+
+    TouchPoint() = default;
+    TouchPoint(int32_t x, int32_t y, int32_t z = 0) : x(x), y(y), z(z) {}
+  };
+
+  class TouchDriver {
+    public:
+      TouchDriver(uint16_t width, uint16_t height, Rotation rotation)
+         : width(width), height(height), rotation(rotation) {
+         }
+
+      virtual ~TouchDriver() {
+        cleanup();
+      }
+
+      virtual void update(uint16_t average_samples = 16) = 0;
+      virtual void cleanup() {};
+
+      bool is_touched() {
+        return touch_down;
+      }
+
+      TouchPoint get_touch() {
+        return touch;
+      }
+
+      TouchPoint get_raw_touch() {
+        return raw_touch;
+      }
+
+      Point get_point() {
+        return Point(touch.x, touch.y);
+      }
+
+      Rotation get_rotation() {
+        return rotation;
+      }
+
+      void set_z_enabled(bool enabled) {
+        z_enabled = enabled;
+      }
+      
+      void calibrate_z(uint16_t min_pressure, uint16_t max_pressure) {
+        raw_min.z = min_pressure;
+        raw_max.z = max_pressure;
+      }
+
+      void calibrate_xy(TouchPoint top_left, TouchPoint bottom_right, uint16_t pixel_inset) {
+        uint16_t dx = bottom_right.x - top_left.x;
+        uint16_t dy = bottom_right.y - top_left.y;
+        uint16_t dx_pixel = width - (pixel_inset * 2);
+        uint16_t dy_pixel = height - (pixel_inset * 2);
+
+        float touch_px  = (float)dx / dx_pixel;
+        float touch_py  = (float)dy / dy_pixel;
+
+        uint16_t x_inset = touch_px * (pixel_inset);
+        uint16_t y_inset = touch_py * (pixel_inset);
+        
+        raw_min.x = top_left.x - x_inset;
+        raw_min.y = top_left.y - y_inset;
+
+        raw_max.x = bottom_right.x + x_inset;
+        raw_max.y = bottom_right.y + y_inset;
+      }
+
+      void calibrate_touchscreen(TouchPoint top_left, TouchPoint bottom_right, uint16_t min_pressure, uint16_t max_pressure, uint16_t pixel_inset) {
+        calibrate_xy(top_left, bottom_right, pixel_inset);
+        calibrate_z(min_pressure, max_pressure);
+      }
+
+    protected:
+      uint16_t  width;
+      uint16_t  height;
+      Rotation  rotation;
+      bool			touch_down = false;
+      bool			z_enabled  = true;
+
+      TouchPoint			raw_min = {0, 0, 0};
+      TouchPoint			raw_max = {0, 0, 0};
+      TouchPoint			raw_touch = {0, 0, 0};
+      TouchPoint			touch = {0, 0, 0};
+      uint16_t				median;
+  };
 }

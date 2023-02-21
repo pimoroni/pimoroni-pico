@@ -6,7 +6,7 @@ namespace pimoroni {
     : PicoGraphics(width, height, frame_buffer) {
         this->pen_type = PEN_RGB332;
         if(this->frame_buffer == nullptr) {
-            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+            create_owned_frame_buffer(buffer_size(width, height));
         }
     }
     void PicoGraphics_PenRGB332::set_pen(uint c) {
@@ -86,6 +86,17 @@ namespace pimoroni {
 
             frame_convert_rgb565(callback, [&]() {
                 return rgb332_to_rgb565_lut[*src++];
+            });
+        }
+    }
+    void PicoGraphics_PenRGB332::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {
+        if(type == PEN_RGB565) {
+            // Treat our void* frame_buffer as uint8_t
+            uint8_t *src = (uint8_t *)frame_buffer + rect.x + (rect.y * bounds.w);
+            rect_convert_rgb565(rect, callback, [&](RGB565 *data) {
+                for(int32_t i= 0; i < rect.w; i++)
+                  data[i] = rgb332_to_rgb565_lut[*src++];
+                src += bounds.w - rect.w;
             });
         }
     }

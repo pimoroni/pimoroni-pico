@@ -6,7 +6,7 @@ namespace pimoroni {
     : PicoGraphics(width, height, frame_buffer) {
         this->pen_type = PEN_3BIT;
         if(this->frame_buffer == nullptr) {
-            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+            create_owned_frame_buffer(buffer_size(width, height));
         }
         cache_built = false;
     }
@@ -118,4 +118,6 @@ namespace pimoroni {
             }
         }
     }
+    void PicoGraphics_Pen3Bit::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {
+    };
 }

@@ -11,7 +11,6 @@
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 
-#include "st7789_parallel.pio.h"
 
 #include <algorithm>
 
@@ -19,7 +18,7 @@
 namespace pimoroni {
 
 
-  class ST7789 : public DisplayDriver {
+  class ILI9341 : public DisplayDriver {
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
   
   public:
@@ -29,7 +28,6 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
-
     // interface pins with our standard defaults where appropriate
     uint cs;
     uint dc;
@@ -38,14 +36,8 @@ namespace pimoroni {
     uint d0;
     uint bl;
     uint vsync  = PIN_UNUSED; // only available on some products
-    uint parallel_sm;
-    PIO parallel_pio;
-    uint parallel_offset;
+    uint rst;
     uint st_dma_data;
-
-    // The ST7789 requires 16 ns between SPI rising edges.
-    // 16 ns = 62,500,000 Hz
-    static const uint32_t SPI_BAUD = 62'500'000;
 
     // current update rect and full screen rect
     Rect								full_screen_region;
@@ -70,73 +62,13 @@ namespace pimoroni {
 
 
   public:
-    // Parallel init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, ParallelPins pins, bool use_async_dma = false) :
-      DisplayDriver(width, height, rotation),
-      spi(nullptr), round(false),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl), use_async_dma(use_async_dma) {
-
-      parallel_pio = pio1;
-      parallel_sm = pio_claim_unused_sm(parallel_pio, true);
-      parallel_offset = pio_add_program(parallel_pio, &st7789_parallel_program);
-  
-      //gpio_init(wr_sck);
-      //gpio_set_dir(wr_sck, GPIO_OUT);
-      //gpio_set_function(wr_sck, GPIO_FUNC_SIO);
-      pio_gpio_init(parallel_pio, wr_sck);
-
-      gpio_set_function(rd_sck,  GPIO_FUNC_SIO);
-      gpio_set_dir(rd_sck, GPIO_OUT);
-
-      for(auto i = 0u; i < 8; i++) {
-        //gpio_set_function(d0 + i, GPIO_FUNC_SIO);
-        //gpio_set_dir(d0 + i, GPIO_OUT);
-        //gpio_init(d0 + 0); gpio_set_dir(d0 + i, GPIO_OUT);
-        pio_gpio_init(parallel_pio, d0 + i);
-      }
-
-      pio_sm_set_consecutive_pindirs(parallel_pio, parallel_sm, d0, 8, true);
-      pio_sm_set_consecutive_pindirs(parallel_pio, parallel_sm, wr_sck, 1, true);
-
-      pio_sm_config c = st7789_parallel_program_get_default_config(parallel_offset);
-
-      sm_config_set_out_pins(&c, d0, 8);
-      sm_config_set_sideset_pins(&c, wr_sck);
-      sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
-      sm_config_set_out_shift(&c, false, true, 8);
-      
-      // Determine clock divider
-      constexpr uint32_t max_pio_clk = 32 * MHZ;
-      const uint32_t sys_clk_hz = clock_get_hz(clk_sys);
-      const uint32_t clk_div = (sys_clk_hz + max_pio_clk - 1) / max_pio_clk;
-      sm_config_set_clkdiv(&c, clk_div);
-      
-      pio_sm_init(parallel_pio, parallel_sm, parallel_offset, &c);
-      pio_sm_set_enabled(parallel_pio, parallel_sm, true);
-
-
-      st_dma_data = dma_claim_unused_channel(true);
-      dma_data_config = dma_channel_get_default_config(st_dma_data);
-      channel_config_set_transfer_data_size(&dma_data_config, DMA_SIZE_8);
-      channel_config_set_bswap(&dma_data_config, false);
-      channel_config_set_dreq(&dma_data_config, pio_get_dreq(parallel_pio, parallel_sm, true));
-      dma_channel_configure(st_dma_data, &dma_data_config, &parallel_pio->txf[parallel_sm], NULL, 0, false);
-  
-      gpio_put(rd_sck, 1);
-
-      setup_dma_control_if_needed();
-
-      common_init();
-    }
-
-    // Serial init
-    ST7789(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins, bool use_async_dma = false) :
+    ILI9341(uint16_t width, uint16_t height, Rotation rotation, bool round, SPIPins pins, uint reset_pin = PIN_UNUSED, uint baud_rate = 62500000, bool use_async_dma = false) :
       DisplayDriver(width, height, rotation),
       spi(pins.spi), round(round),
-      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), use_async_dma(use_async_dma) {
+      cs(pins.cs), dc(pins.dc), wr_sck(pins.sck), d0(pins.mosi), bl(pins.bl), rst(reset_pin), use_async_dma(use_async_dma) {
 
       // configure spi interface and pins
-      spi_init(spi, SPI_BAUD);
+      spi_init(spi, baud_rate);
 
       gpio_set_function(wr_sck, GPIO_FUNC_SPI);
       gpio_set_function(d0, GPIO_FUNC_SPI);
@@ -153,7 +85,7 @@ namespace pimoroni {
       common_init();
     }
   
-    virtual ~ST7789()
+    virtual ~ILI9341()
     {
       cleanup();
     }
@@ -173,6 +105,9 @@ namespace pimoroni {
       }
     }
 
+    bool is_using_async_dma() {
+      return use_async_dma;
+    }
     void wait_for_update_to_finish()
     {
       if(use_async_dma && dma_control_chain_is_enabled) {
@@ -194,16 +129,18 @@ namespace pimoroni {
       in_dma_update = false;
     }
 
+
   private:
     void common_init();
     void configure_display(Rotation rotate);
     void write_blocking_dma(const uint8_t *src, size_t len);
-    void write_blocking_parallel(const uint8_t *src, size_t len);
-    void command(uint8_t command, size_t len = 0, const char *data = NULL, bool use_async_dma = false);
+    void command(uint8_t command, size_t len = 0, const char *data = NULL, bool bDataDma = false);
     void setup_dma_control_if_needed();
     void enable_dma_control(bool enable);
     void start_dma_control();
     bool set_update_region(Rect& update_rect);
-  };
+    void set_addr_window(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void reset();
 
+  };
 }
