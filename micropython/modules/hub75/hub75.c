@@ -4,6 +4,7 @@
 /***** Methods *****/
 MP_DEFINE_CONST_FUN_OBJ_1(Hub75___del___obj, Hub75___del__);
 MP_DEFINE_CONST_FUN_OBJ_KW(Hub75_set_pixel_obj, 5, Hub75_set_pixel);
+MP_DEFINE_CONST_FUN_OBJ_KW(Hub75_set_pixel_by_offset_obj, i4, Hub75_set_pixel_by_offset);
 MP_DEFINE_CONST_FUN_OBJ_1(Hub75_clear_obj, Hub75_clear);
 MP_DEFINE_CONST_FUN_OBJ_1(Hub75_start_obj, Hub75_start);
 MP_DEFINE_CONST_FUN_OBJ_1(Hub75_stop_obj, Hub75_stop);
@@ -14,6 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(Hub75_update_obj, Hub75_update);
 STATIC const mp_rom_map_elem_t Hub75_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Hub75___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&Hub75_set_pixel_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_pixel_by_offset), MP_ROM_PTR(&Hub75_set_pixel_by_offset_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&Hub75_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&Hub75_start_obj) },
     { MP_ROM_QSTR(MP_QSTR_stop), MP_ROM_PTR(&Hub75_stop_obj) },

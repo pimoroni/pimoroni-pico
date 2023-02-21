@@ -57,7 +57,28 @@ void Hub75::set_color(uint x, uint y, Pixel c) {
     back_buffer[offset] = c;
 }
  
-void Hub75::set_color_by_offset(int offset, Pixel c) {
+void Hub75::set_pixel_by_offset(int offset, uint8_t r, uint8_t g, uint8_t b) {
+    Pixel c = Pixel(r,g,b);
+    switch(color_order) {
+        case COLOR_ORDER::RGB:
+            c = Pixel(r, g, b);
+            break;
+        case COLOR_ORDER::RBG:
+            c = Pixel(r, b, g);
+            break;
+        case COLOR_ORDER::GRB:
+            c = Pixel(g, r, b);
+            break;
+        case COLOR_ORDER::GBR:
+            c = Pixel(g, b, r);
+            break;
+        case COLOR_ORDER::BRG:
+            c = Pixel(b, r, g);
+            break;
+        case COLOR_ORDER::BGR:
+            c = Pixel(b, g, r);
+            break;
+    }
     back_buffer[offset] = c;
 }
 
