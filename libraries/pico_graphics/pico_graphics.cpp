@@ -420,4 +420,34 @@ namespace pimoroni {
     // Callback with zero length to ensure previous buffer is fully written
     callback(row_buf[buf_idx], 0);
   }
+
+  // Common function for frame buffer conversion to 565 pixel format
+  void PicoGraphics::frame_convert_rgb888(conversion_callback_func callback, next_pixel_func_rgb888 get_next_pixel)
+  {
+    // Allocate two temporary buffers, as the callback may transfer by DMA
+    // while we're preparing the next part of the row
+    const int BUF_LEN = 64;
+    RGB888 row_buf[2][BUF_LEN];
+    int buf_idx = 0;
+    int buf_entry = 0;
+    for(auto i = 0; i < bounds.w * bounds.h; i++) {
+      row_buf[buf_idx][buf_entry] = get_next_pixel();
+      buf_entry++;
+
+      // Transfer a filled buffer and swap to the next one
+      if (buf_entry == BUF_LEN) {
+          callback(row_buf[buf_idx], BUF_LEN * sizeof(RGB888));
+          buf_idx ^= 1;
+          buf_entry = 0;
+      }
+    }
+
+    // Transfer any remaining pixels ( < BUF_LEN )
+    if(buf_entry > 0) {
+        callback(row_buf[buf_idx], buf_entry * sizeof(RGB888));
+    }
+
+    // Callback with zero length to ensure previous buffer is fully written
+    callback(row_buf[buf_idx], 0);
+  }
 }
