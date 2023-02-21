@@ -5,6 +5,11 @@ import machine
 
 # You will need to create or update the file secrets.py with your network credentials using Thonny
 # in order for the example to update using the NTP.
+
+# secrets.py should contain:
+# WIFI_SSID = ""
+# WIFI_PASSWORD = ""
+
 try:
     from secrets import WIFI_SSID, WIFI_PASSWORD
 except ImportError:
