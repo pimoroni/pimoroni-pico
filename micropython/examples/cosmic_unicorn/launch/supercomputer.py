@@ -1,15 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
 import random
 from cosmic import CosmicUnicorn
 
