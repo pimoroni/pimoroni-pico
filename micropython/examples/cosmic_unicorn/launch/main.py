@@ -56,7 +56,7 @@ while True:
         import rainbow as effect        # noqa: F811
         break
     if pressed() == CosmicUnicorn.SWITCH_D:
-        import lava_lamp as effect    # noqa: F811
+        import today as effect    # noqa: F811
         break
 
     # pause for a moment
