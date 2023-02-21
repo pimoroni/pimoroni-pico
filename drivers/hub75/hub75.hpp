@@ -121,7 +121,7 @@ class Hub75 {
 
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false, 16) {};
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB, uint refresh_rate=16);
     ~Hub75();
 
