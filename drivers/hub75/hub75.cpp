@@ -6,7 +6,7 @@
 
 namespace pimoroni {
 
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order, REFRESH_RATE refresh_rate)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order, uint refresh_rate)
  : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order), refresh_rate(refresh_rate)
  {
     // Set up allllll the GPIO
