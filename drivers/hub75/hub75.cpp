@@ -6,8 +6,8 @@
 
 namespace pimoroni {
 
-Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order)
- : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order)
+Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order, REFRESH_RATE refresh_rate)
+ : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order), refresh_rate(refresh_rate)
  {
     // Set up allllll the GPIO
     gpio_init(pin_r0); gpio_set_function(pin_r0, GPIO_FUNC_SIO); gpio_set_dir(pin_r0, true); gpio_put(pin_r0, 0);
@@ -56,6 +56,10 @@ void Hub75::set_color(uint x, uint y, Pixel c) {
     }
     back_buffer[offset] = c;
 }
+ 
+void Hub75::set_color_by_offset(int offset, Pixel c) {
+    back_buffer[offset] = c;
+}
 
 void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
     switch(color_order) {
@@ -86,7 +90,7 @@ void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
 
     uint8_t threshold = width - position;
     for(auto i = 0u; i < width; i++) {
-        auto j = i % 16;
+        auto j = i % refresh_rate;
         bool b = value & (1 << j);
 
         gpio_put(pin_r0, b);
