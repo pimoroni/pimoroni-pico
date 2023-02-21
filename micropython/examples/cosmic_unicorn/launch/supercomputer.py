@@ -1,5 +1,5 @@
 import random
-from galactic import GalacticUnicorn
+from cosmic import CosmicUnicorn
 
 graphics = None
 
@@ -8,8 +8,8 @@ colour = (230, 150, 0)
 
 def init():
     global width, height, lifetime, age
-    width = GalacticUnicorn.WIDTH
-    height = GalacticUnicorn.HEIGHT
+    width = CosmicUnicorn.WIDTH
+    height = CosmicUnicorn.HEIGHT
     lifetime = [[0.0 for y in range(height)] for x in range(width)]
     age = [[0.0 for y in range(height)] for x in range(width)]
     for y in range(height):
