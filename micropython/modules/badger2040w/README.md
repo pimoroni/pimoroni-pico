@@ -50,7 +50,7 @@ Additionally Badger 2040 W does not have a "user" button since the BOOTSEL butto
 
 ## Getting Started
 
-:warning: If you're using the examples-included firmware you're good to go, otherwise you'll need to copy `examples/badger2040w/lib/badger2040w.py` and `examples/badger2040w/lib/network_manager.py` over to your Badger 2040 W.
+:warning: If you're using the examples-included firmware you're good to go, otherwise you'll need to copy `examples/badger2040w/lib/badger2040w.py`, `micropython/examples/badger2040w/WIFI_CONFIG.py`and `examples/badger2040w/lib/network_manager.py` over to your Badger 2040 W.
 
 To start coding your Badger 2040 W, you will need to add the following lines of code to the start of your code file.
 
