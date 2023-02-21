@@ -95,7 +95,7 @@ There are 16 pen colours - or "shades of grey" - to choose, from 0 (black) to 15
 Since Badger 2040 W cannot display colours other than black and white, any value from 1 to 14 will apply dithering when drawn, to simulate a shade of grey.
 
 ```python
-pen(
+set_pen(
     colour  # int: colour from 0 to 15
 )
 ```
@@ -190,7 +190,7 @@ There are currently four constants naming the different update speeds from 0 to 
 * `UPDATE_TURBO` - a super fast update, prone to ghosting, great for making minor changes such as moving a cursor through a menu
 
 ```python
-update_speed(
+set_update_speed(
     speed  # int: one of the update constants
 )
 ```
