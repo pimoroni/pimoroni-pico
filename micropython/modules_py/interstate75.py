@@ -2,6 +2,7 @@ from pimoroni import RGBLED, Button
 from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32, DISPLAY_INTERSTATE75_64X32, DISPLAY_INTERSTATE75_96X32, DISPLAY_INTERSTATE75_128X32, DISPLAY_INTERSTATE75_64X64, DISPLAY_INTERSTATE75_128X64, DISPLAY_INTERSTATE75_192X64, DISPLAY_INTERSTATE75_256X64
 from pimoroni_i2c import PimoroniI2C
 import hub75
+import sys
 
 # Index Constants
 SWITCH_A = 0
@@ -40,12 +41,13 @@ class Interstate75:
     # Count Constants
     NUM_SWITCHES = 2
 
-    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB, interstate75w=False):
+    def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB):
+        self.interstate75w = "Pico W" in sys.implementation._machine
         self.display = PicoGraphics(display=display)
         self.width, self.height = self.display.get_bounds()
         self.hub75 = hub75.Hub75(self.width, self.height, panel_type=panel_type, stb_invert=stb_invert, color_order=color_order)
         self.hub75.start()
-        if interstate75w:
+        if self.interstate75w:
             self._switch_pins = self.SWITCH_PINS_W
         else:
             self._switch_pins = self.SWITCH_PINS

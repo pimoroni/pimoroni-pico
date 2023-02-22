@@ -4,7 +4,7 @@ Push either switch A, switch B or the BOOT switch (in the case of the non-w vers
 '''
 import interstate75
 
-i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32, interstate75w=True)
+i75 = interstate75.Interstate75(display=interstate75.DISPLAY_INTERSTATE75_32X32)
 graphics = i75.display
 
 width = i75.width

@@ -4,9 +4,10 @@ This library offers convenient functions for interacting with [Interstate75](htt
 
 ## Table of Content
 - [Table of Content](#table-of-content)
-- [Interstate75 Module](#interstate75-class)
+- [Interstate75 Class](#interstate75-class)
   - [Switches](#switches)
   - [RGB LED](#rgb-led)
+- [Display](#display)
 
 
 
@@ -14,7 +15,18 @@ This library offers convenient functions for interacting with [Interstate75](htt
 
 The `Interstate75` class deals with RGB LED and buttons on the Interstate75 and 75W. To create one, import the `interstate75` module, then define a new `board` variable.
 
-This is where you define the HUB75 matrix display size that you wish to use by defining `display=`
+
+```python
+import interstate75
+
+display = interstate75.DISPLAY_INTERSTATE75_32X32
+
+board = interstate75.Interstate75(display=display)
+```
+
+The version of Intersate75 you're using should be automatically detected. Check `board.interstate75w` to verify this. It should be `True` on a W and `False` on a non-W.
+
+You can choose the HUB75 matrix display size that you wish to use by defining `display=` as one of the following:
 
 ```python
 DISPLAY_INTERSTATE75_32X32
@@ -26,28 +38,6 @@ DISPLAY_INTERSTATE75_128X64
 DISPLAY_INTERSTATE75_192X64
 DISPLAY_INTERSTATE75_256X64
 ```
-
-You are able to set which version of the Interstate75 that you are using with the `interstate75w=`. By default this value is set to `True` to use the Interstate75W button layout. By setting it to `False` the module will use the Interstate75 button layout. If you are using an Interstate75W it is important to set this value to interstate75w=True, otherwise this could disable the WiFi in your project
-
-```python
-import interstate75
-
-display = interstate75.DISPLAY_INTERSTATE75_32X32
-
-board = interstate75.Interstate75(display=display)
-```
-
-Or for an Interstate75W.
-
-```python
-import interstate75
-
-display = interstate75.DISPLAY_INTERSTATE75_32X32
-
-board = interstate75.Interstate75(display=display, interstate75w=False)  # This is the setup to be able to access the both A and BOOT on the Interstate75 (non W)
-```
-
-From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
 
 ### Switches
 
