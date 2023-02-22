@@ -23,8 +23,8 @@ def draw(colour):
             graphics.pixel(x, y)
 
     gu.update(graphics)
-    
-  
+
+
 def status_handler(mode, status, ip):
     # reports wifi connection status
     print(mode, status, ip)
