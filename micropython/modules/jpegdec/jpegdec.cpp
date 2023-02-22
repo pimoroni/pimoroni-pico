@@ -149,7 +149,16 @@ MICROPY_EVENT_POLL_HOOK
                 || current_graphics->pen_type == PicoGraphics::PEN_P4
                 || current_graphics->pen_type == PicoGraphics::PEN_3BIT
                 || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
-                    current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
+                    if (current_flags & FLAG_NO_DITHER) {
+                        int closest = RGB((RGB565)pDraw->pPixels[i]).closest(current_graphics->get_palette(), current_graphics->get_palette_size());
+                        if (closest == -1) {
+                            closest = 0;
+                        }
+                        current_graphics->set_pen(closest);
+                        current_graphics->pixel({pDraw->x + x, pDraw->y + y});
+                    } else {
+                        current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
+                    }
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});

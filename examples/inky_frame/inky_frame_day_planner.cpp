@@ -4,7 +4,11 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 
+#ifdef INKY_FRAME_7
+#include "libraries/inky_frame_7/inky_frame_7.hpp"
+#else
 #include "libraries/inky_frame/inky_frame.hpp"
+#endif
 
 using namespace pimoroni;
 
