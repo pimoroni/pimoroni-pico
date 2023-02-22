@@ -1,3 +1,5 @@
+add_subdirectory(mandelbrot)
+
 set(OUTPUT_NAME pico_display2_demo)
 
 add_executable(
