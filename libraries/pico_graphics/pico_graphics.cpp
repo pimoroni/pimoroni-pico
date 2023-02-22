@@ -32,6 +32,9 @@ namespace pimoroni {
   void PicoGraphics::frame_convert(PenType type, conversion_callback_func callback) {};
   void PicoGraphics::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {};
 
+  int PicoGraphics::get_palette_size() {return 0;}
+  RGB* PicoGraphics::get_palette() {return nullptr;}
+
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};
   }
