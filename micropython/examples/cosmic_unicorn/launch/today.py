@@ -24,11 +24,12 @@ rtc = machine.RTC()
 
 DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
 
+# Enable the Wireless
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+
 
 def network_connect(SSID, PSK):
-    # Enable the Wireless
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
 
     # Number of attempts to make before timeout
     max_wait = 5
@@ -52,12 +53,16 @@ def network_connect(SSID, PSK):
 # Function to sync the Pico RTC using NTP
 def sync_time():
 
-    network_connect(WIFI_SSID, WIFI_PASSWORD)
-
     try:
-        ntptime.settime()
-    except OSError:
-        print("Unable to sync with NTP server. Check network and try again.")
+        network_connect(WIFI_SSID, WIFI_PASSWORD)
+    except NameError:
+        print("Create secrets.py with your WiFi credentials")
+
+    if wlan.status() < 0 or wlan.status() >= 3:
+        try:
+            ntptime.settime()
+        except OSError:
+            print("Unable to sync with NTP server. Check network and try again.")
 
 
 def init():
