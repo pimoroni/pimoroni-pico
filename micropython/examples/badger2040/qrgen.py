@@ -10,12 +10,18 @@ try:
 except OSError:
     pass
 
-# Check that there is a qrcode.txt, if not preload
+# Load all available QR Code Files
 try:
-    text = open("qrcodes/qrcode.txt", "r")
+    CODES = [f for f in os.listdir("/qrcodes") if f.endswith(".txt")]
 except OSError:
-    text = open("qrcodes/qrcode.txt", "w")
-    text.write("""https://pimoroni.com/badger2040
+    CODES = []
+
+# create demo QR code file if no QR code files exist
+if len(CODES) == 0:
+    try:
+        new_qr_code_filename = "qrcode.txt"
+        with open(f"/qrcodes/{new_qr_code_filename}", "w") as text:
+            text.write("""https://pimoroni.com/badger2040
 Badger 2040
 * 296x128 1-bit e-ink
 * six user buttons
@@ -25,20 +31,15 @@ Badger 2040
 Scan this code to learn
 more about Badger 2040.
 """)
-    text.flush()
-    text.seek(0)
+            text.flush()
 
-# Load all available QR Code Files
-try:
-    CODES = [f for f in os.listdir("/qrcodes") if f.endswith(".txt")]
-    TOTAL_CODES = len(CODES)
-except OSError:
-    pass
+        # Set the CODES list to contain the new_qr_code_filename (created above)
+        CODES = [new_qr_code_filename]
 
+    except OSError:
+        CODES = []
 
-print(f'There are {TOTAL_CODES} QR Codes available:')
-for codename in CODES:
-    print(f'File: {codename}')
+TOTAL_CODES = len(CODES)
 
 display = badger2040.Badger2040()
 
@@ -48,6 +49,15 @@ code = qrcode.QRCode()
 state = {
     "current_qr": 0
 }
+
+
+def set_state_current_index_in_range():
+    badger_os.state_load("qrcodes", state)
+    if state["current_qr"] >= len(CODES):
+        state["current_qr"] = len(CODES) - 1  # set to last index (zero-based). Note: will set to -1 if currently 0
+    if state["current_qr"] < 0:  # check that the index is not negative, thus still out of range
+        state["current_qr"] = 0
+    badger_os.state_save("qrcodes", state)
 
 
 def measure_qr_code(size, code):
@@ -70,9 +80,13 @@ def draw_qr_code(ox, oy, size, code):
 def draw_qr_file(n):
     display.led(128)
     file = CODES[n]
-    codetext = open("qrcodes/{}".format(file), "r")
 
-    lines = codetext.read().strip().split("\n")
+    try:
+        with open(f"/qrcodes/{file}", "r") as codetext:
+            lines = codetext.read().strip().split("\n")
+    except OSError:
+        lines = ["", "", "", "", "", "", "", "", "", ""]
+
     code_text = lines.pop(0)
     title_text = lines.pop(0)
     detail_text = lines
@@ -110,7 +124,7 @@ def draw_qr_file(n):
     display.update()
 
 
-badger_os.state_load("qrcodes", state)
+set_state_current_index_in_range()
 changed = not badger2040.woken_by_button()
 
 while True:
