@@ -5,10 +5,29 @@
 #if defined(MULTICORE)
 #include "pico/multicore.h"
 #endif
+
 #include "libraries/pico_display_2/pico_display_2.hpp"
+#include "drivers/st7789/st7789.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
+#include "rgbled.hpp"
+#include "button.hpp"
 
 
 using namespace pimoroni;
+
+// PicoDisplay2 is 320 by 240
+#define DISPLAY_WIDTH PicoDisplay2::WIDTH
+#define DISPLAY_HEIGHT PicoDisplay2::HEIGHT
+
+ST7789 st7789(DISPLAY_WIDTH, DISPLAY_HEIGHT, ROTATE_0, false, get_spi_pins(BG_SPI_FRONT));
+PicoGraphics_PenRGB565 graphics(st7789.width, st7789.height, nullptr);
+
+RGBLED led(PicoDisplay2::LED_R, PicoDisplay2::LED_G, PicoDisplay2::LED_B);
+
+Button button_a(PicoDisplay2::A);
+Button button_b(PicoDisplay2::B);
+Button button_x(PicoDisplay2::X);
+Button button_y(PicoDisplay2::Y);
 
 typedef int32_t fixed_t;
 
@@ -33,12 +52,6 @@ static inline fixed_t fixed_multiply(fixed_t a, fixed_t b) {
 }
 #define FXD_MUL(x, y) fixed_multiply(x, y)
 
-// PicoDisplay2 is 320 by 240
-#define DISPLAY_WIDTH PicoDisplay2::WIDTH
-#define DISPLAY_HEIGHT PicoDisplay2::HEIGHT
-
-uint16_t g_buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT];
-PicoDisplay2 pico_display(g_buffer);
 
 class MandelbrotView {
 public:
@@ -161,10 +174,10 @@ void MandelbrotView::render(void) {
         pFrame += screenSizeX;
         if (core == 1 && (screenY & 0xF) == 0) {
             // update core1 view every 16 lines
-            pico_display.update();
+            st7789.update(&graphics);
         }
     }
-    pico_display.update();
+    st7789.update(&graphics);
 }
 
 // HSV Conversion expects float inputs in the range of 0.0-360.0 for the h channel and 0.0-1.0 for the s and v channels
@@ -186,7 +199,7 @@ uint16_t penFromHSV(float h, float s, float v) {
         case 4: r = t; g = p; b = v; break;
         case 5: r = v; g = p; b = q; break;
     }
-    return pico_display.create_pen(r, g, b);
+    return graphics.create_pen(r, g, b);
 }
 
 void MandelbrotView::createPalettes(int aPaletteSize) {
@@ -195,12 +208,12 @@ void MandelbrotView::createPalettes(int aPaletteSize) {
         pPalettes[ii] = static_cast<uint16_t*>(malloc(sizeof(uint16_t) * aPaletteSize));
     }
     for (int ii = 0; ii < aPaletteSize; ++ii) {
-        pPalettes[0][ii] = pico_display.create_pen(255 - 255 * ii / aPaletteSize, 255 - 255 * ii / aPaletteSize, 255 - 255 * ii / aPaletteSize);
-        pPalettes[1][ii] = pico_display.create_pen(255, 255, 255);
+        pPalettes[0][ii] = graphics.create_pen(255 - 255 * ii / aPaletteSize, 255 - 255 * ii / aPaletteSize, 255 - 255 * ii / aPaletteSize);
+        pPalettes[1][ii] = graphics.create_pen(255, 255, 255);
         pPalettes[2][ii] = penFromHSV(160.0 + 360.0 * static_cast<float>(ii) / aPaletteSize, 0.9, 1.0);
         pPalettes[3][ii] = penFromHSV(60.0 + 360.0 * static_cast<float>(ii) / aPaletteSize, 0.9, 1.0);
         pPalettes[4][ii] = penFromHSV(360.0 * static_cast<float>(ii) / aPaletteSize, 0.9, 1.0);
-        pPalettes[5][ii] = pico_display.create_pen(ii % 4 * 64, ii % 8 * 32, ii % 16 * 16);
+        pPalettes[5][ii] = graphics.create_pen(ii % 4 * 64, ii % 8 * 32, ii % 16 * 16);
     }
     pPalette = pPalettes[paletteIndex];
 }
@@ -240,15 +253,14 @@ void core1_main(void) {
 #endif // MULTICORE
 
 int main() {
-    pico_display.init();
-    pico_display.set_backlight(100);
-    pico_display.set_pen(0, 0, 0);
-    pico_display.clear();
-    pico_display.update();
+    st7789.set_backlight(100);
+    graphics.set_pen(0, 0, 0);
+    graphics.clear();
+    st7789.update(&graphics);
 
     const int iterationLimitV0 = 40;
     const int iterationLimitV1 = 128;
-    g_view0.init(DISPLAY_WIDTH, DISPLAY_HEIGHT, g_buffer, iterationLimitV1, 4, iterationLimitV0, 0);
+    g_view0.init(DISPLAY_WIDTH, DISPLAY_HEIGHT, (uint16_t *)graphics.frame_buffer, iterationLimitV1, 4, iterationLimitV0, 0);
 
 #if defined(MULTICORE)
     g_view1.init(g_view0, 1, iterationLimitV1, 1);
@@ -266,31 +278,31 @@ int main() {
 #if defined(MULTICORE)
         g_view1.setRange(fxdRangeR, fxdCenter);
 #endif
-        pico_display.set_led(64, 0, 0);
+        led.set_rgb(64, 0, 0);
 
         g_view0.render();
 
-        pico_display.set_led(0, 0, 64);
+        led.set_rgb(0, 0, 64);
 #if defined(MULTICORE)
         core1_start();
 #endif
 
-        pico_display.set_led(0, 0, 0);
+        led.set_rgb(0, 0, 0);
 
         // Loop, waiting for key presses
         bool keyPressed = false;
         while (keyPressed == false) {
             sleep_ms(1);
 
-            if (pico_display.is_pressed(pico_display.A)) {
+            if (button_a.raw()) {
                 // Hold A to move left/right
-                if (pico_display.is_pressed(pico_display.X) && fxdCenter.r > FXD_FROM_INT(-3)) {
+                if (button_x.read() && fxdCenter.r > FXD_FROM_INT(-3)) {
                     fxdCenter.r -= fxdRangeR / 8;
                     keyPressed = true;
-                } else if (pico_display.is_pressed(pico_display.Y) && fxdCenter.r < FXD_FROM_INT(3)) {
+                } else if (button_y.read() && fxdCenter.r < FXD_FROM_INT(3)) {
                     fxdCenter.r += fxdRangeR / 8;
                     keyPressed = true;
-                } else if (pico_display.is_pressed(pico_display.B)) {
+                } else if (button_b.read()) {
                     // Press A and B together to switch palette
                     g_view0.nextPalette();
 #if defined(MULTICORE)
@@ -298,19 +310,19 @@ int main() {
 #endif
                     keyPressed = true;
                 }
-            } else if (pico_display.is_pressed(pico_display.B)) {
+            } else if (button_b.raw()) {
                 // Hold B to move up/down
-                if (pico_display.is_pressed(pico_display.X) && fxdCenter.i > FXD_FROM_INT(-2)) {
+                if (button_x.read() && fxdCenter.i > FXD_FROM_INT(-2)) {
                     fxdCenter.i -= fxdRangeR / 8;
                     keyPressed = true;
-                } else if (pico_display.is_pressed(pico_display.Y) && fxdCenter.i < FXD_FROM_INT(2)) {
+                } else if (button_y.read() && fxdCenter.i < FXD_FROM_INT(2)) {
                     fxdCenter.i += fxdRangeR / 8;
                     keyPressed = true;
                 }
             } else {
                 // Otherwise zoom in/out
-                if (pico_display.is_pressed(pico_display.X)) {
-                    if (pico_display.is_pressed(pico_display.Y)) {
+                if (button_x.read()) {
+                    if (button_y.read()) {
                         // Press X and Y together to reset to initial position
                         fxdRangeR = fxdInitialRangeR;
                         fxdCenter = fxdInitialCenter;
@@ -319,7 +331,7 @@ int main() {
                         fxdRangeR *= 3;
                     }
                     keyPressed = true;
-                } else if (pico_display.is_pressed(pico_display.Y) && fxdRangeR < FXD_FROM_INT(3)) {
+                } else if (button_y.read() && fxdRangeR < FXD_FROM_INT(3)) {
                     fxdRangeR *= 4;
                     fxdRangeR /= 3;
                     keyPressed = true;
