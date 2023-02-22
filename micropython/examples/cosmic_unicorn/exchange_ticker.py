@@ -127,13 +127,13 @@ while 1:
         currency_symbol = rate_keys[symbol_index]
         currency_rate = rates[rate_keys[symbol_index]]
 
-    if(cu.is_pressed(CosmicUnicorn.SWITCH_A)):
+    if (cu.is_pressed(CosmicUnicorn.SWITCH_A)):
         ref_currency_index += 1
         if (ref_currency_index > len(currency_keys)):
             ref_currency_index = 0
         update_base_currency(ref_currency_index)
 
-    if(cu.is_pressed(CosmicUnicorn.SWITCH_B)):
+    if (cu.is_pressed(CosmicUnicorn.SWITCH_B)):
         cycle_count = 0
         symbol_index += 1
 

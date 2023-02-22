@@ -80,6 +80,7 @@ html_file = open('index.html', 'r')
 # WIFI settings
 WIFI_COUNTRY = "GB"  # Changeme!
 
+
 # Index page
 @app.route('/')
 async def index(request, response):
