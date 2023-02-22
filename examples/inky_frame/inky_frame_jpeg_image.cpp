@@ -7,7 +7,11 @@
 
 #include "JPEGDEC.h"
 
+#ifdef INKY_FRAME_7
+#include "libraries/inky_frame_7/inky_frame_7.hpp"
+#else
 #include "libraries/inky_frame/inky_frame.hpp"
+#endif
 
 using namespace pimoroni;
 
@@ -169,7 +173,7 @@ int main() {
   printf("done!\n");
 
   printf("Displaying file: %s\n", filename.c_str());
-  draw_jpeg(filename, 0, 0, 600, 448);
+  draw_jpeg(filename, 0, 0, inky.width, inky.height);
   printf("done!\n");
 
   inky.update();
