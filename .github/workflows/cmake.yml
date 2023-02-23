@@ -28,8 +28,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: /home/runner/.ccache
-        key: ccache-cmake-${{github.ref}}-${{github.sha}}
+        key: ccache-cmake-${{github.ref}}-${{matrix.board}}-${{github.sha}}
         restore-keys: |
+          ccache-cmake-${{github.ref}}-${{matrix.board}}
           ccache-cmake-${{github.ref}}
           ccache-cmake
 
