@@ -15,9 +15,9 @@ namespace pimoroni {
   int PicoGraphics_PenInky7::create_pen(uint8_t r, uint8_t g, uint8_t b) {
     return RGB(r, g, b).to_rgb888() | 0x010101;
   }
-    int PicoGraphics_PenInky7::create_pen_hsv(float h, float s, float v) {
-        return RGB::from_hsv(h, s, v).to_rgb888();
-    }
+  int PicoGraphics_PenInky7::create_pen_hsv(float h, float s, float v) {
+    return RGB::from_hsv(h, s, v).to_rgb888() | 0x010101;
+  }
   void PicoGraphics_PenInky7::set_pixel(const Point &p) {
     if ((color & 0x010101) == 0x010101) {
       set_pixel_dither(p, RGB(color));
@@ -68,8 +68,7 @@ namespace pimoroni {
 
     // set the pixel
     //color = candidates[pattern[pattern_index]];
-    color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
-    set_pixel(p);
+    driver.write_pixel(p, candidate_cache[cache_key][dither16_pattern[pattern_index]] & 0x07);
   }
   void PicoGraphics_PenInky7::frame_convert(PenType type, conversion_callback_func callback) {
     if(type == PEN_INKY7) {
