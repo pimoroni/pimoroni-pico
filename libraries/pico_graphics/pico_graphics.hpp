@@ -538,7 +538,7 @@ namespace pimoroni {
 
   class PicoGraphics_PenInky7 : public PicoGraphics {
     public:
-      static const uint16_t palette_size = 8;
+      static const uint16_t palette_size = 7; // Taupe is unpredictable and greenish
       RGB palette[8] = {
         /*
         {0x2b, 0x2a, 0x37},
