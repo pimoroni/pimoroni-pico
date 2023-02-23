@@ -334,7 +334,7 @@ namespace pimoroni {
   class PicoGraphics_Pen3Bit : public PicoGraphics {
     public:
       static const uint16_t palette_size = 8;
-      uint8_t color;
+      uint color;
       RGB palette[8] = {
         /*
         {0x2b, 0x2a, 0x37},
@@ -365,10 +365,13 @@ namespace pimoroni {
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       void set_thickness(uint t) override {};
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
 
       int get_palette_size() override {return palette_size;};
       RGB* get_palette() override {return palette;};
 
+      void _set_pixel(const Point &p, uint col);
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
       void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
