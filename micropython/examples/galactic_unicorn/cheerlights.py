@@ -17,11 +17,9 @@ height = GalacticUnicorn.HEIGHT
 
 # fill display
 def draw(colour):
-    for x in range(width):
-        for y in range(height):
-            graphics.set_pen(colour)
-            graphics.pixel(x, y)
-
+    
+    graphics.set_pen(colour)
+    graphics.clear()
     gu.update(graphics)
 
 
