@@ -45,6 +45,25 @@ namespace pimoroni {
       g((c >> 8) & 0xff),
       b(c & 0xff) {}
     constexpr RGB(int16_t r, int16_t g, int16_t b) : r(r), g(g), b(b) {}
+  
+    static RGB from_hsv(float h, float s, float v) {
+      float i = floor(h * 6.0f);
+      float f = h * 6.0f - i;
+      v *= 255.0f;
+      uint8_t p = v * (1.0f - s);
+      uint8_t q = v * (1.0f - f * s);
+      uint8_t t = v * (1.0f - (1.0f - f) * s);
+
+      switch (int(i) % 6) {
+        case 0: return RGB(v, t, p);
+        case 1: return RGB(q, v, p);
+        case 2: return RGB(p, v, t);
+        case 3: return RGB(p, q, v);
+        case 4: return RGB(t, p, v);
+        case 5: return RGB(v, p, q);
+        default: return RGB(0, 0, 0);
+      }
+  }
 
     constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
     constexpr RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
@@ -271,7 +290,6 @@ namespace pimoroni {
     void polygon(const std::vector<Point> &points);
     void triangle(Point p1, Point p2, Point p3);
     void line(Point p1, Point p2);
-    void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b);
     void thick_line(Point p1, Point p2, uint thickness);
 
   protected:
@@ -551,6 +569,7 @@ namespace pimoroni {
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
 

@@ -21,26 +21,6 @@ Button button_b(PicoDisplay2::B);
 Button button_x(PicoDisplay2::X);
 Button button_y(PicoDisplay2::Y);
 
-// HSV Conversion expects float inputs in the range of 0.00-1.00 for each channel
-// Outputs are rgb in the range 0-255 for each channel
-void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
-  float i = floor(h * 6.0f);
-  float f = h * 6.0f - i;
-  v *= 255.0f;
-  uint8_t p = v * (1.0f - s);
-  uint8_t q = v * (1.0f - f * s);
-  uint8_t t = v * (1.0f - (1.0f - f) * s);
-
-  switch (int(i) % 6) {
-    case 0: r = v; g = t; b = p; break;
-    case 1: r = q; g = v; b = p; break;
-    case 2: r = p; g = v; b = t; break;
-    case 3: r = p; g = q; b = v; break;
-    case 4: r = t; g = p; b = v; break;
-    case 5: r = v; g = p; b = q; break;
-  }
-}
-
 int main() {
   st7789.set_backlight(255);
 
@@ -107,10 +87,10 @@ int main() {
 
     // Since HSV takes a float from 0.0 to 1.0 indicating hue,
     // then we can divide millis by the number of milliseconds
-    // we want a full colour cycle to take. 5000 = 5 sec.
-    uint8_t r = 0, g = 0, b = 0;
-    from_hsv((float)millis() / 5000.0f, 1.0f, 0.5f + sinf(millis() / 100.0f / 3.14159f) * 0.5f, r, g, b);
-    led.set_rgb(r, g, b);
+    // we want a full colour cycle to take. 5000 = 5 sec
+    RGB p = RGB::from_hsv((float)millis() / 5000.0f, 1.0f, 0.5f + sinf(millis() / 100.0f / 3.14159f) * 0.5f);
+
+    led.set_rgb(p.r, p.g, p.b);
 
 
     graphics.set_pen(WHITE);

@@ -15,6 +15,9 @@ namespace pimoroni {
   int PicoGraphics_PenInky7::create_pen(uint8_t r, uint8_t g, uint8_t b) {
     return RGB(r, g, b).to_rgb888() | 0x010101;
   }
+    int PicoGraphics_PenInky7::create_pen_hsv(float h, float s, float v) {
+        return RGB::from_hsv(h, s, v).to_rgb888();
+    }
   void PicoGraphics_PenInky7::set_pixel(const Point &p) {
     if ((color & 0x010101) == 0x010101) {
       set_pixel_dither(p, RGB(color));
