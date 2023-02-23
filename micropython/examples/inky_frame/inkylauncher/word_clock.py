@@ -34,7 +34,10 @@ def approx_time(hours, minutes):
 def update():
     global time_string
     # grab the current time from the ntp server and update the Pico RTC
-    ntptime.settime()
+    try:
+        ntptime.settime()
+    except OSError:
+        print("Unable to contact NTP server")
 
     current_t = rtc.datetime()
     time_string = approx_time(current_t[4] - 12 if current_t[4] > 12 else current_t[4], current_t[5])
