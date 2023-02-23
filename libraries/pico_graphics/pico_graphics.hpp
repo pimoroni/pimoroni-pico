@@ -40,6 +40,10 @@ namespace pimoroni {
       r((__builtin_bswap16(c) & 0b1111100000000000) >> 8),
       g((__builtin_bswap16(c) & 0b0000011111100000) >> 3),
       b((__builtin_bswap16(c) & 0b0000000000011111) << 3) {}
+    constexpr RGB(uint c) :
+      r((c >> 16) & 0xff),
+      g((c >> 8) & 0xff),
+      b(c & 0xff) {}
     constexpr RGB(int16_t r, int16_t g, int16_t b) : r(r), g(g), b(b) {}
 
     constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
@@ -539,8 +543,7 @@ namespace pimoroni {
       bool cache_built = false;
       std::array<uint8_t, 16> candidates;
     
-      RGB src_color;
-      RGB565 color;
+      uint color;
       IDirectDisplayDriver<uint8_t> &driver;
 
       PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver);

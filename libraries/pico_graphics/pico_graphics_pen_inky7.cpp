@@ -7,15 +7,20 @@ namespace pimoroni {
       this->pen_type = PEN_INKY7;
   }
   void PicoGraphics_PenInky7::set_pen(uint c) {
-    color = c & 0x7;
+    color = c;
   }
   void PicoGraphics_PenInky7::set_pen(uint8_t r, uint8_t g, uint8_t b) {
+    color = RGB(r, g, b).to_rgb888() | 0x010101;
   }
   int PicoGraphics_PenInky7::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-    return 0;
+    return RGB(r, g, b).to_rgb888() | 0x010101;
   }
   void PicoGraphics_PenInky7::set_pixel(const Point &p) {
-    driver.write_pixel(p, color);
+    if ((color & 0x010101) == 0x010101) {
+      set_pixel_dither(p, RGB(color));
+    } else {
+      driver.write_pixel(p, color & 0x07);
+    }
   }
   void PicoGraphics_PenInky7::set_pixel_span(const Point &p, uint l) {
     driver.write_pixel_span(p, l, color);
