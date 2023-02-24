@@ -59,6 +59,7 @@ def status_handler(mode, status, ip):
     print("IP: {}".format(ip))
     MESSAGE = "{}".format(ip)
 
+
 # Create web server application
 app = webserver()
 
