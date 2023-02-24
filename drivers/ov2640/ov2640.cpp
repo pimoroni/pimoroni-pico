@@ -48,7 +48,7 @@ namespace pimoroni {
         sleep_ms(100);
 
         // Initialise the camera itself over SCCB
-        regs_write(ov2640_svga);
+        regs_write(ov2640_init);
         //ov2640_regs_write(config, ov2640_uxga_cif);
 
         // TODO: Support other sizes
@@ -75,6 +75,20 @@ namespace pimoroni {
     }
 
     void OV2640::set_image_size(ImageSize size) {
+        if (size == SIZE_352x288){
+            regs_write(ov2640_cif);
+        }
+        else if (size == SIZE_800x600){
+            regs_write(ov2640_svga);
+        }
+        else if (size == SIZE_1600x1200)
+        {
+            regs_write(ov2640_uxga);
+        }
+        else{
+            return;
+        }
+        
         // TODO
 
         current_size = size;
@@ -82,12 +96,21 @@ namespace pimoroni {
 
     void OV2640::set_image_mode(ImageMode mode) {
         // Set output mode
-        i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xff, 0x00);
+        i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xff, 0x00);  // Select sensor bank
         if (mode == MODE_RGB565) {
             i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xDA, 0x09);
         }
-        else {
+        else if (mode == MODE_YUYV) {
             i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xDA, 0x00);
+        }
+        else if (mode == MODE_RAW) {
+            i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xDA, 0x04);
+        }
+        else if (mode == MODE_JPEG){
+            i2c->reg_write_uint8(OV2640_I2C_ADDRESS, 0xDA, 0x10);
+        }
+        else{
+            return;
         }
 
         current_mode = mode;
@@ -96,8 +119,8 @@ namespace pimoroni {
     uint32_t OV2640::get_image_len_in_bytes() const {
         switch (current_size) {
             case SIZE_1600x1200: return 1600 * 1200 * 2;
-            //case SIZE_800x600: return 800 * 600 * 2;
-            //case SIZE_352x288: return 352 * 288 * 2;
+            case SIZE_800x600: return 800 * 600 * 2;
+            case SIZE_352x288: return 352 * 288 * 2;
             default: return 0;
         }
     }

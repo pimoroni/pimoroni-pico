@@ -2,7 +2,7 @@
 #define OV2640_INIT_H
 #include <stdint.h>
 
-static const uint8_t ov2640_svga[][2] = {
+static const uint8_t ov2640_init[][2] = {
 	{0xff, 0x00},  /* Device control register list Table 12 */
 	{0x2c, 0xff},  /* Reserved                              */
 	{0x2e, 0xdf},  /* Reserved                              */
@@ -185,7 +185,7 @@ static const uint8_t ov2640_svga[][2] = {
 	{0xdd, 0x7f},
 	{0x05, 0x00},
 	{0xFF, 0x00},
-	{0x05, 0x00},
+	{0x05, 0x00},  // DSP bypass off
 //	{0xda, 0x09},  // Byte swapped RGB565
 	{0xda, 0x00},  // YUV422 YUYV
 	{0x98, 0x00},
@@ -226,7 +226,7 @@ static const uint8_t ov2640_svga[][2] = {
 	{0x00, 0x00}
 };
 
-static const uint8_t ov2640_uxga_cif[][2] = {   
+static const uint8_t ov2640_cif[][2] = {   
 	{0xff, 0x00},   
 	{0xe0, 0x04}, // RESET DVP
 	{0xc0, 0xc8}, // HSIZE8: 1600
@@ -246,4 +246,63 @@ static const uint8_t ov2640_uxga_cif[][2] = {
 	{0xe0, 0x00}   
 };   
 
+static const uint8_t ov2640_uxga[][2]{
+	{0xff, 0x00}, // Bank switch
+	{0xe0, 0x04}, // RESET DVP
+	{0x50, 0x00}, // CTRLI: VDIV=0, HDIV=0
+	{0x51, 0x90}, // HSIZE: 400 * 4
+	{0x52, 0x2c}, // VSIZE: 300 * 4
+	{0x53, 0x00},
+	{0x54, 0x00},
+	{0x55, 0x88},
+	{0x57, 0x00},
+	{0x5a, 0x90}, // OUTW: 400 * 4 = 1600
+	{0x5b, 0x2c}, // OUTH: 300 * 4 = 1200
+	{0x5c, 0x05},
+	{0xd3, 0x80}, // PCLK_DIV = AUTO
+};
+
+static const uint8_t ov2640_svga[][2]{
+	{0xff, 0x00}, // Bank switch
+	{0xe0, 0x04}, // RESET DVP
+	{0x50, 0x89}, // CTRLI: LP_DP, VDIV=1, HDIV=1
+	{0x51, 0x90}, // HSIZE: 400 * 4
+	{0x52, 0x2c}, // VSIZE: 300 * 4
+	{0x53, 0x00},
+	{0x54, 0x00},
+	{0x55, 0x88},
+	{0x57, 0x00},
+	{0x5a, 0xc8}, // OUTW: 200 * 4 = 800
+	{0x5b, 0x96}, // OUTH: 150 * 4 = 600
+	{0x5c, 0x00},
+	{0xd3, 0x02}, // PCLK_DIV = 2
+	{0xff, 0x01}, // Bank switch
+	{0x12, 0x00},  /* Common control 7                      */
+};
+static const uint8_t ov2640_mode_YUV422[][2]{
+	{0xda, 0x00},  // YUV422 YUYV
+};
+static const uint8_t ov2640_mode_RGB565[][2]{
+	{0xda, 0x09},  // RGB565 RGB 
+};
+
+static const uint8_t ov2640_dsp_gain_reg = 0x00;
+
+
+
+
+
+static const uint8_t ov2640_dsp_com7_reg = 0x12;
+
+static const uint8_t ov2640_dsp_com7_testpattern_bm = (1 << 1);
+static const uint8_t ov2640_dsp_com7_zoommode_bm = (1 << 2);
+static const uint8_t ov2640_dsp_com7_sysrest_bm = (1 << 7);
+
+static const uint8_t ov2640_dsp_com8_reg = 0x13;
+
+static const uint8_t ov2640_dsp_com8_bandingfilter_bm = (1 << 5);
+static const uint8_t ov2640_dsp_com8_agc_en_bm = (1 << 2);
+static const uint8_t ov2640_dsp_com8_aec_bm = (1 << 0);
+
+static const uint8_t ov2640_dsp_agc_ceiling_reg = 0x14;
 #endif

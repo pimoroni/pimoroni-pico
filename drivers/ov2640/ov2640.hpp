@@ -21,13 +21,15 @@ namespace pimoroni {
             // TODO: Changing image size not supported yet
             enum ImageSize {
                 SIZE_1600x1200,
-                //SIZE_800x600,
-                //SIZE_352x288,
+                SIZE_800x600,
+                SIZE_352x288,
             };
 
             enum ImageMode {
                 MODE_RGB565,
                 MODE_YUYV,
+                MODE_RAW,
+                MODE_JPEG
             };
 
             OV2640() : OV2640(new I2C()) {}

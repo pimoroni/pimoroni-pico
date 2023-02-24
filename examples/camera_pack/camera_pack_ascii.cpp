@@ -23,6 +23,7 @@ int main() {
     // Press the button to take a picture!
     while (1) {
         while (gpio_get(camera.SW_A));
+        printf("image capture started\n");
 
         camera.capture_image(0);
         printf("Image capture complete\n");
