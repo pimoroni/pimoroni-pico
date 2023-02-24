@@ -5,12 +5,15 @@ import WIFI_CONFIG
 from network_manager import NetworkManager
 import uasyncio as asyncio
 import uasyncio.core
-
+from tinyweb.server import webserver
 
 '''
-Display scrolling wisdom, quotes or greetz.
+Display scrolling wisdom, quotes or greetz... from the internetz!
 
 You can adjust the brightness with LUX + and -.
+
+Requires network_manager.py , WIFI_CONFIG.py, logging.mpy and tinyweb from micropython/examples/common
+You'll also need index.html to be saved alongside this file.
 '''
 
 # Server Settings
@@ -56,23 +59,8 @@ def status_handler(mode, status, ip):
     print("IP: {}".format(ip))
     MESSAGE = "{}".format(ip)
 
-
-try:
-    from tinyweb.server import webserver
-
-except ImportError:
-    # WIFI settings
-    WIFI_COUNTRY = "GB"  # Changeme!
-    network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-    # Install missing module
-    import upip
-    upip.install('logging')
-    from tinyweb.server import webserver
-
 # Create web server application
 app = webserver()
-
 
 # Static page
 html_file = open('index.html', 'r')
@@ -201,7 +189,7 @@ async def message_update():
         await asyncio.sleep(0.001)
 
 
-# The folloing is required to run both the web server and the scrolling text coherantly
+# The following is required to run both the web server and the scrolling text coherently
 app._server_coro = app._tcp_server(host, port, app.backlog)
 loop = asyncio.get_event_loop()
 t1 = loop.create_task(message_update())
