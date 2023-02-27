@@ -9,7 +9,7 @@ pixel by pixel from a pattern of Os and Xs.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 prompt_x = 0
@@ -125,21 +125,21 @@ def draw(image, fg, bg, time_ms):
 
             graphics.pixel(x + prompt_x, y + prompt_y)
 
-    gu.update(graphics)
+    cu.update(graphics)
 
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 while True:
 
     time_ms = time.ticks_ms()
     prompt = (time_ms // 3000) % 3
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     start = time.ticks_ms()
 

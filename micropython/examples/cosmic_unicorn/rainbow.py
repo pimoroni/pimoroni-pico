@@ -12,7 +12,7 @@ and the brightness with LUX + and -.
 The sleep button stops the animation (can be started again with A or B).
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 width = CosmicUnicorn.WIDTH
@@ -55,7 +55,7 @@ def draw():
             graphics.set_pen(graphics.create_pen(int(colour[0] * v), int(colour[1] * v), int(colour[2] * v)))
             graphics.pixel(x, y)
 
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 hue_map = [from_hsv(x / width, 1.0, 1.0) for x in range(width)]
@@ -65,7 +65,7 @@ animate = True
 stripe_width = 3.0
 speed = 1.0
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 phase = 0
 while True:
@@ -73,38 +73,38 @@ while True:
     if animate:
         phase += speed
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         hue_offset += 0.01
         hue_offset = 1.0 if hue_offset > 1.0 else hue_offset
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         hue_offset -= 0.01
         hue_offset = 0.0 if hue_offset < 0.0 else hue_offset
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         animate = False
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         speed += 0.05
         speed = 10.0 if speed > 10.0 else speed
         animate = True
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         speed -= 0.05
         speed = 0.0 if speed < 0.0 else speed
         animate = True
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
         stripe_width += 0.05
         stripe_width = 10.0 if stripe_width > 10.0 else stripe_width
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_D):
         stripe_width -= 0.05
         stripe_width = 1.0 if stripe_width < 1.0 else stripe_width
 

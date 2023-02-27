@@ -9,7 +9,7 @@ Displays some text, gradients and colours and demonstrates button use.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 width = CosmicUnicorn.WIDTH
@@ -57,18 +57,18 @@ def outline_text(text):
     graphics.text(text, x, y, -1, 1)
 
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 while True:
 
     time_ms = time.ticks_ms()
     test = (time_ms // 1000) % 5
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     graphics.set_pen(graphics.create_pen(0, 0, 0))
     graphics.clear()
@@ -91,33 +91,33 @@ while True:
 
     text = ""
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         text = "Button A"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         text = "Button B"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
         text = "Button C"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_D):
         text = "Button D"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         text = "Louder!"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         text = "Quieter"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         text = "Brighter!"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         text = "Darker"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         text = "Zzz... zzz..."
 
     outline_text(text)
 
-    gu.update(graphics)
+    cu.update(graphics)

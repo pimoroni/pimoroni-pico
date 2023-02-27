@@ -9,7 +9,7 @@ A pretty, procedural fire effect.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 fire_colours = [graphics.create_pen(0, 0, 0),
@@ -71,7 +71,7 @@ def draw():
                 _set_pen(_fire_colours[4])
             _pixel(x, y)
 
-    gu.update(_graphics)
+    cu.update(_graphics)
 
 
 width = CosmicUnicorn.WIDTH + 2
@@ -81,15 +81,15 @@ fire_spawns = 5
 damping_factor = 0.97
 
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 while True:
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     start = time.ticks_ms()
 

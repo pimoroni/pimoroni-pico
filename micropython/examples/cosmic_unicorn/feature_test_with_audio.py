@@ -18,7 +18,7 @@ Also demonstrates some of the audio / synth features.
 
 gc.collect()
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 width = CosmicUnicorn.WIDTH
@@ -56,7 +56,7 @@ bass_notes = (
     SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, SUB, -1, SUB, -1, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0)
 
 notes = [melody_notes, rhythm_notes, drum_beats, hi_hat, bass_notes]
-channels = [gu.synth_channel(i) for i in range(len(notes) + 1)]  # Extra channel for tones
+channels = [cu.synth_channel(i) for i in range(len(notes) + 1)]  # Extra channel for tones
 
 # Configure the synth to play our notes
 channels[0].configure(waveforms=Channel.TRIANGLE + Channel.SQUARE,
@@ -136,7 +136,7 @@ def outline_text(text):
     graphics.text(text, x, y, -1, 1)
 
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 # Vars for storing button state
 was_a_pressed = False
@@ -181,7 +181,7 @@ while True:
     time_ms = time.ticks_ms()
     test = (time_ms // 1000) % 5
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         if not was_a_pressed:
             channels[0].volume(10000 / 65535)
             channels[1].volume(12000 / 65535)
@@ -195,7 +195,7 @@ while True:
                 beat = 0
                 next_beat()
 
-            gu.play_synth()
+            cu.play_synth()
             synthing = True
             timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
 
@@ -203,7 +203,7 @@ while True:
     else:
         was_a_pressed = False
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         if not was_b_pressed:
             channels[0].volume(0)
             channels[1].volume(12000 / 65535)
@@ -217,7 +217,7 @@ while True:
                 beat = 0
                 next_beat()
 
-            gu.play_synth()
+            cu.play_synth()
             synthing = True
             timer.init(freq=10, mode=Timer.PERIODIC, callback=tick)
 
@@ -225,7 +225,7 @@ while True:
     else:
         was_b_pressed = False
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
         if not was_c_pressed:
             # Stop synth (if running) and play Tone A
             timer.deinit()
@@ -233,14 +233,14 @@ while True:
             channels[5].play_tone(tone_a, 0.06)
             channels[5].volume(12000 / 65535)
 
-            gu.play_synth()
+            cu.play_synth()
             synthing = False
 
         was_c_pressed = True
     else:
         was_c_pressed = False
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_D):
         if not was_d_pressed:
             # Stop synth (if running) and play Tone B
             timer.deinit()
@@ -249,43 +249,43 @@ while True:
             channels[5].play_tone(tone_b, 0.06, attack=0.5)
             channels[5].volume(12000 / 65535)
 
-            gu.play_synth()
+            cu.play_synth()
             synthing = False
 
         was_d_pressed = True
     else:
         was_d_pressed = False
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         if tone_b > 0:  # Zero means tone not playing
             # Increase Tone B
             tone_b = min(tone_b + 10, 20000)
             channels[5].frequency(tone_b)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         if tone_b > 0:  # Zero means tone not playing
             # Decrease Tone B
             tone_b = max(tone_b - 10, 10)
             channels[5].frequency(max(tone_b, 10))
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         if tone_a > 0:  # Zero means tone not playing
             # Increase Tone A
             tone_a = min(tone_a + 10, 20000)
             channels[5].frequency(tone_a)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         if tone_a > 0:  # Zero means tone not playing
             # Decrease Tone A
             tone_a = max(tone_a - 10, 10)
             channels[5].frequency(tone_a)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         if not was_z_pressed:
             # Stop synth and both tones
             tone_a = 0
             tone_b = 0
-            gu.stop_playing()
+            cu.stop_playing()
             timer.deinit()
             synthing = False
 
@@ -312,36 +312,36 @@ while True:
         # print("white gradient")
         gradient(255, 255, 255)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         text = "PlaySyn"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_B):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         text = "SoloSyn"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
         text = "Tone A"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_D):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_D):
         text = "Tone B"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_UP):
         text = "RaiseA"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_VOLUME_DOWN):
         text = "LowerA"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         text = "RaiseB"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         text = "LowerB"
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_SLEEP):
         text = "Stop"
 
     outline_text(text)
 
-    gu.update(graphics)
+    cu.update(graphics)
 
     # pause for a moment (important or the USB serial device will fail
     time.sleep(0.001)

@@ -6,11 +6,11 @@ import machine
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 # Default Brightness
-gu.set_brightness(0.4)
+cu.set_brightness(0.4)
 
 # You will need to create or update the file secrets.py with your network credentials using Thonny
 # in order for the example to update using the NTP.
@@ -106,7 +106,7 @@ def draw():
 
     graphics.set_pen(graphics.create_pen(0, 0, 0))
 
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 init()
@@ -114,14 +114,14 @@ init()
 while 1:
 
     # Adjust Brightness +/-
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     # Connect to the network and sync with the NTP server
-    if gu.is_pressed(CosmicUnicorn.SWITCH_C):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_C):
         sync_time()
 
     draw()

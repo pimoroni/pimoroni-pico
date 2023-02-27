@@ -1,6 +1,6 @@
-# This Cosmic Unicorn example updates a pixel every five(ish) minutes
+# This Cosmic Unicorn example updates a pixel every two(ish) minutes
 # to display the most recent #cheerlights colour. Discover the most popular
-# colours over time, or use it as an avant garde (but colourful) 53 hour clock!
+# colours over time, or use it as an avant garde (but colourful) 32 hour clock!
 # Find out more about the Cheerlights API at https://cheerlights.com/
 #
 # To run this example you'll need WIFI_CONFIG.py and network_manager.py from
@@ -77,17 +77,17 @@ def update_leds():
             graphics.set_pen(current_colour)
             graphics.pixel(x, y)
             i = i + 1
-    gu.update(graphics)
+    cu.update(graphics)
     print("LEDs updated!")
 
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 width = CosmicUnicorn.WIDTH
 height = CosmicUnicorn.HEIGHT
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 # set up the Pico W's onboard LED
 pico_led = Pin('LED', Pin.OUT)
@@ -114,15 +114,15 @@ timer.init(period=UPDATE_INTERVAL * 1000, mode=Timer.PERIODIC, callback=lambda t
 while True:
     # adjust brightness with LUX + and -
     # LEDs take a couple of secs to update, so adjust in big (10%) steps
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.1)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.1)
         update_leds()
-        print(f"Brightness set to {gu.get_brightness()}")
+        print(f"Brightness set to {cu.get_brightness()}")
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.1)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.1)
         update_leds()
-        print(f"Brightness set to {gu.get_brightness()}")
+        print(f"Brightness set to {cu.get_brightness()}")
 
     # pause for a moment (important or the USB serial device will fail)
     time.sleep(0.001)

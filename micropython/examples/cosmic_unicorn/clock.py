@@ -37,8 +37,8 @@ MIDDAY_VALUE = 0.8
 MIDNIGHT_VALUE = 0.3
 
 
-# create galactic object and graphics surface for drawing
-gu = CosmicUnicorn()
+# create cosmic object and graphics surface for drawing
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 # create the rtc object
@@ -131,7 +131,7 @@ def sync_time():
         time.sleep(0.2)
 
         redraw_display_if_reqd()
-        gu.update(graphics)
+        cu.update(graphics)
 
     if max_wait > 0:
         print("Connected")
@@ -195,9 +195,6 @@ def redraw_display_if_reqd():
 
         clock = "{:02}:{:02}:{:02}".format(hour, minute, second)
 
-        # set the font
-        graphics.set_font("bitmap8")
-
         # calculate text position so that it is centred
         w = graphics.measure_text(clock, 1)
         x = int(width / 2 - w / 2 + 1)
@@ -208,23 +205,25 @@ def redraw_display_if_reqd():
         last_second = second
 
 
-gu.set_brightness(0.5)
+# set the font
+graphics.set_font("bitmap8")
+cu.set_brightness(0.5)
 
 sync_time()
 
 while True:
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         sync_time()
 
     redraw_display_if_reqd()
 
     # update the display
-    gu.update(graphics)
+    cu.update(graphics)
 
     time.sleep(0.01)

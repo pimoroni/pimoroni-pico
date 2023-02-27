@@ -102,10 +102,11 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Inky Frame 5.7" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-5-7
 * Automation 2040 W Mini (inputs, outputs and a relay, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w-mini
 * Plasma Stick 2040 W (bijou LED strip controller) - https://shop.pimoroni.com/products/plasma-stick-2040-w
-* Galactic Unicorn (dazzling 53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
+* Galactic Unicorn (53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
 * Interstate 75 W (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75-w
 * Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
 * Badger 2040 W (E Ink badge) - https://shop.pimoroni.com/products/badger-2040-w
+* Cosmic Unicorn (32 x 32 LED matrix) - https://shop.pimoroni.com/products/cosmic-unicorn
 
 ## Breakouts
 
