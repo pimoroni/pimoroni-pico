@@ -1,0 +1,102 @@
+<http>
+<head>
+       <style>
+              h1 {
+              align-content: center;
+              color: rgb(192, 192, 214);
+              margin-left: 20px;
+              background-color: darkmagenta;
+              font-size: xxx-large;
+}
+       </style>
+       <script>
+              var getUrl = window.location;
+              var baseUrl = getUrl.protocol + "//" + getUrl.host;
+              var displayText;
+              var colourBF ="#000000";
+              var colourFG ="#000000";
+
+              function convertHexToRgb(hex) {
+              
+              // Convert the first 2 characters to hexadecimal
+              var r = parseInt(hex.substring(1, 3), 16),
+                
+              // Convert the middle 2 characters to hexadecimal
+              g = parseInt(hex.substring(3, 5), 16),
+                    
+              // Convert the last 2 characters to hexadecimal
+              b = parseInt(hex.substring(5, 7), 16);
+                    
+              // append them all
+              return   r + ", " + g + ", "
+                      + b ;
+          }
+
+              function updateCU(comm,val){
+                     console.log(typeof(comm))
+                     console.log(typeof(val))
+                     console.log(comm, val)
+                     fetch(baseUrl+"/update" + "?"+comm+"="+String(val))
+                     .then(response => {
+                     // indicates whether the response is successful (status code 200-299) or not
+                     if (!response.ok) {
+                     throw new Error(`Request failed with status ${reponse.status}`)
+                     }
+                     return response.json()
+                     })
+                     .then(data => {
+                     console.log(data)
+
+                     })
+                     .catch(error => console.log(error))
+              }
+              function updateText(){
+                     displayText = document.getElementById("inputtxt").value;
+                     colourFG = convertHexToRgb(document.getElementById("inputfgcolour").value);
+                     colourBG = convertHexToRgb(document.getElementById("inputbgcolour").value);
+                     updateCU("colourfg", colourFG);
+                     updateCU("text", displayText);
+                     
+                     updateCU("colourbg", colourBG);
+              }
+              function updateColour(){
+                     colourFG = document.getElementById('inputfgcolour').value;
+                     colourBG = document.getElementById('inputbgcolour').value;
+                     
+              }
+
+       </script>
+</head>
+<body>
+<h1 id="title">Cosmic Unicorn Web Text</h1>
+<center>
+<label for="inputtxt"> Enter text to display:</label>
+<br>
+
+<input type="text" id="inputtxt" name="inputtxt" required
+       minlength="4" size="16">
+<br>
+       <label for="inputfgcolour"> Text Colour:</label>
+<br>
+
+<input type="color" id="inputfgcolour" name="inputfgcolour" required
+       minlength="4" maxlength="30" size="16" onchange="updateColour()" value='#000000'>
+<br>       
+<label for="inputbgcolour"> Background Colour:</label>
+<br>
+
+<input type="color" id="inputbgcolour" name="inputbgcolour" required
+       minlength="4" maxlength="30" size="16" onchange="updateColour()" value='#000000'>
+<br>
+<button class="favorite styled"
+       onclick="updateText()"
+        type="button">
+    Update
+</button>
+<p>
+       Please type in what you wish to be displayed on the Cosmic Unicorn and whe you are ready hit update to update the display
+</p>
+
+</center>
+</body>
+</http>
