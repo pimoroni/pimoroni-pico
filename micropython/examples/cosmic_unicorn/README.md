@@ -19,7 +19,7 @@
   - [Exchange Ticker](#exchange-ticker)
   - [HTTP Text](#http-text)
   - [Weather](#weather)
-- [Numpy examples](#numpy-examples)
+- [NumPy examples](#numpy-examples)
 - [Other Examples](#other-examples)
   - [Launch (Demo Reel)](#launch-demo-reel)
 
@@ -154,11 +154,11 @@ Requires `logging.mpy` and `tinyweb` from [micropython/examples/common](../../ex
 
 Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API.
 
-## Numpy examples
+## NumPy examples
 
 [numpy](numpy)
 
-The examples in the folder use `numpy` (part of the `ulab` library) for super fast graphical effects.
+The examples in the folder use `numpy`-like array functions contained in the `ulab` library for super fast graphical effects.
 
 ## Other Examples
 
