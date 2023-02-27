@@ -34,15 +34,9 @@ int main() {
     gpio_init(camera.SW_A);
     gpio_set_dir(camera.SW_A, GPIO_IN);
     gpio_pull_up(camera.SW_A);
+    camera.mount_sdcard();
+    camera.print_directory_listing("");
 
-
-    printf("mounting sd card.. ");
-    fr = f_mount(&fs, "", 1);
-    if (fr != FR_OK) {
-        printf("Failed to mount SD card, error: %d\n", fr);
-    return 0;
-    }
-  printf("done!\n");
     // Press the button to take a picture!
     while (1) {
         while (gpio_get(camera.SW_A));

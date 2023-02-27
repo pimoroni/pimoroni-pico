@@ -6,20 +6,35 @@
 #include <string>
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
-//#include "drivers/sdcard/sdcard.h"
-
-#define SDCARD_SPI_BUS spi0
-#define SDCARD_PIN_SPI0_CS     26
-#define SDCARD_PIN_SPI0_SCK    18
-#define SDCARD_PIN_SPI0_MOSI   19
-#define SDCARD_PIN_SPI0_MISO   20
 #include "drivers/fatfs/ff.h"
 
 FATFS fs;
 FRESULT fr;
+char data[] = "ouch this is going to hurt";
 
-const void* buff = "hello world";
 
+
+
+void print_error(FRESULT error){
+    switch (error)
+    {
+    case FR_DISK_ERR:
+        printf("FR_DISK_ERROR\n");
+        break;
+    case FR_NOT_READY:
+        printf("FR_NOT_READY\n");
+        break;
+    case FR_EXIST:
+        printf("FR_EXIST\n");
+        break;
+    case FR_NOT_ENABLED:
+        printf("FR_NOT_ENABLED\n");
+        break;
+    default:
+        printf("unknown error %d\n", error);
+        break;
+    }
+}
 
 int main() {
     stdio_init_all();
@@ -32,6 +47,7 @@ int main() {
     gpio_set_dir(17 , true);
     gpio_put(17, 1);
     int count =0 ; 
+    const void* buff = &data[0];
 while (1)
 {
     /* code */
@@ -59,23 +75,36 @@ while (1)
     while(f_readdir(dir, &file) == FR_OK && file.fname[0]) {
         printf("- %s %lld\n", file.fname, file.fsize);
     }
+    f_closedir(dir);
     const TCHAR* filename = "test1.txt";
     FIL *fil = new FIL;
-    uint bytes_written;
 
-    if(f_open(fil, filename, FA_CREATE_NEW)){
-        f_write (fil,			/* Open file to be written */
-	            buff,	/* Data to be written */
-	            11,			/* Number of bytes to write */
-	            &bytes_written			/* Number of bytes written */
-);
-printf("bytes written %d", bytes_written);
-f_close(fil);
+    uint count = 0;
+    uint bytes_written;
+    while (1){
+    fr = f_open(fil, filename, FA_OPEN_APPEND | FA_WRITE);
+    if ( fr == FR_OK) {
+    //fr = f_lseek(fil, f_size(fil));
+        
+        f_printf(fil, "hello world %d \n", count);
+
+        f_write(fil, buff, 12, &bytes_written);
+        printf("I have written %d\n", bytes_written);
+
+
+        fr = f_close(fil);
+        if (fr != FR_OK){
+            print_error(fr);
+        }
+        printf("linewritten\n");
     }
     else {
         printf("no write \n");
+        print_error(fr);
     }
-  f_closedir(dir);
+  sleep_ms(2000);
+  count++;
+    }
   printf("done!\n");
 
 sleep_ms(2000);

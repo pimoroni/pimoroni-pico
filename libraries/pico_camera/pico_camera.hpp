@@ -3,8 +3,11 @@
 #include "common/pimoroni_i2c.hpp"
 #include "drivers/aps6404/aps6404.hpp"
 #include "drivers/ov2640/ov2640.hpp"
+#include "drivers/fatfs/ff.h"
 
 namespace pimoroni {
+
+
 
     class PicoCamera {
     public:
@@ -12,6 +15,8 @@ namespace pimoroni {
         static const uint8_t SW_A = 7;
         static const uint8_t EXT_LED = 2;
         static const uint8_t EXT_INT = 3;
+        static const uint8_t PSRAM_CS = 17;
+        static const uint8_t SDCARD_CS = 26;
 
         using ImageSize = OV2640::ImageSize;
         using ImageMode = OV2640::ImageMode;
@@ -22,6 +27,16 @@ namespace pimoroni {
         void init(uint32_t* buffer=nullptr, uint32_t buffer_len=0);
 
         void memory_test();
+
+        // sdcard functions
+        void mount_sdcard();
+        void print_directory_listing(const char* path);
+        void open_file(const char* path, bool append);
+        void close_file();
+        void create_file();
+        void write_buffer_to_file(const void* buffer, uint buffer_size);
+        void read_file_to_buffer(const void* buffer, uint bytes_to_read);
+        void print_sdcard_status();
 
         // Set the size of image to be captured
         void set_image_size(ImageSize size) { ov2640.set_image_size(size); }
@@ -50,11 +65,25 @@ namespace pimoroni {
         APS6404 aps6404;
         OV2640 ov2640;
 
+        // Data types for handling the file system
+        FATFS *file_system_p; // Pointer to Selected file system
+        FRESULT file_result; // Error handling
+        FILINFO file_info; // Datatype for information about a file
+        FIL *file_p; // File pointer
+        DIR *dir_p; // Directory pointer
+
+        // Specific States for sdcard and files
+        uint8_t sd_hardware_initialised = 0;
+        uint8_t sdcard_mounted = 0;
+        uint16_t bytes_written_to_sdcard = 0;
+        uint16_t bytes_remaining_to_write_to_sdcard = 0;
+
         static constexpr int NUM_BUFFERS = 4;
         uint32_t* buffers[NUM_BUFFERS];
         uint32_t buffer_len_in_words;
         uint32_t transfer_addr;
 
+        void cs_enable(bool psram, bool sdcard);    // swaping between sdcard and psram
         uint32_t get_address_for_slot(int slot) const;
     };
 }

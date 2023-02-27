@@ -7,9 +7,9 @@
 namespace pimoroni {
     void PicoCamera::init(uint32_t* buffer, uint32_t buffer_len) {
         // Ensure SD card is deselected
-        gpio_init(26);
-        gpio_put(26, 1);
-        gpio_set_dir(26, GPIO_OUT);
+        gpio_init(SDCARD_CS);
+        gpio_put(SDCARD_CS, 1);
+        gpio_set_dir(SDCARD_CS, GPIO_OUT);
 
         ov2640.init(ImageSize::SIZE_1600x1200, ImageMode::MODE_RGB565);
         aps6404.init();
@@ -79,4 +79,67 @@ namespace pimoroni {
         const uint32_t image_len_in_pages = (get_image_len_in_bytes() + APS6404::PAGE_SIZE - 1) / APS6404::PAGE_SIZE;
         return slot * image_len_in_pages * APS6404::PAGE_SIZE;
     }
+
+    void PicoCamera::cs_enable(bool psram, bool sdcard){
+        if (psram && sdcard){   // Make sure onlt one is selected at a time
+            return;
+        }
+        if (psram){
+            gpio_put(SDCARD_CS, 1);
+            sleep_us(100);
+            gpio_put(PSRAM_CS, 0);
+        }
+        if (sdcard){
+            gpio_put(PSRAM_CS, 1);
+            sleep_us(100);
+            gpio_put(SDCARD_CS, 0);
+        }
+    }
+
+        void PicoCamera::mount_sdcard(){
+
+            file_result = f_mount(file_system_p, nullptr, 1);
+            if (file_result != FR_OK) {
+                printf("Failed to mount SD card, error: %d\n", file_result);
+                sdcard_mounted = true;
+            }
+            else
+            {
+                sd_hardware_initialised = true;
+                sdcard_mounted = true;
+                printf("done!\n");
+            }
+        }
+
+        void PicoCamera::print_directory_listing(const char* path){
+            if (sd_hardware_initialised && sdcard_mounted){
+            f_opendir(dir_p, path);
+
+            while(f_readdir(dir_p, &file_info) == FR_OK && file_info.fname[0]) {
+                printf("- %s %lld\n", file_info.fname, file_info.fsize);
+            }
+            f_closedir(dir_p);
+            }
+            else{
+                printf("Please mount sd card");
+            }
+        }
+        void PicoCamera::open_file(const char* path, bool append=false){
+            
+        }
+        void PicoCamera::close_file(){
+
+        }
+        void PicoCamera::create_file(){
+
+        }
+        void PicoCamera::write_buffer_to_file(const void* buffer, uint buffer_size){
+
+        }
+        void PicoCamera::read_file_to_buffer(const void* buffer, uint bytes_to_read){
+
+        }
+        void PicoCamera::print_sdcard_status(){
+
+        }
 }
