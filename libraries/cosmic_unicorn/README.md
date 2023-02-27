@@ -1,12 +1,12 @@
-# Galactic Unicorn (C/C++)<!-- omit in toc -->
+# Cosmic Unicorn (C/C++)<!-- omit in toc -->
 
-Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
+Cosmic Unicorn offers 32x32 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
 
-You can buy one here: https://shop.pimoroni.com/products/galactic-unicorn
+You can buy one here: https://shop.pimoroni.com/products/cosmic-unicorn
 
 ## These are not your everyday RGB LEDs!
 
-Internally Galactic Unicorn applies gamma correction to the supplied image data and updates the display with 14-bit precision resulting in extremely linear visual output - including at the low end.
+Internally Cosmic Unicorn applies gamma correction to the supplied image data and updates the display with 14-bit precision resulting in extremely linear visual output - including at the low end.
 
 The display is refreshed around 300 times per second (300fps!) allowing for rock solid stability even when being filmed, no smearing or flickering even when in motion.
 
@@ -14,9 +14,9 @@ No strobing or brightness stepping here folks - it's the perfect backdrop for yo
 
 ## Getting started
 
-The Galactic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
+The Cosmic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
 
-Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_graphics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
+Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/libraries/pico_graphics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Cosmic Unicorn to have it displayed on the screen.
 
 - [Example Program](#example-program)
 - [Interleaved Framebuffer](#interleaved-framebuffer)
@@ -41,7 +41,7 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
     - [`void play_synth()`](#void-play_synth)
     - [`void stop_playing()`](#void-stop_playing)
   - [Constants](#constants)
-    - [`WIDTH` & `HEIGHT`](#width--height)
+    - [`WIDTH` \& `HEIGHT`](#width--height)
 
 # Example Program
 
@@ -52,15 +52,15 @@ The following example shows how to scroll a simple message across the display.
 #include <stdlib.h>
 
 #include "libraries/pico_graphics/pico_graphics.hpp"
-#include "galactic_unicorn.hpp"
+#include "cosmic_unicorn.hpp"
 
 using namespace pimoroni;
 
 // create a PicoGraphics framebuffer to draw into
-PicoGraphics_PenRGB888 graphics(GalacticUnicorn::WIDTH, GalacticUnicorn::HEIGHT, nullptr);
+PicoGraphics_PenRGB888 graphics(CosmicUnicorn::WIDTH, CosmicUnicorn::HEIGHT, nullptr);
 
-// create our GalacticUnicorn object
-GalacticUnicorn galactic_unicorn;
+// create our CosmicUnicorn object
+CosmicUnicorn cosmic_unicorn;
 
 // message to scroll
 std::string message = "Pirate. Monkey. Robot. Ninja.";
@@ -69,18 +69,18 @@ int main() {
 
   stdio_init_all();
 
-  // initialise the GalacticUnicorn object
-  galactic_unicorn.init();
+  // initialise the CosmicUnicorn object
+  cosmic_unicorn.init();
 
   // start position for scrolling (off the side of the display)
-  float scroll = -(float)GalacticUnicorn::WIDTH;
+  float scroll = -(float)CosmicUnicorn::WIDTH;
 
   while(true) {
     // determine the scroll position of the text
     int width = graphics.measure_text(message, 1);
     scroll += 0.25f;
     if(scroll > width) {
-      scroll = -(float)GalacticUnicorn::WIDTH;
+      scroll = -(float)CosmicUnicorn::WIDTH;
     }
 
     // clear the graphics object
@@ -92,7 +92,7 @@ int main() {
     graphics.text(message, Point(0 - scroll, 5), -1, 0.55);    
 
     // update the display
-    galactic_unicorn.update(&graphics);
+    cosmic_unicorn.update(&graphics);
 
     sleep_ms(10);
   }
@@ -103,7 +103,7 @@ int main() {
 
 # Interleaved Framebuffer
 
-Galactic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
+Cosmic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
 
 The PIO is a powerful, but limited, tool. It has no way to access memory at random and minimal support for decision making and branching. All it can really do is process a stream of data/instructions in order. 
 
@@ -129,7 +129,7 @@ If you're working with our library then you don't need to worry about any of the
 
 ### `void init()`
 
-Initialise the Galactic Unicorn hardware, interleaved framebuffer, and PIO programs. This function must be called before attempting to do anything else with Galactic Unicorn.
+Initialise the Cosmic Unicorn hardware, interleaved framebuffer, and PIO programs. This function must be called before attempting to do anything else with Cosmic Unicorn.
 
 ### `void set_brightness(float value)`
 
@@ -146,10 +146,10 @@ Adjust the brightness of the display - `delta` is supplied as a floating point v
 For example:
 
 ```c++
-galactic.set_brightness(0.5f);
-galactic.adjust_brightness(0.1f); // brightness is now 0.6
-galactic.adjust_brightness(0.7f); // brightness is now 1.0
-galactic.adjust_brightness(-0.2f); // brightness is now 0.8
+cosmic.set_brightness(0.5f);
+cosmic.adjust_brightness(0.1f); // brightness is now 0.6
+cosmic.adjust_brightness(0.7f); // brightness is now 1.0
+cosmic.adjust_brightness(-0.2f); // brightness is now 0.8
 ```
 
 ### `void set_volume(float value)`
@@ -167,10 +167,10 @@ Adjust the volume - `delta` is supplied as a floating point value and will be ad
 For example:
 
 ```c++
-galactic.set_volume(0.5f);
-galactic.adjust_volume(0.1f); // volume is now 0.6
-galactic.adjust_volume(0.7f); // volume is now 1.0
-galactic.adjust_volume(-0.2f); // volume is now 0.8
+cosmic.set_volume(0.5f);
+cosmic.adjust_volume(0.1f); // volume is now 0.6
+cosmic.adjust_volume(0.7f); // volume is now 1.0
+cosmic.adjust_volume(-0.2f); // volume is now 0.8
 ```
 
 ### `uint16_t light()`
@@ -181,7 +181,7 @@ Get the current value seen by the onboard light sensor as a value between `0` an
 
 Returns true if the requested `button` is currently pressed.
 
-There are a set of constants on the GalacticUnicorn class that represent each of the buttons. The brightness, sleep, and volume buttons are not tied to hardware functions (they are implemented entirely in software) so can also be used for user functions if preferred.
+There are a set of constants on the CosmicUnicorn class that represent each of the buttons. The brightness, sleep, and volume buttons are not tied to hardware functions (they are implemented entirely in software) so can also be used for user functions if preferred.
 
 ```c++
 static const uint8_t SWITCH_A               =  0;
@@ -198,7 +198,7 @@ static const uint8_t SWITCH_BRIGHTNESS_DOWN = 26;
 For example:
 
 ```c++
-while(!galactic.is_pressed(GalacticUnicorn::SWITCH_A)) {
+while(!cosmic.is_pressed(CosmicUnicorn::SWITCH_A)) {
   // wait for switch A to be pressed
 }
 printf("We did it! We pressed switch A! Heck yeah!");
@@ -208,7 +208,7 @@ printf("We did it! We pressed switch A! Heck yeah!");
 
 ### `void update(PicoGraphics *graphics)`
 
-**This is our recommended way to update the image on Galactic Unicorn.** The PicoGraphics library provides a collection of powerful drawing methods to make things simple.
+**This is our recommended way to update the image on Cosmic Unicorn.** The PicoGraphics library provides a collection of powerful drawing methods to make things simple.
 
 The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied. This lets you have multiple PicoGraphics objects on the go at once and switch between them by changing which gets passed into this function.
 
@@ -216,7 +216,7 @@ If however you'd rather twiddle individual pixels (for example you're producing 
 
 ### `void clear()`
 
-Clear the contents of the interleaved framebuffer. This will make your Galactic Unicorn display turn off when the next frame is displayed.
+Clear the contents of the interleaved framebuffer. This will make your Cosmic Unicorn display turn off when the next frame is displayed.
 
 If you're using PicoGraphics to build your image (recommended!) then you won't need to call this method as you'll overwrite the entire display when you call `update()` anyway.
 
@@ -250,10 +250,10 @@ Stops any currently playing audio.
 
 ### `WIDTH` & `HEIGHT`
 
-The width and height of Galactic Unicorn are available in constants `WIDTH` and `HEIGHT`.
+The width and height of Cosmic Unicorn are available in constants `WIDTH` and `HEIGHT`.
 
 For example:
 
 ```c++
-int num_pixels = GalacticUnicorn::WIDTH * GalacticUnicorn::HEIGHT;
+int num_pixels = CosmicUnicorn::WIDTH * CosmicUnicorn::HEIGHT;
 ```
