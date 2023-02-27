@@ -1,12 +1,12 @@
-# Galactic Unicorn (MicroPython) <!-- omit in toc -->
+# Cosmic Unicorn (MicroPython) <!-- omit in toc -->
 
-Galactic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
+Cosmic Unicorn offers 32x32 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
 
-You can buy one here: https://shop.pimoroni.com/products/galactic-unicorn
+You can buy one here: https://shop.pimoroni.com/products/cosmic-unicorn
 
 ## These are not your everyday RGB LEDs!
 
-Internally Galactic Unicorn applies gamma correction to the supplied image data and updates the display with 14-bit precision resulting in extremely linear visual output - including at the low end.
+Internally Cosmic Unicorn applies gamma correction to the supplied image data and updates the display with 14-bit precision resulting in extremely linear visual output - including at the low end.
 
 The display is refreshed around 300 times per second (300fps!) allowing for rock solid stability even when being filmed, no smearing or flickering even when in motion.
 
@@ -14,9 +14,9 @@ No strobing or brightness stepping here folks - it's the perfect backdrop for yo
 
 ## Getting started
 
-The Galactic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
+The Cosmic Unicorn library provides a collection of methods that allow you to easily access all of the features on the board.
 
-Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Galactic Unicorn to have it displayed on the screen.
+Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/pimoroni-pico/tree/main/micropython/modules/picographics) library which provides a comprehensive selection of drawing methods - once your drawing work is complete you pass the PicoGraphics object to Cosmic Unicorn to have it displayed on the screen.
 
 - [Example Program](#example-program)
 - [Interleaved Framebuffer](#interleaved-framebuffer)
@@ -41,7 +41,7 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
     - [`stop_playing()`](#stop_playing)
     - [Channel Reference](#channel-reference)
   - [Constants](#constants)
-    - [`WIDTH` & `HEIGHT`](#width--height)
+    - [`WIDTH` \& `HEIGHT`](#width--height)
   - [Using Breakouts](#using-breakouts)
 
 # Example Program
@@ -49,18 +49,18 @@ Drawing is primarily handled via our [PicoGraphics](https://github.com/pimoroni/
 The following example shows how to scroll a simple message across the display.
 
 ```python
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN
 import time
 
 # create a PicoGraphics framebuffer to draw into
-graphics = PicoGraphics(display=DISPLAY_GALACTIC_UNICORN)
+graphics = PicoGraphics(display=DISPLAY_COSMIC_UNICORN)
 
-# create our GalacticUnicorn object
-gu = GalacticUnicorn()
+# create our CosmicUnicorn object
+cu = CosmicUnicorn()
 
 # start position for scrolling (off the side of the display)
-scroll = float(-GalacticUnicorn.WIDTH)
+scroll = float(-CosmicUnicorn.WIDTH)
 
 # message to scroll
 MESSAGE = "Pirate. Monkey. Robot. Ninja."
@@ -74,7 +74,7 @@ while True:
     width = graphics.measure_text(MESSAGE, 1)
     scroll += 0.25
     if scroll > width:
-      scroll = float(-GalacticUnicorn.WIDTH)
+      scroll = float(-CosmicUnicorn.WIDTH)
 
     # clear the graphics object
     graphics.set_pen(BLACK)
@@ -85,14 +85,14 @@ while True:
     graphics.text(MESSAGE, round(0 - scroll), 2, -1, 0.55);    
 
     # update the display
-    gu.update(graphics)
+    cu.update(graphics)
 
     time.sleep(0.02)
 ```
 
 # Interleaved Framebuffer
 
-Galactic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
+Cosmic Unicorn takes advantage of the RP2040's PIOs to drive screen updates - this is what gives it the performance it needs to render with 14-bit precision at over 300 frames per second.
 
 The PIO is a powerful, but limited, tool. It has no way to access memory at random and minimal support for decision making and branching. All it can really do is process a stream of data/instructions in order. 
 
@@ -116,22 +116,22 @@ If you're working with our library then you don't need to worry about any of the
 
 ## Imports and Objects
 
-To access these functions, you'll need to first `import` the relevant libraries and then set up a Galactic Unicorn object:
+To access these functions, you'll need to first `import` the relevant libraries and then set up a Cosmic Unicorn object:
 
 ```python
-from galactic import GalacticUnicorn
+from cosmic import CosmicUnicorn
 
-gu = GalacticUnicorn()
+cu = CosmicUnicorn()
 ```
 
 or (with PicoGraphics):
 
 ```python
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN
 
-gu = GalacticUnicorn()
-graphics = PicoGraphics(display=DISPLAY_GALACTIC_UNICORN)
+cu = CosmicUnicorn()
+graphics = PicoGraphics(display=DISPLAY_COSMIC_UNICORN)
 ```
 
 ## System State
@@ -151,10 +151,10 @@ Adjust the brightness of the display - `delta` is supplied as a floating point v
 For example:
 
 ```python
-gu.set_brightness(0.5)
-gu.adjust_brightness(0.1)  # brightness is now 0.6
-gu.adjust_brightness(0.7)  # brightness is now 1.0
-gu.adjust_brightness(-0.2)  # brightness is now 0.8
+cu.set_brightness(0.5)
+cu.adjust_brightness(0.1)  # brightness is now 0.6
+cu.adjust_brightness(0.7)  # brightness is now 1.0
+cu.adjust_brightness(-0.2)  # brightness is now 0.8
 ```
 
 ### `set_volume(value)`
@@ -172,10 +172,10 @@ Adjust the volume - `delta` is supplied as a floating point value and will be ad
 For example:
 
 ```python
-gu.set_volume(0.5)
-gu.set_volume(0.1)  # volume is now 0.6
-gu.adjust_volume(0.7)  # volume is now 1.0
-gu.adjust_volume(-0.2)  # volume is now 0.8
+cu.set_volume(0.5)
+cu.set_volume(0.1)  # volume is now 0.6
+cu.adjust_volume(0.7)  # volume is now 1.0
+cu.adjust_volume(-0.2)  # volume is now 0.8
 ```
 
 ### `light()`
@@ -186,7 +186,7 @@ Get the current value seen by the onboard light sensor as a value between `0` an
 
 Returns true if the requested `button` is currently pressed.
 
-There are a set of constants in the GalacticUnicorn class that represent each of the buttons. The brightness, sleep, and volume buttons are not tied to hardware functions (they are implemented entirely in software) so can also be used for user functions if preferred. Here's a list of the constants and their associated pin numbers:
+There are a set of constants in the CosmicUnicorn class that represent each of the buttons. The brightness, sleep, and volume buttons are not tied to hardware functions (they are implemented entirely in software) so can also be used for user functions if preferred. Here's a list of the constants and their associated pin numbers:
 
 ```python
 SWITCH_A               =  0
@@ -203,7 +203,7 @@ SWITCH_BRIGHTNESS_DOWN = 26
 For example:
 
 ```python
-while not gu.is_pressed(GalacticUnicorn.SWITCH_A):
+while not cu.is_pressed(CosmicUnicorn.SWITCH_A):
     # wait for switch A to be pressed
     pass
 
@@ -218,17 +218,17 @@ The PicoGraphics library provides a collection of powerful drawing methods to ma
 
 The image on the PicoGraphics object provided is copied to the interleaved framebuffer with gamma correction applied.
 
-For example (assuming you've set up your Galactic Unicorn and PicoGraphics objects up [as we did above](#imports-and-objects)):
+For example (assuming you've set up your Cosmic Unicorn and PicoGraphics objects up [as we did above](#imports-and-objects)):
 
 ```python
-gu.update(graphics)
+cu.update(graphics)
 ```
 
-⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently. Here it's a Galactic Unicorn function to which you need to pass a PicoGraphics object to.
+⚠️ If you've used PicoGraphics on our other boards note that this `update` function works a little differently. Here it's a Cosmic Unicorn function to which you need to pass a PicoGraphics object to.
 
 ### `clear()`
 
-Clear the contents of the interleaved framebuffer. This will make your Galactic Unicorn display turn off. To show an image again, call the `update()` function as described above.
+Clear the contents of the interleaved framebuffer. This will make your Cosmic Unicorn display turn off. To show an image again, call the `update()` function as described above.
 
 ## Audio
 
@@ -282,22 +282,22 @@ play_tone(frequency, volume=None, attack=None, release=None)
 
 ### `WIDTH` & `HEIGHT`
 
-The width and height of Galactic Unicorn are available in constants `WIDTH` and `HEIGHT`.
+The width and height of Cosmic Unicorn are available in constants `WIDTH` and `HEIGHT`.
 
 For example:
 
 ```python
-num_pixels = GalacticUnicorn.WIDTH * GalacticUnicorn.HEIGHT
+num_pixels = CosmicUnicorn.WIDTH * CosmicUnicorn.HEIGHT
 print(num_pixels)
 ```
 
 ## Using Breakouts
 
-Galactic Unicorn has two Qw/ST (Qwiic/STEMMA QT) connectors. Breakouts with Qw/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
+Cosmic Unicorn has two Qw/ST (Qwiic/STEMMA QT) connectors. Breakouts with Qw/ST connectors, can be plugged straight in with a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587). You can connect I2C Breakout Garden breakouts without Qw/ST connectors using a [JST-SH to JST-SH cable](https://shop.pimoroni.com/products/jst-sh-cable-qwiic-stemma-qt-compatible?variant=31910609813587) and a [Qw/ST to Breakout Garden adaptor](https://shop.pimoroni.com/products/stemma-qt-qwiic-to-breakout-garden-adapter).
 
 - [List of breakouts currently supported in our C++/MicroPython build](https://github.com/pimoroni/pimoroni-pico#breakouts)
 
-Galactic Unicorn uses GP4 and GP5 for its I2C interface. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
+Cosmic Unicorn uses GP4 and GP5 for its I2C interface. You can use the constants in the shared `pimoroni` module to set up the I2C interface:
 
 ```python
 from pimoroni_i2c import PimoroniI2C
