@@ -28,6 +28,7 @@ On the releases page you'll find a bunch of different .uf2 files for use on diff
 | Galactic Unicorn                                             | **pimoroni-picow_galactic_unicorn-vx.x.x-micropython.uf2**   |                                                              |
 | Inky Frame                                                   | **pimoroni-picow_inky_frame-vx.x.x-micropython.uf2**         |                                                              |
 | Badger 2040 W                                                | **pimoroni-badger2040w-vx.x.x-micropython.uf2** or **pimoroni-badger2040w-vx.x.x-micropython-with-examples.uf2** | Download **pimoroni-badger2040w-vx.x.x-micropython-with-examples.uf2** for built in examples! |
+| Cosmic Unicorn                                               | **pimoroni-picow_cosmic_unicorn-vx.x.x-micropython.uf2**     |                                                              |
 
 ## Entering DFU/bootloader mode
 
