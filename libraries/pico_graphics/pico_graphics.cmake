@@ -1,3 +1,11 @@
+if(NOT TARGET bitmap_fonts)
+    include(${CMAKE_CURRENT_LIST_DIR}/../bitmap_fonts/bitmap_fonts.cmake)
+endif()
+
+if(NOT TARGET hershey_fonts)
+    include(${CMAKE_CURRENT_LIST_DIR}/../hershey_fonts/hershey_fonts.cmake)
+endif()
+
 add_library(pico_graphics 
     ${CMAKE_CURRENT_LIST_DIR}/types.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics.cpp

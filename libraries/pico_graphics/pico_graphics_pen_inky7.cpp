@@ -7,17 +7,31 @@ namespace pimoroni {
       this->pen_type = PEN_INKY7;
   }
   void PicoGraphics_PenInky7::set_pen(uint c) {
-    color = c & 0x7;
+    color = c;
   }
   void PicoGraphics_PenInky7::set_pen(uint8_t r, uint8_t g, uint8_t b) {
+    color = RGB(r, g, b).to_rgb888() | 0x7f000000;
   }
   int PicoGraphics_PenInky7::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-    return 0;
+    return RGB(r, g, b).to_rgb888() | 0x7f000000;
+  }
+  int PicoGraphics_PenInky7::create_pen_hsv(float h, float s, float v) {
+    return RGB::from_hsv(h, s, v).to_rgb888() | 0x7f000000;
   }
   void PicoGraphics_PenInky7::set_pixel(const Point &p) {
-    driver.write_pixel(p, color);
+    if ((color & 0x7f000000) == 0x7f000000) {
+      set_pixel_dither(p, RGB(color));
+    } else {
+      driver.write_pixel(p, color & 0x07);
+    }
   }
   void PicoGraphics_PenInky7::set_pixel_span(const Point &p, uint l) {
+    if ((color & 0x7f000000) == 0x7f000000) {
+      for(auto x = 0u; x < l; x++) {
+        set_pixel_dither(p + Point(x, 0), RGB(color));
+      }
+      return;
+    }
     driver.write_pixel_span(p, l, color);
   }
   void PicoGraphics_PenInky7::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
@@ -60,8 +74,7 @@ namespace pimoroni {
 
     // set the pixel
     //color = candidates[pattern[pattern_index]];
-    color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
-    set_pixel(p);
+    driver.write_pixel(p, candidate_cache[cache_key][dither16_pattern[pattern_index]] & 0x07);
   }
   void PicoGraphics_PenInky7::frame_convert(PenType type, conversion_callback_func callback) {
     if(type == PEN_INKY7) {
