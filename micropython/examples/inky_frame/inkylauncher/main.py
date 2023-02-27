@@ -72,7 +72,7 @@ def launcher():
     graphics.set_pen(1)
     graphics.text("E. Random Joke", 35, HEIGHT - (85 + y_offset), 600, 3)
 
-    graphics.set_pen(graphics.create_pen(220,220,220))
+    graphics.set_pen(graphics.create_pen(220, 220, 220))
     graphics.rectangle(WIDTH - 100, HEIGHT - (340 + y_offset), 70, 50)
     graphics.rectangle(WIDTH - 150, HEIGHT - (280 + y_offset), 120, 50)
     graphics.rectangle(WIDTH - 200, HEIGHT - (220 + y_offset), 170, 50)
