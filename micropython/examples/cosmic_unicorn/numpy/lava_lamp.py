@@ -41,7 +41,7 @@ class Blob():
 
         if self.y < 0.0 or self.y >= float(height):
             self.y = max(0.0, self.y)
-            self.y = min(float(width - 1), self.y)
+            self.y = min(float(height - 1), self.y)
             self.dy = -self.dy
 
 
