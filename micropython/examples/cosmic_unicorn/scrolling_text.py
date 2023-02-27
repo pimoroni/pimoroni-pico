@@ -1,6 +1,6 @@
 import time
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 '''
 Display scrolling wisdom, quotes or greetz.
@@ -17,12 +17,12 @@ MESSAGE = "\"Space is big. Really big. You just won't believe how vastly hugely 
 HOLD_TIME = 2.0
 STEP_TIME = 0.075
 
-# create galactic object and graphics surface for drawing
-gu = GalacticUnicorn()
+# create cosmic object and graphics surface for drawing
+gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-width = GalacticUnicorn.WIDTH
-height = GalacticUnicorn.HEIGHT
+width = CosmicUnicorn.WIDTH
+height = CosmicUnicorn.HEIGHT
 
 
 # function for drawing outlined text
@@ -62,10 +62,10 @@ last_time = time.ticks_ms()
 while True:
     time_ms = time.ticks_ms()
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
     if state == STATE_PRE_SCROLL and time_ms - last_time > HOLD_TIME * 1000:

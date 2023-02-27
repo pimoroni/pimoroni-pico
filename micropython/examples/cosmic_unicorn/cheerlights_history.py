@@ -1,6 +1,6 @@
-# This Cosmic Unicorn example updates a pixel every five(ish) minutes
+# This Cosmic Unicorn example updates a pixel every two(ish) minutes
 # to display the most recent #cheerlights colour. Discover the most popular
-# colours over time, or use it as an avant garde (but colourful) 53 hour clock!
+# colours over time, or use it as an avant garde (but colourful) 32 hour clock!
 # Find out more about the Cheerlights API at https://cheerlights.com/
 #
 # To run this example you'll need WIFI_CONFIG.py and network_manager.py from
