@@ -2,15 +2,15 @@ import os
 from microdot_asyncio import Microdot, send_file
 from microdot_asyncio_websocket import with_websocket
 from phew import connect_to_wifi
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 from WIFI_CONFIG import SSID, PSK
 
 
-gu = GalacticUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 mv_graphics = memoryview(graphics)
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 WIDTH, HEIGHT = graphics.get_bounds()
 
@@ -24,12 +24,12 @@ server = Microdot()
 
 @server.route("/", methods=["GET"])
 def route_index(request):
-    return send_file("galactic_paint/index.html")
+    return send_file("cosmic_paint/index.html")
 
 
 @server.route("/static/<path:path>", methods=["GET"])
 def route_static(request, path):
-    return send_file(f"galactic_paint/static/{path}")
+    return send_file(f"cosmic_paint/static/{path}")
 
 
 def get_pixel(x, y):
@@ -86,7 +86,7 @@ async def echo(request, ws):
 
         except ValueError:
             if data == "show":
-                gu.update(graphics)
+                cu.update(graphics)
 
             if data == "fill":
                 data = await ws.receive()
