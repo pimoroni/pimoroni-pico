@@ -40,7 +40,7 @@ def launcher():
     graphics.clear()
     graphics.set_pen(0)
 
-    graphics.set_pen(5)
+    graphics.set_pen(graphics.create_pen(255, 215, 0))
     graphics.rectangle(0, 0, WIDTH, 50)
     graphics.set_pen(0)
     title = "Launcher"
