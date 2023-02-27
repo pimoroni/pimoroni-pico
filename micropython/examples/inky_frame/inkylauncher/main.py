@@ -72,6 +72,13 @@ def launcher():
     graphics.set_pen(1)
     graphics.text("E. Random Joke", 35, HEIGHT - (85 + y_offset), 600, 3)
 
+    graphics.set_pen(graphics.create_pen(220,220,220))
+    graphics.rectangle(WIDTH - 100, HEIGHT - (340 + y_offset), 70, 50)
+    graphics.rectangle(WIDTH - 150, HEIGHT - (280 + y_offset), 120, 50)
+    graphics.rectangle(WIDTH - 200, HEIGHT - (220 + y_offset), 170, 50)
+    graphics.rectangle(WIDTH - 250, HEIGHT - (160 + y_offset), 220, 50)
+    graphics.rectangle(WIDTH - 300, HEIGHT - (100 + y_offset), 270, 50)
+
     graphics.set_pen(0)
     note = "Hold A + E, then press Reset, to return to the Launcher"
     note_len = graphics.measure_text(note, 2) // 2

@@ -87,7 +87,7 @@ def draw():
         if word in time_string:
             graphics.set_pen(0)
         else:
-            graphics.set_pen(6)
+            graphics.set_pen(graphics.create_pen(220,220,220))
 
         for letter in word:
             text_length = graphics.measure_text(letter, scale, spacing)
