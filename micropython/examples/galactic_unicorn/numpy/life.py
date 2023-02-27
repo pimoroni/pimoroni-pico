@@ -20,7 +20,7 @@ Press "B" to toggle smoothing.
 # machine.freq(250_000_000)
 
 INITIAL_LIFE = 500        # Number of live cells to seed
-GENERATION_TIME_MS = 200  # MS between generations
+GENERATION_TIME_MS = 50   # MS between generations
 MINIMUM_LIFE = 10         # Auto reseed when only this many alive cells remain
 SMOOTHED = True           # Enable for a more organic if somewhat unsettling feel
 
@@ -51,6 +51,7 @@ def update():
         seed_life()
         return
 
+    # Rollin' rollin' rollin.
     _N = numpy.roll(life, -1, axis=0)
     _NW = numpy.roll(_N, -1, axis=1)
     _NE = numpy.roll(_N, 1, axis=1)
@@ -60,21 +61,21 @@ def update():
     _W = numpy.roll(life, -1, axis=1)
     _E = numpy.roll(life, 1, axis=1)
 
+    # Compute the total neighbours for each cell
     neighbours[:] = _N + _NW + _NE + _S + _SW + _SE + _W + _E
 
     next_generation[:] = life[:]
 
-    for x in range(width):
-        for y in range(height):
-            count = neighbours[y][x]
+    # Any cells with exactly three neighbours should always stay alive
+    next_generation[:] += neighbours[:] == 3
 
-            if life[y][x]:  # Alive
-                if count < 2 or count > 3:
-                    next_generation[y][x] = int(False)
-            elif count == 3:
-                next_generation[y][x] = int(True)
+    # Any alive cells with less than two neighbours should die
+    next_generation[:] -= (neighbours[:] < 2) * life
 
-    life[:] = next_generation
+    # Any alive cells with more than three neighbours should die
+    next_generation[:] -= (neighbours[:] > 3) * life
+
+    life[:] = numpy.clip(next_generation, 0, 1)
 
 
 def draw():
