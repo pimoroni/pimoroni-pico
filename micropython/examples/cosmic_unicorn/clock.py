@@ -38,7 +38,7 @@ MIDNIGHT_VALUE = 0.3
 
 
 # create cosmic object and graphics surface for drawing
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 # create the rtc object
@@ -131,7 +131,7 @@ def sync_time():
         time.sleep(0.2)
 
         redraw_display_if_reqd()
-        gu.update(graphics)
+        cu.update(graphics)
 
     if max_wait > 0:
         print("Connected")
@@ -207,23 +207,23 @@ def redraw_display_if_reqd():
 
 # set the font
 graphics.set_font("bitmap8")
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 sync_time()
 
 while True:
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         sync_time()
 
     redraw_display_if_reqd()
 
     # update the display
-    gu.update(graphics)
+    cu.update(graphics)
 
     time.sleep(0.01)

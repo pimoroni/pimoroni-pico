@@ -13,8 +13,8 @@ Play with the number of spawns, heat, damping factor and colour palette to tweak
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
-gu = CosmicUnicorn()
-gu.set_brightness(0.5)
+cu = CosmicUnicorn()
+cu.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_COSMIC_UNICORN, pen_type=PEN_P8)
 
 # Number of random fire spawns
@@ -79,7 +79,7 @@ def draw():
     # Multiplies it by the number of palette entries (-1) to turn it into a palette index
     # Converts to uint8_t datatype to match the framebuffer
     memoryview(graphics)[:] = numpy.ndarray(numpy.clip(heat[0:32, 0:32], 0, 1) * (PALETTE_SIZE - 1), dtype=numpy.uint8).tobytes()
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 width = CosmicUnicorn.WIDTH
@@ -92,11 +92,11 @@ t_total = 0
 while True:
     gc.collect()
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     tstart = time.ticks_ms()
     gc.collect()

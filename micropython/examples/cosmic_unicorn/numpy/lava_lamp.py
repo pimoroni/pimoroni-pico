@@ -13,9 +13,9 @@ A lava lamp effect, created by blurred, moving particles.
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY_COSMIC_UNICORN, pen_type=PEN_P8)
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 width = CosmicUnicorn.WIDTH
 height = CosmicUnicorn.HEIGHT
@@ -77,18 +77,18 @@ def draw():
     # Multiplies by palette entries (-1) to turn it into a palette index
     # Converts to uint8_t datatype to match the framebuffer
     memoryview(graphics)[:] = numpy.ndarray(numpy.clip(lava, 0.0, 1.0) * (PAL_COLS - 1), dtype=numpy.uint8).tobytes()
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 t_count = 0
 t_total = 0
 
 while True:
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     tstart = time.ticks_ms()
     gc.collect()

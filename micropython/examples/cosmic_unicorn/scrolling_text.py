@@ -18,7 +18,7 @@ HOLD_TIME = 2.0
 STEP_TIME = 0.075
 
 # create cosmic object and graphics surface for drawing
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 width = CosmicUnicorn.WIDTH
@@ -41,7 +41,7 @@ def outline_text(text, x, y):
     graphics.text(text, x, y, -1, 1)
 
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 # state constants
 STATE_PRE_SCROLL = 0
@@ -62,11 +62,11 @@ last_time = time.ticks_ms()
 while True:
     time_ms = time.ticks_ms()
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     if state == STATE_PRE_SCROLL and time_ms - last_time > HOLD_TIME * 1000:
         if msg_width + PADDING * 2 >= width:
@@ -90,7 +90,7 @@ while True:
     outline_text(MESSAGE, x=PADDING - shift, y=2)
 
     # update the display
-    gu.update(graphics)
+    cu.update(graphics)
 
     # pause for a moment (important or the USB serial device will fail)
     time.sleep(0.001)

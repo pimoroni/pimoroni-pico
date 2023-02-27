@@ -10,7 +10,7 @@ A 70s-tastic, procedural rainbow lava lamp.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 blob_count = 10
@@ -121,22 +121,22 @@ def draw_portrait():
                 graphics.set_pen(0)
             graphics.pixel(y, x)
 
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 setup_portrait()
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 while True:
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         setup_portrait()
 
     start = time.ticks_ms()

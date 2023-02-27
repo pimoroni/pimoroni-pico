@@ -10,7 +10,7 @@ super computer doing its work in the eighties.
 You can adjust the brightness with LUX + and -.
 '''
 
-gu = CosmicUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 colour = (230, 150, 0)
@@ -42,7 +42,7 @@ def draw():
                 graphics.set_pen(0)
             graphics.pixel(x, y)
 
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 @micropython.native  # noqa: F821
@@ -58,15 +58,15 @@ def update():
 
 setup()
 
-gu.set_brightness(0.5)
+cu.set_brightness(0.5)
 
 while True:
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     start = time.ticks_ms()
 

@@ -12,8 +12,8 @@ THIS IS FINE!
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
-gu = CosmicUnicorn()
-gu.set_brightness(0.5)
+cu = CosmicUnicorn()
+cu.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_COSMIC_UNICORN, pen_type=PEN_P8)
 
 # Number of random fire spawns
@@ -84,7 +84,7 @@ def draw():
     graphics.text("This", 6, 4, 1, 1)
     graphics.text("is", 11, 12, 1, 1)
     graphics.text("fine", 6, 20, 1, 1)
-    gu.update(graphics)
+    cu.update(graphics)
 
 
 width = CosmicUnicorn.WIDTH
@@ -97,11 +97,11 @@ t_total = 0
 while True:
     gc.collect()
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        gu.adjust_brightness(+0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
+        cu.adjust_brightness(+0.01)
 
-    if gu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        gu.adjust_brightness(-0.01)
+    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        cu.adjust_brightness(-0.01)
 
     tstart = time.ticks_ms()
     gc.collect()
