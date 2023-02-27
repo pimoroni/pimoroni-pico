@@ -22,6 +22,3 @@
 	path = drivers/vl53l5cx/src
 	url = https://github.com/ST-mirror/VL53L5CX_ULD_driver
 	branch = no-fw/lite/en
-[submodule "drivers/mlx90640/src"]
-	path = drivers/mlx90640/src
-	url = https://github.com/melexis/mlx90640-library

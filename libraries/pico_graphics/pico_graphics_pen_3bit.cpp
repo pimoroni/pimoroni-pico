@@ -10,7 +10,12 @@ namespace pimoroni {
         }
         cache_built = false;
     }
-    void PicoGraphics_Pen3Bit::_set_pixel(const Point &p, uint col) {
+    void PicoGraphics_Pen3Bit::set_pen(uint c) {
+        color = c & 0xf;
+    }
+    void PicoGraphics_Pen3Bit::set_pen(uint8_t r, uint8_t g, uint8_t b) {
+    }
+    void PicoGraphics_Pen3Bit::set_pixel(const Point &p) {
         uint offset = (bounds.w * bounds.h) / 8;
         uint8_t *buf = (uint8_t *)frame_buffer;
 
@@ -20,48 +25,27 @@ namespace pimoroni {
         uint8_t *bufB = bufA + offset;
         uint8_t *bufC = bufA + offset + offset;
 
-        uint8_t cA = (col & 0b100) >> 2;
+        uint8_t cA = (color & 0b100) >> 2;
         *bufA &= ~(1U << bo);
         *bufA |= (cA << bo);
 
-        uint8_t cB = (col & 0b010) >> 1;
+        uint8_t cB = (color & 0b010) >> 1;
         *bufB &= ~(1U << bo);
         *bufB |= (cB << bo);
 
-        uint8_t cC = (col & 0b001);
+        uint8_t cC = (color & 0b001);
         *bufC &= ~(1U << bo);
         *bufC |= (cC << bo);
     }
-    void PicoGraphics_Pen3Bit::set_pen(uint c) {
-        color = c;
-    }
-    void PicoGraphics_Pen3Bit::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-        color = RGB(r, g, b).to_rgb888() | 0x7f000000;
-    }
-    int PicoGraphics_Pen3Bit::create_pen(uint8_t r, uint8_t g, uint8_t b) {
-        return RGB(r, g, b).to_rgb888() | 0x7f000000;
-    }
-    int PicoGraphics_Pen3Bit::create_pen_hsv(float h, float s, float v) {
-        return RGB::from_hsv(h, s, v).to_rgb888() | 0x7f000000;
-    }
-    void PicoGraphics_Pen3Bit::set_pixel(const Point &p) {
-        if ((color & 0x7f000000) == 0x7f000000) {
-            set_pixel_dither(p, RGB(color));
-        } else {
-            _set_pixel(p, color);
-        }
-    }
+
     void PicoGraphics_Pen3Bit::set_pixel_span(const Point &p, uint l) {
         Point lp = p;
         while(l--) {
-            if ((color & 0x7f000000) == 0x7f000000) {
-                set_pixel_dither(lp, RGB(color));
-            } else {
-                _set_pixel(lp, color);
-            }
+            set_pixel(lp);
             lp.x++;
         }
     }
+
     void PicoGraphics_Pen3Bit::get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates) {
         RGB error;
         for(size_t i = 0; i < candidates.size(); i++) {
@@ -103,7 +87,8 @@ namespace pimoroni {
 
         // set the pixel
         //color = candidates[pattern[pattern_index]];
-        _set_pixel(p, candidate_cache[cache_key][dither16_pattern[pattern_index]]);
+        color = candidate_cache[cache_key][dither16_pattern[pattern_index]];
+        set_pixel(p);
     }
     void PicoGraphics_Pen3Bit::frame_convert(PenType type, conversion_callback_func callback) {
         if(type == PEN_P4) {

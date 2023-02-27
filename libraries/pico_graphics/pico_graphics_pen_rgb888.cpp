@@ -19,7 +19,11 @@ namespace pimoroni {
         return RGB(r, g, b).to_rgb888();
     }
     int PicoGraphics_PenRGB888::create_pen_hsv(float h, float s, float v) {
-        return RGB::from_hsv(h, s, v).to_rgb888();
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        from_hsv(h, s, v, r, g, b);
+        return RGB(r, g, b).to_rgb888();
     }
     void PicoGraphics_PenRGB888::set_pixel(const Point &p) {
         uint32_t *buf = (uint32_t *)frame_buffer;

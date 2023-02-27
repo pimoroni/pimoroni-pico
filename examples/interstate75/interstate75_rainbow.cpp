@@ -42,10 +42,13 @@ int main() {
 
   uint8_t hue_map[hub75.width][3];
   for(uint i = 0; i < hub75.width; i++) {
-    RGB p = RGB::from_hsv(i / (float) hub75.width, 1.0f, 0.7f);
-    hue_map[i][0] =  p.r;
-    hue_map[i][1] =  p.g;
-    hue_map[i][2] =  p.b;
+    uint8_t r=0;
+    uint8_t g=0;
+    uint8_t b=0;
+    graphics.from_hsv(i / (float) hub75.width, 1.0f, 0.7f, r, g, b);
+    hue_map[i][0] =  r;
+    hue_map[i][1] =  g;
+    hue_map[i][2] =  b;
   }
 
   hub75.start(dma_complete);
