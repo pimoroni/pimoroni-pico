@@ -25,7 +25,7 @@
 
 ## About Cosmic Unicorn
 
-Cosmic Unicorn offers 53x11 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
+Cosmic Unicorn offers 32x32 bright RGB LEDs driven by Pico W's PIO in addition to a 1W amplifier + speaker, a collection of system and user buttons, and two Qw/ST connectors for adding external sensors and devices. Woha!
 
 - :link: [Cosmic Unicorn store page](https://shop.pimoroni.com/products/cosmic-unicorn)
 
