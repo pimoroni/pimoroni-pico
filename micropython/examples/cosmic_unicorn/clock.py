@@ -37,7 +37,7 @@ MIDDAY_VALUE = 0.8
 MIDNIGHT_VALUE = 0.3
 
 
-# create galactic object and graphics surface for drawing
+# create cosmic object and graphics surface for drawing
 gu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
