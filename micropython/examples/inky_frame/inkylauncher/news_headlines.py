@@ -138,6 +138,9 @@ def draw():
     if feed:
 
         # Title
+        graphics.set_pen(graphics.create_pen(200, 0, 0))
+        graphics.rectangle(0, 0, WIDTH, 40)
+        graphics.set_pen(1)
         graphics.text("Headlines from BBC News:", 10, 10, 320, 3)
 
         graphics.set_pen(4)
@@ -154,6 +157,9 @@ def draw():
         draw_qr_code(WIDTH - 110, 65, 100, code)
         code.set_text(feed[1]["guid"])
         draw_qr_code(10, 265, 100, code)
+
+        graphics.set_pen(graphics.create_pen(200, 0, 0))
+        graphics.rectangle(0, HEIGHT - 20, WIDTH, 20)
 
     else:
         graphics.set_pen(4)
