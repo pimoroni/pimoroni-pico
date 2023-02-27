@@ -18,7 +18,7 @@
 
 #ifndef SDCARD_PIN_SPI0_MOSI
 #define SDCARD_PIN_SPI0_MOSI   19
-#endif
+#endif 
 
 #ifndef SDCARD_PIN_SPI0_MISO 
 #define SDCARD_PIN_SPI0_MISO   16

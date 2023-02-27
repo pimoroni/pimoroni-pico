@@ -247,8 +247,6 @@ static const uint8_t ov2640_cif[][2] = {
 };   
 
 static const uint8_t ov2640_uxga[][2]{
-	{0xff, 0x00}, // Bank switch
-	{0xe0, 0x04}, // RESET DVP
 	{0x50, 0x00}, // CTRLI: VDIV=0, HDIV=0
 	{0x51, 0x90}, // HSIZE: 400 * 4
 	{0x52, 0x2c}, // VSIZE: 300 * 4

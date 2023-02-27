@@ -44,7 +44,8 @@ namespace pimoroni {
             {}
 
             void init(ImageSize size, ImageMode mode);
-
+            void reset();
+            void test_mode();
             void set_image_size(ImageSize size);
             ImageSize get_image_size() const { return current_size; }
 

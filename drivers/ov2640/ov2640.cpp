@@ -88,9 +88,6 @@ namespace pimoroni {
         else{
             return;
         }
-        
-        // TODO
-
         current_size = size;
     }
 
@@ -114,6 +111,14 @@ namespace pimoroni {
         }
 
         current_mode = mode;
+    }
+
+    void OV2640::test_mode(){
+
+    }
+
+    void OV2640::reset(){
+        
     }
 
     uint32_t OV2640::get_image_len_in_bytes() const {
