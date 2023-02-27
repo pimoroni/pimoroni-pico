@@ -195,9 +195,6 @@ def redraw_display_if_reqd():
 
         clock = "{:02}:{:02}:{:02}".format(hour, minute, second)
 
-        # set the font
-        graphics.set_font("bitmap8")
-
         # calculate text position so that it is centred
         w = graphics.measure_text(clock, 1)
         x = int(width / 2 - w / 2 + 1)
@@ -208,6 +205,8 @@ def redraw_display_if_reqd():
         last_second = second
 
 
+# set the font
+graphics.set_font("bitmap8")
 gu.set_brightness(0.5)
 
 sync_time()
