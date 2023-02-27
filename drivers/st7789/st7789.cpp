@@ -3,7 +3,11 @@
 #include <cstdlib>
 #include <math.h>
 
+
 namespace pimoroni {
+
+  DMAInterruptHandler *DMAInterruptHandler::dma_interrupt_handlers[2] = {nullptr, nullptr};
+  
   uint8_t madctl;
   uint16_t caset[2] = {0, 0};
   uint16_t raset[2] = {0, 0};
@@ -45,6 +49,7 @@ namespace pimoroni {
     RASET     = 0x2B,
     PWMFRSEL  = 0xCC
   };
+
 
   void ST7789::common_init() {
     gpio_set_function(dc, GPIO_FUNC_SIO);
@@ -115,13 +120,15 @@ namespace pimoroni {
       dma_channel_unclaim(st_dma_data);
     }
 
+#if !USE_ASYNC_INTERRUPTS
     if(use_async_dma && dma_channel_is_claimed(st_dma_control_chain)) {
       dma_channel_abort(st_dma_control_chain);
       dma_channel_unclaim(st_dma_control_chain);
     }
 
 		delete[] dma_control_chain_blocks;
-		
+#endif 
+
     if(spi) return; // SPI mode needs no further tear down
 
     if(pio_sm_is_claimed(parallel_pio, parallel_sm)) {
@@ -268,15 +275,6 @@ namespace pimoroni {
     parallel_pio->fdebug = sm_stall_mask;
       while (!(parallel_pio->fdebug & sm_stall_mask))
           ;
-    /*uint32_t mask = 0xff << d0;
-    while(len--) {
-      gpio_put(wr_sck, false);     
-      uint8_t v = *src++;
-      gpio_put_masked(mask, v << d0);
-      //asm("nop;");
-      gpio_put(wr_sck, true);
-      asm("nop;");
-    }*/
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data, bool use_async_dma) {
@@ -337,17 +335,24 @@ namespace pimoroni {
 				uint16_t* framePtr = (uint16_t*)display->frame_buffer + region.x + (region.y * width);
 
 				if(use_async_dma) {
-					// TODO for dma the pico doesn't support dma stride so we need chained dma channels
-					// simple first test wait for dma to complete
-					enable_dma_control(true);
+#if USE_ASYNC_INTERRUPTS          
+					enable_dma_interrupt(true);
+          dma_stride.count = region.h;
+          dma_stride.data = (uint8_t*)framePtr;
+          dma_stride.size = region.w * sizeof(uint16_t);
+          dma_stride.width = width * sizeof(uint16_t);
+          start_dma_interrupt();
+#else
+					// Setup chained dma channels
+					enable_dma_control_chain(true);
 					
 					for(int32_t control_idx = 0; control_idx < region.h; control_idx++) {
 						dma_control_chain_blocks[control_idx] = { region.w * sizeof(uint16_t), (uint8_t*)framePtr };
 						framePtr+=(width);
 					}
 					dma_control_chain_blocks[region.h] = { 0, 0 };
-					start_dma_control();
-
+					start_dma_control_chain();
+#endif
 				}
 				else {
 					for(int32_t row = region.y; row < region.y + region.h; row++) {
@@ -424,7 +429,7 @@ namespace pimoroni {
     pwm_set_gpio_level(bl, value);
   }
 
-	void ST7789::setup_dma_control_if_needed() {
+	void ST7789::setup_dma_control_chain_if_needed() {
 		if(use_async_dma) {
 			dma_control_chain_blocks = new DMAControlBlock[height+1];
 			st_dma_control_chain = dma_claim_unused_channel(true);
@@ -441,7 +446,41 @@ namespace pimoroni {
 		}
 	}
 
-	void ST7789::enable_dma_control(bool enable) {
+
+	void ST7789::enable_dma_interrupt(bool enable) {
+	 	if(use_async_dma) {
+ 			if(dma_interrupts_is_enabled != enable){
+				dma_interrupts_is_enabled = enable;
+
+        if(dma_interrupts_is_enabled) {
+          enable_dma_irq(this, st_dma_data, use_dma_interrupt);
+        } else
+        {
+          disable_dma_irq(this, st_dma_data, use_dma_interrupt);
+        }
+      }
+    }
+  }
+
+	void ST7789::start_dma_interrupt() {
+		if(use_async_dma) {
+      if(dma_stride.count && dma_interrupts_is_enabled)
+      {
+        dma_channel_configure(st_dma_data, &dma_data_config, &spi_get_hw(spi)->dr, dma_stride.data, dma_stride.size, false);
+
+        dma_hw->ints0 = 1u << st_dma_data;
+        dma_start_channel_mask(1u << st_dma_data);
+
+        dma_stride.count--;
+        dma_stride.data += dma_stride.width;
+      }
+      else
+        in_dma_update = false; // Mark as completed
+		}
+	}
+
+
+	void ST7789::enable_dma_control_chain(bool enable) {
 		if(use_async_dma) {
 			if(dma_control_chain_is_enabled != enable){
 				dma_control_chain_is_enabled = enable;
@@ -470,12 +509,13 @@ namespace pimoroni {
 		}
 	}
 
-	void ST7789::start_dma_control() {
+	void ST7789::start_dma_control_chain() {
 		if(use_async_dma && dma_control_chain_is_enabled) {
    		dma_hw->ints0 = 1u << st_dma_data;
 			dma_start_channel_mask(1u << st_dma_control_chain);
 		}
 	}
+
 
 	bool ST7789::set_update_region(Rect& update_region){
 		// find intersection with display
