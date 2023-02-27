@@ -1,5 +1,7 @@
 'use strict';
 
+var WIDTH = 32;
+var HEIGHT = 32;
 var md = false;
 var color = tinycolor('#840000');
 var update;
@@ -20,9 +22,9 @@ $(document).ready(function(){
     return false;
   });
 
-  for (var y = 0; y < 11; y++) {
+  for (var y = 0; y < HEIGHT; y++) {
     var row = $('<tr></tr>');
-    for (var x = 0; x < 53; x++) {
+    for (var x = 0; x < WIDTH; x++) {
       row.append('<td></td>');
     }
     $('tbody').append(row);

@@ -1,6 +1,6 @@
-# Galactic Paint
+# Cosmic Paint
 
-Galactic Paint lets you paint pixels onto your Galatic Unicorn over WiFi, in realtime!
+Cosmic Paint lets you paint pixels onto your Cosmic Unicorn over WiFi, in realtime!
 
 ## Setting Up
 
