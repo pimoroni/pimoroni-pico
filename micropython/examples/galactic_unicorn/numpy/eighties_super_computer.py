@@ -1,7 +1,7 @@
 import gc
 import time
 import random
-from galactic import GalacticUnicorn
+from galactic import GalacticUnicorn, Channel
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN, PEN_P8
 from ulab import numpy
 
@@ -13,14 +13,27 @@ Experiment with the damping, number of spawns and intensity to change the effect
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
+DAMPING_FACTOR = 0.95
+NUMBER_OF_LIGHTS = 10
+INTENSITY = 20
+
 gu = GalacticUnicorn()
 gu.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_GALACTIC_UNICORN, pen_type=PEN_P8)
 
+volume = 0.5
 
-DAMPING_FACTOR = 0.95
-NUMBER_OF_LIGHTS = 10
-INTENSITY = 20
+boopety_beepety = gu.synth_channel(0)
+boopety_beepety.configure(
+    waveforms=Channel.SQUARE | Channel.SINE,
+    attack=0.1,
+    decay=0.1,
+    sustain=0.0,
+    release=0.5,
+    volume=volume
+)
+
+gu.play_synth()
 
 # Fill palette with a yellow
 r, g, b = (230, 150, 0)
@@ -60,11 +73,25 @@ while True:
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
 
+    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_DOWN):
+        volume -= 0.1
+        volume = max(0.0, volume)
+        boopety_beepety.volume(volume)
+
+    if gu.is_pressed(GalacticUnicorn.SWITCH_VOLUME_UP):
+        volume += 0.1
+        volume = min(1.0, volume)
+        boopety_beepety.volume(volume)
+
     tstart = time.ticks_ms()
     gc.collect()
     update()
     draw()
     tfinish = time.ticks_ms()
+
+    # Play random notes between 100 and 880Hz for a computery effect
+    boopety_beepety.frequency(random.randint(100, 880))
+    boopety_beepety.trigger_attack()
 
     total = tfinish - tstart
     t_total += total
