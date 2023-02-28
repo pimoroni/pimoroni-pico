@@ -170,7 +170,7 @@ In RGB565 and RGB332 modes this packs the given RGB into an integer representing
 
 In P4 and P8 modes this will consume one palette entry, or return an error if your palette is full. Palette colours are stored as RGB and converted when they are displayed on screen.
 
-You can also now specify an HSV pen, which allows a pen to be created from HSV (Hue, Saturation, Value) values, avoiding the need to calculate the RGB result in Python.
+You can also now specify an HSV pen, which allows a pen to be created from HSV (Hue, Saturation, Value) values between 0.0 and 1.0, avoiding the need to calculate the RGB result in Python.
 
 ```python
 display.create_pen_hsv(h, s, v)
