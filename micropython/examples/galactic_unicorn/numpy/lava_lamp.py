@@ -2,23 +2,25 @@ import gc
 import time
 import math
 import random
-from cosmic import CosmicUnicorn
-from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN, PEN_P8
+from galactic import GalacticUnicorn
+from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN, PEN_P8
 from ulab import numpy
 
 """
 A lava lamp effect, created by blurred, moving particles.
+
+Oh boy, this one's real lively! Stand your Galactic Unicorn on its side for best effect.
 """
 
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
-cu = CosmicUnicorn()
-graphics = PicoGraphics(DISPLAY_COSMIC_UNICORN, pen_type=PEN_P8)
-cu.set_brightness(0.5)
+gu = GalacticUnicorn()
+graphics = PicoGraphics(DISPLAY_GALACTIC_UNICORN, pen_type=PEN_P8)
+gu.set_brightness(0.5)
 
-width = CosmicUnicorn.WIDTH
-height = CosmicUnicorn.HEIGHT
+width = GalacticUnicorn.WIDTH
+height = GalacticUnicorn.HEIGHT
 lava = numpy.zeros((height, width))
 
 
@@ -26,9 +28,9 @@ class Blob():
     def __init__(self):
         self.x = float(random.randint(0, width - 1))
         self.y = float(random.randint(0, height - 1))
-        self.r = (float(random.randint(0, 40)) / 10.0) + 5.0
-        self.dx = (float(random.randint(0, 2)) / 20.0) - 0.05
-        self.dy = (float(random.randint(0, 2)) / 20.0) - 0.025  # positive bias
+        self.r = (float(random.randint(0, 40)) / 5.0)
+        self.dx = (float(random.randint(0, 20)) / 80.0)
+        self.dy = (float(random.randint(0, 20)) / 80.0) - 0.15
 
     def move(self):
         self.x += self.dx
@@ -77,18 +79,18 @@ def draw():
     # Multiplies by palette entries (-1) to turn it into a palette index
     # Converts to uint8_t datatype to match the framebuffer
     memoryview(graphics)[:] = numpy.ndarray(numpy.clip(lava, 0.0, 1.0) * (PAL_COLS - 1), dtype=numpy.uint8).tobytes()
-    cu.update(graphics)
+    gu.update(graphics)
 
 
 t_count = 0
 t_total = 0
 
 while True:
-    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
-        cu.adjust_brightness(+0.01)
+    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
+        gu.adjust_brightness(+0.01)
 
-    if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
-        cu.adjust_brightness(-0.01)
+    if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        gu.adjust_brightness(-0.01)
 
     tstart = time.ticks_ms()
     gc.collect()
