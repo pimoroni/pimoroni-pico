@@ -170,6 +170,12 @@ In RGB565 and RGB332 modes this packs the given RGB into an integer representing
 
 In P4 and P8 modes this will consume one palette entry, or return an error if your palette is full. Palette colours are stored as RGB and converted when they are displayed on screen.
 
+You can also now specify an HSV pen, which allows a pen to be created from HSV (Hue, Saturation, Value) values, avoiding the need to calculate the RGB result in Python.
+
+```python
+display.create_pen_hsv(h, s, v)
+```
+
 To tell PicoGraphics which pen to use:
 
 ```python
@@ -177,12 +183,6 @@ display.set_pen(my_pen)
 ```
 
 This will be either an RGB332, RGB565 or RGB888 colour, or a palette index.
-
-As of v1.19.14 you can also specify an HSV pen, which allows a pen to be created from HSV (Hue, Saturation, Value) values, avoiding the need to calculate the RGB result in Python.
-
-```python
-display.set_pen_hsv(h, s, v)
-```
 
 ##### Monochrome Modes
 
