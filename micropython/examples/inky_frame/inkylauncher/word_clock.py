@@ -34,7 +34,10 @@ def approx_time(hours, minutes):
 def update():
     global time_string
     # grab the current time from the ntp server and update the Pico RTC
-    ntptime.settime()
+    try:
+        ntptime.settime()
+    except OSError:
+        print("Unable to contact NTP server")
 
     current_t = rtc.datetime()
     time_string = approx_time(current_t[4] - 12 if current_t[4] > 12 else current_t[4], current_t[5])
@@ -63,6 +66,12 @@ def draw():
         y = 10
         line_space = 70
         letter_space = 40
+    elif WIDTH == 800:
+        default_x = 5
+        x = default_x
+        y = 70
+        line_space = 60
+        letter_space = 50
     else:  # Inky Frame 5.7"
         default_x = 20
         x = default_x
@@ -78,7 +87,7 @@ def draw():
         if word in time_string:
             graphics.set_pen(0)
         else:
-            graphics.set_pen(7)
+            graphics.set_pen(graphics.create_pen(220, 220, 220))
 
         for letter in word:
             text_length = graphics.measure_text(letter, scale, spacing)
