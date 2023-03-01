@@ -101,7 +101,7 @@ def draw():
             graphics.set_pen(4)
             graphics.text(joke['setup'], 10, 10, WIDTH - 75, 5)
             graphics.set_pen(3)
-            graphics.text(joke['delivery'], 10, 290, WIDTH - 75, 5)
+            graphics.text(joke['delivery'], 10, 250, WIDTH - 75, 5)
 
         graphics.set_pen(0)
         # Donate link QR
