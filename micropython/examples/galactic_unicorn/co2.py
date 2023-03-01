@@ -69,10 +69,10 @@ while True:
         # calculate a colour from the co2 reading
         hue = max(0, HUE_START + ((co2 - MIN) * (HUE_END - HUE_START) / (MAX - MIN)))
 
-        # create pens with this colour (and for the stored highest / lowest values)
-        CURRENT_COLOUR = graphics.create_pen_hsv(hue/360, 1.0, 0.8)
-        HIGH_COLOUR = graphics.create_pen_hsv(HUE_END/360, 1.0, 0.8)
-        LOW_COLOUR = graphics.create_pen_hsv(HUE_START/360, 1.0, 0.8)
+        # create pens with this colour (and with the high / low colours)
+        CURRENT_COLOUR = graphics.create_pen_hsv(hue / 360, 1.0, 0.8)
+        HIGH_COLOUR = graphics.create_pen_hsv(HUE_END / 360, 1.0, 0.8)
+        LOW_COLOUR = graphics.create_pen_hsv(HUE_START / 360, 1.0, 0.8)
 
         # draw the text
         graphics.set_pen(CURRENT_COLOUR)
@@ -87,16 +87,16 @@ while True:
 
         # draw a bar for the current co2 level
         graphics.set_pen(CURRENT_COLOUR)
-        graphics.rectangle(0, 9, int(co2/WIDTH), 10)
+        graphics.rectangle(0, 9, int(co2 / WIDTH), 10)
 
         # draw a bar for the highest co2 level seen
         graphics.set_pen(HIGH_COLOUR)
-        graphics.pixel(int(highest/WIDTH), 9)
-        graphics.pixel(int(highest/WIDTH), 10)
+        graphics.pixel(int(highest / WIDTH), 9)
+        graphics.pixel(int(highest / WIDTH), 10)
 
         # draw a bar for the lowest co2 level seen
         graphics.set_pen(LOW_COLOUR)
-        graphics.pixel(int(lowest/WIDTH), 9)
-        graphics.pixel(int(lowest/WIDTH), 10)
+        graphics.pixel(int(lowest / WIDTH), 9)
+        graphics.pixel(int(lowest / WIDTH), 10)
 
         gu.update(graphics)
