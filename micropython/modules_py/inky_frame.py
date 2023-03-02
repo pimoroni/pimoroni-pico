@@ -3,6 +3,14 @@ from machine import Pin
 from wakeup import get_shift_state, reset_shift_state
 import time
 
+BLACK = 0
+WHITE = 1
+GREEN = 2
+BLUE = 3
+RED = 4
+YELLOW = 5
+ORANGE = 6
+TAUPE = 7
 
 SR_CLOCK = 8
 SR_LATCH = 9
