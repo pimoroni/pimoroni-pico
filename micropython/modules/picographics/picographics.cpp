@@ -503,6 +503,10 @@ mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
 mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
     (void)flags;
+    if((PicoGraphicsPenType)self->graphics->pen_type == PEN_INKY7) {
+        // Special case for Inky Frame 7.3" which uses a PSRAM framebuffer not accessible as a raw buffer
+        mp_raise_ValueError("No local framebuffer.");
+    }
     bufinfo->buf = self->graphics->frame_buffer;
     bufinfo->len = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, self->graphics->bounds.w, self->graphics->bounds.h);
     bufinfo->typecode = 'B';
@@ -511,6 +515,11 @@ mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *buf
 
 mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    if((PicoGraphicsPenType)self->graphics->pen_type == PEN_INKY7) {
+        // Special case for Inky Frame 7.3" which uses a PSRAM framebuffer not accessible as a raw buffer
+        mp_raise_ValueError("No local framebuffer.");
+    }
 
     if (framebuffer == mp_const_none) {
         m_del(uint8_t, self->buffer, self->graphics->bounds.w * self->graphics->bounds.h);
