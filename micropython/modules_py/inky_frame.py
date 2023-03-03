@@ -59,7 +59,7 @@ def woken_by_ext_trigger():
 
 
 def woken_by_button():
-    return bool(SHIFT_STATE & 0b11111000)
+    return bool(sr.read() & 0b11111000) or bool(SHIFT_STATE & 0b11111000)
 
 
 def pico_rtc_to_pcf():
