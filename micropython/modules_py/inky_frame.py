@@ -31,9 +31,9 @@ LED_WIFI = const(7)
 
 HOLD_VSYS_EN = const(2)
 
-RTC_ALARM = const(5)
-EXTERNAL_TRIGGER = const(6)
-EINK_BUSY = const(7)
+RTC_ALARM = const(2)
+EXTERNAL_TRIGGER = const(1)
+EINK_BUSY = const(0)
 
 SHIFT_STATE = get_shift_state()
 
@@ -49,11 +49,17 @@ vsys.on()
 
 
 def woken_by_rtc():
-    return bool(sr.read() & (1 << RTC_ALARM))
+    mask = (1 << RTC_ALARM)
+    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
+
+
+def woken_by_ext_trigger():
+    mask = (1 << EXTERNAL_TRIGGER)
+    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
 
 
 def woken_by_button():
-    return bool(SHIFT_STATE & 0b00011111)
+    return bool(SHIFT_STATE & 0b11111000)
 
 
 def pico_rtc_to_pcf():
@@ -94,10 +100,16 @@ def sleep_for(minutes):
     rtc.set_alarm(0, minute, hour)
     rtc.enable_alarm_interrupt(True)
 
-    vsys.off()
+    turn_off()
+
+    # Simulate sleep while on USB power
+    while minutes > 0:
+        time.sleep(60)
+        minutes -= 1
 
 
 def turn_off():
+    time.sleep(0.1)
     vsys.off()
 
 
