@@ -396,7 +396,7 @@ display.rectangle(x, y, w, h)
 * `x` - the destination X coordinate
 * `y` - the destination Y coordinate
 * `w` - the width
-* `h` - the eight
+* `h` - the height
 
 #### Triangle
 
