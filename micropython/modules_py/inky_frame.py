@@ -123,7 +123,7 @@ class Button:
     def __init__(self, sr, idx, led, debounce=50):
         self.sr = sr
         self.startup_state = bool(SHIFT_STATE & (1 << idx))
-        self.led = Pin(led, Pin.OUT)  # LEDs are just regular IOs
+        self.led = PWMLED(led)
         self.led.off()
         self._idx = idx
         self._debounce_time = debounce
@@ -135,6 +135,12 @@ class Button:
 
     def led_off(self):
         self.led.off()
+
+    def led_brightness(self, brightness):
+        self.led.brightness(brightness)
+
+    def led_toggle(self):
+        self.led.toggle()
 
     def read(self):
         if self.startup_state:
