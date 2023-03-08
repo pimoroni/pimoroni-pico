@@ -54,7 +54,7 @@ namespace pimoroni {
   }
 
   datetime_t PCF85063A::get_datetime() {
-    static uint8_t result[7] = {0};
+    uint8_t result[7] = {0};
 
     i2c->read_bytes(address, Registers::SECONDS, result, 7);
 
@@ -72,7 +72,7 @@ namespace pimoroni {
   }
 
   void PCF85063A::set_datetime(datetime_t *t) {
-    static uint8_t data[7] = {
+    uint8_t data[7] = {
       bcd_encode((uint)t->sec),
       bcd_encode((uint)t->min),
       bcd_encode((uint)t->hour),

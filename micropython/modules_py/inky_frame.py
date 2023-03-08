@@ -1,32 +1,129 @@
-from pimoroni import ShiftRegister
-from machine import Pin
+from pimoroni import ShiftRegister, PWMLED
+from machine import Pin, I2C, RTC
 from wakeup import get_shift_state, reset_shift_state
+from micropython import const
+import pcf85063a
+import ntptime
 import time
 
+BLACK = const(0)
+WHITE = const(1)
 
-SR_CLOCK = 8
-SR_LATCH = 9
-SR_OUT = 10
+GREEN = const(2)
+BLUE = const(3)
+RED = const(4)
+YELLOW = const(5)
+ORANGE = const(6)
+TAUPE = const(7)
 
-LED_A = 11
-LED_B = 12
-LED_C = 13
-LED_D = 14
-LED_E = 15
+SR_CLOCK = const(8)
+SR_LATCH = const(9)
+SR_OUT = const(10)
 
-LED_BUSY = 6
-LED_WIFI = 7
+LED_A = const(11)
+LED_B = const(12)
+LED_C = const(13)
+LED_D = const(14)
+LED_E = const(15)
+
+LED_BUSY = const(6)
+LED_WIFI = const(7)
+
+HOLD_VSYS_EN = const(2)
+
+RTC_ALARM = const(2)
+EXTERNAL_TRIGGER = const(1)
+EINK_BUSY = const(0)
 
 SHIFT_STATE = get_shift_state()
 
 reset_shift_state()
+
+i2c = I2C(0)
+rtc = pcf85063a.PCF85063A(i2c)
+i2c.writeto_mem(0x51, 0x00, b'\x00')  # ensure rtc is running (this should be default?)
+rtc.enable_timer_interrupt(False)
+
+vsys = Pin(HOLD_VSYS_EN)
+vsys.on()
+
+
+def woken_by_rtc():
+    mask = (1 << RTC_ALARM)
+    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
+
+
+def woken_by_ext_trigger():
+    mask = (1 << EXTERNAL_TRIGGER)
+    return bool(sr.read() & mask) or bool(SHIFT_STATE & mask)
+
+
+def woken_by_button():
+    return bool(sr.read() & 0b11111000) or bool(SHIFT_STATE & 0b11111000)
+
+
+def pico_rtc_to_pcf():
+    # Set the PCF85063A to the time stored by Pico W's RTC
+    year, month, day, dow, hour, minute, second, _ = RTC().datetime()
+    rtc.datetime((year, month, day, hour, minute, second, dow))
+
+
+def pcf_to_pico_rtc():
+    # Set Pico W's RTC to the time stored by the PCF85063A
+    t = rtc.datetime()
+    # BUG ERRNO 22, EINVAL, when date read from RTC is invalid for the Pico's RTC.
+    try:
+        RTC().datetime((t[0], t[1], t[2], t[6], t[3], t[4], t[5], 0))
+        return True
+    except OSError:
+        return False
+
+
+def sleep_for(minutes):
+    year, month, day, hour, minute, second, dow = rtc.datetime()
+
+    # if the time is very close to the end of the minute, advance to the next minute
+    # this aims to fix the edge case where the board goes to sleep right as the RTC triggers, thus never waking up
+    if second >= 55:
+        minute += 1
+
+    minute += minutes
+
+    while minute >= 60:
+        minute -= 60
+        hour += 1
+
+    if hour >= 24:
+        hour -= 24
+
+    rtc.clear_alarm_flag()
+    rtc.set_alarm(0, minute, hour)
+    rtc.enable_alarm_interrupt(True)
+
+    turn_off()
+
+    # Simulate sleep while on USB power
+    while minutes > 0:
+        time.sleep(60)
+        minutes -= 1
+
+
+def turn_off():
+    time.sleep(0.1)
+    vsys.off()
+
+
+def set_time():
+    # Set both Pico W's RTC and PCF85063A to NTP time
+    ntptime.settime()
+    pico_rtc_to_pcf()
 
 
 class Button:
     def __init__(self, sr, idx, led, debounce=50):
         self.sr = sr
         self.startup_state = bool(SHIFT_STATE & (1 << idx))
-        self.led = Pin(led, Pin.OUT)  # LEDs are just regular IOs
+        self.led = PWMLED(led)
         self.led.off()
         self._idx = idx
         self._debounce_time = debounce
@@ -38,6 +135,12 @@ class Button:
 
     def led_off(self):
         self.led.off()
+
+    def led_brightness(self, brightness):
+        self.led.brightness(brightness)
+
+    def led_toggle(self):
+        self.led.toggle()
 
     def read(self):
         if self.startup_state:
@@ -70,5 +173,5 @@ button_c = Button(sr, 5, LED_C)
 button_d = Button(sr, 4, LED_D)
 button_e = Button(sr, 3, LED_E)
 
-led_busy = Pin(LED_BUSY, Pin.OUT)
-led_wifi = Pin(LED_WIFI, Pin.OUT)
+led_busy = PWMLED(LED_BUSY)
+led_wifi = PWMLED(LED_WIFI)

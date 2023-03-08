@@ -25,6 +25,7 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
     - [Get Bounds](#get-bounds)
   - [Text](#text)
     - [Changing The Font](#changing-the-font)
+    - [Changing The Thickness](#changing-the-thickness)
     - [Drawing Text](#drawing-text)
   - [Basic Shapes](#basic-shapes)
     - [Line](#line)
@@ -311,6 +312,17 @@ These are aligned horizontally (x) to their left edge, but vertically (y) to the
 * `serif_italic`
 * `serif`
 
+#### Changing The Thickness
+
+Vector (Hershey) fonts are drawn with individual lines. By default these are 1px thick, making for very thin and typically illegible text.
+
+To change the thickness of lines used for Vector fonts, use the `set_thickness` method:
+
+```python
+display.set_thickness(n)
+```
+
+Drawing thick text involves setting a lot more pixels and may slow your drawing down considerably. Be careful how and where you use this.
 
 #### Drawing Text
 
@@ -371,7 +383,13 @@ To draw a straight line at any angle between two specified points:
 display.line(x1, y1, x2, y2)
 ```
 
-The X1/Y1 and X2/Y2 coordinates describe the start and end of the line respectively. 
+The X1/Y1 and X2/Y2 coordinates describe the start and end of the line respectively.
+
+If you need a thicker line, for an outline or UI elements you can supply a fifth parameter - thickness - like so:
+
+```python
+display.line(x1, y1, x2, y2, thickness)
+```
 
 #### Circle
 

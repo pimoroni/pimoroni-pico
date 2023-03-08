@@ -50,6 +50,10 @@ namespace pimoroni {
     }
   }
 
+  void PicoGraphics::set_thickness(uint t) {
+    thickness = t;
+  }
+
   void PicoGraphics::set_clip(const Rect &r) {
     clip = bounds.intersection(r);
   }
@@ -284,6 +288,25 @@ namespace pimoroni {
   }
 
   void PicoGraphics::thick_line(Point p1, Point p2, uint thickness) {
+    int32_t ht = thickness / 2;
+    int32_t t = (int32_t)thickness;
+
+    // fast horizontal line
+    if(p1.y == p2.y) {
+      int32_t start = std::min(p1.x, p2.x);
+      int32_t end   = std::max(p1.x, p2.x);
+      rectangle(Rect(start, p1.y - ht, end - start, t));
+      return;
+    }
+
+    // fast vertical line
+    if(p1.x == p2.x) {
+      int32_t start  = std::min(p1.y, p2.y);
+      int32_t length = std::max(p1.y, p2.y) - start;
+      rectangle(Rect(p1.x - ht, start, t, length));
+      return;
+    }
+
     // general purpose line
     // lines are either "shallow" or "steep" based on whether the x delta
     // is greater than the y delta
@@ -298,8 +321,7 @@ namespace pimoroni {
       int32_t x = p1.x;
       int32_t y = p1.y << 16;
       while(s--) {
-        int32_t ht = thickness / 2;
-        rectangle({x - ht, (y >> 16) - ht, ht * 2, ht * 2});
+        rectangle({x - ht, (y >> 16) - ht, t, t});
         y += sy;
         x += sx;
       }
@@ -311,8 +333,7 @@ namespace pimoroni {
       int32_t y = p1.y;
       int32_t x = p1.x << 16;
       while(s--) {
-        int32_t ht = thickness / 2;
-        rectangle({(x >> 16) - ht, y - ht, ht * 2, ht * 2});
+        rectangle({(x >> 16) - ht, y - ht, t, t});
         y += sy;
         x += sx;
       }

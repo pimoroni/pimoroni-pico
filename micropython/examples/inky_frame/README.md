@@ -12,6 +12,7 @@
   - [Random Joke](#random-joke)
   - [SD Card Test](#sd-card-test)
   - [XKCD Daily](#xkcd-daily)
+  - [Dithering](#dithering)
 
 ## PicoGraphics
 
@@ -90,4 +91,9 @@ Download and display the daily webcomic from https://xkcd.com/
 The webcomic is rendered "offline" by our feed2image service since xkcd.com requires TLS1.3!
 
 For bugs/contributions see: https://github.com/pimoroni/feed2image
+
+### Dithering
+[inky_frame_dithering.py](inky_frame_dithering.py)
+
+A basic example showing automatic dithering in action, as PicoGraphics tries to use Inky Frame's limited colour palette to match arbitrary colours.
 

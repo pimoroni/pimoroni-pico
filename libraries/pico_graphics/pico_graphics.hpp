@@ -251,7 +251,7 @@ namespace pimoroni {
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void set_pixel(const Point &p) = 0;
     virtual void set_pixel_span(const Point &p, uint l) = 0;
-    virtual void set_thickness(uint t) = 0;
+    void set_thickness(uint t);
 
     virtual int get_palette_size();
     virtual RGB* get_palette();
@@ -304,7 +304,6 @@ namespace pimoroni {
       PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override;
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
@@ -321,7 +320,6 @@ namespace pimoroni {
       PicoGraphics_Pen1BitY(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override;
 
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
@@ -364,7 +362,6 @@ namespace pimoroni {
 
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
 
@@ -397,7 +394,6 @@ namespace pimoroni {
       PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
@@ -431,7 +427,6 @@ namespace pimoroni {
       PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
@@ -457,7 +452,6 @@ namespace pimoroni {
       PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
@@ -480,7 +474,6 @@ namespace pimoroni {
       PicoGraphics_PenRGB565(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
@@ -497,7 +490,6 @@ namespace pimoroni {
       PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
@@ -570,7 +562,6 @@ namespace pimoroni {
       PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;

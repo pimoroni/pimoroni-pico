@@ -503,6 +503,10 @@ mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
 mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *bufinfo, mp_uint_t flags) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
     (void)flags;
+    if((PicoGraphicsPenType)self->graphics->pen_type == PEN_INKY7) {
+        // Special case for Inky Frame 7.3" which uses a PSRAM framebuffer not accessible as a raw buffer
+        mp_raise_ValueError("No local framebuffer.");
+    }
     bufinfo->buf = self->graphics->frame_buffer;
     bufinfo->len = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, self->graphics->bounds.w, self->graphics->bounds.h);
     bufinfo->typecode = 'B';
@@ -511,6 +515,11 @@ mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *buf
 
 mp_obj_t ModPicoGraphics_set_framebuffer(mp_obj_t self_in, mp_obj_t framebuffer) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    if((PicoGraphicsPenType)self->graphics->pen_type == PEN_INKY7) {
+        // Special case for Inky Frame 7.3" which uses a PSRAM framebuffer not accessible as a raw buffer
+        mp_raise_ValueError("No local framebuffer.");
+    }
 
     if (framebuffer == mp_const_none) {
         m_del(uint8_t, self->buffer, self->graphics->bounds.w * self->graphics->bounds.h);
@@ -748,10 +757,6 @@ mp_obj_t ModPicoGraphics_create_pen_hsv(size_t n_args, const mp_obj_t *args) {
 
 mp_obj_t ModPicoGraphics_set_thickness(mp_obj_t self_in, mp_obj_t pen) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
-
-    if(self->graphics->pen_type != PicoGraphics::PEN_1BIT) {
-        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Thickness not supported!"));
-    }
 
     self->graphics->set_thickness(mp_obj_get_int(pen));
 
@@ -1034,16 +1039,27 @@ mp_obj_t ModPicoGraphics_triangle(size_t n_args, const mp_obj_t *args) {
 }
 
 mp_obj_t ModPicoGraphics_line(size_t n_args, const mp_obj_t *args) {
-    enum { ARG_self, ARG_x1, ARG_y1, ARG_x2, ARG_y2 };
+    enum { ARG_self, ARG_x1, ARG_y1, ARG_x2, ARG_y2, ARG_thickness };
 
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
-    self->graphics->line(
-        {mp_obj_get_int(args[ARG_x1]),
-         mp_obj_get_int(args[ARG_y1])},
-        {mp_obj_get_int(args[ARG_x2]),
-         mp_obj_get_int(args[ARG_y2])}
-    );
+    if(n_args == 5) {
+        self->graphics->line(
+            {mp_obj_get_int(args[ARG_x1]),
+            mp_obj_get_int(args[ARG_y1])},
+            {mp_obj_get_int(args[ARG_x2]),
+            mp_obj_get_int(args[ARG_y2])}
+        );
+    }
+    else if(n_args == 6) {
+        self->graphics->thick_line(
+            {mp_obj_get_int(args[ARG_x1]),
+            mp_obj_get_int(args[ARG_y1])},
+            {mp_obj_get_int(args[ARG_x2]),
+            mp_obj_get_int(args[ARG_y2])},
+            mp_obj_get_int(args[ARG_thickness])
+        );
+    }
 
     return mp_const_none;
 }
