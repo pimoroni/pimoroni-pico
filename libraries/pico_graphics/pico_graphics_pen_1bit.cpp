@@ -18,10 +18,6 @@ namespace pimoroni {
     color = std::max(r, std::max(g, b)) >> 4;
   }
 
-  void PicoGraphics_Pen1Bit::set_thickness(uint t) {
-    thickness = t;
-  }
-
   void PicoGraphics_Pen1Bit::set_pixel(const Point &p) {
     // pointer to byte in framebuffer that contains this pixel
     uint8_t *buf = (uint8_t *)frame_buffer;
