@@ -224,3 +224,30 @@ class ShiftRegister:
 
     def is_set(self, mask):
         return self.read() & mask == mask
+
+
+# A basic wrapper for PWM with regular on/off and toggle functions from Pin
+# Intended to be used for driving LEDs with brightness control & compatibility with Pin
+class PWMLED:
+    def __init__(self, pin, invert=False):
+        self._invert = invert
+        self._led = PWM(Pin(pin, Pin.OUT))
+        self._led.freq(1000)
+        self._brightness = 0
+        self.brightness(0)
+
+    def brightness(self, brightness):
+        brightness = min(1.0, max(0.0, brightness))
+        self._brightness = brightness
+        if self._invert:
+            brightness = 1.0 - brightness
+        self._led.duty_u16(int(65535 * brightness))
+
+    def on(self):
+        self.brightness(1)
+
+    def off(self):
+        self.brightness(0)
+
+    def toggle(self):
+        self.brightness(1 - self._brightness)

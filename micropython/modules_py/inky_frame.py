@@ -1,4 +1,4 @@
-from pimoroni import ShiftRegister
+from pimoroni import ShiftRegister, PWMLED
 from machine import Pin, I2C, RTC
 from wakeup import get_shift_state, reset_shift_state
 from micropython import const
@@ -167,5 +167,5 @@ button_c = Button(sr, 5, LED_C)
 button_d = Button(sr, 4, LED_D)
 button_e = Button(sr, 3, LED_E)
 
-led_busy = Pin(LED_BUSY, Pin.OUT)
-led_wifi = Pin(LED_WIFI, Pin.OUT)
+led_busy = PWMLED(LED_BUSY)
+led_wifi = PWMLED(LED_WIFI)
