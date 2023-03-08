@@ -5,6 +5,8 @@ Most of your interaction with Inky Frame will be via the PicoGraphics library, b
 - [Pico Graphics](#pico-graphics)
   - [Colour \& Dithering](#colour--dithering)
   - [Images \& JPEGs](#images--jpegs)
+- [Buttons \& LEDs](#buttons--leds)
+  - [Status LEDs](#status-leds)
 - [Battery Power \& RTC](#battery-power--rtc)
   - [Function Reference](#function-reference)
     - [Wakeup States](#wakeup-states)
@@ -59,6 +61,38 @@ You can use the `jpegdec` (JPEG decoding) module to display JPEG files on Inky, 
 1. JPEGs are compressed and lossy, a small JPEG displayed on Inky might show random specks of colour where you don't expect them as PicoGraphics tries its best to dither noise to the nearest available colours.
 2. JPEGs are, by default, dithered to the 7 (or 8 on 4.0 and 5.7) available colours. This uses "ordered dither," which is fast, but not very pretty.
 3. You can turn off dithering with `jpeg.decode(dither=False)` for a posterised effect.
+
+## Buttons & LEDs
+
+Inky Frame has five user buttons labelled A to E, with LEDs. The buttons are connected via a shift-register and available in the `inky_frame` module as `button_a`, `button_b`, `button_c`, `button_d` and `button_e`.
+
+Each button has some convenient methods for checking if it's pressed:
+
+* `raw()` - get the current state of the button with no debounce (returns `True` the first time it's called if the corresponding button)
+* `read()` - read the current button state, observing debounce (50ms)
+
+Additionally each button has some methods for controlling its associated LED:
+
+* `led_on()` - turn the LED on
+* `led_off()` - turn the LED off
+* `led_toggle()` - toggle the LED
+* `led_brightness(0.5)` - set the LED brightness (from 0.0 to 1.0)
+
+### Status LEDs
+
+In addition to the button LEDs there are two status LEDs, `busy` and `wifi`, which are available as:
+
+* `led_busy` - connected to pin `LED_BUSY`
+* `led_wifi` - connected to pin `LED_WIFI`
+
+These are instances of the `pimoroni.PWMLED` class, and have the following methods:
+
+* `on()` - turn the LED on
+* `off()` - turn the LED off
+* `toggle()` - toggle the LED
+* `brightness(0.5)` - set the LED brightness (from 0.0 to 1.0)
+
+:info: `toggle()` is provided for compatibility with the `Pin()` class. It's a little odd, since it changes the LED brightness to `1.0 - current_brightness`.
 
 ## Battery Power & RTC
 
@@ -127,4 +161,4 @@ PicoGraphics has undocumented support for accessing its raw framebuffer using `m
 
 This is useful for copying raw binary images (effectively valid Inky frame buffers saved to a file) avoiding JPEG compression and so forth. For some dicussion about why and how you might do this, see: https://github.com/pimoroni/pimoroni-pico/issues/681
 
-This *does not work* for Inky 7.3, since there is no framebuffer in memory.
+:warning: This *does not work* for Inky 7.3, since there is no framebuffer in memory. PicoGraphics will raise a `ValueError: No local framebuffer.` if you try. We aim to fix this with some hardfault handling sorcery.
