@@ -364,7 +364,7 @@ namespace pimoroni {
 
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
+      void set_thickness(uint t) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
 
@@ -570,7 +570,7 @@ namespace pimoroni {
       PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
-      void set_thickness(uint t) override {};
+      void set_thickness(uint t) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;

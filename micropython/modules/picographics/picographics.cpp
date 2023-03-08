@@ -758,7 +758,10 @@ mp_obj_t ModPicoGraphics_create_pen_hsv(size_t n_args, const mp_obj_t *args) {
 mp_obj_t ModPicoGraphics_set_thickness(mp_obj_t self_in, mp_obj_t pen) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
-    if(self->graphics->pen_type != PicoGraphics::PEN_1BIT) {
+    if(
+       self->graphics->pen_type != PicoGraphics::PEN_1BIT
+    && self->graphics->pen_type != PicoGraphics::PEN_3BIT
+    && self->graphics->pen_type != PicoGraphics::PEN_INKY7) {
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Thickness not supported!"));
     }
 
