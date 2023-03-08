@@ -34,9 +34,22 @@ Inky Frame supports eight native colours, those that it's physically capable of 
 
 :info: † - the "taupe" colour (also known as clear) is the colour used to reset the display to a default, clear state. We misuse this as an extra colour on 4.0" and 5.7", but the 7.3" display clear colour is a sort of muddy, greenish gradient that's not consistent enough. You can stil use it, by all means, but it wont be considered for dithering.
 
-You can use colours outside of these eight by using `create_pen(r, g, b)` or `create_pen_hsv(h, s, v)`.
+These colours are available as constants in the `inky_frame` module so you don't have to remember which number corresponds to which, eg:
+
+```python
+display.set_pen(inky_frame.YELLOW)
+```
+
+You can use colours outside of these eight by using `create_pen(r, g, b)` or `create_pen_hsv(h, s, v)`. eg:
+
+```python
+my_colour = display.create_pen(255, 128, 0)
+display.set_pen(my_colour)
+```
 
 PicoGraphics will do its best to match your colour choice by mixing the available colours with a dither pattern. This works best on large areas of colour such as backgrounds, big UI elements or chunky text. See the `inky_frame_dithering.py` example for a demonstration.
+
+:info: Due to the lack of light blue or pink native colours, Inky Frame isn't very good at reproducing pink, purple, violet or light blue, cyan and teal.
 
 
 ### Images & JPEGs
