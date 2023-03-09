@@ -29,4 +29,12 @@ include(galactic_unicorn/micropython)
 
 include(modules_py/modules_py)
 
+# Most board specific ports wont need all of these
+copy_module(gfx_pack.py)
+copy_module(interstate75.py)
+if(PICO_BOARD STREQUAL "pico_w")
+    copy_module(automation.py)
+    copy_module(inventor.py)
+endif()
+
 include(micropython-common-ulab)
