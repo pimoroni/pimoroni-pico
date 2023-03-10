@@ -14,9 +14,10 @@ BreakoutRTC rtc(&i2c);
 int main() {
   stdio_init_all();
   sleep_ms(5000);
+#ifdef PICO_DEFALUT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-
+#endif
 
   if(!rtc.init()) {
     printf("Init failed! Check your connections and i2c pin choices.\n");
