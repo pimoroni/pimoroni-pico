@@ -47,4 +47,7 @@ namespace hershey {
   int32_t measure_text(const font_t* font, std::string_view message, float s);
   int32_t glyph(const font_t* font, line_func line, unsigned char c, int32_t x, int32_t y, float s, float a);
   void text(const font_t* font, line_func line, std::string_view message, int32_t x, int32_t y, float s, float a);
+
+  bool has_font(std::string_view font);
+  const font_t* font(std::string_view font);
 }

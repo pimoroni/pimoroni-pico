@@ -44,8 +44,8 @@ namespace pimoroni {
       set_font(&font14_outline);
     } else {
       // check that font exists and assign it
-      if(hershey::fonts.find((std::string)name) != hershey::fonts.end()) {
-        set_font(hershey::fonts[(std::string)name]);
+      if(hershey::has_font(name)) {
+        set_font(hershey::font(name));
       }
     }
   }

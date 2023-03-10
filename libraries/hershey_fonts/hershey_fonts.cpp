@@ -14,6 +14,26 @@ namespace hershey {
     //{ "serif_bold",   &timesrb }
   };
 
+  bool has_font(std::string_view font) {
+    if(font == "sans"
+    || font == "gothic"
+    || font == "cursive"
+    || font == "serif_italic"
+    || font == "serif") {
+      return true;
+    }
+    return false;
+  }
+
+  const font_t* font(std::string_view font) {
+    if(font == "sans") return &futural;
+    else if(font == "gothic") return &gothgbt;
+    else if(font == "cursive") return &scripts;
+    else if(font == "serif_italic") return &timesi;
+    else if(font == "serif") return &timesr;
+    return &futural;
+  }
+
   inline float deg2rad(float degrees) {
     return (degrees * M_PI) / 180.0f;
   }
