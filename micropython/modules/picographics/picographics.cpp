@@ -23,10 +23,10 @@ extern "C" {
 #include "py/reader.h"
 #include "extmod/vfs.h"
 
-std::string mp_obj_to_string_r(const mp_obj_t &obj) {
+const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
     if(mp_obj_is_str_or_bytes(obj)) {
         GET_STR_DATA_LEN(obj, str, str_len);
-        return (const char*)str;
+        return std::string_view((const char*)str, str_len);
     }
     mp_raise_TypeError("can't convert object to str implicitly");
 }
@@ -935,7 +935,7 @@ mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+    const std::string_view t((const char*)str, str_len);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
@@ -969,7 +969,7 @@ mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, m
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+    const std::string_view t((const char*)str, str_len);
 
     float scale = args[ARG_scale].u_obj == mp_const_none ? 2.0f : mp_obj_get_float(args[ARG_scale].u_obj);
     int letter_spacing = args[ARG_spacing].u_int;

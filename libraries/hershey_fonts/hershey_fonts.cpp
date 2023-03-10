@@ -41,7 +41,7 @@ namespace hershey {
     return gd->width * s;
   }
 
-  int32_t measure_text(const font_t* font, std::string message, float s) {
+  int32_t measure_text(const font_t* font, std::string_view message, float s) {
     int32_t width = 0;
     for(auto &c : message) {
       width += measure_glyph(font, c, s);
@@ -93,7 +93,7 @@ namespace hershey {
     return gd->width * s;
   }
 
-  void text(const font_t* font, line_func line, std::string message, int32_t x, int32_t y, float s, float a) {
+  void text(const font_t* font, line_func line, std::string_view message, int32_t x, int32_t y, float s, float a) {
     int32_t cx = x;
     int32_t cy = y;
 
