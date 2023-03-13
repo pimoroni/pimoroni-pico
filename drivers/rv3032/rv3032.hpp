@@ -114,6 +114,9 @@ Distributed as-is; no warranty is given.
 #define RV3032_EEOffset_8_1             0xC1 // bits 8 to 1 of EEOffset. Bit 0 is bit 7 of register 0x37 
 #define RV3032_EEPROM_Backup_Register   0xC0
 
+// Temperature Registers
+#define RV3032_TEMP_LSB     0x0E
+#define RV3032_TEMP_MSB     0x0F
 
 // BITS IN IMPORTANT REGISTERS
 
@@ -326,6 +329,11 @@ namespace pimoroni {
 
     uint8_t status(); // Returns the status byte
     void clear_interrupts();
+
+    // Temperature related functions
+    uint16_t get_temperature_raw();
+    char* string_temperature(bool centigrade=true);
+    float get_temperature(bool centigrade=true);
 
 private:
     // Values in RTC are stored in Binary Coded Decimal. These functions convert to/from Decimal

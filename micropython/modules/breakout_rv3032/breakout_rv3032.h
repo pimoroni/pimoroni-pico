@@ -73,5 +73,7 @@ extern mp_obj_t BreakoutRV3032_disable_clock_out(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_read_clock_output_interrupt_flag(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_clear_clock_output_interrupt_flag(mp_obj_t self_in);
 
+extern mp_obj_t BreakoutRV3032_get_temperature(mp_obj_t self_in, mp_obj_t celsius_in);
+
 extern mp_obj_t BreakoutRV3032_status(mp_obj_t self_in);
 extern mp_obj_t BreakoutRV3032_clear_interrupts(mp_obj_t self_in);

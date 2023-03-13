@@ -641,6 +641,46 @@ namespace pimoroni {
     write_register(RV3032_STATUS, 0);
   }
 
+
+  /*********************************
+  Temperature Functions
+  ********************************/
+  uint16_t RV3032::get_temperature_raw(){
+    uint16_t raw_temperature = 0;
+    uint16_t temp_msb = 0;
+    uint8_t temp_lsb = 0;
+    temp_msb = read_register(RV3032_TEMP_MSB);
+    temp_lsb = read_register(RV3032_TEMP_LSB);
+    raw_temperature = (temp_msb << 4) + (temp_lsb >> 4);
+    return raw_temperature;
+  }
+
+  char* RV3032::string_temperature(bool centigrade){
+    static char temp_str[10];
+    if (centigrade == true){
+      sprintf(temp_str, "%.4fF", get_temperature(centigrade));
+    }
+    else{
+      sprintf(temp_str, "%.4fC", get_temperature(centigrade));
+    }
+    return temp_str;
+  }
+
+  float RV3032::get_temperature(bool centigrade){
+    float temperature = 0.0;
+    int8_t temp_msb = 0;
+    uint8_t temp_lsb = 0;
+    temp_msb = (int8_t)read_register(RV3032_TEMP_MSB);
+    temp_lsb = read_register(RV3032_TEMP_LSB);
+    temperature = (float)temp_msb + ((float)(temp_lsb>>4)) * 0.0625f ;
+    if (centigrade == true){
+      return temperature;
+    }
+    else{
+      return ((temperature * 1.8f) + 32);
+    }
+  }
+
   /*********************************
   FOR INTERNAL USE
   ********************************/

@@ -67,6 +67,8 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_clear_clock_output_interrupt_flag_obj, 
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_status_obj, BreakoutRV3032_status);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_clear_interrupts_obj, BreakoutRV3032_clear_interrupts);
 
+MP_DEFINE_CONST_FUN_OBJ_2(BreakoutRV3032_get_temperature_obj, BreakoutRV3032_get_temperature);
+
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutRV3032_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&BreakoutRV3032_reset_obj) },
@@ -121,6 +123,7 @@ STATIC const mp_rom_map_elem_t BreakoutRV3032_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear_clock_output_interrupt_flag), MP_ROM_PTR(&BreakoutRV3032_clear_clock_output_interrupt_flag_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_status), MP_ROM_PTR(&BreakoutRV3032_status_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_interrupts), MP_ROM_PTR(&BreakoutRV3032_clear_interrupts_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_temperature), MP_ROM_PTR(&BreakoutRV3032_get_temperature_obj) },
     { MP_ROM_QSTR(MP_QSTR_TCR_3K), MP_ROM_INT(MP_TCR_3K) },
     { MP_ROM_QSTR(MP_QSTR_TCR_5K), MP_ROM_INT(MP_TCR_5K) },
     { MP_ROM_QSTR(MP_QSTR_TCR_9K), MP_ROM_INT(MP_TCR_9K) },

@@ -269,6 +269,14 @@ mp_obj_t BreakoutRV3032_set_24_hour(mp_obj_t self_in) {
     return mp_const_none;
 }
 
+// Temperature related
+mp_obj_t BreakoutRV3032_get_temperature(mp_obj_t self_in, mp_obj_t celsius_in) {
+    breakout_rtc_BreakoutRV3032_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_rtc_BreakoutRV3032_obj_t);
+    bool celcsius = mp_obj_get_bool(celcsius_in);
+
+    return mp_obj_new_float(self->breakout->get_temperature(celcsius));
+}
+
 mp_obj_t BreakoutRV3032_enable_alarm_interrupt(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     if(n_args == 1) {
         enum { ARG_self };
