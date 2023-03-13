@@ -2,6 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
+#include "micropython/modules/util.hpp"
 #include "libraries/pico_rgb_keypad/pico_rgb_keypad.hpp"
 
 using namespace pimoroni;
@@ -16,7 +17,7 @@ extern "C" {
 
 mp_obj_t picokeypad_init() {
     if(keypad == nullptr) {
-        keypad = new PicoRGBKeypad();
+        keypad = m_tracked_alloc_class(PicoRGBKeypad);
         keypad->init();
     }
     return mp_const_none;
