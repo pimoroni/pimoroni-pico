@@ -26,6 +26,8 @@ namespace pimoroni {
                 bool status;
             };
 
+            i2c_intf_ptr i2c_interface;
+
             bool debug = false;
 
             bool init();
