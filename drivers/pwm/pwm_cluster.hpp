@@ -24,6 +24,7 @@ namespace pimoroni {
   public:
     static const uint BUFFER_SIZE = 64;     // Set to 64, the maximum number of single rises and falls for 32 channels within a looping time period
     static const uint NUM_BUFFERS = 3;
+    static const uint MAX_PWM_CHANNELS = 32;
 
 
     //--------------------------------------------------
@@ -104,7 +105,7 @@ namespace pimoroni {
     int dma_channel;
     uint pin_mask;
     uint8_t channel_count;
-    ChannelState* channels;
+    ChannelState channels[NUM_BANK0_GPIOS];
     uint8_t channel_to_pin_map[NUM_BANK0_GPIOS];
     uint wrap_level;
 

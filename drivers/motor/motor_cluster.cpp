@@ -29,8 +29,6 @@ namespace motor {
   }
 
   MotorCluster::~MotorCluster() {
-    delete[] states;
-    delete[] configs;
   }
 
   bool MotorCluster::init() {
@@ -713,10 +711,8 @@ namespace motor {
                                          float deadzone, DecayMode mode, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     if(motor_count > 0) {
-      states = new MotorState[motor_count];
-      configs = new motor_config[motor_count];
-
       for(uint motor = 0; motor < motor_count; motor++) {
+        configs[motor] = motor_config();
         states[motor] = MotorState(direction, speed_scale, zeropoint, deadzone);
         configs[motor].phase = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
         configs[motor].mode = mode;

@@ -22,12 +22,15 @@ namespace motor {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
+  public:
+    static const uint MAX_MOTOR_CHANNELS = 16;
+
   private:
     PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    MotorState* states;
-    motor_config* configs;
+    MotorState states[MAX_MOTOR_CHANNELS];
+    motor_config configs[MAX_MOTOR_CHANNELS];
 
 
     //--------------------------------------------------

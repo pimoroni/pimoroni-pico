@@ -19,6 +19,8 @@ namespace servo {
     static constexpr float DEFAULT_MID_PULSE = 1500.0f;  // in microseconds
     static constexpr float DEFAULT_MAX_PULSE = 2500.0f;  // in microseconds
 
+    static const uint MAX_CALIBRATION_PAIRS = 32;
+
   private:
     static constexpr float LOWER_HARD_LIMIT = 400.0f;   // The minimum microsecond pulse to send
     static constexpr float UPPER_HARD_LIMIT = 2600.0f;  // The maximum microsecond pulse to send
@@ -110,7 +112,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    Pair* calibration;
+    Pair calibration[MAX_CALIBRATION_PAIRS];
     uint calibration_size;
     bool limit_lower;
     bool limit_upper;
