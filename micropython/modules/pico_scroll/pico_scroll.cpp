@@ -3,6 +3,7 @@
 #include "pico/binary_info.h"
 #include "pico/stdlib.h"
 
+#include "micropython/modules/util.hpp"
 #include "libraries/pico_scroll/pico_scroll.hpp"
 
 using namespace pimoroni;
@@ -19,7 +20,7 @@ extern "C" {
 
 mp_obj_t picoscroll_init() {
     if(scroll == nullptr)
-        scroll = new PicoScroll();
+        scroll = m_tracked_alloc_class(PicoScroll);
     scroll->init();
     return mp_const_none;
 }
