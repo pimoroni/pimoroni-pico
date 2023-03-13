@@ -4,15 +4,16 @@
 - [Examples](#examples)
   - [Button Test](#button-test)
   - [Daily Activity](#daily-activity)
+  - [Dithering](#dithering)
   - [Image Gallery](#image-gallery)
   - [LED PWM](#led-pwm)
   - [News](#news)
   - [PlaceKitten](#placekitten)
   - [Quote of the Day](#quote-of-the-day)
   - [Random Joke](#random-joke)
+  - [RTC Demo](#rtc-demo)
   - [SD Card Test](#sd-card-test)
   - [XKCD Daily](#xkcd-daily)
-  - [Dithering](#dithering)
 
 ## PicoGraphics
 
@@ -40,6 +41,11 @@ This example demonstrates a simple way of reading when a button has been pushed 
 [inky_frame_daily_activity.py](inky_frame_daily_activity.py)
 
 Generate a random activity from Bored API.
+
+### Dithering
+[inky_frame_dithering.py](inky_frame_dithering.py)
+
+A basic example showing automatic dithering in action, as PicoGraphics tries to use Inky Frame's limited colour palette to match arbitrary colours.
 
 ### Image Gallery
 [/image_gallery](../inky_frame/image_gallery)
@@ -78,6 +84,11 @@ Jokes are rendered into images "offline" by our feed2image service for two reaso
 
 For bugs/contributions or to complain about a joke, see: https://github.com/pimoroni/feed2image
 
+### RTC Demo
+[inky_frame_rtc_demo.py](inky_frame_rtc_demo.py)
+
+A basic example that sets the time/date from an NTP server, syncs the Inky and Pico RTCs and and makes Inky Frame wake up on a timer.
+
 ### SD Card Test
 [sd_test.py](sd_test.py)
 
@@ -92,8 +103,4 @@ The webcomic is rendered "offline" by our feed2image service since xkcd.com requ
 
 For bugs/contributions see: https://github.com/pimoroni/feed2image
 
-### Dithering
-[inky_frame_dithering.py](inky_frame_dithering.py)
-
-A basic example showing automatic dithering in action, as PicoGraphics tries to use Inky Frame's limited colour palette to match arbitrary colours.
 
