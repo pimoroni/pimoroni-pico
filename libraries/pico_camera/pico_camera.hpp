@@ -5,6 +5,7 @@
 #include "drivers/ov2640/ov2640.hpp"
 #include "drivers/fatfs/ff.h"
 
+
 namespace pimoroni {
 
 
@@ -27,7 +28,8 @@ namespace pimoroni {
         void init(uint32_t* buffer=nullptr, uint32_t buffer_len=0);
 
         void memory_test();
-
+        void enable_psram();
+        void enable_sdcard();
         // sdcard functions
         void mount_sdcard();
         void print_directory_listing(const char* path);

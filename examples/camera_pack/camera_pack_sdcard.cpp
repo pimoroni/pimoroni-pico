@@ -7,8 +7,7 @@
 
 
 
-#define SDCARD_PIO 1
-#define SDCARD_PIO_SM          7
+
 #define SDCARD_PIN_SPI0_CS     26
 #define SDCARD_PIN_SPI0_SCK    18
 #define SDCARD_PIN_SPI0_MOSI   19
@@ -26,9 +25,14 @@ PicoCamera camera;
 int main() {
     stdio_init_all();
 
-    sleep_ms(5000);
+    sleep_ms(2000);
 
     camera.init();
+    while (1){
+    camera.mount_sdcard();
+    sleep_ms(1000);
+    }
+    camera.print_directory_listing("");
     camera.memory_test();
 
     gpio_init(camera.SW_A);

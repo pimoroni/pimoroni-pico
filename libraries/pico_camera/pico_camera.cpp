@@ -3,6 +3,7 @@
 #include "pico/stdlib.h"
 #include "hardware/sync.h"
 #include "pico_camera.hpp"
+#include "drivers/fatfs/ff.h"
 
 namespace pimoroni {
     void PicoCamera::init(uint32_t* buffer, uint32_t buffer_len) {
@@ -95,8 +96,26 @@ namespace pimoroni {
             gpio_put(SDCARD_CS, 0);
         }
     }
+    void PicoCamera::enable_psram(){
+        gpio_set_function(18, GPIO_FUNC_PIO0);
+        gpio_set_function(19, GPIO_FUNC_PIO0);
+        gpio_set_function(20, GPIO_FUNC_PIO0);
+
+    }
+
+    void PicoCamera::enable_sdcard(){
+        gpio_set_function(18, GPIO_FUNC_SPI);
+        gpio_set_function(19, GPIO_FUNC_SPI);
+        gpio_set_function(20, GPIO_FUNC_SPI);
+
+    }
 
         void PicoCamera::mount_sdcard(){
+            enable_sdcard();
+
+            printf("mounting sd card.. \n");
+
+            printf(" cs pin %d ", SDCARD_PIN_SPI0_CS);
 
             file_result = f_mount(file_system_p, nullptr, 1);
             if (file_result != FR_OK) {
@@ -109,6 +128,7 @@ namespace pimoroni {
                 sdcard_mounted = true;
                 printf("done!\n");
             }
+            enable_psram();
         }
 
         void PicoCamera::print_directory_listing(const char* path){
