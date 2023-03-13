@@ -67,7 +67,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_clear_clock_output_interrupt_flag_obj, 
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_status_obj, BreakoutRV3032_status);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_clear_interrupts_obj, BreakoutRV3032_clear_interrupts);
 
-MP_DEFINE_CONST_FUN_OBJ_2(BreakoutRV3032_get_temperature_obj, BreakoutRV3032_get_temperature);
+MP_DEFINE_CONST_FUN_OBJ_1(BreakoutRV3032_get_temperature_obj, BreakoutRV3032_get_temperature);
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutRV3032_locals_dict_table[] = {
