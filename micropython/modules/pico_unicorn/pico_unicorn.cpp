@@ -2,6 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
+#include "micropython/modules/util.hpp"
 #include "libraries/pico_unicorn/pico_unicorn.hpp"
 
 using namespace pimoroni;
@@ -16,7 +17,7 @@ extern "C" {
 
 mp_obj_t picounicorn_init() {
     if(unicorn == nullptr)
-        unicorn = new PicoUnicorn();
+        unicorn = m_tracked_alloc_class(PicoUnicorn);
     unicorn->init();
     return mp_const_none;
 }
