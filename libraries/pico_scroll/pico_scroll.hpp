@@ -19,6 +19,7 @@ namespace pimoroni {
     uint8_t __fb[BUFFER_SIZE];
   
   public:
+    ~PicoScroll();
     void init();
     void update();
     void set_pixels(const char *pixels);

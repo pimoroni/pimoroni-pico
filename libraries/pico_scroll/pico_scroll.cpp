@@ -35,6 +35,11 @@ enum reg {
 
 namespace pimoroni {
 
+  PicoScroll::~PicoScroll() {
+    clear();
+    update();
+  }
+
   void PicoScroll::init() {
     // setup i2c interface
     i2c_init(i2c0, 400000);
