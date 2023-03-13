@@ -11,7 +11,10 @@ namespace pimoroni {
             gpio_pull_up(interrupt);
         }
 
-        device.intf_ptr = new i2c_intf_ptr{.i2c = i2c, .address = address};
+        i2c_interface.i2c = i2c;
+        i2c_interface.address = address;
+
+        device.intf_ptr = &i2c_interface;
         device.intf = BMP280_I2C_INTF;
         device.read = (bmp280_com_fptr_t)&read_bytes;
         device.write = (bmp280_com_fptr_t)&write_bytes;
