@@ -1,7 +1,7 @@
 import time
-import picokeypad as keypad
+import picokeypad
 
-keypad.init()
+keypad = picokeypad.PicoKeypad()
 keypad.set_brightness(1.0)
 
 lit = 0

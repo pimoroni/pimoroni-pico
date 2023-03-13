@@ -16,6 +16,7 @@ namespace pimoroni {
     uint8_t *led_data;
   
   public:
+    ~PicoRGBKeypad();
     void init();
     void update();
     void set_brightness(float brightness);
