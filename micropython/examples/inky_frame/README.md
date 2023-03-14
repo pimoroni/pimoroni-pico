@@ -3,6 +3,7 @@
 - [PicoGraphics](#picographics)
 - [Examples](#examples)
   - [Button Test](#button-test)
+  - [Carbon Intensity](#carbon-intensity)
   - [Daily Activity](#daily-activity)
   - [Dithering](#dithering)
   - [Image Gallery](#image-gallery)
@@ -36,6 +37,13 @@ Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`.
 Inky Frame's buttons (and the RTC alarm, busy signal from the screen and external trigger from the hack header) are connected to a shift register to help conserve pins, and to allow these inputs to wake the board up from sleep.
 
 This example demonstrates a simple way of reading when a button has been pushed by reading the shift register and checking if the bit in a specific position is 0 or 1.
+
+### Carbon Intensity
+[carbon_intensity.py](carbon_intensity.py)
+
+This example connects to the Carbon Intensity API to give you a regional forecast of how your (UK) electricity is being generated and its carbon impact.
+
+Find out more at https://carbonintensity.org.uk/
 
 ### Daily Activity
 [inky_frame_daily_activity.py](inky_frame_daily_activity.py)
