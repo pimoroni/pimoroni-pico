@@ -5,4 +5,4 @@ These files are compiled to .mpy to save RAM. You can find the original .py sour
 - [TinyWeb](https://github.com/belyalov/tinyweb)
 - [logging](https://github.com/pfalcon/pycopy-lib)
 - [urllib.urequest](https://github.com/pfalcon/pycopy-lib)
-- [sdcard](https://github.com/micropython/micropython/blob/master/drivers/sdcard/sdcard.py)
+- [sdcard](https://github.com/micropython/micropython-lib/blob/master/micropython/drivers/storage/sdcard/sdcard.py)
