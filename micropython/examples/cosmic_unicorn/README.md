@@ -22,6 +22,7 @@
 - [NumPy examples](#numpy-examples)
 - [Other Examples](#other-examples)
   - [Launch (Demo Reel)](#launch-demo-reel)
+- [Other Resources](#other-resources)
 
 ## About Cosmic Unicorn
 
@@ -167,3 +168,9 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 [launch](launch)
 
 If you want to get the demo reel that Cosmic Unicorn ships with back, copy the contents of this `launch` folder to your Pico W.
+
+## Other Resources
+
+Here are some cool Cosmic Unicorn community projects and resources that you might find useful / inspirational! Note that code at the links below has not been tested by us and we're not able to offer support with it.
+
+- :link: [Green Energy Display with Cosmic Unicorn](https://www.hackster.io/andreas-motzek/clock-and-green-energy-display-with-cosmic-unicorn-641dcb)
