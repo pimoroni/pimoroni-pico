@@ -156,7 +156,7 @@ def redraw_display_if_reqd():
 
     year, month, day, wd, hour, minute, second, _ = rtc.datetime()
     if second != last_second:
-        hour += utc_offset
+        hour = (hour + utc_offset) % 24
         time_through_day = (((hour * 60) + minute) * 60) + second
         percent_through_day = time_through_day / 86400
         percent_to_midday = 1.0 - ((math.cos(percent_through_day * math.pi * 2) + 1) / 2)
