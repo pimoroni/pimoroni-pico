@@ -139,6 +139,9 @@ draw()
 # Go to sleep if on battery power
 inky_frame.turn_off()
 
+# Or comment out the line above and uncomment this one to wake up and update every half hour
+# inky_frame.sleep_for(30)
+
 """
 Pico W RAM seems insufficient to decode a https request whilst having a PicoGraphics instance active.
 If you are running off USB and want this to update periodically, you could incorporate a machine.reset()
