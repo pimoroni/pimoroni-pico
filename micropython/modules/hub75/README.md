@@ -8,13 +8,13 @@ The Interstate 75 library is intended for the Interstate 75 and Interstate 75 W 
 
 It can, in theory, be used with your own custom wiring, though custom pin assignments are not supported yet.
 
-- [Notes On PIO & DMA Limitations](#notes-on-pio--dma-limitations)
+- [Notes On PIO \& DMA Limitations](#notes-on-pio--dma-limitations)
 - [Getting Started](#getting-started)
   - [FM6216A Panels](#fm6216a-panels)
   - [Setting Colour Order](#setting-colour-order)
 - [Quick Reference](#quick-reference)
   - [Set A Pixel](#set-a-pixel)
-  - [Clear The Display](#clear-the-display)
+  - [Clear the display](#clear-the-display)
 
 ## Notes On PIO & DMA Limitations
 
@@ -61,7 +61,7 @@ matrix = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.PANEL_FM6126A)
 Some hub 75 panels have varying colour orders. A keyword argument is supplied to configure this:
 
 ```python
-matrix = hub75.Hub75(WIDTH, HEIGHT, panel_type=hub75.COLOR_ORDER_RBG)
+matrix = hub75.Hub75(WIDTH, HEIGHT, color_order=hub75.COLOR_ORDER_RBG)
 ```
 
 The available orders are defined as constants in `hub75`:
