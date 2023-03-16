@@ -12,7 +12,7 @@ Use:
 600x448 for Inky Frame 5.7"
 800x480 for Inky Frame 7.3"
 
-If you want to use your own images, they will need to be the correct dimensions for your screen and saved *without progressing encoding*.
+If you want to use your own images, they will need to be the correct dimensions for your screen and saved *without progressive encoding*.
 
 ## Image transfer instructions
 
