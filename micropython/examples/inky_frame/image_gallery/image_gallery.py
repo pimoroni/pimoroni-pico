@@ -23,10 +23,10 @@ IMAGE_D = "jwst4.jpg"
 IMAGE_E = "jwst5.jpg"
 
 # set up the display
-display = PicoGraphics(DISPLAY)
+graphics = PicoGraphics(DISPLAY)
 
 # Create a new JPEG decoder for our PicoGraphics
-j = jpegdec.JPEG(display)
+j = jpegdec.JPEG(graphics)
 
 
 def display_image(filename):
@@ -38,7 +38,7 @@ def display_image(filename):
     j.decode(0, 0, jpegdec.JPEG_SCALE_FULL)
 
     # Display the result
-    display.update()
+    graphics.update()
 
 
 print('Press a button to display an image!')
