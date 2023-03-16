@@ -15,6 +15,8 @@ PicoScroll *scroll = nullptr;
 
 extern "C" {
 #include "pico_scroll.h"
+#include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
+#include "py/builtin.h"
 
 #define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
 #define INCORRECT_SIZE_MSG "Scroll height wrong: > 8 pixels."
@@ -23,6 +25,17 @@ typedef struct _PicoScroll_obj_t {
     mp_obj_base_t base;
     PicoScroll* scroll;
 } PicoScroll_obj_t;
+
+// from picographics/picographics.cpp
+// used to support accepting a PicoGraphics class
+typedef struct _ModPicoGraphics_obj_t {
+    mp_obj_base_t base;
+    PicoGraphics *graphics;
+    DisplayDriver *display;
+    void *spritedata;
+    void *buffer;
+    _PimoroniI2C_obj_t *i2c;
+} ModPicoGraphics_obj_t;
 
 mp_obj_t picoscroll_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PicoScroll_obj_t *self = nullptr;
@@ -52,7 +65,7 @@ mp_obj_t picoscroll_get_height(mp_obj_t self_in) {
     return mp_obj_new_int(PicoScroll::HEIGHT);
 }
 
-mp_obj_t picoscroll_update(mp_obj_t self_in) {
+mp_obj_t picoscroll_show(mp_obj_t self_in) {
     PicoScroll_obj_t *self = MP_OBJ_TO_PTR2(self_in, PicoScroll_obj_t);
     self->scroll->update();
     return mp_const_none;
@@ -206,5 +219,15 @@ mp_obj_t picoscroll_is_pressed(mp_obj_t self_in, mp_obj_t button_obj) {
     }
 
     return buttonPressed ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t picoscroll_update(mp_obj_t self_in, mp_obj_t graphics_in) {
+    PicoScroll_obj_t *self = MP_OBJ_TO_PTR2(self_in, PicoScroll_obj_t);
+    ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
+
+    if(picographics->base.type == &ModPicoGraphics_type) {
+        self->scroll->update(picographics->graphics);
+    }
+    return mp_const_none;
 }
 }

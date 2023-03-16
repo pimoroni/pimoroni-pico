@@ -217,6 +217,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_SCROLL_PACK:
+            width = 17;
+            height = 7;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -347,7 +354,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             || display == DISPLAY_INTERSTATE75_64X32
             || display == DISPLAY_GALACTIC_UNICORN
             || display == DISPLAY_COSMIC_UNICORN
-            || display == DISPLAY_UNICORN_PACK) {
+            || display == DISPLAY_UNICORN_PACK
+            || display == DISPLAY_SCROLL_PACK) {
         // Create a dummy display driver
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
