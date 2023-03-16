@@ -1,6 +1,7 @@
 #pragma once
 
 #include "hardware/pio.h"
+#include "pico_graphics.hpp"
 
 namespace pimoroni {
 
@@ -39,6 +40,8 @@ namespace pimoroni {
     void set_pixel(uint8_t x, uint8_t y, uint8_t v);
 
     bool is_pressed(uint8_t button);
+
+    void update(PicoGraphics *graphics);
   private:
     void partial_teardown();
     void dma_safe_abort(uint channel);

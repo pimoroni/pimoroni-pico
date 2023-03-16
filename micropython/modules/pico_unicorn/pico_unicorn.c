@@ -23,9 +23,11 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_clear_obj, picounicorn_clear);
 STATIC MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_is_pressed_obj, picounicorn_is_pressed);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_width_obj, picounicorn_get_width);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_height_obj, picounicorn_get_height);
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_update_obj, picounicorn_update);
 
 STATIC const mp_rom_map_elem_t picounicorn_locals_dict_table[] = {   
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&picounicorn__del__obj) },
+    { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&picounicorn_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&picounicorn_set_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel_value), MP_ROM_PTR(&picounicorn_set_pixel_value_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&picounicorn_clear_obj) },

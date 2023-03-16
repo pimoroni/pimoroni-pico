@@ -210,6 +210,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_UNICORN_PACK:
+            width = 16;
+            height = 7;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -331,17 +338,17 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     } else if (display == DISPLAY_INKY_PACK) {
         self->display = m_new_class(UC8151, width, height, (Rotation)rotate, spi_bus);
-
-    } else if (display == DISPLAY_GALACTIC_UNICORN) {
-        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
     
     } else if (display == DISPLAY_GFX_PACK) {
         self->display = m_new_class(ST7567, width, height, spi_bus);
 
-    } else if (display == DISPLAY_INTERSTATE75_32X32 || display == DISPLAY_INTERSTATE75_64X64 || display == DISPLAY_INTERSTATE75_64X32) {
-        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
-    
-    } else if (display == DISPLAY_COSMIC_UNICORN) {
+    } else if (display == DISPLAY_INTERSTATE75_32X32
+            || display == DISPLAY_INTERSTATE75_64X64
+            || display == DISPLAY_INTERSTATE75_64X32
+            || display == DISPLAY_GALACTIC_UNICORN
+            || display == DISPLAY_COSMIC_UNICORN
+            || display == DISPLAY_UNICORN_PACK) {
+        // Create a dummy display driver
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
     } else {

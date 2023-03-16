@@ -4,17 +4,31 @@
 
 #include "micropython/modules/util.hpp"
 #include "libraries/pico_unicorn/pico_unicorn.hpp"
+#include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
 
 extern "C" {
 #include "pico_unicorn.h"
+#include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
+#include "py/builtin.h"
 
 typedef struct _picounicorn_obj_t {
     mp_obj_base_t base;
     PicoUnicorn *unicorn;
 } picounicorn_obj_t;
+
+// from picographics/picographics.cpp
+// used to support accepting a PicoGraphics class
+typedef struct _ModPicoGraphics_obj_t {
+    mp_obj_base_t base;
+    PicoGraphics *graphics;
+    DisplayDriver *display;
+    void *spritedata;
+    void *buffer;
+    _PimoroniI2C_obj_t *i2c;
+} ModPicoGraphics_obj_t;
 
 mp_obj_t picounicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) { 
     picounicorn_obj_t *self = m_new_obj_with_finaliser(picounicorn_obj_t);
@@ -119,5 +133,15 @@ mp_obj_t picounicorn_is_pressed(mp_obj_t self_in, mp_obj_t button_obj) {
     }
 
     return buttonPressed ? mp_const_true : mp_const_false;
+}
+
+mp_obj_t picounicorn_update(mp_obj_t self_in, mp_obj_t graphics_in) {
+    picounicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, picounicorn_obj_t);
+    ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
+
+    if(picographics->base.type == &ModPicoGraphics_type) {
+        self->unicorn->update(picographics->graphics);
+    }
+    return mp_const_none;
 }
 }
