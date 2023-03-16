@@ -1,6 +1,5 @@
 import gc
-from machine import Pin, PWM
-from pimoroni_i2c import PimoroniI2C
+from machine import Pin, PWM, I2C
 from plasma import WS2812
 from motor import Motor
 from servo import Servo
@@ -54,6 +53,7 @@ NUM_LEDS = 12
 
 class Inventor2040W():
     AMP_EN_PIN = 3
+    I2C_ID = 0
     I2C_SDA_PIN = 4
     I2C_SCL_PIN = 5
     MOTOR_A_PINS = (6, 7)
@@ -75,12 +75,13 @@ class Inventor2040W():
     AMP_CORRECTION = 4
     DEFAULT_VOLUME = 0.2
 
-    def __init__(self, motor_gear_ratio=50, init_motors=True, init_servos=True):
+    def __init__(self, motor_gear_ratio=50, init_motors=True, init_servos=True, init_i2c=True, i2c_baudrate=100000):
         # Free up hardware resources
         gc.collect()
 
         # Set up the motors and encoders, if the user wants them
         self.motors = None
+        self.encoders = None
         if init_motors:
             cpr = MMME_CPR * motor_gear_ratio
             self.motors = [Motor(self.MOTOR_A_PINS), Motor(self.MOTOR_B_PINS)]
@@ -94,7 +95,9 @@ class Inventor2040W():
             self.servos = [Servo(i) for i in range(self.SERVO_1_PIN, self.SERVO_6_PIN + 1)]
 
         # Set up the i2c for Qw/st and Breakout Garden
-        self.i2c = PimoroniI2C(self.I2C_SDA_PIN, self.I2C_SCL_PIN, 100000)
+        self.i2c = None
+        if init_i2c:
+            self.i2c = I2C(self.I2C_ID, self.I2C_SDA_PIN, self.I2C_SCL_PIN, i2c_baudrate)
 
         # Set up the amp enable
         self.__amp_en = Pin(self.AMP_EN_PIN, Pin.OUT)
@@ -120,14 +123,14 @@ class Inventor2040W():
             self.play_silence()
             raise ValueError("frequency of range. Expected greater than 0")
 
-        corrected_volume = (self.__volume ** 4)  # Correct for RC Filter curve
+        corrected_volume = (self.__volume ** self.AMP_CORRECTION)  # Correct for RC Filter curve
         self.audio_pwm.duty_u16(int(32768 * corrected_volume))
         self.unmute_audio()
 
     def play_silence(self):
         self.audio_pwm.freq(44100)
 
-        corrected_volume = (self.__volume ** 4)  # Correct for RC Filter curve
+        corrected_volume = (self.__volume ** self.AMP_CORRECTION)  # Correct for RC Filter curve
         self.audio_pwm.duty_u16(int(32768 * corrected_volume))
         self.unmute_audio()
 
