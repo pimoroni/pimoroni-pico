@@ -4,9 +4,10 @@ This library offers convenient functions for interacting with [Interstate75](htt
 
 ## Table of Content
 - [Table of Content](#table-of-content)
-- [Interstate75 Module](#interstate75-class)
+- [Interstate75 Class](#interstate75-class)
   - [Switches](#switches)
   - [RGB LED](#rgb-led)
+- [Display](#display)
 
 
 
@@ -14,7 +15,18 @@ This library offers convenient functions for interacting with [Interstate75](htt
 
 The `Interstate75` class deals with RGB LED and buttons on the Interstate75 and 75W. To create one, import the `interstate75` module, then define a new `board` variable.
 
-This is where you define the HUB75 matrix display size that you wish to use by defining `display=`
+
+```python
+import interstate75
+
+display = interstate75.DISPLAY_INTERSTATE75_32X32
+
+board = interstate75.Interstate75(display=display)
+```
+
+The version of Intersate75 you're using should be automatically detected. Check `board.interstate75w` to verify this. It should be `True` on a W and `False` on a non-W.
+
+You can choose the HUB75 matrix display size that you wish to use by defining `display=` as one of the following:
 
 ```python
 DISPLAY_INTERSTATE75_32X32
@@ -27,17 +39,6 @@ DISPLAY_INTERSTATE75_192X64
 DISPLAY_INTERSTATE75_256X64
 ```
 
-
-```python
-import interstate75
-
-display = interstate75.DISPLAY_INTERSTATE75_32X32
-
-board = interstate75.Interstate75(display=display)
-```
-
-From here, all features can be accessed by calling functions on `board`. In addition, when using Qwiic / Stemma QT devices, the I2C channel to use can be accessed with `board.i2c`.
-
 ### Switches
 
 Interstate75 and 75W have two switches in the front of the board. To read one of the switches, call `.switch_pressed(switch)`, where `switch` is a value from `0` to `.NUM_SWITCHES - 1`. This returns `True` when the specified switch is pressed, and `False` otherwise.
@@ -47,11 +48,21 @@ To read a specific input, the `interstate75` module contains these handy constan
 * `SWITCH_A` = `0`
 * `SWITCH_B` = `1`
 
+The Interstate75 (non W) uses the boot button instead of `SWITCH_B`
+
+* `SWITCH_A` = `0`
+* `SWITCH_BOOT` = `1`
+
 ```python
 if board.switch_pressed(SWITCH_A):
   # Do something interesting here!
 
+# Either for Interstate 75W
 if board.switch_pressed(SWITCH_B):
+  # Do something else even more interesting here!
+
+# Or for Interstate 75
+if board.switch_pressed(SWITCH_BOOT):
   # Do something else even more interesting here!
 ```
 

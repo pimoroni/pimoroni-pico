@@ -13,8 +13,11 @@ PicoGraphics_PenRGB888 graphics(hub75.width, hub75.height, nullptr);
 
 // And each button
 Button button_a(Interstate75::A);
-Button button_b(Interstate75::B);
+// For the Interstate75
+// Button button_b(Interstate75::BOOT); // Using this button definition on the Interstate75W will most likely disable the wifi make sure it is commented out if using Interstate75W
 
+// Or for the Interstate75W
+Button button_b(Interstate75::B); // This button is not present on the Interstate75 (non W version)
 // RGB LED
 RGBLED led(Interstate75::LED_R, Interstate75::LED_G, Interstate75::LED_B, ACTIVE_LOW);
 
