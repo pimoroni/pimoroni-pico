@@ -12,12 +12,14 @@ namespace servo {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
+  public:
+    static const uint MAX_SERVO_CHANNELS = 32;
   private:
     PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    ServoState* states;
-    float* servo_phases;
+    ServoState states[MAX_SERVO_CHANNELS];
+    float servo_phases[MAX_SERVO_CHANNELS];
 
 
     //--------------------------------------------------

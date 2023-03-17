@@ -247,10 +247,8 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     if(mp_obj_is_str_or_bytes(self->file)){
         GET_STR_DATA_LEN(self->file, str, str_len);
 
-        std::string t((const char*)str);
-
         result = self->jpeg->open(
-            t.c_str(),
+            (const char*)str,
             jpegdec_open_callback,
             jpegdec_close_callback,
             jpegdec_read_callback,

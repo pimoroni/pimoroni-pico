@@ -10,9 +10,6 @@ using namespace pimoroni;
 PicoUnicorn pico_unicorn;
 
 int main() {
-
-  pico_unicorn.init();
-
   bool a_pressed = false;
   bool b_pressed = false;
   bool x_pressed = false;

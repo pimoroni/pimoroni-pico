@@ -1,5 +1,7 @@
-#include <string>
 #pragma once
+
+#include <string>
+#include "pico_graphics.hpp"
 
 namespace pimoroni {
 
@@ -19,6 +21,7 @@ namespace pimoroni {
     uint8_t __fb[BUFFER_SIZE];
   
   public:
+    ~PicoScroll();
     void init();
     void update();
     void set_pixels(const char *pixels);
@@ -35,6 +38,7 @@ namespace pimoroni {
     void clear();
     bool is_pressed(uint8_t button);
 
+    void update(PicoGraphics *graphics);
   private:
     void i2c_write(uint8_t reg, const char *data, uint8_t len);
   };

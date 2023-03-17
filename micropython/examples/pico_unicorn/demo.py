@@ -1,6 +1,6 @@
-import picounicorn
+from picounicorn import PicoUnicorn
 
-picounicorn.init()
+picounicorn = PicoUnicorn()
 
 
 # From CPython Lib/colorsys.py

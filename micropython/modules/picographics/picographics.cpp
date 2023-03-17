@@ -23,10 +23,10 @@ extern "C" {
 #include "py/reader.h"
 #include "extmod/vfs.h"
 
-std::string mp_obj_to_string_r(const mp_obj_t &obj) {
+const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
     if(mp_obj_is_str_or_bytes(obj)) {
         GET_STR_DATA_LEN(obj, str, str_len);
-        return (const char*)str;
+        return std::string_view((const char*)str, str_len);
     }
     mp_raise_TypeError("can't convert object to str implicitly");
 }
@@ -210,6 +210,20 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_UNICORN_PACK:
+            width = 16;
+            height = 7;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
+        case DISPLAY_SCROLL_PACK:
+            width = 17;
+            height = 7;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -331,17 +345,18 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     } else if (display == DISPLAY_INKY_PACK) {
         self->display = m_new_class(UC8151, width, height, (Rotation)rotate, spi_bus);
-
-    } else if (display == DISPLAY_GALACTIC_UNICORN) {
-        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
     
     } else if (display == DISPLAY_GFX_PACK) {
         self->display = m_new_class(ST7567, width, height, spi_bus);
 
-    } else if (display == DISPLAY_INTERSTATE75_32X32 || display == DISPLAY_INTERSTATE75_64X64 || display == DISPLAY_INTERSTATE75_64X32) {
-        self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
-    
-    } else if (display == DISPLAY_COSMIC_UNICORN) {
+    } else if (display == DISPLAY_INTERSTATE75_32X32
+            || display == DISPLAY_INTERSTATE75_64X64
+            || display == DISPLAY_INTERSTATE75_64X32
+            || display == DISPLAY_GALACTIC_UNICORN
+            || display == DISPLAY_COSMIC_UNICORN
+            || display == DISPLAY_UNICORN_PACK
+            || display == DISPLAY_SCROLL_PACK) {
+        // Create a dummy display driver
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
     } else {
@@ -935,7 +950,7 @@ mp_obj_t ModPicoGraphics_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+    const std::string_view t((const char*)str, str_len);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
@@ -969,7 +984,7 @@ mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, m
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    std::string t((const char*)str);
+    const std::string_view t((const char*)str, str_len);
 
     float scale = args[ARG_scale].u_obj == mp_const_none ? 2.0f : mp_obj_get_float(args[ARG_scale].u_obj);
     int letter_spacing = args[ARG_spacing].u_int;

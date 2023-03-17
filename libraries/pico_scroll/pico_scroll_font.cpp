@@ -1,4 +1,5 @@
 #include "pico_scroll_font.hpp"
+#include <string.h>
 
 /* static font data */
 static const unsigned char __bitmap[256][5] = {
@@ -135,13 +136,15 @@ static const unsigned char __bitmap[256][5] = {
 /* render a text string to a pre-allocated buffer - strlen(text) * 6 bytes */
 int render_text(const char *text, unsigned int nchr, unsigned char *buffer, unsigned int nbfr) {
     // TODO check nbfr >= 6 * nchr
+    memset(buffer, 0, nbfr);
 
     for (unsigned int i = 0; i < nchr; i++) {
         const unsigned char *symbol = __bitmap[(unsigned int)text[i]];
         for (unsigned int j = 0; j < 5; j++) {
-            buffer[i * 6 + j] = symbol[j];
+            unsigned int offset = i * 6 + j;
+            if (offset >= nbfr) return -1;
+            buffer[offset] = symbol[j];
         }
-        buffer[i * 6 + 5] = 0x0;
     }
     return 0;
 }

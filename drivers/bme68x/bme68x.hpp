@@ -18,6 +18,8 @@ namespace pimoroni {
                 int8_t address;
             };
 
+            i2c_intf_ptr i2c_interface;
+
             bool debug = true;
 
             bool init();

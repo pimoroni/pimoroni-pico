@@ -44,8 +44,6 @@ namespace servo {
   }
 
   ServoCluster::~ServoCluster() {
-    delete[] states;
-    delete[] servo_phases;
   }
 
   bool ServoCluster::init() {
@@ -502,9 +500,6 @@ namespace servo {
   void ServoCluster::create_servo_states(CalibrationType default_type, bool auto_phase) {
     uint8_t servo_count = pwms.get_chan_count();
     if(servo_count > 0) {
-      states = new ServoState[servo_count];
-      servo_phases = new float[servo_count];
-
       for(uint servo = 0; servo < servo_count; servo++) {
         states[servo] = ServoState(default_type);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
@@ -515,9 +510,6 @@ namespace servo {
   void ServoCluster::create_servo_states(const Calibration& calibration, bool auto_phase) {
     uint8_t servo_count = pwms.get_chan_count();
     if(servo_count > 0) {
-      states = new ServoState[servo_count];
-      servo_phases = new float[servo_count];
-
       for(uint servo = 0; servo < servo_count; servo++) {
         states[servo] = ServoState(calibration);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;

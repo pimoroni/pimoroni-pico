@@ -1,7 +1,7 @@
-import picounicorn
+from picounicorn import PicoUnicorn
 import time
 
-picounicorn.init()
+picounicorn = PicoUnicorn()
 
 
 # From CPython Lib/colorsys.py

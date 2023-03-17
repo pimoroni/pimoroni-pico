@@ -10,6 +10,7 @@ pico_generate_pio_header(usermod_pico_unicorn ${CMAKE_CURRENT_LIST_DIR}/../../..
 
 target_include_directories(usermod_pico_unicorn INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/
 )
 
 target_compile_definitions(usermod_pico_unicorn INTERFACE

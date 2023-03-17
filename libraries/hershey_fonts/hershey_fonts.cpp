@@ -14,6 +14,26 @@ namespace hershey {
     //{ "serif_bold",   &timesrb }
   };
 
+  bool has_font(std::string_view font) {
+    if(font == "sans"
+    || font == "gothic"
+    || font == "cursive"
+    || font == "serif_italic"
+    || font == "serif") {
+      return true;
+    }
+    return false;
+  }
+
+  const font_t* font(std::string_view font) {
+    if(font == "sans") return &futural;
+    else if(font == "gothic") return &gothgbt;
+    else if(font == "cursive") return &scripts;
+    else if(font == "serif_italic") return &timesi;
+    else if(font == "serif") return &timesr;
+    return &futural;
+  }
+
   inline float deg2rad(float degrees) {
     return (degrees * M_PI) / 180.0f;
   }
@@ -41,7 +61,7 @@ namespace hershey {
     return gd->width * s;
   }
 
-  int32_t measure_text(const font_t* font, std::string message, float s) {
+  int32_t measure_text(const font_t* font, std::string_view message, float s) {
     int32_t width = 0;
     for(auto &c : message) {
       width += measure_glyph(font, c, s);
@@ -93,7 +113,7 @@ namespace hershey {
     return gd->width * s;
   }
 
-  void text(const font_t* font, line_func line, std::string message, int32_t x, int32_t y, float s, float a) {
+  void text(const font_t* font, line_func line, std::string_view message, int32_t x, int32_t y, float s, float a) {
     int32_t cx = x;
     int32_t cy = y;
 
