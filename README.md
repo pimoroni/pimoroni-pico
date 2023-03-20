@@ -107,6 +107,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
 * Badger 2040 W (E Ink badge) - https://shop.pimoroni.com/products/badger-2040-w
 * Cosmic Unicorn (32 x 32 LED matrix) - https://shop.pimoroni.com/products/cosmic-unicorn
+* Inky Frame 7.3" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-7-3
 
 ## Breakouts
 
