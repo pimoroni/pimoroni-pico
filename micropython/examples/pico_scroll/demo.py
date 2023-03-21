@@ -27,7 +27,7 @@ while True:
                     if m == (i + (loop - b)) % loop and b < tail:
                         scroll.set_pixel(x, y, br_mult * (tail - b))
 
-    scroll.update()
+    scroll.show()
     i += 1
     if i >= loop:
         i = 0
