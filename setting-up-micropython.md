@@ -12,22 +12,23 @@ We provide pre-built MicroPython images which include all the drivers that inclu
 
 ## Which file to download?
 
-On the releases page you'll find a bunch of different .uf2 files for use on different RP2040 boards (if you can't see them, click on the arrow next to 'assets' to expand the list).
+On the releases page you'll find a bunch of different .uf2 files for use on different RP2040 boards (if you can't see them, click on the arrow next to 'assets' to expand the list). For Badger 2040 and Badger 2040 W you should refer to the [Badger 2040 repository](https://github.com/pimoroni/badger2040/).
 
 - [Releases page](https://github.com/pimoroni/pimoroni-pico/releases)
+- [Badger 2040 firmware](https://github.com/pimoroni/badger2040/releases)
 
 | Board                                                        | What uf2 file to use                                         | Notes                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Raspberry Pi Pico and most other RP2040 boards without wireless (Plasma 2040, Interstate 75, Servo 2040, Motor 2040, Tiny 2040 2MB) | **pimoroni-pico-vx.x.x-micropython.uf2**                     |                                                              |
 | Raspberry Pi Pico W and most Pico W Aboard products (Automation 2040 W, Inventor 2040 W, Plasma Stick, Interstate 75 W) | **pimoroni-picow-vx.x.x-micropython.uf2**                    |                                                              |
-| Badger 2040                                                  | **pimoroni-badger2040-vx.x.x-micropython.uf2** or **pimoroni-badger2040-vx.x.x-micropython-without-badger-os.uf2** | Download **pimoroni-badger2040-vx.x.x-micropython.uf2** for built in examples! |
 | Tufty 2040                                                   | **pimoroni-tufty2040-vx.x.x-micropython.uf2**                |                                                              |
 | Pimoroni Pico LiPo                                           | **pimoroni-picolipo_4mb-vx.x.x-micropython.uf2** or **pimoroni-picolipo_16mb-vx.x.x-micropython.uf2** | Includes support for the increased flash memory on these boards |
 | Tiny 2040 8MB                                                | **pimoroni-tiny2040-vx.x.x-micropython.uf2**                 | Includes support for the increased flash memory on this board |
 | Enviro Urban, Indoor, Weather & Grow                         | **pimoroni-picow_enviro-vx.x.x-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
 | Galactic Unicorn                                             | **pimoroni-picow_galactic_unicorn-vx.x.x-micropython.uf2**   |                                                              |
 | Inky Frame                                                   | **pimoroni-picow_inky_frame-vx.x.x-micropython.uf2**         |                                                              |
-| Badger 2040 W                                                | **pimoroni-badger2040w-vx.x.x-micropython.uf2** or **pimoroni-badger2040w-vx.x.x-micropython-with-examples.uf2** | Download **pimoroni-badger2040w-vx.x.x-micropython-with-examples.uf2** for built in examples! |
+| Badger 2040 W                                                | **pimoroni-badger2040w-vx.x.x-micropython.uf2** or **pimoroni-badger2040w-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
+| Badger 2040                                                  | **pimoroni-badger2040-vx.x.x-micropython.uf2** or  **pimoroni-badger2040-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Cosmic Unicorn                                               | **pimoroni-picow_cosmic_unicorn-vx.x.x-micropython.uf2**     |                                                              |
 
 ## Entering DFU/bootloader mode

@@ -1,4 +1,6 @@
 # Badger 2040 W MicroPython Examples <!-- omit in toc -->
+
+:warning: This code has been deprecated in favour of a dedicated Badger 2040 project: https://github.com/pimoroni/badger2040
  
 - [About Badger 2040 W](#about-badger-2040-w)
 - [Badger 2040 W and PicoGraphics](#badger-2040-w-and-picographics)
