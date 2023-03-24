@@ -35,3 +35,6 @@ include(micropython-common-ulab)
 enable_ulab()
 
 include(modules_py/modules_py)
+
+# C++ Magic Memory
+include(cppmem/micropython)

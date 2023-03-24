@@ -40,3 +40,6 @@ include(motor/micropython)
 # include(micropython-common)
 
 include(modules_py/modules_py)
+
+# C++ Magic Memory
+include(cppmem/micropython)

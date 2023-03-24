@@ -21,3 +21,6 @@ endif()
 include(plasma/micropython)
 include(ulab/code/micropython)
 include(qrcode/micropython/micropython)
+
+# C++ Magic Memory
+include(cppmem/micropython)
