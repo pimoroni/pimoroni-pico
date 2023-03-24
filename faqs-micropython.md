@@ -41,7 +41,7 @@ Save your code as `main.py` to run it automatically when your board's powered up
 
 ### How do I do a factory reset?
 
-If you need to delete all your programs from your board's flash memory and start again from scratch, you can do that by downloading [this special .uf2 file](https://www.raspberrypi.org/documentation/pico/getting-started/static/6f6f31460c258138bd33cc96ddd76b91/flash_nuke.uf2) and copying it to your board whilst it's in bootloader mode (hold down 'bootsel', and tap 'reset'/plug in the USB cable). Once you've done that, you'll need to [install MicroPython](setting-up-micropython.md) again.
+If you need to delete all your programs from your board's flash memory and start again from scratch, you can do that by downloading [this special .uf2 file](https://datasheets.raspberrypi.com/soft/flash_nuke.uf2) and copying it to your board whilst it's in bootloader mode (hold down 'bootsel', and tap 'reset'/plug in the USB cable). Once you've done that, you'll need to [install MicroPython](setting-up-micropython.md) again.
 
 You may also find clearing the flash to be useful if you encounter problems after upgrading to the newest version of MicroPython - just make sure you save any code you've been working on to your computer first!
 
