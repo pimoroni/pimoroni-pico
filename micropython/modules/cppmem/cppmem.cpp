@@ -106,13 +106,3 @@ void operator delete(void *p, __unused std::size_t n) noexcept { stat_free(p); }
 void operator delete[](void *p, __unused std::size_t n) noexcept { stat_free(p); }
 
 #endif
-
-namespace {
-    struct SwitchAllocatorMode {
-        public:
-            SwitchAllocatorMode() {
-                mode = MICROPYTHON;
-            }
-    };
-    SwitchAllocatorMode switchallocatormode __attribute__ ((init_priority (65535)));
-}
