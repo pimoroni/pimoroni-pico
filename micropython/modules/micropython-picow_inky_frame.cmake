@@ -46,3 +46,7 @@ include(motor/micropython)
 include(modules_py/modules_py)
 
 copy_module(inky_frame.py)
+copy_module(boot.py)
+
+# C++ Magic Memory
+include(cppmem/micropython)

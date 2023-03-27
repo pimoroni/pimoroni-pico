@@ -48,6 +48,7 @@ if(PICO_BOARD STREQUAL "pico_w")
     copy_module(automation.py)
     copy_module(inventor.py)
 endif()
+copy_module(boot.py)
 
 # Must call `enable_ulab()` to enable
 include(micropython-common-ulab)
