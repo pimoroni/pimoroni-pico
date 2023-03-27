@@ -2,11 +2,13 @@
 
 Badger 2040 is an RP2040 powered E Ink badge.
 
+:warning: This code has been deprecated in favour of a dedicated Badger 2040 project: https://github.com/pimoroni/badger2040
+
 - [Summary](#summary)
   - [Getting Started](#getting-started)
   - [Update Speed](#update-speed)
   - [Buttons](#buttons)
-  - [System Speed](#system-speed)
+  - [System speed](#system-speed)
   - [Other Functions](#other-functions)
   - [Other Constants](#other-constants)
     - [Screen Size](#screen-size)
@@ -21,7 +23,7 @@ Badger 2040 is an RP2040 powered E Ink badge.
     - [Draw Text](#draw-text)
     - [Measure Text](#measure-text)
     - [Change Font](#change-font)
-  - [Lines, Pixels & Rectangles](#lines-pixels--rectangles)
+  - [Lines, Pixels \& Rectangles](#lines-pixels--rectangles)
     - [Pixel](#pixel)
     - [Line](#line)
     - [Rectangle](#rectangle)

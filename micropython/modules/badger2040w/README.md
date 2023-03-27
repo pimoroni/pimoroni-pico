@@ -2,6 +2,8 @@
 
 Badger 2040 W is a Raspberry Pi Pico W powered E Ink badge.
 
+:warning: This code has been deprecated in favour of a dedicated Badger 2040 project: https://github.com/pimoroni/badger2040
+
 - [Summary](#summary)
   - [Differences between Badger 2040 W and Badger 2040](#differences-between-badger-2040-w-and-badger-2040)
   - [Getting Started](#getting-started)
