@@ -9,12 +9,16 @@ enum allocator_mode {
     MICROPYTHON
 };
 
+#ifndef CPP_FIXED_HEAP_SIZE
+#define CPP_FIXED_HEAP_SIZE 1024u
+#endif
+
 static uint32_t alloc_bytes = 0;
 static uint32_t alloc_count = 0;
 static uint32_t free_count = 0;
 
 static allocator_mode mode = FIXED_HEAP;
-static constexpr size_t cpp_heap_size = 10 * 1024 / 4;
+static constexpr size_t cpp_heap_size = CPP_FIXED_HEAP_SIZE / 4;
 static uint32_t cpp_heap[cpp_heap_size];
 static uint32_t ptr = 0;
 static char cpp_err_buf[128] = {0};
