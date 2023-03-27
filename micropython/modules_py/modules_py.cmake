@@ -34,3 +34,4 @@ genversion(version.py)
 
 # .py files to copy from modules_py to ports/rp2/modules
 copy_module(pimoroni.py)
+copy_module(boot.py)
