@@ -40,7 +40,7 @@ try:
 
 except ImportError:
     # WIFI settings
-    WIFI_COUNTRY = "GB"  # Changeme!
+    WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
     network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
     # Install missing module
@@ -60,7 +60,7 @@ else:
     html_file = open('index.html', 'r')
 
 # WIFI settings
-WIFI_COUNTRY = "GB"  # Changeme!
+WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
 
 
 class LEDs:
