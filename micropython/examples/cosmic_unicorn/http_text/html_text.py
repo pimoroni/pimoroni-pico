@@ -67,7 +67,7 @@ app = webserver()
 html_file = open('index.html', 'r')
 
 # WIFI settings
-WIFI_COUNTRY = "GB"  # Changeme!
+WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
 
 
 # Index page

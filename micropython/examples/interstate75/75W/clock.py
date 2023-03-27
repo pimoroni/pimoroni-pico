@@ -115,6 +115,7 @@ def sync_time():
     # Start connection
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
+    wlan.config(pm=0xa11140)  # Turn WiFi power saving off for some slow APs
     wlan.connect(WIFI_SSID, WIFI_PASSWORD)
 
     # Wait for connect success or failure
