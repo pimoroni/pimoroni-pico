@@ -42,6 +42,8 @@ STATIC const mp_rom_map_elem_t picoscroll_locals[] = {
     { MP_ROM_QSTR(MP_QSTR_show_bitmap_1d), MP_ROM_PTR(&picoscroll_show_bitmap_1d_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&picoscroll_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picoscroll_is_pressed_obj) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(17) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(7) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
