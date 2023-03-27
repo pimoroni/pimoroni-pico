@@ -34,6 +34,12 @@ STATIC const mp_rom_map_elem_t picounicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_is_pressed), MP_ROM_PTR(&picounicorn_is_pressed_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&picounicorn_get_width_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&picounicorn_get_height_obj) },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(16) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(7) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
+    { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(picounicorn_locals_dict, picounicorn_locals_dict_table);
@@ -59,12 +65,12 @@ const mp_obj_type_t picounicorn_type = {
 STATIC const mp_rom_map_elem_t picounicorn_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_picounicorn) }, 
     { MP_OBJ_NEW_QSTR(MP_QSTR_PicoUnicorn), (mp_obj_t)&picounicorn_type },
+    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(16) },
+    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(7) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(BUTTON_A) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(BUTTON_B) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
-    { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(16) },
-    { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(7) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_picounicorn_globals, picounicorn_globals_table);
 

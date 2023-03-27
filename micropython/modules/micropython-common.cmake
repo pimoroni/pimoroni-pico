@@ -18,7 +18,6 @@ include(micropython-common-breakouts)
 include(pico_unicorn/micropython)
 include(pico_scroll/micropython)
 include(pico_rgb_keypad/micropython)
-include(pico_wireless/micropython)
 include(pico_explorer/micropython)
 
 # LEDs & Matrices

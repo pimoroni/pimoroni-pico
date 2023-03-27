@@ -2,30 +2,6 @@
 #include <algorithm>
 
 namespace pimoroni {
-  lookup::lookup(std::initializer_list<uint16_t> values) : lut(values) {
-  }
-
-  uint8_t lookup::index(uint16_t value) {
-    auto it = find(lut.begin(), lut.end(), value);
-
-    if(it == lut.end())
-      return 0;
-
-    return it - lut.begin();
-  }
-
-  uint16_t lookup::value(uint8_t index) {
-    return lut[index];
-  }
-
-  pimoroni::lookup LTR559::lookup_led_current({5, 10, 20, 50, 100});
-  pimoroni::lookup LTR559::lookup_led_duty_cycle({25, 50, 75, 100});
-  pimoroni::lookup LTR559::lookup_led_pulse_freq({30, 40, 50, 60, 70, 80, 90, 100});
-  pimoroni::lookup LTR559::lookup_proximity_meas_rate({10, 50, 70, 100, 200, 500, 1000, 2000});
-  pimoroni::lookup LTR559::lookup_light_integration_time({100, 50, 200, 400, 150, 250, 300, 350});
-  pimoroni::lookup LTR559::lookup_light_repeat_rate({50, 100, 200, 500, 1000, 2000});
-  pimoroni::lookup LTR559::lookup_light_gain({1, 2, 4, 8, 0, 0, 48, 96});
-  
   bool LTR559::init() {
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
@@ -129,7 +105,7 @@ namespace pimoroni {
       i2c->read_bytes(address, LTR559_ALS_DATA_CH1, (uint8_t *)&als, 4);
       data.als0 = als[1];
       data.als1 = als[0];
-      data.gain = this->lookup_light_gain.value((status >> LTR559_ALS_PS_STATUS_ALS_GAIN_SHIFT) & LTR559_ALS_PS_STATUS_ALS_GAIN_MASK);
+      data.gain = lookup_light_gain[(status >> LTR559_ALS_PS_STATUS_ALS_GAIN_SHIFT) & LTR559_ALS_PS_STATUS_ALS_GAIN_MASK];
 
       data.ratio = 101.0f;
 
@@ -163,12 +139,12 @@ namespace pimoroni {
   }
 
   void LTR559::proximity_led(uint8_t current, uint8_t duty_cycle, uint8_t pulse_freq, uint8_t num_pulses) {
-    current = lookup_led_current.index(current);
+    current = lookup<lookup_led_current>(current);
 
-    duty_cycle = lookup_led_duty_cycle.index(duty_cycle);
+    duty_cycle = lookup<lookup_led_duty_cycle>(duty_cycle);
     duty_cycle <<= LTR559_PS_LED_DUTY_CYCLE_SHIFT; 
 
-    pulse_freq = lookup_led_pulse_freq.index(pulse_freq);
+    pulse_freq = lookup<lookup_led_pulse_freq>(pulse_freq);
     pulse_freq <<= LTR559_PS_LED_PULSE_FREQ_SHIFT;
 
     uint8_t buf = current | duty_cycle | pulse_freq;
@@ -180,7 +156,7 @@ namespace pimoroni {
 
   void LTR559::light_control(bool active, uint8_t gain) {
     uint8_t buf = 0;
-    gain = lookup_light_gain.index(gain);
+    gain = lookup<lookup_light_gain>(gain);
     buf |= gain << LTR559_ALS_CONTROL_GAIN_SHIFT;
 
     if(active)
@@ -223,8 +199,8 @@ namespace pimoroni {
 
   void LTR559::light_measurement_rate(uint16_t integration_time, uint16_t rate) {
     data.integration_time = integration_time;
-    integration_time = lookup_light_integration_time.index(integration_time);
-    rate = lookup_light_repeat_rate.index(rate);
+    integration_time = lookup<lookup_light_integration_time>(integration_time);
+    rate = lookup<lookup_light_repeat_rate>(rate);
     uint8_t buf = 0;
     buf |= rate;
     buf |= integration_time << LTR559_ALS_MEAS_RATE_INTEGRATION_TIME_SHIFT;
@@ -232,7 +208,7 @@ namespace pimoroni {
   }
 
   void LTR559::proximity_measurement_rate(uint16_t rate) {
-    uint8_t buf = lookup_proximity_meas_rate.index(rate);
+    uint8_t buf = lookup<lookup_proximity_meas_rate>(rate);
     i2c->write_bytes(address, LTR559_PS_MEAS_RATE, &buf, 1);
   }
 

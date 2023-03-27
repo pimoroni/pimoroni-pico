@@ -8,10 +8,11 @@ namespace pimoroni {
   static const uint8_t DOT_CHAR_WIDTH = 5;
 
   struct DotChar {
+    uint16_t code;
     uint8_t data[DOT_CHAR_WIDTH];
   };
 
-  static const std::map<uint16_t, DotChar> dotfont = {
+  static const DotChar dotfont[] = {
     {32, {0x00, 0x00, 0x00, 0x00, 0x00}},   // (space)
     {33, {0x00, 0x00, 0x5f, 0x00, 0x00}},   // !
     {34, {0x00, 0x07, 0x00, 0x07, 0x00}},   // "

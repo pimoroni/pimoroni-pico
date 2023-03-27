@@ -3,6 +3,7 @@
 #include <cmath>
 
 namespace hershey {
+#ifndef MICROPY_BUILD_TYPE
   std::map<std::string, const font_t*> fonts = {
     { "sans",         &futural },
     //{ "sans_bold",    &futuram },
@@ -13,6 +14,7 @@ namespace hershey {
     { "serif",        &timesr  },
     //{ "serif_bold",   &timesrb }
   };
+#endif
 
   bool has_font(std::string_view font) {
     if(font == "sans"

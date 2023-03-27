@@ -124,7 +124,16 @@ mp_obj_t BreakoutDotMatrix_set_character(size_t n_args, const mp_obj_t *pos_args
     breakout_dotmatrix_BreakoutDotMatrix_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_dotmatrix_BreakoutDotMatrix_obj_t);
 
     int x = args[ARG_x].u_int;
-    int ch = mp_obj_get_int(args[ARG_ch].u_obj);
+    int ch = 0;
+
+    if(mp_obj_is_str_or_bytes(args[ARG_ch].u_obj)) {
+        GET_STR_DATA_LEN(args[ARG_ch].u_obj, str, str_len);
+        if(str_len == 1) {
+            ch = str[0];
+        }
+    } else {
+        ch = mp_obj_get_int(args[ARG_ch].u_obj);
+    }
     self->breakout->set_character(x, ch);
 
     return mp_const_none;
