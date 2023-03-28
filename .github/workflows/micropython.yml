@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -32,6 +32,14 @@ jobs:
         ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
+
+    # Check out MicroPython Libs
+    - name: Checkout MicroPython Libs
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3
+      with:
+        repository: micropython/micropython-lib
+        path: micropython-lib
 
     - name: Fetch base MicroPython submodules
       if: steps.cache.outputs.cache-hit != 'true'
@@ -53,7 +61,7 @@ jobs:
 
   build:
     needs: deps
-    name: Build ${{matrix.board}}
+    name: Build ${{matrix.name}} (${{matrix.board}})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -68,10 +76,20 @@ jobs:
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
           board: PIMORONI_TUFTY2040
+        - name: picow
+          board: PICO_W
+        - name: picow_enviro
+          board: PICO_W_ENVIRO
+        - name: picow_galactic_unicorn
+          board: PICO_W
+        - name: picow_cosmic_unicorn
+          board: PICO_W
+        - name: picow_inky_frame
+          board: PICO_W_INKY
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython.uf2
+      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
 
     steps:
     - name: Compiler Cache
@@ -124,13 +142,14 @@ jobs:
     - name: Rename .uf2 for artifact
       shell: bash
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
-      run: cp firmware.uf2 $RELEASE_FILE
+      run: |
+        cp firmware.uf2 $RELEASE_FILE.uf2
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{env.RELEASE_FILE}}
-        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}
+        name: ${{env.RELEASE_FILE}}.uf2
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
@@ -140,5 +159,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build-${{matrix.board}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}
+        asset_name: ${{env.RELEASE_FILE}}.uf2
         asset_content_type: application/octet-stream
