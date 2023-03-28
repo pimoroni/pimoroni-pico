@@ -75,7 +75,7 @@ jobs:
         - name: picolipo_16mb
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
-          board: PICO
+          board: PIMORONI_TUFTY2040
         - name: picow
           board: PICO_W
         - name: enviro
@@ -92,6 +92,7 @@ jobs:
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
       RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
+      PICO_BOARD_HEADER_DIRS: micropython/lib/pico-sdk/src/boards/include/boards;pimoroni-pico-${{ github.sha }}/micropython/board/inc
 
     steps:
     - name: Compiler Cache
