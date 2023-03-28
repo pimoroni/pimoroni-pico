@@ -75,17 +75,19 @@ jobs:
         - name: picolipo_16mb
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
-          board: PIMORONI_TUFTY2040
+          board: PICO
         - name: picow
           board: PICO_W
         - name: picow_enviro
-          board: PICO_W_ENVIRO
+          board: PICO_W
+          patch: true
         - name: picow_galactic_unicorn
           board: PICO_W
         - name: picow_cosmic_unicorn
           board: PICO_W
         - name: picow_inky_frame
-          board: PICO_W_INKY
+          board: PICO_W
+          patch: true
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
@@ -119,11 +121,12 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
   
-    - name: "HACK: MicroPython Board Fixups"
+    - name: "HACK: Pico SDK Patch"
+      if: matrix.patch == true
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board/board-fixup.sh ${{matrix.name}} ${{matrix.board}} ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board
+        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
 
     - name: Configure MicroPython
       shell: bash

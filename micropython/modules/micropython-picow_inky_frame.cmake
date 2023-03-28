@@ -7,6 +7,8 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+set(MICROPY_BOARD_DIR "${CMAKE_CURRENT_LIST_DIR}/../board/PICO_W_INKY")
+
 # Essential
 include(pimoroni_i2c/micropython)
 include(pimoroni_bus/micropython)
