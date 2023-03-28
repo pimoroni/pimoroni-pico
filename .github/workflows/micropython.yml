@@ -96,7 +96,7 @@ jobs:
       # MicroPython version will be contained in github.event.release.tag_name for releases
       RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
       MICROPY_BOARD_DIR: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
-      USER_C_MODULES: "$GITHUB_WORKSPACE/pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-${{matrix.name}}.cmake"
+      USER_C_MODULES: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{matrix.name}}.cmake"
 
     steps:
     - name: Compiler Cache
@@ -129,9 +129,9 @@ jobs:
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
       shell: bash
-      working-directory: micropython/ports/rp2
+      working-directory: micropython
       run: |
-        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
+        $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
 
     - name: Configure MicroPython (Local Board Dir)
       if: matrix.local_board_dir == true
