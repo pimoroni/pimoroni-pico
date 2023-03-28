@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 38e7b842c6bc8122753cbf0845eb141f28fbcb72
+  MICROPYTHON_VERSION: 5f89057759083f4b0fa75c71aaf9c2f8573c6882
 
 jobs:
   deps:
@@ -19,16 +19,16 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
     # Check out MicroPython
     - name: Checkout MicroPython
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
-        repository: micropython/micropython
+        repository: pimoroni/micropython
         ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
@@ -61,7 +61,7 @@ jobs:
 
   build:
     needs: deps
-    name: Build  ${{matrix.name}} (${{matrix.board}})
+    name: Build ${{matrix.name}} (${{matrix.board}})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -95,9 +95,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}
 
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
@@ -134,12 +134,19 @@ jobs:
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
       run: |
         cp firmware.uf2 $RELEASE_FILE.uf2
+        cp firmware.elf $RELEASE_FILE.elf
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{env.RELEASE_FILE}}.uf2
         path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.uf2
+
+    - name: Store .elf as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{env.RELEASE_FILE}}.elf
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.elf
 
     - name: Upload .uf2
       if: github.event_name == 'release'
