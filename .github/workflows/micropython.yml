@@ -61,7 +61,7 @@ jobs:
 
   build:
     needs: deps
-    name: Build ${{matrix.name}} (${{matrix.board}})
+    name: ${{matrix.name}} (${{matrix.board}})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
