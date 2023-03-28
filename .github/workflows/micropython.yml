@@ -78,14 +78,14 @@ jobs:
           board: PICO
         - name: picow
           board: PICO_W
-        - name: picow_enviro
+        - name: enviro
           board: PICO_W
           patch: true
-        - name: picow_galactic_unicorn
+        - name: galactic_unicorn
           board: PICO_W
-        - name: picow_cosmic_unicorn
+        - name: cosmic_unicorn
           board: PICO_W
-        - name: picow_inky_frame
+        - name: inky_frame
           board: PICO_W
           patch: true
 
