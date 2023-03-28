@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 38e7b842c6bc8122753cbf0845eb141f28fbcb72
+  MICROPYTHON_VERSION: aa067da1d2de875ac63b2bed6264c69de8440b94
 
 jobs:
   deps:
@@ -28,7 +28,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
-        repository: micropython/micropython
+        repository: pimoroni/micropython
         ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
@@ -160,12 +160,19 @@ jobs:
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
       run: |
         cp firmware.uf2 $RELEASE_FILE.uf2
+        cp firmware.elf $RELEASE_FILE.elf
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v3
       with:
         name: ${{env.RELEASE_FILE}}.uf2
         path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.uf2
+
+    - name: Store .elf as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{env.RELEASE_FILE}}.elf
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.elf
 
     - name: Upload .uf2
       if: github.event_name == 'release'
