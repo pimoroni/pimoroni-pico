@@ -68,6 +68,8 @@ jobs:
         include:
         - name: pico
           board: PICO
+        - name: picow
+          board: PICO_W
         - name: tiny2040
           board: PIMORONI_TINY2040
         - name: picolipo_4mb
@@ -76,23 +78,25 @@ jobs:
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
           board: PIMORONI_TUFTY2040
-        - name: picow
-          board: PICO_W
+          local_board_dir: true
         - name: enviro
-          board: PICO_W
+          board: PICO_W_ENVIRO
+          local_board_dir: true
           patch: true
         - name: galactic_unicorn
           board: PICO_W
         - name: cosmic_unicorn
           board: PICO_W
         - name: inky_frame
-          board: PICO_W
+          board: PICO_W_INKY
+          local_board_dir: true
           patch: true
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
       RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
-      PICO_BOARD_HEADER_DIRS: micropython/lib/pico-sdk/src/boards/include/boards;pimoroni-pico-${{ github.sha }}/micropython/board/inc
+      MICROPY_BOARD_DIR: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
+      USER_C_MODULES: "$GITHUB_WORKSPACE/pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-${{matrix.name}}.cmake"
 
     steps:
     - name: Compiler Cache
@@ -129,12 +133,20 @@ jobs:
       run: |
         ../../../pimoroni-pico-${GITHUB_SHA}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
 
-    - name: Configure MicroPython
+    - name: Configure MicroPython (Local Board Dir)
+      if: matrix.local_board_dir == true
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-${{matrix.name}}.cmake -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+    
+    - name: Configure MicroPython (Upstream Board Dir)
+      if: matrix.local_board_dir != true
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+  
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
