@@ -562,7 +562,7 @@ j = jpegdec.JPEG(display)
 j.open_file("filename.jpeg")
 
 # Decode the JPEG
-j.decode(0, 0, jpegdec.JPEG_SCALE_FULL)
+j.decode(0, 0, jpegdec.JPEG_SCALE_FULL, dither=True)
 
 # Display the result
 display.update()
@@ -579,3 +579,4 @@ The arguments for `decode` are as follows:
 1. Decode X - where to place the decoded JPEG on screen
 2. Decode Y
 3. Flags - one of `JPEG_SCALE_FULL`, `JPEG_SCALE_HALF`, `JPEG_SCALE_QUARTER` or `JPEG_SCALE_EIGHTH`
+4. If you want to turn off dither altogether, try `dither=False`. This is useful if you want to [pre-dither your images](https://ditherit.com/) or for artsy posterization effects.
