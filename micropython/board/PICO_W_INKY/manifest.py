@@ -1,4 +1,4 @@
-include("../manifest.py")
+include("$(PORT_DIR)/boards/manifest.py")
 
 require("mip")
 require("ntptime")

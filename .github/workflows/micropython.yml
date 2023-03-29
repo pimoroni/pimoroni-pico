@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -32,6 +32,14 @@ jobs:
         ref: ${{env.MICROPYTHON_VERSION}}
         submodules: false  # MicroPython submodules are hideously broken
         path: micropython
+
+    # Check out MicroPython Libs
+    - name: Checkout MicroPython Libs
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3
+      with:
+        repository: micropython/micropython-lib
+        path: micropython-lib
 
     - name: Fetch base MicroPython submodules
       if: steps.cache.outputs.cache-hit != 'true'
@@ -53,13 +61,15 @@ jobs:
 
   build:
     needs: deps
-    name: Build ${{matrix.board}}
+    name: ${{matrix.name}} (${{matrix.board}})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
         include:
         - name: pico
           board: PICO
+        - name: picow
+          board: PICO_W
         - name: tiny2040
           board: PIMORONI_TINY2040
         - name: picolipo_4mb
@@ -68,10 +78,25 @@ jobs:
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
           board: PIMORONI_TUFTY2040
+          local_board_dir: true
+        - name: enviro
+          board: PICO_W_ENVIRO
+          local_board_dir: true
+          patch: true
+        - name: galactic_unicorn
+          board: PICO_W
+        - name: cosmic_unicorn
+          board: PICO_W
+        - name: inky_frame
+          board: PICO_W_INKY
+          local_board_dir: true
+          patch: true
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython.uf2
+      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
+      MICROPY_BOARD_DIR: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
+      USER_C_MODULES: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{matrix.name}}.cmake"
 
     steps:
     - name: Compiler Cache
@@ -101,18 +126,27 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
   
-    - name: "HACK: MicroPython Board Fixups"
+    - name: "HACK: Pico SDK Patch"
+      if: matrix.patch == true
+      shell: bash
+      working-directory: micropython
+      run: |
+        $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
+
+    - name: Configure MicroPython (Local Board Dir)
+      if: matrix.local_board_dir == true
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board/board-fixup.sh ${{matrix.name}} ${{matrix.board}} ../../../pimoroni-pico-${GITHUB_SHA}/micropython/_board
-
-    - name: Configure MicroPython
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+    
+    - name: Configure MicroPython (Upstream Board Dir)
+      if: matrix.local_board_dir != true
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=../../../pimoroni-pico-${GITHUB_SHA}/micropython/modules/micropython-${{matrix.name}}.cmake -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
+        cmake -S . -B build-${{matrix.board}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+  
     - name: Build MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
@@ -124,13 +158,14 @@ jobs:
     - name: Rename .uf2 for artifact
       shell: bash
       working-directory: micropython/ports/rp2/build-${{matrix.board}}
-      run: cp firmware.uf2 $RELEASE_FILE
+      run: |
+        cp firmware.uf2 $RELEASE_FILE.uf2
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{env.RELEASE_FILE}}
-        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}
+        name: ${{env.RELEASE_FILE}}.uf2
+        path: micropython/ports/rp2/build-${{matrix.board}}/${{env.RELEASE_FILE}}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
@@ -140,5 +175,5 @@ jobs:
       with:
         asset_path: micropython/ports/rp2/build-${{matrix.board}}/firmware.uf2
         upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}
+        asset_name: ${{env.RELEASE_FILE}}.uf2
         asset_content_type: application/octet-stream
