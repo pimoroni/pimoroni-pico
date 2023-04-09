@@ -1,5 +1,11 @@
 import machine
-import ntptime
+import urequests
+
+# Set your latitude/longitude here (find yours by right clicking in Google Maps!)
+LAT = 53.38609085276884
+LNG = -1.4239983439328177
+TIMEZONE = "auto"  # determines time zone from lat/long
+URL = "http://api.open-meteo.com/v1/forecast?latitude=" + str(LAT) + "&longitude=" + str(LNG) + "&current_weather=true&timezone=" + TIMEZONE
 
 # Length of time between updates in minutes.
 UPDATE_INTERVAL = 15
@@ -33,11 +39,27 @@ def approx_time(hours, minutes):
 
 def update():
     global time_string
+    global URL
+    
     # grab the current time from the ntp server and update the Pico RTC
     try:
-        ntptime.settime()
-    except OSError:
-        print("Unable to contact NTP server")
+        print(f"Requesting URL: {URL}")
+        r = urequests.get(URL)
+        # open the json data
+        j = r.json()
+        r.close()
+        print("Data obtained!")
+        print(j)
+
+        # parse relevant data from JSON
+        current = j["current_weather"]
+        datetime = current["time"].replace("T", "-")
+        datetime = datetime.replace(":", "-")
+        (year, month, day, hours, minutes) = datetime.split("-")
+        print(f"Local time derived from Open-Meteo API: {year}, {month}, {day}, {hours}, {minutes}")
+        rtc.datetime()
+    except OSError as e:
+        print("Unable to contact Time server")
 
     current_t = rtc.datetime()
     time_string = approx_time(current_t[4] - 12 if current_t[4] > 12 else current_t[4], current_t[5])
