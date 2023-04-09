@@ -57,7 +57,7 @@ def update():
         datetime = datetime.replace(":", "-")
         (year, month, day, hours, minutes) = datetime.split("-")
         print(f"Local time derived from Open-Meteo API: {year}, {month}, {day}, {hours}, {minutes}")
-        rtc.datetime()
+        rtc.datetime((int(year), int(month), int(day), int(hours), int(minutes), 0, 0, 0))
     except OSError as e:
         print("Unable to contact Time server")
 
