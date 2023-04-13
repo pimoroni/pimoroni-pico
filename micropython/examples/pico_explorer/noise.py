@@ -109,8 +109,7 @@ tones = {
 }
 
 # put the notes for your song in here!
-song = ["F6", "F6", "E6", "F6", "F5", "P", "F5", "P", "C6", "AS5", "A5", "C6", "F6", "P", "F6", "P", "G6", "FS6", "G6", "G5", "P", "G5", "P", "G6", "F6", "E6", "D6", "C6", "P", "C6", "P", "D6", "E6", "F6", "E6", "D6", "C6", "D6", "C6", "AS5", "A5", "AS5", "A5", "G5", "F5", "G5", "F5", "E5", "D5", "C5", "D5", "E5", "F5", "G5", "AS5", "A5", "G5", "A5", "F5", "P", "F5"]
-
+song = ["AS6", "A6", "AS6", "P", "AS5", "P", "AS5", "P", "F6", "DS6", "D6", "F6", "AS6", "A6", "AS6", "D7", "C7", "AS6", "C7", "P", "C6", "P", "C6", "P", "C6", "AS5", "A5", "C6", "F6", "P", "F6", "P", "G6", "A6", "AS6", "A6", "G6", "F6", "G6", "F6", "DS6", "D6", "DS6", "D6", "C6", "AS5", "AS5", "A5", "G5", "F5", "G5", "AS5", "A5", "C6", "AS5", "D6", "C6", "DS6", "D6", "P", "AS5", "P", "AS5"]
 
 def clear():                        # this function clears Pico Explorer's screen to black
     display.set_pen(BLACK)
