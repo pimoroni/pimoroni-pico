@@ -111,6 +111,7 @@ tones = {
 # put the notes for your song in here!
 song = ["AS6", "A6", "AS6", "P", "AS5", "P", "AS5", "P", "F6", "DS6", "D6", "F6", "AS6", "A6", "AS6", "D7", "C7", "AS6", "C7", "P", "C6", "P", "C6", "P", "C6", "AS5", "A5", "C6", "F6", "P", "F6", "P", "G6", "A6", "AS6", "A6", "G6", "F6", "G6", "F6", "DS6", "D6", "DS6", "D6", "C6", "AS5", "AS5", "A5", "G5", "F5", "G5", "AS5", "A5", "C6", "AS5", "D6", "C6", "DS6", "D6", "P", "AS5", "P", "AS5"]
 
+
 def clear():                        # this function clears Pico Explorer's screen to black
     display.set_pen(BLACK)
     display.clear()
