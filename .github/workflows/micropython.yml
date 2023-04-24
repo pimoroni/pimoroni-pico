@@ -126,6 +126,12 @@ jobs:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
   
+    - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
+      shell: bash
+      working-directory: micropython
+      run: |
+        git checkout lib/pico-sdk
+
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
       shell: bash
