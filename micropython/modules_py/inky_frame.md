@@ -19,7 +19,7 @@ Most of your interaction with Inky Frame will be via the PicoGraphics library, b
 ## Pico Graphics
 
 You can draw on Inky Frame using our PicoGraphics display library.
-- [PicoGraphics MicroPython function reference](../../modules/picographics)
+- [PicoGraphics MicroPython function reference](../modules/picographics)
 
 ### Colour & Dithering
 
