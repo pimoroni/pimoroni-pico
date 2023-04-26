@@ -31,10 +31,10 @@
 // for each row:
 //   for each bcd frame:
 //            0: 00111111                           // row pixel count (minus one)
-//      1  - 64: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
-//      65 - 67: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
-//           68: xxxxrrrr                           // row select bits
-//      69 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+//            1: xxxxrrrr                           // row select bits
+//      2  - 65: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+//      66 - 67: xxxxxxxx, xxxxxxxx,                // dummy bytes to dword align
+//      68 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
 //
 //  .. and back to the start
 
@@ -154,13 +154,14 @@ namespace pimoroni {
         uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
         p[ 0] = 64 - 1;               // row pixel count
-        p[68] = row;                  // row select
+        p[ 1] = row;                  // row select
 
         // set the number of bcd ticks for this frame
         uint32_t bcd_ticks = (1 << frame);
-        p[69] = (bcd_ticks &     0xff) >>  0;
-        p[70] = (bcd_ticks &   0xff00) >>  8;
-        p[71] = (bcd_ticks & 0xff0000) >> 16;
+        p[68] = (bcd_ticks &       0xff) >>  0;
+        p[69] = (bcd_ticks &     0xff00) >>  8;
+        p[70] = (bcd_ticks &   0xff0000) >> 16;
+        p[71] = (bcd_ticks & 0xff000000) >> 24;
       }
     }
 
@@ -491,7 +492,7 @@ namespace pimoroni {
 
     // set the appropriate bits in the separate bcd frames
     for(uint8_t frame = 0; frame < BCD_FRAME_COUNT; frame++) {
-      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 1 + x];
+      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 2 + x];
 
       uint8_t red_bit = gamma_r & 0b1;
       uint8_t green_bit = gamma_g & 0b1;
