@@ -36,7 +36,7 @@ STATIC MP_DEFINE_CONST_DICT(BreakoutEncoderWheel_locals_dict, BreakoutEncoderWhe
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
-    breakout_encoder_BreakoutEncoderWheel_type,
+    breakout_encoder_wheel_BreakoutEncoderWheel_type,
     MP_QSTR_BreakoutEncoderWheel,
     MP_TYPE_FLAG_NONE,
     make_new, BreakoutEncoderWheel_make_new,
