@@ -1,11 +1,11 @@
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder_wheel import BreakoutEncoderWheel
 
-print("""
+"""
 A demonstration of reading the rotary dial of the Encoder Wheel breakout.
 
 Press Ctrl+C to stop the program.
-""")
+"""
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}

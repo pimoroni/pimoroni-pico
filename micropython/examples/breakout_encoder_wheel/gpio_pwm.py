@@ -5,11 +5,11 @@ from ioexpander import PWM
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder_wheel import BreakoutEncoderWheel, CENTRE, GPIOS, NUM_GPIOS
 
-print("""
+"""
 Output a sine wave PWM sequence on the Encoder Wheel's side GPIO pins.
 
 Press the centre button or Ctrl+C to stop the program.
-""")
+"""
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
