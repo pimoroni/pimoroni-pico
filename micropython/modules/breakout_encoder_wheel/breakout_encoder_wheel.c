@@ -34,12 +34,22 @@ STATIC const mp_rom_map_elem_t BreakoutEncoderWheel_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutEncoderWheel_locals_dict, BreakoutEncoderWheel_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_encoder_BreakoutEncoderWheel_type,
+    MP_QSTR_BreakoutEncoderWheel,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutEncoderWheel_make_new,
+    locals_dict, (mp_obj_dict_t*)&BreakoutEncoderWheel_locals_dict
+);
+#else
 const mp_obj_type_t breakout_encoder_wheel_BreakoutEncoderWheel_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutEncoderWheel,
     .make_new = BreakoutEncoderWheel_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutEncoderWheel_locals_dict,
 };
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +71,7 @@ const mp_obj_module_t breakout_encoder_wheel_user_cmodule = {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 #if MICROPY_VERSION <= 70144
-MP_REGISTER_MODULE(MP_QSTR_breakout_encoder_wheel, breakout_encoder_wheel_user_cmodule, MODULE_BREAKOUT_ENCODER_ENABLED);
+MP_REGISTER_MODULE(MP_QSTR_breakout_encoder_wheel, breakout_encoder_wheel_user_cmodule, MODULE_BREAKOUT_ENCODER_WHEEL_ENABLED);
 #else
 MP_REGISTER_MODULE(MP_QSTR_breakout_encoder_wheel, breakout_encoder_wheel_user_cmodule);
 #endif
