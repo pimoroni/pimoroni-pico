@@ -134,9 +134,9 @@ jobs:
   
     - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
       shell: bash
-      working-directory: micropython
+      working-directory: micropython/lib/pico-sdk
       run: |
-        git checkout lib/pico-sdk
+        git checkout .
 
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
