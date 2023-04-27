@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: 38e7b842c6bc8122753cbf0845eb141f28fbcb72
+  MICROPYTHON_VERSION: v1.20.0
 
 jobs:
   deps:
@@ -125,12 +125,18 @@ jobs:
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
+
+    - name: Set MicroPython Version Env Vars
+      shell: bash
+      run: |
+        echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
+        echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
   
     - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
       shell: bash
-      working-directory: micropython
+      working-directory: micropython/lib/pico-sdk
       run: |
-        git checkout lib/pico-sdk
+        git checkout .
 
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
