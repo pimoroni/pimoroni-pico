@@ -150,21 +150,21 @@ jobs:
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_C_HEAP_SIZE=4096 -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
     
     - name: Configure MicroPython (Upstream Board Dir)
       if: matrix.local_board_dir != true
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_C_HEAP_SIZE=4096 -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
   
-    - name: Build MicroPython
+    - name: Build MicroPython  # Multiple simultaneous jobs trigger https://github.com/pimoroni/pimoroni-pico/issues/761
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
         ccache --zero-stats || true
-        cmake --build build-${{matrix.name}} -j 2
+        cmake --build build-${{matrix.name}} -j 1
         ccache --show-stats || true
 
     - name: Rename .uf2 for artifact
