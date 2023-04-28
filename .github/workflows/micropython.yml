@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-pico
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-pico
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -41,17 +41,17 @@ jobs:
         repository: micropython/micropython-lib
         path: micropython-lib
 
-    - name: Fetch base MicroPython submodules
+    - name: Fetch Pico submodules
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-      working-directory: micropython
-      run: git submodule update --init
-
-    - name: Fetch Pico SDK submodules
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: micropython/lib/pico-sdk
-      run: git submodule update --init
+      working-directory: micropython/ports/rp2
+      run: |
+        git submodule update --init ../../lib/pico-sdk
+        git submodule update --init ../../lib/cyw43-driver
+        git submodule update --init ../../lib/lwip
+        git submodule update --init ../../lib/mbedtls
+        git submodule update --init ../../lib/micropython-lib
+        git submodule update --init ../../lib/tinyusb
 
     - name: Build mpy-cross
       if: steps.cache.outputs.cache-hit != 'true'
