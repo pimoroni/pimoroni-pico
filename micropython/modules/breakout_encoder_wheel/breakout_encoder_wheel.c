@@ -84,11 +84,11 @@ const mp_obj_type_t breakout_encoder_wheel_BreakoutEncoderWheel_type = {
 
 /***** Module Constants *****/
 const mp_rom_obj_tuple_t breakout_encoder_wheel_gpio_pins = {
-    {&mp_type_tuple}, 3, { MP_ROM_INT(7), MP_ROM_INT(8), MP_ROM_INT(9), },
+    {&mp_type_tuple}, 3, { MP_ROM_INT(7), MP_ROM_INT(8), MP_ROM_INT(9) },
 };
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_encoder_wheel_globals_table[] = {
+STATIC const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_encoder_wheel) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutEncoderWheel), (mp_obj_t)&breakout_encoder_wheel_BreakoutEncoderWheel_type },
 
