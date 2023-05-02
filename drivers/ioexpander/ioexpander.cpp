@@ -320,8 +320,21 @@ namespace pimoroni {
           Pin::adc(1, 7, 0)}
   {}
 
-  bool IOExpander::init(bool skipChipIdCheck) {
-    bool succeeded = true;
+  bool IOExpander::init(bool skipChipIdCheck, bool perform_reset) {
+    if(!skipChipIdCheck) {
+      uint16_t chip_id = get_chip_id();
+      if(chip_id != CHIP_ID) {
+        if(debug) {
+          printf("Chip ID invalid: %04x expected: %04x\n", chip_id, CHIP_ID);
+        }
+        return false;
+      }
+    }
+
+    // Reset the chip if requested, to put it into a known state
+    if(perform_reset && !reset()) {
+      return false;
+    }
 
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
@@ -331,17 +344,36 @@ namespace pimoroni {
       enable_interrupt_out(true);
     }
 
-    if(!skipChipIdCheck) {
-      uint16_t chip_id = get_chip_id();
-      if(chip_id != CHIP_ID) {
-        if(debug) {
-          printf("Chip ID invalid: %04x expected: %04x\n", chip_id, CHIP_ID);
-        }
-        succeeded = false;
+    return true;
+  }
+
+  uint8_t IOExpander::check_reset() {
+    uint8_t user_flash_reg = reg::USER_FLASH;
+    uint8_t value;
+    if(i2c_write_blocking(i2c->get_i2c(), address, &user_flash_reg, 1, false) == PICO_ERROR_GENERIC) {
+      return 0x00;
+    }
+    if(i2c_read_blocking(i2c->get_i2c(), address, (uint8_t *)&value, sizeof(uint8_t), false) == PICO_ERROR_GENERIC) {
+      return 0x00;
+    }
+
+    return value;
+  }
+
+  bool IOExpander::reset() {
+    uint32_t start_time = millis();
+    set_bits(reg::CTRL, ctrl_mask::RESET);
+    // Wait for a register to read its initialised value
+    while(check_reset() != 0x78) {
+      sleep_ms(1);
+      if(millis() - start_time >= timeout) {
+        if(debug)
+          printf("Timed out waiting for Reset!");
+        return false;
       }
     }
 
-    return succeeded;
+    return true;
   }
 
   i2c_inst_t* IOExpander::get_i2c() const {

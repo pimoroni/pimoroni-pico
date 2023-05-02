@@ -171,7 +171,12 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    bool init(bool skip_chip_id_check = false);
+    bool init(bool skip_chip_id_check = false, bool perform_reset = false);
+
+  private:
+    uint8_t check_reset();
+  public:
+    bool reset();
 
     // For print access in micropython
     i2c_inst_t* get_i2c() const;

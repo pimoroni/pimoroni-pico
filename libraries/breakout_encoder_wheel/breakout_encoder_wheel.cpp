@@ -6,35 +6,29 @@ namespace pimoroni {
 
   bool BreakoutEncoderWheel::init(bool skip_chip_id_check) {
     bool success = false;
-    if(ioe.init(skip_chip_id_check)) {
+    if(ioe.init(skip_chip_id_check, true) && led_ring.init()) {
 
-      if(interrupt_pin != PIN_UNUSED) {
-        ioe.enable_interrupt_out(true);
-      }
-
-      ioe.setup_rotary_encoder(ENC_CHANNEL, ENC_TERM_A, ENC_TERM_B);
-
-      if(led_ring.init()) {
-        led_ring.enable({
-          0b00000000, 0b10111111,
-          0b00111110, 0b00111110,
-          0b00111111, 0b10111110,
-          0b00000111, 0b10000110,
-          0b00110000, 0b00110000,
-          0b00111111, 0b10111110,
-          0b00111111, 0b10111110,
-          0b01111111, 0b11111110,
-          0b01111111, 0b00000000
-        }, 0);
-
-        success = true;
-      }
+      ioe.setup_rotary_encoder(ENC_CHANNEL, ENC_TERM_A, ENC_TERM_B, 0, true); // count microsteps
 
       ioe.set_mode(SW_UP, IOExpander::PIN_IN_PU);
       ioe.set_mode(SW_DOWN, IOExpander::PIN_IN_PU);
       ioe.set_mode(SW_LEFT, IOExpander::PIN_IN_PU);
       ioe.set_mode(SW_RIGHT, IOExpander::PIN_IN_PU);
       ioe.set_mode(SW_CENTRE, IOExpander::PIN_IN_PU);
+
+      led_ring.enable({
+        0b00000000, 0b10111111,
+        0b00111110, 0b00111110,
+        0b00111111, 0b10111110,
+        0b00000111, 0b10000110,
+        0b00110000, 0b00110000,
+        0b00111111, 0b10111110,
+        0b00111111, 0b10111110,
+        0b01111111, 0b11111110,
+        0b01111111, 0b00000000
+      }, 0);
+
+      success = true;
     }
 
     return success;
@@ -67,7 +61,7 @@ namespace pimoroni {
   void BreakoutEncoderWheel::set_ioe_address(uint8_t address) {
     ioe.set_address(address);
   }
-  
+
   bool BreakoutEncoderWheel::get_interrupt_flag() {
     return ioe.get_interrupt_flag();
   }
@@ -93,36 +87,50 @@ namespace pimoroni {
     }
   }
 
-  int BreakoutEncoderWheel::count() {
-    return 0; // TODO
+  int16_t BreakoutEncoderWheel::count() {
+    take_encoder_reading();
+    return enc_count;
   }
 
-  int BreakoutEncoderWheel::delta() {
-    return 0; // TODO
-  }
+  int16_t BreakoutEncoderWheel::delta() {
+    take_encoder_reading();
 
-  int BreakoutEncoderWheel::step() {
-    return 0; // TODO
-  }
+    // Determine the change in counts since the last time this function was performed
+    int16_t change = enc_count - last_delta_count;
+    last_delta_count = enc_count;
 
-  int BreakoutEncoderWheel::turn() {
-    return 0; // TODO
+    return change;
   }
 
   void BreakoutEncoderWheel::zero() {
+    ioe.clear_rotary_encoder(ENC_CHANNEL);
+    enc_count = 0;
+    enc_step = 0;
+    enc_turn = 0;
+    last_raw_count = 0;
+    last_delta_count = 0;
+  }
 
+  int16_t BreakoutEncoderWheel::step() {
+    take_encoder_reading();
+    return enc_step;
+  }
+
+  int16_t BreakoutEncoderWheel::turn() {
+    take_encoder_reading();
+    return enc_turn;
   }
 
   float BreakoutEncoderWheel::revolutions() {
-    return 0; // TODO
+    return (float)count() / (float)ENC_COUNTS_PER_REV;
   }
 
   float BreakoutEncoderWheel::degrees() {
-    return 0; // TODO
+    return revolutions() * 360.0f;
   }
 
   float BreakoutEncoderWheel::radians() {
-    return 0; // TODO
+    return revolutions() * M_PI * 2.0f;
   }
 
   Direction BreakoutEncoderWheel::direction() {
@@ -209,19 +217,31 @@ namespace pimoroni {
     return 0; // TODO
   }
 
-  /*
-  bool BreakoutEncoderWheel::wheel_available() {
-    return (ioe.get_interrupt_flag() > 0);
-  }
+  void BreakoutEncoderWheel::take_encoder_reading() {
+    // Read the current count
+    int16_t raw_count = ioe.read_rotary_encoder(ENC_CHANNEL) / ENC_COUNT_DIVIDER;
+    int16_t raw_change = raw_count - last_raw_count;
+    last_raw_count = raw_count;
 
-  int16_t BreakoutEncoderWheel::read_wheel() {
-    //int16_t count = ioe.read_rotary_encoder(ENC_CHANNEL);
-    //if(direction != DIRECTION_CW)
-    //  count = 0 - count;
+    // Invert the change
+    if(enc_direction == REVERSED_DIR) {
+      raw_change = 0 - raw_change;
+    }
 
-    ioe.clear_interrupt_flag();
-    //return count;
-    return 0;
+    enc_count += raw_change;
+
+    enc_step += raw_change;
+    if(raw_change > 0) {
+      while(enc_step >= ENC_COUNTS_PER_REV) {
+        enc_step -= ENC_COUNTS_PER_REV;
+        enc_turn += 1;
+      }
+    }
+    else if(raw_change < 0) {
+      while(enc_step < 0) {
+        enc_step += ENC_COUNTS_PER_REV;
+        enc_turn -= 1;
+      }
+    }
   }
-  */
 }

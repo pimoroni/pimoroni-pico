@@ -48,7 +48,7 @@ mp_obj_t BreakoutEncoderWheel_make_new(const mp_obj_type_t *type, size_t n_args,
 }
 
 /***** Methods *****/
-mp_obj_t BreakoutEncoderWheel_set_address(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t BreakoutEncoderWheel_set_ioe_address(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_address };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },

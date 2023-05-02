@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Methods *****/
-MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoderWheel_set_address_obj, 2, BreakoutEncoderWheel_set_address);
+MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoderWheel_set_ioe_address_obj, 2, BreakoutEncoderWheel_set_ioe_address);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoderWheel_get_interrupt_flag_obj, BreakoutEncoderWheel_get_interrupt_flag);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutEncoderWheel_clear_interrupt_flag_obj, BreakoutEncoderWheel_clear_interrupt_flag);
 
@@ -32,7 +32,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoderWheel_gpio_pwm_frequency_obj, 2, Break
 
 /***** Binding of Methods *****/
 STATIC const mp_rom_map_elem_t BreakoutEncoderWheel_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR_set_address), MP_ROM_PTR(&BreakoutEncoderWheel_set_address_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_ioe_address), MP_ROM_PTR(&BreakoutEncoderWheel_set_ioe_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_interrupt_flag), MP_ROM_PTR(&BreakoutEncoderWheel_get_interrupt_flag_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_interrupt_flag), MP_ROM_PTR(&BreakoutEncoderWheel_clear_interrupt_flag_obj) },
 
@@ -92,7 +92,7 @@ STATIC const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_encoder_wheel) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutEncoderWheel), (mp_obj_t)&breakout_encoder_wheel_BreakoutEncoderWheel_type },
 
-    { MP_ROM_QSTR(MP_QSTR_I2C_ADDR), MP_ROM_INT(0x13) },
+    { MP_ROM_QSTR(MP_QSTR_DEFAULT_IOE_I2C_ADDR), MP_ROM_INT(0x13) },
     { MP_ROM_QSTR(MP_QSTR_DEFAULT_LED_I2C_ADDR), MP_ROM_INT(0x77) },
     { MP_ROM_QSTR(MP_QSTR_ALTERNATE_LED_I2C_ADDR), MP_ROM_INT(0x74) },
 

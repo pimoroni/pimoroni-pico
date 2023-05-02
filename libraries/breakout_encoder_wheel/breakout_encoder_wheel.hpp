@@ -29,6 +29,8 @@ namespace pimoroni {
     static const uint8_t ENC_CHANNEL    = 1;
     static const uint8_t ENC_TERM_A     = 12;
     static const uint8_t ENC_TERM_B     = 3;
+    static const uint8_t ENC_COUNTS_PER_REV = 24;
+    static const uint8_t ENC_COUNT_DIVIDER = 2;
 
     static const uint8_t SW_UP          = 13;
     static const uint8_t SW_DOWN        = 4;
@@ -73,9 +75,14 @@ namespace pimoroni {
   private:
     IOExpander ioe;
     IS31FL3731 led_ring;
-    //Direction direction = DEFAULT_DIRECTION;
-    uint interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
+
     Direction enc_direction = DEFAULT_DIRECTION;
+    int16_t enc_count = 0;
+    int16_t enc_step = 0;
+    int16_t enc_turn = 0;
+    int16_t last_raw_count = 0;
+    int16_t last_delta_count = 0;
+
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -109,11 +116,11 @@ namespace pimoroni {
 
     // Encoder breakout specific
     bool pressed(uint button);
-    int count();
-    int delta();
-    int step();
-    int turn();
+    int16_t count();
+    int16_t delta();
     void zero();
+    int16_t step();
+    int16_t turn();
     float revolutions();
     float degrees();
     float radians();
@@ -131,6 +138,9 @@ namespace pimoroni {
     void gpio_pin_value(int gpio, int value, bool load = true, bool wait_for_load = false);
     void gpio_pwm_load(bool wait_for_load = false);
     int gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
+
+  private:
+    void take_encoder_reading();
   };
 
 }
