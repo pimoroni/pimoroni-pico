@@ -1,5 +1,5 @@
 import time
-from datetime import datetime
+from machine import RTC
 
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder_wheel import BreakoutEncoderWheel, NUM_LEDS
@@ -12,6 +12,12 @@ Press Ctrl+C to stop the program.
 
 PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
 PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
+
+# Datetime Indices
+HOUR = 4
+MINUTE = 5
+SECOND = 6
+MICROSECOND = 7
 
 # Constants
 BRIGHTNESS = 1.0    # The brightness of the LEDs
@@ -27,12 +33,13 @@ MILLIS_PER_HALF_DAY = MILLIS_PER_HOUR * 12
 # Create a new BreakoutEncoderWheel
 i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 wheel = BreakoutEncoderWheel(i2c)
+rtc = machine.RTC()
 
 
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - time.monotonic()
+    time_to_sleep = end_time - (time.ticks_ms() / 1000)
     if time_to_sleep > 0.0:
         time.sleep(time_to_sleep)
 
@@ -58,22 +65,22 @@ def led_brightness_at(led, position, half_width=1, span=1):
     elif lower < 0.0:
         brightness = clamp((led - (lower + NUM_LEDS)) / span, brightness, 1.0)
 
-    return brightness * BRIGHTNESS * 255
+    return int(brightness * BRIGHTNESS * 255)
 
 
 # Make rainbows
 while True:
 
     # Record the start time of this loop
-    start_time = time.monotonic()
+    start_time = time.ticks_ms() / 1000
 
     # Get the current system time
-    now = datetime.now()
+    now = rtc.datetime()
 
     # Convert the seconds, minutes, and hours into milliseconds (this is done to give a smoother animation, particularly for the seconds hand)
-    sec_as_millis = (now.second * MILLIS_PER_SECOND) + (now.microsecond // MILLIS_PER_SECOND)
-    min_as_millis = (now.minute * MILLIS_PER_MINUTE) + sec_as_millis
-    hour_as_millis = ((now.hour % 12) * MILLIS_PER_HOUR) + min_as_millis
+    sec_as_millis = (now[SECOND] * MILLIS_PER_SECOND) + (now[MICROSECOND] // MILLIS_PER_SECOND)
+    min_as_millis = (now[MINUTE] * MILLIS_PER_MINUTE) + sec_as_millis
+    hour_as_millis = ((now[HOUR] % 12) * MILLIS_PER_HOUR) + min_as_millis
 
     # Calculate the position on the LED ring that the, second, minute, and hour hands should be
     sec_pos = min(sec_as_millis / MILLIS_PER_MINUTE, 1.0) * NUM_LEDS

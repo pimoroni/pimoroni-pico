@@ -13,15 +13,6 @@ namespace pimoroni {
       uint8_t b;
     };
 
-    //--------------------------------------------------
-    // Enums
-    //--------------------------------------------------
-  public:
-    enum Direction : bool {
-      DIRECTION_CW = true,
-      DIRECTION_CCW = false
-    };
-
 
     //--------------------------------------------------
     // Constants
@@ -29,22 +20,21 @@ namespace pimoroni {
   public:
     static const uint8_t DEFAULT_IOE_I2C_ADDRESS    = 0x13;
     static const uint8_t DEFAULT_LED_I2C_ADDRESS    = 0x77;
-    static const uint8_t LED_I2C_ADDRESS_ALTERNATE  = 0x74;
+    static const uint8_t ALTERNATE_LED_I2C_ADDRESS  = 0x74;
 
-    static const Direction DEFAULT_DIRECTION  = DIRECTION_CW;
+    static const Direction DEFAULT_DIRECTION  = NORMAL_DIR;
     static const uint32_t DEFAULT_TIMEOUT     = 1;
 
   private:
-    static const uint8_t SWITCH_CENTRE  = 1;
-    static const uint8_t SWITCH_UP      = 13;
-    static const uint8_t SWITCH_LEFT    = 11;
-    static const uint8_t SWITCH_DOWN    = 4;
-    static const uint8_t SWITCH_RIGHT   = 2;
-
+    static const uint8_t ENC_CHANNEL    = 1;
     static const uint8_t ENC_TERM_A     = 12;
     static const uint8_t ENC_TERM_B     = 3;
 
-    static const uint8_t ENC_CHANNEL    = 1;
+    static const uint8_t SW_UP          = 13;
+    static const uint8_t SW_DOWN        = 4;
+    static const uint8_t SW_LEFT        = 11;
+    static const uint8_t SW_RIGHT       = 2;
+    static const uint8_t SW_CENTRE      = 1;
 
     // This wonderful lookup table maps the LEDs on the encoder wheel
     // from their 3x24 (remember, they're RGB) configuration to
@@ -85,7 +75,7 @@ namespace pimoroni {
     IS31FL3731 led_ring;
     //Direction direction = DEFAULT_DIRECTION;
     uint interrupt_pin = PIN_UNUSED;     // A local copy of the value passed to the IOExpander, used in initialisation
-
+    Direction enc_direction = DEFAULT_DIRECTION;
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -118,17 +108,29 @@ namespace pimoroni {
     void clear_interrupt_flag();
 
     // Encoder breakout specific
-    Direction get_encoder_direction();
-    void set_encoder_direction(Direction direction);
+    bool pressed(uint button);
+    int count();
+    int delta();
+    int step();
+    int turn();
+    void zero();
+    float revolutions();
+    float degrees();
+    float radians();
+    Direction direction();
+    void direction(Direction direction);
+    void set_rgb(int index, int r, int g, int b);
+    void set_hsv(int index, float h, float s = 1.0f, float v = 1.0f);
+    void clear();
+    void show();
 
-    void set_pixel(uint8_t index, uint8_t r, uint8_t g, uint8_t b);
-    //void update(uint8_t frame = 0);
-    //void clear();
-
-    bool wheel_available();
-    int16_t read_wheel();
-    void clear_wheel();
-    bool read_switch();
+    int gpio_pin_mode(int gpio);
+    void gpio_pin_mode(int gpio, int mode);
+    int gpio_pin_value(int gpio);
+    float gpio_pin_value_as_voltage(int gpio);
+    void gpio_pin_value(int gpio, int value, bool load = true, bool wait_for_load = false);
+    void gpio_pwm_load(bool wait_for_load = false);
+    int gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
   };
 
 }

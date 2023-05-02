@@ -104,7 +104,7 @@ STATIC const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_DOWN), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_LEFT), MP_ROM_INT(2) },
     { MP_ROM_QSTR(MP_QSTR_RIGHT), MP_ROM_INT(3) },
-    { MP_ROM_QSTR(MP_QSTR_CENTRE), MP_ROM_INT(5) },
+    { MP_ROM_QSTR(MP_QSTR_CENTRE), MP_ROM_INT(4) },
 
     { MP_ROM_QSTR(MP_QSTR_GP7), MP_ROM_INT(7) },
     { MP_ROM_QSTR(MP_QSTR_GP8), MP_ROM_INT(8) },

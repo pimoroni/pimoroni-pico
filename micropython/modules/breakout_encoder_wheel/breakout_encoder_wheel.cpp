@@ -81,7 +81,7 @@ extern mp_obj_t BreakoutEncoderWheel_pressed(mp_obj_t self_in, mp_obj_t button_i
     int button = mp_obj_get_int(button_in);
 
     if(button < 0 || button >= 5) {
-        mp_raise_ValueError("button out of range. Expected 0 to 4")
+        mp_raise_ValueError("button out of range. Expected 0 to 4");
     }
 
     return mp_obj_new_bool(self->breakout->pressed(button));
@@ -195,9 +195,9 @@ extern mp_obj_t BreakoutEncoderWheel_set_hsv(size_t n_args, const mp_obj_t *pos_
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_s, MP_ARG_INT, { .u_obj = mp_const_none }},
-        { MP_QSTR_v, MP_ARG_INT, { .u_obj = mp_const_none }},
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_s, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+        { MP_QSTR_v, MP_ARG_OBJ, { .u_obj = mp_const_none }},
     };
 
     // Parse args.

@@ -1,7 +1,7 @@
 import math
 import time
 
-from ioexpander import PWM
+from breakout_ioexpander import BreakoutIOExpander
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder_wheel import BreakoutEncoderWheel, CENTRE, GPIOS, NUM_GPIOS
 
@@ -28,7 +28,7 @@ period = wheel.gpio_pwm_frequency(FREQUENCY)
 
 # Set the GPIO pins to PWM outputs
 for g in GPIOS:
-    wheel.gpio_pin_mode(g, PWM)
+    wheel.gpio_pin_mode(g, BreakoutIOExpander.PIN_PWM)
 
 offset = 0.0
 
@@ -36,7 +36,7 @@ offset = 0.0
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - time.monotonic()
+    time_to_sleep = end_time - (time.ticks_ms() / 1000)
     if time_to_sleep > 0.0:
         time.sleep(time_to_sleep)
 
@@ -45,7 +45,7 @@ def sleep_until(end_time):
 while not wheel.pressed(CENTRE):
 
     # Record the start time of this loop
-    start_time = time.monotonic()
+    start_time = time.ticks_ms() / 1000
 
     offset += SPEED / 1000.0
 

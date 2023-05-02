@@ -49,13 +49,13 @@ def clamp(n, smallest, largest):
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - time.monotonic()
+    time_to_sleep = end_time - (time.ticks_ms() / 1000)
     if time_to_sleep > 0.0:
         time.sleep(time_to_sleep)
 
 
 # Record the current time
-current_time = time.monotonic()
+current_time = (time.ticks_ms() / 1000)
 
 # Run the update loop forever
 while True:

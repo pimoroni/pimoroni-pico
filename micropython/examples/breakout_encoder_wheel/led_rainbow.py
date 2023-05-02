@@ -29,7 +29,7 @@ offset = 0.0
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - time.monotonic()
+    time_to_sleep = end_time - (time.ticks_ms() / 1000)
     if time_to_sleep > 0.0:
         time.sleep(time_to_sleep)
 
@@ -38,7 +38,7 @@ def sleep_until(end_time):
 while True:
 
     # Record the start time of this loop
-    start_time = time.monotonic()
+    start_time = time.ticks_ms() / 1000
 
     offset += SPEED / 1000.0
 

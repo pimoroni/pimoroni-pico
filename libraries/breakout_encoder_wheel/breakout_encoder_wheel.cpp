@@ -1,5 +1,6 @@
 #include "breakout_encoder_wheel.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace pimoroni {
 
@@ -13,7 +14,21 @@ namespace pimoroni {
 
       ioe.setup_rotary_encoder(ENC_CHANNEL, ENC_TERM_A, ENC_TERM_B);
 
-      success = true;
+      if(led_ring.init()) {
+        led_ring.enable({
+          0b00000000, 0b10111111,
+          0b00111110, 0b00111110,
+          0b00111111, 0b10111110,
+          0b00000111, 0b10000110,
+          0b00110000, 0b00110000,
+          0b00111111, 0b10111110,
+          0b00111111, 0b10111110,
+          0b01111111, 0b11111110,
+          0b01111111, 0b00000000
+        }, 0);
+
+        success = true;
+      }
     }
 
     return success;
@@ -55,22 +70,127 @@ namespace pimoroni {
     ioe.clear_interrupt_flag();
   }
 
-  BreakoutEncoderWheel::Direction BreakoutEncoderWheel::get_encoder_direction() {
-    //return direction;
-    return DEFAULT_DIRECTION;
+  bool BreakoutEncoderWheel::pressed(uint button) {
+    return 0; // TODO
   }
 
-  void BreakoutEncoderWheel::set_encoder_direction(Direction direction) {
-    //this->direction = direction;
+  int BreakoutEncoderWheel::count() {
+    return 0; // TODO
   }
 
-  void BreakoutEncoderWheel::set_pixel(uint8_t index, uint8_t r, uint8_t g, uint8_t b) {
+  int BreakoutEncoderWheel::delta() {
+    return 0; // TODO
+  }
+
+  int BreakoutEncoderWheel::step() {
+    return 0; // TODO
+  }
+
+  int BreakoutEncoderWheel::turn() {
+    return 0; // TODO
+  }
+
+  void BreakoutEncoderWheel::zero() {
+
+  }
+
+  float BreakoutEncoderWheel::revolutions() {
+    return 0; // TODO
+  }
+
+  float BreakoutEncoderWheel::degrees() {
+    return 0; // TODO
+  }
+
+  float BreakoutEncoderWheel::radians() {
+    return 0; // TODO
+  }
+
+  Direction BreakoutEncoderWheel::direction() {
+    return enc_direction;
+  }
+
+  void BreakoutEncoderWheel::direction(Direction direction) {
+    enc_direction = direction;
+  }
+
+  void BreakoutEncoderWheel::set_rgb(int index, int r, int g, int b) {
     RGBLookup rgb = lookup_table[index];
     led_ring.set(rgb.r, r);
     led_ring.set(rgb.g, g);
     led_ring.set(rgb.b, b);
   }
 
+  void BreakoutEncoderWheel::set_hsv(int index, float h, float s, float v) {
+    int r, g, b;
+    if(h < 0.0f) {
+        h = 1.0f + fmod(h, 1.0f);
+    }
+
+    int i = int(h * 6);
+    float f = h * 6 - i;
+
+    v = v * 255.0f;
+
+    float sv = s * v;
+    float fsv = f * sv;
+
+    auto p = uint8_t(-sv + v);
+    auto q = uint8_t(-fsv + v);
+    auto t = uint8_t(fsv - sv + v);
+
+    uint8_t bv = uint8_t(v);
+
+    switch (i % 6) {
+        default:
+        case 0: r = bv; g = t; b = p; break;
+        case 1: r = q; g = bv; b = p; break;
+        case 2: r = p; g = bv; b = t; break;
+        case 3: r = p; g = q; b = bv; break;
+        case 4: r = t; g = p; b = bv; break;
+        case 5: r = bv; g = p; b = q; break;
+    }
+
+    set_rgb(index, r, g, b);
+  }
+
+  void BreakoutEncoderWheel::clear() {
+    led_ring.clear();
+  }
+
+  void BreakoutEncoderWheel::show() {
+    led_ring.update();
+  }
+
+  int BreakoutEncoderWheel::gpio_pin_mode(int gpio) {
+    return 0; // TODO
+  }
+
+  void BreakoutEncoderWheel::gpio_pin_mode(int gpio, int mode) {
+
+  }
+
+  int BreakoutEncoderWheel::gpio_pin_value(int gpio) {
+    return 0; // TODO
+  }
+
+  float BreakoutEncoderWheel::gpio_pin_value_as_voltage(int gpio) {
+    return 0; // TODO
+  }
+
+  void BreakoutEncoderWheel::gpio_pin_value(int gpio, int value, bool load, bool wait_for_load) {
+
+  }
+
+  void BreakoutEncoderWheel::gpio_pwm_load(bool wait_for_load) {
+
+  }
+
+  int BreakoutEncoderWheel::gpio_pwm_frequency(float frequency, bool load, bool wait_for_load) {
+    return 0; // TODO
+  }
+
+  /*
   bool BreakoutEncoderWheel::wheel_available() {
     return (ioe.get_interrupt_flag() > 0);
   }
@@ -84,8 +204,5 @@ namespace pimoroni {
     //return count;
     return 0;
   }
-
-  void BreakoutEncoderWheel::clear_wheel() {
-    ioe.clear_rotary_encoder(ENC_CHANNEL);
-  }
+  */
 }

@@ -1,5 +1,4 @@
 import time
-from colorsys import hsv_to_rgb
 
 from pimoroni_i2c import PimoroniI2C
 from breakout_encoder_wheel import BreakoutEncoderWheel, UP, DOWN, LEFT, RIGHT, CENTRE, NUM_LEDS
@@ -38,6 +37,30 @@ changed = True
 last_centre_pressed = False
 
 
+# From CPython Lib/colorsys.py
+def hsv_to_rgb(h, s, v):
+    if s == 0.0:
+        return v, v, v
+    i = int(h * 6.0)
+    f = (h * 6.0) - i
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
+    i = i % 6
+    if i == 0:
+        return v, t, p
+    if i == 1:
+        return q, v, p
+    if i == 2:
+        return p, v, t
+    if i == 3:
+        return p, q, v
+    if i == 4:
+        return t, p, v
+    if i == 5:
+        return v, p, q
+
+
 # Simple function to clamp a value between 0.0 and 1.0
 def clamp01(value):
     return max(min(value, 1.0), 0.0)
@@ -46,14 +69,14 @@ def clamp01(value):
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - time.monotonic()
+    time_to_sleep = end_time - (time.ticks_ms() / 1000)
     if time_to_sleep > 0.0:
         time.sleep(time_to_sleep)
 
 
 while True:
     # Record the start time of this loop
-    start_time = time.monotonic()
+    start_time = time.ticks_ms() / 1000
 
     # If up is pressed, increase the brightness
     if wheel.pressed(UP):
@@ -95,7 +118,7 @@ while True:
     if changed:
         # Print the colour at the current hue, saturation, and brightness
         r, g, b = [int(c * 255) for c in hsv_to_rgb(position / NUM_LEDS, saturation, brightness)]
-        print("Colour Code = #", hex(r)[2:].zfill(2), hex(g)[2:].zfill(2), hex(b)[2:].zfill(2), sep="")
+        print("Colour Code = #", '{:02x}'.format(r), '{:02x}'.format(g), '{:02x}'.format(b), sep="")
 
         # Set the LED at the current position to either the actual colour,
         # or an inverted version to show a "selection marker"
