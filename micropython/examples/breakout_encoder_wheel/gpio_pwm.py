@@ -16,7 +16,7 @@ PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 SPEED = 5             # The speed that the PWM will cycle at
 UPDATES = 50          # How many times to update LEDs and Servos per second
-UPDATE_RATE = 1 / UPDATES
+UPDATE_RATE_US = 1000000 // UPDATES
 FREQUENCY = 1000      # The frequency to run the PWM at
 
 # Create a new BreakoutEncoderWheel
@@ -36,16 +36,16 @@ offset = 0.0
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - (time.ticks_ms() / 1000)
-    if time_to_sleep > 0.0:
-        time.sleep(time_to_sleep)
+    time_to_sleep = time.ticks_diff(end_time, time.ticks_us())
+    if time_to_sleep > 0:
+        time.sleep_us(time_to_sleep)
 
 
 # Make PWM waves until the centre button is pressed
 while not wheel.pressed(CENTRE):
 
     # Record the start time of this loop
-    start_time = time.ticks_ms() / 1000
+    start_time = time.ticks_us()
 
     offset += SPEED / 1000.0
 
@@ -61,7 +61,7 @@ while not wheel.pressed(CENTRE):
     wheel.gpio_pwm_load()
 
     # Sleep until the next update, accounting for how long the above operations took to perform
-    sleep_until(start_time + UPDATE_RATE)
+    sleep_until(time.ticks_add(start_time, UPDATE_RATE_US))
 
 # Turn off the PWM outputs
 for g in GPIOS:

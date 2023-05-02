@@ -21,10 +21,11 @@ typedef struct _breakout_encoder_wheel_BreakoutEncoderWheel_obj_t {
 mp_obj_t BreakoutEncoderWheel_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = nullptr;
 
-    enum { ARG_i2c, ARG_address, ARG_interrupt };
+    enum { ARG_i2c, ARG_ioe_address, ARG_led_address, ARG_interrupt };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_OBJ, {.u_obj = nullptr} },
-        { MP_QSTR_address, MP_ARG_INT, {.u_int = BreakoutEncoderWheel::DEFAULT_IOE_I2C_ADDRESS} },
+        { MP_QSTR_ioe_address, MP_ARG_INT, {.u_int = BreakoutEncoderWheel::DEFAULT_IOE_I2C_ADDRESS} },
+        { MP_QSTR_led_address, MP_ARG_INT, {.u_int = BreakoutEncoderWheel::DEFAULT_LED_I2C_ADDRESS} },
         { MP_QSTR_interrupt, MP_ARG_INT, {.u_int = PIN_UNUSED} },
     };
 
@@ -37,7 +38,7 @@ mp_obj_t BreakoutEncoderWheel_make_new(const mp_obj_type_t *type, size_t n_args,
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    self->breakout = m_new_class(BreakoutEncoderWheel, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int, args[ARG_interrupt].u_int);
+    self->breakout = m_new_class(BreakoutEncoderWheel, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_ioe_address].u_int, args[ARG_led_address].u_int, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, "BreakoutEncoderWheel: breakout not found when initialising");

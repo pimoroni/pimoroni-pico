@@ -17,12 +17,11 @@ PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 HOUR = 4
 MINUTE = 5
 SECOND = 6
-MICROSECOND = 7
 
 # Constants
 BRIGHTNESS = 1.0    # The brightness of the LEDs
 UPDATES = 50        # How many times the LEDs will be updated per second
-UPDATE_RATE = 1 / UPDATES
+UPDATE_RATE_US = 1000000 // UPDATES
 
 # Handy values for the number of milliseconds
 MILLIS_PER_SECOND = 1000
@@ -33,15 +32,15 @@ MILLIS_PER_HALF_DAY = MILLIS_PER_HOUR * 12
 # Create a new BreakoutEncoderWheel
 i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 wheel = BreakoutEncoderWheel(i2c)
-rtc = machine.RTC()
+rtc = RTC()
 
 
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - (time.ticks_ms() / 1000)
-    if time_to_sleep > 0.0:
-        time.sleep(time_to_sleep)
+    time_to_sleep = time.ticks_diff(end_time, time.ticks_us())
+    if time_to_sleep > 0:
+        time.sleep_us(time_to_sleep)
 
 
 # Simple function to clamp a value between a minimum and maximum
@@ -72,13 +71,13 @@ def led_brightness_at(led, position, half_width=1, span=1):
 while True:
 
     # Record the start time of this loop
-    start_time = time.ticks_ms() / 1000
+    start_time = time.ticks_us()
 
     # Get the current system time
     now = rtc.datetime()
 
     # Convert the seconds, minutes, and hours into milliseconds (this is done to give a smoother animation, particularly for the seconds hand)
-    sec_as_millis = (now[SECOND] * MILLIS_PER_SECOND) + (now[MICROSECOND] // MILLIS_PER_SECOND)
+    sec_as_millis = (now[SECOND] * MILLIS_PER_SECOND)
     min_as_millis = (now[MINUTE] * MILLIS_PER_MINUTE) + sec_as_millis
     hour_as_millis = ((now[HOUR] % 12) * MILLIS_PER_HOUR) + min_as_millis
 
@@ -96,4 +95,4 @@ while True:
     wheel.show()
 
     # Sleep until the next update, accounting for how long the above operations took to perform
-    sleep_until(start_time + UPDATE_RATE)
+    sleep_until(time.ticks_add(start_time, UPDATE_RATE_US))

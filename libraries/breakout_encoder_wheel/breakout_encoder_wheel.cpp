@@ -29,6 +29,12 @@ namespace pimoroni {
 
         success = true;
       }
+
+      ioe.set_mode(SW_UP, IOExpander::PIN_IN_PU);
+      ioe.set_mode(SW_DOWN, IOExpander::PIN_IN_PU);
+      ioe.set_mode(SW_LEFT, IOExpander::PIN_IN_PU);
+      ioe.set_mode(SW_RIGHT, IOExpander::PIN_IN_PU);
+      ioe.set_mode(SW_CENTRE, IOExpander::PIN_IN_PU);
     }
 
     return success;
@@ -71,7 +77,20 @@ namespace pimoroni {
   }
 
   bool BreakoutEncoderWheel::pressed(uint button) {
-    return 0; // TODO
+    switch(button) {
+      case 0:
+        return ioe.input(SW_UP) == 0;
+      case 1:
+        return ioe.input(SW_DOWN) == 0;
+      case 2:
+        return ioe.input(SW_LEFT) == 0;
+      case 3:
+        return ioe.input(SW_RIGHT) == 0;
+      case 4:
+        return ioe.input(SW_CENTRE) == 0;
+      default:
+        return false;
+    }
   }
 
   int BreakoutEncoderWheel::count() {

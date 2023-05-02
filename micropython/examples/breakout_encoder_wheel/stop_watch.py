@@ -20,7 +20,7 @@ BRIGHTNESS = 1.0                    # The brightness of the LEDs when the stopwa
 UPDATES = 50                        # How many times the LEDs will be updated per second
 MINUTE_UPDATES = UPDATES * 60       # How many times the LEDs will be updated per minute
 HOUR_UPDATES = MINUTE_UPDATES * 60  # How many times the LEDs will be updated per hour
-UPDATE_RATE = 1 / UPDATES
+UPDATE_RATE_US = 1000000 // UPDATES
 
 IDLE_PULSE_MIN = 0.2                # The brightness (between 0.0 and 1.0) that the idle pulse will go down to
 IDLE_PULSE_MAX = 0.5                # The brightness (between 0.0 and 1.0) that the idle pulse will go up to
@@ -49,13 +49,13 @@ def clamp(n, smallest, largest):
 # Sleep until a specific time in the future. Use this instead of time.sleep() to correct for
 # inconsistent timings when dealing with complex operations or external communication
 def sleep_until(end_time):
-    time_to_sleep = end_time - (time.ticks_ms() / 1000)
-    if time_to_sleep > 0.0:
-        time.sleep(time_to_sleep)
+    time_to_sleep = time.ticks_diff(end_time, time.ticks_us())
+    if time_to_sleep > 0:
+        time.sleep_us(time_to_sleep)
 
 
 # Record the current time
-current_time = (time.ticks_ms() / 1000)
+current_time = time.ticks_us()
 
 # Run the update loop forever
 while True:
@@ -100,9 +100,9 @@ while True:
         # Set each LED, such that ones below the current time are fully lit, ones after
         # are off, and the one at the transition is at a percentage of the brightness
         for i in range(NUM_LEDS):
-            r = clamp(r_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255
-            g = clamp(g_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255
-            b = clamp(b_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255
+            r = int(clamp(r_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255)
+            g = int(clamp(g_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255)
+            b = int(clamp(b_to_light - i, 0.0, 1.0) * BRIGHTNESS * 255)
             wheel.set_rgb(i, r, g, b)
         wheel.show()
 
@@ -122,5 +122,5 @@ while True:
             hour_update = 0
 
     # Sleep until the next update, accounting for how long the above operations took to perform
-    current_time += UPDATE_RATE
+    current_time = time.ticks_add(current_time, UPDATE_RATE_US)
     sleep_until(current_time)
