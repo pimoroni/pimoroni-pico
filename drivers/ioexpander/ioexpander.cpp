@@ -366,7 +366,7 @@ namespace pimoroni {
     // Wait for a register to read its initialised value
     while(check_reset() != 0x78) {
       sleep_ms(1);
-      if(millis() - start_time >= timeout) {
+      if(millis() - start_time >= RESET_TIMEOUT_MS) {
         if(debug)
           printf("Timed out waiting for Reset!");
         return false;

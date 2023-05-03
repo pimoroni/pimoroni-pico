@@ -27,8 +27,8 @@ namespace pimoroni {
 
   private:
     static const uint8_t ENC_CHANNEL    = 1;
-    static const uint8_t ENC_TERM_A     = 12;
-    static const uint8_t ENC_TERM_B     = 3;
+    static const uint8_t ENC_TERM_A     = 3;
+    static const uint8_t ENC_TERM_B     = 12;
     static const uint8_t ENC_COUNTS_PER_REV = 24;
     static const uint8_t ENC_COUNT_DIVIDER = 2;
 

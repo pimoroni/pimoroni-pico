@@ -26,6 +26,8 @@ namespace pimoroni {
     static const uint8_t PIN_MODE_PWM = 0b00101;  // PWM, Output, Push-Pull mode
     static const uint8_t PIN_MODE_ADC = 0b01010;  // ADC, Input-only (high-impedance)
 
+    static const uint32_t RESET_TIMEOUT_MS = 1000;
+
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS = 0x18;
 
