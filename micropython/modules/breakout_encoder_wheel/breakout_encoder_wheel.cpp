@@ -4,6 +4,7 @@
 
 
 using namespace pimoroni;
+using namespace encoderwheel;
 
 extern "C" {
 #include "breakout_encoder_wheel.h"
