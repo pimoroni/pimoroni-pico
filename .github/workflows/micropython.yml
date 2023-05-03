@@ -128,6 +128,13 @@ jobs:
       run: |
         echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
         echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
+
+    - name: "HACK: Clean ports/rp2/modules"  # We should move to using manifest.py to include our custom modules
+      shell: bash
+      working-directory: micropython/ports/rp2
+      run: |
+        rm -rf modules
+        git checkout modules
   
     - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
       shell: bash
