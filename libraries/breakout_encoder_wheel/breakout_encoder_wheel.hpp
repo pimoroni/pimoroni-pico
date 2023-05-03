@@ -5,6 +5,21 @@
 #include "common/pimoroni_common.hpp"
 
 namespace pimoroni {
+namespace encoderwheel {
+  static const uint8_t NUM_LEDS = 24;
+  static const uint8_t NUM_BUTTONS = 5;
+  static const uint8_t NUM_GPIOS = 3;
+
+  static const uint8_t UP = 0;
+  static const uint8_t DOWN = 1;
+  static const uint8_t LEFT = 2;
+  static const uint8_t RIGHT = 3;
+  static const uint8_t CENTRE = 4;
+
+  static const uint8_t GP7 = 7;
+  static const uint8_t GP8 = 8;
+  static const uint8_t GP9 = 9;
+  static const uint8_t GPIOS[] = {GP7, GP8, GP9};
 
   class BreakoutEncoderWheel {
     struct RGBLookup {
@@ -142,5 +157,5 @@ namespace pimoroni {
   private:
     void take_encoder_reading();
   };
-
+}
 }

@@ -12,8 +12,6 @@ PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 # Constants
 BUTTON_NAMES = ["Up", "Down", "Left", "Right", "Centre"]
-UPDATES = 50        # How many times the buttons will be checked and LEDs updated, per second
-UPDATE_RATE = 1 / UPDATES
 
 # Create a new BreakoutEncoderWheel
 i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)

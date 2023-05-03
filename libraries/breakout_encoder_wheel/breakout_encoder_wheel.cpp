@@ -3,6 +3,7 @@
 #include <cmath>
 
 namespace pimoroni {
+namespace encoderwheel {
 
   bool BreakoutEncoderWheel::init(bool skip_chip_id_check) {
     bool success = false;
@@ -151,7 +152,7 @@ namespace pimoroni {
   void BreakoutEncoderWheel::set_hsv(int index, float h, float s, float v) {
     int r, g, b;
     if(h < 0.0f) {
-        h = 1.0f + fmod(h, 1.0f);
+        h = 1.0f + fmodf(h, 1.0f);
     }
 
     int i = int(h * 6);
@@ -244,4 +245,5 @@ namespace pimoroni {
       }
     }
   }
+}
 }

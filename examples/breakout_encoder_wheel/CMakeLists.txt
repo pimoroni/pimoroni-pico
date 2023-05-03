@@ -1,0 +1,8 @@
+add_subdirectory(buttons)
+add_subdirectory(chase_game)
+add_subdirectory(clock)
+add_subdirectory(colour_picker)
+add_subdirectory(encoder)
+#add_subdirectory(gpio_pwm)
+add_subdirectory(led_rainbow)
+add_subdirectory(stop_watch)
