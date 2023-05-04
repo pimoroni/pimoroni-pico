@@ -88,6 +88,11 @@ const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type = {
 STATIC const mp_map_elem_t breakout_ioexpander_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_ioexpander) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutIOExpander), (mp_obj_t)&breakout_ioexpander_BreakoutIOExpander_type },
+    { MP_ROM_QSTR(MP_QSTR_IN), MP_ROM_INT(IOE_PIN_IN) },
+    { MP_ROM_QSTR(MP_QSTR_IN_PU), MP_ROM_INT(IOE_PIN_IN_PU) },
+    { MP_ROM_QSTR(MP_QSTR_OUT), MP_ROM_INT(IOE_PIN_OUT) },
+    { MP_ROM_QSTR(MP_QSTR_PWM), MP_ROM_INT(IOE_PIN_PWM) },
+    { MP_ROM_QSTR(MP_QSTR_ADC), MP_ROM_INT(IOE_PIN_ADC) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_ioexpander_globals, breakout_ioexpander_globals_table);
 
