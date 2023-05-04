@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-with-libs
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -41,17 +41,17 @@ jobs:
         repository: micropython/micropython-lib
         path: micropython-lib
 
-    - name: Fetch base MicroPython submodules
+    - name: Fetch Pico submodules
       if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
-      working-directory: micropython
-      run: git submodule update --init
-
-    - name: Fetch Pico SDK submodules
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: micropython/lib/pico-sdk
-      run: git submodule update --init
+      working-directory: micropython/ports/rp2
+      run: |
+        git submodule update --init ../../lib/pico-sdk
+        git submodule update --init ../../lib/cyw43-driver
+        git submodule update --init ../../lib/lwip
+        git submodule update --init ../../lib/mbedtls
+        git submodule update --init ../../lib/micropython-lib
+        git submodule update --init ../../lib/tinyusb
 
     - name: Build mpy-cross
       if: steps.cache.outputs.cache-hit != 'true'
@@ -78,10 +78,8 @@ jobs:
           board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
           board: PIMORONI_TUFTY2040
-          local_board_dir: true
         - name: enviro
           board: PICO_W_ENVIRO
-          local_board_dir: true
           patch: true
         - name: galactic_unicorn
           board: PICO_W
@@ -89,7 +87,6 @@ jobs:
           board: PICO_W
         - name: inky_frame
           board: PICO_W_INKY
-          local_board_dir: true
           patch: true
 
     env:
@@ -131,12 +128,25 @@ jobs:
       run: |
         echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
         echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
-  
-    - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
+
+    - name: "HACK: Clean ports/rp2/modules and ports/rp2/CMakeLists.txt"
       shell: bash
-      working-directory: micropython/lib/pico-sdk
+      working-directory: micropython/ports/rp2
       run: |
-        git checkout .
+        rm -rf modules
+        git checkout modules
+  
+    - name: "HACK: Revert Patches"  # Avoid an already-patched MicroPython tree breaking our build
+      shell: bash
+      working-directory: micropython
+      run: |
+        git checkout lib/pico-sdk
+        git checkout ports/rp2/CMakeLists.txt
+
+    - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
+      shell: bash
+      working-directory: micropython
+      run: git apply $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/micropython_nano_specs.patch
 
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
@@ -145,20 +155,12 @@ jobs:
       run: |
         $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
 
-    - name: Configure MicroPython (Local Board Dir)
-      if: matrix.local_board_dir == true
+    - name: Configure MicroPython
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_C_HEAP_SIZE=4096 -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-    
-    - name: Configure MicroPython (Upstream Board Dir)
-      if: matrix.local_board_dir != true
-      shell: bash
-      working-directory: micropython/ports/rp2
-      run: |
-        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_C_HEAP_SIZE=4096 -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-  
+        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
     - name: Build MicroPython  # Multiple simultaneous jobs trigger https://github.com/pimoroni/pimoroni-pico/issues/761
       shell: bash
       working-directory: micropython/ports/rp2
