@@ -19,9 +19,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-pico
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-pico
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -129,18 +129,24 @@ jobs:
         echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
         echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
 
-    - name: "HACK: Clean ports/rp2/modules"  # We should move to using manifest.py to include our custom modules
+    - name: "HACK: Clean ports/rp2/modules and ports/rp2/CMakeLists.txt"
       shell: bash
       working-directory: micropython/ports/rp2
       run: |
         rm -rf modules
         git checkout modules
   
-    - name: "HACK: Revert Pico SDK Patch"  # Avoid an already-patched MicroPython tree breaking our build
+    - name: "HACK: Revert Patches"  # Avoid an already-patched MicroPython tree breaking our build
       shell: bash
-      working-directory: micropython/lib/pico-sdk
+      working-directory: micropython
       run: |
-        git checkout .
+        git checkout lib/pico-sdk
+        git checkout ports/rp2/CMakeLists.txt
+
+    - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
+      shell: bash
+      working-directory: micropython
+      run: git apply $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/micropython_nano_specs.patch
 
     - name: "HACK: Pico SDK Patch"
       if: matrix.patch == true
