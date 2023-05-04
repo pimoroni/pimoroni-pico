@@ -94,6 +94,15 @@ namespace pimoroni {
       command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
     }
 
+    if(width == 240 && height == 135) { // Pico Display Pack (1.14" 240x135)
+      command(reg::VRHS, 1, "\x00"); // VRH Voltage setting
+      command(reg::GCTRL, 1, "\x75"); // VGH and VGL voltages
+      command(reg::VCOMS, 1, "\x3D"); // VCOM voltage
+      command(0xd6, 1, "\xa1"); // ???
+      command(reg::GMCTRP1, 14, "\x70\x04\x08\x09\x09\x05\x2A\x33\x41\x07\x13\x13\x29\x2f");
+      command(reg::GMCTRN1, 14, "\x70\x03\x09\x0A\x09\x06\x2B\x34\x41\x07\x12\x14\x28\x2E");
+    }
+
     command(reg::INVON);   // set inversion mode
     command(reg::SLPOUT);  // leave sleep mode
     command(reg::DISPON);  // turn display on
