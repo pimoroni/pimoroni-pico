@@ -1,4 +1,4 @@
-# Encoder Wheel Breakout Micropython Examples <!-- omit in toc -->
+# RGB Encoder Wheel Breakout Examples (Micropython) <!-- omit in toc -->
 
 - [Function Examples](#function-examples)
   - [Buttons](#buttons)

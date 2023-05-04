@@ -1,5 +1,6 @@
 #include <math.h>
 #include <string>
+#include "pimoroni_i2c.hpp"
 #include "breakout_encoder_wheel.hpp"
 #include "time.h"
 #include "hardware/rtc.h"

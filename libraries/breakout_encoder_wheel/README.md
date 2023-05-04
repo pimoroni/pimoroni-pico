@@ -1,6 +1,6 @@
-# RGB Encoder Wheel Breakout (Micropython) <!-- omit in toc -->
+# RGB Encoder Wheel Breakout (C++) <!-- omit in toc -->
 
-This is the Micropython library reference for the [Pimoroni RGB Encoder Wheel Breakout](https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout).
+This is the C++ library reference for the [Pimoroni RGB Encoder Wheel Breakout](https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout).
 
 
 ## Table of Content <!-- omit in toc -->
@@ -29,6 +29,7 @@ This is the Micropython library reference for the [Pimoroni RGB Encoder Wheel Br
 - [Function Reference](#function-reference)
 - [Constants Reference](#constants-reference)
   - [Address Constants](#address-constants)
+  - [Value Constants](#value-constants)
   - [Button Constants](#button-constants)
   - [GPIO Constants](#gpio-constants)
   - [Count Constants](#count-constants)
@@ -38,16 +39,19 @@ This is the Micropython library reference for the [Pimoroni RGB Encoder Wheel Br
 
 To start coding for your Encoder Wheel breakout, you will first need to create an object for accessing the I2C bus that the breakout is connected to. The easiest way to do this is via the `PimoroniI2C` class, with one of the handy pin constants from `pimoroni`, like so:
 
-```python
-from pimoroni_i2c import PimoroniI2C
-from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
-i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
+```c++
+#include "pimoroni_i2c.hpp"
+using namespace pimoroni;
+
+I2C i2c(BOARD::BREAKOUT_GARDEN);
 ```
 
-This creates a `i2c` variable that can be passed into the Encoder Wheel's class as part of its creation:
-```python
-from breakout_encoder_wheel import BreakoutEncoderWheel
-wheel = BreakoutEncoderWheel(i2c)
+This creates a `i2c` object that can be passed into the Encoder Wheel's class as part of its creation:
+```c++
+#include "breakout_encoder_wheel.hpp"
+using namespace encoderwheel;
+
+BreakoutEncoderWheel wheel(&i2c);
 ```
 
 The above lines of code import the `BreakoutEncoderWheel` class and create an instance of it, called `wheel`. This will be used in the rest of the examples going forward.
@@ -65,8 +69,8 @@ EncoderWheel has five buttons, covering up, down, left, right, and centre. These
 
 For example, to read the centre button you would write:
 
-```python
-centre_state = wheel.pressed(CENTRE)
+```c++
+bool centre_state = wheel.pressed(CENTRE);
 ```
 
 You can also get the number of buttons using the `NUM_BUTTONS` constant.
@@ -97,7 +101,7 @@ These functions differ from reading the `.count()` or `.revolutions()` by using 
 
 ### Changing the Direction
 
-The counting direction of an encoder can be changed by calling `.direction(REVERSED_DIR)` at any time in code. The `REVERSED_DIR` constant comes from the `pimoroni` module. There is also a `NORMAL_DIR` constant, though this is the default.
+The counting direction of an encoder can be changed by calling `.direction(REVERSED_DIR)` at any time in code. The `REVERSED_DIR` constant comes from `pimoroni_common.hpp`. There is also a `NORMAL_DIR` constant, though this is the default.
 
 
 ### Resetting to Zero
@@ -118,16 +122,16 @@ You can set the colour of a LED on the ring in either the RGB colourspace, or HS
 
 Set the first LED - `0` - to Purple `255, 0, 255`:
 
-```python
-wheel.set_rgb(0, 255, 0, 255)
+```c++
+wheel.set_rgb(0, 255, 0, 255);
 ```
 
 #### HSV
 
 Set the first LED - `0` - to Red `0.0`:
 
-```python
-wheel.set_hsv(0, 0.0, 1.0, 1.0)
+```c++
+wheel.set_hsv(0, 0.0, 1.0, 1.0);
 ```
 
 
@@ -150,26 +154,25 @@ There are three spare GPIO pins on the edge of Encoder Wheel. These can be used 
 
 ### Setup
 
-To start using a GPIO pin, first import one of the handy constants used to reference them (see [GPIO Constants](#gpio-constants)). For example, to use the first GPIO pin:
+To start using a GPIO pin, one of the handy constants from the `encoderwheel` namespace can be used to reference them (see [GPIO Constants](#gpio-constants)).
 
-```python
-from breakout_encoder_wheel import GP7
-```
+Then you need to import the constants for the pin mode to use. These are on the `IOExpander` class that Encoder Wheel is based on.
 
-Then you need to import the constants for the pin mode to use. These are on the `breakout_ioexpander` module that Encoder Wheel is based on.
+```c++
+#import "breakout_ioexpander.hpp"
+using namespace pimoroni;
 
-```python
-# For input
-from breakout_ioexpander import IN  # or IN_PU of a pull-up is wanted
+// For input
+IOExpander::PIN_IN;   // or PIN_IN_PU of a pull-up is wanted
 
-# For output
-from breakout_ioexpander import OUT
+// For output
+IOExpander::PIN_OUT;
 
-# For PWM
-from breakout_ioexpander import PWM
+// For PWM
+IOExpander::PIN_PWM;
 
-# For ADC
-from breakout_ioexpander import ADC
+// For ADC
+IOExpander::PIN_ADC;
 ```
 
 
@@ -177,14 +180,14 @@ from breakout_ioexpander import ADC
 
 With the intended constants imported, the mode of a GPIO pin can be set by calling `.gpio_pin_mode(gpio, mode)`:
 
-```python
-wheel.gpio_pin_mode(GP7, <IN or IN_PU or OUT or PWM or ADC>)
+```c++
+wheel.gpio_pin_mode(GP7, IOExpander::PIN_<IN or IN_PU or OUT or PWM or ADC>);
 ```
 
 It is also possible to read the current mode of a GPIO pin by calling `.gpio_pin_mode(gpio)`:
 
-```python
-mode = wheel.gpio_pin_mode(GP7)
+```c++
+mode = wheel.gpio_pin_mode(GP7);
 ```
 
 
@@ -192,8 +195,8 @@ mode = wheel.gpio_pin_mode(GP7)
 
 The current value of an GPIO pin in input or ADC mode can be read by calling `.gpio_pin_value(gpio)`:
 
-```python
-value = wheel.gpio_pin_value(GP7)
+```c++
+value = wheel.gpio_pin_value(GP7);
 ```
 
 If the mode is digital, the value will either be `0` or `1`.
@@ -204,8 +207,8 @@ If the mode is analog, the value will be a voltage from `0.0` to `3.3`.
 
 The current value of a GPIO pin in output mode can be set by calling `.gpio_pin_value(gpio, value)`:
 
-```python
-wheel.gpio_pin_value(GP7, value)
+```c++
+wheel.gpio_pin_value(GP7, value);
 ```
 
 The expected value is either `0` or `1`, or `True` or `False`.
@@ -213,7 +216,7 @@ The expected value is either `0` or `1`, or `True` or `False`.
 
 ### As PWM
 
-The GPIO pins can also be set as PWM outputs. The `PWM` constant can be imported from the `breakout_ioexpander` module, and passed into the `.gpio_pin_mode()` function.
+The GPIO pins can also be set as PWM outputs. The `PIN_PWM` constant can be accessed from the `IOExpander` class, and passed into the `.gpio_pin_mode()` function.
 
 The frequency of the PWM signal can then be configured by calling `.gpio_pwm_frequency()`, which accepts a frequency (in Hz). It returns the cycle period, which should be used to set duty cycles.
 
@@ -221,24 +224,25 @@ Finally, the duty cycle of the PWM signal can be set by calling `.gpio_pin_value
 
 Below is an example of setting a gpio pin to output a 25KHz signal with a 50% duty cycle:
 
-```python
-from pimoroni_i2c import PimoroniI2C
-from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
-from breakout_ioexpander import PWM
-from breakout_encoderwheel import BreakoutEncoderWheel, GP7
+```c++
+#include "pimoroni_i2c.hpp"
+#include "breakout_encoder_wheel.hpp"
 
-# Initialise EncoderWheel
-i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
-wheel = BreakoutEncoderWheel(i2c)
+using namespace pimoroni;
+using namespace encoderwheel;
 
-# Setup the gpio pin as a PWM output
-wheel.gpio_pin_mode(GP7, PWM)
+// Initialise EncoderWheel
+I2C i2c(BOARD::BREAKOUT_GARDEN);
+BreakoutEncoderWheel wheel(&i2c);
 
-# Set the gpio pin's frequency to 25KHz, and record the cycle period
-period = wheel.gpio_pwm_frequency(25000)
+// Setup the gpio pin as a PWM output
+wheel.gpio_pin_mode(GP7, IOExpander::PIN_PWM);
 
-# Output a 50% duty cycle square wave
-wheel.gpio_pin_value(GP7, int(period * 0.5))
+// Set the gpio pin's frequency to 25KHz, and record the cycle period
+uint16_t period = wheel.gpio_pwm_frequency(25000);
+
+// Output a 50% duty cycle square wave
+wheel.gpio_pin_value(GP7, (int)(period * 0.5f));
 ```
 
 
@@ -246,9 +250,9 @@ wheel.gpio_pin_value(GP7, int(period * 0.5))
 
 By default, changes to a gpio pin's frequency or value are applied immediately. However, sometimes this may not be wanted, and instead you want all pins to receive updated parameters at the same time, regardless of how long the code ran that calculated the update.
 
-For this purpose, `.gpio_pwm_frequency()` and `.gpio_pin_value()` include an optional parameter `load`, which by default is `True`. To avoid this "loading" include `load=False` in the relevant function calls. Then either the last call can include `load=True`, or a specific call to `.gpio_pwm_load()` can be made.
+For this purpose, `.gpio_pwm_frequency()` and `.gpio_pin_value()` include an optional parameter `load`, which by default is `true`. To avoid this "loading" set the parameter to `false`. Then either the last call can include a `true`, or a specific call to `.gpio_pwm_load()` can be made.
 
-In addition, any function that performs a load, including the `.gpio_pwm_load()` function, can be made to wait until the new PWM value has been sent out of the pins. By default this is disabled, but can be enabled by including `wait_for_load=True` in the relevant function calls.
+In addition, any function that performs a load, including the `.gpio_pwm_load()` function, can be made to wait until the new PWM value has been sent out of the pins. By default this is disabled, but can be enabled by including setting the `wait_for_load` parameter to `true` in the relevant function calls.
 
 
 #### Limitations
@@ -259,7 +263,7 @@ All of Encoder Wheel's PWM outputs share the same timing parameters. This means 
 ## Function Reference
 
 Here is the complete list of functions available on the `BreakoutEncoderWheel` class:
-```python
+```c++
 BreakoutEncoderWheel(ioe_address=0x13, led_address=0x77, interrupt=PIN_UNUSED)
 set_ioe_address(address)
 pressed(button)
@@ -287,7 +291,7 @@ gpio_pwm_frequency(frequency, load=True, wait_for_load=True)
 
 ## Constants Reference
 
-Here is the complete list of constants on the `breakoutencoderwheel` module:
+Here is the complete list of public constants on the `BreakoutEncoderWheel` class:
 
 ### Address Constants
 
@@ -295,6 +299,13 @@ Here is the complete list of constants on the `breakoutencoderwheel` module:
 * `DEFAULT_LED_I2C_ADDR` = `0x77`
 * `ALTERNATE_LED_I2C_ADDR` = `0x74`
 
+### Value Constants
+
+* `DEFAULT_DIRECTION`  = `NORMAL_DIR`
+* `DEFAULT_TIMEOUT` = `1`
+
+
+Here is the complete list of public constants in the `encoderwheel` namespace:
 
 ### Button Constants
 

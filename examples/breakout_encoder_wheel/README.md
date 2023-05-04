@@ -1,4 +1,4 @@
-# Encoder Wheel Breakout C++ Examples <!-- omit in toc -->
+# RGB Encoder Wheel Breakout Examples (C++) <!-- omit in toc -->
 
 - [Function Examples](#function-examples)
   - [Buttons](#buttons)
