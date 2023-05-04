@@ -1,7 +1,7 @@
 import math
 import time
-
 from pimoroni_i2c import PimoroniI2C
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
 from breakout_encoder_wheel import BreakoutEncoderWheel, CENTRE, NUM_LEDS
 
 """
@@ -11,9 +11,6 @@ Press the centre button to start the stopwatch, then again to pause and resume.
 
 Press Ctrl+C to stop the program.
 """
-
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 # Constants
 BRIGHTNESS = 1.0                    # The brightness of the LEDs when the stopwatch is running
@@ -29,7 +26,8 @@ UPDATES_PER_PULSE = IDLE_PULSE_TIME * UPDATES
 
 IDLE, COUNTING, PAUSED = range(3)   # The state constants used for program flow
 
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+# Create a new BreakoutEncoderWheel
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 wheel = BreakoutEncoderWheel(i2c)
 
 # Variables

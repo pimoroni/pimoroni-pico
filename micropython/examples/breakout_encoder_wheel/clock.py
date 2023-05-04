@@ -1,7 +1,7 @@
 import time
 from machine import RTC
-
 from pimoroni_i2c import PimoroniI2C
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
 from breakout_encoder_wheel import BreakoutEncoderWheel, NUM_LEDS
 
 """
@@ -9,9 +9,6 @@ Displays a 12 hour clock on Encoder Wheel's LED ring, getting time from the syst
 
 Press Ctrl+C to stop the program.
 """
-
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
 
 # Datetime Indices
 HOUR = 4
@@ -30,8 +27,10 @@ MILLIS_PER_HOUR = MILLIS_PER_MINUTE * 60
 MILLIS_PER_HALF_DAY = MILLIS_PER_HOUR * 12
 
 # Create a new BreakoutEncoderWheel
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 wheel = BreakoutEncoderWheel(i2c)
+
+# Access the built-in RTC
 rtc = RTC()
 
 

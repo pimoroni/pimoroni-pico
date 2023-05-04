@@ -1,4 +1,5 @@
 from pimoroni_i2c import PimoroniI2C
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
 from breakout_encoder_wheel import BreakoutEncoderWheel, UP, DOWN, LEFT, RIGHT, CENTRE, NUM_BUTTONS, NUM_LEDS
 
 """
@@ -7,14 +8,11 @@ A demonstration of reading the 5 buttons on Encoder Wheel.
 Press Ctrl+C to stop the program.
 """
 
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
-
 # Constants
 BUTTON_NAMES = ["Up", "Down", "Left", "Right", "Centre"]
 
 # Create a new BreakoutEncoderWheel
-i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 wheel = BreakoutEncoderWheel(i2c)
 
 # Variables
