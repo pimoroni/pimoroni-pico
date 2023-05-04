@@ -87,17 +87,21 @@ def sleep_for(minutes):
     if second >= 55:
         minute += 1
 
-    minute += minutes
+    # Can't sleep beyond a month, so clamp the sleep to a 28 day maximum
+    minutes = min(minutes, 40320)
 
-    while minute >= 60:
-        minute -= 60
-        hour += 1
+    # Calculate the future alarm date; first, turn the current time into seconds since epoch
+    sec_since_epoch = time.mktime((year, month, day, hour, minute, second, dow, 0))
 
-    if hour >= 24:
-        hour -= 24
+    # Add the required minutes to this
+    sec_since_epoch += minutes * 60
 
+    # And convert it back into a more useful tuple
+    (ayear, amonth, aday, ahour, aminute, asecond, adow, adoy) = time.localtime(sec_since_epoch)
+
+    # And now set the alarm as before, now including the day
     rtc.clear_alarm_flag()
-    rtc.set_alarm(0, minute, hour)
+    rtc.set_alarm(0, aminute, ahour, aday)
     rtc.enable_alarm_interrupt(True)
 
     turn_off()
