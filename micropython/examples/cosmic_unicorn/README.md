@@ -174,3 +174,5 @@ If you want to get the demo reel that Cosmic Unicorn ships with back, copy the c
 Here are some cool Cosmic Unicorn community projects and resources that you might find useful / inspirational! Note that code at the links below has not been tested by us and we're not able to offer support with it.
 
 - :link: [Green Energy Display with Cosmic Unicorn](https://www.hackster.io/andreas-motzek/clock-and-green-energy-display-with-cosmic-unicorn-641dcb)
+- :link: [cosmic-emoji-react - paint emojis from a computer, phone or tablet](https://github.com/chriscareycode/cosmic-unicorn/tree/main/cosmic-emoji-react)
+- :link: [cosmic-paste - paste images from the clipboard to Cosmic Unicorn](https://github.com/chriscareycode/cosmic-unicorn/tree/main/cosmic-paste)
