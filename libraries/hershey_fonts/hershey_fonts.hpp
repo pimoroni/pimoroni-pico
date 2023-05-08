@@ -1,6 +1,7 @@
 #include <map>
 #include <string>
 #include <functional>
+#include <cstdint>
 
 namespace hershey {
   struct font_glyph_t {
