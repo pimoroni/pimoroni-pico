@@ -217,7 +217,7 @@ namespace pimoroni {
     i2c->read_blocking(address, (uint8_t *)&value, 4, false);
 
     // TODO do we need to bswap this return value?
-    return __bswap32(value);
+    return __builtin_bswap32(value);
   }
 
   // set distance mode to Short, Medium, or Long
