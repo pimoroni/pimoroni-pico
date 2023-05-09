@@ -57,6 +57,7 @@ namespace pimoroni {
 
             uint dma_channel;
             uint read_cmd_dma_channel;
+            bool last_cmd_was_write = false;
 
             static constexpr int MULTI_READ_MAX_PAGES = 128;
             uint32_t multi_read_cmd_buffer[3 * MULTI_READ_MAX_PAGES];

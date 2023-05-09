@@ -12,6 +12,8 @@ using namespace pimoroni;
 #define FRAME_HEIGHT 480
 
 int main() {
+  set_sys_clock_khz(200000, true);
+
   stdio_init_all();
 
   constexpr uint BUTTON_A = 9;
@@ -37,26 +39,47 @@ int main() {
 
   printf("Starting\n");
 
+  constexpr int NUM_CIRCLES = 50;
+  struct Circle {
+    uint16_t x, y, size, grow;
+  } circles[NUM_CIRCLES];
+
+  for(int i =0 ; i < 50 ; i++)
+  {
+    circles[i].size = (rand() % 50) + 1;
+    circles[i].grow = std::max(0, (rand() % 50) - 25);
+    circles[i].x = rand() % graphics.bounds.w;
+    circles[i].y = rand() % graphics.bounds.h;
+  }
+
   while (true) {
-    while(gpio_get(BUTTON_A) == 1) {
-      sleep_ms(10);
-    }
+    //while(gpio_get(BUTTON_A) == 1) {
+    //  sleep_ms(10);
+    //}
     uint32_t render_start_time = time_us_32();
 
     graphics.set_pen(0xFFFF);
     graphics.clear();
 
-    for(int i =0 ; i < 50 ; i++)
+    for(int i =0 ; i < NUM_CIRCLES ; i++)
     {
-      uint size = 25 + (rand() % 50);
-      uint x = rand() % graphics.bounds.w;
-      uint y = rand() % graphics.bounds.h;
-
       graphics.set_pen(0);
-      graphics.circle(Point(x, y), size);
+      graphics.circle(Point(circles[i].x, circles[i].y), circles[i].size);
 
       graphics.set_pen(RGB::from_hsv(i * 0.02f, 1.0f, 1.0f).to_rgb555());
-      graphics.circle(Point(x, y), size-2);
+      graphics.circle(Point(circles[i].x, circles[i].y), circles[i].size-2);
+      if (circles[i].grow) {
+        circles[i].size++;
+        circles[i].grow--;
+      } else {
+        circles[i].size--;
+        if (circles[i].size == 0) {
+          circles[i].size = 1;
+          circles[i].grow = rand() % 75;
+          circles[i].x = rand() % graphics.bounds.w;
+          circles[i].y = rand() % graphics.bounds.h;
+        }
+      }
     }
 
 #if 0

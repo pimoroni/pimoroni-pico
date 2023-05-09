@@ -93,12 +93,16 @@ namespace pimoroni {
             pio_offset = pio_add_program(pio, &sram_program);
             aps6404_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0, false, false, false);
         }
+
+        last_cmd_was_write = false;
     }
 
     void APS6404::write(uint32_t addr, uint32_t* data, uint32_t len_in_bytes) {
-        wait_for_finish_blocking();
-
-        setup_cmd_buffer_dma(true);
+        if (!last_cmd_was_write) {
+            wait_for_finish_blocking();
+            setup_cmd_buffer_dma(true);
+            last_cmd_was_write = true;
+        }
 
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
@@ -128,16 +132,18 @@ namespace pimoroni {
     }
 
     void APS6404::write_repeat(uint32_t addr, uint32_t data, uint32_t len_in_bytes) {
-        repeat_data = data;
-        wait_for_finish_blocking();
-
-        setup_cmd_buffer_dma(true);
+        if (!last_cmd_was_write) {
+            wait_for_finish_blocking();
+            setup_cmd_buffer_dma(true);
+            last_cmd_was_write = true;
+        }
 
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
              addr += page_len, len -= page_len, page_len = std::min(PAGE_SIZE, len))
         {
             wait_for_finish_blocking();
+            repeat_data = data;
 
             pio_sm_put_blocking(pio, pio_sm, (page_len << 1) - 1);
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
@@ -193,6 +199,7 @@ namespace pimoroni {
     }
 
     void APS6404::start_read(uint32_t* read_buf, uint32_t total_len_in_words, int chain_channel) {
+        last_cmd_was_write = false;
         wait_for_finish_blocking();
 
         dma_channel_config c = dma_channel_get_default_config(dma_channel);
