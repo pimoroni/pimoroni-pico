@@ -26,6 +26,7 @@
 namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
+  typedef uint16_t RGB555;
   typedef uint32_t RGB888;
 
 
@@ -106,6 +107,14 @@ namespace pimoroni {
                    ((b & 0b11111000) >> 3);
 
       return __builtin_bswap16(p);
+    }
+
+    constexpr RGB555 to_rgb555() {
+      uint16_t p = ((r & 0b11111000) << 7) |
+                   ((g & 0b11111000) << 2) |
+                   ((b & 0b11111000) >> 3);
+
+      return p;
     }
 
     constexpr RGB565 to_rgb332() {
@@ -192,7 +201,8 @@ namespace pimoroni {
       PEN_RGB332,
       PEN_RGB565,
       PEN_RGB888,
-      PEN_INKY7
+      PEN_INKY7,
+      PEN_DV_RGB555
     };
 
     void *frame_buffer;
@@ -577,6 +587,24 @@ namespace pimoroni {
       void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
+      }
+  };
+
+  class PicoGraphics_PenDV_RGB555 : public PicoGraphics {
+    public:
+      RGB555 color;
+      IDirectDisplayDriver<uint16_t> &driver;
+
+      PicoGraphics_PenDV_RGB555(uint16_t width, uint16_t height, IDirectDisplayDriver<uint16_t> &direct_display_driver);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+
+      static size_t buffer_size(uint w, uint h) {
+        return w * h * sizeof(RGB555);
       }
   };
 }

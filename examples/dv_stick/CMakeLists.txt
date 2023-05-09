@@ -1,0 +1,1 @@
+include(dv_stick_test.cmake)

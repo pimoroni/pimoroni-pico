@@ -1,0 +1,222 @@
+; Pins:
+; - CSn is side-set 0
+; - SCK is side-set 1
+; - D0 is IN/OUT/SET pin 0
+;
+; DMA is 32 bit.  Stream takes form:
+; 32 bits For read: length of read in nibbles, minus 4
+;         For write: length of write in nibbles, minus 1
+;         Original data length in bits must be a multiple of 32
+; 8 bits AP6404 cmd (0xeb = read, 0x38 = write)
+; 24 bits address
+; 32 bits sram_offset_do_read or sram_offset_do_write
+; For write, data
+
+; Program for running at high frequencies (130MHz-290MHz RP2040 system clock)
+; Waits an extra half cycle on read as the data back from the PSRAM appears a fixed
+; amount of *time* after the CLK
+.program sram
+.side_set 2
+.wrap_target
+top:
+  set x, 6          side 0b01
+  out y, 32         side 0b01
+  set pindirs, 0xf  side 0b01
+
+; Write command, followed by data
+addr_lp:
+  out pins, 4       side 0b00
+  jmp x--, addr_lp  side 0b10
+  out pins, 4       side 0b00
+  out pc, 32        side 0b10
+PUBLIC do_write:
+  out pins, 4       side 0b00
+  jmp y--, do_write side 0b10
+  set pindirs, 0    side 0b00
+  out null, 32      side 0b01
+  jmp top           side 0b01
+
+; Read command
+PUBLIC do_read:
+; Wait for 8.5 clocks (6 + 2.5 for latencies)
+  set x, 7          side 0b00
+rwt_lp:
+  set pindirs, 0    side 0b10
+  jmp x-- rwt_lp    side 0b00
+
+  set x, 2          side 0b10
+rd_lp:
+  in pins, 4        side 0b00
+  jmp y--, rd_lp    side 0b10
+
+; Read the remaining 3 nibbles, but no more clocks so we don't read beyond
+; the requested length from the SRAM.
+rd_rem:
+  in pins, 4        side 0b01
+  jmp x--, rd_rem   side 0b01
+.wrap
+
+; Program for running at low frequencies (<130MHz RP2040 system clock)
+.program sram_slow
+.side_set 2
+.wrap_target
+top:
+  set x, 6          side 0b01
+  out y, 32         side 0b01
+  set pindirs, 0xf  side 0b01
+
+; Write command, followed by data
+addr_lp:
+  out pins, 4       side 0b00
+  jmp x--, addr_lp  side 0b10
+  out pins, 4       side 0b00
+  out pc, 32        side 0b10
+PUBLIC do_write:
+  out pins, 4       side 0b00
+  jmp y--, do_write side 0b10
+  set pindirs, 0    side 0b00
+  out null, 32      side 0b01
+  jmp top           side 0b01
+
+; Read command
+PUBLIC do_read:
+  set pindirs, 0    side 0b00
+; Wait for 8 clocks (6 + 2 for latencies)
+  set x, 6          side 0b10
+rwt_lp:
+  nop               side 0b00
+  jmp x-- rwt_lp    side 0b10
+
+  set x, 2          side 0b00
+rd_lp:
+  in pins, 4        side 0b10
+  jmp y--, rd_lp    side 0b00
+
+; Read the remaining 3 nibbles, but no more clocks so we don't read beyond
+; the requested length from the SRAM.
+rd_rem:
+  in pins, 4        side 0b01
+  jmp x--, rd_rem   side 0b01
+.wrap
+
+; Program for running at extreme frequencies (>290MHz RP2040 system clock)
+; Runs clock at 1/3rd RP2040 clock with 66% duty cycle.  Out of spec but
+; then everything we are doing here is!
+.program sram_fast
+.side_set 2
+.wrap_target
+top:
+  set x, 6              side 0b01
+  out y, 32             side 0b01
+  set pindirs, 0xf      side 0b01
+
+; Write command, followed by data
+addr_lp:
+  out pins, 4           side 0b00
+  jmp x--, addr_lp [1]  side 0b10
+  out pins, 4           side 0b00
+  out pc, 32       [1]  side 0b10
+PUBLIC do_write:
+  out pins, 4           side 0b00
+  jmp y--, do_write [1] side 0b10
+  set pindirs, 0        side 0b00
+  out null, 32          side 0b01
+  jmp top               side 0b01
+
+; Read command
+PUBLIC do_read:
+  set pindirs, 0        side 0b00
+; Wait for 8 clocks (6 + 2 for latencies)
+  set x, 6         [1]  side 0b10
+rwt_lp:
+  nop                   side 0b00
+  jmp x-- rwt_lp   [1]  side 0b10
+
+  set x, 2              side 0b00
+rd_lp:
+  nop                   side 0b10
+  in pins, 4            side 0b10
+  jmp y--, rd_lp        side 0b00
+
+; Read the remaining 2 nibbles, but no more clocks so we don't read beyond
+; the requested length from the SRAM.
+rd_rem:
+  in pins, 4       [1]  side 0b01
+  jmp x--, rd_rem       side 0b01
+.wrap
+
+; Write only program that writes a short (<32 bit) command, 
+; ignoring the rest of the 32 bit input word.
+; This is used to write the reset command and enter QPI mode.
+.program sram_reset
+.side_set 2
+.wrap_target
+  out y, 32         side 0b01
+  pull              side 0b01
+wr_lp:
+  out pins, 1       side 0b00
+  jmp y--, wr_lp    side 0b10
+  out null, 32  [7] side 0b01  ; Ensure large enough gap between commands for reset time
+  nop [7]           side 0b01
+.wrap
+
+.program sram_reset_qpi
+.side_set 2
+.wrap_target
+  out y, 32         side 0b01
+  pull              side 0b01
+  set pindirs, 0xF  side 0b01
+wr_lp:
+  out pins, 4       side 0b00
+  jmp y--, wr_lp    side 0b10
+  out null, 32  [7] side 0b01  ; Ensure large enough gap between commands for reset time
+  set pindirs, 0 [7] side 0b01
+.wrap
+
+
+% c-sdk {
+void aps6404_reset_program_init(PIO pio, uint sm, uint offset, uint csn, uint mosi) {
+    uint miso = mosi + 1;
+    pio_gpio_init(pio, csn);
+    pio_gpio_init(pio, csn + 1);
+    pio_gpio_init(pio, mosi);
+    pio_sm_set_consecutive_pindirs(pio, sm, csn, 2, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, mosi, 1, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, miso, 1, false);
+
+    pio_sm_config c = sram_reset_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, miso);
+    sm_config_set_in_shift(&c, false, true, 32);
+    sm_config_set_out_pins(&c, mosi, 1);
+    sm_config_set_out_shift(&c, false, true, 32);
+    sm_config_set_sideset_pins(&c, csn);
+    sm_config_set_clkdiv(&c, 4.f);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+void aps6404_program_init(PIO pio, uint sm, uint offset, uint csn, uint mosi, bool slow, bool fast, bool reset) {
+    pio_gpio_init(pio, csn);
+    pio_gpio_init(pio, csn + 1);
+    pio_gpio_init(pio, mosi);
+    pio_gpio_init(pio, mosi + 1);
+    pio_gpio_init(pio, mosi + 2);
+    pio_gpio_init(pio, mosi + 3);
+    pio_sm_set_consecutive_pindirs(pio, sm, csn, 2, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, mosi, 4, false);
+
+    pio_sm_config c = slow ? sram_slow_program_get_default_config(offset) : 
+                      fast ? sram_fast_program_get_default_config(offset) : 
+                      reset ? sram_reset_qpi_program_get_default_config(offset) :
+                      sram_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, mosi);
+    sm_config_set_in_shift(&c, false, true, 32);
+    sm_config_set_out_pins(&c, mosi, 4);
+    sm_config_set_out_shift(&c, false, true, 32);
+    sm_config_set_set_pins(&c, mosi, 4);
+    sm_config_set_sideset_pins(&c, csn);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
