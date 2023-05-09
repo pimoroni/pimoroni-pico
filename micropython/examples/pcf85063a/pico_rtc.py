@@ -85,7 +85,7 @@ print("  >", now)
 print()
 
 print("- clear timer flag")
-rtc.clear_alarm_flag()
+rtc.clear_timer_flag()
 
 print()
 print("tests complete")
