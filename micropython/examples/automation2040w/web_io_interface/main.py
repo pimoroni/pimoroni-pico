@@ -39,9 +39,7 @@ try:
     from tinyweb.server import webserver
 
 except ImportError:
-    # WIFI settings
-    WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
-    network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+    network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
     # Install missing module
     import upip
@@ -51,16 +49,6 @@ except ImportError:
 
 # Create web server application
 app = webserver()
-
-
-# Static page
-if is_mini:
-    html_file = open('index_mini.html', 'r')
-else:
-    html_file = open('index.html', 'r')
-
-# WIFI settings
-WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
 
 
 class LEDs:
@@ -196,10 +184,10 @@ class relays:
 # Index page
 @app.route('/')
 async def index(request, response):
-    # Start HTTP response with content-type text/html
-    await response.start_html()
-    # Send actual HTML page
-    await response.send(html_file.read())
+    if is_mini:
+        await response.send_file('index_mini.html', content_type='text/html')
+    else:
+        await response.send_file('index.html', content_type='text/html')
 
 
 # HTTP redirection
@@ -211,7 +199,7 @@ async def redirect(request, response):
 
 def run():
     # Setup wifi
-    network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+    network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
     app.add_resource(outputs, '/outputs')
     app.add_resource(relays, '/relays')

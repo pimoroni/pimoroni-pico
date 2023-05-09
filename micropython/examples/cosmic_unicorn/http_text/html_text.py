@@ -63,20 +63,12 @@ def status_handler(mode, status, ip):
 # Create web server application
 app = webserver()
 
-# Static page
-html_file = open('index.html', 'r')
-
-# WIFI settings
-WIFI_COUNTRY = "GB"  # Change to your local two-letter ISO 3166-1 country code
-
 
 # Index page
 @app.route('/')
 async def index(request, response):
-    # Start HTTP response with content-type text/html
-    await response.start_html()
     # Send actual HTML page
-    await response.send(html_file.read())
+    await response.send_file('index.html', content_type='text/html')
 
 
 # HTTP redirection
@@ -120,7 +112,7 @@ def outline_text(text, x, y):
 
 def run():
     # Setup wifi
-    network_manager = NetworkManager(WIFI_COUNTRY, status_handler=status_handler)
+    network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
 
     app.add_resource(text, '/update')
 
