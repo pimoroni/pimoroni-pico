@@ -64,8 +64,8 @@ namespace pimoroni {
   }
 
   void LTP305::set_character(uint8_t x, uint16_t ch) {
-    uint8_t *data = nullptr;
-    for(auto c : dotfont) {
+    const uint8_t *data = nullptr;
+    for(const auto& c : dotfont) {
       if(c.code == ch) {
         data = &c.data[0];
         break;
