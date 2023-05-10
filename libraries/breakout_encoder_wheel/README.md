@@ -131,7 +131,7 @@ wheel.set_rgb(0, 255, 0, 255);
 Set the first LED - `0` - to Red `0.0`:
 
 ```c++
-wheel.set_hsv(0, 0.0, 1.0, 1.0);
+wheel.set_hsv(0, 0.0f, 1.0f, 1.0f);
 ```
 
 
@@ -239,7 +239,7 @@ BreakoutEncoderWheel wheel(&i2c);
 wheel.gpio_pin_mode(GP7, IOExpander::PIN_PWM);
 
 // Set the gpio pin's frequency to 25KHz, and record the cycle period
-uint16_t period = wheel.gpio_pwm_frequency(25000);
+uint16_t period = wheel.gpio_pwm_frequency(25000.0f);
 
 // Output a 50% duty cycle square wave
 wheel.gpio_pin_value(GP7, (int)(period * 0.5f));
@@ -264,29 +264,34 @@ All of Encoder Wheel's PWM outputs share the same timing parameters. This means 
 
 Here is the complete list of functions available on the `BreakoutEncoderWheel` class:
 ```c++
-BreakoutEncoderWheel(ioe_address=0x13, led_address=0x77, interrupt=PIN_UNUSED)
-set_ioe_address(address)
-pressed(button)
-count()
-delta()
-step()
-turn()
-zero()
-revolutions()
-degrees()
-radians()
-direction()
-direction(direction)
-set_rgb(index, r, g, b)
-set_hsv(index, h, s=1.0, v=1.0)
-clear()
-show()
-gpio_pin_mode(gpio)
-gpio_pin_mode(gpio, mode)
-gpio_pin_value(gpio)
-gpio_pin_value(gpio, value)
-gpio_pwm_load(wait_for_load=True)
-gpio_pwm_frequency(frequency, load=True, wait_for_load=True)
+BreakoutEncoderWheel(uint8_t ioe_address = DEFAULT_IOE_I2C_ADDRESS, uint8_t led_address = DEFAULT_LED_I2C_ADDRESS);
+BreakoutEncoderWheel(I2C *i2c, uint8_t ioe_address = 0x13, uint8_t led_address = 0x77, uint interrupt = PIN_UNUSED, uint32_t timeout = 1, bool debug = false);
+bool init(bool skip_chip_id_check = false);
+void set_ioe_address(uint8_t address);
+bool get_interrupt_flag();
+void clear_interrupt_flag();
+bool pressed(uint button);
+int16_t count();
+int16_t delta();
+void zero();
+int16_t step();
+int16_t turn();
+float revolutions();
+float degrees();
+float radians();
+Direction direction();
+void direction(Direction direction);
+void set_rgb(int index, int r, int g, int b);
+void set_hsv(int index, float h, float s = 1.0f, float v = 1.0f);
+void clear();
+void show();
+uint8_t gpio_pin_mode(uint8_t gpio);
+void gpio_pin_mode(uint8_t gpio, uint8_t mode);
+int16_t gpio_pin_value(uint8_t gpio);
+float gpio_pin_value_as_voltage(uint8_t gpio);
+void gpio_pin_value(uint8_t gpio, uint16_t value, bool load = true, bool wait_for_load = false);
+void gpio_pwm_load(bool wait_for_load = true);
+uint16_t gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
 ```
 
 ## Constants Reference
@@ -315,14 +320,12 @@ Here is the complete list of public constants in the `encoderwheel` namespace:
 * `RIGHT` = `3`
 * `CENTRE` = `4`
 
-
 ### GPIO Constants
 
 * `GP7` = `7`
 * `GP8` = `8`
 * `GP9` = `9`
 * `GPIOS` = (`7`, `8`, `9`)
-
 
 ### Count Constants
 

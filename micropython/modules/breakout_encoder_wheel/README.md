@@ -225,7 +225,7 @@ Below is an example of setting a gpio pin to output a 25KHz signal with a 50% du
 from pimoroni_i2c import PimoroniI2C
 from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
 from breakout_ioexpander import PWM
-from breakout_encoderwheel import BreakoutEncoderWheel, GP7
+from breakout_encoder_wheel import BreakoutEncoderWheel, GP7
 
 # Initialise EncoderWheel
 i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)

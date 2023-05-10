@@ -116,6 +116,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * MICS6814 - Gas Sensor - https://shop.pimoroni.com/products/mics6814-gas-sensor-breakout
 * RGB Potentiometer - https://shop.pimoroni.com/products/rgb-potentiometer-breakout
 * RGB Encoder - https://shop.pimoroni.com/products/rgb-encoder-breakout
+* RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
 * IO Expander - https://shop.pimoroni.com/products/io-expander
 * RV3028 - Real-Time Clock (RTC) - https://shop.pimoroni.com/products/rv3028-real-time-clock-rtc-breakout
 * ST7735 - 0.96" LCD - https://shop.pimoroni.com/products/0-96-spi-colour-lcd-160x80-breakout
