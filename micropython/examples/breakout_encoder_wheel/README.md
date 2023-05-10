@@ -3,6 +3,7 @@
 - [Function Examples](#function-examples)
   - [Buttons](#buttons)
   - [Encoder](#encoder)
+  - [Interrupt](#interrupt)
 - [LED Examples](#led-examples)
   - [LED Rainbow](#led-rainbow)
   - [Clock](#clock)
@@ -26,6 +27,12 @@ A demonstration of reading the 5 buttons on Encoder Wheel.
 [encoder.py](encoder.py)
 
 A demonstration of reading the rotary dial of the Encoder Wheel breakout.
+
+
+### Interrupt
+[interrupt.py](interrupt.py)
+
+How to read the buttons and rotary dial of the Encoder Wheel breakout, only when an interrupt occurs.
 
 
 ## LED Examples

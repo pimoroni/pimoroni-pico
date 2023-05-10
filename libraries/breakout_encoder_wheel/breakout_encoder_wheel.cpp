@@ -17,6 +17,12 @@ namespace encoderwheel {
       ioe.set_mode(SW_RIGHT, IOExpander::PIN_IN_PU);
       ioe.set_mode(SW_CENTRE, IOExpander::PIN_IN_PU);
 
+      ioe.set_pin_interrupt(SW_UP, true);
+      ioe.set_pin_interrupt(SW_DOWN, true);
+      ioe.set_pin_interrupt(SW_LEFT, true);
+      ioe.set_pin_interrupt(SW_RIGHT, true);
+      ioe.set_pin_interrupt(SW_CENTRE, true);
+
       led_ring.enable({
         0b00000000, 0b10111111,
         0b00111110, 0b00111110,

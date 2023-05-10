@@ -3,6 +3,7 @@
 - [Function Examples](#function-examples)
   - [Buttons](#buttons)
   - [Encoder](#encoder)
+  - [Interrupt](#interrupt)
 - [LED Examples](#led-examples)
   - [LED Rainbow](#led-rainbow)
   - [Clock](#clock)
@@ -26,6 +27,12 @@ A demonstration of reading the 5 buttons on Encoder Wheel.
 [encoder/encoder.cpp](encoder/encoder.cpp)
 
 A demonstration of reading the rotary dial of the Encoder Wheel breakout.
+
+
+### Interrupt
+[interrupt/interrupt.cpp](interrupt/interrupt.cpp)
+
+How to read the buttons and rotary dial of the Encoder Wheel breakout, only when an interrupt occurs.
 
 
 ## LED Examples

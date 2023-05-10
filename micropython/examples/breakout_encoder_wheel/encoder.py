@@ -8,9 +8,6 @@ A demonstration of reading the rotary dial of the Encoder Wheel breakout.
 Press Ctrl+C to stop the program.
 """
 
-PINS_BREAKOUT_GARDEN = {"sda": 4, "scl": 5}
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
-
 # Create a new BreakoutEncoderWheel
 i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 wheel = BreakoutEncoderWheel(i2c)
