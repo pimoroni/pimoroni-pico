@@ -27,6 +27,9 @@ namespace pimoroni {
     static const uint8_t PIN_MODE_ADC = 0b01010;  // ADC, Input-only (high-impedance)
 
     static const uint32_t RESET_TIMEOUT_MS = 1000;
+    static const uint32_t CLOCK_FREQ = 24000000;
+    static const uint32_t MAX_PERIOD = (1 << 16) - 1;
+    static const uint32_t MAX_DIVIDER = (1 << 7);
 
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS = 0x18;
@@ -205,7 +208,8 @@ namespace pimoroni {
     void pwm_clear(bool wait_for_clear = true);
     bool pwm_clearing();
     bool set_pwm_control(uint8_t divider);
-    void set_pwm_period(uint16_t value, bool load = true);
+    void set_pwm_period(uint16_t value, bool load = true, bool wait_for_load = true);
+    uint16_t set_pwm_frequency(float frequency, bool load = true, bool wait_for_load = true);
 
     uint8_t get_mode(uint8_t pin);
     void set_mode(uint8_t pin, uint8_t mode, bool schmitt_trigger = false, bool invert = false);
@@ -213,7 +217,7 @@ namespace pimoroni {
     int16_t input(uint8_t pin, uint32_t adc_timeout = 1);
     float input_as_voltage(uint8_t pin, uint32_t adc_timeout = 1);
 
-    void output(uint8_t pin, uint16_t value, bool load = true);
+    void output(uint8_t pin, uint16_t value, bool load = true, bool wait_for_load = true);
 
     void setup_rotary_encoder(uint8_t channel, uint8_t pin_a, uint8_t pin_b, uint8_t pin_c = 0, bool count_microsteps = false);
     int16_t read_rotary_encoder(uint8_t channel);

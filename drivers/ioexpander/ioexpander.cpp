@@ -523,13 +523,35 @@ namespace pimoroni {
     return divider_good;
   }
 
-  void IOExpander::set_pwm_period(uint16_t value, bool load) {
+  void IOExpander::set_pwm_period(uint16_t value, bool load, bool wait_for_load) {
     value &= 0xffff;
     i2c->reg_write_uint8(address, reg::PWMPL, (uint8_t)(value & 0xff));
     i2c->reg_write_uint8(address, reg::PWMPH, (uint8_t)(value >> 8));
 
     if(load)
-      pwm_load();
+      pwm_load(wait_for_load);
+  }
+
+  uint16_t IOExpander::set_pwm_frequency(float frequency, bool load, bool wait_for_load) {
+    uint32_t period = (uint32_t)(CLOCK_FREQ / frequency);
+    if (period / 128 > MAX_PERIOD) {
+      return MAX_PERIOD;
+    }
+    if (period < 2) {
+      return 2;
+    }
+
+    uint8_t divider = 1;
+    while ((period > MAX_PERIOD) && (divider < MAX_DIVIDER)) {
+      period >>= 1;
+      divider <<= 1;
+    }
+
+    period = MIN(period, MAX_PERIOD); // Should be unnecessary because of earlier raised errors, but kept in case
+    set_pwm_control(divider);
+    set_pwm_period((uint16_t)(period - 1), load, wait_for_load);
+
+    return (uint16_t)period;
   }
 
   uint8_t IOExpander::get_mode(uint8_t pin) {
@@ -701,7 +723,7 @@ namespace pimoroni {
     }
   }
 
-  void IOExpander::output(uint8_t pin, uint16_t value, bool load) {
+  void IOExpander::output(uint8_t pin, uint16_t value, bool load, bool wait_for_load) {
     if(pin < 1 || pin > NUM_PINS) {
       printf("Pin should be in range 1-14.");
       return;
@@ -717,7 +739,7 @@ namespace pimoroni {
       i2c->reg_write_uint8(address, io_pin.reg_pwml, (uint8_t)(value & 0xff));
       i2c->reg_write_uint8(address, io_pin.reg_pwmh, (uint8_t)(value >> 8));
       if(load)
-        pwm_load();
+        pwm_load(wait_for_load);
     }
     else {
       if(value == LOW) {

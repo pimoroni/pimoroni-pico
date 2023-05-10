@@ -41,17 +41,17 @@ namespace encoderwheel {
     static const uint32_t DEFAULT_TIMEOUT     = 1;
 
   private:
-    static const uint8_t ENC_CHANNEL    = 1;
-    static const uint8_t ENC_TERM_A     = 3;
-    static const uint8_t ENC_TERM_B     = 12;
-    static const uint8_t ENC_COUNTS_PER_REV = 24;
-    static const uint8_t ENC_COUNT_DIVIDER = 2;
+    static const uint8_t ENC_CHANNEL          = 1;
+    static const uint8_t ENC_TERM_A           = 3;
+    static const uint8_t ENC_TERM_B           = 12;
+    static const uint8_t ENC_COUNTS_PER_REV   = 24;
+    static const uint8_t ENC_COUNT_DIVIDER    = 2;
 
-    static const uint8_t SW_UP          = 13;
-    static const uint8_t SW_DOWN        = 4;
-    static const uint8_t SW_LEFT        = 11;
-    static const uint8_t SW_RIGHT       = 2;
-    static const uint8_t SW_CENTRE      = 1;
+    static const uint8_t SW_UP                = 13;
+    static const uint8_t SW_DOWN              = 4;
+    static const uint8_t SW_LEFT              = 11;
+    static const uint8_t SW_RIGHT             = 2;
+    static const uint8_t SW_CENTRE            = 1;
 
     // This wonderful lookup table maps the LEDs on the encoder wheel
     // from their 3x24 (remember, they're RGB) configuration to
@@ -146,12 +146,12 @@ namespace encoderwheel {
     void clear();
     void show();
 
-    int gpio_pin_mode(int gpio);
-    void gpio_pin_mode(int gpio, int mode);
-    int gpio_pin_value(int gpio);
-    float gpio_pin_value_as_voltage(int gpio);
-    void gpio_pin_value(int gpio, int value, bool load = true, bool wait_for_load = false);
-    void gpio_pwm_load(bool wait_for_load = false);
+    uint8_t gpio_pin_mode(uint8_t gpio);
+    void gpio_pin_mode(uint8_t gpio, uint8_t mode);
+    int16_t gpio_pin_value(uint8_t gpio);
+    float gpio_pin_value_as_voltage(uint8_t gpio);
+    void gpio_pin_value(uint8_t gpio, uint16_t value, bool load = true, bool wait_for_load = false);
+    void gpio_pwm_load(bool wait_for_load = true);
     int gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
 
   private:

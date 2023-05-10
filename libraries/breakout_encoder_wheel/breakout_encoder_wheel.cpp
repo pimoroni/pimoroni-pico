@@ -190,32 +190,37 @@ namespace encoderwheel {
     led_ring.update();
   }
 
-  int BreakoutEncoderWheel::gpio_pin_mode(int gpio) {
-    return 0; // TODO
+  uint8_t BreakoutEncoderWheel::gpio_pin_mode(uint8_t gpio) {
+    assert(gpio < GP7 || gpio > GP9);
+    return ioe.get_mode(gpio);
   }
 
-  void BreakoutEncoderWheel::gpio_pin_mode(int gpio, int mode) {
-
+  void BreakoutEncoderWheel::gpio_pin_mode(uint8_t gpio, uint8_t mode) {
+    assert(gpio < GP7 || gpio > GP9);
+    ioe.set_mode(gpio, mode);
   }
 
-  int BreakoutEncoderWheel::gpio_pin_value(int gpio) {
-    return 0; // TODO
+  int16_t BreakoutEncoderWheel::gpio_pin_value(uint8_t gpio) {
+    assert(gpio < GP7 || gpio > GP9);
+    return ioe.input(gpio);
   }
 
-  float BreakoutEncoderWheel::gpio_pin_value_as_voltage(int gpio) {
-    return 0; // TODO
+  float BreakoutEncoderWheel::gpio_pin_value_as_voltage(uint8_t gpio) {
+    assert(gpio < GP7 || gpio > GP9);
+    return ioe.input_as_voltage(gpio);
   }
 
-  void BreakoutEncoderWheel::gpio_pin_value(int gpio, int value, bool load, bool wait_for_load) {
-
+  void BreakoutEncoderWheel::gpio_pin_value(uint8_t gpio, uint16_t value, bool load, bool wait_for_load) {
+    assert(gpio < GP7 || gpio > GP9);
+    ioe.output(gpio, value, load, wait_for_load);
   }
 
   void BreakoutEncoderWheel::gpio_pwm_load(bool wait_for_load) {
-
+    ioe.pwm_load(wait_for_load);
   }
 
   int BreakoutEncoderWheel::gpio_pwm_frequency(float frequency, bool load, bool wait_for_load) {
-    return 0; // TODO
+    return ioe.set_pwm_frequency(frequency, load, wait_for_load);
   }
 
   void BreakoutEncoderWheel::take_encoder_reading() {
