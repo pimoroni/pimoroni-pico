@@ -219,7 +219,7 @@ namespace encoderwheel {
     ioe.pwm_load(wait_for_load);
   }
 
-  int BreakoutEncoderWheel::gpio_pwm_frequency(float frequency, bool load, bool wait_for_load) {
+  uint16_t BreakoutEncoderWheel::gpio_pwm_frequency(float frequency, bool load, bool wait_for_load) {
     return ioe.set_pwm_frequency(frequency, load, wait_for_load);
   }
 

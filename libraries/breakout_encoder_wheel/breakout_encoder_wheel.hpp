@@ -152,7 +152,7 @@ namespace encoderwheel {
     float gpio_pin_value_as_voltage(uint8_t gpio);
     void gpio_pin_value(uint8_t gpio, uint16_t value, bool load = true, bool wait_for_load = false);
     void gpio_pwm_load(bool wait_for_load = true);
-    int gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
+    uint16_t gpio_pwm_frequency(float frequency, bool load = true, bool wait_for_load = false);
 
   private:
     void take_encoder_reading();

@@ -27,9 +27,6 @@ namespace pimoroni {
     static const uint8_t PIN_MODE_ADC = 0b01010;  // ADC, Input-only (high-impedance)
 
     static const uint32_t RESET_TIMEOUT_MS = 1000;
-    static const uint32_t CLOCK_FREQ = 24000000;
-    static const uint32_t MAX_PERIOD = (1 << 16) - 1;
-    static const uint32_t MAX_DIVIDER = (1 << 7);
 
   public:
     static const uint8_t DEFAULT_I2C_ADDRESS = 0x18;
@@ -49,6 +46,10 @@ namespace pimoroni {
 
     static const uint16_t LOW = 0;
     static const uint16_t HIGH = 1;
+
+    static const uint32_t CLOCK_FREQ = 24000000;
+    static const uint32_t MAX_PERIOD = (1 << 16) - 1;
+    static const uint32_t MAX_DIVIDER = (1 << 7);
 
 
     //--------------------------------------------------

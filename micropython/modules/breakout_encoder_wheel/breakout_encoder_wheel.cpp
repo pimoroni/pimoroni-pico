@@ -244,22 +244,77 @@ extern mp_obj_t BreakoutEncoderWheel_show(mp_obj_t self_in) {
 }
 
 extern mp_obj_t BreakoutEncoderWheel_gpio_pin_mode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
+enum { ARG_self, ARG_gpio, ARG_mode };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_gpio, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_mode, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
 
-    return mp_const_none;
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
+    int gpio = args[ARG_gpio].u_int;
+    if(gpio < 7 || gpio > 9) {
+        mp_raise_ValueError("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)");
+    }
+
+    if(args[ARG_mode].u_obj == mp_const_none) {
+        return mp_obj_new_int(self->breakout->gpio_pin_mode(gpio));
+    }
+    else {
+        int mode = mp_obj_get_int(args[ARG_mode].u_obj);
+        self->breakout->gpio_pin_mode(gpio, mode);
+
+        return mp_const_none;
+    }
 }
 
 extern mp_obj_t BreakoutEncoderWheel_gpio_pin_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    //breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
+    enum { ARG_self, ARG_gpio, ARG_value, ARG_load, ARG_wait_for_load };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_gpio, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_value, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+        { MP_QSTR_wait_for_load, MP_ARG_BOOL, { .u_bool = false }},
+    };
 
-    return mp_const_none;
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
+    int gpio = args[ARG_gpio].u_int;
+    if(gpio < 7 || gpio > 9) {
+        mp_raise_ValueError("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)");
+    }
+
+    if(args[ARG_value].u_obj == mp_const_none) {
+        if(self->breakout->gpio_pin_mode(gpio) == IOExpander::PIN_ADC) {
+            return mp_obj_new_float(self->breakout->gpio_pin_value_as_voltage(gpio));
+        }
+        else {
+            return mp_obj_new_int(self->breakout->gpio_pin_value(gpio));
+        }
+    }
+    else {
+        int value = mp_obj_get_int(args[ARG_value].u_obj);
+        bool load = args[ARG_load].u_bool;
+        bool wait_for_load = args[ARG_wait_for_load].u_bool;
+        self->breakout->gpio_pin_value(gpio, value, load, wait_for_load);
+
+        return mp_const_none;
+    }
 }
 
 extern mp_obj_t BreakoutEncoderWheel_gpio_pwm_load(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_wait_for_load };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_wait_for_load, MP_ARG_BOOL, { .u_bool = false }},
+        { MP_QSTR_wait_for_load, MP_ARG_BOOL, { .u_bool = true }},
     };
 
     // Parse args.
@@ -279,8 +334,8 @@ extern mp_obj_t BreakoutEncoderWheel_gpio_pwm_frequency(size_t n_args, const mp_
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_frequency, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = false }},
-        { MP_QSTR_wait_for_load, MP_ARG_BOOL, { .u_bool = false }},
+        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+        { MP_QSTR_wait_for_load, MP_ARG_BOOL, { .u_bool = true }},
     };
 
     // Parse args.
@@ -289,10 +344,17 @@ extern mp_obj_t BreakoutEncoderWheel_gpio_pwm_frequency(size_t n_args, const mp_
 
     breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
     float frequency = mp_obj_get_float(args[ARG_frequency].u_obj);
+    uint32_t period = (uint32_t)(IOExpander::CLOCK_FREQ / frequency);
+    if (period / 128 > IOExpander::MAX_PERIOD) {
+      mp_raise_ValueError("The provided frequency is too low");
+    }
+    if (period < 2) {
+      mp_raise_ValueError("The provided frequency is too high");
+    }
+
     bool load = args[ARG_load].u_bool;
     bool wait_for_load = args[ARG_wait_for_load].u_bool;
-
-    int period = self->breakout->gpio_pwm_frequency(frequency, load, wait_for_load);
+    period = self->breakout->gpio_pwm_frequency(frequency, load, wait_for_load);
 
     return mp_obj_new_int(period);
 }
