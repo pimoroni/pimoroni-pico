@@ -240,29 +240,13 @@ namespace pimoroni {
   }
 
   void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
-    const uint8_t *p = src;
-    while(len--) {
-      // Does not byte align correctly
-      //pio_sm_put_blocking(parallel_pio, parallel_sm, *p);
-      while (pio_sm_is_tx_fifo_full(parallel_pio, parallel_sm))
-        ;
-      *(volatile uint8_t*)&parallel_pio->txf[parallel_sm] = *p;
-      p++;
-    }
+    write_blocking_dma(src, len);
+    dma_channel_wait_for_finish_blocking(st_dma);
 
-    uint32_t sm_stall_mask = 1u << (parallel_sm + PIO_FDEBUG_TXSTALL_LSB);
-    parallel_pio->fdebug = sm_stall_mask;
-      while (!(parallel_pio->fdebug & sm_stall_mask))
-          ;
-    /*uint32_t mask = 0xff << d0;
-    while(len--) {
-      gpio_put(wr_sck, false);     
-      uint8_t v = *src++;
-      gpio_put_masked(mask, v << d0);
-      //asm("nop;");
-      gpio_put(wr_sck, true);
-      asm("nop;");
-    }*/
+    // This may cause a race between PIO and the
+    // subsequent chipselect deassert for the last pixel
+    while(!pio_sm_is_tx_fifo_empty(parallel_pio, parallel_sm))
+      ;
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data) {
