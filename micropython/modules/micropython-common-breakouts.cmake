@@ -1,5 +1,6 @@
 include(breakout_dotmatrix/micropython)
 include(breakout_encoder/micropython)
+include(breakout_encoder_wheel/micropython)
 include(breakout_ioexpander/micropython)
 include(breakout_ltr559/micropython)
 include(breakout_as7262/micropython)
