@@ -21,10 +21,10 @@
 ; for each row:
 ;   for each bcd frame:
 ;           0: 00111111                           // row pixel count (minus one)
-;     1  - 64: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
-;     65 - 67: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
-;          68: xxxxrrrr                           // row select bits
-;     69 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+;           1: xxxxrrrr                           // row select bits
+;     2  - 65: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+;     66 - 67: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
+;     68 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
 ; 
 ; .. and back to the start
 
@@ -33,6 +33,7 @@
 
 ; loop over row pixels
   out y, 8                        ; get row pixel count (minus 1 because test is pre decrement)
+  out pins, 8                     ; output row select
 pixels:
     
     ; red bit
@@ -63,15 +64,13 @@ pixels:
 
   jmp y-- pixels
 
-  out null, 24                    ; discard dummy bytes
-
-  out pins, 8                     ; output row select
+  out null, 16                    ; discard dummy bytes
 
   set pins, 0b110 [5]             ; latch high, blank high
   set pins, 0b000                 ; blank low (enable output)
 
 ; loop over bcd delay period
-  out y, 24                       ; get bcd delay counter value
+  out y, 32                       ; get bcd delay counter value
 bcd_delay:
   jmp y-- bcd_delay         
 
