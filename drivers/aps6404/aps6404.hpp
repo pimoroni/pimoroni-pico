@@ -9,7 +9,7 @@ namespace pimoroni {
             static constexpr int RAM_SIZE = 8 * 1024 * 1024;
             static constexpr int PAGE_SIZE = 1024;
 
-            APS6404(uint pin_csn = 17, uint pin_d0 = 19, PIO pio = pio0);
+            APS6404(uint pin_csn = 17, uint pin_d0 = 19, PIO pio = pio1);
 
             void init();
 

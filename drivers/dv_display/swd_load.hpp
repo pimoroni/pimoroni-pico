@@ -1,0 +1,1 @@
+bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections);

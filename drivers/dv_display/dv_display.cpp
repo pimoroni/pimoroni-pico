@@ -1,4 +1,6 @@
 #include "dv_display.hpp"
+#include "swd_load.hpp"
+#include "pico-stick.h"
 
 #include <cstdlib>
 #include <math.h>
@@ -14,6 +16,8 @@ namespace pimoroni {
     gpio_init(VSYNC);
     gpio_set_dir(VSYNC, GPIO_IN);
 
+    swd_load_program(section_addresses, section_data, section_data_len, sizeof(section_addresses) / sizeof(section_addresses[0]));
+
     ram.init();
     write_header(0);
 
@@ -23,7 +27,17 @@ namespace pimoroni {
 
     bank = 0;
     gpio_put(RAM_SEL, 0);
+    sleep_ms(500);
+
+    printf("Start I2C\n");
+    //i2c_init(i2c0, 100000);
+    //gpio_set_function(I2C_SDA, GPIO_FUNC_I2C); gpio_pull_up(I2C_SDA);
+    //gpio_set_function(I2C_SCL, GPIO_FUNC_I2C); gpio_pull_up(I2C_SCL);
+
     i2c.reg_write_uint8(I2C_ADDR, I2C_REG_START, 1);
+    //uint8_t i2c_cmd[] = {I2C_REG_START, 1};
+    //i2c_write_blocking(i2c0, I2C_ADDR, i2c_cmd, 2, false);
+    printf("Started\n");
   }
   
   void DVDisplay::flip() {

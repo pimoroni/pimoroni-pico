@@ -1,0 +1,219 @@
+; Pins:
+; - SWC is side-set 0
+; - SWD is IN/OUT/SET pin 0
+;
+; SWD write:
+;   7 bits request  (request parity set in input)
+;   1 bit park
+;   1 bit turn
+;   3 bits response - fail if not 001 - sent LSB first
+;   1 bit turn
+;  32 bits data
+;   1 bit parity (computed and sent from PIO)
+;
+.program swd_write
+.side_set 1 opt
+error:
+    irq 0            side 1
+
+top:
+    ; Wait driven
+    set pins, 0      side 1
+    set pindirs, 1   side 1
+    mov isr, null    side 1
+
+    set y, 6         side 1
+    pull             side 1
+    set pindirs, 1   side 1
+
+    ; Send 7 bits
+send_cmd:
+    out pins, 1    [1] side 0
+    jmp y--, send_cmd [1]  side 1
+    
+    set pindirs, 0     side 0
+    set y, 3           side 0
+
+    ; Read 5 bits: park, turn, rsp
+read_rsp:
+    in pins, 1   [1]   side 1
+    jmp y--, read_rsp [1] side 0
+    in pins, 1         side 1
+
+    set x, 0x1C        side 0
+    mov y, isr         side 0
+    pull               side 1
+    jmp x!=y, error    side 1 ; Not OK
+
+    set pindirs, 1     side 1
+    set x, 0           side 1
+
+send_data:
+    out y, 1           side 0
+    mov pins, y        side 0
+    jmp y--, negate    side 1
+    jmp !osre, send_data side 1
+
+.wrap_target
+    mov pins, x  [1]   side 0
+    jmp top            side 1
+
+negate:
+    mov x, ~x             side 1
+    jmp !osre, send_data  side 1
+
+; Must be identical to above, except ignoring error.
+.program swd_write_ignore_error
+.side_set 1 opt
+error:
+    irq 0            side 1
+
+top:
+    ; Wait driven
+    set pins, 0      side 1
+    set pindirs, 1   side 1
+    mov isr, null    side 1
+
+    set y, 6         side 1
+    pull             side 1
+    set pindirs, 1   side 1
+
+    ; Send 7 bits
+send_cmd:
+    out pins, 1    [1] side 0
+    jmp y--, send_cmd [1]  side 1
+    
+    set pindirs, 0     side 0
+    set y, 3           side 0
+
+    ; Read 5 bits: park, turn, rsp
+read_rsp:
+    in pins, 1   [1]   side 1
+    jmp y--, read_rsp [1] side 0
+    in pins, 1         side 1
+
+    set x, 0x1C        side 0
+    mov y, isr         side 0
+    pull               side 1
+    nop                side 1 ; Ignore
+
+    set pindirs, 1     side 1
+    set x, 0           side 1
+
+send_data:
+    out y, 1           side 0
+    mov pins, y        side 0
+    jmp y--, negate    side 1
+    jmp !osre, send_data side 1
+
+.wrap_target
+    mov pins, x  [1]   side 0
+    jmp top            side 1
+
+negate:
+    mov x, ~x             side 1
+    jmp !osre, send_data  side 1
+
+.program swd_read
+.side_set 1 opt
+error:
+    irq 0            side 1
+
+.wrap_target
+top:
+    ; Wait driven
+    set pins, 0      side 1
+    set pindirs, 1   side 1
+    mov isr, null    side 1
+
+    set y, 6         side 1
+    pull             side 1
+    set pindirs, 1   side 1
+
+    ; Send 7 bits
+send_cmd:
+    out pins, 1    [1] side 0
+    jmp y--, send_cmd [1]  side 1
+    
+    set pindirs, 0     side 0
+    set y, 3           side 0
+
+    ; Read 5 bits: park, turn, rsp
+read_rsp:
+    in pins, 1   [1]   side 1
+    jmp y--, read_rsp [1] side 0
+    in pins, 1         side 1
+
+    set x, 0x1C        side 1
+    mov y, isr         side 1
+    jmp x!=y, error    side 1 ; Not OK
+
+    ; Read 32 bits
+    set y, 31  [1]     side 0
+read_data:
+    in pins, 1   [1]   side 1
+    jmp y--, read_data [1] side 0
+
+    ; Ignore parity and turn
+    mov isr, ::isr [1] side 1
+    push         [1]   side 0
+
+.program swd_raw_write
+.side_set 1 opt
+    ; Wait undriven
+    set pins, 0      side 1
+    set pindirs, 1   side 1
+    out y, 32        side 1
+
+send:
+    out pins, 1   [1] side 0
+    jmp y--, send [1] side 1
+
+    out null, 32     side 1
+
+.program swd_raw_read
+.side_set 1 opt
+    out y, 32        side 1
+
+read:
+    in pins, 1    [1] side 1
+    jmp y--, read [1] side 0
+
+    push             side 1
+
+% c-sdk {
+void swd_initial_init(PIO pio, uint sm, uint swc, uint swd) {
+    pio_gpio_init(pio, swc);
+    pio_gpio_init(pio, swd);
+    pio_sm_set_consecutive_pindirs(pio, sm, swc, 1, true);
+    pio_sm_set_consecutive_pindirs(pio, sm, swd, 1, false);
+}
+
+void swd_program_init(PIO pio, uint sm, uint offset, uint swc, uint swd, bool read) {
+    pio_sm_config c = read ? swd_read_program_get_default_config(offset) : swd_write_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, swd);
+    sm_config_set_in_shift(&c, false, false, 32);
+    sm_config_set_set_pins(&c, swd, 1);
+    sm_config_set_out_pins(&c, swd, 1);
+    sm_config_set_out_shift(&c, true, false, 32);
+    sm_config_set_sideset_pins(&c, swc);
+    sm_config_set_clkdiv(&c, 60.f);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+
+void swd_raw_program_init(PIO pio, uint sm, uint offset, uint swc, uint swd, bool read) {
+    pio_sm_config c = read ? swd_raw_read_program_get_default_config(offset) : swd_raw_write_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, swd);
+    sm_config_set_in_shift(&c, false, false, 32);
+    sm_config_set_set_pins(&c, swd, 1);
+    sm_config_set_out_pins(&c, swd, 1);
+    sm_config_set_out_shift(&c, true, true, 32);
+    sm_config_set_sideset_pins(&c, swc);
+    sm_config_set_clkdiv(&c, 60.f);
+
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}
