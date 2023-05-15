@@ -144,11 +144,11 @@ namespace pimoroni {
     }
   }
 
-  void PicoGraphics::text(const std::string_view &t, const Point &p, int32_t wrap, float s, float a, uint8_t letter_spacing) {
+  void PicoGraphics::text(const std::string_view &t, const Point &p, int32_t wrap, float s, float a, uint8_t letter_spacing, bool fixed_width) {
     if (bitmap_font) {
       bitmap::text(bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
         rectangle(Rect(x, y, w, h));
-      }, t, p.x, p.y, wrap, std::max(1.0f, s), letter_spacing);
+      }, t, p.x, p.y, wrap, std::max(1.0f, s), letter_spacing, fixed_width);
       return;
     }
 
@@ -166,8 +166,8 @@ namespace pimoroni {
     }
   }
 
-  int32_t PicoGraphics::measure_text(const std::string_view &t, float s, uint8_t letter_spacing) {
-    if (bitmap_font) return bitmap::measure_text(bitmap_font, t, std::max(1.0f, s), letter_spacing);
+  int32_t PicoGraphics::measure_text(const std::string_view &t, float s, uint8_t letter_spacing, bool fixed_width) {
+    if (bitmap_font) return bitmap::measure_text(bitmap_font, t, std::max(1.0f, s), letter_spacing, fixed_width);
     if (hershey_font) return hershey::measure_text(hershey_font, t, s);
     return 0;
   }
