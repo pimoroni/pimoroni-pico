@@ -87,7 +87,7 @@ static void idle() {
     pio_sm_put_blocking(pio0, pio_sm, 0);
 }
 
-static bool connect(bool first = true) {
+static bool connect(bool first = true, uint core = 0) {
     if (first) {
         pio_prog = &swd_raw_write_program;
         pio_offset = pio_add_program(pio0, &swd_raw_write_program);
@@ -138,7 +138,7 @@ static bool connect(bool first = true) {
     wait_for_idle();
     pio0_hw->irq = 1;
     pio_sm_put_blocking(pio0, pio_sm, 0x19);
-    pio_sm_put_blocking(pio0, pio_sm, 0x01002927);
+    pio_sm_put_blocking(pio0, pio_sm, 0x01002927 | (core << 28));
 
     printf("Read ID\n");
     uint id;
@@ -148,7 +148,7 @@ static bool connect(bool first = true) {
     }
     printf("Received ID: %08x\n", id);
 
-    if (id != 0x0bc12477) return false;
+    if (core != 0xf && id != 0x0bc12477) return false;
 
     printf("Abort\n");
     if (!write_cmd(0x01, 0x1E)) {
@@ -179,13 +179,28 @@ static bool connect(bool first = true) {
         return false;
     }
 
-    printf("Setup memory access\n");
-    if (!write_cmd(0x23, 0xA2000052)) {
-        printf("Memory access setup failed\n");
-        return false;
+    if (core != 0xf) {
+        printf("Setup memory access\n");
+        if (!write_cmd(0x23, 0xA2000052)) {
+            printf("Memory access setup failed\n");
+            return false;
+        }
+
+        printf("Halt CPU\n");
+        if (!write_reg(0xe000edf0, 0xA05F0003)) {
+            printf("Halt failed\n");
+            return false;
+        }
+    }
+    else {
+        if (!write_cmd(0x29, 0x00000001)) {
+            printf("Clear reset failed\n");
+            return false;
+        }
     }
 
     idle();
+
     return true;
 }
 
@@ -193,24 +208,23 @@ static bool load(uint address, const uint* data, uint len_in_bytes) {
     printf("Loading %d bytes at %08x\n", len_in_bytes, address);
     idle();
 
-    printf("Halt CPU\n");
-    if (!write_reg(0xe000edf0, 0xA05F0003)) {
-        printf("Halt failed\n");
-        return false;
-    }
-
-    idle();
-
     constexpr uint BLOCK_SIZE = 1024;
-    for (uint i = 0; i < len_in_bytes; i += BLOCK_SIZE) {
-        uint block_len_in_words = std::min(BLOCK_SIZE >> 2, (len_in_bytes - i) >> 2);
+    uint block_len_in_words = std::min((BLOCK_SIZE - (address & (BLOCK_SIZE - 1))) >> 2, len_in_bytes >> 2);
+    for (uint i = 0; i < len_in_bytes; ) {
         if (!write_block(address + i, &data[i >> 2], block_len_in_words)) {
             printf("Block write failed\n");
             return false;
         }
+        i += block_len_in_words << 2;
+        block_len_in_words = std::min(BLOCK_SIZE >> 2, (len_in_bytes - i) >> 2);
     }
 
-    for (uint j = 0; j < len_in_bytes; j += 4) {
+#ifdef FULL_VERIFY
+    for (uint j = 0; j < len_in_bytes; j += 4) 
+#else
+    uint j = 0;
+#endif
+    {
         uint check_data;
         if (!read_reg(address + j, check_data)) {
             printf("Read failed\n");
@@ -227,18 +241,23 @@ static bool load(uint address, const uint* data, uint len_in_bytes) {
     return true;
 }
 
-static bool start(uint pc = 0x20000001) {
+static bool start(uint pc, uint sp) {
     idle();
 
+    // Start from boot address, which can be read from ROM at 0x4
+    uint rom_pc, rom_sp;
+    read_reg(0x0, rom_sp);
+    read_reg(0x4, rom_pc);
+
     printf("Set PC\n");
-    if (!write_reg(0xe000edf8, pc) ||
+    if (!write_reg(0xe000edf8, rom_pc) ||
         !write_reg(0xe000edf4, 0x1000F))
     {
         printf("Failed to set PC\n");
         return false;
     }
     printf("Set SP\n");
-    if (!write_reg(0xe000edf8, 0x15004000) || //0x20042000) ||
+    if (!write_reg(0xe000edf8, rom_sp) ||
         !write_reg(0xe000edf4, 0x1000D))
     {
         printf("Failed to set SP\n");
@@ -246,12 +265,21 @@ static bool start(uint pc = 0x20000001) {
     }
     idle();
 
-#if 1
+    // If a PC has been given, go through watchdog boot sequence to start there
+    if (pc != 0) {
+        uint watchdog_data[4] = {0xb007c0d3, 0x4ff83f2d ^ pc, sp, pc};
+        printf("Setup watchdog\n");
+        if (!write_block(0x4005801c, watchdog_data, 4)) {
+            printf("Failed to setup watchdog for reset\n");
+        }
+    }
+
+#if 0
     uint data;
     write_reg(0xe000edf4, 0x0000F);
     idle();
     read_reg(0xe000edf8, data);
-    printf("Set PC to %08x\n", data);
+    printf("PC is %08x\n", data);
 
     for (int i = 0; i < 16; ++i) {
         write_reg(0xe000edf4, i);
@@ -265,7 +293,6 @@ static bool start(uint pc = 0x20000001) {
         printf("WD%d is %08x\n", i, data);
     }
 #endif
-    //write_reg(0x40010008, 0xC000);
 
     printf("Start CPU\n");
     if (!write_reg(0xe000edf0, 0xA05F0001)) {
@@ -275,12 +302,34 @@ static bool start(uint pc = 0x20000001) {
 
     idle();
     wait_for_idle();
-    //sleep_us(100);
+
+#if 0
+    sleep_ms(10);
+
+    connect(false);
+    printf("Halt CPU\n");
+    if (!write_reg(0xe000edf0, 0xA05F0003)) {
+        printf("Halt failed\n");
+        return false;
+    }
+
+    for (int i = 0; i < 16; ++i) {
+        write_reg(0xe000edf4, i);
+        idle();
+        read_reg(0xe000edf8, data);
+        printf("R%d is %08x\n", i, data);
+    }
+
+    for (int i = 0; i < 4; ++i) {
+        read_reg(0x4005801c + 4*i, data);
+        printf("WD%d is %08x\n", i, data);
+    }
+#endif
 
     return true;
 }
 
-bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections) {
+bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections, uint pc = 0x20000001, uint sp = 0x20042000, bool use_xip_as_ram = false) {
     gpio_init(2);
     gpio_init(3);
     gpio_disable_pulls(2);
@@ -288,11 +337,25 @@ bool swd_load_program(const uint* addresses, const uint** data, const uint* data
 
     printf("Connecting\n");
 
-    bool ok = connect();
-
-    printf("Connected %s\n", ok ? "OK" : "Fail");
+    bool ok = connect(true, 0xf);
+    printf("Reset %s\n", ok ? "OK" : "Fail");
     if (!ok) {
         return false;
+    }
+
+    ok = connect(false, 0);    
+
+    printf("Connected core 0 %s\n", ok ? "OK" : "Fail");
+    if (!ok) {
+        return false;
+    }
+
+    if (use_xip_as_ram) {
+        printf("Disable XIP\n");
+        if (!write_reg(0x14000000, 0)) {
+            printf("Disable XIP failed\n");
+            return false;
+        }
     }
 
     for (uint i = 0; i < num_sections; ++i)
@@ -303,7 +366,12 @@ bool swd_load_program(const uint* addresses, const uint** data, const uint* data
         }   
     }
 
-    ok = start();
+    ok = start(pc, sp);
+
+    ok |= connect(false, 1);
+
+    ok |= start(0, 0x20041000);
+
     unload_pio();
     return ok;
 }

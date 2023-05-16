@@ -3,18 +3,36 @@
 
 #include <stdio.h>
 #include "hardware/gpio.h"
+#include "hardware/uart.h"
 #include "drivers/dv_display/dv_display.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 using namespace pimoroni;
 
-#define FRAME_WIDTH 640
+#define FRAME_WIDTH 720
 #define FRAME_HEIGHT 480
 
+void on_uart_rx() {
+    while (uart_is_readable(uart1)) {
+        uint8_t ch = uart_getc(uart1);
+        putc(ch, stdout);
+    }
+}
+
 int main() {
-  set_sys_clock_khz(200000, true);
+  set_sys_clock_khz(216000, true);
 
   stdio_init_all();
+
+  // Relay UART RX from the display driver
+  gpio_set_function(5, GPIO_FUNC_UART);
+  uart_init(uart1, 115200);
+  uart_set_hw_flow(uart1, false, false);
+  uart_set_format(uart1, 8, 1, UART_PARITY_NONE);
+  uart_set_fifo_enabled(uart1, false);
+  irq_set_exclusive_handler(UART1_IRQ, on_uart_rx);
+  irq_set_enabled(UART1_IRQ, true);
+  uart_set_irq_enables(uart1, true, false);
 
   constexpr uint BUTTON_A = 9;
   gpio_init(BUTTON_A);

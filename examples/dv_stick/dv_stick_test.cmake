@@ -6,7 +6,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(${OUTPUT_NAME} pico_stdlib dv_display hardware_i2c pico_graphics)
+target_link_libraries(${OUTPUT_NAME} pico_stdlib dv_display hardware_i2c hardware_uart pico_graphics)
 
 pico_enable_stdio_usb(${OUTPUT_NAME} 1)
 

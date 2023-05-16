@@ -1,1 +1,1 @@
-bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections);
+bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections, uint pc = 0x20000001, uint sp = 0x20042000, bool use_xip_as_ram = false);

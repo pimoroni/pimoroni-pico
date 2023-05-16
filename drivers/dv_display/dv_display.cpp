@@ -16,7 +16,7 @@ namespace pimoroni {
     gpio_init(VSYNC);
     gpio_set_dir(VSYNC, GPIO_IN);
 
-    swd_load_program(section_addresses, section_data, section_data_len, sizeof(section_addresses) / sizeof(section_addresses[0]));
+    swd_load_program(section_addresses, section_data, section_data_len, sizeof(section_addresses) / sizeof(section_addresses[0]), 0x20000001, 0x15004000, true);
 
     ram.init();
     write_header(0);
