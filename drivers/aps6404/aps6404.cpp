@@ -98,6 +98,13 @@ namespace pimoroni {
     }
 
     void APS6404::write(uint32_t addr, uint32_t* data, uint32_t len_in_bytes) {
+        dma_channel_config c = dma_channel_get_default_config(dma_channel);
+        channel_config_set_read_increment(&c, true);
+        channel_config_set_write_increment(&c, false);
+        channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
+        channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+        channel_config_set_bswap(&c, true);
+        
         if (!last_cmd_was_write) {
             wait_for_finish_blocking();
             setup_cmd_buffer_dma(true);
@@ -114,13 +121,6 @@ namespace pimoroni {
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
             pio_sm_put_blocking(pio, pio_sm, pio_offset + sram_offset_do_write);
 
-            dma_channel_config c = dma_channel_get_default_config(dma_channel);
-            channel_config_set_read_increment(&c, true);
-            channel_config_set_write_increment(&c, false);
-            channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
-            channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
-            channel_config_set_bswap(&c, true);
-            
             dma_channel_configure(
                 dma_channel, &c,
                 &pio->txf[pio_sm],
@@ -132,6 +132,13 @@ namespace pimoroni {
     }
 
     void APS6404::write_repeat(uint32_t addr, uint32_t data, uint32_t len_in_bytes) {
+        dma_channel_config c = dma_channel_get_default_config(dma_channel);
+        channel_config_set_read_increment(&c, false);
+        channel_config_set_write_increment(&c, false);
+        channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
+        channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+        channel_config_set_bswap(&c, true);
+        
         if (!last_cmd_was_write) {
             wait_for_finish_blocking();
             setup_cmd_buffer_dma(true);
@@ -149,13 +156,6 @@ namespace pimoroni {
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
             pio_sm_put_blocking(pio, pio_sm, pio_offset + sram_offset_do_write);
 
-            dma_channel_config c = dma_channel_get_default_config(dma_channel);
-            channel_config_set_read_increment(&c, false);
-            channel_config_set_write_increment(&c, false);
-            channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
-            channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
-            channel_config_set_bswap(&c, true);
-            
             dma_channel_configure(
                 dma_channel, &c,
                 &pio->txf[pio_sm],
@@ -199,9 +199,6 @@ namespace pimoroni {
     }
 
     void APS6404::start_read(uint32_t* read_buf, uint32_t total_len_in_words, int chain_channel) {
-        last_cmd_was_write = false;
-        wait_for_finish_blocking();
-
         dma_channel_config c = dma_channel_get_default_config(dma_channel);
         channel_config_set_read_increment(&c, false);
         channel_config_set_write_increment(&c, true);
@@ -212,6 +209,9 @@ namespace pimoroni {
             channel_config_set_chain_to(&c, chain_channel);
         }
         
+        last_cmd_was_write = false;
+        wait_for_finish_blocking();
+
         dma_channel_configure(
             dma_channel, &c,
             read_buf,

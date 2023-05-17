@@ -39,7 +39,7 @@ int main() {
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
-  sleep_ms(5000);
+  //sleep_ms(5000);
 
   DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT);
   display.init();
@@ -78,6 +78,20 @@ int main() {
 
     graphics.set_pen(0xFFFF);
     graphics.clear();
+
+    for (uint i = 0; i < 128; i++) {
+      for (uint j = 0; j < 256; j++) {
+        graphics.set_pen((j << 7) | i);
+        graphics.pixel(Point(j, i));
+      }
+    }
+
+    for (uint i = 0; i < 128; i++) {
+      for (uint j = 0; j < 256; j++) {
+        graphics.set_pen((j << 7) | i);
+        graphics.pixel(Point(i, j+128));
+      }
+    }
 
     for(int i =0 ; i < NUM_CIRCLES ; i++)
     {

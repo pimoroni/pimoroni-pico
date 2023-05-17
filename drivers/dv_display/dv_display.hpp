@@ -48,6 +48,7 @@ namespace pimoroni {
       : ram(CS, D0)
       , i2c(I2C_SDA, I2C_SCL)
       , width(width), height(height)
+      , pixel_buffer_location(-1, -1)
     {}
 
     //--------------------------------------------------
@@ -66,7 +67,7 @@ namespace pimoroni {
           for(uint k = 0; k < 1024*mb; k++) {
             sprintf(writeBuffer, "%u-%u", b, k);
 
-            write(k*1024, strlen(writeBuffer)+1, (uint16_t *)writeBuffer);
+            ram.write(k*1024, (uint32_t *)writeBuffer, strlen(writeBuffer)+1);
           }
         }
 
@@ -91,8 +92,12 @@ namespace pimoroni {
       void flip();
 
     private:
-      void write(uint32_t address, size_t len, const uint16_t *data);
-      void write(uint32_t address, size_t len, const uint16_t byte);
+      static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 16;
+      uint32_t pixel_buffer[PIXEL_BUFFER_LEN_IN_WORDS];
+      Point pixel_buffer_location;
+      int32_t pixel_buffer_x;
+
+      void write(uint32_t address, size_t len, const uint16_t colour);
       void read(uint32_t address, size_t len, uint16_t *data);
 
       void write_header(uint bank);

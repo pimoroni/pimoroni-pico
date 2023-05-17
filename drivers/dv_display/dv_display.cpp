@@ -16,6 +16,7 @@ namespace pimoroni {
     gpio_init(VSYNC);
     gpio_set_dir(VSYNC, GPIO_IN);
 
+    sleep_ms(200);
     swd_load_program(section_addresses, section_data, section_data_len, sizeof(section_addresses) / sizeof(section_addresses[0]), 0x20000001, 0x15004000, true);
 
     ram.init();
@@ -27,7 +28,7 @@ namespace pimoroni {
 
     bank = 0;
     gpio_put(RAM_SEL, 0);
-    sleep_ms(500);
+    sleep_ms(100);
 
     printf("Start I2C\n");
     //i2c_init(i2c0, 100000);
@@ -41,24 +42,14 @@ namespace pimoroni {
   }
   
   void DVDisplay::flip() {
+    if (pixel_buffer_location.y != -1) {
+      ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+      pixel_buffer_location.y = -1;
+    }
     bank ^= 1;
     ram.wait_for_finish_blocking();
     while (gpio_get(VSYNC) == 0);
     gpio_put(RAM_SEL, bank);
-  }
-
-  void DVDisplay::write(uint32_t address, size_t len, const uint16_t *data)
-  {
-    if ((uintptr_t)data & 2) {
-      write(address, 1, *data);
-      data++;
-      len--;
-      address += 2;
-    }
-
-    if (len > 0) {
-      ram.write(address, (uint32_t*)data, len << 1);
-    }
   }
 
   void DVDisplay::write(uint32_t address, size_t len, const uint16_t colour)
@@ -75,7 +66,21 @@ namespace pimoroni {
 
   void DVDisplay::write_pixel(const Point &p, uint16_t colour)
   {
-    write(pointToAddress(p), 1, colour);
+    if (pixel_buffer_location.y == p.y && pixel_buffer_location.x + pixel_buffer_x == p.x) {
+      if (pixel_buffer_x & 1) pixel_buffer[pixel_buffer_x >> 1] |= (uint32_t)colour << 16;
+      else pixel_buffer[pixel_buffer_x >> 1] = colour;
+      if (++pixel_buffer_x == PIXEL_BUFFER_LEN_IN_WORDS * 2) {
+        ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
+        pixel_buffer_location.y = -1;
+      }
+      return;
+    }
+    else if (pixel_buffer_location.y != -1) {
+      ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+    }
+    pixel_buffer_location = p;
+    pixel_buffer_x = 1;
+    pixel_buffer[0] = colour;
   }
 
   void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t colour)
