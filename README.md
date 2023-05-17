@@ -140,6 +140,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * ICP10125 - High Accuracy Pressure / Altitude / Temperature Sensor - https://shop.pimoroni.com/products/icp10125-air-pressure-breakout
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
+* RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
 
 ## Kits
 
