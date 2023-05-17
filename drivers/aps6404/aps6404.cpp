@@ -98,18 +98,28 @@ namespace pimoroni {
     }
 
     void APS6404::write(uint32_t addr, uint32_t* data, uint32_t len_in_bytes) {
-        dma_channel_config c = dma_channel_get_default_config(dma_channel);
-        channel_config_set_read_increment(&c, true);
-        channel_config_set_write_increment(&c, false);
-        channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
-        channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
-        channel_config_set_bswap(&c, true);
-        
         if (!last_cmd_was_write) {
+            dma_channel_config c = dma_channel_get_default_config(dma_channel);
+            channel_config_set_read_increment(&c, true);
+            channel_config_set_write_increment(&c, false);
+            channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
+            channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+            channel_config_set_bswap(&c, true);
+            
             wait_for_finish_blocking();
             setup_cmd_buffer_dma(true);
             last_cmd_was_write = true;
+
+            dma_channel_configure(
+                dma_channel, &c,
+                &pio->txf[pio_sm],
+                nullptr,
+                1,
+                false
+            );
         }
+
+        hw_set_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
 
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
@@ -121,29 +131,33 @@ namespace pimoroni {
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
             pio_sm_put_blocking(pio, pio_sm, pio_offset + sram_offset_do_write);
 
-            dma_channel_configure(
-                dma_channel, &c,
-                &pio->txf[pio_sm],
-                data,
-                (page_len >> 2) + 1,
-                true
-            );
+            dma_channel_transfer_from_buffer_now(dma_channel, data, (page_len >> 2) + 1);
         }
     }
 
     void APS6404::write_repeat(uint32_t addr, uint32_t data, uint32_t len_in_bytes) {
-        dma_channel_config c = dma_channel_get_default_config(dma_channel);
-        channel_config_set_read_increment(&c, false);
-        channel_config_set_write_increment(&c, false);
-        channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
-        channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
-        channel_config_set_bswap(&c, true);
-        
         if (!last_cmd_was_write) {
+            dma_channel_config c = dma_channel_get_default_config(dma_channel);
+            channel_config_set_read_increment(&c, false);
+            channel_config_set_write_increment(&c, false);
+            channel_config_set_dreq(&c, pio_get_dreq(pio, pio_sm, true));
+            channel_config_set_transfer_data_size(&c, DMA_SIZE_32);
+            channel_config_set_bswap(&c, true);
+            
             wait_for_finish_blocking();
             setup_cmd_buffer_dma(true);
             last_cmd_was_write = true;
+
+            dma_channel_configure(
+                dma_channel, &c,
+                &pio->txf[pio_sm],
+                nullptr,
+                1,
+                false
+            );
         }
+
+        hw_clear_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
 
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
@@ -156,13 +170,7 @@ namespace pimoroni {
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
             pio_sm_put_blocking(pio, pio_sm, pio_offset + sram_offset_do_write);
 
-            dma_channel_configure(
-                dma_channel, &c,
-                &pio->txf[pio_sm],
-                &repeat_data,
-                (page_len >> 2) + 1,
-                true
-            );
+            dma_channel_transfer_from_buffer_now(dma_channel, &repeat_data, (page_len >> 2) + 1);
         }
     }
 
