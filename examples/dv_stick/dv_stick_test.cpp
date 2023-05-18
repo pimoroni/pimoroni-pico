@@ -56,6 +56,7 @@ int main() {
   display.flip();
 
   printf("Starting\n");
+  graphics.set_font("bitmap8");
 
   constexpr int NUM_CIRCLES = 50;
   struct Circle {
@@ -86,12 +87,14 @@ int main() {
       }
     }
 
+#if 0
     for (uint i = 0; i < 128; i++) {
       for (uint j = 0; j < 256; j++) {
         graphics.set_pen((j << 7) | i);
         graphics.pixel(Point(i, j+128));
       }
     }
+#endif
 
     for(int i =0 ; i < NUM_CIRCLES ; i++)
     {
@@ -123,6 +126,14 @@ int main() {
   #endif
 
     uint32_t render_time = time_us_32() - render_start_time;
+
+    char buffer[8];
+    sprintf(buffer, "%s %s %s", 
+            gpio_get(BUTTON_A) == 0 ? "A" : " ", 
+            display.is_button_b_pressed() ? "B" : " ",
+            display.is_button_c_pressed() ? "C" : " ");
+    graphics.set_pen(0);
+    graphics.text(buffer, {500,10}, FRAME_WIDTH - 500, 3);
 
     uint32_t flip_start_time = time_us_32();
     display.flip();

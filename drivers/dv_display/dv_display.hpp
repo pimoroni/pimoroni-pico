@@ -37,6 +37,8 @@ namespace pimoroni {
     // I2C
     static constexpr uint I2C_ADDR = 0x0D;
     static constexpr uint I2C_REG_START = 0xF9;
+    static constexpr uint I2C_REG_GPIO = 0xC0;
+    static constexpr uint I2C_REG_GPIO_HI = 0xC8;
     
     static constexpr uint32_t base_address = 0x10000;
     uint16_t width = 0;
@@ -90,6 +92,12 @@ namespace pimoroni {
 
       void init();
       void flip();
+
+      uint8_t get_driver_gpio();
+      uint8_t get_driver_gpio_hi();
+
+      bool is_button_b_pressed() { return (get_driver_gpio() & 0x1) != 0x1; }
+      bool is_button_c_pressed() { return (get_driver_gpio() & 0x2) != 0x2; }
 
     private:
       static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 16;

@@ -52,6 +52,14 @@ namespace pimoroni {
     gpio_put(RAM_SEL, bank);
   }
 
+  uint8_t DVDisplay::get_driver_gpio() {
+    return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO);
+  }
+
+  uint8_t DVDisplay::get_driver_gpio_hi() {
+    return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
+  }
+
   void DVDisplay::write(uint32_t address, size_t len, const uint16_t colour)
   {
     uint32_t val = colour | ((uint32_t)colour << 16);
