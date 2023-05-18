@@ -36,6 +36,7 @@ namespace pimoroni {
 
     // I2C
     static constexpr uint I2C_ADDR = 0x0D;
+    static constexpr uint I2C_REG_SET_RES = 0xF8;
     static constexpr uint I2C_REG_START = 0xF9;
     static constexpr uint I2C_REG_GPIO = 0xC0;
     static constexpr uint I2C_REG_GPIO_HI = 0xC8;
@@ -46,7 +47,11 @@ namespace pimoroni {
     uint8_t bank = 0;
 
   public:
-    DVDisplay(uint16_t width, uint16_t height) 
+    // Valid resolutions are:
+    //   640x480 (60Hz), 720x480 (60Hz), 720x400 (70Hz), 720x576 (50Hz)
+    //   800x600 (60Hz), 800x480 (60Hz), 800x450 (60Hz), 960x540 (50Hz), 1280x720 (30Hz)
+    // Note resolutions on the second line require quite extreme overclocking and may not work on all hardware.
+    DVDisplay(uint16_t width, uint16_t height)
       : ram(CS, D0)
       , i2c(I2C_SDA, I2C_SCL)
       , width(width), height(height)

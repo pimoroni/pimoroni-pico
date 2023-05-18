@@ -1,6 +1,6 @@
 #include "dv_display.hpp"
 #include "swd_load.hpp"
-#include "pico-stick.h"
+#include "pico-stick-wide.h"
 
 #include <cstdlib>
 #include <math.h>
@@ -9,6 +9,31 @@
 namespace pimoroni {
 
   void DVDisplay::init() {
+    uint8_t mode = 0xFF;
+    if (width == 640) {
+      mode = 0;
+    }
+    else if (width == 720) {
+      if (height == 480) mode = 1;
+      else if (height == 400) mode = 2;
+      else if (height == 576) mode = 3;
+    }
+    else if (width == 800) {
+      if (height == 600) mode = 0x10;
+      else if (height == 480) mode = 0x11;
+      else if (height == 450) mode = 0x12;
+    }
+    else if (width == 960) {
+      if (height == 540) mode = 0x14;
+    }
+    else if (width == 1280) {
+      if (height == 720) mode = 0x15;
+    }
+
+    if (mode == 0xFF) {
+      printf("Resolution %dx%d is not supported.  Will use 720x480.\n", width, height);
+    }
+
     gpio_init(RAM_SEL);
     gpio_put(RAM_SEL, 0);
     gpio_set_dir(RAM_SEL, GPIO_OUT);
@@ -31,13 +56,12 @@ namespace pimoroni {
     sleep_ms(100);
 
     printf("Start I2C\n");
-    //i2c_init(i2c0, 100000);
-    //gpio_set_function(I2C_SDA, GPIO_FUNC_I2C); gpio_pull_up(I2C_SDA);
-    //gpio_set_function(I2C_SCL, GPIO_FUNC_I2C); gpio_pull_up(I2C_SCL);
+
+    if (mode != 0xFF) {
+      i2c.reg_write_uint8(I2C_ADDR, I2C_REG_SET_RES, mode);
+    }
 
     i2c.reg_write_uint8(I2C_ADDR, I2C_REG_START, 1);
-    //uint8_t i2c_cmd[] = {I2C_REG_START, 1};
-    //i2c_write_blocking(i2c0, I2C_ADDR, i2c_cmd, 2, false);
     printf("Started\n");
   }
   

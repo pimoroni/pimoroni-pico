@@ -12,8 +12,8 @@
 
 using namespace pimoroni;
 
-#define FRAME_WIDTH 720
-#define FRAME_HEIGHT 480
+#define FRAME_WIDTH 1280
+#define FRAME_HEIGHT 720
 
 FATFS fs;
 FRESULT fr;
@@ -146,12 +146,13 @@ int main() {
   auto dir = new DIR();
   bool first = true;
   constexpr int ms_per_image = 5000;
+  const TCHAR* dirname = "/images720/";
   while (1) {
-    f_opendir(dir, "/images/");
+    f_opendir(dir, dirname);
     while(f_readdir(dir, &file) == FR_OK && file.fname[0]) {
         printf("- %s %lld\n", file.fname, file.fsize);
 
-        draw_jpeg(std::string("/images/") + file.fname);
+        draw_jpeg(std::string(dirname) + file.fname);
 
         if (!first) {
           for (int w = 0; w < ms_per_image && gpio_get(BUTTON_A) == 1; w += 10) {
