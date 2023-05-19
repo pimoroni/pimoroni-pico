@@ -10,24 +10,36 @@ namespace pimoroni {
 
   void DVDisplay::init() {
     uint8_t mode = 0xFF;
-    if (width == 640) {
+    uint16_t full_width = width;
+    uint16_t full_height = height;
+
+    if (width < 640 || (width == 640 && (height == 360 || height == 720))) {
+      h_repeat = 2;
+      full_width *= 2;
+    }
+    if (height < 400) {
+      v_repeat = 2;
+      full_height *= 2;
+    }
+
+    if (full_width == 640) {
       mode = 0;
     }
-    else if (width == 720) {
-      if (height == 480) mode = 1;
-      else if (height == 400) mode = 2;
-      else if (height == 576) mode = 3;
+    else if (full_width == 720) {
+      if (full_height == 480) mode = 1;
+      else if (full_height == 400) mode = 2;
+      else if (full_height == 576) mode = 3;
     }
-    else if (width == 800) {
-      if (height == 600) mode = 0x10;
-      else if (height == 480) mode = 0x11;
-      else if (height == 450) mode = 0x12;
+    else if (full_width == 800) {
+      if (full_height == 600) mode = 0x10;
+      else if (full_height == 480) mode = 0x11;
+      else if (full_height == 450) mode = 0x12;
     }
-    else if (width == 960) {
-      if (height == 540) mode = 0x14;
+    else if (full_width == 960) {
+      if (full_height == 540) mode = 0x14;
     }
-    else if (width == 1280) {
-      if (height == 720) mode = 0x15;
+    else if (full_width == 1280) {
+      if (full_height == 720) mode = 0x15;
     }
 
     if (mode == 0xFF) {
@@ -128,9 +140,10 @@ namespace pimoroni {
   void DVDisplay::write_header(uint bank)
   {
     uint32_t buf[8];
+    uint32_t full_width = width * h_repeat;
     buf[0] = 0x4F434950;
-    buf[1] = 0x01010101;
-    buf[2] = (uint32_t)width << 16;
+    buf[1] = 0x01000101 + ((uint32_t)v_repeat << 16);
+    buf[2] = full_width << 16;
     buf[3] = (uint32_t)height << 16;
     buf[4] = 0x00000001;
     buf[5] = 0x00010000 + height + (bank << 24);
@@ -141,7 +154,7 @@ namespace pimoroni {
     uint addr = 4 * 7;
     for (int i = 0; i < height; i += 8) {
       for (int j = 0; j < 8; ++j) {
-        buf[j] = 0x91000000 + ((i + j) * width * 2) + base_address;
+        buf[j] = 0x90000000 + ((uint32_t)h_repeat << 24) + ((i + j) * width * 2) + base_address;
       }
       ram.write(addr, buf, 8 * 4);
       ram.wait_for_finish_blocking();

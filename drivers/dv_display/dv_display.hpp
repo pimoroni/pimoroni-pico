@@ -45,12 +45,15 @@ namespace pimoroni {
     uint16_t width = 0;
     uint16_t height = 0;
     uint8_t bank = 0;
+    uint8_t h_repeat = 1;
+    uint8_t v_repeat = 1;
 
   public:
     // Valid resolutions are:
     //   640x480 (60Hz), 720x480 (60Hz), 720x400 (70Hz), 720x576 (50Hz)
     //   800x600 (60Hz), 800x480 (60Hz), 800x450 (60Hz), 960x540 (50Hz), 1280x720 (30Hz)
     // Note resolutions on the second line require quite extreme overclocking and may not work on all hardware.
+    // Either or both of the horizontal or vertical component of any resolution may be halved.
     DVDisplay(uint16_t width, uint16_t height)
       : ram(CS, D0)
       , i2c(I2C_SDA, I2C_SCL)
