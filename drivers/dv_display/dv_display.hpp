@@ -40,6 +40,7 @@ namespace pimoroni {
     static constexpr uint I2C_REG_START = 0xF9;
     static constexpr uint I2C_REG_GPIO = 0xC0;
     static constexpr uint I2C_REG_GPIO_HI = 0xC8;
+    static constexpr uint I2C_REG_EDID = 0xED;
     
     static constexpr uint32_t base_address = 0x10000;
     uint16_t width = 0;
@@ -96,6 +97,7 @@ namespace pimoroni {
       
       void write_pixel(const Point &p, uint16_t colour) override;
       void write_pixel_span(const Point &p, uint l, uint16_t colour) override;
+      void write_pixel_span(const Point &p, uint l, uint16_t *data);
       void read_pixel_span(const Point &p, uint l, uint16_t *data) override;
 
       void init();
@@ -106,6 +108,9 @@ namespace pimoroni {
 
       bool is_button_b_pressed() { return (get_driver_gpio() & 0x1) != 0x1; }
       bool is_button_c_pressed() { return (get_driver_gpio() & 0x2) != 0x2; }
+
+      // The supplied buffer must be at least 128 bytes long
+      void get_edid(uint8_t* edid);
 
     private:
       static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 16;

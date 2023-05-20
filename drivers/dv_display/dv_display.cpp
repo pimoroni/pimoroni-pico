@@ -96,6 +96,10 @@ namespace pimoroni {
     return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
   }
 
+  void DVDisplay::get_edid(uint8_t* edid) {
+    i2c.read_bytes(I2C_ADDR, I2C_REG_EDID, edid, 128);
+  }
+
   void DVDisplay::write(uint32_t address, size_t len, const uint16_t colour)
   {
     uint32_t val = colour | ((uint32_t)colour << 16);
@@ -130,6 +134,20 @@ namespace pimoroni {
   void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t colour)
   {
     write(pointToAddress(p), l, colour);
+  }
+
+  void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t *data)
+  {
+    uint32_t offset = 0;
+    if (((uintptr_t)data & 0x2) != 0) {
+      uint32_t val = *data++;
+      ram.write(pointToAddress(p), &val, 2);
+      --l;
+      offset = 2;
+    }
+    if (l > 0) {
+      ram.write(pointToAddress(p) + offset, (uint32_t*)data, l << 1);
+    }
   }
 
   void DVDisplay::read_pixel_span(const Point &p, uint l, uint16_t *data)
