@@ -12,6 +12,11 @@ using namespace pimoroni;
 #define FRAME_WIDTH 720
 #define FRAME_HEIGHT 480
 
+#define READ_EDID 1
+#if READ_EDID
+extern "C" { int decode_edid(unsigned char* edid); }
+#endif
+
 void on_uart_rx() {
     while (uart_is_readable(uart1)) {
         uint8_t ch = uart_getc(uart1);
@@ -45,14 +50,14 @@ int main() {
   display.init();
   //display.test();
 
-#if 0
-  uint8_t edid[128];
-  display.get_edid(edid);
-  for (int i = 0; i < 8; ++i) {
-      for (int j = 0; j < 16; ++j) {
-          printf("%02x ", edid[i*16 + j]);
-      }
-      printf("\n");
+#if READ_EDID
+  sleep_ms(5000);
+
+  {
+    uint8_t edid[128];
+    display.get_edid(edid);
+    sleep_ms(50);
+    decode_edid(edid);
   }
 #endif
 

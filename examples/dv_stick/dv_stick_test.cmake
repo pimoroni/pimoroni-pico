@@ -3,6 +3,7 @@ set(OUTPUT_NAME dv_stick_test)
 add_executable(
   ${OUTPUT_NAME}
   dv_stick_test.cpp
+  edid-decode.c
 )
 
 # Pull in pico libraries that we need
