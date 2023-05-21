@@ -39,6 +39,7 @@ namespace pimoroni {
     static constexpr uint I2C_REG_SET_RES = 0xF8;
     static constexpr uint I2C_REG_START = 0xF9;
     static constexpr uint I2C_REG_GPIO = 0xC0;
+    static constexpr uint I2C_REG_LED = 0xC1;
     static constexpr uint I2C_REG_GPIO_HI = 0xC8;
     static constexpr uint I2C_REG_EDID = 0xED;
     
@@ -108,6 +109,11 @@ namespace pimoroni {
 
       bool is_button_b_pressed() { return (get_driver_gpio() & 0x1) != 0x1; }
       bool is_button_c_pressed() { return (get_driver_gpio() & 0x2) != 0x2; }
+
+      // Valid LED levels are from 0-127.
+      void set_led_level(uint8_t level);
+      void set_led_level(float level) { set_led_level((uint8_t)(level * 127.f)); }
+      void set_led_heartbeat();
 
       // The supplied buffer must be at least 128 bytes long
       void get_edid(uint8_t* edid);

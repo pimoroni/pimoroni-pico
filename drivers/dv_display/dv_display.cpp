@@ -96,6 +96,14 @@ namespace pimoroni {
     return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
   }
 
+  void DVDisplay::set_led_level(uint8_t level) {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_LED, level | 0x80);
+  }
+
+  void DVDisplay::set_led_heartbeat() {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_LED, 2);
+  }
+
   void DVDisplay::get_edid(uint8_t* edid) {
     i2c.read_bytes(I2C_ADDR, I2C_REG_EDID, edid, 128);
   }

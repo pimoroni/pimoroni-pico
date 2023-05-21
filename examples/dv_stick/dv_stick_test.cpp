@@ -45,6 +45,17 @@ int main() {
   display.init();
   //display.test();
 
+#if 0
+  uint8_t edid[128];
+  display.get_edid(edid);
+  for (int i = 0; i < 8; ++i) {
+      for (int j = 0; j < 16; ++j) {
+          printf("%02x ", edid[i*16 + j]);
+      }
+      printf("\n");
+  }
+#endif
+
   PicoGraphics_PenDV_RGB555 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 
   graphics.set_pen(0x001F);
@@ -71,6 +82,7 @@ int main() {
     circles[i].y = rand() % graphics.bounds.h;
   }
 
+  int frames = 0;
   while (true) {
     //while(gpio_get(BUTTON_A) == 1) {
     //  sleep_ms(10);
@@ -139,5 +151,9 @@ int main() {
     display.flip();
     uint32_t flip_time = time_us_32() - flip_start_time;
     printf("Render: %.3f, flip: %.3f\n", render_time / 1000.f, flip_time / 1000.f);
+
+    ++frames;
+    if (gpio_get(BUTTON_A) == 0) display.set_led_level((uint8_t)frames);
+    else display.set_led_heartbeat();
   }
 }
