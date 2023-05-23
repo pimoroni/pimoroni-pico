@@ -87,12 +87,12 @@ namespace pimoroni {
     }
 
     if(width == 320 && height == 240) {
-      command(reg::GCTRL, 1, "\x74"); // VGH and VGL voltages
-      command(reg::VCOMS, 1, "\x2F"); // VCOM voltage
-      command(reg::VRHS, 1, "\x19");  // VRH Voltage setting
+      command(reg::GCTRL, 1, "\x35"); // VGH and VGL voltages
+      command(reg::VCOMS, 1, "\x2D"); // VCOM voltage
+      command(reg::VRHS, 1, "\x15");  // VRH Voltage setting
       command(0xd6, 1, "\xa1"); // ???
-      command(reg::GMCTRP1, 14, "\xF0\x08\x0F\x0B\x0B\x07\x34\x43\x4B\x38\x14\x13\x2C\x31");
-      command(reg::GMCTRN1, 14, "\xF0\x0C\x11\x09\x08\x24\x34\x33\x4A\x3A\x16\x16\x2E\x32");
+      command(reg::GMCTRP1, 14, "\x70\x05\x0A\x0B\x0A\x27\x2F\x44\x47\x37\x14\x14\x29\x2F");
+      command(reg::GMCTRN1, 14, "\x70\x07\x0C\x08\x08\x04\x2F\x33\x46\x18\x15\x15\x2B\x2D");
     }
 
     if(width == 240 && height == 135) { // Pico Display Pack (1.14" 240x135)
