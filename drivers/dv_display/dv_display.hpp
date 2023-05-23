@@ -15,7 +15,7 @@
 namespace pimoroni {
 
   // This is ARGB1555 only for now
-  class DVDisplay : public IDirectDisplayDriver<uint16_t> {
+  class DVDisplay : public IDirectDisplayDriver<uint16_t>, public IPaletteDisplayDriver {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
@@ -41,6 +41,10 @@ namespace pimoroni {
     static constexpr uint I2C_REG_GPIO = 0xC0;
     static constexpr uint I2C_REG_LED = 0xC1;
     static constexpr uint I2C_REG_GPIO_HI = 0xC8;
+    static constexpr uint I2C_REG_GPIO_HI_OUT = 0xC9;
+    static constexpr uint I2C_REG_GPIO_HI_OE = 0xCA;
+    static constexpr uint I2C_REG_GPIO_HI_PULL_UP = 0xCB;
+    static constexpr uint I2C_REG_GPIO_HI_PULL_DOWN = 0xCC;
     static constexpr uint I2C_REG_EDID = 0xED;
     
     static constexpr uint32_t base_address = 0x10000;
@@ -51,6 +55,8 @@ namespace pimoroni {
     uint8_t v_repeat = 1;
 
   public:
+      static constexpr int PALETTE_SIZE = 32;
+
     // Valid resolutions are:
     //   640x480 (60Hz), 720x480 (60Hz), 720x400 (70Hz), 720x576 (50Hz)
     //   800x600 (60Hz), 800x480 (60Hz), 800x450 (60Hz), 960x540 (50Hz), 1280x720 (30Hz)
@@ -104,11 +110,31 @@ namespace pimoroni {
       void init();
       void flip();
 
-      uint8_t get_driver_gpio();
-      uint8_t get_driver_gpio_hi();
+      // 32 colour palette mode.  Note that palette entries range from 0-31,
+      // but when writing colour values the palette entry is in bits 6-2, so the
+      // entry value is effectively multiplied by 4.
+      void enable_palette(bool enable);
+      void set_palette(RGB888 palette[PALETTE_SIZE]);
+      void set_palette_colour(uint8_t entry, RGB888 colour);
+      
+      void write_palette_pixel(const Point &p, uint8_t colour);
+      void write_palette_pixel_span(const Point &p, uint l, uint8_t colour);
+      void write_palette_pixel_span(const Point &p, uint l, uint8_t* data);
+      void read_palette_pixel_span(const Point &p, uint l, uint8_t *data);
 
-      bool is_button_b_pressed() { return (get_driver_gpio() & 0x1) != 0x1; }
-      bool is_button_c_pressed() { return (get_driver_gpio() & 0x2) != 0x2; }
+      uint8_t get_gpio();
+      uint8_t get_gpio_hi();
+      void set_gpio_hi_dir(uint pin, bool output);
+      void set_gpio_hi_dir_all(uint8_t output_enables);
+      void set_gpio_hi(uint pin, bool on);
+      void set_gpio_hi_all(uint8_t vals);
+      void set_gpio_hi_pull_up(uint pin, bool on);
+      void set_gpio_hi_pull_up_all(uint8_t vals);
+      void set_gpio_hi_pull_down(uint pin, bool on);
+      void set_gpio_hi_pull_down_all(uint8_t vals);
+
+      bool is_button_b_pressed() { return (get_gpio() & 0x1) != 0x1; }
+      bool is_button_c_pressed() { return (get_gpio() & 0x2) != 0x2; }
 
       // Valid LED levels are from 0-127.
       void set_led_level(uint8_t level);
@@ -119,6 +145,10 @@ namespace pimoroni {
       void get_edid(uint8_t* edid);
 
     private:
+      uint8_t palette[PALETTE_SIZE * 3] alignas(4);
+      bool use_palette_mode = false;
+      bool rewrite_header = false;
+
       static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 16;
       uint32_t pixel_buffer[PIXEL_BUFFER_LEN_IN_WORDS];
       Point pixel_buffer_location;
@@ -126,12 +156,20 @@ namespace pimoroni {
 
       void write(uint32_t address, size_t len, const uint16_t colour);
       void read(uint32_t address, size_t len, uint16_t *data);
+      void write(uint32_t address, size_t len, const uint8_t colour);
+      void read(uint32_t address, size_t len, uint8_t *data);
 
-      void write_header(uint bank);
+      void write_palette();
+      void write_header();
 
-      uint32_t pointToAddress(const Point &p)
-      {
+      void i2c_modify_bit(uint8_t reg, uint bit, bool enable);
+
+      uint32_t point_to_address(const Point &p) {
         return base_address + ((p.y * (uint32_t)width) + p.x) * 2;
+      }
+
+      uint32_t point_to_address_palette(const Point &p) {
+        return base_address + (p.y * (uint32_t)width * 2) + p.x;
       }
   };
 }

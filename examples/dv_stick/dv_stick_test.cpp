@@ -61,13 +61,21 @@ int main() {
   }
 #endif
 
-  PicoGraphics_PenDV_RGB555 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
+  display.enable_palette(true);
+  PicoGraphics_PenDV_P5 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 
-  graphics.set_pen(0x001F);
+  graphics.create_pen(0, 0, 0);
+  graphics.create_pen(0xFF, 0xFF, 0xFF);
+
+  for (int i = 0; i < 25; ++i) {
+    graphics.create_pen_hsv(i * 0.04f, 1.0f, 1.0f);
+  }
+
+  graphics.set_pen(0xFF, 0, 0);
   graphics.clear();
   display.flip();
   sleep_ms(2000);
-  graphics.set_pen(0x7C00);
+  graphics.set_pen(0, 0, 0xFF);
   graphics.clear();
   display.flip();
 
@@ -76,7 +84,7 @@ int main() {
 
   constexpr int NUM_CIRCLES = 50;
   struct Circle {
-    uint16_t x, y, size, grow;
+    uint16_t x, y, size, grow, pen;
   } circles[NUM_CIRCLES];
 
   for(int i =0 ; i < 50 ; i++)
@@ -85,6 +93,7 @@ int main() {
     circles[i].grow = std::max(0, (rand() % 50) - 25);
     circles[i].x = rand() % graphics.bounds.w;
     circles[i].y = rand() % graphics.bounds.h;
+    circles[i].pen = 2 + (i >> 1);
   }
 
   int frames = 0;
@@ -94,17 +103,18 @@ int main() {
     //}
     uint32_t render_start_time = time_us_32();
 
-    graphics.set_pen(0xFFFF);
+    graphics.set_pen(0xFF, 0xFF, 0xFF);
     graphics.clear();
 
+#if 0
     for (uint i = 0; i < 128; i++) {
       for (uint j = 0; j < 256; j++) {
-        graphics.set_pen((j << 7) | i);
+        RGB555 col = (j << 7) | i;
+        graphics.set_pen((col << 3) & 0xF8, (col >> 2) & 0xF8, (col >> 7) & 0xF8);
         graphics.pixel(Point(j, i));
       }
     }
 
-#if 0
     for (uint i = 0; i < 128; i++) {
       for (uint j = 0; j < 256; j++) {
         graphics.set_pen((j << 7) | i);
@@ -115,10 +125,12 @@ int main() {
 
     for(int i =0 ; i < NUM_CIRCLES ; i++)
     {
-      graphics.set_pen(0);
+      graphics.set_pen(0, 0, 0);
       graphics.circle(Point(circles[i].x, circles[i].y), circles[i].size);
 
-      graphics.set_pen(RGB::from_hsv(i * 0.02f, 1.0f, 1.0f).to_rgb555());
+      //RGB col = RGB::from_hsv(i * 0.02f, 1.0f, 1.0f);
+      //graphics.set_pen(col.r, col.g, col.b);
+      graphics.set_pen(circles[i].pen);
       graphics.circle(Point(circles[i].x, circles[i].y), circles[i].size-2);
       if (circles[i].grow) {
         circles[i].size++;
@@ -149,15 +161,19 @@ int main() {
             gpio_get(BUTTON_A) == 0 ? "A" : " ", 
             display.is_button_b_pressed() ? "B" : " ",
             display.is_button_c_pressed() ? "C" : " ");
-    graphics.set_pen(0);
+    graphics.set_pen(0, 0, 0);
     graphics.text(buffer, {500,10}, FRAME_WIDTH - 500, 3);
 
     uint32_t flip_start_time = time_us_32();
     display.flip();
     uint32_t flip_time = time_us_32() - flip_start_time;
-    printf("Render: %.3f, flip: %.3f\n", render_time / 1000.f, flip_time / 1000.f);
+    if (false) printf("Render: %.3f, flip: %.3f\n", render_time / 1000.f, flip_time / 1000.f);
+
+    //printf("%02x %02x\n", display.get_gpio(), display.get_gpio_hi());
 
     ++frames;
+    display.set_gpio_hi_pull_up_all(frames & 0x3F);
+    display.set_gpio_hi_pull_down_all(~(frames & 0x3F));
     if (gpio_get(BUTTON_A) == 0) display.set_led_level((uint8_t)frames);
     else display.set_led_heartbeat();
   }

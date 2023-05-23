@@ -202,7 +202,8 @@ namespace pimoroni {
       PEN_RGB565,
       PEN_RGB888,
       PEN_INKY7,
-      PEN_DV_RGB555
+      PEN_DV_RGB555,
+      PEN_DV_P5
     };
 
     void *frame_buffer;
@@ -538,6 +539,12 @@ namespace pimoroni {
        virtual void read_pixel_span(const Point &p, uint l, T *data) {};
    };
 
+  class IPaletteDisplayDriver {
+    public:
+      virtual void write_palette_pixel(const Point &p, uint8_t colour) = 0;
+      virtual void write_palette_pixel_span(const Point &p, uint l, uint8_t colour) = 0;
+      virtual void set_palette_colour(uint8_t entry, RGB888 colour) = 0;
+  };
 
   class PicoGraphics_PenInky7 : public PicoGraphics {
     public:
@@ -605,6 +612,39 @@ namespace pimoroni {
 
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB555);
+      }
+  };
+
+  class PicoGraphics_PenDV_P5 : public PicoGraphics {
+    public:
+      static const uint16_t palette_size = 32;
+      uint8_t color;
+      IPaletteDisplayDriver &driver;
+      RGB palette[palette_size];
+      bool used[palette_size];
+
+      std::array<std::array<uint8_t, 16>, 512> candidate_cache;
+      bool cache_built = false;
+      std::array<uint8_t, 16> candidates;
+
+      PicoGraphics_PenDV_P5(uint16_t width, uint16_t height, IPaletteDisplayDriver &dv_display);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
+      int reset_pen(uint8_t i) override;
+
+      int get_palette_size() override {return palette_size;};
+      RGB* get_palette() override {return palette;};
+
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
+      void set_pixel_dither(const Point &p, const RGB &c) override;
+
+      static size_t buffer_size(uint w, uint h) {
+          return w * h;
       }
   };
 }

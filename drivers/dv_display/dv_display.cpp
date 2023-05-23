@@ -57,11 +57,15 @@ namespace pimoroni {
     swd_load_program(section_addresses, section_data, section_data_len, sizeof(section_addresses) / sizeof(section_addresses[0]), 0x20000001, 0x15004000, true);
 
     ram.init();
-    write_header(0);
+    bank = 0;
+    write_header();
+    sleep_us(100);
 
     gpio_put(RAM_SEL, 1);
     ram.init();
-    write_header(1);
+    bank = 1;
+    write_header();
+    sleep_us(100);
 
     bank = 0;
     gpio_put(RAM_SEL, 0);
@@ -78,22 +82,72 @@ namespace pimoroni {
   }
   
   void DVDisplay::flip() {
-    if (pixel_buffer_location.y != -1) {
-      ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+    if (use_palette_mode) {
+      write_palette();
+      if (pixel_buffer_location.y != -1) {
+        ram.write(point_to_address_palette(pixel_buffer_location), pixel_buffer, pixel_buffer_x);
+        pixel_buffer_location.y = -1;
+      }
+    }
+    else if (pixel_buffer_location.y != -1) {
+      ram.write(point_to_address(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
       pixel_buffer_location.y = -1;
     }
     bank ^= 1;
     ram.wait_for_finish_blocking();
     while (gpio_get(VSYNC) == 0);
     gpio_put(RAM_SEL, bank);
+    if (rewrite_header) {
+      write_header();
+      rewrite_header = false;
+    }
   }
 
-  uint8_t DVDisplay::get_driver_gpio() {
+  uint8_t DVDisplay::get_gpio() {
     return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO);
   }
 
-  uint8_t DVDisplay::get_driver_gpio_hi() {
+  uint8_t DVDisplay::get_gpio_hi() {
     return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
+  }
+
+  void DVDisplay::i2c_modify_bit(uint8_t reg, uint bit, bool enable) {
+    uint8_t val = i2c.reg_read_uint8(I2C_ADDR, reg);
+    if (enable) val |= 1u << bit;
+    else val &= ~(1u << bit);
+    i2c.reg_write_uint8(I2C_ADDR, reg, val);
+  }
+
+  void DVDisplay::set_gpio_hi_dir(uint pin, bool output) {
+    i2c_modify_bit(I2C_REG_GPIO_HI_OE, pin, output);
+  }
+
+  void DVDisplay::set_gpio_hi_dir_all(uint8_t val) {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OE, val);
+  }
+
+  void DVDisplay::set_gpio_hi(uint pin, bool on) {
+    i2c_modify_bit(I2C_REG_GPIO_HI_OUT, pin, on);
+  }
+
+  void DVDisplay::set_gpio_hi_all(uint8_t val) {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OUT, val);
+  }
+
+  void DVDisplay::set_gpio_hi_pull_up(uint pin, bool on) {
+    i2c_modify_bit(I2C_REG_GPIO_HI_PULL_UP, pin, on);
+  }
+
+  void DVDisplay::set_gpio_hi_pull_up_all(uint8_t val) {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_UP, val);
+  }
+
+  void DVDisplay::set_gpio_hi_pull_down(uint pin, bool on) {
+    i2c_modify_bit(I2C_REG_GPIO_HI_PULL_DOWN, pin, on);
+  }
+
+  void DVDisplay::set_gpio_hi_pull_down_all(uint8_t val) {
+    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_DOWN, val);
   }
 
   void DVDisplay::set_led_level(uint8_t level) {
@@ -120,19 +174,32 @@ namespace pimoroni {
     ram.read_blocking(address, (uint32_t*)data, (len + 1) >> 1);
   }
 
+  void DVDisplay::write(uint32_t address, size_t len, const uint8_t colour)
+  {
+    uint32_t val = colour | ((uint32_t)colour << 16);
+    val |= val << 8;
+
+    ram.write_repeat(address, val, len);
+  }
+
+  void DVDisplay::read(uint32_t address, size_t len, uint8_t *data)
+  {
+    ram.read_blocking(address, (uint32_t*)data, len);
+  }
+
   void DVDisplay::write_pixel(const Point &p, uint16_t colour)
   {
     if (pixel_buffer_location.y == p.y && pixel_buffer_location.x + pixel_buffer_x == p.x) {
       if (pixel_buffer_x & 1) pixel_buffer[pixel_buffer_x >> 1] |= (uint32_t)colour << 16;
       else pixel_buffer[pixel_buffer_x >> 1] = colour;
       if (++pixel_buffer_x == PIXEL_BUFFER_LEN_IN_WORDS * 2) {
-        ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
+        ram.write(point_to_address(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
         pixel_buffer_location.y = -1;
       }
       return;
     }
     else if (pixel_buffer_location.y != -1) {
-      ram.write(pointToAddress(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+      ram.write(point_to_address(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
     }
     pixel_buffer_location = p;
     pixel_buffer_x = 1;
@@ -141,7 +208,7 @@ namespace pimoroni {
 
   void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t colour)
   {
-    write(pointToAddress(p), l, colour);
+    write(point_to_address(p), l, colour);
   }
 
   void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t *data)
@@ -149,21 +216,92 @@ namespace pimoroni {
     uint32_t offset = 0;
     if (((uintptr_t)data & 0x2) != 0) {
       uint32_t val = *data++;
-      ram.write(pointToAddress(p), &val, 2);
+      ram.write(point_to_address(p), &val, 2);
       --l;
       offset = 2;
     }
     if (l > 0) {
-      ram.write(pointToAddress(p) + offset, (uint32_t*)data, l << 1);
+      ram.write(point_to_address(p) + offset, (uint32_t*)data, l << 1);
     }
   }
 
   void DVDisplay::read_pixel_span(const Point &p, uint l, uint16_t *data)
   {
-    read(pointToAddress(p), l, data);
+    read(point_to_address(p), l, data);
   }
 
-  void DVDisplay::write_header(uint bank)
+  void DVDisplay::enable_palette(bool enable)
+  {
+    use_palette_mode = enable;
+    rewrite_header = true;
+    write_header();
+    write_palette();
+  }
+  
+  void DVDisplay::set_palette(RGB888 new_palette[PALETTE_SIZE])
+  {
+    for (int i = 0; i < PALETTE_SIZE; ++i) {
+      set_palette_colour(i, new_palette[i]);
+    }
+  }
+
+  void DVDisplay::set_palette_colour(uint8_t entry, RGB888 colour)
+  {
+    palette[entry * 3] = (colour >> 16) & 0xFF;
+    palette[entry * 3 + 1] = (colour >> 8) & 0xFF;
+    palette[entry * 3 + 2] = colour & 0xFF;
+  }
+  
+  void DVDisplay::write_palette()
+  {
+    uint addr = (height + 7) * 4;
+    ram.write(addr, (uint32_t*)palette, PALETTE_SIZE * 3);
+  }
+
+  void DVDisplay::write_palette_pixel(const Point &p, uint8_t colour)
+  {
+    if (pixel_buffer_location.y == p.y && pixel_buffer_location.x + pixel_buffer_x == p.x) {
+      if (pixel_buffer_x & 3) pixel_buffer[pixel_buffer_x >> 2] |= (uint32_t)colour << ((pixel_buffer_x & 3) << 3);
+      else pixel_buffer[pixel_buffer_x >> 2] = colour;
+      if (++pixel_buffer_x == PIXEL_BUFFER_LEN_IN_WORDS * 4) {
+        ram.write(point_to_address_palette(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
+        pixel_buffer_location.y = -1;
+      }
+      return;
+    }
+    else if (pixel_buffer_location.y != -1) {
+      ram.write(point_to_address_palette(pixel_buffer_location), pixel_buffer, pixel_buffer_x);
+    }
+    pixel_buffer_location = p;
+    pixel_buffer_x = 1;
+    pixel_buffer[0] = colour;
+  }
+  
+  void DVDisplay::write_palette_pixel_span(const Point &p, uint l, uint8_t colour)
+  {
+    write(point_to_address_palette(p), l, colour);
+  }
+  
+  void DVDisplay::write_palette_pixel_span(const Point &p, uint l, uint8_t* data)
+  {
+    uint32_t offset = 0;
+    while (((uintptr_t)data & 0x3) != 0 && l > 0) {
+      uint32_t val = *data++;
+      ram.write(point_to_address_palette(p), &val, 1);
+      --l;
+      offset++;
+    }
+    if (l > 0) {
+      ram.write(point_to_address_palette(p) + offset, (uint32_t*)data, l);
+    }
+  }
+  
+  void DVDisplay::read_palette_pixel_span(const Point &p, uint l, uint8_t *data)
+  {
+    read(point_to_address_palette(p), l, data);
+  }
+
+  void DVDisplay::write_header()
   {
     uint32_t buf[8];
     uint32_t full_width = width * h_repeat;
@@ -173,20 +311,20 @@ namespace pimoroni {
     buf[3] = (uint32_t)height << 16;
     buf[4] = 0x00000001;
     buf[5] = 0x00010000 + height + (bank << 24);
-    buf[6] = 0x00000000;
+    buf[6] = 0x00000001;
     ram.write(0, buf, 7 * 4);
     ram.wait_for_finish_blocking();
 
     uint addr = 4 * 7;
+    uint line_type = 0x90000000u;
+    if (use_palette_mode) line_type = 0xa0000000u;
     for (int i = 0; i < height; i += 8) {
       for (int j = 0; j < 8; ++j) {
-        buf[j] = 0x90000000 + ((uint32_t)h_repeat << 24) + ((i + j) * width * 2) + base_address;
+        buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * width * 2) + base_address;
       }
       ram.write(addr, buf, 8 * 4);
       ram.wait_for_finish_blocking();
       addr += 4 * 8;
     }
-
-    sleep_us(100);
   }
 }
