@@ -8,6 +8,7 @@ on:
 
 env:
   MICROPYTHON_VERSION: v1.20.0
+  WORKFLOW_VERSION: v0
 
 jobs:
   deps:
@@ -19,9 +20,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-nano-specs
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
 
     # Check out MicroPython
     - name: Checkout MicroPython
@@ -109,9 +110,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}
+        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
         restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}
+          workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
 
     - name: Install Compiler & CCache
       if: runner.os == 'Linux'
@@ -128,20 +129,6 @@ jobs:
       run: |
         echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
         echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
-
-    - name: "HACK: Clean ports/rp2/modules and ports/rp2/CMakeLists.txt"
-      shell: bash
-      working-directory: micropython/ports/rp2
-      run: |
-        rm -rf modules
-        git checkout modules
-  
-    - name: "HACK: Revert Patches"  # Avoid an already-patched MicroPython tree breaking our build
-      shell: bash
-      working-directory: micropython
-      run: |
-        git checkout lib/pico-sdk
-        git checkout ports/rp2/CMakeLists.txt
 
     - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
       shell: bash
