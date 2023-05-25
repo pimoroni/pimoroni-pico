@@ -5,9 +5,6 @@
 #include <new>
 
 
-
-using namespace std;
-
 #ifdef PP_DEBUG
 #define debug(...) printf(__VA_ARGS__)
 #else
@@ -92,8 +89,8 @@ namespace pretty_poly {
     int sx = start.x, sy = start.y, ex = end.x, ey = end.y;
 
     if(ey < sy) {
-      swap(sy, ey);
-      swap(sx, ex);
+      std::swap(sy, ey);
+      std::swap(sx, ex);
     }
 
     /*sx <<= settings::antialias;
@@ -120,7 +117,7 @@ namespace pretty_poly {
 
       if(y >= 0 && y < (int)node_buffer_size) {  
         // clamp node x value to tile bounds
-        int nx = max(min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
+        int nx = std::max(std::min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
         debug("      + adding node at %d, %d\n", x, y);
         // add node to node list
         nodes[y][node_counts[y]++] = nx;
