@@ -116,7 +116,7 @@ namespace pretty_poly {
     rect_t bounds() {
       T minx = this->points[0].x, maxx = minx;
       T miny = this->points[0].y, maxy = miny;
-      for(auto i = 1; i < this->count; i++) {
+      for(auto i = 1u; i < this->count; i++) {
         minx = min(minx, this->points[i].x);
         miny = min(miny, this->points[i].y);
         maxx = max(maxx, this->points[i].x); 

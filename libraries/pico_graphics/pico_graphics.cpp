@@ -268,7 +268,7 @@ namespace pimoroni {
 
     pretty_poly::contour_t<int> contour(new pretty_poly::point_t<int>[points.size()], points.size());
 
-    for(auto i = 0; i < points.size(); i++) {
+    for(auto i = 0u; i < points.size(); i++) {
       contour.points[i] = pretty_poly::point_t<int>(points[i].x, points[i].y);
     }
 
