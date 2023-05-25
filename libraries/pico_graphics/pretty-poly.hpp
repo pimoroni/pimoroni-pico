@@ -50,9 +50,10 @@ namespace pretty_poly {
   }
 
   void init(void *memory) {
+    uintptr_t m = (uintptr_t)memory;
     tile_buffer = new(memory) uint8_t[tile_buffer_size];
-    node_counts = new(memory + tile_buffer_size) unsigned[node_buffer_size];
-    nodes = new(memory + tile_buffer_size + (node_buffer_size * sizeof(unsigned))) int[node_buffer_size][32];
+    node_counts = new((void *)(m + tile_buffer_size)) unsigned[node_buffer_size];
+    nodes = new((void *)(m + tile_buffer_size + (node_buffer_size * sizeof(unsigned)))) int[node_buffer_size][32];
   }
 
   void set_options(tile_callback_t callback, antialias_t antialias, rect_t clip) {
@@ -66,7 +67,7 @@ namespace pretty_poly {
   }
 
   // dy step (returns 1, 0, or -1 if the supplied value is > 0, == 0, < 0)
-  __attribute__((always_inline)) int sign(int v) {
+  inline constexpr int sign(int v) {
     // assumes 32-bit int/unsigned
     return ((unsigned)-v >> 31) - ((unsigned)v >> 31);
   }
@@ -117,7 +118,7 @@ namespace pretty_poly {
       // consume accumulated error
       while(e > dy) {e -= dy; x += xinc;}
 
-      if(y >= 0 && y < node_buffer_size) {  
+      if(y >= 0 && y < (int)node_buffer_size) {  
         // clamp node x value to tile bounds
         int nx = max(min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
         debug("      + adding node at %d, %d\n", x, y);
@@ -142,7 +143,7 @@ namespace pretty_poly {
       (((contour.points[contour.count - 1].y * scale) << settings::antialias) / 65536) + oy
     );
 
-    for(int i = 0; i < contour.count; i++) {
+    for(auto i = 0u; i < contour.count; i++) {
       point_t<int> point(
         (((contour.points[i].x * scale) << settings::antialias) / 65536) + ox,
         (((contour.points[i].y * scale) << settings::antialias) / 65536) + oy
@@ -155,14 +156,14 @@ namespace pretty_poly {
   }
 
   void render_nodes(const tile_t &tile) {
-    for(auto y = 0; y < node_buffer_size; y++) {
+    for(auto y = 0; y < (int)node_buffer_size; y++) {
       if(node_counts[y] == 0) {
         continue;
       }
 
       std::sort(&nodes[y][0], &nodes[y][0] + node_counts[y]);
 
-      for(auto i = 0; i < node_counts[y]; i += 2) {
+      for(auto i = 0u; i < node_counts[y]; i += 2) {
         int sx = nodes[y][i + 0];
         int ex = nodes[y][i + 1];
 
