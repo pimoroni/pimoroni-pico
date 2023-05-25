@@ -2,8 +2,6 @@
 #include <cstdint>
 #include <math.h>
 
-using namespace std;
-
 #ifdef PP_DEBUG
 #define debug(...) printf(__VA_ARGS__)
 #else
@@ -81,14 +79,14 @@ namespace pretty_poly {
     rect_t(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
     bool empty() const {return this->w == 0 && this->h == 0;}
     rect_t intersection(const rect_t &c) {
-      return rect_t(max(this->x, c.x), max(this->y, c.y),
-        max(0, min(this->x + this->w, c.x + c.w) - max(this->x, c.x)),
-        max(0, min(this->y + this->h, c.y + c.h) - max(this->y, c.y)));
+      return rect_t(std::max(this->x, c.x), std::max(this->y, c.y),
+        std::max(0, std::min(this->x + this->w, c.x + c.w) - std::max(this->x, c.x)),
+        std::max(0, std::min(this->y + this->h, c.y + c.h) - std::max(this->y, c.y)));
     }
     rect_t merge(const rect_t &c) {
-      return rect_t(min(this->x, c.x), min(this->y, c.y),
-        max(this->x + this->w, c.x + c.w) - min(this->x, c.x),
-        max(this->y + this->h, c.y + c.h) - min(this->y, c.y));
+      return rect_t(std::min(this->x, c.x), std::min(this->y, c.y),
+        std::max(this->x + this->w, c.x + c.w) - std::min(this->x, c.x),
+        std::max(this->y + this->h, c.y + c.h) - std::min(this->y, c.y));
     }
   };
 
@@ -110,17 +108,17 @@ namespace pretty_poly {
     unsigned count;
 
     contour_t() {}
-    contour_t(vector<point_t<T>> v) : points(v.data()), count(v.size()) {};
+    contour_t(std::vector<point_t<T>> v) : points(v.data()), count(v.size()) {};
     contour_t(point_t<T> *points, unsigned count) : points(points), count(count) {};
 
     rect_t bounds() {
       T minx = this->points[0].x, maxx = minx;
       T miny = this->points[0].y, maxy = miny;
       for(auto i = 1u; i < this->count; i++) {
-        minx = min(minx, this->points[i].x);
-        miny = min(miny, this->points[i].y);
-        maxx = max(maxx, this->points[i].x); 
-        maxy = max(maxy, this->points[i].y);
+        minx = std::min(minx, this->points[i].x);
+        miny = std::min(miny, this->points[i].y);
+        maxx = std::max(maxx, this->points[i].x); 
+        maxy = std::max(maxy, this->points[i].y);
       }
       return rect_t(minx, miny, maxx - minx, maxy - miny);
     }
