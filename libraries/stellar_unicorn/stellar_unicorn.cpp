@@ -138,11 +138,11 @@ namespace pimoroni {
                 
     // for each row:
     //   for each bcd frame:
-    //            0: 00111111                           // row pixel count (minus one)
-    //      1  - 64: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
-    //      65 - 67: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
-    //           68: xxxrrrrr                           // row select bits
-    //      69 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+    //            0: 00011111                           // row pixel count (minus one)
+    //      1  - 16: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+    //      17 - 19: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
+    //           20: xxxrrrrr                           // row select bits
+    //      21 - 23: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
     //
     //  .. and back to the start
 
@@ -153,15 +153,15 @@ namespace pimoroni {
         // find the offset of this row and frame in the bitstream
         uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
-        p[ 0] = 32 - 1;               // row pixel count
+        p[ 0] = 16 - 1;               // row pixel count
         p[ 1] = row;                  // row select
 
         // set the number of bcd ticks for this frame
         uint32_t bcd_ticks = (1 << frame);
-        p[36] = (bcd_ticks &       0xff) >>  0;
-        p[37] = (bcd_ticks &     0xff00) >>  8;
-        p[38] = (bcd_ticks &   0xff0000) >> 16;
-        p[39] = (bcd_ticks & 0xff000000) >> 24;
+        p[20] = (bcd_ticks &       0xff) >>  0;
+        p[21] = (bcd_ticks &     0xff00) >>  8;
+        p[22] = (bcd_ticks &   0xff0000) >> 16;
+        p[23] = (bcd_ticks & 0xff000000) >> 24;
       }
     }
 
@@ -531,8 +531,8 @@ namespace pimoroni {
       if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
         uint32_t *p = (uint32_t *)graphics->frame_buffer;
 
-        for(int y = 0; y < 32; y++) {
-          for(int x = 0; x < 32; x++) {
+        for(int y = 0; y < 16; y++) {
+          for(int x = 0; x < 16; x++) {
             uint32_t col = *p;
             uint8_t r = (col & 0xff0000) >> 16;
             uint8_t g = (col & 0x00ff00) >>  8;
@@ -545,8 +545,8 @@ namespace pimoroni {
       }
       else if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
         uint16_t *p = (uint16_t *)graphics->frame_buffer;
-        for(int y = 0; y < 32; y++) {
-          for(int x = 0; x < 32; x++) {
+        for(int y = 0; y < 16; y++) {
+          for(int x = 0; x < 16; x++) {
             uint16_t col = __builtin_bswap16(*p);
             uint8_t r = (col & 0b1111100000000000) >> 8;
             uint8_t g = (col & 0b0000011111100000) >> 3;
@@ -562,8 +562,8 @@ namespace pimoroni {
         graphics->frame_convert(PicoGraphics::PEN_RGB888, [this, offset](void *data, size_t length) mutable {
           uint32_t *p = (uint32_t *)data;
           for(auto i = 0u; i < length / 4; i++) {
-            int x = offset % 32;
-            int y = offset / 32;
+            int x = offset % 16;
+            int y = offset / 16;
 
             uint32_t col = *p;
             uint8_t r = (col & 0xff0000) >> 16;
