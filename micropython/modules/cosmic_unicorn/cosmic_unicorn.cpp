@@ -341,7 +341,7 @@ mp_obj_t Channel_play_tone(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
 /***** Variables Struct *****/
 typedef struct _CosmicUnicorn_obj_t {
     mp_obj_base_t base;
-    CosmicUnicorn* Cosmic;
+    CosmicUnicorn* cosmic;
 } _CosmicUnicorn_obj_t;
 
 typedef struct _ModPicoGraphics_obj_t {
@@ -388,12 +388,12 @@ mp_obj_t CosmicUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     }
 
 
-    CosmicUnicorn *Cosmic = m_new_class(CosmicUnicorn);
-    Cosmic->init();
+    CosmicUnicorn *cosmic = m_new_class(CosmicUnicorn);
+    cosmic->init();
 
     self = m_new_obj_with_finaliser(_CosmicUnicorn_obj_t);
     self->base.type = &CosmicUnicorn_type;
-    self->Cosmic = Cosmic;
+    self->cosmic = cosmic;
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -402,7 +402,7 @@ mp_obj_t CosmicUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 /***** Destructor ******/
 mp_obj_t CosmicUnicorn___del__(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    m_del_class(CosmicUnicorn, self->Cosmic);
+    m_del_class(CosmicUnicorn, self->cosmic);
     return mp_const_none;
 }
 
@@ -410,7 +410,7 @@ mp_obj_t CosmicUnicorn___del__(mp_obj_t self_in) {
 /***** Methods *****/
 extern mp_obj_t CosmicUnicorn_clear(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->clear();
+    self->cosmic->clear();
     return mp_const_none;
 }
 
@@ -418,54 +418,54 @@ extern mp_obj_t CosmicUnicorn_update(mp_obj_t self_in, mp_obj_t graphics_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
     ModPicoGraphics_obj_t *picographics = MP_OBJ_TO_PTR2(graphics_in, ModPicoGraphics_obj_t);
 
-    self->Cosmic->update(picographics->graphics);
+    self->cosmic->update(picographics->graphics);
 
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_set_brightness(mp_obj_t self_in, mp_obj_t value) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->set_brightness(mp_obj_get_float(value));
+    self->cosmic->set_brightness(mp_obj_get_float(value));
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_get_brightness(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    return mp_obj_new_float(self->Cosmic->get_brightness());
+    return mp_obj_new_float(self->cosmic->get_brightness());
 }
 
 extern mp_obj_t CosmicUnicorn_adjust_brightness(mp_obj_t self_in, mp_obj_t delta) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->adjust_brightness(mp_obj_get_float(delta));
+    self->cosmic->adjust_brightness(mp_obj_get_float(delta));
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_set_volume(mp_obj_t self_in, mp_obj_t value) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->set_volume(mp_obj_get_float(value));
+    self->cosmic->set_volume(mp_obj_get_float(value));
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_get_volume(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    return mp_obj_new_float(self->Cosmic->get_volume());
+    return mp_obj_new_float(self->cosmic->get_volume());
 }
 
 extern mp_obj_t CosmicUnicorn_adjust_volume(mp_obj_t self_in, mp_obj_t delta) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->adjust_volume(mp_obj_get_float(delta));
+    self->cosmic->adjust_volume(mp_obj_get_float(delta));
     return mp_const_none;
 }
 
 
 extern mp_obj_t CosmicUnicorn_light(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    return mp_obj_new_float(self->Cosmic->light());
+    return mp_obj_new_float(self->cosmic->light());
 }
 
 extern mp_obj_t CosmicUnicorn_is_pressed(mp_obj_t self_in, mp_obj_t button) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    return mp_obj_new_bool(self->Cosmic->is_pressed((uint8_t)mp_obj_get_int(button)));
+    return mp_obj_new_bool(self->cosmic->is_pressed((uint8_t)mp_obj_get_int(button)));
 }
 
 extern mp_obj_t CosmicUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
@@ -477,21 +477,21 @@ extern mp_obj_t CosmicUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
         mp_raise_ValueError("Supplied buffer is too small!");
     }
 
-    self->Cosmic->play_sample((uint8_t *)bufinfo.buf, bufinfo.len);
+    self->cosmic->play_sample((uint8_t *)bufinfo.buf, bufinfo.len);
 
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_play_synth(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->play_synth();
+    self->cosmic->play_synth();
 
     return mp_const_none;
 }
 
 extern mp_obj_t CosmicUnicorn_stop_playing(mp_obj_t self_in) {
     _CosmicUnicorn_obj_t *self = MP_OBJ_TO_PTR2(self_in, _CosmicUnicorn_obj_t);
-    self->Cosmic->stop_playing();
+    self->cosmic->stop_playing();
 
     return mp_const_none;
 }
@@ -509,7 +509,7 @@ extern mp_obj_t CosmicUnicorn_synth_channel(mp_obj_t self_in, mp_obj_t channel_i
     // Could very easily mess up in weird ways once object deletion is considered?
     _Channel_obj_t *channel_obj = m_new_obj_with_finaliser(_Channel_obj_t);
     channel_obj->base.type = &Channel_type;
-    channel_obj->channel = &self->Cosmic->synth_channel(channel);
+    channel_obj->channel = &self->cosmic->synth_channel(channel);
 
     return MP_OBJ_FROM_PTR(channel_obj);
 }
