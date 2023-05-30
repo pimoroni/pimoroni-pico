@@ -210,6 +210,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_STELLAR_UNICORN:
+            width = 16;
+            height = 16;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         case DISPLAY_UNICORN_PACK:
             width = 16;
             height = 7;
@@ -354,6 +362,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             || display == DISPLAY_INTERSTATE75_64X32
             || display == DISPLAY_GALACTIC_UNICORN
             || display == DISPLAY_COSMIC_UNICORN
+            || display == DISPLAY_STELLAR_UNICORN
             || display == DISPLAY_UNICORN_PACK
             || display == DISPLAY_SCROLL_PACK) {
         // Create a dummy display driver
