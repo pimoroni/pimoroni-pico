@@ -1,0 +1,131 @@
+body {
+    background:#333;
+    padding:20px;
+    font-family:Arial, Verdana, Sans-Serif;
+    background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAaUlEQVQYV33Q0Q3AIAgEUBjBFVyBFRzbWVjBEajXBIOVypcJj1NhETG61BiDVJX4Bh211v5hRDiniV+Elx0wQwd0hEatlUop65srMSah23vf8Auz65AWMc8rDHvCCjAQK2KeDcuQDzh+AHEJX8mbbU1BAAAAAElFTkSuQmCC) repeat;
+}
+
+.icons {
+    position:absolute;
+    margin:0;
+    padding:20px;
+    list-style:none;
+}
+
+.icons li {
+    margin:20px;
+    padding:0;
+    list-style:none;
+    padding-top:80px;
+    width:100px;
+}
+
+.icons li span {
+    background:#FFF;
+    color:#000;
+    border:1px solid #000;
+    line-height:20px;
+    padding:5px 10px;
+    text-align:center;
+    font-size:10px;
+    line-height:10px;
+    display:inline-block;
+}
+
+#palette ul, #palette li {
+    margin:0;padding:0;list-style:none;
+}
+
+#palette {
+    list-style:none;
+    position:relative;
+    height: 122px;
+    padding:0 8px;
+}
+
+#palette ul {
+    display:block;
+    width:456px;
+    float: left;
+}
+
+#palette li, #palette input {
+    border: 2px outset;
+    width:49px;
+    height:49px;
+    float:left;
+    display:block;
+    margin:2px;
+}
+
+#palette input {
+    width:110px;
+    height:110px;
+}
+
+.window {
+    width: 640px;
+    position: relative;
+    background: #0E071A;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
+}
+
+.tools {
+    margin:0;padding:0;list-style:none;
+    clear:both;
+    display:block;
+    position:absolute;
+    top: 50px;
+    right: 8px;
+    width: 98px;
+    background:#999999;
+    font-size:0;
+}
+.tools span {
+    line-height:30px;
+}
+
+.tools li {
+    font-size:16px;
+    width: 45px;
+    height: 40px;
+    text-align:center;
+    margin:0;
+    padding:0;
+    display:inline-block;
+    line-height:40px;
+    border:2px outset #EEEEEE;
+    background:#F5F5F5;
+    cursor:pointer;
+    color:#000;
+}
+
+.tools li.selected {
+    background:#000;
+    color:#FFF;
+}
+
+h1 {
+    color: #FFF;
+    background: #6D38BB;
+    height:40px;
+    margin:0;
+    padding:0 8px;
+    line-height:40px;
+    font-weight:normal;
+    font-size:24px;
+}
+
+table {
+    clear:both;
+    cursor:pointer;
+    margin:10px;
+    border:1px solid #333;
+    background: #000000;
+}
+
+table td {
+    width:14px;
+    height:14px;
+    border:1px solid #333;
+}
