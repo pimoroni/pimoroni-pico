@@ -20,7 +20,7 @@
 
 ; for each row:
 ;   for each bcd frame:
-;           0: 00111111                           // row pixel count (minus one)
+;           0: 00011111                           // row pixel count (minus one)
 ;           1: xxxxrrrr                           // row select bits
 ;     2  - 65: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
 ;     66 - 67: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align

@@ -153,15 +153,15 @@ namespace pimoroni {
         // find the offset of this row and frame in the bitstream
         uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
-        p[ 0] = 64 - 1;               // row pixel count
+        p[ 0] = 32 - 1;               // row pixel count
         p[ 1] = row;                  // row select
 
         // set the number of bcd ticks for this frame
         uint32_t bcd_ticks = (1 << frame);
-        p[68] = (bcd_ticks &       0xff) >>  0;
-        p[69] = (bcd_ticks &     0xff00) >>  8;
-        p[70] = (bcd_ticks &   0xff0000) >> 16;
-        p[71] = (bcd_ticks & 0xff000000) >> 24;
+        p[36] = (bcd_ticks &       0xff) >>  0;
+        p[37] = (bcd_ticks &     0xff00) >>  8;
+        p[38] = (bcd_ticks &   0xff0000) >> 16;
+        p[39] = (bcd_ticks & 0xff000000) >> 24;
       }
     }
 
@@ -463,15 +463,6 @@ namespace pimoroni {
     x = (WIDTH - 1) - x;
     y = (HEIGHT - 1) - y;
 
-    // map coordinates into display space
-    if(y < 16) {
-      // move to top half of display (which is actually the right half of the framebuffer)
-      x += 32;
-    }else{
-      // remap y coordinate
-      y -= 16;      
-    }
-
     r = (r * this->brightness) >> 8;
     g = (g * this->brightness) >> 8;
     b = (b * this->brightness) >> 8;
@@ -482,11 +473,11 @@ namespace pimoroni {
 
     // for each row:
     //   for each bcd frame:
-    //            0: 00111111                           // row pixel count (minus one)
-    //      1  - 64: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
-    //      65 - 67: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
-    //           68: xxxxrrrr                           // row select bits
-    //      69 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+    //            0: 00011111                           // row pixel count (minus one)
+    //      1  - 32: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+    //      33 - 35: xxxxxxxx, xxxxxxxx, xxxxxxxx       // dummy bytes to dword align
+    //           36: xxxxrrrr                           // row select bits
+    //      37 - 39: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
     //
     //  .. and back to the start
 

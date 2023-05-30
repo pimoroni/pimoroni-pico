@@ -48,7 +48,7 @@ namespace pimoroni {
   private:
     static const uint32_t ROW_COUNT = 16;
     static const uint32_t BCD_FRAME_COUNT = 14;
-    static const uint32_t BCD_FRAME_BYTES = 72;
+    static const uint32_t BCD_FRAME_BYTES = 40;
     static const uint32_t ROW_BYTES = BCD_FRAME_COUNT * BCD_FRAME_BYTES;
     static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES);
     static const uint SYSTEM_FREQ = 22050;
