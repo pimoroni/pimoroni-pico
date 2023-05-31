@@ -1,4 +1,5 @@
 import time
+import math
 import machine
 from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
@@ -29,12 +30,21 @@ def pressed():
 
 # wait for a button to be pressed and load that effect
 while True:
+    b = int((math.sin(time.ticks_ms() / 200) + 1) / 2.0 * 255)
+    b = max(60, b)
+
     graphics.set_font("bitmap6")
     graphics.set_pen(graphics.create_pen(0, 0, 0))
     graphics.clear()
-    graphics.set_pen(graphics.create_pen(155, 155, 155))
-    graphics.text("PRESS", 3, 6, -1, 1)
-    graphics.text("A B C OR D!", 5, 14, 16, 1, 0)
+
+    graphics.set_pen(graphics.create_pen(b, 0, 0))
+    graphics.pixel(0, 3)
+    graphics.set_pen(graphics.create_pen(0, b, 0))
+    graphics.pixel(0, 5)
+    graphics.set_pen(graphics.create_pen(0, 0, b))
+    graphics.pixel(0, 7)
+    graphics.set_pen(graphics.create_pen(b, 0, b))
+    graphics.pixel(0, 9)
 
     # brightness up/down
     if stellar.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_UP):

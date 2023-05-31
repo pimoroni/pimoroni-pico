@@ -30,7 +30,7 @@ HEIGHT = StellarUnicorn.HEIGHT
 
 rtc = machine.RTC()
 
-DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
+DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 # Enable the Wireless
 wlan = network.WLAN(network.STA_IF)
@@ -99,7 +99,7 @@ def draw():
     graphics.set_pen(RED)
     graphics.rectangle(0, 0, WIDTH, 7)
     graphics.set_pen(WHITE)
-    graphics.text(DAYS[current_t[3]], (WIDTH // 2) - (day_length // 2) - 1, 0, 16, 1)
+    graphics.text(DAYS[current_t[3]], (WIDTH // 2) - (day_length // 2), 0, 16, 1)
 
     graphics.set_pen(RED)
     graphics.set_font("bitmap6")

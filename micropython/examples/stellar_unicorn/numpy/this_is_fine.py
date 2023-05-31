@@ -6,7 +6,7 @@ from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN, PEN_P8
 from ulab import numpy
 
 """
-THIS IS FINE!
+THI IS FIN!
 """
 
 # MAXIMUM OVERKILL
@@ -17,7 +17,7 @@ su.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_STELLAR_UNICORN, pen_type=PEN_P8)
 
 # Number of random fire spawns
-FIRE_SPAWNS = 5
+FIRE_SPAWNS = 4
 
 # Fire damping
 DAMPING_FACTOR = 0.98
@@ -81,9 +81,9 @@ def draw():
 
     # Draw text over the top
     graphics.set_pen(0)
-    graphics.text("This", 6, 1, 1, 1)
-    graphics.text("is", 11, 9, 1, 1)
-    graphics.text("fine", 6, 17, 1, 1)
+    graphics.text("This", 1, 0, 1, 1)
+    graphics.text("is", 1, 3, 1, 1)
+    graphics.text("fine", 1, 9, 1, 1)
     su.update(graphics)
 
 

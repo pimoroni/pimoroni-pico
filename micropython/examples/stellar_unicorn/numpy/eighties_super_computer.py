@@ -14,7 +14,7 @@ Experiment with the damping, number of spawns and intensity to change the effect
 # machine.freq(250_000_000)
 
 DAMPING_FACTOR = 0.95
-NUMBER_OF_LIGHTS = 10
+NUMBER_OF_LIGHTS = 4
 INTENSITY = 20
 
 volume = 0.5

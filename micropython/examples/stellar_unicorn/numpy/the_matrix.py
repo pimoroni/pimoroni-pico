@@ -12,6 +12,8 @@ HELLO NEO.
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
+NUM_SPARKLES = 1
+
 su = StellarUnicorn()
 su.set_brightness(1.0)
 graphics = PicoGraphics(DISPLAY_STELLAR_UNICORN, pen_type=PEN_P8)
@@ -29,7 +31,7 @@ for g in range(128):
 def update():
     trippy[:] *= 0.65
 
-    for _ in range(2):
+    for _ in range(NUM_SPARKLES):
         x = random.randint(0, width - 1)
         y = random.randint(0, height // 2)
         trippy[y][x] = random.randint(128, 255) / 255.0

@@ -13,7 +13,7 @@ damping_factor = 0.97
 
 
 def init():
-    # a palette of five firey colours (white, yellow, orange, red, smoke)
+    # a palette of five fiery colours (white, yellow, orange, red, smoke)
     global palette
     palette = [
         graphics.create_pen(0, 0, 0),

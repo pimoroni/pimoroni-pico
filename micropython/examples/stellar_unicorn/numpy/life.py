@@ -15,9 +15,9 @@ Press "A" to manually re-seed.
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
-INITIAL_LIFE = 500        # Number of live cells to seed
+INITIAL_LIFE = 128        # Number of live cells to seed
 GENERATION_TIME_MS = 50   # MS between generations
-MINIMUM_LIFE = 10         # Auto reseed when only this many alive cells remain
+MINIMUM_LIFE = 15         # Auto reseed when only this many alive cells remain
 SMOOTHED = True           # Enable for a more organic if somewhat unsettling feel
 
 DECAY = 0.90              # Rate at which smoothing effect decays, higher number = more persistent, 1.0 = no decay

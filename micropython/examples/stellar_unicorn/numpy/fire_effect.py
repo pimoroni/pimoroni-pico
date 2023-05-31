@@ -18,7 +18,7 @@ su.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_STELLAR_UNICORN, pen_type=PEN_P8)
 
 # Number of random fire spawns
-FIRE_SPAWNS = 5
+FIRE_SPAWNS = 3
 
 # Fire damping
 DAMPING_FACTOR = 0.98

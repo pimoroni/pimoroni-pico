@@ -6,14 +6,15 @@ import machine
 # You will need to create or update the file secrets.py with your network credentials using Thonny
 # in order for the example to update using the NTP.
 
-# secrets.py should contain:
-# WIFI_SSID = ""
-# WIFI_PASSWORD = ""
+# WIFI_CONFIG.py should contain:
+# SSID = ""
+# PSK = ""
+# COUNTRY = ""
 
 try:
-    from secrets import WIFI_SSID, WIFI_PASSWORD
+    from WIFI_CONFIG import SSID, PSK
 except ImportError:
-    print("Create secrets.py with your WiFi credentials")
+    print("Create WIFI_CONFIG.py with your WiFi credentials")
 
 graphics = None
 
@@ -22,14 +23,14 @@ HEIGHT = 16  # StellarUnicorn.HEIGHT
 
 rtc = machine.RTC()
 
-DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"]
+DAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
 
 # Enable the Wireless
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
 
-def network_connect(SSID, PSK):
+def network_connect(ssid, psk):
 
     # Number of attempts to make before timeout
     max_wait = 5
@@ -37,7 +38,7 @@ def network_connect(SSID, PSK):
     # Sets the Wireless LED pulsing and attempts to connect to your local network.
     print("connecting...")
     wlan.config(pm=0xa11140)  # Turn WiFi power saving off for some slow APs
-    wlan.connect(SSID, PSK)
+    wlan.connect(ssid, psk)
 
     while max_wait > 0:
         if wlan.status() < 0 or wlan.status() >= 3:
@@ -55,9 +56,9 @@ def network_connect(SSID, PSK):
 def sync_time():
 
     try:
-        network_connect(WIFI_SSID, WIFI_PASSWORD)
+        network_connect(SSID, PSK)
     except NameError:
-        print("Create secrets.py with your WiFi credentials")
+        print("Create WIFI_CONFIG.py with your WiFi credentials")
 
     if wlan.status() < 0 or wlan.status() >= 3:
         try:
@@ -67,12 +68,10 @@ def sync_time():
 
 
 def init():
-
     sync_time()
 
 
 def draw():
-
     # Pens
     RED = graphics.create_pen(120, 0, 0)
     WHITE = graphics.create_pen(255, 255, 255)
@@ -85,16 +84,16 @@ def draw():
 
     # Measures the length of the text to help us with centring later.
     day_length = graphics.measure_text(DAYS[current_t[3]], 1)
-    date_length = graphics.measure_text(str(current_t[2]), 3)
+    date_length = graphics.measure_text(str(current_t[2]), 1)
 
     graphics.set_font("bitmap6")
     graphics.set_pen(RED)
     graphics.rectangle(0, 0, WIDTH, 7)
     graphics.set_pen(WHITE)
-    graphics.text(DAYS[current_t[3]], (WIDTH // 2) - (day_length // 2) - 1, 0, 16, 1)
+    graphics.text(DAYS[current_t[3]], (WIDTH // 2) - (day_length // 2), 0, 16, 1)
 
     graphics.set_pen(RED)
-    graphics.set_font("bitmap8")
-    graphics.text(str(current_t[2]), (WIDTH // 2) - (date_length // 2) + 1, 9, 16, 3)
+    graphics.set_font("bitmap6")
+    graphics.text(str(current_t[2]), (WIDTH // 2) - (date_length // 2) + 1, 8, 16, 1)
 
     graphics.set_pen(graphics.create_pen(0, 0, 0))

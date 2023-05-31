@@ -11,14 +11,46 @@ from network_manager import NetworkManager
 import uasyncio
 import urequests
 import time
+import random
 from machine import Timer, Pin
 from stellar import StellarUnicorn
-from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
+from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY, PEN_P8 as PEN
 
-URL = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
+URL = 'http://api.thingspeak.com/channels/1417/field/1/last.txt'
 
-UPDATE_INTERVAL = 113  # refresh interval in secs. Be nice to free APIs!
-# this esoteric number is used so that a column of LEDs equates (approximately) to an hour
+UPDATE_INTERVAL = 60 * 60 / 16  # refresh interval in secs. Be nice to free APIs!
+# Calculated as 60 minutes * 60 seconds divided by number of pixels per row
+# so that a row of LEDs equates (approximately) to an hour
+
+CHEERLIGHTS_COLOR_VALUES = [
+    (0x00, 0x00, 0x00),  # Black/Unlit
+    (0xFF, 0x00, 0x00),
+    (0x00, 0x80, 0x00),
+    (0x00, 0x00, 0xFF),
+    (0x00, 0xFF, 0xFF),
+    (0xFF, 0xFF, 0xFF),
+    (0xFD, 0xF5, 0xE6),
+    (0x80, 0x00, 0x80),
+    (0xFF, 0x00, 0xFF),
+    (0xFF, 0xFF, 0x00),
+    (0xFF, 0xA5, 0x00),
+    (0xFF, 0xC0, 0xCB),
+]
+
+CHEERLIGHTS_COLOR_NAMES = [
+    "black",  # Black/Unlit, not part of cheerlights colours
+    "red",
+    "green",
+    "blue",
+    "cyan",
+    "white",
+    "oldlace",
+    "purple",
+    "magenta",
+    "yellow",
+    "orange",
+    "pink"
+]
 
 
 def status_handler(mode, status, ip):
@@ -32,70 +64,61 @@ def status_handler(mode, status, ip):
             print('Wifi connection failed!')
 
 
-def hex_to_rgb(hex):
-    # converts a hex colour code into RGB
-    h = hex.lstrip('#')
-    r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
-    return r, g, b
-
-
 def get_data():
+    global index
     # open the json file
-    print(f'Requesting URL: {URL}')
-    r = urequests.get(URL)
-    # open the json data
-    j = r.json()
-    print('Data obtained!')
-    r.close()
+    if UPDATE_INTERVAL >= 60:
+        print(f'Requesting URL: {URL}')
+        r = urequests.get(URL)
+        name = r.content.decode("utf-8").strip()
+        r.close()
+        print('Data obtained!')
+
+    else:
+        print("Random test colour!")
+        # For sped-up testing we don't want to hit the API at all
+        name = random.choice(CHEERLIGHTS_COLOR_NAMES[1:])
 
     # flash the onboard LED after getting data
     pico_led.value(True)
     time.sleep(0.2)
     pico_led.value(False)
 
-    # extract hex colour from the json data
-    hex = j['field2']
-
     # add the new hex colour to the end of the array
-    colour_array.append(hex)
-    print(f'Colour added to array: {hex}')
-    # remove the oldest colour in the array
-    colour_array.pop(0)
-    update_leds()
+    if index == (width * height):
+        index = 0
+        graphics.clear()
 
+    colour_array[index] = CHEERLIGHTS_COLOR_NAMES.index(name)
+    index += 1
+    print(f'Colour added to array: {name}')
 
-def update_leds():
-    # light up the LEDs
-    # this step takes a second, it's doing a lot of hex_to_rgb calculations!
-    print("Updating LEDs...")
-    i = 0
-    for x in range(width):
-        for y in range(height):
-            r, g, b = hex_to_rgb(colour_array[i])
-
-            current_colour = graphics.create_pen(r, g, b)
-            graphics.set_pen(current_colour)
-            graphics.pixel(x, y)
-            i = i + 1
     su.update(graphics)
     print("LEDs updated!")
 
 
 su = StellarUnicorn()
-graphics = PicoGraphics(DISPLAY)
-
 width = StellarUnicorn.WIDTH
 height = StellarUnicorn.HEIGHT
+
+# set up a buffer to store the colours
+colour_array = bytearray(width * height)
+
+# We'll use palette mode, so just make the colour list the display buffer
+graphics = PicoGraphics(DISPLAY, pen_type=PEN, buffer=colour_array)
+
+# Set up the palette with cheerlights colour values
+graphics.set_palette(CHEERLIGHTS_COLOR_VALUES)
+graphics.set_pen(0)
+graphics.clear()
+
+# Keep track of the pixel we're lighting
+index = 0
 
 su.set_brightness(0.5)
 
 # set up the Pico W's onboard LED
 pico_led = Pin('LED', Pin.OUT)
-
-current_colour = graphics.create_pen(0, 0, 0)
-
-# set up an list to store the colours
-colour_array = ["#000000"] * 1024
 
 # set up wifi
 try:
@@ -109,19 +132,19 @@ get_data()
 
 # start timer (the timer will call the function to update our data every UPDATE_INTERVAL)
 timer = Timer(-1)
-timer.init(period=UPDATE_INTERVAL * 1000, mode=Timer.PERIODIC, callback=lambda t: get_data())
+timer.init(period=int(UPDATE_INTERVAL * 1000), mode=Timer.PERIODIC, callback=lambda t: get_data())
 
 while True:
     # adjust brightness with LUX + and -
     # LEDs take a couple of secs to update, so adjust in big (10%) steps
     if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_UP):
         su.adjust_brightness(+0.1)
-        update_leds()
+        su.update(graphics)
         print(f"Brightness set to {su.get_brightness()}")
 
     if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_DOWN):
         su.adjust_brightness(-0.1)
-        update_leds()
+        su.update(graphics)
         print(f"Brightness set to {su.get_brightness()}")
 
     # pause for a moment (important or the USB serial device will fail)

@@ -24,7 +24,7 @@ currency_symbol = ""
 currency_rate = ""
 rate_keys = []
 
-# diplay options
+# display options
 line_1_line = -2
 line_2_line = 9
 line_3_line = 20

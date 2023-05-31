@@ -13,6 +13,8 @@ A lava lamp effect, created by blurred, moving particles.
 # MAXIMUM OVERKILL
 # machine.freq(250_000_000)
 
+NUM_BLOBS = 3
+
 su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY_STELLAR_UNICORN, pen_type=PEN_P8)
 su.set_brightness(0.5)
@@ -45,7 +47,7 @@ class Blob():
             self.dy = -self.dy
 
 
-blobs = [Blob() for _ in range(10)]
+blobs = [Blob() for _ in range(NUM_BLOBS)]
 
 
 # Fill palette with a steep falloff from bright red to dark blue
@@ -60,7 +62,7 @@ def update():
         blob.move()
         lava[int(blob.y)][int(blob.x)] = blob.r
 
-    # Propogate the blobs outwards
+    # Propagate the blobs outwards
     a = numpy.roll(lava, 1, axis=0)
     b = numpy.roll(lava, -1, axis=0)
     d = numpy.roll(lava, 1, axis=1)
