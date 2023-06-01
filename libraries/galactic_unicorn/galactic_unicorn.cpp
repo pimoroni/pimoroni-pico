@@ -149,7 +149,7 @@ namespace pimoroni {
     }
 
     // setup light sensor adc
-    adc_init();
+    if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
     adc_gpio_init(LIGHT_SENSOR);
 
     gpio_init(COLUMN_CLOCK); gpio_set_dir(COLUMN_CLOCK, GPIO_OUT); gpio_put(COLUMN_CLOCK, false);
