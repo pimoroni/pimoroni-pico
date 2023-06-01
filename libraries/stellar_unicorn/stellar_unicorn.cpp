@@ -38,10 +38,6 @@
 //
 //  .. and back to the start
 
-static uint16_t r_gamma_lut[256] = {0};
-static uint16_t g_gamma_lut[256] = {0};
-static uint16_t b_gamma_lut[256] = {0};
-
 static uint32_t dma_channel;
 static uint32_t dma_ctrl_channel;
 static uint32_t audio_dma_channel;
@@ -121,19 +117,6 @@ namespace pimoroni {
     if(unicorn != nullptr) {
       // Tear down the old GU instance's hardware resources
       partial_teardown();
-    }
-
-
-    // create 14-bit gamma luts
-    for(uint16_t v = 0; v < 256; v++) {
-      // gamma correct the provided 0-255 brightness value onto a
-      // 0-65535 range for the pwm counter
-      float r_gamma = 1.8f;
-      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-      float g_gamma = 1.8f;
-      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-      float b_gamma = 1.8f;
-      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
     }
                 
     // for each row:
@@ -467,9 +450,9 @@ namespace pimoroni {
     g = (g * this->brightness) >> 8;
     b = (b * this->brightness) >> 8;
 
-    uint16_t gamma_r = r_gamma_lut[r];
-    uint16_t gamma_g = g_gamma_lut[g];
-    uint16_t gamma_b = b_gamma_lut[b];
+    uint16_t gamma_r = GAMMA_14BIT[r];
+    uint16_t gamma_g = GAMMA_14BIT[g];
+    uint16_t gamma_b = GAMMA_14BIT[b];
 
     // for each row:
     //   for each bcd frame:
