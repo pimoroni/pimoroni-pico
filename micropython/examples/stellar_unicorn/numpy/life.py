@@ -16,9 +16,9 @@ Press "A" to manually re-seed.
 # machine.freq(250_000_000)
 
 INITIAL_LIFE = 128        # Number of live cells to seed
-GENERATION_TIME_MS = 50   # MS between generations
-MINIMUM_LIFE = 15         # Auto reseed when only this many alive cells remain
+GENERATION_TIME_MS = 100   # MS between generations
 SMOOTHED = True           # Enable for a more organic if somewhat unsettling feel
+STALEMATE_DEPTH = 5       # How many generations of changes must match before reset
 
 DECAY = 0.90              # Rate at which smoothing effect decays, higher number = more persistent, 1.0 = no decay
 TENACITY = 32             # Rate at which smoothing effect increases
@@ -27,12 +27,15 @@ su = StellarUnicorn()
 su.set_brightness(0.5)
 graphics = PicoGraphics(DISPLAY_STELLAR_UNICORN, pen_type=PEN_P8)
 
+changed_cells = []
+
+
 for c in range(256):
     graphics.create_pen(c // 2, 0, c)
 
 
 def update():
-    global last_gen
+    global last_gen, changed_cells
 
     if SMOOTHED:
         duration[:] += life * TENACITY
@@ -42,10 +45,6 @@ def update():
         return
 
     last_gen = time.ticks_ms()
-
-    if numpy.sum(life) < MINIMUM_LIFE:
-        seed_life()
-        return
 
     # Rollin' rollin' rollin.
     _N = numpy.roll(life, -1, axis=0)
@@ -71,7 +70,15 @@ def update():
     # Any alive cells with more than three neighbours should die
     next_generation[:] -= (neighbours[:] > 3) * life
 
-    life[:] = numpy.clip(next_generation, 0, 1)
+    next_generation[:] = numpy.clip(next_generation, 0, 1)
+
+    changed_cells.append(numpy.sum(life != next_generation))
+    changed_cells = changed_cells[-STALEMATE_DEPTH:]
+
+    life[:] = next_generation
+
+    if changed_cells.count(changed_cells[0]) == STALEMATE_DEPTH:
+        seed_life(INITIAL_LIFE // 2)
 
 
 def draw():
@@ -83,8 +90,8 @@ def draw():
     su.update(graphics)
 
 
-def seed_life():
-    for _ in range(INITIAL_LIFE):
+def seed_life(amount=INITIAL_LIFE):
+    for _ in range(amount):
         x = random.randint(0, width - 1)
         y = random.randint(0, height - 1)
         life[y][x] = int(True)  # Avoid: TypeError: 'bool' object isn't iterable
