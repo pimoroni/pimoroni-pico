@@ -203,7 +203,8 @@ namespace pimoroni {
       PEN_RGB888,
       PEN_INKY7,
       PEN_DV_RGB555,
-      PEN_DV_P5
+      PEN_DV_P5,
+      PEN_DV_RGB888,
     };
 
     void *frame_buffer;
@@ -612,6 +613,24 @@ namespace pimoroni {
 
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB555);
+      }
+  };
+
+  class PicoGraphics_PenDV_RGB888 : public PicoGraphics {
+    public:
+      RGB888 color;
+      IDirectDisplayDriver<RGB888> &driver;
+
+      PicoGraphics_PenDV_RGB888(uint16_t width, uint16_t height, IDirectDisplayDriver<RGB888> &direct_display_driver);
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+
+      static size_t buffer_size(uint w, uint h) {
+        return w * h * sizeof(RGB888);
       }
   };
 

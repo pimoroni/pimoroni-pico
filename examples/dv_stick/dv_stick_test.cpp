@@ -9,13 +9,15 @@
 
 using namespace pimoroni;
 
-#define FRAME_WIDTH 720
-#define FRAME_HEIGHT 480
+#define FRAME_WIDTH 360
+#define FRAME_HEIGHT 240
 
-#define READ_EDID 1
+#define READ_EDID 0
 #if READ_EDID
 extern "C" { int decode_edid(unsigned char* edid); }
 #endif
+
+#define USE_PALETTE 0
 
 void on_uart_rx() {
     while (uart_is_readable(uart1)) {
@@ -44,9 +46,9 @@ int main() {
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
-  //sleep_ms(5000);
+  sleep_ms(5000);
 
-  DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT);
+  DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
   display.init();
   //display.test();
 
@@ -61,19 +63,29 @@ int main() {
   }
 #endif
 
-  display.enable_palette(true);
+#if USE_PALETTE
+  display.set_mode(DVDisplay::MODE_PALETTE)
   PicoGraphics_PenDV_P5 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
+#else
+  //display.set_mode(DVDisplay::MODE_RGB888);
+  PicoGraphics_PenDV_RGB888 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
+#endif
 
   graphics.create_pen(0, 0, 0);
   graphics.create_pen(0xFF, 0xFF, 0xFF);
 
+#if USE_PALETTE
   for (int i = 0; i < 25; ++i) {
     graphics.create_pen_hsv(i * 0.04f, 1.0f, 1.0f);
   }
+#endif
 
   graphics.set_pen(0xFF, 0, 0);
+  printf(".\n");
   graphics.clear();
+  printf("..\n");
   display.flip();
+  printf("...\n");
   sleep_ms(2000);
   graphics.set_pen(0, 0, 0xFF);
   graphics.clear();
@@ -84,7 +96,8 @@ int main() {
 
   constexpr int NUM_CIRCLES = 50;
   struct Circle {
-    uint16_t x, y, size, grow, pen;
+    uint16_t x, y, size, grow;
+    uint32_t pen;
   } circles[NUM_CIRCLES];
 
   for(int i =0 ; i < 50 ; i++)
@@ -93,7 +106,11 @@ int main() {
     circles[i].grow = std::max(0, (rand() % 50) - 25);
     circles[i].x = rand() % graphics.bounds.w;
     circles[i].y = rand() % graphics.bounds.h;
+#if USE_PALETTE
     circles[i].pen = 2 + (i >> 1);
+#else
+    circles[i].pen = graphics.create_pen_hsv(i * 0.02f, 1.0f, 1.0f);
+#endif
   }
 
   int frames = 0;
