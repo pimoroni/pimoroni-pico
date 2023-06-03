@@ -12,14 +12,14 @@
 
 using namespace pimoroni;
 
-#define FRAME_WIDTH 1280
+#define FRAME_WIDTH 640
 #define FRAME_HEIGHT 720
 
 FATFS fs;
 FRESULT fr;
 
-DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT);
-PicoGraphics_PenDV_RGB555 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
+DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
+PicoGraphics_PenDV_RGB888 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 
 JPEGDEC jpeg;
 struct {
@@ -48,24 +48,26 @@ int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
 }
 
 int jpegdec_draw_callback(JPEGDRAW *draw) {
-  uint16_t *p = draw->pPixels;
+  uint8_t *p = (uint8_t*)draw->pPixels;
 
   int xo = jpeg_decode_options.x;
   int yo = jpeg_decode_options.y;
 
   for(int y = 0; y < draw->iHeight; y++) {
-    for(int x = 0; x < draw->iWidth; x++) {
-      int sx = draw->x + x + xo;
+    for(int x = 0; x < draw->iWidth; x+=2) {
+      int sx = ((draw->x + x) >> 1) + xo;
       int sy = draw->y + y + yo;
 
       if(sx >= 0 && sx < graphics.bounds.w && x < draw->iWidthUsed &&
          sy >= 0 && sy < graphics.bounds.h) {
-        const RGB565 col = *p;
-        graphics.set_pen((col & 0x1F) | ((col & 0xFFC0) >> 1));
+        RGB888 col = ((((uint32_t)p[0] + (uint32_t)p[3]) << 15) & 0xff0000) | 
+                     ((((uint32_t)p[1] + (uint32_t)p[4]) << 7) & 0xff00) | 
+                      (((uint32_t)p[2] + (uint32_t)p[5]) >> 1);
+        graphics.set_pen(col);
         graphics.pixel({sx, sy});
       }
 
-      p++;
+      p += 6;
     }
   }
 
@@ -82,10 +84,10 @@ void draw_jpeg(std::string filename) {
     jpegdec_draw_callback
   );
 
-  jpeg_decode_options.x = (FRAME_WIDTH - jpeg.getWidth()) >> 1;
+  jpeg_decode_options.x = (FRAME_WIDTH - (jpeg.getWidth() >> 1)) >> 1;
   jpeg_decode_options.y = (FRAME_HEIGHT - jpeg.getHeight()) >> 1;
 
-  jpeg.setPixelType(RGB565_LITTLE_ENDIAN);
+  jpeg.setPixelType(RGB888_LITTLE_ENDIAN);
 
   printf("- starting jpeg decode..");
   int start = millis();

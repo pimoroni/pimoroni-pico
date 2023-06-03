@@ -2210,7 +2210,6 @@ static void JPEGPixel2BE(uint16_t *pDest, int32_t iY1, int32_t iY2, int32_t iCb,
     *(uint32_t *)&pDest[0] = __builtin_bswap16(ulPixel1) | ((uint32_t)__builtin_bswap16(ulPixel2)<<16);
 } /* JPEGPixel2BE() */
 
-#if 0
 static void JPEGPixelLE888(uint8_t *pDest, int iY, int iCb, int iCr)
 {
     int32_t iCBB, iCBG, iCRG, iCRR;
@@ -2236,7 +2235,6 @@ static void JPEGPixelLE888(uint8_t *pDest, int iY, int iCb, int iCr)
     if (uVal & 0x100) uVal = 0;
     *pDest++ = uVal;
 }
-#endif
 
 static void JPEGPutMCU11(JPEGIMAGE *pJPEG, int x, int iPitch)
 {
@@ -2246,6 +2244,7 @@ static void JPEGPutMCU11(JPEGIMAGE *pJPEG, int x, int iPitch)
     int iRow;
     uint8_t *pY, *pCr, *pCb;
     uint16_t *pOutput = &pJPEG->usPixels[x];
+    uint8_t *pOutput8 = ((uint8_t*)pJPEG->usPixels) + x * 3;
 
     pY  = (unsigned char *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (unsigned char *)&pJPEG->sMCUs[1*DCTSIZE];
@@ -2341,6 +2340,17 @@ static void JPEGPutMCU11(JPEGIMAGE *pJPEG, int x, int iPitch)
                 Y = (int)(*pY++) << 12;
                 JPEGPixelLE(pOutput+iCol, Y, iCb, iCr);
             } // for col
+        }
+        else if (pJPEG->ucPixelType == RGB888_LITTLE_ENDIAN)
+        {
+            for (iCol=0; iCol<8; iCol++) // up to 4x2 cols to do
+            {
+                iCr = *pCr++;
+                iCb = *pCb++;
+                Y = (int)(*pY++) << 12;
+                JPEGPixelLE888(pOutput8+iCol*3, Y, iCb, iCr);
+            } // for col
+            pOutput8 += iPitch * 3;
         }
         else
         {
@@ -2697,6 +2707,7 @@ static void JPEGPutMCU12(JPEGIMAGE *pJPEG, int x, int iPitch)
     int iRow, iCol, iXCount, iYCount;
     uint8_t *pY, *pCr, *pCb;
     uint16_t *pOutput = &pJPEG->usPixels[x];
+    uint8_t *pOutput8 = ((uint8_t*)pJPEG->usPixels) + x * 3;
     
     pY  = (uint8_t *)&pJPEG->sMCUs[0*DCTSIZE];
     pCb = (uint8_t *)&pJPEG->sMCUs[2*DCTSIZE];
@@ -2828,6 +2839,11 @@ static void JPEGPutMCU12(JPEGIMAGE *pJPEG, int x, int iPitch)
                 JPEGPixelLE(pOutput + iCol, Y1, Cb, Cr);
                 JPEGPixelLE(pOutput + iPitch + iCol, Y2, Cb, Cr);
             }
+            else if (pJPEG->ucPixelType == RGB888_LITTLE_ENDIAN)
+            {
+                JPEGPixelLE888(pOutput8 + iCol*3, Y1, Cb, Cr);
+                JPEGPixelLE888(pOutput8 + (iPitch + iCol)*3, Y2, Cb, Cr);
+            }
             else
             {
                 JPEGPixelBE(pOutput + iCol, Y1, Cb, Cr);
@@ -2840,6 +2856,7 @@ static void JPEGPutMCU12(JPEGIMAGE *pJPEG, int x, int iPitch)
         pCb += 8;
         pCr += 8;
         pOutput += iPitch*2; // next 2 lines of dest pixels
+        pOutput8 += iPitch*6;
     }
 } /* JPEGPutMCU12() */
 static void JPEGPutMCU21(JPEGIMAGE *pJPEG, int x, int iPitch)
@@ -3097,6 +3114,8 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
     cDCTable2 = pJPEG->JPCI[2].dc_tbl_no;
     cACTable2 = pJPEG->JPCI[2].ac_tbl_no;
     iDCPred0 = iDCPred1 = iDCPred2 = mcuCX = mcuCY = 0;
+
+    printf("SubSample mode: 0x%x\n", pJPEG->ucSubSample);
     
     switch (pJPEG->ucSubSample) // set up the parameters for the different subsampling options
     {
@@ -3155,6 +3174,8 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
     iMCUCount = MAX_BUFFERED_PIXELS / (mcuCX * mcuCY);
     if (pJPEG->ucPixelType == EIGHT_BIT_GRAYSCALE)
         iMCUCount *= 2; // each pixel is only 1 byte
+    else if (pJPEG->ucPixelType == RGB888_LITTLE_ENDIAN)
+        iMCUCount = (iMCUCount >> 1) + (iMCUCount >> 3);  // each picel is 3 bytes
     if (iMCUCount > cx)
         iMCUCount = cx; // don't go wider than the image
     if (iMCUCount > pJPEG->iMaxMCUs) // did the user set an upper bound on how many pixels per JPEGDraw callback?
@@ -3164,6 +3185,9 @@ static int DecodeJPEG(JPEGIMAGE *pJPEG)
     jd.iBpp = 16;
     switch (pJPEG->ucPixelType)
     {
+        case RGB888_LITTLE_ENDIAN:
+            jd.iBpp = 24;
+            break;
         case EIGHT_BIT_GRAYSCALE:
             jd.iBpp = 8;
             break;

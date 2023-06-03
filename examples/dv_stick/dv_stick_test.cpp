@@ -46,7 +46,7 @@ int main() {
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
-  sleep_ms(5000);
+  //sleep_ms(5000);
 
   DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
   display.init();
@@ -120,8 +120,15 @@ int main() {
     //}
     uint32_t render_start_time = time_us_32();
 
+#if 1
+    for (int j = 0; j < FRAME_HEIGHT; ++j) {
+      graphics.set_pen(j, 0xFF, 0xFF);
+      graphics.pixel_span({0,j}, FRAME_WIDTH);
+    }
+#else
     graphics.set_pen(0xFF, 0xFF, 0xFF);
     graphics.clear();
+#endif
 
 #if 0
     for (uint i = 0; i < 128; i++) {
