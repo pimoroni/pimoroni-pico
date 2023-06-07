@@ -66,25 +66,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: pico
-          board: PICO
-        - name: picow
-          board: PICO_W
-        - name: tiny2040
-          board: PIMORONI_TINY2040
-        - name: picolipo_4mb
-          board: PIMORONI_PICOLIPO_4MB
-        - name: picolipo_16mb
-          board: PIMORONI_PICOLIPO_16MB
-        - name: tufty2040
-          board: PIMORONI_TUFTY2040
-        - name: enviro
-          board: PICO_W_ENVIRO
-          patch: true
-        - name: galactic_unicorn
-          board: PICO_W
-        - name: cosmic_unicorn
-          board: PICO_W
         - name: inky_frame
           board: PICO_W_INKY
           patch: true
