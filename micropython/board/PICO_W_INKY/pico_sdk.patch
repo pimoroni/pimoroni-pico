@@ -1,5 +1,5 @@
 diff --git a/src/rp2_common/pico_runtime/runtime.c b/src/rp2_common/pico_runtime/runtime.c
-index f9018d0..ae8c479 100644
+index 144ace1..52bb6c9 100644
 --- a/src/rp2_common/pico_runtime/runtime.c
 +++ b/src/rp2_common/pico_runtime/runtime.c
 @@ -20,6 +20,7 @@
@@ -58,19 +58,19 @@ index f9018d0..ae8c479 100644
      // (basically anything in aeabi that uses bootrom)
  
 diff --git a/src/rp2_common/pico_standard_link/crt0.S b/src/rp2_common/pico_standard_link/crt0.S
-index d061108..e48d870 100644
+index 7d29f76..799ce19 100644
 --- a/src/rp2_common/pico_standard_link/crt0.S
 +++ b/src/rp2_common/pico_standard_link/crt0.S
-@@ -10,6 +10,8 @@
+@@ -11,6 +11,8 @@
+ #include "hardware/regs/addressmap.h"
  #include "hardware/regs/sio.h"
- #include "pico/asm_helper.S"
  #include "pico/binary_info/defs.h"
 +#include "hardware/regs/resets.h"
 +#include "hardware/regs/rosc.h"
  
  #ifdef NDEBUG
  #ifndef COLLAPSE_IRQS
-@@ -226,6 +228,23 @@ _reset_handler:
+@@ -225,6 +227,23 @@ _reset_handler:
      cmp r0, #0
      bne hold_non_core0_in_bootrom
  
@@ -94,7 +94,7 @@ index d061108..e48d870 100644
      // In a NO_FLASH binary, don't perform .data copy, since it's loaded
      // in-place by the SRAM load. Still need to clear .bss
  #if !PICO_NO_FLASH
-@@ -252,6 +271,10 @@ bss_fill_test:
+@@ -251,6 +270,10 @@ bss_fill_test:
      cmp r1, r2
      bne bss_fill_loop
  
@@ -105,7 +105,7 @@ index d061108..e48d870 100644
  platform_entry: // symbol for stack traces
      // Use 32-bit jumps, in case these symbols are moved out of branch range
      // (e.g. if main is in SRAM and crt0 in flash)
-@@ -311,6 +334,19 @@ data_cpy_table:
+@@ -310,6 +333,18 @@ data_cpy_table:
  runtime_init:
      bx lr
  
@@ -121,12 +121,11 @@ index d061108..e48d870 100644
 +runtime_reset_peripherals:
 +    bx lr
 +
-+
  // ----------------------------------------------------------------------------
  // If core 1 somehow gets into crt0 due to a spectacular VTOR mishap, we need to
  // catch it and send back to the sleep-and-launch code in the bootrom. Shouldn't
-@@ -335,3 +371,9 @@ hold_non_core0_in_bootrom:
- .align 2
+@@ -350,3 +385,9 @@ spacer_section .heap
+ .p2align 2
      .equ HeapSize, PICO_HEAP_SIZE
  .space HeapSize
 +
@@ -135,4 +134,3 @@ index d061108..e48d870 100644
 +.align 4
 +runtime_wakeup_gpio_state:
 +.word 0x00000000
-\ No newline at end of file

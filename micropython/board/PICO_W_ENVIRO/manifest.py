@@ -4,5 +4,8 @@ include("$(PORT_DIR)/boards/manifest.py")
 require("bundle-networking")
 require("umqtt.simple")
 
+# Bluetooth
+require("aioble")
+
 freeze("../../modules_py", "pimoroni.py")
 freeze("../../modules_py", "boot.py")

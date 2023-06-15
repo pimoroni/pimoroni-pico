@@ -5,5 +5,8 @@ require("bundle-networking")
 require("urllib.urequest")
 require("umqtt.simple")
 
+# Bluetooth
+require("aioble")
+
 freeze("../../modules_py", "pimoroni.py")
 freeze("../../modules_py", "boot.py")
