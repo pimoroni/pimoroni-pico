@@ -2,6 +2,7 @@
 
 #include "hardware/pio.h"
 #include "pico_graphics.hpp"
+#include "common/pimoroni_common.hpp"
 #include "../pico_synth/pico_synth.hpp"
 
 namespace pimoroni {

@@ -30,6 +30,7 @@ On the releases page you'll find a bunch of different .uf2 files for use on diff
 | Badger 2040 W                                                | **pimoroni-badger2040w-vx.x.x-micropython.uf2** or **pimoroni-badger2040w-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Badger 2040                                                  | **pimoroni-badger2040-vx.x.x-micropython.uf2** or  **pimoroni-badger2040-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Cosmic Unicorn                                               | **pimoroni-picow_cosmic_unicorn-vx.x.x-micropython.uf2**     |                                                              |
+| Stellar Unicorn                                               | **pimoroni-picow_stellar_unicorn-vx.x.x-micropython.uf2**     |                                                              |
 
 ## Entering DFU/bootloader mode
 

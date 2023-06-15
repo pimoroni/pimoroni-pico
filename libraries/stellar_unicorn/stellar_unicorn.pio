@@ -1,0 +1,79 @@
+.program stellar_unicorn
+.side_set 1 opt
+
+; out pins:
+;
+; - 3: row select bit 0
+; - 4: row select bit 1
+; - 5: row select bit 2
+; - 6: row select bit 3
+
+; set pins:
+;
+; - 0: column data (base)
+; - 1: column latch
+; - 2: column blank
+
+; sideset pin:
+;
+; - 0: column clock
+
+; for each row:
+;   for each bcd frame:
+;           0: 00011111                           // row pixel count (minus one)
+;           1: xxxxrrrr                           // row select bits
+;     2  - 65: xxxxxbgr, xxxxxbgr, xxxxxbgr, ...  // pixel data
+;     66 - 67: xxxxxxxx, xxxxxxxx                 // dummy bytes to dword align
+;     68 - 71: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
+; 
+; .. and back to the start
+
+
+.wrap_target
+
+; loop over row pixels
+  out y, 8                        ; get row pixel count (minus 1 because test is pre decrement)
+  out pins, 8                     ; output row select
+pixels:
+    
+    ; red bit
+    out x, 1       side 0  [1]    ; pull in blue bit from OSR into register x, clear clock
+    set pins, 0b100               ; clear data bit, blank high
+    jmp !x endb                   ; if bit was zero jump
+    set pins, 0b101               ; set data bit, blank high
+  endb:                      
+    nop            side 1 [2]     ; clock in bit
+
+    ; green bit
+    out x, 1       side 0 [1]        ; pull in green bit from OSR into register X, clear clock
+    set pins, 0b100               ; clear data bit, blank high
+    jmp !x endg                   ; if bit was zero jump
+    set pins, 0b101               ; set data bit, blank high
+  endg:                      
+    nop            side 1 [2]     ; clock in bit
+
+    ; blue bit
+    out x, 1       side 0  [1]       ; pull in red bit from OSR into register X, clear clock
+    set pins, 0b100               ; clear data bit, blank high
+    jmp !x endr                   ; if bit was zero jump
+    set pins, 0b101               ; set data bit, blank high
+  endr:                      
+    out null, 5             side 1 [2]     ; clock in bit
+
+    ;out null, 5    side 0         ; discard the five dummy bits for this pixel
+
+  jmp y-- pixels
+
+  out null, 16                    ; discard dummy bytes
+
+  set pins, 0b110 [5]             ; latch high, blank high
+  set pins, 0b000                 ; blank low (enable output)
+
+; loop over bcd delay period
+  out y, 32                       ; get bcd delay counter value
+bcd_delay:
+  jmp y-- bcd_delay         
+
+  set pins 0b100                  ; blank high (disable output)
+
+.wrap

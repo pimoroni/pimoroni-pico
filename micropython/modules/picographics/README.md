@@ -72,6 +72,7 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * Galactic Unicorn - 53x11 LED Matrix - `DISPLAY_GALACTIC_UNICORN`
 * Interstate75 and 75W - HUB75 Matrix driver - `DISPLAY_INTERSTATE75_SIZEOFMATRIX` please read below!
 * Cosmic Unicorn - 32x32 LED Matrix - `DISPLAY_COSMIC_UNICORN`
+* Stellar Unicorn - 16x16 LED Matrix - `DISPLAY_STELLAR_UNICORN`
 
 #### Interstate75 and Interstate75W Display modes
 

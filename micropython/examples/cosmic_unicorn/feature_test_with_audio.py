@@ -152,8 +152,6 @@ tone_b = 0
 # The current synth beat
 beat = 0
 
-text = ""
-
 
 def next_beat():
     global beat
@@ -311,6 +309,8 @@ while True:
     elif test == 4:
         # print("white gradient")
         gradient(255, 255, 255)
+
+    text = ""
 
     if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         text = "PlaySyn"

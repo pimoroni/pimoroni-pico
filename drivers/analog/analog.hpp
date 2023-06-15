@@ -11,7 +11,7 @@ namespace pimoroni {
   public:
     Analog(uint pin, float amplifier_gain = 1.0f, float resistor = 0.0f, float offset = 0.0f) :
     pin(pin), amplifier_gain(amplifier_gain), resistor(resistor), offset(offset) {
-      adc_init();
+      if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
 
       //Make sure GPIO is high-impedance, no pullups etc
       adc_gpio_init(pin);

@@ -86,6 +86,8 @@ jobs:
           board: PICO_W
         - name: cosmic_unicorn
           board: PICO_W
+        - name: stellar_unicorn
+          board: PICO_W
         - name: inky_frame
           board: PICO_W_INKY
           patch: true
