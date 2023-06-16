@@ -7,8 +7,8 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.20.0
-  WORKFLOW_VERSION: v0
+  MICROPYTHON_VERSION: 856e08b1931b88271816a2f60648f6ff332235b2
+  WORKFLOW_VERSION: v1
 
 jobs:
   deps:
@@ -53,6 +53,7 @@ jobs:
         git submodule update --init ../../lib/mbedtls
         git submodule update --init ../../lib/micropython-lib
         git submodule update --init ../../lib/tinyusb
+        git submodule update --init ../../lib/btstack
 
     - name: Build mpy-cross
       if: steps.cache.outputs.cache-hit != 'true'
