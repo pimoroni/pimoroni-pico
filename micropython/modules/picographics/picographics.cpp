@@ -37,6 +37,7 @@ typedef struct _ModPicoGraphics_obj_t {
     DisplayDriver *display;
     void *spritedata;
     void *buffer;
+    void *fontdata;
     _PimoroniI2C_obj_t *i2c;
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
@@ -520,7 +521,16 @@ mp_obj_t ModPicoGraphics_sprite(size_t n_args, const mp_obj_t *args) {
 
 mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
-    self->graphics->set_font(mp_obj_to_string_r(font));
+
+    if (mp_obj_is_str(font)) {
+        self->graphics->set_font(mp_obj_to_string_r(font));
+    }
+    else {
+        mp_buffer_info_t bufinfo;
+        mp_get_buffer_raise(font, &bufinfo, MP_BUFFER_READ);
+        self->fontdata = bufinfo.buf;
+        self->graphics->set_font(((bitmap::font_t *)self->fontdata));
+    }
     return mp_const_none;
 }
 
