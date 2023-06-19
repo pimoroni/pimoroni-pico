@@ -21,7 +21,7 @@ function(add_resource target file)
             ${CMAKE_CURRENT_SOURCE_DIR}/${FILENAME}
             ${CMAKE_CURRENT_BINARY_DIR}
 
-    COMMAND arm-none-eabi-ld -r -b binary -o ${NAME}.o ${FILENAME}
+    COMMAND $ENV{PICO_TOOLCHAIN_PATH}arm-none-eabi-ld -r -b binary -o ${NAME}.o ${FILENAME}
     DEPENDS ${FILENAME}
   )
 
