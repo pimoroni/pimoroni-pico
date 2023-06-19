@@ -38,6 +38,7 @@ typedef struct _ModPicoGraphics_obj_t {
     void *spritedata;
     void *buffer;
     void *fontdata;
+    bool noblock;
     _PimoroniI2C_obj_t *i2c;
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
@@ -265,7 +266,7 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
 mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     ModPicoGraphics_obj_t *self = nullptr;
 
-    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address };
+    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address, ARG_noblock };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
@@ -274,6 +275,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_extra_pins, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_i2c_address, MP_ARG_INT, { .u_int = -1 } },
+        { MP_QSTR_noblock, MP_ARG_OBJ, { .u_obj = mp_const_false } },
     };
 
     // Parse args.
@@ -282,6 +284,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     self = m_new_obj_with_finaliser(ModPicoGraphics_obj_t);
     self->base.type = &ModPicoGraphics_type;
+    self->noblock = args[ARG_noblock].u_obj == mp_const_true;
 
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
 
@@ -621,7 +624,7 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     }
 */
 
-    while(self->display->is_busy()) {
+    while(self->display->is_busy() && !self->noblock) {
     #ifdef MICROPY_EVENT_POLL_HOOK
     MICROPY_EVENT_POLL_HOOK
     #endif
@@ -629,13 +632,16 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 
     self->display->update(self->graphics);
 
-    while(self->display->is_busy()) {
+    while(self->display->is_busy() && !self->noblock) {
     #ifdef MICROPY_EVENT_POLL_HOOK
     MICROPY_EVENT_POLL_HOOK
     #endif
     }
 
-    self->display->power_off();
+    if(!self->noblock) {
+        // TODO: Can we attach an interrupt on busy wait to handle this when it changes?
+        self->display->power_off();
+    }
 
     return mp_const_none;
 }
