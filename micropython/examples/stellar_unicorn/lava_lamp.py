@@ -13,7 +13,7 @@ You can adjust the brightness with LUX + and -.
 su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-blob_count = 10
+blob_count = 5
 
 
 class Blob():
