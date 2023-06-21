@@ -50,6 +50,8 @@ The easiest way to start displaying cool stuff on Stellar Unicorn is using our S
 
 Clock example with (optional) NTP synchronization. You can adjust the brightness with LUX + and -, and resync the time by pressing A.
 
+This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../fonts) and copy it to your Pico W.
+
 ### Eighties Super Computer
 
 [eighties_super_computer.py](eighties_super_computer.py)
