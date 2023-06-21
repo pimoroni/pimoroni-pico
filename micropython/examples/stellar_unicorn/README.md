@@ -19,10 +19,10 @@
   - [Exchange Ticker](#exchange-ticker)
   - [HTTP Text](#http-text)
   - [Weather](#weather)
-- [NumPy examples](#numpy-examples)
+- [NumPy Examples](#numpy-examples)
 - [Other Examples](#other-examples)
+  - [CO2](#co2)
   - [Launch (Demo Reel)](#launch-demo-reel)
-- [Other Resources](#other-resources)
 
 ## About Stellar Unicorn
 
@@ -155,7 +155,7 @@ Requires `logging.mpy` and `tinyweb` from [micropython/examples/common](../../ex
 
 Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API.
 
-## NumPy examples
+## NumPy Examples
 
 [numpy](numpy)
 
@@ -163,16 +163,16 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 
 ## Other Examples
 
+### CO2
+
+[co2.py](co2.py)
+
+Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an carbon dioxide detector. Press A, B and C to switch between modes.
+
+This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../fonts) and copy it to your Pico W.
+
 ### Launch (Demo Reel)
 
 [launch](launch)
 
 If you want to get the demo reel that Stellar Unicorn ships with back, copy the contents of this `launch` folder to your Pico W.
-
-## Other Resources
-
-Here are some cool Stellar Unicorn community projects and resources that you might find useful / inspirational! Note that code at the links below has not been tested by us and we're not able to offer support with it.
-
-- :link: [Green Energy Display with Stellar Unicorn](https://www.hackster.io/andreas-motzek/clock-and-green-energy-display-with-stellar-unicorn-641dcb)
-- :link: [stellar-emoji-react - paint emojis from a computer, phone or tablet](https://github.com/chriscareycode/stellar-unicorn/tree/main/stellar-emoji-react)
-- :link: [stellar-paste - paste images from the clipboard to Stellar Unicorn](https://github.com/chriscareycode/stellar-unicorn/tree/main/stellar-paste)
