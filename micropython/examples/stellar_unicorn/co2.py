@@ -75,7 +75,7 @@ while True:
         if mode == "co2":
             # draw the co2 level
             co2_string = str(co2)
-            if co2 < 999:
+            if co2 < 1000:
                 graphics.text(f"{co2:.0f}", 2, 2, scale=1, fixed_width=True)
             else:
                 graphics.text(f"{co2_string[0]}", 1, 2, scale=1, fixed_width=True)
