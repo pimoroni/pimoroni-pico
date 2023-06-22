@@ -333,7 +333,7 @@ namespace pimoroni {
     read(point_to_address_palette(p), l, data);
   }
 
-  void DVDisplay::write_header()
+  void DVDisplay::write_header_preamble()
   {
     uint32_t buf[8];
     uint32_t full_width = width * h_repeat;
@@ -346,7 +346,13 @@ namespace pimoroni {
     buf[6] = 0x00000001;
     ram.write(0, buf, 7 * 4);
     ram.wait_for_finish_blocking();
+  }
 
+  void DVDisplay::write_header()
+  {
+    write_header_preamble();
+
+    uint32_t buf[8];
     uint addr = 4 * 7;
     uint line_type = 0x80000000u + ((uint)mode << 28);
     printf("Write header, line type %08x\n", line_type);

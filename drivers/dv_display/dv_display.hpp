@@ -28,7 +28,7 @@ namespace pimoroni {
     //--------------------------------------------------
     // Variables
     //--------------------------------------------------
-  private:
+  protected:
     // Ram accessed through the APS6404 driver
     APS6404 ram;
 
@@ -158,11 +158,18 @@ namespace pimoroni {
       // The supplied buffer must be at least 128 bytes long
       void get_edid(uint8_t* edid);
 
-    private:
+    protected:
       uint8_t palette[PALETTE_SIZE * 3] alignas(4);
       bool rewrite_header = false;
 
-      static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 16;
+      virtual void write_palette();
+      virtual void write_header();
+
+      void write_header_preamble();
+      void i2c_modify_bit(uint8_t reg, uint bit, bool enable);
+
+    private:
+      static constexpr int PIXEL_BUFFER_LEN_IN_WORDS = 32;
       uint32_t pixel_buffer[PIXEL_BUFFER_LEN_IN_WORDS];
       Point pixel_buffer_location;
       int32_t pixel_buffer_x;
@@ -172,11 +179,6 @@ namespace pimoroni {
       void write(uint32_t address, size_t len, const uint8_t colour);
       void read(uint32_t address, size_t len, uint8_t *data);
       void write(uint32_t address, size_t len, const RGB888 colour);
-
-      void write_palette();
-      void write_header();
-
-      void i2c_modify_bit(uint8_t reg, uint bit, bool enable);
 
       uint32_t point_to_address(const Point &p) {
         return base_address + ((p.y * (uint32_t)width * 3) + p.x) * 2;
