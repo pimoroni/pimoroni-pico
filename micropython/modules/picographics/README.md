@@ -305,7 +305,7 @@ These are aligned from their top-left corner.
 * `bitmap8`
 * `bitmap14_outline`
 
-Vector (Hershey) fonts. 
+Vector (Hershey) fonts.
 These are aligned horizontally (x) to their left edge, but vertically (y) to their midline excluding descenders [i.e., aligned at top edge of lower case letter m]. At `scale=1`, the top edge of upper case letters is 10 pixels above the specified `y`, text baseline is 10 pixels below the specified `y`, and descenders go down to 20 pixels below the specified `y`.
 
 * `sans`
@@ -341,6 +341,7 @@ display.text(text, x, y, wordwrap, scale, angle, spacing)
 * `scale` - size
 * `angle` - rotation angle (Vector only!)
 * `spacing` - letter spacing
+* `fixed_width` - space all characters equal distance apart (monospace)
 
 Text scale can be a whole number (integer) for Bitmap fonts, or a decimal (float) for Vector (Hershey) fonts.
 
@@ -355,7 +356,7 @@ Draws "Hello World" in a 16px tall, 2x scaled version of the `bitmap8` font.
 Sometimes you might want to measure a text string for centering or alignment on screen, you can do this with:
 
 ```python
-width = display.measure_text(text, scale, spacing)
+width = display.measure_text(text, scale, spacing, fixed_width)
 ```
 
 The height of each Bitmap font is explicit in its name.
