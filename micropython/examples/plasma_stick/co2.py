@@ -48,7 +48,7 @@ Temperature: {temperature:.2f} °C
 Humidity:    {humidity:.2f} %""")
 
         # calculates a colour
-        hue = HUE_START + ((co2 - MIN) * (HUE_END - HUE_START) / (MAX - MIN))
+        hue = max(0, HUE_START + ((co2 - MIN) * (HUE_END - HUE_START) / (MAX - MIN)))
 
         # set the leds
         for i in range(NUM_LEDS):
