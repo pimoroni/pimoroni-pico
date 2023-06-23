@@ -266,7 +266,7 @@ while True:
                 display.set_pen(RED)
             if corrected_temperature < 10:
                 display.set_pen(CYAN)
-            display.text(f"{corrected_temperature:.1f}°c", 5, 15, WIDTH, scale=4)
+            display.text(f"{corrected_temperature:.1f}°C", 5, 15, WIDTH, scale=4)
 
             # draw temp max and min
             display.set_pen(CYAN)
@@ -278,7 +278,7 @@ while True:
             display.set_pen(WHITE)
             display.text(f"rh {corrected_humidity:.0f}%", 0, 75, WIDTH, scale=3)
             display.text(f"{pressure_hpa:.0f}hPa", 0, 125, WIDTH, scale=3)
-            display.text(f"{lux} lux", 0, 175, WIDTH, scale=3)
+            display.text(f"{lux:.0f} lux", 0, 175, WIDTH, scale=3)
 
             # draw the second column of text
             display.text(f"{describe_humidity(corrected_humidity)}", 125, 75, WIDTH, scale=3)
