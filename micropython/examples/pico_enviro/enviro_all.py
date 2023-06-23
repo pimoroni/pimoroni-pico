@@ -189,7 +189,7 @@ temperature, pressure, humidity, gas, status, _, _ = bme.read()
 time.sleep(0.5)
 
 while True:
-    # turn off the backlight with A and turn it back on with B
+    # turn on the backlight with A and turn it back off with B
     # switch between sensor and equaliser mode with X and Y
     if button_a.is_pressed:
         display.set_backlight(BRIGHTNESS)
