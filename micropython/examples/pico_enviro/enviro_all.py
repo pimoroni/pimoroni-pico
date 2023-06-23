@@ -63,6 +63,7 @@ def adjust_to_sea_pressure(pressure_hpa, temperature, altitude):
 
 def describe_pressure(pressure_hpa):
     """Convert pressure into barometer-type description."""
+    pressure_hpa += 0.5
     if pressure_hpa < 970:
         description = "storm"
     elif 970 <= pressure_hpa < 990:
@@ -80,6 +81,7 @@ def describe_pressure(pressure_hpa):
 
 def describe_humidity(corrected_humidity):
     """Convert relative humidity into good/bad description."""
+    corrected_humidity += 0.5
     if 40 < corrected_humidity < 60:
         description = "good"
     else:
@@ -89,6 +91,7 @@ def describe_humidity(corrected_humidity):
 
 def describe_light(lux):
     """Convert light level in lux to descriptive value."""
+    lux += 0.5
     if lux < 50:
         description = "dark"
     elif 50 <= lux < 100:
