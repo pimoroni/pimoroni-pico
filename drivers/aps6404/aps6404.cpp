@@ -6,6 +6,13 @@
 #include "hardware/clocks.h"
 #include "pico/stdlib.h"
 #include "aps6404.pio.h"
+#ifndef MICROPY_BUILD_TYPE
+#define mp_printf(_, ...) printf(__VA_ARGS__);
+#else
+extern "C" {
+#include "py/runtime.h"
+}
+#endif
 
 namespace pimoroni {
     APS6404::APS6404(uint pin_csn, uint pin_d0, PIO pio)
@@ -20,17 +27,19 @@ namespace pimoroni {
         }
 
         pio_prog = &sram_reset_program;
+        pio_clear_instruction_memory(pio);
         pio_offset = pio_add_program(pio, &sram_reset_program);
-        pio_sm = pio_claim_unused_sm(pio, true);
+        pio_sm = 0; //pio_claim_unused_sm(pio, true);
 
         // Claim DMA channels
-        dma_channel = dma_claim_unused_channel(true);
-        read_cmd_dma_channel = dma_claim_unused_channel(true);
+        dma_channel = 0;// dma_claim_unused_channel(true);
+        read_cmd_dma_channel = 1;// dma_claim_unused_channel(true);
     }
 
     void APS6404::init() {
         pio_sm_set_enabled(pio, pio_sm, false);
-        pio_remove_program(pio, pio_prog, pio_offset);
+        pio_clear_instruction_memory(pio);
+        //pio_remove_program(pio, pio_prog, pio_offset);
 
         pio_prog = &sram_reset_program;
         pio_offset = pio_add_program(pio, &sram_reset_program);

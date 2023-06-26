@@ -5,6 +5,13 @@
 #include <cstdlib>
 #include <math.h>
 #include <string.h>
+#ifndef MICROPY_BUILD_TYPE
+#define mp_printf(_, ...) printf(__VA_ARGS__);
+#else
+extern "C" {
+#include "py/runtime.h"
+}
+#endif
 
 namespace pimoroni {
 
@@ -43,7 +50,7 @@ namespace pimoroni {
     }
 
     if (res_mode == 0xFF) {
-      printf("Resolution %dx%d is not supported.  Will use 720x480.\n", width, height);
+      mp_printf(&mp_plat_print, "Resolution %dx%d is not supported.  Will use 720x480.\n", width, height);
     }
 
     gpio_init(RAM_SEL);
@@ -71,14 +78,14 @@ namespace pimoroni {
     gpio_put(RAM_SEL, 0);
     sleep_ms(100);
 
-    printf("Start I2C\n");
+    mp_printf(&mp_plat_print, "Start I2C\n");
 
     if (res_mode != 0xFF) {
       i2c.reg_write_uint8(I2C_ADDR, I2C_REG_SET_RES, res_mode);
     }
 
     i2c.reg_write_uint8(I2C_ADDR, I2C_REG_START, 1);
-    printf("Started\n");
+    mp_printf(&mp_plat_print, "Started\n");
   }
   
   void DVDisplay::flip() {
@@ -355,7 +362,7 @@ namespace pimoroni {
     uint32_t buf[8];
     uint addr = 4 * 7;
     uint line_type = 0x80000000u + ((uint)mode << 28);
-    printf("Write header, line type %08x\n", line_type);
+    mp_printf(&mp_plat_print, "Write header, line type %08x\n", line_type);
     for (int i = 0; i < height; i += 8) {
       for (int j = 0; j < 8; ++j) {
         buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * width * 6) + base_address;
