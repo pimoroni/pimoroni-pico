@@ -155,7 +155,7 @@ Requires `logging.mpy` and `tinyweb` from [micropython/examples/common](../../ex
 
 [weather](weather)
 
-Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API.
+Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API. Make sure to copy across the `icons` folder to your Unicorn.
 
 ## NumPy Examples
 
