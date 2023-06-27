@@ -17,7 +17,7 @@ using namespace pimoroni;
 extern "C" { int decode_edid(unsigned char* edid); }
 #endif
 
-#define USE_PALETTE 0
+#define USE_PALETTE 1
 
 void on_uart_rx() {
     while (uart_is_readable(uart1)) {
@@ -64,7 +64,7 @@ int main() {
 #endif
 
 #if USE_PALETTE
-  display.set_mode(DVDisplay::MODE_PALETTE)
+  display.set_mode(DVDisplay::MODE_PALETTE);
   PicoGraphics_PenDV_P5 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 #else
   //display.set_mode(DVDisplay::MODE_RGB888);
