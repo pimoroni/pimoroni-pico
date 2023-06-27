@@ -14,6 +14,28 @@ extern "C" {
 }
 #endif
 
+static const pio_program* pio_prog[2] = {nullptr, nullptr};
+static uint16_t pio_offset[2] = {0xffff, 0xffff};
+
+const void pio_remove_exclusive_program(PIO pio) {
+    uint8_t pio_index = pio == pio0 ? 0 : 1;
+    const pio_program* current_program = pio_prog[pio_index];
+    uint16_t current_offset = pio_offset[pio_index];
+    if(current_program) {
+        pio_remove_program(pio, current_program, current_offset);
+        pio_prog[pio_index] = nullptr;
+        pio_offset[pio_index] = 0xffff;
+    }
+}
+
+const uint16_t pio_change_exclusive_program(PIO pio, const pio_program* prog) {
+    pio_remove_exclusive_program(pio);
+    uint8_t pio_index = pio == pio0 ? 0 : 1;
+    pio_prog[pio_index] = prog;
+    pio_offset[pio_index] = pio_add_program(pio, prog);
+    return pio_offset[pio_index];
+};
+
 namespace pimoroni {
     APS6404::APS6404(uint pin_csn, uint pin_d0, PIO pio)
                 : pin_csn(pin_csn)
@@ -27,22 +49,19 @@ namespace pimoroni {
         }
 
         pio_prog = &sram_reset_program;
-        pio_clear_instruction_memory(pio);
-        pio_offset = pio_add_program(pio, &sram_reset_program);
-        pio_sm = 0; //pio_claim_unused_sm(pio, true);
+        pio_offset = pio_change_exclusive_program(pio, &sram_reset_program);
+        pio_sm = 1;
 
         // Claim DMA channels
-        dma_channel = 0;// dma_claim_unused_channel(true);
-        read_cmd_dma_channel = 1;// dma_claim_unused_channel(true);
+        dma_channel = 0;
+        read_cmd_dma_channel = 1;
     }
 
     void APS6404::init() {
         pio_sm_set_enabled(pio, pio_sm, false);
-        pio_clear_instruction_memory(pio);
-        //pio_remove_program(pio, pio_prog, pio_offset);
 
         pio_prog = &sram_reset_program;
-        pio_offset = pio_add_program(pio, &sram_reset_program);
+        pio_offset = pio_change_exclusive_program(pio, &sram_reset_program);
         aps6404_reset_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0);
 
         sleep_us(200);
@@ -59,10 +78,9 @@ namespace pimoroni {
 
     void APS6404::set_qpi() {
         pio_sm_set_enabled(pio, pio_sm, false);
-        pio_remove_program(pio, pio_prog, pio_offset);
 
         pio_prog = &sram_reset_program;
-        pio_offset = pio_add_program(pio, &sram_reset_program);
+        pio_offset = pio_change_exclusive_program(pio, &sram_reset_program);
         aps6404_reset_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0);
         pio_sm_put_blocking(pio, pio_sm, 0x00000007u);
         pio_sm_put_blocking(pio, pio_sm, 0x35000000u);
@@ -74,10 +92,9 @@ namespace pimoroni {
 
     void APS6404::set_spi() {
         pio_sm_set_enabled(pio, pio_sm, false);
-        pio_remove_program(pio, pio_prog, pio_offset);
 
         pio_prog = &sram_reset_qpi_program;
-        pio_offset = pio_add_program(pio, &sram_reset_qpi_program);
+        pio_offset = pio_change_exclusive_program(pio, &sram_reset_qpi_program);
         aps6404_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0, false, false, true);
         pio_sm_put_blocking(pio, pio_sm, 0x00000001u);
         pio_sm_put_blocking(pio, pio_sm, 0xF5000000u);
@@ -85,21 +102,20 @@ namespace pimoroni {
 
     void APS6404::adjust_clock() {
         pio_sm_set_enabled(pio, pio_sm, false);
-        pio_remove_program(pio, pio_prog, pio_offset);
 
         if (clock_get_hz(clk_sys) > 296000000) {
             pio_prog = &sram_fast_program;
-            pio_offset = pio_add_program(pio, &sram_fast_program);
+            pio_offset = pio_change_exclusive_program(pio, &sram_fast_program);
             aps6404_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0, false, true, false);
         }
         else if (clock_get_hz(clk_sys) < 130000000) {
             pio_prog = &sram_slow_program;
-            pio_offset = pio_add_program(pio, &sram_slow_program);
+            pio_offset = pio_change_exclusive_program(pio, &sram_slow_program);
             aps6404_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0, true, false, false);
         }
         else {
             pio_prog = &sram_program;
-            pio_offset = pio_add_program(pio, &sram_program);
+            pio_offset = pio_change_exclusive_program(pio, &sram_program);
             aps6404_program_init(pio, pio_sm, pio_offset, pin_csn, pin_d0, false, false, false);
         }
 

@@ -14,42 +14,46 @@ static uint pio_offset;
 static uint pio_sm;
 static const pio_program_t* pio_prog;
 
+PIO swd_pio = pio1;
+
+extern const uint16_t pio_change_exclusive_program(PIO pio, const pio_program* prog);
+extern const void pio_remove_exclusive_program(PIO pio);
+
 static void wait_for_idle() {
     uint pull_offset = (pio_prog == &swd_raw_write_program) ? 2 : 
                        (pio_prog == &swd_raw_read_program) ? 0 : 5;
-    while (!pio_sm_is_tx_fifo_empty(pio0, pio_sm) || pio0_hw->sm[pio_sm].addr != pio_offset + pull_offset);
+    while (!pio_sm_is_tx_fifo_empty(swd_pio, pio_sm) || swd_pio->sm[pio_sm].addr != pio_offset + pull_offset);
 }
 
 static void switch_program(bool read, bool raw = false) {
     wait_for_idle();
-    pio_sm_set_enabled(pio0, pio_sm, false);
-    pio_remove_program(pio0, pio_prog, pio_offset);
+    pio_sm_set_enabled(swd_pio, pio_sm, false);
     pio_prog = raw ? (read ? &swd_raw_read_program : &swd_raw_write_program) :
                      (read ? &swd_read_program : &swd_write_program);
-    pio_offset = pio_add_program(pio0, pio_prog);
+    pio_offset = pio_change_exclusive_program(swd_pio, pio_prog);
     if (raw) {
-        swd_raw_program_init(pio0, pio_sm, pio_offset, 2, 3, read);
+        swd_raw_program_init(swd_pio, pio_sm, pio_offset, 2, 3, read);
     } else {
-        swd_program_init(pio0, pio_sm, pio_offset, 2, 3, read);
+        swd_program_init(swd_pio, pio_sm, pio_offset, 2, 3, read);
         wait_for_idle();
-        pio0_hw->irq = 1;
+        swd_pio->irq = 1;
     }
 }
 
 static void unload_pio() {
-    pio_sm_set_enabled(pio0, pio_sm, false);
-    pio_remove_program(pio0, pio_prog, pio_offset);
-    pio_sm_unclaim(pio0, pio_sm);
+    pio_sm_set_enabled(swd_pio, pio_sm, false);
+    pio_remove_exclusive_program(swd_pio);
+    pio_sm_unclaim(swd_pio, pio_sm);
 }
 
 static bool write_cmd(uint cmd, uint data) {
     if (pio_prog != &swd_write_program) {
         switch_program(false);
     }
-    pio_sm_put_blocking(pio0, pio_sm, cmd);
-    pio_sm_put_blocking(pio0, pio_sm, data);
+    pio_sm_put_blocking(swd_pio, pio_sm, cmd);
+    pio_sm_put_blocking(swd_pio, pio_sm, data);
     wait_for_idle();
-    if (pio0_hw->irq & 0x1) {
+    if (swd_pio->irq & 0x1) {
         return false;
     }
     return true;
@@ -71,13 +75,13 @@ static bool read_cmd(uint cmd, uint& data) {
     if (pio_prog != &swd_read_program) {
         switch_program(true);
     }
-    pio_sm_put_blocking(pio0, pio_sm, cmd);
+    pio_sm_put_blocking(swd_pio, pio_sm, cmd);
     wait_for_idle();
-    if (pio0_hw->irq & 0x1) {
+    if (swd_pio->irq & 0x1) {
         mp_printf(&mp_plat_print, "Read ID failed\n");
         return false;
     }
-    data = pio_sm_get_blocking(pio0, pio_sm);
+    data = pio_sm_get_blocking(swd_pio, pio_sm);
     return true;
 }
 
@@ -90,28 +94,27 @@ static bool read_reg(uint addr, uint &data) {
 
 static void idle() {
     switch_program(false, true);
-    pio_sm_put_blocking(pio0, pio_sm, 7);
-    pio_sm_put_blocking(pio0, pio_sm, 0);
+    pio_sm_put_blocking(swd_pio, pio_sm, 7);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0);
 }
 
 static bool connect(bool first = true, uint core = 0) {
     if (first) {
-        pio_clear_instruction_memory(pio0);
         pio_prog = &swd_raw_write_program;
-        pio_offset = pio_add_program(pio0, &swd_raw_write_program);
-        pio_sm = 0; //pio_claim_unused_sm(pio0, true);
+        pio_offset = pio_change_exclusive_program(swd_pio, &swd_raw_write_program);
+        pio_sm = 0;
 
-        swd_initial_init(pio0, pio_sm, 2, 3);
+        swd_initial_init(swd_pio, pio_sm, 2, 3);
 
-        swd_raw_program_init(pio0, pio_sm, pio_offset, 2, 3, false);
+        swd_raw_program_init(swd_pio, pio_sm, pio_offset, 2, 3, false);
     } else {
         switch_program(false, true);
     }
 
     // Begin transaction: 8 clocks, data low
     mp_printf(&mp_plat_print, "Begin transaction\n");
-    pio_sm_put_blocking(pio0, pio_sm, 7);
-    pio_sm_put_blocking(pio0, pio_sm, 0);
+    pio_sm_put_blocking(swd_pio, pio_sm, 7);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0);
 
     // Go to SWD mode:
     // 8 clocks, data high
@@ -119,34 +122,33 @@ static bool connect(bool first = true, uint core = 0) {
     // 4 clocks, data low
     // 0x1A
     mp_printf(&mp_plat_print, "SWD Mode\n");
-    pio_sm_put_blocking(pio0, pio_sm, 8-1);
-    pio_sm_put_blocking(pio0, pio_sm, 0xFF);
+    pio_sm_put_blocking(swd_pio, pio_sm, 8-1);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0xFF);
 
     mp_printf(&mp_plat_print, "Tag\n");
-    pio_sm_put_blocking(pio0, pio_sm, 32*4+4+8-1);
-    pio_sm_put_blocking(pio0, pio_sm, 0x6209F392);
-    pio_sm_put_blocking(pio0, pio_sm, 0x86852D95);
-    pio_sm_put_blocking(pio0, pio_sm, 0xE3DDAFE9);
-    pio_sm_put_blocking(pio0, pio_sm, 0x19BC0EA2);
-    pio_sm_put_blocking(pio0, pio_sm, 0x1A0);
+    pio_sm_put_blocking(swd_pio, pio_sm, 32*4+4+8-1);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x6209F392);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x86852D95);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0xE3DDAFE9);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x19BC0EA2);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x1A0);
 
     // Line Reset: 50 high, 8 low
     mp_printf(&mp_plat_print, "Line Reset\n");
-    pio_sm_put_blocking(pio0, pio_sm, 58-1);
-    pio_sm_put_blocking(pio0, pio_sm, 0xFFFFFFFF);
-    pio_sm_put_blocking(pio0, pio_sm, 0x003FFFF);
+    pio_sm_put_blocking(swd_pio, pio_sm, 58-1);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0xFFFFFFFF);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x003FFFF);
 
     mp_printf(&mp_plat_print, "Target Select\n"); // Must ignore error response
     wait_for_idle();
-    pio_sm_set_enabled(pio0, pio_sm, false);
-    pio_remove_program(pio0, pio_prog, pio_offset);
+    pio_sm_set_enabled(swd_pio, pio_sm, false);
     pio_prog = &swd_write_ignore_error_program;
-    pio_offset = pio_add_program(pio0, pio_prog);
-    swd_program_init(pio0, pio_sm, pio_offset, 2, 3, false);
+    pio_offset = pio_change_exclusive_program(swd_pio, pio_prog);
+    swd_program_init(swd_pio, pio_sm, pio_offset, 2, 3, false);
     wait_for_idle();
-    pio0_hw->irq = 1;
-    pio_sm_put_blocking(pio0, pio_sm, 0x19);
-    pio_sm_put_blocking(pio0, pio_sm, 0x01002927 | (core << 28));
+    swd_pio->irq = 1;
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x19);
+    pio_sm_put_blocking(swd_pio, pio_sm, 0x01002927 | (core << 28));
 
     mp_printf(&mp_plat_print, "Read ID\n");
     uint id;
