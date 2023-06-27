@@ -81,10 +81,10 @@ namespace pimoroni {
     mp_printf(&mp_plat_print, "Start I2C\n");
 
     if (res_mode != 0xFF) {
-      i2c.reg_write_uint8(I2C_ADDR, I2C_REG_SET_RES, res_mode);
+      i2c->reg_write_uint8(I2C_ADDR, I2C_REG_SET_RES, res_mode);
     }
 
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_START, 1);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_START, 1);
     mp_printf(&mp_plat_print, "Started\n");
   }
   
@@ -111,18 +111,18 @@ namespace pimoroni {
   }
 
   uint8_t DVDisplay::get_gpio() {
-    return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO);
+    return i2c->reg_read_uint8(I2C_ADDR, I2C_REG_GPIO);
   }
 
   uint8_t DVDisplay::get_gpio_hi() {
-    return i2c.reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
+    return i2c->reg_read_uint8(I2C_ADDR, I2C_REG_GPIO_HI);
   }
 
   void DVDisplay::i2c_modify_bit(uint8_t reg, uint bit, bool enable) {
-    uint8_t val = i2c.reg_read_uint8(I2C_ADDR, reg);
+    uint8_t val = i2c->reg_read_uint8(I2C_ADDR, reg);
     if (enable) val |= 1u << bit;
     else val &= ~(1u << bit);
-    i2c.reg_write_uint8(I2C_ADDR, reg, val);
+    i2c->reg_write_uint8(I2C_ADDR, reg, val);
   }
 
   void DVDisplay::set_gpio_hi_dir(uint pin, bool output) {
@@ -130,7 +130,7 @@ namespace pimoroni {
   }
 
   void DVDisplay::set_gpio_hi_dir_all(uint8_t val) {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OE, val);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OE, val);
   }
 
   void DVDisplay::set_gpio_hi(uint pin, bool on) {
@@ -138,7 +138,7 @@ namespace pimoroni {
   }
 
   void DVDisplay::set_gpio_hi_all(uint8_t val) {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OUT, val);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_OUT, val);
   }
 
   void DVDisplay::set_gpio_hi_pull_up(uint pin, bool on) {
@@ -146,7 +146,7 @@ namespace pimoroni {
   }
 
   void DVDisplay::set_gpio_hi_pull_up_all(uint8_t val) {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_UP, val);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_UP, val);
   }
 
   void DVDisplay::set_gpio_hi_pull_down(uint pin, bool on) {
@@ -154,19 +154,19 @@ namespace pimoroni {
   }
 
   void DVDisplay::set_gpio_hi_pull_down_all(uint8_t val) {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_DOWN, val);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_GPIO_HI_PULL_DOWN, val);
   }
 
   void DVDisplay::set_led_level(uint8_t level) {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_LED, level | 0x80);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_LED, level | 0x80);
   }
 
   void DVDisplay::set_led_heartbeat() {
-    i2c.reg_write_uint8(I2C_ADDR, I2C_REG_LED, 2);
+    i2c->reg_write_uint8(I2C_ADDR, I2C_REG_LED, 2);
   }
 
   void DVDisplay::get_edid(uint8_t* edid) {
-    i2c.read_bytes(I2C_ADDR, I2C_REG_EDID, edid, 128);
+    i2c->read_bytes(I2C_ADDR, I2C_REG_EDID, edid, 128);
   }
 
   void DVDisplay::write(uint32_t address, size_t len, const uint16_t colour)

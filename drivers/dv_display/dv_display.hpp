@@ -25,25 +25,11 @@ namespace pimoroni {
       MODE_RGB888 = 3,
     };
 
-    //--------------------------------------------------
-    // Variables
-    //--------------------------------------------------
-  protected:
-    // Ram accessed through the APS6404 driver
-    APS6404 ram;
-
-    // I2C interface to driver
-    I2C i2c;
-
-    // interface pins
-    static constexpr uint CS     = 17;
-    static constexpr uint D0     = 19;
-    static constexpr uint VSYNC  = 16;
-    static constexpr uint RAM_SEL = 8;
+    // I2C pins
     static constexpr uint I2C_SDA = 6;
     static constexpr uint I2C_SCL = 7;
 
-    // I2C
+    // I2C address and registers
     static constexpr uint I2C_ADDR = 0x0D;
     static constexpr uint I2C_REG_SET_RES = 0xF8;
     static constexpr uint I2C_REG_START = 0xF9;
@@ -55,6 +41,22 @@ namespace pimoroni {
     static constexpr uint I2C_REG_GPIO_HI_PULL_UP = 0xCB;
     static constexpr uint I2C_REG_GPIO_HI_PULL_DOWN = 0xCC;
     static constexpr uint I2C_REG_EDID = 0xED;
+
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
+  protected:
+    // Ram accessed through the APS6404 driver
+    APS6404 ram;
+
+    // I2C interface to driver
+    I2C* i2c;
+
+    // interface pins
+    static constexpr uint CS     = 17;
+    static constexpr uint D0     = 19;
+    static constexpr uint VSYNC  = 16;
+    static constexpr uint RAM_SEL = 8;
     
     static constexpr uint32_t base_address = 0x10000;
     uint16_t width = 0;
@@ -71,8 +73,16 @@ namespace pimoroni {
     // Note resolutions on the second line require quite extreme overclocking and may not work on all hardware.
     // Either or both of the horizontal or vertical component of any resolution may be halved.
     DVDisplay(uint16_t width, uint16_t height, Mode mode = MODE_RGB555)
-      : ram(CS, D0)
-      , i2c(I2C_SDA, I2C_SCL)
+      : ram(CS, D0, pio0)
+      , i2c(new I2C(I2C_SDA, I2C_SCL))
+      , width(width), height(height)
+      , mode(mode)
+      , pixel_buffer_location(-1, -1)
+    {}
+
+    DVDisplay(uint16_t width, uint16_t height, I2C* i2c, Mode mode = MODE_RGB555)
+      : ram(CS, D0, pio0)
+      , i2c(i2c)
       , width(width), height(height)
       , mode(mode)
       , pixel_buffer_location(-1, -1)
