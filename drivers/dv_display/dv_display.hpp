@@ -73,7 +73,7 @@ namespace pimoroni {
     // Note resolutions on the second line require quite extreme overclocking and may not work on all hardware.
     // Either or both of the horizontal or vertical component of any resolution may be halved.
     DVDisplay(uint16_t width, uint16_t height, Mode mode = MODE_RGB555)
-      : ram(CS, D0, pio0)
+      : ram(CS, D0, pio1)
       , i2c(new I2C(I2C_SDA, I2C_SCL))
       , width(width), height(height)
       , mode(mode)
@@ -81,7 +81,7 @@ namespace pimoroni {
     {}
 
     DVDisplay(uint16_t width, uint16_t height, I2C* i2c, Mode mode = MODE_RGB555)
-      : ram(CS, D0, pio0)
+      : ram(CS, D0, pio1)
       , i2c(i2c)
       , width(width), height(height)
       , mode(mode)
