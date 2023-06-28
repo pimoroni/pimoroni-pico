@@ -18,7 +18,7 @@ using namespace pimoroni;
 FATFS fs;
 FRESULT fr;
 
-DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
+DVDisplay display;
 PicoGraphics_PenDV_RGB888 graphics(FRAME_WIDTH, FRAME_HEIGHT, display);
 
 JPEGDEC jpeg;
@@ -126,7 +126,7 @@ int main() {
 
   sleep_ms(5000);
 
-  display.init();
+  display.init(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
   //display.test();
 
   graphics.set_pen(0);

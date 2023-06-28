@@ -10,7 +10,7 @@
 using namespace pimoroni;
 
 #define FRAME_WIDTH 360
-#define FRAME_HEIGHT 240
+#define FRAME_HEIGHT 480
 
 #define READ_EDID 0
 #if READ_EDID
@@ -48,8 +48,8 @@ int main() {
 
   //sleep_ms(5000);
 
-  DVDisplay display(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
-  display.init();
+  DVDisplay display;
+  display.init(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
   //display.test();
 
 #if READ_EDID
@@ -77,6 +77,9 @@ int main() {
 #if USE_PALETTE
   for (int i = 0; i < 25; ++i) {
     graphics.create_pen_hsv(i * 0.04f, 1.0f, 1.0f);
+  }
+  for (int i = 0; i < 5; ++i) {
+    graphics.create_pen((i+3) * (255/8), 255, 255);
   }
 #endif
 
@@ -122,7 +125,7 @@ int main() {
 
 #if 1
     for (int j = 0; j < FRAME_HEIGHT; ++j) {
-      graphics.set_pen(j, 0xFF, 0xFF);
+      graphics.set_pen(j & 0xFF, 0xFF, 0xFF);
       graphics.pixel_span({0,j}, FRAME_WIDTH);
     }
 #else
