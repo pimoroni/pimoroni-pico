@@ -20,6 +20,10 @@ namespace pimoroni {
     this->height = height;
     this->mode = mode;
 
+    bank = 0;
+    h_repeat = 1;
+    v_repeat = 1;
+
     uint8_t res_mode = 0xFF;
     uint16_t full_width = width;
     uint16_t full_height = height;
