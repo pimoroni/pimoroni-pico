@@ -48,14 +48,11 @@ namespace pimoroni {
             gpio_disable_pulls(pin_d0 + i);
         }
 
-        pio_sm = 1;
-        pio_sm_claim(pio, pio_sm);
+        pio_sm = pio_claim_unused_sm(pio, true);
 
         // Claim DMA channels
-        dma_channel = 0;
-        dma_channel_claim(dma_channel);
-        read_cmd_dma_channel = 1;
-        dma_channel_claim(read_cmd_dma_channel);
+        dma_channel = dma_claim_unused_channel(true);
+        read_cmd_dma_channel = dma_claim_unused_channel(true);
     }
 
     void APS6404::init() {

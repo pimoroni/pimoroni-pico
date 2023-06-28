@@ -102,7 +102,7 @@ static bool connect(bool first = true, uint core = 0) {
     if (first) {
         pio_prog = &swd_raw_write_program;
         pio_offset = pio_change_exclusive_program(swd_pio, &swd_raw_write_program);
-        pio_sm = 0;
+        pio_sm = pio_claim_unused_sm(swd_pio, true);
 
         swd_initial_init(swd_pio, pio_sm, 2, 3);
 

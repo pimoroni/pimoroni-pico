@@ -72,19 +72,15 @@ namespace pimoroni {
     //   800x600 (60Hz), 800x480 (60Hz), 800x450 (60Hz), 960x540 (50Hz), 1280x720 (30Hz)
     // Note resolutions on the second line require quite extreme overclocking and may not work on all hardware.
     // Either or both of the horizontal or vertical component of any resolution may be halved.
-    DVDisplay(uint16_t width, uint16_t height, Mode mode = MODE_RGB555)
+    DVDisplay()
       : ram(CS, D0, pio1)
       , i2c(new I2C(I2C_SDA, I2C_SCL))
-      , width(width), height(height)
-      , mode(mode)
       , pixel_buffer_location(-1, -1)
     {}
 
-    DVDisplay(uint16_t width, uint16_t height, I2C* i2c, Mode mode = MODE_RGB555)
+    DVDisplay(I2C* i2c)
       : ram(CS, D0, pio1)
       , i2c(i2c)
-      , width(width), height(height)
-      , mode(mode)
       , pixel_buffer_location(-1, -1)
     {}
 
@@ -131,7 +127,7 @@ namespace pimoroni {
       void write_pixel(const Point &p, RGB888 colour) override;
       void write_pixel_span(const Point &p, uint l, RGB888 colour) override;
 
-      void init();
+      void init(uint16_t width, uint16_t height, Mode mode = MODE_RGB555);
       void flip();
 
       // 32 colour palette mode.  Note that palette entries range from 0-31,

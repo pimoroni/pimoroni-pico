@@ -15,7 +15,11 @@ extern "C" {
 
 namespace pimoroni {
 
-  void DVDisplay::init() {
+  void DVDisplay::init(uint16_t width, uint16_t height, Mode mode) {
+    this->width = width;
+    this->height = height;
+    this->mode = mode;
+
     uint8_t res_mode = 0xFF;
     uint16_t full_width = width;
     uint16_t full_height = height;
