@@ -129,6 +129,7 @@ namespace pimoroni {
 
       void init(uint16_t width, uint16_t height, Mode mode = MODE_RGB555);
       void flip();
+      void reset();
 
       // 32 colour palette mode.  Note that palette entries range from 0-31,
       // but when writing colour values the palette entry is in bits 6-2, so the

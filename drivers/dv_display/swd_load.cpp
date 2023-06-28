@@ -339,20 +339,30 @@ static bool start(uint pc, uint sp) {
     return true;
 }
 
-bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections, uint pc = 0x20000001, uint sp = 0x20042000, bool use_xip_as_ram = false) {
+static bool swd_reset_internal() {
     gpio_init(2);
     gpio_init(3);
     gpio_disable_pulls(2);
     gpio_pull_up(3);
 
-    mp_printf(&mp_plat_print, "Connecting\n");
-
     bool ok = connect(true, 0xf);
     mp_printf(&mp_plat_print, "Reset %s\n", ok ? "OK" : "Fail");
+    return ok;
+}
+
+bool swd_reset() {
+    bool ok = swd_reset_internal();
+    unload_pio();
+    return ok;
+}
+
+static bool swd_load_program_internal(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections, uint pc, uint sp, bool use_xip_as_ram) {
+    bool ok = swd_reset_internal();
     if (!ok) {
         return false;
     }
 
+    mp_printf(&mp_plat_print, "Connecting\n");
     ok = connect(false, 0);    
 
     mp_printf(&mp_plat_print, "Connected core 0 %s\n", ok ? "OK" : "Fail");
@@ -382,6 +392,11 @@ bool swd_load_program(const uint* addresses, const uint** data, const uint* data
 
     ok |= start(0, 0x20041000);
 
+    return ok;
+}
+
+bool swd_load_program(const uint* addresses, const uint** data, const uint* data_len_in_bytes, uint num_sections, uint pc = 0x20000001, uint sp = 0x20042000, bool use_xip_as_ram = false) {
+    bool ok = swd_load_program_internal(addresses, data, data_len_in_bytes, num_sections, pc, sp, use_xip_as_ram);
     unload_pio();
     return ok;
 }

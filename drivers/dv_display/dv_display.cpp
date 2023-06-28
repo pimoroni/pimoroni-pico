@@ -118,6 +118,10 @@ namespace pimoroni {
     }
   }
 
+  void DVDisplay::reset() {
+    swd_reset();
+  }
+
   uint8_t DVDisplay::get_gpio() {
     return i2c->reg_read_uint8(I2C_ADDR, I2C_REG_GPIO);
   }
