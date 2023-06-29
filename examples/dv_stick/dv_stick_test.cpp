@@ -9,8 +9,11 @@
 
 using namespace pimoroni;
 
-#define FRAME_WIDTH 360
-#define FRAME_HEIGHT 480
+#define DISPLAY_WIDTH 720
+#define DISPLAY_HEIGHT 480
+
+#define FRAME_WIDTH 720
+#define FRAME_HEIGHT 720
 
 #define READ_EDID 0
 #if READ_EDID
@@ -49,7 +52,7 @@ int main() {
   //sleep_ms(5000);
 
   DVDisplay display;
-  display.init(FRAME_WIDTH, FRAME_HEIGHT, DVDisplay::MODE_RGB888);
+  display.init(DISPLAY_WIDTH, DISPLAY_HEIGHT, DVDisplay::MODE_RGB888, FRAME_WIDTH, FRAME_HEIGHT);
   //display.test();
 
 #if READ_EDID
@@ -96,6 +99,9 @@ int main() {
 
   printf("Starting\n");
   graphics.set_font("bitmap8");
+
+  Point scroll = {0, 0};
+  int scroll_dir = 1;
 
   constexpr int NUM_CIRCLES = 50;
   struct Circle {
@@ -197,6 +203,13 @@ int main() {
     if (false) printf("Render: %.3f, flip: %.3f\n", render_time / 1000.f, flip_time / 1000.f);
 
     //printf("%02x %02x\n", display.get_gpio(), display.get_gpio_hi());
+
+    display.set_display_offset(scroll);
+    scroll.y += scroll_dir;
+    if (scroll.y + DISPLAY_HEIGHT > FRAME_HEIGHT || scroll.y < 0) {
+      scroll_dir = -scroll_dir;
+      scroll.y += scroll_dir;
+    }
 
     ++frames;
     display.set_gpio_hi_pull_up_all(frames & 0x3F);

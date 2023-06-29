@@ -15,24 +15,30 @@ extern "C" {
 
 namespace pimoroni {
 
-  void DVDisplay::init(uint16_t width, uint16_t height, Mode mode) {
-    this->width = width;
-    this->height = height;
-    this->mode = mode;
+  void DVDisplay::init(uint16_t display_width_, uint16_t display_height_, Mode mode_, uint16_t frame_width_, uint16_t frame_height_) {
+    display_width = display_width_;
+    display_height = display_height_;
+    mode = mode_;
+
+    if (frame_width == 0) frame_width = display_width_;
+    else frame_width = frame_width_;
+
+    if (frame_height == 0) frame_height = display_height_;
+    else frame_height = frame_height_;
 
     bank = 0;
     h_repeat = 1;
     v_repeat = 1;
 
     uint8_t res_mode = 0xFF;
-    uint16_t full_width = width;
-    uint16_t full_height = height;
+    uint16_t full_width = display_width;
+    uint16_t full_height = display_height;
 
-    if (width < 640 || (width == 640 && (height == 360 || height == 720))) {
+    if (display_width < 640 || (display_width == 640 && (display_height == 360 || display_height == 720))) {
       h_repeat = 2;
       full_width *= 2;
     }
-    if (height < 400) {
+    if (display_height < 400) {
       v_repeat = 2;
       full_height *= 2;
     }
@@ -58,7 +64,7 @@ namespace pimoroni {
     }
 
     if (res_mode == 0xFF) {
-      mp_printf(&mp_plat_print, "Resolution %dx%d is not supported.  Will use 720x480.\n", width, height);
+      mp_printf(&mp_plat_print, "Resolution %dx%d is not supported.  Will use 720x480.\n", display_width, display_height);
     }
 
     gpio_init(RAM_SEL);
@@ -105,7 +111,7 @@ namespace pimoroni {
       }
     }
     else if (pixel_buffer_location.y != -1) {
-      ram.write(point_to_address(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+      ram.write(point_to_address16(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
       pixel_buffer_location.y = -1;
     }
     bank ^= 1;
@@ -120,6 +126,14 @@ namespace pimoroni {
 
   void DVDisplay::reset() {
     swd_reset();
+  }
+
+  void DVDisplay::set_display_offset(const Point& p) {
+    int32_t offset = (int32_t)point_to_address(p) - (int32_t)point_to_address({0,0});
+    while (offset & 3) {
+      offset -= pixel_size();
+    }
+    i2c->write_bytes(I2C_ADDR, I2C_REG_SCROLL, (uint8_t*)&offset, 4);
   }
 
   uint8_t DVDisplay::get_gpio() {
@@ -232,13 +246,13 @@ namespace pimoroni {
       if (pixel_buffer_x & 1) pixel_buffer[pixel_buffer_x >> 1] |= (uint32_t)colour << 16;
       else pixel_buffer[pixel_buffer_x >> 1] = colour;
       if (++pixel_buffer_x == PIXEL_BUFFER_LEN_IN_WORDS * 2) {
-        ram.write(point_to_address(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
+        ram.write(point_to_address16(pixel_buffer_location), pixel_buffer, PIXEL_BUFFER_LEN_IN_WORDS * 4);
         pixel_buffer_location.y = -1;
       }
       return;
     }
     else if (pixel_buffer_location.y != -1) {
-      ram.write(point_to_address(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
+      ram.write(point_to_address16(pixel_buffer_location), pixel_buffer, pixel_buffer_x << 1);
     }
     pixel_buffer_location = p;
     pixel_buffer_x = 1;
@@ -247,7 +261,7 @@ namespace pimoroni {
 
   void DVDisplay::write_pixel_span(const Point &p, uint l, uint16_t colour)
   {
-    write(point_to_address(p), l, colour);
+    write(point_to_address16(p), l, colour);
   }
 
   void DVDisplay::write_pixel(const Point &p, RGB888 colour)
@@ -265,18 +279,18 @@ namespace pimoroni {
     uint32_t offset = 0;
     if (((uintptr_t)data & 0x2) != 0) {
       uint32_t val = *data++;
-      ram.write(point_to_address(p), &val, 2);
+      ram.write(point_to_address16(p), &val, 2);
       --l;
       offset = 2;
     }
     if (l > 0) {
-      ram.write(point_to_address(p) + offset, (uint32_t*)data, l << 1);
+      ram.write(point_to_address16(p) + offset, (uint32_t*)data, l << 1);
     }
   }
 
   void DVDisplay::read_pixel_span(const Point &p, uint l, uint16_t *data)
   {
-    read(point_to_address(p), l, data);
+    read(point_to_address16(p), l, data);
   }
 
   void DVDisplay::set_mode(Mode new_mode)
@@ -305,7 +319,7 @@ namespace pimoroni {
   
   void DVDisplay::write_palette()
   {
-    uint addr = (height + 7) * 4;
+    uint addr = (display_height + 7) * 4;
     ram.write(addr, (uint32_t*)palette, PALETTE_SIZE * 3);
   }
 
@@ -355,13 +369,13 @@ namespace pimoroni {
   void DVDisplay::write_header_preamble()
   {
     uint32_t buf[8];
-    uint32_t full_width = width * h_repeat;
+    uint32_t full_width = display_width * h_repeat;
     buf[0] = 0x4F434950;
     buf[1] = 0x01000101 + ((uint32_t)v_repeat << 16);
     buf[2] = full_width << 16;
-    buf[3] = (uint32_t)height << 16;
+    buf[3] = (uint32_t)display_height << 16;
     buf[4] = 0x00000001;
-    buf[5] = 0x00010000 + height + (bank << 24);
+    buf[5] = 0x00010000 + display_height + (bank << 24);
     buf[6] = 0x00000001;
     ram.write(0, buf, 7 * 4);
     ram.wait_for_finish_blocking();
@@ -375,13 +389,31 @@ namespace pimoroni {
     uint addr = 4 * 7;
     uint line_type = 0x80000000u + ((uint)mode << 28);
     mp_printf(&mp_plat_print, "Write header, line type %08x\n", line_type);
-    for (int i = 0; i < height; i += 8) {
+    for (int i = 0; i < display_height; i += 8) {
       for (int j = 0; j < 8; ++j) {
-        buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * width * 6) + base_address;
+        buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * frame_width * 6) + base_address;
       }
       ram.write(addr, buf, 8 * 4);
       ram.wait_for_finish_blocking();
       addr += 4 * 8;
+    }
+  }
+
+  uint32_t DVDisplay::point_to_address(const Point& p) const {
+    switch(mode) {
+      default:
+      case MODE_RGB555: return point_to_address16(p);
+      case MODE_PALETTE: return point_to_address_palette(p);
+      case MODE_RGB888: return point_to_address24(p);
+    }
+  }
+
+  int DVDisplay::pixel_size() const {
+    switch(mode) {
+      default:
+      case MODE_RGB555: return 2;
+      case MODE_PALETTE: return 1;
+      case MODE_RGB888: return 3;
     }
   }
 }

@@ -20,8 +20,8 @@ namespace pimoroni {
     static constexpr int PALETTE_SIZE = 32;
 
     enum Mode {
-      MODE_RGB555 = 1,
       MODE_PALETTE = 2,
+      MODE_RGB555 = 1,
       MODE_RGB888 = 3,
     };
 
@@ -41,6 +41,7 @@ namespace pimoroni {
     static constexpr uint I2C_REG_GPIO_HI_PULL_UP = 0xCB;
     static constexpr uint I2C_REG_GPIO_HI_PULL_DOWN = 0xCC;
     static constexpr uint I2C_REG_EDID = 0xED;
+    static constexpr uint I2C_REG_SCROLL = 0xF0;
 
     //--------------------------------------------------
     // Variables
@@ -59,8 +60,10 @@ namespace pimoroni {
     static constexpr uint RAM_SEL = 8;
     
     static constexpr uint32_t base_address = 0x10000;
-    uint16_t width = 0;
-    uint16_t height = 0;
+    uint16_t display_width = 0;
+    uint16_t display_height = 0;
+    uint16_t frame_width = 0;
+    uint16_t frame_height = 0;
     uint8_t bank = 0;
     uint8_t h_repeat = 1;
     uint8_t v_repeat = 1;
@@ -127,7 +130,7 @@ namespace pimoroni {
       void write_pixel(const Point &p, RGB888 colour) override;
       void write_pixel_span(const Point &p, uint l, RGB888 colour) override;
 
-      void init(uint16_t width, uint16_t height, Mode mode = MODE_RGB555);
+      void init(uint16_t width, uint16_t height, Mode mode = MODE_RGB555, uint16_t frame_width = 0, uint16_t frame_height = 0);
       void flip();
       void reset();
 
@@ -137,11 +140,17 @@ namespace pimoroni {
       void set_mode(Mode new_mode);
       void set_palette(RGB888 palette[PALETTE_SIZE]);
       void set_palette_colour(uint8_t entry, RGB888 colour);
-      
+
       void write_palette_pixel(const Point &p, uint8_t colour);
       void write_palette_pixel_span(const Point &p, uint l, uint8_t colour);
       void write_palette_pixel_span(const Point &p, uint l, uint8_t* data);
       void read_palette_pixel_span(const Point &p, uint l, uint8_t *data);
+
+      // Set the top left corner of the display within the frame, if a larger
+      // frame is specified than the display.
+      // Note that the supplied x coordinate is rounded down to the previous multiple of 2 in RGB555 mode 
+      // or multiple of 4 in palette or RGB888 modes
+      void set_display_offset(const Point& p);
 
       uint8_t get_gpio();
       uint8_t get_gpio_hi();
@@ -187,16 +196,19 @@ namespace pimoroni {
       void read(uint32_t address, size_t len, uint8_t *data);
       void write(uint32_t address, size_t len, const RGB888 colour);
 
-      uint32_t point_to_address(const Point &p) {
-        return base_address + ((p.y * (uint32_t)width * 3) + p.x) * 2;
+      uint32_t point_to_address(const Point& p) const;
+      int pixel_size() const;
+
+      uint32_t point_to_address16(const Point &p) const {
+        return base_address + ((p.y * (uint32_t)frame_width * 3) + p.x) * 2;
       }
 
-      uint32_t point_to_address_palette(const Point &p) {
-        return base_address + (p.y * (uint32_t)width * 6) + p.x;
+      uint32_t point_to_address_palette(const Point &p) const {
+        return base_address + (p.y * (uint32_t)frame_width * 6) + p.x;
       }
 
-      uint32_t point_to_address24(const Point &p) {
-        return base_address + ((p.y * (uint32_t)width * 2) + p.x) * 3;
+      uint32_t point_to_address24(const Point &p) const {
+        return base_address + ((p.y * (uint32_t)frame_width * 2) + p.x) * 3;
       }
   };
 }
