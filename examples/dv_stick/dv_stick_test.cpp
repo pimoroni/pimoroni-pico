@@ -9,18 +9,18 @@
 
 using namespace pimoroni;
 
-#define DISPLAY_WIDTH 720
+#define DISPLAY_WIDTH 360
 #define DISPLAY_HEIGHT 480
 
-#define FRAME_WIDTH 720
-#define FRAME_HEIGHT 720
+#define FRAME_WIDTH 1000
+#define FRAME_HEIGHT 480
 
 #define READ_EDID 0
 #if READ_EDID
 extern "C" { int decode_edid(unsigned char* edid); }
 #endif
 
-#define USE_PALETTE 1
+#define USE_PALETTE 0
 
 void on_uart_rx() {
     while (uart_is_readable(uart1)) {
@@ -205,11 +205,19 @@ int main() {
     //printf("%02x %02x\n", display.get_gpio(), display.get_gpio_hi());
 
     display.set_display_offset(scroll);
+    #if 1
+    scroll.x += scroll_dir;
+    if (scroll.x + DISPLAY_WIDTH > FRAME_WIDTH || scroll.x < 0) {
+      scroll_dir = -scroll_dir;
+      scroll.x += scroll_dir;
+    }
+    #else
     scroll.y += scroll_dir;
     if (scroll.y + DISPLAY_HEIGHT > FRAME_HEIGHT || scroll.y < 0) {
       scroll_dir = -scroll_dir;
       scroll.y += scroll_dir;
     }
+    #endif
 
     ++frames;
     display.set_gpio_hi_pull_up_all(frames & 0x3F);

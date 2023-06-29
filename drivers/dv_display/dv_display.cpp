@@ -20,10 +20,10 @@ namespace pimoroni {
     display_height = display_height_;
     mode = mode_;
 
-    if (frame_width == 0) frame_width = display_width_;
+    if (frame_width_ == 0) frame_width = display_width_;
     else frame_width = frame_width_;
 
-    if (frame_height == 0) frame_height = display_height_;
+    if (frame_height_ == 0) frame_height = display_height_;
     else frame_height = frame_height_;
 
     bank = 0;
@@ -130,9 +130,6 @@ namespace pimoroni {
 
   void DVDisplay::set_display_offset(const Point& p) {
     int32_t offset = (int32_t)point_to_address(p) - (int32_t)point_to_address({0,0});
-    while (offset & 3) {
-      offset -= pixel_size();
-    }
     i2c->write_bytes(I2C_ADDR, I2C_REG_SCROLL, (uint8_t*)&offset, 4);
   }
 

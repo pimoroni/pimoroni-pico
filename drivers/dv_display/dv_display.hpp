@@ -148,8 +148,6 @@ namespace pimoroni {
 
       // Set the top left corner of the display within the frame, if a larger
       // frame is specified than the display.
-      // Note that the supplied x coordinate is rounded down to the previous multiple of 2 in RGB555 mode 
-      // or multiple of 4 in palette or RGB888 modes
       void set_display_offset(const Point& p);
 
       uint8_t get_gpio();
