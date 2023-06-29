@@ -14,7 +14,7 @@ static uint pio_offset;
 static uint pio_sm;
 static const pio_program_t* pio_prog;
 
-PIO swd_pio = pio1;
+PIO swd_pio = pio0;
 
 extern const uint16_t pio_change_exclusive_program(PIO pio, const pio_program* prog);
 extern const void pio_remove_exclusive_program(PIO pio);
