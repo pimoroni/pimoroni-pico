@@ -31,8 +31,8 @@ namespace pimoroni {
 
     // I2C address and registers
     static constexpr uint I2C_ADDR = 0x0D;
-    static constexpr uint I2C_REG_SET_RES = 0xF8;
-    static constexpr uint I2C_REG_START = 0xF9;
+    static constexpr uint I2C_REG_SET_RES = 0xFC;
+    static constexpr uint I2C_REG_START = 0xFD;
     static constexpr uint I2C_REG_GPIO = 0xC0;
     static constexpr uint I2C_REG_LED = 0xC1;
     static constexpr uint I2C_REG_GPIO_HI = 0xC8;
@@ -41,7 +41,7 @@ namespace pimoroni {
     static constexpr uint I2C_REG_GPIO_HI_PULL_UP = 0xCB;
     static constexpr uint I2C_REG_GPIO_HI_PULL_DOWN = 0xCC;
     static constexpr uint I2C_REG_EDID = 0xED;
-    static constexpr uint I2C_REG_SCROLL = 0xF0;
+    static constexpr uint I2C_REG_SCROLL_BASE = 0xF0;
 
     //--------------------------------------------------
     // Variables
@@ -146,9 +146,14 @@ namespace pimoroni {
       void write_palette_pixel_span(const Point &p, uint l, uint8_t* data);
       void read_palette_pixel_span(const Point &p, uint l, uint8_t *data);
 
-      // Set the top left corner of the display within the frame, if a larger
-      // frame is specified than the display.
-      void set_display_offset(const Point& p);
+      // Set the scroll offset for a set of scanlines on the display.  There are 3 scroll offsets, indexes 1-3.
+      // By default, all scanlines are offset by scroll idx 1, so setting this effectively moves the 
+      // top left corner of the display within the frame.
+      void set_display_offset(const Point& p, int idx=1);
+
+      // Configure the scroll offset index to use for a set of scanlines (inclusive of miny, exclusive of maxy),
+      // this applies to the current bank only - you need to set again after flipping to apply the same setting to the other bank.
+      void set_scroll_idx_for_lines(int idx, int miny, int maxy);
 
       uint8_t get_gpio();
       uint8_t get_gpio_hi();

@@ -119,7 +119,7 @@ namespace pimoroni {
     while (gpio_get(VSYNC) == 0);
     gpio_put(RAM_SEL, bank);
     if (rewrite_header) {
-      write_header();
+      set_scroll_idx_for_lines(-1, 0, display_height);
       rewrite_header = false;
     }
   }
@@ -128,9 +128,35 @@ namespace pimoroni {
     swd_reset();
   }
 
-  void DVDisplay::set_display_offset(const Point& p) {
+  void DVDisplay::set_display_offset(const Point& p, int idx) {
     int32_t offset = (int32_t)point_to_address(p) - (int32_t)point_to_address({0,0});
-    i2c->write_bytes(I2C_ADDR, I2C_REG_SCROLL, (uint8_t*)&offset, 4);
+    i2c->write_bytes(I2C_ADDR, I2C_REG_SCROLL_BASE + 4*(idx-1), (uint8_t*)&offset, 4);
+  }
+
+  void DVDisplay::set_scroll_idx_for_lines(int idx, int miny, int maxy) {
+    constexpr int buf_size = 32;
+    uint32_t buf[buf_size];
+    uint addr = 4 * (7 + miny);
+    uint line_type = (uint)mode << 28;
+    if (idx >= 0) line_type |= (uint)idx << 30;
+    for (int i = miny; i < maxy; i += buf_size) {
+      int maxj = std::min(buf_size, maxy - i);
+      if (idx >= 0) {
+        for (int j = 0; j < maxj; ++j) {
+          buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * frame_width * 6) + base_address;
+        }
+      }
+      else {
+        ram.read_blocking(addr, buf, maxj);
+        for (int j = 0; j < maxj; ++j) {
+          buf[j] &= 0xC0000000;
+          buf[j] |= line_type + ((uint32_t)h_repeat << 24) + ((i + j) * frame_width * 6) + base_address;
+        }
+      }
+      ram.write(addr, buf, maxj * 4);
+      ram.wait_for_finish_blocking();
+      addr += 4 * maxj;
+    }
   }
 
   uint8_t DVDisplay::get_gpio() {
@@ -294,7 +320,7 @@ namespace pimoroni {
   {
     mode = new_mode;
     rewrite_header = true;
-    write_header();
+    set_scroll_idx_for_lines(-1, 0, display_height);
     if (mode == MODE_PALETTE) {
       write_palette();
     }
@@ -381,19 +407,7 @@ namespace pimoroni {
   void DVDisplay::write_header()
   {
     write_header_preamble();
-
-    uint32_t buf[8];
-    uint addr = 4 * 7;
-    uint line_type = 0x80000000u + ((uint)mode << 28);
-    mp_printf(&mp_plat_print, "Write header, line type %08x\n", line_type);
-    for (int i = 0; i < display_height; i += 8) {
-      for (int j = 0; j < 8; ++j) {
-        buf[j] = line_type + ((uint32_t)h_repeat << 24) + ((i + j) * frame_width * 6) + base_address;
-      }
-      ram.write(addr, buf, 8 * 4);
-      ram.wait_for_finish_blocking();
-      addr += 4 * 8;
-    }
+    set_scroll_idx_for_lines(1, 0, display_height);
   }
 
   uint32_t DVDisplay::point_to_address(const Point& p) const {

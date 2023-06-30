@@ -13,7 +13,7 @@ using namespace pimoroni;
 #define DISPLAY_HEIGHT 480
 
 #define FRAME_WIDTH 1000
-#define FRAME_HEIGHT 480
+#define FRAME_HEIGHT 600
 
 #define READ_EDID 0
 #if READ_EDID
@@ -49,7 +49,7 @@ int main() {
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
-  //sleep_ms(5000);
+  sleep_ms(5000);
 
   DVDisplay display;
   display.init(DISPLAY_WIDTH, DISPLAY_HEIGHT, DVDisplay::MODE_RGB888, FRAME_WIDTH, FRAME_HEIGHT);
@@ -90,18 +90,23 @@ int main() {
   printf(".\n");
   graphics.clear();
   printf("..\n");
+  display.set_scroll_idx_for_lines(0, 100, 200);
+  display.set_scroll_idx_for_lines(2, 300, FRAME_HEIGHT);
   display.flip();
   printf("...\n");
   sleep_ms(2000);
   graphics.set_pen(0, 0, 0xFF);
   graphics.clear();
+  display.set_scroll_idx_for_lines(0, 100, 200);
+  display.set_scroll_idx_for_lines(2, 300, FRAME_HEIGHT);
   display.flip();
 
   printf("Starting\n");
   graphics.set_font("bitmap8");
 
-  Point scroll = {0, 0};
-  int scroll_dir = 1;
+  Point scroll1 = {0, 0};
+  Point scroll2 = {0, 0};
+  int scroll_dir[2] = {1,1};
 
   constexpr int NUM_CIRCLES = 50;
   struct Circle {
@@ -204,20 +209,18 @@ int main() {
 
     //printf("%02x %02x\n", display.get_gpio(), display.get_gpio_hi());
 
-    display.set_display_offset(scroll);
-    #if 1
-    scroll.x += scroll_dir;
-    if (scroll.x + DISPLAY_WIDTH > FRAME_WIDTH || scroll.x < 0) {
-      scroll_dir = -scroll_dir;
-      scroll.x += scroll_dir;
+    display.set_display_offset(scroll1, 1);
+    display.set_display_offset(scroll2, 2);
+    scroll1.x += scroll_dir[0];
+    if (scroll1.x + DISPLAY_WIDTH > FRAME_WIDTH || scroll1.x < 0) {
+      scroll_dir[0] = -scroll_dir[0];
+      scroll1.x += scroll_dir[0];
     }
-    #else
-    scroll.y += scroll_dir;
-    if (scroll.y + DISPLAY_HEIGHT > FRAME_HEIGHT || scroll.y < 0) {
-      scroll_dir = -scroll_dir;
-      scroll.y += scroll_dir;
+    scroll2.y += scroll_dir[1];
+    if (scroll2.y + DISPLAY_HEIGHT > FRAME_HEIGHT || scroll2.y < 0) {
+      scroll_dir[1] = -scroll_dir[1];
+      scroll2.y += scroll_dir[1];
     }
-    #endif
 
     ++frames;
     display.set_gpio_hi_pull_up_all(frames & 0x3F);
