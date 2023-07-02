@@ -157,6 +157,13 @@ Requires `logging.mpy` and `tinyweb` from [micropython/examples/common](../../ex
 
 Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API. Make sure to copy across the `icons` folder to your Unicorn.
 
+Buttons:
+A - show / hide temperature
+B - swap between Celsius and Fahrenheit
+C - randomly select a weather icon
+D - add rainbows
+LUX + and - adjust brightness
+
 ## NumPy Examples
 
 [numpy](numpy)
@@ -171,7 +178,7 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 
 Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an carbon dioxide detector. Press A, B and C to switch between modes.
 
-This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
+This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
 
 ### Launch (Demo Reel)
 

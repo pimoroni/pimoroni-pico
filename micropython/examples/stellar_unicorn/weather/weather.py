@@ -6,12 +6,20 @@ from network_manager import NetworkManager
 import uasyncio
 import urequests
 import jpegdec
+from random import choice
 
 """
 This example connects to Open Meteo to access the current weather conditions.
 It then displays an appropriate weather icon on Stellar Unicorn.
 
 Find out more about the Open Meteo API at https://open-meteo.com
+
+Buttons:
+A - show / hide temperature
+B - swap between Celsius and Fahrenheit
+C - randomly select a weather icon
+D - add rainbows
+LUX + and - adjust brightness
 """
 
 # Set your latitude/longitude here (find yours by right clicking in Google Maps!)
@@ -62,18 +70,34 @@ def status_handler(mode, status, ip):
             print('Wifi connection failed!')
 
 
-# create galactic object and graphics surface for drawing
+# create objects and picographics surface for drawing
 su = StellarUnicorn()
 display = PicoGraphics(DISPLAY)
 
+jpeg = jpegdec.JPEG(display)
+
+# some useful constants
 WIDTH = StellarUnicorn.WIDTH
 HEIGHT = StellarUnicorn.HEIGHT
 
+BLACK = display.create_pen(0, 0, 0)
 RED = display.create_pen(255, 0, 0)
+ORANGE = display.create_pen(246, 138, 30)
+YELLOW = display.create_pen(255, 216, 0)
+GREEN = display.create_pen(0, 121, 64)
+BLUE = display.create_pen(0, 0, 255)
+INDIGO = display.create_pen(36, 64, 142)
+VIOLET = display.create_pen(115, 41, 130)
+WHITE = display.create_pen(255, 255, 255)
 
-jpeg = jpegdec.JPEG(display)
+show_temperature = True
+show_fahrenheit = False
+show_rainbow = False
 
-su.set_brightness(1.0)
+# timer variable to keep track of how often to poll the api
+timer = UPDATE_INTERVAL * 60.0
+
+su.set_brightness(0.8)
 
 # set up wifi
 try:
@@ -83,7 +107,45 @@ except Exception as e:
     print(f'Wifi connection failed! {e}')
 
 while True:
-    get_data()
+    # adjust brightness with LUX + and -
+    if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_UP):
+        su.adjust_brightness(+0.05)
+        print(f"Brightness set to {su.get_brightness()}")
+    if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_DOWN):
+        su.adjust_brightness(-0.05)
+        print(f"Brightness set to {su.get_brightness()}")
+
+    if su.is_pressed(StellarUnicorn.SWITCH_A):
+        show_temperature = not show_temperature
+        print(f"Show temperature = {show_temperature}")
+        # debounce
+        time.sleep(0.1)
+
+    if su.is_pressed(StellarUnicorn.SWITCH_B):
+        show_fahrenheit = not show_fahrenheit
+        print(f"Show fahrenheit = {show_fahrenheit}")
+        # debounce
+        time.sleep(0.1)
+
+    # I hate this weather, give me another
+    if su.is_pressed(StellarUnicorn.SWITCH_C):
+        weathercode = choice([71, 51, 1, 0, 95])
+        print("Weather icon randomised!")
+        # debounce
+        time.sleep(0.1)
+
+    # brighten up boring weather with a rainbow
+    if su.is_pressed(StellarUnicorn.SWITCH_D):
+        show_rainbow = not show_rainbow
+        print(f"Show rainbow = {show_rainbow}")
+        # debounce
+        time.sleep(0.1)
+
+    # we only need to ping the api for data every UPDATE_INTERVAL
+    if timer >= UPDATE_INTERVAL * 60:
+        get_data()
+        timer = 0.0
+
     if weathercode is not None:
         # Choose an appropriate icon based on the weather code
         # Weather codes from https://open-meteo.com/en/docs
@@ -99,9 +161,37 @@ while True:
             jpeg.open_file("icons/storm.jpg")
         jpeg.decode(0, 0, jpegdec.JPEG_SCALE_FULL)
 
+        if show_rainbow is True:
+            display.set_pen(VIOLET)
+            display.circle(WIDTH - 1, HEIGHT - 1, 6)
+            display.set_pen(BLUE)
+            display.circle(WIDTH - 1, HEIGHT - 1, 5)
+            display.set_pen(GREEN)
+            display.circle(WIDTH - 1, HEIGHT - 1, 4)
+            display.set_pen(YELLOW)
+            display.circle(WIDTH - 1, HEIGHT - 1, 3)
+            display.set_pen(ORANGE)
+            display.circle(WIDTH - 1, HEIGHT - 1, 2)
+            display.set_pen(RED)
+            display.circle(WIDTH - 1, HEIGHT - 1, 1)
+
+        # draw the temperature text
+        if show_temperature is True:
+            display.set_pen(RED)
+            if show_fahrenheit is True:
+                fahrenheit = (temperature * 9 / 5) + 32
+                # measure the text so we can right align it
+                text_width = display.measure_text(f"{fahrenheit:.0f}°", scale=1)
+                display.text(f"{fahrenheit:.0f}°", WIDTH - text_width, 4, WIDTH, scale=1)
+            else:
+                # measure the text so we can right align it
+                text_width = display.measure_text(f"{temperature:.0f}°", scale=1)
+                display.text(f"{temperature:.0f}°", WIDTH - text_width, 4, WIDTH, scale=1)
+
     else:
         display.set_pen(RED)
         display.text("ERR", 0, 0, WIDTH, 1)
 
     su.update(display)
-    time.sleep(UPDATE_INTERVAL * 60)
+    timer += 0.1
+    time.sleep(0.1)
