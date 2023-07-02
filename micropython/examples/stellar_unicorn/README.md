@@ -50,7 +50,7 @@ The easiest way to start displaying cool stuff on Stellar Unicorn is using our S
 
 Clock example with (optional) NTP synchronization. You can adjust the brightness with LUX + and -, and resync the time by pressing A.
 
-This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../fonts) and copy it to your Pico W.
+This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
 
 ### Eighties Super Computer
 
@@ -171,7 +171,7 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 
 Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an carbon dioxide detector. Press A, B and C to switch between modes.
 
-This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../fonts) and copy it to your Pico W.
+This examples uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
 
 ### Launch (Demo Reel)
 
