@@ -12,6 +12,7 @@
   - [Nostalgia Prompt](#nostalgia-prompt)
   - [Rainbow](#rainbow)
   - [Scrolling Text](#scrolling-text)
+  - [Thermometer](#thermometer)
   - [Today](#today)
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights History](#cheerlights-history)
@@ -104,6 +105,12 @@ Some good old fashioned rainbows! You can adjust the cycling speed with A and B,
 [scrolling_text.py](scrolling_text.py)
 
 Display scrolling wisdom, quotes or greetz. You can adjust the brightness with LUX + and -.
+
+
+### Thermometer
+[thermometer_pico.py](thermometer_pico.py)
+
+Shows the temperature (from the Pico W's internal sensor) against an appropriately coloured pulsing blob.
 
 ### Today
 
