@@ -24,6 +24,8 @@
 - [Other Examples](#other-examples)
   - [CO2](#co2)
   - [Encoder Wheel](#encoder-wheel)
+  - [Thermometer (BME280)](#thermometer-bme280)
+  - [Thermometer (BME68x)](#thermometer-bme68x)
   - [Launch (Demo Reel)](#launch-demo-reel)
 
 ## About Stellar Unicorn
@@ -180,6 +182,8 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 
 ## Other Examples
 
+These examples use additional hardware.
+
 ### CO2
 
 [co2.py](co2.py)
@@ -192,6 +196,16 @@ This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../.
 [encoder_wheel.py](encoder_wheel.py)
 
 This example uses [RGB Encoder Wheel breakout](https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout) to make an RGB colour picker. Use the encoder wheel to pick a hue and view the RGB breakdown of that colour on the Unicorn display (you can adjust saturation and brightness using the buttons on the breakout too).
+
+### Thermometer (BME280)
+[thermometer_bme280.py](thermometer_bme280.py)
+
+Shows temperature, humidity and pressure (from a [BME280 sensor breakout](https://shop.pimoroni.com/products/bme280-breakout)) against an appropriately coloured pulsing blob.
+
+### Thermometer (BME68x)
+[thermometer_bme68x.py](thermometer_bme68x.py)
+
+Shows temperature, humidity and pressure (from a [BME680](https://shop.pimoroni.com/products/bme680-breakout) or [BME688](https://shop.pimoroni.com/products/bme688-breakout) sensor breakout) against an appropriately coloured pulsing blob.
 
 ### Launch (Demo Reel)
 
