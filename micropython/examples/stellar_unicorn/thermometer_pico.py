@@ -95,7 +95,7 @@ while True:
 
     # or uncomment these lines if you'd prefer it in Freedom Units
     # graphics.set_pen(WHITE)
-    # fahrenheit = (temperature_average * 9 / 5) + 32
+    # fahrenheit = (temperature * 9 / 5) + 32
     # graphics.text(f"{fahrenheit:.0f}°", 2, 5, scale=1)
 
     # time to update the display
