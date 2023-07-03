@@ -123,10 +123,10 @@ while True:
         graphics.text(f"{humidity:.0f}%", 1, 5, scale=1)
 
     if mode == "pressure":
-        if pressure/100 < 1000:
-            graphics.text(f"{pressure/100:.0f} hPa", 1, 0, WIDTH, scale=1)
+        if pressure / 100 < 1000:
+            graphics.text(f"{pressure / 100:.0f} hPa", 1, 0, WIDTH, scale=1)
         else:
-            pressure_string = str(pressure/100)
+            pressure_string = str(pressure / 100)
             graphics.text(f"{pressure_string[0]}.{pressure_string[1]}k hPa", 0, 0, WIDTH, scale=1)
 
     # time to update the display
