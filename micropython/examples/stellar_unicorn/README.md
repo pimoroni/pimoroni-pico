@@ -23,6 +23,7 @@
 - [NumPy Examples](#numpy-examples)
 - [Other Examples](#other-examples)
   - [CO2](#co2)
+  - [Encoder Wheel](#encoder-wheel)
   - [Launch (Demo Reel)](#launch-demo-reel)
 
 ## About Stellar Unicorn
@@ -186,6 +187,11 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an carbon dioxide detector. Press A, B and C to switch between modes.
 
 This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
+
+### Encoder Wheel
+[encoder_wheel.py](encoder_wheel.py)
+
+This example uses [RGB Encoder Wheel breakout](https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout) to make an RGB colour picker. Use the encoder wheel to pick a hue and view the RGB breakdown of that colour on the Unicorn display (you can adjust saturation and brightness using the buttons on the breakout too).
 
 ### Launch (Demo Reel)
 
