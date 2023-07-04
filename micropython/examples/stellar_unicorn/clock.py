@@ -8,6 +8,8 @@
 # WIFI_PASSWORD = "Your WiFi password"
 #
 # Clock synchronizes time on start, and resynchronizes if you press the A button
+#
+# This example uses a custom tiny font - find 3x5.bitmapfont in pimoroni-pico/fonts
 
 import time
 import math
@@ -193,7 +195,7 @@ def redraw_display_if_reqd():
         gradient_background(hue, sat, val,
                             hue + HUE_OFFSET, sat, val)
 
-        clock = "{:02}:{:02}:{:02}".format(hour, minute, second)
+        clock = "{:02} {:02}".format(hour, minute)
 
         # calculate text position so that it is centred
         w = graphics.measure_text(clock, 1)
@@ -206,7 +208,7 @@ def redraw_display_if_reqd():
 
 
 # set the font
-graphics.set_font("bitmap6")
+graphics.set_font(open("3x5.bitmapfont", "rb").read())
 su.set_brightness(0.5)
 
 sync_time()

@@ -12,6 +12,7 @@
   - [Nostalgia Prompt](#nostalgia-prompt)
   - [Rainbow](#rainbow)
   - [Scrolling Text](#scrolling-text)
+  - [Thermometer](#thermometer)
   - [Today](#today)
 - [Wireless Examples](#wireless-examples)
   - [Cheerlights History](#cheerlights-history)
@@ -19,10 +20,13 @@
   - [Exchange Ticker](#exchange-ticker)
   - [HTTP Text](#http-text)
   - [Weather](#weather)
-- [NumPy examples](#numpy-examples)
+- [NumPy Examples](#numpy-examples)
 - [Other Examples](#other-examples)
+  - [CO2](#co2)
+  - [Encoder Wheel](#encoder-wheel)
+  - [Thermometer (BME280)](#thermometer-bme280)
+  - [Thermometer (BME68x)](#thermometer-bme68x)
   - [Launch (Demo Reel)](#launch-demo-reel)
-- [Other Resources](#other-resources)
 
 ## About Stellar Unicorn
 
@@ -49,6 +53,8 @@ The easiest way to start displaying cool stuff on Stellar Unicorn is using our S
 [clock.py](clock.py)
 
 Clock example with (optional) NTP synchronization. You can adjust the brightness with LUX + and -, and resync the time by pressing A.
+
+This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
 
 ### Eighties Super Computer
 
@@ -103,6 +109,12 @@ Some good old fashioned rainbows! You can adjust the cycling speed with A and B,
 
 Display scrolling wisdom, quotes or greetz. You can adjust the brightness with LUX + and -.
 
+
+### Thermometer
+[thermometer_pico.py](thermometer_pico.py)
+
+Shows the temperature (from the Pico W's internal sensor) against an appropriately coloured pulsing blob.
+
 ### Today
 
 [today.py](today.py)
@@ -153,9 +165,16 @@ Requires `logging.mpy` and `tinyweb` from [micropython/examples/common](../../ex
 
 [weather](weather)
 
-Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API.
+Display current weather data from the [Open-Meteo](https://open-meteo.com/) weather API. Make sure to copy across the `icons` folder to your Unicorn.
 
-## NumPy examples
+Buttons:
+A - show / hide temperature
+B - swap between Celsius and Fahrenheit
+C - randomly select a weather icon
+D - add rainbows
+LUX + and - adjust brightness
+
+## NumPy Examples
 
 [numpy](numpy)
 
@@ -163,16 +182,33 @@ The examples in the folder use `numpy`-like array functions contained in the `ul
 
 ## Other Examples
 
+These examples use additional hardware.
+
+### CO2
+
+[co2.py](co2.py)
+
+Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an carbon dioxide detector. Press A, B and C to switch between modes.
+
+This example uses a custom tiny bitmap font, find 3x5.bitmapfont in [fonts](../../common/fonts) and copy it to your Pico W.
+
+### Encoder Wheel
+[encoder_wheel.py](encoder_wheel.py)
+
+This example uses [RGB Encoder Wheel breakout](https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout) to make an RGB colour picker. Use the encoder wheel to pick a hue and view the RGB breakdown of that colour on the Unicorn display (you can adjust saturation and brightness using the buttons on the breakout too).
+
+### Thermometer (BME280)
+[thermometer_bme280.py](thermometer_bme280.py)
+
+Shows temperature, humidity and pressure (from a [BME280 sensor breakout](https://shop.pimoroni.com/products/bme280-breakout)) against an appropriately coloured pulsing blob.
+
+### Thermometer (BME68x)
+[thermometer_bme68x.py](thermometer_bme68x.py)
+
+Shows temperature, humidity and pressure (from a [BME680](https://shop.pimoroni.com/products/bme680-breakout) or [BME688](https://shop.pimoroni.com/products/bme688-breakout) sensor breakout) against an appropriately coloured pulsing blob.
+
 ### Launch (Demo Reel)
 
 [launch](launch)
 
 If you want to get the demo reel that Stellar Unicorn ships with back, copy the contents of this `launch` folder to your Pico W.
-
-## Other Resources
-
-Here are some cool Stellar Unicorn community projects and resources that you might find useful / inspirational! Note that code at the links below has not been tested by us and we're not able to offer support with it.
-
-- :link: [Green Energy Display with Stellar Unicorn](https://www.hackster.io/andreas-motzek/clock-and-green-energy-display-with-stellar-unicorn-641dcb)
-- :link: [stellar-emoji-react - paint emojis from a computer, phone or tablet](https://github.com/chriscareycode/stellar-unicorn/tree/main/stellar-emoji-react)
-- :link: [stellar-paste - paste images from the clipboard to Stellar Unicorn](https://github.com/chriscareycode/stellar-unicorn/tree/main/stellar-paste)

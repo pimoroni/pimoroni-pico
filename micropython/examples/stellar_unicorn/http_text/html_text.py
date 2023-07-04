@@ -173,7 +173,7 @@ async def message_update():
         graphics.set_pen(graphics.create_pen(int(BACKGROUND_COLOUR[0]), int(BACKGROUND_COLOUR[1]), int(BACKGROUND_COLOUR[2])))
         graphics.clear()
 
-        outline_text(MESSAGE, x=PADDING - shift, y=11)
+        outline_text(MESSAGE, x=PADDING - shift, y=4)
 
         # update the display
         su.update(graphics)

@@ -25,13 +25,13 @@ currency_rate = ""
 rate_keys = []
 
 # display options
-line_1_line = -2
-line_2_line = 9
-line_3_line = 20
+line_1_line = -1
+line_2_line = 4
+line_3_line = 9
 
 ref_currency_index = 0
 
-cycles_per_sequence = 120
+cycles_per_sequence = 200
 
 su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY)
@@ -61,8 +61,8 @@ def get_data(currency_selected):
     graphics.set_pen(graphics.create_pen(20, 20, 20))
     graphics.clear()
     graphics.set_pen(graphics.create_pen(100, 100, 100))
-    graphics.text("Get", 0, 10, scale=1, spacing=1)
-    graphics.text("data", 8, 16, scale=1, spacing=1)
+    graphics.text("Get", 0, 0, scale=1)
+    graphics.text("data", 0, 7, scale=1)
     su.update(graphics)
     gc.collect()
     # open the json file
@@ -88,14 +88,11 @@ def update_display(cycle):
     graphics.set_pen(graphics.create_pen(20, 20, 20))
     graphics.clear()
     graphics.set_pen(graphics.create_pen(100, 0, 0))
-    graphics.text(ref_currency_name, calculate_xpos((len(ref_currency_name)), cycle), line_1_line, scale=2, spacing=1)
+    graphics.text(ref_currency_name, calculate_xpos((len(ref_currency_name)), cycle), line_1_line, scale=1)
     graphics.set_pen(graphics.create_pen(100, 100, 0))
-    if len(currency_symbol) > 3:
-        graphics.text(currency_symbol, calculate_xpos((len(currency_symbol)), cycle), line_2_line, scale=2, spacing=1)
-    else:
-        graphics.text(currency_symbol, 0, line_2_line, scale=2, spacing=1)
+    graphics.text(currency_symbol, calculate_xpos((len(currency_symbol)), cycle), line_2_line, scale=1)
     graphics.set_pen(graphics.create_pen(0, 100, 100))
-    graphics.text(currency_rate, calculate_xpos((len(currency_rate)), cycle), line_3_line, scale=2, spacing=1)
+    graphics.text(currency_rate, calculate_xpos((len(currency_rate)), cycle), line_3_line, scale=1)
 
 
 def update_base_currency(index):
