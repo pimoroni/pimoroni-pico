@@ -159,11 +159,13 @@ down_button = machine.Pin(GalacticUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, ma
 
 
 def adjust_utc_offset(pin):
-    global utc_offset
+    global utc_offset, last_second
     if pin == up_button:
         utc_offset += 1
+        last_second = None
     if pin == down_button:
         utc_offset -= 1
+        last_second = None
 
 
 up_button.irq(trigger=machine.Pin.IRQ_FALLING, handler=adjust_utc_offset)
@@ -215,9 +217,11 @@ sync_time()
 while True:
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
+        last_second = None
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
+        last_second = None
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         sync_time()
