@@ -60,6 +60,9 @@ namespace pimoroni {
     static constexpr uint RAM_SEL = 8;
     
     static constexpr uint32_t base_address = 0x10000;
+    static constexpr uint32_t max_num_sprites = 1024;
+    static constexpr uint32_t sprite_size = 0x900;
+    static constexpr uint32_t sprite_base_address = 0x800000 - (max_num_sprites * sprite_size);
     uint16_t display_width = 0;
     uint16_t display_height = 0;
     uint16_t frame_width = 0;
@@ -134,6 +137,20 @@ namespace pimoroni {
       void flip();
       void reset();
 
+      // Define the data for a sprite, the specified data index can then be supplied
+      // to set_sprite to use the sprite.  Up to 1024 sprites can be defined.
+      // Each sprite can be up to 2KB big, with a maximum width or height of 64 pixels.
+      // So for ARGB1555 sprites 64x16, 32x32, 16x64 are examples of maximum sizes.
+      // Sprites are currently only supported when using ARGB1555 mode.
+      // You must define the sprite to each RAM bank.
+      void define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data);
+
+      // Display/move a sprite to a given position.
+      // Note sprite positions are always display relative (not scrolled)
+      // TODO: Blend mode
+      void set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p);
+      void clear_sprite(int sprite_num);
+
       // 32 colour palette mode.  Note that palette entries range from 0-31,
       // but when writing colour values the palette entry is in bits 6-2, so the
       // entry value is effectively multiplied by 4.
@@ -183,8 +200,9 @@ namespace pimoroni {
 
       virtual void write_palette();
       virtual void write_header();
+      virtual void write_sprite_table();
+      virtual void write_header_preamble();
 
-      void write_header_preamble();
       void i2c_modify_bit(uint8_t reg, uint bit, bool enable);
 
     private:

@@ -49,7 +49,7 @@ int main() {
   gpio_set_dir(BUTTON_A, GPIO_IN);
   gpio_pull_up(BUTTON_A);
 
-  sleep_ms(5000);
+  //sleep_ms(5000);
 
   DVDisplay display;
   display.init(DISPLAY_WIDTH, DISPLAY_HEIGHT, DVDisplay::MODE_RGB888, FRAME_WIDTH, FRAME_HEIGHT);

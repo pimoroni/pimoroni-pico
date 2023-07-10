@@ -398,16 +398,75 @@ namespace pimoroni {
     buf[2] = full_width << 16;
     buf[3] = (uint32_t)display_height << 16;
     buf[4] = 0x00000001;
-    buf[5] = 0x00010000 + display_height + (bank << 24);
-    buf[6] = 0x00000001;
+    buf[5] = 0x00010000 + display_height + ((uint32_t)bank << 24);
+    buf[6] = 0x04000001;
     ram.write(0, buf, 7 * 4);
     ram.wait_for_finish_blocking();
+  }
+
+  void DVDisplay::write_sprite_table()
+  {
+    constexpr uint32_t buf_size = 32;
+    uint32_t buf[buf_size];
+
+    uint addr = (display_height + 7) * 4 + PALETTE_SIZE * 3;
+    uint sprite_type = 0x10000000u;
+    for (uint32_t i = 0; i < max_num_sprites; i += buf_size) {
+      for (uint32_t j = 0; j < buf_size; ++j) {
+        buf[j] = sprite_type + (i + j) * sprite_size + sprite_base_address;
+      }
+      ram.write(addr, buf, buf_size * 4);
+      ram.wait_for_finish_blocking();
+      addr += buf_size * 4;
+    }
   }
 
   void DVDisplay::write_header()
   {
     write_header_preamble();
     set_scroll_idx_for_lines(1, 0, display_height);
+    write_sprite_table();
+  }
+
+  void DVDisplay::define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data)
+  {
+    uint32_t buf[33];
+    uint16_t* buf_ptr = (uint16_t*)buf;
+    uint addr = sprite_base_address + sprite_data_idx * sprite_size;
+    
+    *buf_ptr++ = (height << 8) + width;
+
+    for (uint16_t i = 0; i < height; ++i)
+    {
+      *buf_ptr++ = width << 8;
+    }
+    uint len = (uint8_t*)buf_ptr - (uint8_t*)buf;
+    ram.write(addr, buf, len);
+
+    addr += len;
+    if (len & 2) addr += 2;
+
+    ram.write(addr, (uint32_t*)data, width * height * 2);
+  }
+
+  void DVDisplay::set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p)
+  {
+    uint8_t buf[7];
+    buf[0] = 1;  // BLEND_DEPTH
+    buf[1] = sprite_data_idx & 0xff;
+    buf[2] = sprite_data_idx >> 8;
+    buf[3] = p.x & 0xff;
+    buf[4] = p.x >> 8;
+    buf[5] = p.y & 0xff;
+    buf[6] = p.y >> 8;
+
+    i2c->write_bytes(I2C_ADDR, sprite_num, buf, 7);
+  }
+
+  void DVDisplay::clear_sprite(int sprite_num)
+  {
+    uint16_t off = 0xFFFF;
+    i2c->write_bytes(I2C_ADDR, sprite_num, (uint8_t*)&off, 2);
   }
 
   uint32_t DVDisplay::point_to_address(const Point& p) const {
