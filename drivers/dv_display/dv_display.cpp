@@ -465,8 +465,8 @@ namespace pimoroni {
 
   void DVDisplay::clear_sprite(int sprite_num)
   {
-    uint16_t off = 0xFFFF;
-    i2c->write_bytes(I2C_ADDR, sprite_num, (uint8_t*)&off, 2);
+    uint8_t buf[3] = {1, 0xFF, 0xFF};
+    i2c->write_bytes(I2C_ADDR, sprite_num, buf, 3);
   }
 
   uint32_t DVDisplay::point_to_address(const Point& p) const {
