@@ -459,10 +459,10 @@ namespace pimoroni {
     define_sprite_internal(sprite_data_idx, width, height, (uint32_t*)data);
   }
 
-  void DVDisplay::set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p)
+  void DVDisplay::set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p, SpriteBlendMode blend_mode)
   {
     uint8_t buf[7];
-    buf[0] = 1;  // BLEND_DEPTH
+    buf[0] = (uint8_t)blend_mode;
     buf[1] = sprite_data_idx & 0xff;
     buf[2] = sprite_data_idx >> 8;
     buf[3] = p.x & 0xff;

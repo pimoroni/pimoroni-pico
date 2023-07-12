@@ -25,6 +25,15 @@ namespace pimoroni {
       MODE_RGB888 = 3,
     };
 
+    enum SpriteBlendMode : uint8_t {
+        BLEND_NONE = 0,     // Sprite data always written to frame regardless of alpha
+        BLEND_DEPTH = 1,    // Alpha represents depth.  Order from back to front is: Sprite A0, Frame A0, Sprite A1, Frame A1
+        BLEND_DEPTH2 = 2,   // Alpha represents depth.  Order from back to front is: Sprite A0, Frame A0, Frame A1, Sprite A1
+                            // Note that blend modes are only supported in RGB555 mode.
+        BLEND_BLEND = 3,    // Use frame if Sprite A0 or Frame A1, additive blend if Sprite A1 and Frame A0
+        BLEND_BLEND2 = 4,   // Use frame if Sprite A0, additive blend if Sprite A1
+    };
+
     // I2C pins
     static constexpr uint I2C_SDA = 6;
     static constexpr uint I2C_SCL = 7;
@@ -150,8 +159,7 @@ namespace pimoroni {
 
       // Display/move a sprite to a given position.
       // Note sprite positions are always display relative (not scrolled)
-      // TODO: Blend mode
-      void set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p);
+      void set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p, SpriteBlendMode blend_mode = BLEND_DEPTH);
       void clear_sprite(int sprite_num);
 
       // 32 colour palette mode.  Note that palette entries range from 0-31,

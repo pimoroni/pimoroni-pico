@@ -18,7 +18,7 @@ using namespace pimoroni;
 #define SPRITE_WIDTH 8
 #define SPRITE_HEIGHT 8
 
-#define USE_PALETTE 1
+#define USE_PALETTE 0
 
 #if USE_PALETTE
 static uint8_t sprite_data_pal[] = {
@@ -104,7 +104,7 @@ int main() {
   while (true)
   {
     for (int i = 0; i < 32; ++i) {
-      display.set_sprite(i, 0, sprite_pos[i]);
+      display.set_sprite(i, 0, sprite_pos[i], (i < 16) ? DVDisplay::BLEND_BLEND : DVDisplay::BLEND_DEPTH);
 
       sprite_pos[i] += sprite_dir[i];
       if (sprite_pos[i].x >= DISPLAY_WIDTH || sprite_pos[i].x <= 0) {
