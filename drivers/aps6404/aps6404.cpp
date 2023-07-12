@@ -136,13 +136,12 @@ namespace pimoroni {
             );
         }
 
-        hw_set_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
-
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
              addr += page_len, data += page_len >> 2, len -= page_len, page_len = std::min(PAGE_SIZE, len))
         {
             wait_for_finish_blocking();
+            hw_set_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
 
             pio_sm_put_blocking(pio, pio_sm, (page_len << 1) - 1);
             pio_sm_put_blocking(pio, pio_sm, 0x38000000u | addr);
@@ -174,13 +173,12 @@ namespace pimoroni {
             );
         }
 
-        hw_clear_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
-
         for (int len = len_in_bytes, page_len = std::min(PAGE_SIZE, len); 
              len > 0; 
              addr += page_len, len -= page_len, page_len = std::min(PAGE_SIZE, len))
         {
             wait_for_finish_blocking();
+            hw_clear_bits(&dma_hw->ch[dma_channel].al1_ctrl, DMA_CH0_CTRL_TRIG_INCR_READ_BITS);
             repeat_data = data;
 
             pio_sm_put_blocking(pio, pio_sm, (page_len << 1) - 1);

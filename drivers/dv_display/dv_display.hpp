@@ -141,9 +141,12 @@ namespace pimoroni {
       // to set_sprite to use the sprite.  Up to 1024 sprites can be defined.
       // Each sprite can be up to 2KB big, with a maximum width or height of 64 pixels.
       // So for ARGB1555 sprites 64x16, 32x32, 16x64 are examples of maximum sizes.
-      // Sprites are currently only supported when using ARGB1555 mode.
       // You must define the sprite to each RAM bank.
       void define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data);
+
+      // Palette mode sprites are defined with the colour number in bits 6-2 of each byte and alpha in bit 0.
+      // Because palette mode sprites only use 1 byte per pixel they can be bigger, up to 64x32, or 45x45, for example.
+      void define_palette_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint8_t* data);
 
       // Display/move a sprite to a given position.
       // Note sprite positions are always display relative (not scrolled)
@@ -216,6 +219,8 @@ namespace pimoroni {
       void write(uint32_t address, size_t len, const uint8_t colour);
       void read(uint32_t address, size_t len, uint8_t *data);
       void write(uint32_t address, size_t len, const RGB888 colour);
+
+      void define_sprite_internal(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint32_t* data);
 
       uint32_t point_to_address(const Point& p) const;
       int pixel_size() const;

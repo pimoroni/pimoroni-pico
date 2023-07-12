@@ -1,6 +1,6 @@
 #include "dv_display.hpp"
 #include "swd_load.hpp"
-#include "pico-stick-wide.h"
+#include "pico-stick.h"
 
 #include <cstdlib>
 #include <math.h>
@@ -410,7 +410,7 @@ namespace pimoroni {
     uint32_t buf[buf_size];
 
     uint addr = (display_height + 7) * 4 + PALETTE_SIZE * 3;
-    uint sprite_type = 0x10000000u;
+    uint sprite_type = (uint)mode << 28;
     for (uint32_t i = 0; i < max_num_sprites; i += buf_size) {
       for (uint32_t j = 0; j < buf_size; ++j) {
         buf[j] = sprite_type + (i + j) * sprite_size + sprite_base_address;
@@ -428,7 +428,7 @@ namespace pimoroni {
     write_sprite_table();
   }
 
-  void DVDisplay::define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data)
+  void DVDisplay::define_sprite_internal(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint32_t* data)
   {
     uint32_t buf[33];
     uint16_t* buf_ptr = (uint16_t*)buf;
@@ -447,6 +447,16 @@ namespace pimoroni {
     if (len & 2) addr += 2;
 
     ram.write(addr, (uint32_t*)data, width * height * 2);
+  }
+
+  void DVDisplay::define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data)
+  {
+    define_sprite_internal(sprite_data_idx, width, height, (uint32_t*)data);
+  }
+
+  void DVDisplay::define_palette_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint8_t* data)
+  {
+    define_sprite_internal(sprite_data_idx, width, height, (uint32_t*)data);
   }
 
   void DVDisplay::set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p)
