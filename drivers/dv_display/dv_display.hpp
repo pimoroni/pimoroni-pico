@@ -157,6 +157,9 @@ namespace pimoroni {
       // Because palette mode sprites only use 1 byte per pixel they can be bigger, up to 64x32, or 45x45, for example.
       void define_palette_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint8_t* data);
 
+      // Load a sprite stored in PicoVision sprite format
+      void load_pvs_sprite(uint16_t sprite_data_idx, uint32_t* data, uint32_t len_in_bytes);
+
       // Display/move a sprite to a given position.
       // Note sprite positions are always display relative (not scrolled)
       void set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p, SpriteBlendMode blend_mode = BLEND_DEPTH);

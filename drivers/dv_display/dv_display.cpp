@@ -452,11 +452,20 @@ namespace pimoroni {
   void DVDisplay::define_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint16_t* data)
   {
     define_sprite_internal(sprite_data_idx, width, height, (uint32_t*)data);
+    ram.wait_for_finish_blocking();
   }
 
   void DVDisplay::define_palette_sprite(uint16_t sprite_data_idx, uint16_t width, uint16_t height, uint8_t* data)
   {
     define_sprite_internal(sprite_data_idx, width, height, (uint32_t*)data);
+    ram.wait_for_finish_blocking();
+  }
+
+  void DVDisplay::load_pvs_sprite(uint16_t sprite_data_idx, uint32_t* data, uint32_t len_in_bytes)
+  {
+    uint addr = sprite_base_address + sprite_data_idx * sprite_size;
+    ram.write(addr, data, len_in_bytes);
+    ram.wait_for_finish_blocking();
   }
 
   void DVDisplay::set_sprite(int sprite_num, uint16_t sprite_data_idx, const Point &p, SpriteBlendMode blend_mode)
