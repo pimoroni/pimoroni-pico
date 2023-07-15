@@ -378,6 +378,7 @@ namespace pimoroni {
       ram.write(point_to_address_palette(p), &val, 1);
       --l;
       offset++;
+      ram.wait_for_finish_blocking();
     }
     if (l > 0) {
       ram.write(point_to_address_palette(p) + offset, (uint32_t*)data, l);

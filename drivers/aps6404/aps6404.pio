@@ -34,6 +34,8 @@ PUBLIC do_write:
   jmp y--, do_write side 0b10
   set pindirs, 0    side 0b00
   out null, 32      side 0b01
+PUBLIC do_clear:
+  mov isr, null     side 0b01
   jmp top           side 0b01
 
 ; Read command
@@ -76,6 +78,8 @@ PUBLIC do_write:
   jmp y--, do_write side 0b10
   set pindirs, 0    side 0b00
   out null, 32      side 0b01
+PUBLIC do_clear:
+  mov isr, null     side 0b01
   jmp top           side 0b01
 
 ; Read command
@@ -121,6 +125,8 @@ PUBLIC do_write:
   jmp y--, do_write [1] side 0b10
   set pindirs, 0        side 0b00
   out null, 32          side 0b01
+PUBLIC do_clear:
+  mov isr, null         side 0b01
   jmp top               side 0b01
 
 ; Read command
