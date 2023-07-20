@@ -22,6 +22,8 @@ typedef struct _PNG_decode_target {
     void *target;
     uint8_t flags = 0;
     Point position = {0, 0};
+    Rect source = {0, 0, 0, 0};
+    Point scale = {1, 1};
 } _PNG_decode_target;
 
 typedef struct _PNG_obj_t {
@@ -120,10 +122,15 @@ MICROPY_EVENT_POLL_HOOK
     PicoGraphics *current_graphics = (PicoGraphics *)target->target;
     Point current_position = target->position;
     uint8_t current_flags = target->flags;
+    Point scale = target->scale;
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw png data out of the framebuffer..
     // Can we clip beforehand and make this faster?
-    current_position.y += pDraw->y;
+
+    if(pDraw->y < target->source.y || pDraw->y >= target->source.y + target->source.h) return;
+
+    current_position.y += pDraw->y * scale.y;
+    current_position -= Point(0, target->source.y);
 
     //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", y, pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
     uint8_t *pixel = (uint8_t *)pDraw->pPixels;
@@ -132,9 +139,10 @@ MICROPY_EVENT_POLL_HOOK
             uint8_t r = *pixel++;
             uint8_t g = *pixel++;
             uint8_t b = *pixel++;
+            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             current_graphics->set_pen(r, g, b);
-            current_graphics->pixel(current_position);
-            current_position.x++;
+            current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
+            current_position.x += scale.x;
         }
     } else if (pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
         for(int x = 0; x < pDraw->iWidth; x++) {
@@ -142,11 +150,12 @@ MICROPY_EVENT_POLL_HOOK
             uint8_t g = *pixel++;
             uint8_t b = *pixel++;
             uint8_t a = *pixel++;
+            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             if (a) {
                 current_graphics->set_pen(r, g, b);
-                current_graphics->pixel(current_position);
+                current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
             }
-            current_position.x++;
+            current_position.x += scale.x;
         }
     } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
         for(int x = 0; x < pDraw->iWidth; x++) {
@@ -158,6 +167,7 @@ MICROPY_EVENT_POLL_HOOK
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
             }
+            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             // grab the colour from the palette
             uint8_t r = pDraw->pPalette[(i * 3) + 0];
             uint8_t g = pDraw->pPalette[(i * 3) + 1];
@@ -168,10 +178,14 @@ MICROPY_EVENT_POLL_HOOK
                     if (current_flags & FLAG_NO_DITHER) {
                         // Posterized output to RGB332
                         current_graphics->set_pen(RGB(r, g, b).to_rgb332());
-                        current_graphics->pixel(current_position);
+                        current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                     } else {
                         // Dithered output to RGB332
-                        current_graphics->set_pixel_dither(current_position, {r, g, b});
+                        for(auto px = 0; px < scale.x; px++) {
+                            for(auto py = 0; py < scale.y; py++) {
+                                current_graphics->set_pixel_dither(current_position + Point{px, py}, {r, g, b});
+                            }
+                        }
                     }
                 } else if(current_graphics->pen_type == PicoGraphics::PEN_P8
                     || current_graphics->pen_type == PicoGraphics::PEN_P4
@@ -184,17 +198,21 @@ MICROPY_EVENT_POLL_HOOK
                                 closest = 0;
                             }
                             current_graphics->set_pen(closest);
-                            current_graphics->pixel(current_position);
+                            current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                         } else {
-                        current_graphics->set_pixel_dither(current_position, {r, g, b});
-                    }
+                            for(auto px = 0; px < scale.x; px++) {
+                                for(auto py = 0; py < scale.y; py++) {
+                                    current_graphics->set_pixel_dither(current_position + Point{px, py}, {r, g, b});
+                                }
+                            }
+                        }
 
                 } else {
                     current_graphics->set_pen(r, g, b);
-                    current_graphics->pixel(current_position);
+                    current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                 }
             }
-            current_position.x++;
+            current_position.x += scale.x;
         }
     }
 }
@@ -214,6 +232,8 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
     _PNG_obj_t *self = m_new_obj_with_finaliser(_PNG_obj_t);
     self->base.type = &PNG_type;
     self->png = m_new_class(PNG);
+
+    mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
 
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
@@ -265,13 +285,21 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_dither };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_dither,
+           ARG_source_x, ARG_source_y, ARG_source_w, ARG_source_h,
+           ARG_scale_x, ARG_scale_y };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
         { MP_QSTR_y, MP_ARG_INT, {.u_int = 0}  },
         { MP_QSTR_scale, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_dither, MP_ARG_OBJ, {.u_obj = mp_const_true} },
+        { MP_QSTR_source_x, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_source_y, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_source_w, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_source_h, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_scale_x, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale_y, MP_ARG_INT, {.u_int = 1} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -292,6 +320,15 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     int result = -1;
 
     pngdec_open_helper(self);
+
+    int source_x = args[ARG_source_x].u_int;
+    int source_y = args[ARG_source_y].u_int;
+    int source_w = args[ARG_source_w].u_int == -1 ? self->width : args[ARG_source_w].u_int;
+    int source_h = args[ARG_source_h].u_int == -1 ? self->height : args[ARG_source_h].u_int;
+
+    self->decode_target->source = {source_x, source_y, source_w, source_h};
+
+    self->decode_target->scale = {args[ARG_scale_x].u_int, args[ARG_scale_y].u_int};
 
     result = self->png->decode(self->decode_target, 0);
 
