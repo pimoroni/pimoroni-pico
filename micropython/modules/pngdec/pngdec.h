@@ -10,5 +10,6 @@ extern mp_obj_t _PNG_openFILE(mp_obj_t self_in, mp_obj_t filename);
 extern mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t _PNG_getWidth(mp_obj_t self_in);
 extern mp_obj_t _PNG_getHeight(mp_obj_t self_in);
+extern mp_obj_t _PNG_getPalette(mp_obj_t self_in);
 
 extern void *pngdec_open_callback(const char *filename, int32_t *size);

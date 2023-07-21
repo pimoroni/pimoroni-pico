@@ -6,6 +6,7 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_2(PNG_openFILE_obj, _PNG_openFILE);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(PNG_decode_obj, 1, _PNG_decode);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getWidth_obj, _PNG_getWidth);
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getHeight_obj, _PNG_getHeight);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getPalette_obj, _PNG_getPalette);
 
 // class
 STATIC const mp_rom_map_elem_t PNG_locals_dict_table[] = {
@@ -15,7 +16,7 @@ STATIC const mp_rom_map_elem_t PNG_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_decode), MP_ROM_PTR(&PNG_decode_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_width), MP_ROM_PTR(&PNG_getWidth_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&PNG_getHeight_obj) },
-    { MP_ROM_QSTR(MP_QSTR_get_height), MP_ROM_PTR(&PNG_getHeight_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_palette), MP_ROM_PTR(&PNG_getPalette_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(PNG_locals_dict, PNG_locals_dict_table);
@@ -44,10 +45,10 @@ STATIC const mp_map_elem_t PNG_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pngdec) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PNG), (mp_obj_t)&PNG_type },
 
-    { MP_ROM_QSTR(MP_QSTR_PNG_SCALE_FULL), MP_ROM_INT(0) },
-    { MP_ROM_QSTR(MP_QSTR_PNG_SCALE_HALF), MP_ROM_INT(2) },
-    { MP_ROM_QSTR(MP_QSTR_PNG_SCALE_QUARTER), MP_ROM_INT(4) },
-    { MP_ROM_QSTR(MP_QSTR_PNG_SCALE_EIGHTH), MP_ROM_INT(8) },
+    { MP_ROM_QSTR(MP_QSTR_PNG_NORMAL), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_PNG_POSTERISE), MP_ROM_INT(0) },
+    { MP_ROM_QSTR(MP_QSTR_PNG_DITHER), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_PNG_COPY), MP_ROM_INT(2) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_PNG_globals, PNG_globals_table);

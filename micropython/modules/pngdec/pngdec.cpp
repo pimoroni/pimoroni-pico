@@ -20,7 +20,7 @@ typedef struct _ModPicoGraphics_obj_t {
 
 typedef struct _PNG_decode_target {
     void *target;
-    uint8_t flags = 0;
+    uint8_t mode = 0;
     Point position = {0, 0};
     Rect source = {0, 0, 0, 0};
     Point scale = {1, 1};
@@ -39,8 +39,10 @@ typedef struct _PNG_obj_t {
     int height;
 } _PNG_obj_t;
 
-enum FLAGS : uint8_t {
-    FLAG_NO_DITHER = 1u
+enum DECODE_MODE : uint8_t {
+    MODE_POSTERIZE = 0u,
+    MODE_DITHER = 1u,
+    MODE_COPY = 2u,
 };
 
 void *pngdec_open_callback(const char *filename, int32_t *size) {
@@ -121,7 +123,7 @@ MICROPY_EVENT_POLL_HOOK
     _PNG_decode_target *target = (_PNG_decode_target*)pDraw->pUser;
     PicoGraphics *current_graphics = (PicoGraphics *)target->target;
     Point current_position = target->position;
-    uint8_t current_flags = target->flags;
+    uint8_t current_mode = target->mode;
     Point scale = target->scale;
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw png data out of the framebuffer..
@@ -175,7 +177,7 @@ MICROPY_EVENT_POLL_HOOK
             uint8_t a = pDraw->iHasAlpha ? pDraw->pPalette[768 + i] : 1;
             if (a) {
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
-                    if (current_flags & FLAG_NO_DITHER) {
+                    if (current_mode == MODE_POSTERIZE || current_mode == MODE_COPY) {
                         // Posterized output to RGB332
                         current_graphics->set_pen(RGB(r, g, b).to_rgb332());
                         current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
@@ -192,7 +194,12 @@ MICROPY_EVENT_POLL_HOOK
                     || current_graphics->pen_type == PicoGraphics::PEN_3BIT
                     || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
 
-                        if(current_flags & FLAG_NO_DITHER) {
+                        // Copy raw palette indexes over
+                        if(current_mode == MODE_COPY) {
+                            current_graphics->set_pen(i);
+                            current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
+                        // Posterized output to the available palete
+                        } else if(current_mode == MODE_POSTERIZE) {
                             int closest = RGB(r, g, b).closest(current_graphics->get_palette(), current_graphics->get_palette_size());
                             if (closest == -1) {
                                 closest = 0;
@@ -285,21 +292,14 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_dither,
-           ARG_source_x, ARG_source_y, ARG_source_w, ARG_source_h,
-           ARG_scale_x, ARG_scale_y };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
         { MP_QSTR_y, MP_ARG_INT, {.u_int = 0}  },
-        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_dither, MP_ARG_OBJ, {.u_obj = mp_const_true} },
-        { MP_QSTR_source_x, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_source_y, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_source_w, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_source_h, MP_ARG_INT, {.u_int = -1} },
-        { MP_QSTR_scale_x, MP_ARG_INT, {.u_int = 1} },
-        { MP_QSTR_scale_y, MP_ARG_INT, {.u_int = 1} },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = nullptr} },
+        { MP_QSTR_mode, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = nullptr} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -307,10 +307,43 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     _PNG_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PNG_obj_t);
 
-    // TODO: Implement integer 1x/2x/3x scaling by repeating pixels?
-    //int f = args[ARG_scale].u_int;
+    if(mp_obj_is_type(args[ARG_source].u_obj, &mp_type_tuple)){
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_source].u_obj, mp_obj_tuple_t);
 
-    self->decode_target->flags = args[ARG_dither].u_obj == mp_const_false ? FLAG_NO_DITHER : 0;
+        if(tuple->len != 4) mp_raise_ValueError("decode(): source tuple must contain (x, y, w, h)");
+
+        self->decode_target->source = {
+            mp_obj_get_int(tuple->items[0]),
+            mp_obj_get_int(tuple->items[1]),
+            mp_obj_get_int(tuple->items[2]),
+            mp_obj_get_int(tuple->items[3])
+        };
+    } else {
+        self->decode_target->source = {0, 0, self->width, self->height};
+    }
+
+    // Scale is a single int, corresponds to both width/height
+    if (mp_obj_is_int(args[ARG_scale].u_obj)) {
+        self->decode_target->scale = {
+            mp_obj_get_int(args[ARG_scale].u_obj),
+            mp_obj_get_int(args[ARG_scale].u_obj)
+        };
+    // Scale is a tuple, separate scales for width/height
+    } else if(mp_obj_is_type(args[ARG_scale].u_obj, &mp_type_tuple)){
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_scale].u_obj, mp_obj_tuple_t);
+
+        if(tuple->len != 2) mp_raise_ValueError("decode(): scale tuple must contain (scale_x, scale_y)");
+
+        self->decode_target->scale = {
+            mp_obj_get_int(tuple->items[0]),
+            mp_obj_get_int(tuple->items[1])
+        };
+    // Something else, just roll with the default
+    } else {
+        self->decode_target->scale = {1, 1};
+    }
+
+    self->decode_target->mode = args[ARG_mode].u_int;
 
     self->decode_target->position = {args[ARG_x].u_int, args[ARG_y].u_int};
 
@@ -320,15 +353,6 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     int result = -1;
 
     pngdec_open_helper(self);
-
-    int source_x = args[ARG_source_x].u_int;
-    int source_y = args[ARG_source_y].u_int;
-    int source_w = args[ARG_source_w].u_int == -1 ? self->width : args[ARG_source_w].u_int;
-    int source_h = args[ARG_source_h].u_int == -1 ? self->height : args[ARG_source_h].u_int;
-
-    self->decode_target->source = {source_x, source_y, source_w, source_h};
-
-    self->decode_target->scale = {args[ARG_scale_x].u_int, args[ARG_scale_y].u_int};
 
     result = self->png->decode(self->decode_target, 0);
 
@@ -348,6 +372,31 @@ mp_obj_t _PNG_getWidth(mp_obj_t self_in) {
 mp_obj_t _PNG_getHeight(mp_obj_t self_in) {
     _PNG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PNG_obj_t);
     return mp_obj_new_int(self->height);
+}
+
+// get_height
+mp_obj_t _PNG_getPalette(mp_obj_t self_in) {
+    _PNG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PNG_obj_t);
+    pngdec_open_helper(self);
+
+    self->png->decode(nullptr, 0);
+
+    uint8_t *palette = self->png->getPalette();
+
+    mp_obj_t palette_out[256];
+
+    for(auto i = 0u; i < 256; i++) {
+        mp_obj_t entry[3] = {
+            mp_obj_new_int(*palette++),
+            mp_obj_new_int(*palette++),
+            mp_obj_new_int(*palette++)
+        };
+        palette_out[i] = mp_obj_new_tuple(3, entry);
+    }
+
+    self->png->close();
+
+    return mp_obj_new_list(256, palette_out);
 }
 
 }
