@@ -112,6 +112,8 @@ namespace pimoroni {
     FDATA = 0xFE      // 0xFFFF
   };
 
+  constexpr uint8_t HARDWARE_ID        = 0b10000001;
+
   constexpr uint8_t CFG0_LOW_POWER     = 0b00100000;
   constexpr uint8_t CFG0_BANK          = 0b00010000;
   constexpr uint8_t CFG0_WLONG         = 0b00000100;

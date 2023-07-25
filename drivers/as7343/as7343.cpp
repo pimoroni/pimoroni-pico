@@ -15,6 +15,13 @@ namespace pimoroni {
       gpio_pull_up(interrupt);
     }
 
+    uint8_t aux_id, revision_id,  hardware_id;
+    get_version(aux_id, revision_id, hardware_id);
+
+    if(hardware_id != HARDWARE_ID) {
+      return false;
+    }
+
     reset();
 
     bank_select(0);
