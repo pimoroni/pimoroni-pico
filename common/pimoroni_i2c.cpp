@@ -40,6 +40,15 @@ namespace pimoroni {
         i2c_write_blocking(i2c, address, buffer, 2, false);
     }
 
+    void I2C::reg_write_uint16(uint8_t address, uint8_t reg, uint16_t value) {
+        uint8_t buffer[3] = {
+            reg,
+            (uint8_t)((value & 0xff00) >> 8),
+            (uint8_t)(value & 0x00ff)
+        };
+        i2c_write_blocking(i2c, address, buffer, 3, false);
+    }
+
     uint8_t I2C::reg_read_uint8(uint8_t address, uint8_t reg) {
         uint8_t value;
         i2c_write_blocking(i2c, address, &reg, 1, false);

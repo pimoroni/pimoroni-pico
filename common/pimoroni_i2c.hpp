@@ -63,6 +63,7 @@ namespace pimoroni {
         i2c_inst_t* pin_to_inst(uint pin);
 
         void reg_write_uint8(uint8_t address, uint8_t reg, uint8_t value);
+        void reg_write_uint16(uint8_t address, uint8_t reg, uint16_t value);
         uint8_t reg_read_uint8(uint8_t address, uint8_t reg);
         uint16_t reg_read_uint16(uint8_t address, uint8_t reg);
         int16_t reg_read_int16(uint8_t address, uint8_t reg);
