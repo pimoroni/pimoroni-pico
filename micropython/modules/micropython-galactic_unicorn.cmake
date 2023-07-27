@@ -17,6 +17,7 @@ include(bitmap_fonts/micropython)
 include(picographics/micropython)
 
 # Pico Graphics Extra
+include(pngdec/micropython)
 include(jpegdec/micropython)
 include(qrcode/micropython/micropython)
 
