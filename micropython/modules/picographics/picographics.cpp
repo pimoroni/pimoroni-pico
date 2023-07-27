@@ -61,10 +61,10 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
         case DISPLAY_PICO_DISPLAY_2:
+        case DISPLAY_PICO_W_EXPLORER:
             width = 320;
             height = 240;
             bus_type = BUS_SPI;
-            // Tufty display is upside-down
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB332;
             break;
@@ -325,6 +325,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
             } else if (display == DISPLAY_GFX_PACK) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, 9};
+            } else if (display == DISPLAY_PICO_W_EXPLORER) {
+                spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, SPI_DEFAULT_MISO, 9};
             }
         }
     }
