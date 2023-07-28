@@ -67,6 +67,16 @@ namespace pimoroni {
     static const uint TEMP_SENSE_ADDR = 13;     // 0b1101
     static const uint VOLTAGE_SENSE_ADDR = 14;  // 0b1110
     static const uint EX_ADC_ADDR = 15;         // 0b1111
+
+  private:
+    static constexpr float VOLTAGE_MAX = 17.0f;
+    static constexpr float VOLTAGE_MIN_MEASURE = 0.030f;
+    static constexpr float VOLTAGE_MAX_MEASURE = 2.294f;
+
+    static constexpr float CURRENT_MAX = 10.0f;
+    static constexpr float CURRENT_MIN_MEASURE = 0.0147f;
+    static constexpr float CURRENT_MAX_MEASURE = 0.9307f;
+
   private:
     I2C i2c;
     TCA9555 tca0;
@@ -99,6 +109,17 @@ namespace pimoroni {
     void set_slow_polarity(TCA gpio, bool polarity);
 
     void change_output_mask(uint8_t chip, uint16_t mask, uint16_t state);
+
+    void deselect_address();
+    void select_address(uint8_t address);
+    float shared_adc_voltage();
+
+    float read_voltage();
+    float read_current();
+    float read_temperature();
+    float read_expansion();
+    float read_slot_adc1(SLOT slot);
+    float read_slot_adc2(SLOT slot);
   };
 
 }

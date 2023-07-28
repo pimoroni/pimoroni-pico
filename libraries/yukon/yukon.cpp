@@ -125,6 +125,26 @@ namespace pimoroni {
     tca1.set_output_port(0x0000);
     tca1.set_polarity_port(0x0000);
     tca1.set_config_port(0xFCE6);
+
+    if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
+
+    //Make sure GPIO is high-impedance, no pullups etc
+    adc_gpio_init(SHARED_ADC);
+
+    //Select ADC input 0 (GPIO26)
+    adc_select_input(SHARED_ADC - 26);
+
+    sleep_ms(100);
+    set_slow_config(ADC_ADDR_1, true);
+    sleep_ms(100);
+    set_slow_config(ADC_ADDR_2, true);
+    sleep_ms(100);
+    set_slow_config(ADC_ADDR_3, true);
+    sleep_ms(100);
+    set_slow_config(ADC_MUX_EN_1, true);
+    sleep_ms(100);
+    set_slow_config(ADC_MUX_EN_2, true);
+    sleep_ms(100);
   }
 
   TCA9555& Yukon::get_tca_chip(uint chip) {
@@ -161,5 +181,91 @@ namespace pimoroni {
 
   void Yukon::change_output_mask(uint8_t chip, uint16_t mask, uint16_t state) {
     get_tca_chip(chip).change_output_mask(mask, state);
+  }
+
+  void Yukon::deselect_address() {
+    set_slow_output(ADC_MUX_EN_1, false);
+    set_slow_output(ADC_MUX_EN_2, false);
+  }
+
+  void Yukon::select_address(uint8_t address) {
+    if (address < 0)
+      return; //raise ValueError("address is less than zero")
+    else if(address > 0b1111)
+      return; //raise ValueError("address is greater than number of available addresses")
+    else {
+      uint16_t state = 0x0000;
+
+      if(address & 0b0001) {
+        state |= 1 << ADC_ADDR_1.GPIO;
+      }
+
+      if(address & 0b0010) {
+        state |= 1 << ADC_ADDR_2.GPIO;
+      }
+
+      if(address & 0b0100) {
+        state |= 1 << ADC_ADDR_3.GPIO;
+      }
+
+      if(address & 0b1000) {
+        state |= 1 << ADC_MUX_EN_1.GPIO;
+      }
+      else {
+        state |= 1 << ADC_MUX_EN_2.GPIO;
+      }
+
+      uint16_t adc_io_mask = (1 << ADC_MUX_EN_1.GPIO) | (1 << ADC_MUX_EN_2.GPIO) | (1 << ADC_ADDR_1.GPIO) | (1 << ADC_ADDR_2.GPIO) | (1 << ADC_ADDR_3.GPIO);
+      change_output_mask(ADC_ADDR_1.CHIP, adc_io_mask, state);
+    }
+    sleep_us(10); // Add a delay to let the pins settle before taking a reading
+  }
+
+  float Yukon::shared_adc_voltage() {
+    adc_select_input(SHARED_ADC - 26);
+    return ((float)adc_read() * 3.3f) / (1 << 12);
+  }
+
+  float Yukon::read_voltage() {
+    select_address(VOLTAGE_SENSE_ADDR);
+    // return (shared_adc_voltage() * (100 + 16)) / 16  # Old equation, kept for reference
+    float voltage = ((shared_adc_voltage() - VOLTAGE_MIN_MEASURE) * VOLTAGE_MAX) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MIN_MEASURE);
+    return MAX(voltage, 0.0f);
+  }
+
+  float Yukon::read_current() {
+    select_address(CURRENT_SENSE_ADDR);
+    // return (shared_adc_voltage() - 0.015) / ((1 + (5100 / 27.4)) * 0.0005)  # Old equation, kept for reference
+    float current =((shared_adc_voltage() - CURRENT_MIN_MEASURE) * CURRENT_MAX) / (CURRENT_MAX_MEASURE - CURRENT_MIN_MEASURE);
+    return MAX(current, 0.0f);
+  }
+
+  float Yukon::read_temperature() {
+    select_address(TEMP_SENSE_ADDR);
+    float sense = shared_adc_voltage();
+    float r_thermistor = sense / ((3.3f - sense) / 5100);
+    static constexpr float ROOM_TEMP = 273.15f + 25.0f;
+    static constexpr float RESISTOR_AT_ROOM_TEMP = 10000.0f;
+    static constexpr float BETA = 3435.0f;
+    float t_kelvin = (BETA * ROOM_TEMP) / (BETA + (ROOM_TEMP * log(r_thermistor / RESISTOR_AT_ROOM_TEMP)));
+    float t_celsius = t_kelvin - 273.15f;
+
+    // https://www.allaboutcircuits.com/projects/measuring-temperature-with-an-ntc-thermistor/
+    return t_celsius;
+  }
+
+  float Yukon::read_expansion() {
+    select_address(EX_ADC_ADDR);
+    return shared_adc_voltage();
+  }
+
+  float Yukon::read_slot_adc1(SLOT slot) {
+    select_address(slot.ADC1_ADDR);
+    return shared_adc_voltage();
+  }
+
+  float Yukon::read_slot_adc2(SLOT slot) {
+    select_address(slot.ADC2_TEMP_ADDR);
+    return shared_adc_voltage();
   }
 }
