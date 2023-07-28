@@ -126,4 +126,40 @@ namespace pimoroni {
     tca1.set_polarity_port(0x0000);
     tca1.set_config_port(0xFCE6);
   }
+
+  TCA9555& Yukon::get_tca_chip(uint chip) {
+    assert(chip < NUM_EXPANDERS);
+    return (chip == 0) ? tca0 : tca1;
+  }
+
+  bool Yukon::get_slow_input(TCA gpio) {
+    return get_tca_chip(gpio.CHIP).get_gpio_input(gpio.GPIO);
+  }
+
+  bool Yukon::get_slow_output(TCA gpio) {
+    return get_tca_chip(gpio.CHIP).get_gpio_output(gpio.GPIO);
+  }
+
+  bool Yukon::get_slow_config(TCA gpio) {
+    return get_tca_chip(gpio.CHIP).get_gpio_config(gpio.GPIO);
+  }
+
+  bool Yukon::get_slow_polarity(TCA gpio) {
+    return get_tca_chip(gpio.CHIP).get_gpio_polarity(gpio.GPIO);
+  }
+
+  void Yukon::set_slow_output(TCA gpio, bool value) {
+    get_tca_chip(gpio.CHIP).set_gpio_output(gpio.GPIO, value);
+  }
+  void Yukon::set_slow_config(TCA gpio, bool output) {
+    get_tca_chip(gpio.CHIP).set_gpio_config(gpio.GPIO, output);
+  }
+
+  void Yukon::set_slow_polarity(TCA gpio, bool polarity) {
+    get_tca_chip(gpio.CHIP).set_gpio_polarity(gpio.GPIO, polarity);
+  }
+
+  void Yukon::change_output_mask(uint8_t chip, uint16_t mask, uint16_t state) {
+    get_tca_chip(chip).change_output_mask(mask, state);
+  }
 }

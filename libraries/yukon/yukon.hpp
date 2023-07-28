@@ -72,6 +72,8 @@ namespace pimoroni {
     TCA9555 tca0;
     TCA9555 tca1;
 
+    static const uint NUM_EXPANDERS = 2;
+
   public:
     Yukon() :
       i2c(24, 25),
@@ -82,6 +84,21 @@ namespace pimoroni {
 
     void init();
     void reset();
+
+  private:
+    TCA9555& get_tca_chip(uint chip);
+
+  public:
+    bool get_slow_input(TCA gpio);
+    bool get_slow_output(TCA gpio);
+    bool get_slow_config(TCA gpio);
+    bool get_slow_polarity(TCA gpio);
+
+    void set_slow_output(TCA gpio, bool value);
+    void set_slow_config(TCA gpio, bool output);
+    void set_slow_polarity(TCA gpio, bool polarity);
+
+    void change_output_mask(uint8_t chip, uint16_t mask, uint16_t state);
   };
 
 }
