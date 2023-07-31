@@ -3,6 +3,9 @@
 #include "pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
 #include "drivers/tca9555/tca9555.hpp"
+#include "errors.hpp"
+#include <list>
+#include <iostream>
 
 namespace pimoroni {
 
@@ -34,81 +37,33 @@ namespace pimoroni {
   };
 
 
-  class OverVoltageError : public std::exception {
-  private:
-    std::string message;
 
-  public:
-    OverVoltageError(std::string msg) : message("OverVoltageError: " + msg) {
-    }
-
-    virtual const char* what() const noexcept {
-      return message.c_str();
-    }
+  enum LoggingLevel {
+    LOG_NONE = 0,
+    LOG_WARN,
+    LOG_INFO,
+    LOG_DEBUG
   };
 
-  class UnderVoltageError : public std::exception {
-  private:
-    std::string message;
 
-  public:
-    UnderVoltageError(std::string msg) : message("UnderVoltageError: " + msg) {
+  struct logger {
+    uint level = LOG_INFO;
+
+    void warn(std::string message) {
+      if(level >= LOG_WARN)
+        std::cout << message;
     }
 
-    virtual const char* what() const noexcept {
-      return message.c_str();
-    }
-  };
-
-  class OverCurrentError : public std::exception {
-  private:
-    std::string message;
-
-  public:
-    OverCurrentError(std::string msg) : message("OverCurrentError: " + msg) {
+    void info(std::string message) {
+      if(level >= LOG_INFO) {
+        std::cout << message;
+      }
     }
 
-    virtual const char* what() const noexcept {
-      return message.c_str();
-    }
-  };
-
-  class OverTemperatureError : public std::exception {
-  private:
-    std::string message;
-
-  public:
-    OverTemperatureError(std::string msg) : message("OverTemperatureError: " + msg) {
-    }
-
-    virtual const char* what() const noexcept {
-      return message.c_str();
-    }
-  };
-
-  class FaultError : public std::exception {
-  private:
-    std::string message;
-
-  public:
-    FaultError(std::string msg) : message("FaultError: " + msg) {
-    }
-
-    virtual const char* what() const noexcept {
-      return message.c_str();
-    }
-  };
-
-  class VerificationError : public std::exception {
-  private:
-    std::string message;
-
-  public:
-    VerificationError(std::string msg) : message(msg) {
-    }
-
-    virtual const char* what() const noexcept {
-      return ("VerificationError: " + message).c_str();
+    void debug(std::string message) {
+      if(level >= LOG_DEBUG) {
+        std::cout << message;
+      }
     }
   };
 
@@ -178,18 +133,14 @@ namespace pimoroni {
 
     static const uint NUM_EXPANDERS = 2;
 
-    enum LoggingLevel {
-      LOG_INFO = 2
-    };
-
     float voltage_limit;
     float current_limit;
     float temperature_limit;
-    uint logging_level;
+    logger logging;
     std::map<SLOT, Module*> slot_assignments;
     void* monitor_action_callback;
 
-    struct readings {
+    struct Readings {
       float max_voltage;
       float min_voltage;
       float avg_voltage;
@@ -201,8 +152,11 @@ namespace pimoroni {
       float max_temperature;
       float min_temperature;
       float avg_temperature;
-    } measures;
+    } readings;
     float count_avg;
+
+    std::list<std::string> allowed_readings;
+    std::list<std::string> excluded_readings;
 
   public:
     Yukon(float voltage_limit = DEFAULT_VOLTAGE_LIMIT,
@@ -279,17 +233,27 @@ namespace pimoroni {
     void assign_monitor_action(void* callback_function);
 
     void monitor();
-    void monitored_sleep_ms(uint32_t ms, std::vector<std::string> allowed = std::vector<std::string>(), std::vector<std::string> excluded = std::vector<std::string>());
-    void monitor_until_ms(uint32_t end_ms, std::vector<std::string> allowed = std::vector<std::string>(), std::vector<std::string> excluded = std::vector<std::string>());
+    void monitor_once();
+    void monitored_sleep_ms(uint32_t ms);
+    void monitor_until_ms(uint32_t end_ms);
 
-    void __print_readings(std::vector<std::string> allowed, std::vector<std::string> excluded);
+    void print_readings();
     std::vector<std::pair<std::string, float>> get_readings();
 
     void process_readings();
     void __clear_readings();
     void clear_readings();
 
-    void __print_map(std::string section_name, std::vector<std::pair<std::string, float>> readings, std::vector<std::string> allowed, std::vector<std::string> excluded);
+    void allow_reading(std::string name);
+    void allow_readings(std::list<std::string> names);
+    void exclude_reading(std::string name);
+    void exclude_readings(std::list<std::string> names);
+    void clear_filters();
+
+  private:
+    inline bool in_allowed(std::string name);
+    inline bool in_excluded(std::string name);
+    void __print_named_readings(std::string section_name, std::vector<std::pair<std::string, float>> named_readings);
     //void reset();
   };
 
