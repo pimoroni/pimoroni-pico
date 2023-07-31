@@ -1,7 +1,6 @@
 from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_P4
 from breakout_as7343 import BreakoutAS7343
 from pimoroni_i2c import PimoroniI2C
-import time
 
 
 display = PicoGraphics(DISPLAY_TUFTY_2040, pen_type=PEN_P4, rotate=90)
@@ -31,7 +30,7 @@ as7343 = BreakoutAS7343(i2c)
 
 as7343.set_channels(18)
 as7343.set_gain(1024)
-as7343.set_measurement_time(33) # Roughly 30fps at 16ms/measurement
+as7343.set_measurement_time(33)  # Roughly 30fps at 16ms/measurement
 as7343.set_integration_time(27800)
 
 as7343.set_illumination_current(4)

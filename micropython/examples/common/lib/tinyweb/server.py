@@ -331,7 +331,7 @@ async def restful_resource_handler(req, resp, param=None):
             gc.collect()
         await resp.send('0\r\n\r\n')
     else:
-        if type(res) == tuple:
+        if type(res) is tuple:
             resp.code = res[1]
             res = res[0]
         elif res is None:
