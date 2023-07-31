@@ -1,4 +1,5 @@
 #include "pico/stdlib.h"
+#include <tusb.h>
 
 #include "yukon.hpp"
 using namespace pimoroni;
@@ -28,17 +29,30 @@ int main() {
   // Initialise the servo
   y.init();
 
-  y.set_slow_output(Yukon::MAIN_EN, true);
-
-  while(true) {
-    printf("[Yukon] V = %f, C = %f, T = %f, ", y.read_voltage(), y.read_current(), y.read_temperature());
-    printf("[Slot1] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT1), y.read_slot_adc2(Yukon::SLOT1));
-    printf("[Slot2] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT2), y.read_slot_adc2(Yukon::SLOT2));
-    printf("[Slot3] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT3), y.read_slot_adc2(Yukon::SLOT3));
-    printf("[Slot4] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT4), y.read_slot_adc2(Yukon::SLOT4));
-    printf("[Slot5] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT5), y.read_slot_adc2(Yukon::SLOT5));
-    printf("[Slot6] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT6), y.read_slot_adc2(Yukon::SLOT6));
-    printf("\n");
+  while (!tud_cdc_connected()) {
     sleep_ms(100);
   }
+  printf("tud_cdc_connected()\n");
+
+  try {
+    y.enable_main_output();
+
+    while(!y.is_boot_pressed()) {
+      y.monitored_sleep_ms(100);
+      //printf("[Yukon] V = %f, C = %f, T = %f, ", y.read_voltage(), y.read_current(), y.read_temperature());
+      printf("[Slot1] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT1), y.read_slot_adc2(Yukon::SLOT1));
+      printf("[Slot2] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT2), y.read_slot_adc2(Yukon::SLOT2));
+      printf("[Slot3] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT3), y.read_slot_adc2(Yukon::SLOT3));
+      printf("[Slot4] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT4), y.read_slot_adc2(Yukon::SLOT4));
+      printf("[Slot5] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT5), y.read_slot_adc2(Yukon::SLOT5));
+      printf("[Slot6] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT6), y.read_slot_adc2(Yukon::SLOT6));
+      printf("\n");
+    }
+  }
+  catch(const std::exception &e) {
+    printf(e.what());
+  }
+
+  y.reset();
+  return 0;
 }

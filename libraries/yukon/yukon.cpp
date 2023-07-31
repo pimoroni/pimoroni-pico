@@ -4,6 +4,9 @@
 #include "hardware/adc.h"
 #include "hardware/clocks.h"
 
+#include <stdexcept>
+#include <algorithm>
+
 #include "yukon.hpp"
 
 namespace pimoroni {
@@ -105,12 +108,33 @@ namespace pimoroni {
   const TCA Yukon::LCD_DC = {1, 8};
   const TCA Yukon::LCD_CS = {1, 9};
 
+  Yukon::Yukon(float voltage_limit,
+               float current_limit,
+               float temperature_limit,
+               uint logging_level) :
+    i2c(24, 25),
+    tca0(&i2c, 0x20),
+    tca1(&i2c, 0x26),
+    voltage_limit(MIN(voltage_limit, ABSOLUTE_MAX_VOLTAGE_LIMIT)),
+    current_limit(current_limit),
+    temperature_limit(temperature_limit),
+    logging_level(logging_level) {
+
+    slot_assignments[SLOT1] = nullptr;
+    slot_assignments[SLOT2] = nullptr;
+    slot_assignments[SLOT3] = nullptr;
+    slot_assignments[SLOT4] = nullptr;
+    slot_assignments[SLOT5] = nullptr;
+    slot_assignments[SLOT6] = nullptr;
+  }
+
   Yukon::~Yukon() {
   }
 
   void Yukon::init() {
     tca0.init();
     tca1.init();
+
 
     reset();
   }
@@ -126,6 +150,35 @@ namespace pimoroni {
     tca1.set_polarity_port(0x0000);
     tca1.set_config_port(0xFCE6);
 
+    set_slow_output(MAIN_EN, false);
+    set_slow_config(MAIN_EN, true);
+
+    set_slow_config(USER_SW, false);
+
+    set_slow_output(ADC_MUX_EN_1, false);
+    set_slow_config(ADC_MUX_EN_1, true);
+
+    set_slow_output(ADC_MUX_EN_2, false);
+    set_slow_config(ADC_MUX_EN_2, true);
+
+    set_slow_output(ADC_ADDR_1, false);
+    set_slow_config(ADC_ADDR_1, true);
+
+    set_slow_output(ADC_ADDR_2, false);
+    set_slow_config(ADC_ADDR_2, true);
+
+    set_slow_output(ADC_ADDR_3, false);
+    set_slow_config(ADC_ADDR_3, true);
+
+    set_slow_config(SW_A, false);
+    set_slow_config(SW_B, false);
+
+    set_slow_output(LED_A, false);
+    set_slow_config(LED_A, true);
+
+    set_slow_output(LED_B, false);
+    set_slow_config(LED_B, true);
+
     if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
 
     //Make sure GPIO is high-impedance, no pullups etc
@@ -134,17 +187,9 @@ namespace pimoroni {
     //Select ADC input 0 (GPIO26)
     adc_select_input(SHARED_ADC - 26);
 
-    sleep_ms(100);
-    set_slow_config(ADC_ADDR_1, true);
-    sleep_ms(100);
-    set_slow_config(ADC_ADDR_2, true);
-    sleep_ms(100);
-    set_slow_config(ADC_ADDR_3, true);
-    sleep_ms(100);
-    set_slow_config(ADC_MUX_EN_1, true);
-    sleep_ms(100);
-    set_slow_config(ADC_MUX_EN_2, true);
-    sleep_ms(100);
+    __clear_readings();
+
+    monitor_action_callback = nullptr;
   }
 
   TCA9555& Yukon::get_tca_chip(uint chip) {
@@ -183,12 +228,223 @@ namespace pimoroni {
     get_tca_chip(chip).change_output_mask(mask, state);
   }
 
-  void Yukon::deselect_address() {
+  void Yukon::change_logging(uint logging_level) {
+    this->logging_level = logging_level;
+  }
+
+  SLOT Yukon::__check_slot(uint slot_id) {
+    if(slot_id < 1 || slot_id > NUM_SLOTS) {
+      throw std::invalid_argument("slot id out of range. Expected 1 to 6");
+    }
+
+    auto it = slot_assignments.begin();
+    std::advance(it, slot_id - 1);
+    return it->first;
+  }
+
+  SLOT Yukon::__check_slot(SLOT slot) {
+    if(slot_assignments.find(slot) == slot_assignments.end()) {
+      throw std::invalid_argument("slot is not a valid slot object");
+    }
+    return slot;
+  }
+
+  std::vector<uint> Yukon::find_slots_with_module(std::type_info module_type) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot find slots with modules whilst the main output is active");
+    }
+
+    //logging.info(f"> Finding slots with '{module_type.NAME}' module")
+
+    std::vector<uint> slot_ids;
+    auto it = slot_assignments.begin();
+    while(it != slot_assignments.end()) {
+      SLOT slot = it->first;
+      //logging.info(f"[Slot{slot.ID}]", end=" ")
+      std::type_info* detected = __detect_module(slot); // Need to have a return type that can be null
+
+      if(detected != nullptr && (*detected) == module_type) {
+        //logging.info(f"Found '{detected.NAME}' module")
+        slot_ids.push_back(slot.ID);
+      }
+      else {
+        //logging.info(f"No '{module_type.NAME}` module")
+      }
+    }
+
+    return slot_ids;
+  }
+
+  void Yukon::register_with_slot(Module* module, uint slot_id) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot register modules with slots whilst the main output is active");
+    }
+
+    SLOT slot = __check_slot(slot_id);
+
+    if(slot_assignments[slot] == nullptr)
+      slot_assignments[slot] = module;
+    else
+      throw std::invalid_argument("The selected slot is already populated");
+  }
+
+  void Yukon::register_with_slot(Module* module, SLOT slot) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot register modules with slots whilst the main output is active");
+    }
+
+    slot = __check_slot(slot);
+
+    if(slot_assignments[slot] == nullptr)
+      slot_assignments[slot] = module;
+    else
+      throw std::invalid_argument("The selected slot is already populated");
+  }
+
+  void Yukon::deregister_slot(uint slot_id) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot deregister module slots whilst the main output is active");
+    }
+
+    SLOT slot = __check_slot(slot_id);
+
+    Module* module = slot_assignments[slot];
+    if(module != nullptr) {
+      //module.deregister() //TODO
+      slot_assignments[slot] = nullptr;
+    }
+  }
+
+  void Yukon::deregister_slot(SLOT slot) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot deregister module slots whilst the main output is active");
+    }
+
+    slot = __check_slot(slot);
+
+    Module* module = slot_assignments[slot];
+    if(module != nullptr) {
+      //module.deregister() //TODO
+      slot_assignments[slot] = nullptr;
+    }
+  }
+
+  uint __match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+      return 0; //TODO
+  }
+  std::type_info* __detect_module(uint slot_id) {
+    return nullptr; //TODO
+  }
+  std::type_info* __detect_module(SLOT slot) {
+    return nullptr; //TODO
+  }
+  uint detect_module(uint slot) {
+    return 0;
+  }
+  uint detect_module(SLOT slot) {
+    return 0;
+  }
+
+  void __expand_slot_list(std::vector<SLOT> slot_list) {
+
+  }
+  void __verify_modules(bool allow_unregistered, bool allow_undetected, bool allow_discrepencies, bool allow_no_modules) {
+
+  }
+
+  void initialise_modules(bool allow_unregistered = false, bool allow_undetected = false, bool allow_discrepencies = false, bool allow_no_modules = false) {
+
+  }
+
+  bool is_pressed(uint button) {
+  return false; //TODO
+  }
+  bool Yukon::is_boot_pressed() {
+    return !get_slow_input(USER_SW);
+  }
+  void set_led(uint button, bool value) {
+
+  }
+
+  void Yukon::enable_main_output() {
+    if(!is_main_output()) {
+      uint64_t start = time_us_64();
+
+      __select_address(VOLTAGE_SENSE_ADDR);
+
+      float old_voltage = ((__shared_adc_voltage() - VOLTAGE_MIN_MEASURE) * VOLTAGE_MAX) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MIN_MEASURE);
+      old_voltage = MAX(old_voltage, 0.0f);
+      uint64_t first_stable_time = 0;
+      float new_voltage = 0.0f;
+      uint64_t dur = 100 * 1000;
+      uint64_t dur_b = 5 * 1000;
+
+      //logging.info("> Enabling output ...")
+      printf("> Enabling output ...\n");
+      __enable_main_output();
+      while(true) {
+        new_voltage = ((__shared_adc_voltage() - VOLTAGE_MIN_MEASURE) * VOLTAGE_MAX) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MIN_MEASURE);
+        if(new_voltage > ABSOLUTE_MAX_VOLTAGE_LIMIT) {
+          disable_main_output();
+          throw OverVoltageError("[Yukon] Input voltage exceeded a safe level! Turning off output");
+        }
+
+        uint64_t new_time = time_us_64();
+        if(fabsf(new_voltage - old_voltage) < 0.1f) { // Had to increase from 0.05 for some reason
+          if(first_stable_time == 0) {
+            first_stable_time = new_time;
+          }
+          else if(new_time - first_stable_time > dur_b) {
+            break;
+          }
+        }
+        else {
+          first_stable_time = 0;
+        }
+
+        if(new_time - start > dur) {
+          disable_main_output();
+          throw FaultError("[Yukon] Output voltage did not stablise in an acceptable time. Turning off output\n");
+        }
+
+        old_voltage = new_voltage;
+      }
+
+      if(new_voltage < VOLTAGE_ZERO_LEVEL) {
+        disable_main_output();
+        throw UnderVoltageError("[Yukon] No input voltage detected! Make sure power is being provided to the XT-30 (yellow) connector\n");
+      }
+
+      if(new_voltage < VOLTAGE_LOWER_LIMIT) {
+        disable_main_output();
+        throw UnderVoltageError("[Yukon] Input voltage below minimum operating level. Turning off output\n");
+      }
+
+      clear_readings();
+
+      //logging.info("> Output enabled")
+      printf("> Output enabled\n");
+    } 
+  }
+  void Yukon::__enable_main_output() {
+    set_slow_output(MAIN_EN, true);
+  }
+  void Yukon::disable_main_output() {
+    set_slow_output(MAIN_EN, false);
+    //logging.info("> Output disabled")
+    printf("> Output disabled\n");
+  }
+
+  bool Yukon::is_main_output() {
+    return get_slow_output(MAIN_EN);
+  }
+
+  void Yukon::__deselect_address() {
     set_slow_output(ADC_MUX_EN_1, false);
     set_slow_output(ADC_MUX_EN_2, false);
   }
 
-  void Yukon::select_address(uint8_t address) {
+  void Yukon::__select_address(uint8_t address) {
     if (address < 0)
       return; //raise ValueError("address is less than zero")
     else if(address > 0b1111)
@@ -221,28 +477,28 @@ namespace pimoroni {
     sleep_us(10); // Add a delay to let the pins settle before taking a reading
   }
 
-  float Yukon::shared_adc_voltage() {
+  float Yukon::__shared_adc_voltage() {
     adc_select_input(SHARED_ADC - 26);
     return ((float)adc_read() * 3.3f) / (1 << 12);
   }
 
   float Yukon::read_voltage() {
-    select_address(VOLTAGE_SENSE_ADDR);
+    __select_address(VOLTAGE_SENSE_ADDR);
     // return (shared_adc_voltage() * (100 + 16)) / 16  # Old equation, kept for reference
-    float voltage = ((shared_adc_voltage() - VOLTAGE_MIN_MEASURE) * VOLTAGE_MAX) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MIN_MEASURE);
+    float voltage = ((__shared_adc_voltage() - VOLTAGE_MIN_MEASURE) * VOLTAGE_MAX) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MIN_MEASURE);
     return MAX(voltage, 0.0f);
   }
 
   float Yukon::read_current() {
-    select_address(CURRENT_SENSE_ADDR);
+    __select_address(CURRENT_SENSE_ADDR);
     // return (shared_adc_voltage() - 0.015) / ((1 + (5100 / 27.4)) * 0.0005)  # Old equation, kept for reference
-    float current =((shared_adc_voltage() - CURRENT_MIN_MEASURE) * CURRENT_MAX) / (CURRENT_MAX_MEASURE - CURRENT_MIN_MEASURE);
+    float current =((__shared_adc_voltage() - CURRENT_MIN_MEASURE) * CURRENT_MAX) / (CURRENT_MAX_MEASURE - CURRENT_MIN_MEASURE);
     return MAX(current, 0.0f);
   }
 
   float Yukon::read_temperature() {
-    select_address(TEMP_SENSE_ADDR);
-    float sense = shared_adc_voltage();
+    __select_address(TEMP_SENSE_ADDR);
+    float sense = __shared_adc_voltage();
     float r_thermistor = sense / ((3.3f - sense) / 5100);
     static constexpr float ROOM_TEMP = 273.15f + 25.0f;
     static constexpr float RESISTOR_AT_ROOM_TEMP = 10000.0f;
@@ -255,17 +511,200 @@ namespace pimoroni {
   }
 
   float Yukon::read_expansion() {
-    select_address(EX_ADC_ADDR);
-    return shared_adc_voltage();
+    __select_address(EX_ADC_ADDR);
+    return __shared_adc_voltage();
   }
 
   float Yukon::read_slot_adc1(SLOT slot) {
-    select_address(slot.ADC1_ADDR);
-    return shared_adc_voltage();
+    __select_address(slot.ADC1_ADDR);
+    return __shared_adc_voltage();
   }
 
   float Yukon::read_slot_adc2(SLOT slot) {
-    select_address(slot.ADC2_TEMP_ADDR);
-    return shared_adc_voltage();
+    __select_address(slot.ADC2_TEMP_ADDR);
+    return __shared_adc_voltage();
   }
+  /*
+  float time();
+
+  void assign_monitor_action(void* callback_function);
+*/
+  void Yukon::monitor() {
+    float voltage = read_voltage();
+    if(voltage > voltage_limit) {
+      disable_main_output();
+      throw OverVoltageError("[Yukon] Voltage of " + std::to_string(voltage) + "V exceeded the user set level of " + std::to_string(voltage_limit) + "V! Turning off output\n");
+    }
+
+    if(voltage < VOLTAGE_LOWER_LIMIT) {
+      disable_main_output();
+      throw UnderVoltageError("[Yukon] Voltage of " + std::to_string(voltage) + "V below minimum operating level. Turning off output\n");
+    }
+
+    float current = read_current();
+    if(current > current_limit) {
+      disable_main_output();
+      throw OverCurrentError("[Yukon] Current of " + std::to_string(current) + "A exceeded the user set level of " + std::to_string(current_limit) + "A! Turning off output\n");
+    }
+
+    float temperature = read_temperature();
+    if(temperature > temperature_limit) {
+      disable_main_output();
+      throw OverTemperatureError("[Yukon] Temperature of " + std::to_string(temperature) + "°C exceeded the user set level of " + std::to_string(temperature_limit) + "°C! Turning off output\n");
+    }
+
+    // Run some user action based on the latest readings
+    //if __monitor_action_callback is not None:
+    //  __monitor_action_callback(voltage, current, temperature);
+
+    //for module in self.__slot_assignments.values():
+    //  if module is not None:
+    //    try:
+    //      module.monitor()
+    //    except Exception:
+    //      self.disable_main_output()
+    //      raise  # Now the output is off, let the exception continue into user code
+
+    measures.max_voltage = MAX(voltage, measures.max_voltage);
+    measures.min_voltage = MIN(voltage, measures.min_voltage);
+    measures.avg_voltage += voltage;
+
+    measures.max_current = MAX(current, measures.max_current);
+    measures.min_current = MIN(current, measures.min_current);
+    measures.avg_current += current;
+
+    measures.max_temperature = MAX(temperature, measures.max_temperature);
+    measures.min_temperature = MIN(temperature, measures.min_temperature);
+    measures.avg_temperature += temperature;
+
+    count_avg += 1;
+  }
+
+  void Yukon::monitored_sleep_ms(uint32_t ms, std::vector<std::string> allowed, std::vector<std::string> excluded) {
+    // Calculate the time this sleep should end at
+    uint32_t remaining_ms = ms;
+    uint32_t end_ms = millis() + remaining_ms;
+
+    // Clear any readings from previous monitoring attempts
+    clear_readings();
+
+    // Ensure that at least one monitor check is performed
+    monitor();
+    remaining_ms = end_ms - millis();
+
+    // Perform any subsequent monitors until the end time is reached
+    while(remaining_ms > 0) {
+      monitor();
+      remaining_ms = end_ms - millis();
+    }
+
+    // Process any readings that need it (e.g. averages)
+    process_readings();
+
+    if(logging_level >= LOG_INFO) {
+      __print_readings(allowed, excluded);
+    }
+  }
+
+  void Yukon::monitor_until_ms(uint32_t end_ms, std::vector<std::string> allowed, std::vector<std::string> excluded) {
+    // Clear any readings from previous monitoring attempts
+    clear_readings();
+
+    // Ensure that at least one monitor check is performed
+    monitor();
+    uint32_t remaining_ms = end_ms - millis();
+
+    // Perform any subsequent monitors until the end time is reached
+    while(remaining_ms > 0) {
+      monitor();
+      remaining_ms = end_ms - millis();
+    }
+
+    // Process any readings that need it (e.g. averages)
+    process_readings();
+
+    if(logging_level >= LOG_INFO) {
+      __print_readings(allowed, excluded);
+    }
+  }
+
+  void Yukon::__print_readings(std::vector<std::string> allowed, std::vector<std::string> excluded) {
+    __print_map("[Yukon]", get_readings(), allowed, excluded);
+
+    //for slot, module in self.__slot_assignments.items():
+    //  if module is not None:
+    //    self.__print_dict(f"[Slot{slot.ID}]", module.get_readings(), allowed, excluded)
+    printf("\n");
+  }
+
+  std::vector<std::pair<std::string, float>> Yukon::get_readings() {
+    //std::map<std::string, float> values;
+    std::vector<std::pair<std::string, float>> values;
+    values.push_back(std::pair("V_max", measures.max_voltage));
+    values.push_back(std::pair("V_min", measures.min_voltage));
+    values.push_back(std::pair("V_avg", measures.avg_voltage));
+    values.push_back(std::pair("C_max", measures.max_current));
+    values.push_back(std::pair("C_min", measures.min_current));
+    values.push_back(std::pair("C_avg", measures.avg_current));
+    values.push_back(std::pair("T_max", measures.max_temperature));
+    values.push_back(std::pair("T_min", measures.min_temperature));
+    values.push_back(std::pair("T_avg", measures.avg_temperature));
+    return values;
+  }
+
+  void Yukon::process_readings() {
+    if(count_avg > 0) {
+      measures.avg_voltage /= count_avg;
+      measures.avg_current /= count_avg;
+      measures.avg_temperature /= count_avg;
+    }
+
+    //for module in self.__slot_assignments.values():
+    //  if module is not None:
+    //    module.process_readings()
+  }
+
+  void Yukon::__clear_readings() {
+      measures.max_voltage = -std::numeric_limits<float>::infinity();
+      measures.min_voltage = std::numeric_limits<float>::infinity();
+      measures.avg_voltage = 0;
+
+      measures.max_current = -std::numeric_limits<float>::infinity();
+      measures.min_current = std::numeric_limits<float>::infinity();
+      measures.avg_current = 0;
+
+      measures.max_temperature = -std::numeric_limits<float>::infinity();
+      measures.min_temperature = std::numeric_limits<float>::infinity();
+      measures.avg_temperature = 0;
+
+      count_avg = 0;
+  }
+  void Yukon::clear_readings() {
+    __clear_readings();
+    //for module in self.__slot_assignments.values():
+    //  if module is not None:
+    //    module.clear_readings()
+  }
+
+  void Yukon::__print_map(std::string section_name, std::vector<std::pair<std::string, float>> readings, std::vector<std::string> allowed, std::vector<std::string> excluded) {
+    if(!readings.empty()) {
+      printf((section_name + " ").c_str());
+
+      auto it = readings.begin();
+      while(it != readings.end()) {
+        std::string name = it->first;
+        float value = it->second;
+
+        if((allowed.empty() || (!allowed.empty() && std::find(allowed.begin(), allowed.end(), name) != allowed.end()))
+        && (excluded.empty() || (!excluded.empty() && std::find(excluded.begin(), excluded.end(), name) == excluded.end()))) {
+          //if type(value) is bool:
+          //  print(f"{name} = {int(value)},", end=" ")  # Output 0 or 1 rather than True of False, so bools can appear on plotter charts
+          //else:
+            printf((name + " = " + std::to_string(value) + ", ").c_str());
+        }
+        it++;
+      }
+    }
+  }
+  //void reset();
 }
