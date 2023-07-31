@@ -42,7 +42,7 @@ namespace bitmap {
     return text_width;
   }
 
-  void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale, unicode_sorta::codepage_t codepage) {
+  void character(const font_t *font, rect_func rectangle, const char c, const int32_t x, const int32_t y, const uint8_t scale, int32_t rotation, unicode_sorta::codepage_t codepage) {
     if(c < 32 || c > 127 + 64) { // + 64 char remappings defined in unicode_sorta.hpp
       return;
     }
@@ -89,7 +89,8 @@ namespace bitmap {
     uint8_t accent_offset = char_index < 65 ? offset_upper : offset_lower;
 
     // Offset our y position to account for our column canvas being 32 pixels
-    int y_offset = y - (8 * scale);
+    // this gives us 8 "pixels" of headroom above the letters for diacritic marks
+    int font_offset = (8 * scale);
 
     // Iterate through each horizontal column of font (and accent) data
     for(uint8_t cx = 0; cx < font->widths[char_index]; cx++) {
@@ -97,6 +98,8 @@ namespace bitmap {
       // give ourselves a 32 pixel high canvas in which to plot the char and accent.
       // We shift the char down 8 pixels to make room for an accent above.
       uint32_t data = *d << 8;
+
+      int32_t o_x = cx * scale;
 
       // For fonts that are taller than 8 pixels (up to 16) they need two bytes
       if(two_bytes_per_column) {
@@ -113,7 +116,28 @@ namespace bitmap {
       // Draw the 32 pixel column
       for(uint8_t cy = 0; cy < 32; cy++) {
         if((1U << cy) & data) {
-          rectangle(x + (cx * scale), y_offset + (cy * scale), scale, scale);
+          int32_t o_y = cy * scale;
+          int32_t px = 0;
+          int32_t py = 0;
+          switch (rotation) {
+            case 0:
+              px = x + o_x;
+              py = y - font_offset + o_y;
+              break;
+            case 90:
+              px = x + font_offset - o_y;
+              py = y + o_x;
+              break;
+            case 180:
+              px = x - o_x;
+              py = y + font_offset - o_y;
+              break;
+            case 270:
+              px = x - font_offset + o_y;
+              py = y - o_x;
+              break;
+          }
+          rectangle(px, py, scale, scale);
         }
       }
 
@@ -123,8 +147,9 @@ namespace bitmap {
     }
   }
 
-  void text(const font_t *font, rect_func rectangle, const std::string_view &t, const int32_t x, const int32_t y, const int32_t wrap, const uint8_t scale, const uint8_t letter_spacing, bool fixed_width) {
-    uint32_t co = 0, lo = 0; // character and line (if wrapping) offset
+  void text(const font_t *font, rect_func rectangle, const std::string_view &t, const int32_t x, const int32_t y, const int32_t wrap, const uint8_t scale, const uint8_t letter_spacing, bool fixed_width, int32_t rotation) {
+    uint32_t char_offset = 0;
+    uint32_t line_offset = 0; // line (if wrapping) offset
     unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
 
     size_t i = 0;
@@ -153,37 +178,52 @@ namespace bitmap {
           continue;
         }
         word_width += measure_character(font, t[j], scale, codepage, fixed_width);
+        word_width += letter_spacing * scale;
         codepage = unicode_sorta::PAGE_195;
       }
 
       // if this word would exceed the wrap limit then
       // move to the next line
-      if(co != 0 && co + word_width > (uint32_t)wrap) {
-        co = 0;
-        lo += (font->height + 1) * scale;
+      if(char_offset != 0 && char_offset + word_width > (uint32_t)wrap) {
+        char_offset = 0;
+        line_offset += (font->height + 1) * scale;
       }
 
       // draw word
-      for(size_t j = i; j < next_break; j++) {
+      for(size_t j = i; j < std::min(next_break + 1, t.length()); j++) {
         if (t[j] == unicode_sorta::PAGE_194_START) {
           codepage = unicode_sorta::PAGE_194;
           continue;
         } else if (t[j] == unicode_sorta::PAGE_195_START) {
           continue;
         }
-        if (t[j] == '\n') {
-          lo += (font->height + 1) * scale;
-          co = 0;
+        if (t[j] == '\n') { // Linebreak
+          line_offset += (font->height + 1) * scale;
+          char_offset = 0;
+        } else if (t[j] == ' ') { // Space
+          char_offset += font->widths[0] * scale;
         } else {
-          character(font, rectangle, t[j], x + co, y + lo, scale, codepage);
-          co += measure_character(font, t[j], scale, codepage, fixed_width);
-          co += letter_spacing * scale;
+          switch(rotation) {
+            case 0:
+              character(font, rectangle, t[j], x + char_offset, y + line_offset, scale, rotation, codepage);
+              break;
+            case 90:
+              character(font, rectangle, t[j], x - line_offset, y + char_offset, scale, rotation, codepage);
+              break;
+            case 180:
+              character(font, rectangle, t[j], x - char_offset, y - line_offset, scale, rotation, codepage);
+              break;
+            case 270:
+              character(font, rectangle, t[j], x + line_offset, y - char_offset, scale, rotation, codepage);
+              break;
+          }
+          char_offset += measure_character(font, t[j], scale, codepage, fixed_width);
+          char_offset += letter_spacing * scale;
         }
         codepage = unicode_sorta::PAGE_195;
       }
 
-      // move character offset to end of word and add a space
-      co += font->widths[0] * scale;
+      // move character offset
       i = next_break += 1;
     }
   }
