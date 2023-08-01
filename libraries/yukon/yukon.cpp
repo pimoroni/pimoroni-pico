@@ -91,6 +91,32 @@ namespace pimoroni {
     10,       // ADC2_TEMP_ADDR (0b1010)
   };
 
+  bool LEDStripModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+    return adc_level == ADC_LOW && slow1 == HIGH && slow2 == HIGH && slow3 == HIGH;
+  }
+
+  bool DualMotorModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+    return adc_level == ADC_HIGH && slow2 == HIGH && slow3 == HIGH;
+  }
+
+  bool DualSwitchedModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+    return adc_level == ADC_FLOAT && slow1 == HIGH && slow2 == LOW && slow3 == HIGH;
+  }
+
+  bool BenchPowerModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+    return slow1 == HIGH && slow2 == LOW && slow3 == LOW;
+  }
+
+
+  //module_callback Yukon::KNOWN_MODULES[] = {&LEDStripModule::is_module, &DualMotorModule::is_module};
+  //const std::type_index Yukon::KNOWN_MODULES[] = {typeid(LEDStripModule), typeid(DualMotorModule)};
+
+  const ModuleInfo Yukon::KNOWN_MODULES[] = {
+    LEDStripModule::info(),
+    DualMotorModule::info(),
+    DualSwitchedModule::info(),
+    BenchPowerModule::info()
+  };
 
   const TCA Yukon::MAIN_EN = {0, 6};
   const TCA Yukon::USER_SW = {0, 7};
@@ -253,25 +279,25 @@ namespace pimoroni {
     return slot;
   }
 
-  std::vector<uint> Yukon::find_slots_with_module(std::type_info module_type) {
+  std::vector<uint> Yukon::find_slots_with_module(ModuleInfo module_type) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot find slots with modules whilst the main output is active\n");
     }
 
-    logging.info("> Finding slots with '{module_type.NAME}' module\n");
+    logging.info("> Finding slots with '" + module_type.name + "' module\n");
 
     std::vector<uint> slot_ids;
     for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
       SLOT slot = it->first;
       logging.info("[Slot" + std::to_string(slot.ID) + "] ");
-      std::type_info* detected = __detect_module(slot); // Need to have a return type that can be null
+      const ModuleInfo* detected = __detect_module(slot); // Need to have a return type that can be null
 
-      if(detected != nullptr && (*detected) == module_type) {
-        logging.info("Found '{detected.NAME}' module\n");
+      if(detected != nullptr && detected->type == module_type.type) {
+        logging.info("Found '" + detected->name + "' module\n");
         slot_ids.push_back(slot.ID);
       }
       else {
-        logging.info("No '{module_type.NAME}` module\n");
+        logging.info("No '" + module_type.name + "' module\n");
       }
     }
 
@@ -332,20 +358,72 @@ namespace pimoroni {
     }
   }
 
-  uint __match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-      return 0; //TODO
+  const ModuleInfo* Yukon::__match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+    for(uint i = 0; i < count_of(KNOWN_MODULES); i++) {
+      const ModuleInfo& m = KNOWN_MODULES[i];
+      //printf("%s\n", std::get<0>(KNOWN_MODULES[i]).name());
+      //printf("%s\n", std::get<1>(KNOWN_MODULES[i]).c_str());
+      //printf("%d\n", std::get<2>(KNOWN_MODULES[i])(adc_level, slow1, slow2, slow3));
+      //printf("%s\n", KNOWN_MODULES[i]..name());
+      if(m.is_module(adc_level, slow1, slow2, slow3)) {
+        return &m;
+      }
+    }
+    return nullptr;
   }
-  std::type_info* __detect_module(uint slot_id) {
-    return nullptr; //TODO
+
+  const ModuleInfo* Yukon::__detect_module(SLOT slot) {
+    set_slow_config(slot.SLOW1, false);
+    set_slow_config(slot.SLOW2, false);
+    set_slow_config(slot.SLOW3, false);
+
+    get_slow_input(USER_SW);
+
+    __select_address(slot.ADC1_ADDR);
+    float adc_val = 0.0f;
+    for(uint i = 0; i < DETECTION_SAMPLES; i++) {
+      adc_val += __shared_adc_voltage();
+    }
+    adc_val /= DETECTION_SAMPLES;
+
+    bool slow1 = get_slow_input(slot.SLOW1);
+    bool slow2 = get_slow_input(slot.SLOW2);
+    bool slow3 = get_slow_input(slot.SLOW3);
+
+    logging.debug("ADC1 = " + std::to_string(adc_val) + ", SLOW1 = " + std::to_string((int)slow1) + ", SLOW2 = " + std::to_string((int)slow2) + ", SLOW3 = " + std::to_string((int)slow3) + ", ");
+
+    uint adc_level = ADC_FLOAT;
+    if(adc_val <= DETECTION_ADC_LOW) {
+      adc_level = ADC_LOW;
+    }
+    else if(adc_val >= DETECTION_ADC_HIGH) {
+      adc_level = ADC_HIGH;
+    }
+
+    const ModuleInfo* detected = __match_module(adc_level, slow1, slow2, slow3);
+
+    __deselect_address();
+
+    return detected;
   }
-  std::type_info* __detect_module(SLOT slot) {
-    return nullptr; //TODO
+  const ModuleInfo* Yukon::detect_module(uint slot_id) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot detect modules whilst the main output is active\n");
+    }
+
+    SLOT slot = __check_slot(slot_id);
+
+    return __detect_module(slot);
   }
-  uint detect_module(uint slot) {
-    return 0;
-  }
-  uint detect_module(SLOT slot) {
-    return 0;
+
+  const ModuleInfo* Yukon::detect_module(SLOT slot) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot detect modules whilst the main output is active\n");
+    }
+
+    slot = __check_slot(slot);
+
+    return __detect_module(slot);
   }
 
   void __expand_slot_list(std::vector<SLOT> slot_list) {
@@ -535,8 +613,6 @@ namespace pimoroni {
     return __shared_adc_voltage();
   }
   /*
-  float time();
-
   void assign_monitor_action(void* callback_function);
 */
   void Yukon::monitor() {

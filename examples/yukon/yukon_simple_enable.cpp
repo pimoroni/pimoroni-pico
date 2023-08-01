@@ -26,6 +26,8 @@ Yukon y = Yukon();
 int main() {
   stdio_init_all();
 
+  y.change_logging(3);
+
   // Initialise the servo
   y.init();
 
@@ -34,6 +36,17 @@ int main() {
   }
   sleep_ms(1000);
   printf("tud_cdc_connected()\n");
+
+  y.find_slots_with_module(LEDStripModule::info());
+  y.find_slots_with_module(DualSwitchedModule::info());
+  y.find_slots_with_module(BenchPowerModule::info());
+
+  //y.detect_module(Yukon::SLOT1);
+  //y.detect_module(Yukon::SLOT2);
+  //y.detect_module(Yukon::SLOT3);
+  //y.detect_module(Yukon::SLOT4);
+  //y.detect_module(Yukon::SLOT5);
+  //y.detect_module(Yukon::SLOT6);
 
   try {
     y.enable_main_output();
