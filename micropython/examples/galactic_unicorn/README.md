@@ -10,6 +10,7 @@
   - [Feature Test With Audio](#feature-test-with-audio)
   - [Fire Effect](#fire-effect)
   - [Lava Lamp](#lava-lamp)
+  - [Light Sensor](#light-sensor)
   - [Nostalgia Prompt](#nostalgia-prompt)
   - [Rainbow](#rainbow)
   - [Scrolling Text](#scrolling-text)
