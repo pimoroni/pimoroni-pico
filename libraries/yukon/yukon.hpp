@@ -233,9 +233,10 @@ namespace pimoroni {
     void assign_monitor_action(void* callback_function);
 
     void monitor();
-    void monitor_once();
+    void monitored_sleep(float seconds);
     void monitored_sleep_ms(uint32_t ms);
-    void monitor_until_ms(uint32_t end_ms);
+    void monitor_until(absolute_time_t end);
+    void monitor_once();
 
     void print_readings();
     std::vector<std::pair<std::string, float>> get_readings();

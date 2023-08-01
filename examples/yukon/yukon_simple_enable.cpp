@@ -32,6 +32,7 @@ int main() {
   while (!tud_cdc_connected()) {
     sleep_ms(100);
   }
+  sleep_ms(1000);
   printf("tud_cdc_connected()\n");
 
   try {

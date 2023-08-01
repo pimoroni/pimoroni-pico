@@ -381,7 +381,7 @@ namespace pimoroni {
 
   void Yukon::enable_main_output() {
     if(!is_main_output()) {
-      uint64_t start = time_us_64();
+      absolute_time_t start = get_absolute_time();
 
       __select_address(VOLTAGE_SENSE_ADDR);
 
@@ -389,8 +389,8 @@ namespace pimoroni {
       old_voltage = MAX(old_voltage, 0.0f);
       uint64_t first_stable_time = 0;
       float new_voltage = 0.0f;
-      uint64_t dur = 100 * 1000;
-      uint64_t dur_b = 5 * 1000;
+      const int64_t dur = 100 * 1000;
+      const int64_t dur_b = 5 * 1000;
 
       logging.info("> Enabling output ...\n");
       __enable_main_output();
@@ -401,12 +401,12 @@ namespace pimoroni {
           throw OverVoltageError("[Yukon] Input voltage exceeded a safe level! Turning off output\n");
         }
 
-        uint64_t new_time = time_us_64();
+        absolute_time_t new_time = get_absolute_time();
         if(fabsf(new_voltage - old_voltage) < 0.1f) { // Had to increase from 0.05 for some reason
           if(first_stable_time == 0) {
             first_stable_time = new_time;
           }
-          else if(new_time - first_stable_time > dur_b) {
+          else if(absolute_time_diff_us(first_stable_time, new_time) > dur_b) {
             break;
           }
         }
@@ -414,7 +414,7 @@ namespace pimoroni {
           first_stable_time = 0;
         }
 
-        if(new_time - start > dur) {
+        if(absolute_time_diff_us(start, new_time) > dur) {
           disable_main_output();
           throw FaultError("[Yukon] Output voltage did not stablise in an acceptable time. Turning off output\n");
         }
@@ -590,56 +590,44 @@ namespace pimoroni {
     count_avg += 1;
   }
 
+  void Yukon::monitored_sleep(float seconds) {
+    if(seconds < 0.0f) {
+      throw std::invalid_argument("sleep length must be non-negative");
+    }
+
+    // Convert and handle the sleep as milliseconds
+    monitored_sleep_ms((uint32_t)(1000.0f * seconds + 0.5f));
+  }
+
+  void Yukon::monitored_sleep_ms(uint32_t ms) {
+    // Calculate the time this sleep should end at, and monitor until then
+    monitor_until(make_timeout_time_ms(ms));
+  }
+
+  void Yukon::monitor_until(absolute_time_t end) {
+    // Clear any readings from previous monitoring attempts
+    clear_readings();
+
+    // Perform monitor check(s) until the end time is reached
+    do {
+      monitor();
+      tight_loop_contents();
+    } while(absolute_time_diff_us(get_absolute_time(), end) > 0);
+
+    // Process any readings that need it (e.g. averages)
+    process_readings();
+
+    if(logging.level >= LOG_INFO) {
+      print_readings();
+    }
+  }
+
   void Yukon::monitor_once() {
     // Clear any readings from previous monitoring attempts
     clear_readings();
 
     // Perform a single monitor check
     monitor();
-
-    // Process any readings that need it (e.g. averages)
-    process_readings();
-
-    if(logging.level >= LOG_INFO) {
-      print_readings();
-    }
-  }
-
-  void Yukon::monitored_sleep_ms(uint32_t ms) {
-    // Calculate the time this sleep should end at
-    uint64_t end_us = time_us_64() + ((uint64_t)ms * 1000);
-
-    // Clear any readings from previous monitoring attempts
-    clear_readings();
-
-    // Perform monitor check(s) until the end time is reached
-    uint64_t remaining_us;
-    do {
-      monitor();
-      remaining_us = end_us - time_us_64();
-    } while(remaining_us > 0);
-
-    // Process any readings that need it (e.g. averages)
-    process_readings();
-
-    if(logging.level >= LOG_INFO) {
-      print_readings();
-    }
-  }
-
-  void Yukon::monitor_until_ms(uint32_t end_ms) {
-    // Calculate the time this sleep should end at
-    uint64_t end_us = ((uint64_t)end_ms * 1000);
-
-    // Clear any readings from previous monitoring attempts
-    clear_readings();
-
-    // Perform monitor check(s) until the end time is reached
-    uint64_t remaining_us;
-    do {
-      monitor();
-      remaining_us = end_us - time_us_64();
-    } while(remaining_us > 0);
 
     // Process any readings that need it (e.g. averages)
     process_readings();
