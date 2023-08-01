@@ -56,6 +56,13 @@ def calculate_brightness(current_lsv):
     return brightness_val
 
 
+# draws percentage icon
+def draw_percentage(x, y):
+    graphics.rectangle(x + 1, y + 1, 2, 2)
+    graphics.line(x, y + 6, x + 6, y)
+    graphics.rectangle(x + 4, y + 4, 2, 2)
+
+
 # sets up a handy function we can call to clear the screen
 def clear():
     graphics.set_pen(BLACK)
@@ -105,7 +112,8 @@ while True:
         graphics.text("BRT: ", 0, 1, scale=1)
         # measure the rest of the text before drawing to right align it
         text_width = graphics.measure_text(f"{bp:.0f}/°", scale=1)
-        graphics.text(f"{bp:.0f}%", WIDTH - text_width, 1, scale=1)
+        graphics.text(f"{bp:.0f}", WIDTH - text_width, 1, scale=1)
+        draw_percentage((WIDTH - text_width) + 10, 1)
 
         # draw a bar for the background
         graphics.set_pen(GREY)
@@ -118,4 +126,3 @@ while True:
 
     # time to update the display
     gu.update(graphics)
-    # time.sleep(1)
