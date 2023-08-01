@@ -88,6 +88,14 @@ A pretty, procedural fire effect. Switch between landscape fire and vertical fir
 
 A 70s-tastic, procedural rainbow lava lamp. You can adjust the brightness with LUX + and -.
 
+### Light Sensor
+
+[light_sensor.py](light_sensor.py)
+
+Reads data from the on board light sensor and displays the brightness level of the environment. The display is by default set to auto brightness i.e reacts to the brightness of the environment. 
+- Button A turns auto brightness off 
+- Button B turns auto brightness on
+ 
 ### Nostalgia Prompt
 
 [nostalgia_prompt.py](nostalgia_prompt.py)
