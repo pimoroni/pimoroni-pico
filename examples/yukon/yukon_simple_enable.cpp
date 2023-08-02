@@ -28,27 +28,30 @@ int main() {
 
   y.change_logging(3);
 
-  // Initialise the servo
-  y.init();
-
-  while (!tud_cdc_connected()) {
-    sleep_ms(100);
-  }
-  sleep_ms(1000);
-  printf("tud_cdc_connected()\n");
-
-  y.find_slots_with_module(LEDStripModule::info());
-  y.find_slots_with_module(DualSwitchedModule::info());
-  y.find_slots_with_module(BenchPowerModule::info());
-
-  //y.detect_module(Yukon::SLOT1);
-  //y.detect_module(Yukon::SLOT2);
-  //y.detect_module(Yukon::SLOT3);
-  //y.detect_module(Yukon::SLOT4);
-  //y.detect_module(Yukon::SLOT5);
-  //y.detect_module(Yukon::SLOT6);
-
   try {
+    // Initialise the servo
+    y.init();
+
+    while (!tud_cdc_connected()) {
+      sleep_ms(100);
+    }
+    sleep_ms(1000);
+    printf("tud_cdc_connected()\n");
+
+    LEDStripModule strip;
+    //y.find_slots_with_module(LEDStripModule::info());
+    //y.find_slots_with_module(DualSwitchedModule::info());
+    //y.find_slots_with_module(BenchPowerModule::info());
+    y.register_with_slot(&strip, 2);
+    y.initialise_modules();
+
+    //y.detect_module(Yukon::SLOT1);
+    //y.detect_module(Yukon::SLOT2);
+    //y.detect_module(Yukon::SLOT3);
+    //y.detect_module(Yukon::SLOT4);
+    //y.detect_module(Yukon::SLOT5);
+    //y.detect_module(Yukon::SLOT6);
+
     y.enable_main_output();
 
     while(!y.is_boot_pressed()) {

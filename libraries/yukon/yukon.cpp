@@ -91,33 +91,6 @@ namespace pimoroni {
     10,       // ADC2_TEMP_ADDR (0b1010)
   };
 
-  bool LEDStripModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-    return adc_level == ADC_LOW && slow1 == HIGH && slow2 == HIGH && slow3 == HIGH;
-  }
-
-  bool DualMotorModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-    return adc_level == ADC_HIGH && slow2 == HIGH && slow3 == HIGH;
-  }
-
-  bool DualSwitchedModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-    return adc_level == ADC_FLOAT && slow1 == HIGH && slow2 == LOW && slow3 == HIGH;
-  }
-
-  bool BenchPowerModule::is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-    return slow1 == HIGH && slow2 == LOW && slow3 == LOW;
-  }
-
-
-  //module_callback Yukon::KNOWN_MODULES[] = {&LEDStripModule::is_module, &DualMotorModule::is_module};
-  //const std::type_index Yukon::KNOWN_MODULES[] = {typeid(LEDStripModule), typeid(DualMotorModule)};
-
-  const ModuleInfo Yukon::KNOWN_MODULES[] = {
-    LEDStripModule::info(),
-    DualMotorModule::info(),
-    DualSwitchedModule::info(),
-    BenchPowerModule::info()
-  };
-
   const TCA Yukon::MAIN_EN = {0, 6};
   const TCA Yukon::USER_SW = {0, 7};
 
@@ -304,20 +277,12 @@ namespace pimoroni {
     return slot_ids;
   }
 
-  void Yukon::register_with_slot(Module* module, uint slot_id) {
-    if(is_main_output()) {
-      throw std::runtime_error("Cannot register modules with slots whilst the main output is active\n");
-    }
-
+  void Yukon::register_with_slot(YukonModule* module, uint slot_id) {
     SLOT slot = __check_slot(slot_id);
-
-    if(slot_assignments[slot] == nullptr)
-      slot_assignments[slot] = module;
-    else
-      throw std::invalid_argument("The selected slot is already populated\n");
+    register_with_slot(module, slot);
   }
 
-  void Yukon::register_with_slot(Module* module, SLOT slot) {
+  void Yukon::register_with_slot(YukonModule* module, SLOT slot) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot register modules with slots whilst the main output is active\n");
     }
@@ -331,17 +296,8 @@ namespace pimoroni {
   }
 
   void Yukon::deregister_slot(uint slot_id) {
-    if(is_main_output()) {
-      throw std::runtime_error("Cannot deregister module slots whilst the main output is active\n");
-    }
-
     SLOT slot = __check_slot(slot_id);
-
-    Module* module = slot_assignments[slot];
-    if(module != nullptr) {
-      //module.deregister() //TODO
-      slot_assignments[slot] = nullptr;
-    }
+    deregister_slot(slot);
   }
 
   void Yukon::deregister_slot(SLOT slot) {
@@ -351,7 +307,7 @@ namespace pimoroni {
 
     slot = __check_slot(slot);
 
-    Module* module = slot_assignments[slot];
+    YukonModule* module = slot_assignments[slot];
     if(module != nullptr) {
       //module.deregister() //TODO
       slot_assignments[slot] = nullptr;
@@ -429,12 +385,100 @@ namespace pimoroni {
   void __expand_slot_list(std::vector<SLOT> slot_list) {
 
   }
-  void __verify_modules(bool allow_unregistered, bool allow_undetected, bool allow_discrepencies, bool allow_no_modules) {
+  void Yukon::__verify_modules(bool allow_unregistered, bool allow_undetected, bool allow_discrepencies, bool allow_no_modules) {
+    //TODO Take the allowed parameters and expand them into slot lists that are easier to compare against
+    //allow_unregistered = self.__expand_slot_list(allow_unregistered)
+    //allow_undetected = self.__expand_slot_list(allow_undetected)
+    //allow_discrepencies = self.__expand_slot_list(allow_discrepencies)
 
+    bool raise_unregistered = false;
+    bool raise_undetected = false;
+    bool raise_discrepency = false;
+    uint8_t unregistered_slots = 0;
+
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      SLOT slot = it->first;
+      YukonModule* module = it->second;
+
+      logging.info("[Slot" + std::to_string(slot.ID) + "] ");
+      const ModuleInfo* detected = __detect_module(slot);
+
+      if(detected == nullptr) {
+        if(module != nullptr) {
+          logging.info("No module detected! Expected a '" + module->instance_name() + "' module.\n");
+          if(!allow_undetected) {//if slot not in allow_undetected:
+            raise_undetected = true;
+          }
+        }
+        else {
+          logging.info("Module slot is empty.\n");
+          unregistered_slots += 1;
+        }
+      }
+      else {
+        if(module != nullptr) {
+          if(std::type_index(typeid(*module)) == detected->type) {
+            logging.info("'" + module->instance_name() + "' module detected and registered.\n");
+          }
+          else {
+            logging.info("Module discrepency! Expected a '" + module->instance_name() + "}' module, but detected a '" + detected->name + "' module.\n");
+            if(!allow_discrepencies) { //if slot not in allow_discrepencies:
+              raise_discrepency = true;
+            }
+          }
+        }
+        else {
+          logging.info("'" + detected->name + "' module detected but not registered.\n");
+          if(!allow_unregistered) { //if slot not in allow_unregistered:
+            raise_unregistered = true;
+          }
+          unregistered_slots += 1;
+        }
+      }
+    }
+
+    if(!allow_no_modules && unregistered_slots == NUM_SLOTS) {
+      throw VerificationError("No modules have been registered with Yukon. At least one module needs to be registered to enable the output\n");
+    }
+
+    if(raise_discrepency) {
+      throw VerificationError("Detected a different combination of modules than what was registered with Yukon. Please check the modules attached to your board and the program you are running.\n");
+    }
+
+    if(raise_undetected) {
+      throw VerificationError("Some or all modules registered with Yukon have not been detected. Please check that the modules are correctly attached to your board or disable this warning.");
+    }
+
+    if(raise_unregistered) {
+      throw VerificationError("Detected modules that have not been registered with Yukon, which could behave unexpectedly when connected to power. Please remove these modules or disable this warning.");
+    }
+
+    logging.info("\n");  // New line
   }
 
-  void initialise_modules(bool allow_unregistered = false, bool allow_undetected = false, bool allow_discrepencies = false, bool allow_no_modules = false) {
+  void Yukon::initialise_modules(bool allow_unregistered, bool allow_undetected, bool allow_discrepencies, bool allow_no_modules) {
+    if(is_main_output()) {
+      throw std::runtime_error("Cannot verify modules whilst the main output is active\n");
+    }
 
+    logging.info("> Verifying modules\n");
+
+    __verify_modules(allow_unregistered, allow_undetected, allow_discrepencies, allow_no_modules);
+
+    logging.info("> Initialising modules\n");
+
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      SLOT slot = it->first;
+      YukonModule* module = it->second;
+
+      if(module != nullptr) {
+        logging.info("[Slot" + std::to_string(slot.ID) + " '" + module->instance_name() + "'] Initialising ... ");
+        //TODO module.initialise(slot, self.read_slot_adc1, self.read_slot_adc2)
+        logging.info("done\n");
+      }
+    }
+
+    logging.info("\n");  // New line
   }
 
   bool Yukon::is_pressed(uint button) {

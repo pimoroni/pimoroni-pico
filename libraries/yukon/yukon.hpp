@@ -6,100 +6,8 @@
 #include "errors.hpp"
 #include <list>
 #include <iostream>
-#include <typeindex>
-
+#include "modules.hpp"
 namespace pimoroni {
-
-  class YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
-
-      static constexpr float ROOM_TEMP = 273.15f + 25.0f;
-      static constexpr float RESISTOR_AT_ROOM_TEMP = 10000.0f;
-      static constexpr float BETA = 3435;
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-      return false;
-    }
-  };
-
-  enum ADC {
-    ADC_LOW = 0,
-    ADC_HIGH = 1,
-    ADC_FLOAT = 2,
-    ADC_ANY = 3
-  };
-
-  enum IO {
-    LOW = false,
-    HIGH = true
-  };
-
-  typedef bool (*module_callback)(uint, bool, bool, bool) ;
-
-  struct ModuleInfo {
-    std::type_index type;
-    std::string name;
-    module_callback is_module;
-  };
-
-#define INFO_FUNC(module_name) \
-    static ModuleInfo info() { \
-      return { typeid(module_name), module_name::name(), &module_name::is_module }; \
-      }
-
-  class LEDStripModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
-
-    static std::string name() {
-      return "LED Strip";
-    }
-
-    INFO_FUNC(LEDStripModule)
-  };
-
-
-  class DualMotorModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
-
-    static std::string name() {
-      return "Dual Motor";
-    }
-
-    INFO_FUNC(DualMotorModule)
-  };
-
-  class DualSwitchedModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
-
-    static std::string name() {
-      return "Dual Switched Output";
-    }
-
-    INFO_FUNC(DualSwitchedModule)
-  };
-
-  class BenchPowerModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
-
-    static std::string name() {
-      return "Bench Power";
-    }
-
-    INFO_FUNC(BenchPowerModule)
-  };
 
   struct TCA {
     uint CHIP;
@@ -123,11 +31,6 @@ namespace pimoroni {
       return (ID < o.ID);
     }
   };
-
-  class Module {
-    uint type;
-  };
-
 
 
   enum LoggingLevel {
@@ -224,8 +127,6 @@ namespace pimoroni {
     static constexpr float DETECTION_ADC_LOW = 0.1f;
     static constexpr float DETECTION_ADC_HIGH = 3.2f;
 
-    //static module_callback KNOWN_MODULES[];
-    static const ModuleInfo KNOWN_MODULES[];
   private:
     I2C i2c;
     TCA9555 tca0;
@@ -237,7 +138,7 @@ namespace pimoroni {
     float current_limit;
     float temperature_limit;
     logger logging;
-    std::map<SLOT, Module*> slot_assignments;
+    std::map<SLOT, YukonModule*> slot_assignments;
     void* monitor_action_callback;
 
     struct Readings {
@@ -291,8 +192,8 @@ namespace pimoroni {
 
     std::vector<uint> find_slots_with_module(ModuleInfo module_type);
 
-    void register_with_slot(Module* module, uint slot_id);
-    void register_with_slot(Module* module, SLOT slot);
+    void register_with_slot(YukonModule* module, uint slot_id);
+    void register_with_slot(YukonModule* module, SLOT slot);
 
     void deregister_slot(uint slot_id);
     void deregister_slot(SLOT slot);
