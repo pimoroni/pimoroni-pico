@@ -114,7 +114,6 @@ while True:
 
     bp = (brightness_value / MAX_RANGE) * 100  # gets brightness value in percentage relative to the MAX_LS_VALUE set
 
-
     # deactivate auto brightness by pressing A
     if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         print("Auto brightness off")

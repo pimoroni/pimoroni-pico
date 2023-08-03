@@ -70,7 +70,7 @@ def calculate_brightness(prev_brightness_val):
 # draws percentage icon
 def draw_percentage(x, y):
     graphics.rectangle(x + 1, y + 1, 2, 2)
-    graphics.line(x + 1 , y + 5, x + 6, y)
+    graphics.line(x + 1, y + 5, x + 6, y)
     graphics.rectangle(x + 4, y + 4, 2, 2)
 
 
