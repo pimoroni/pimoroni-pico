@@ -31,7 +31,7 @@ MIN_RANGE = 0.1
 MAX_RANGE = 1
 
 # Rate of display change i.e the lower the value the slower the transition
-TRANSITION_RATE = 1.0 / 32.0
+TRANSITION_RATE = 1.0 / 72.0
 
 
 # perform linear interpolation to map a range of values to discrete
