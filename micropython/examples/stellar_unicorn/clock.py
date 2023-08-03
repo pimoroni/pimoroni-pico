@@ -160,11 +160,13 @@ down_button = machine.Pin(StellarUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, mac
 
 
 def adjust_utc_offset(pin):
-    global utc_offset
+    global utc_offset, last_second
     if pin == up_button:
         utc_offset += 1
+        last_second = None
     if pin == down_button:
         utc_offset -= 1
+        last_second = None
 
 
 up_button.irq(trigger=machine.Pin.IRQ_FALLING, handler=adjust_utc_offset)
@@ -216,9 +218,11 @@ sync_time()
 while True:
     if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_UP):
         su.adjust_brightness(+0.01)
+        last_second = None
 
     if su.is_pressed(StellarUnicorn.SWITCH_BRIGHTNESS_DOWN):
         su.adjust_brightness(-0.01)
+        last_second = None
 
     if su.is_pressed(StellarUnicorn.SWITCH_A):
         sync_time()

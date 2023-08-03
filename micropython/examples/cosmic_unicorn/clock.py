@@ -158,11 +158,13 @@ down_button = machine.Pin(CosmicUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, mach
 
 
 def adjust_utc_offset(pin):
-    global utc_offset
+    global utc_offset, last_second
     if pin == up_button:
         utc_offset += 1
+        last_second = None
     if pin == down_button:
         utc_offset -= 1
+        last_second = None
 
 
 up_button.irq(trigger=machine.Pin.IRQ_FALLING, handler=adjust_utc_offset)
@@ -214,9 +216,11 @@ sync_time()
 while True:
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_UP):
         cu.adjust_brightness(+0.01)
+        last_second = None
 
     if cu.is_pressed(CosmicUnicorn.SWITCH_BRIGHTNESS_DOWN):
         cu.adjust_brightness(-0.01)
+        last_second = None
 
     if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         sync_time()
