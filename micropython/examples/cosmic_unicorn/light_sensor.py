@@ -1,9 +1,9 @@
 import time
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from cosmic import CosmicUnicorn
+from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 
 """
-Light sensoring feature for the galactic unicorn
+Light sensoring feature for the cosmic unicorn
 Uses the onboard light sensor to detect the light in the environment
 The brightness level is displayed as percentage.
 Brightness of the display is auto adjusted to the brightness level of the environment
@@ -11,7 +11,7 @@ Press A to turn auto brightness on
 Press B to turn auto brightness off
 """
 # set up unicorn and drawing variables
-gu = GalacticUnicorn()
+cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 WIDTH, HEIGHT = graphics.get_bounds()
@@ -36,7 +36,6 @@ MAX_RANGE = 1
 # Rate of display change i.e the lower the value the slower the transition
 TRANSITION_RATE = 1.0 / 72.0
 
-
 # perform linear interpolation to map a range of values to discrete
 def map_range(
     x,
@@ -53,7 +52,7 @@ def map_range(
 # gets the light sensor value from onboard sensor and interpolates it
 # clamps the brightness value it outside the ranges specified
 def calculate_brightness(prev_brightness_val):
-    current_lsv = gu.light()
+    current_lsv = cu.light()
     current_brightness_val = map_range(current_lsv)
 
     # uses the previous value to smooth out display changes reducing flickering
@@ -67,44 +66,67 @@ def calculate_brightness(prev_brightness_val):
     return brightness_val
 
 
-# draws percentage icon
-def draw_percentage(x, y):
-    graphics.rectangle(x + 1, y + 1, 2, 2)
-    graphics.line(x + 1, y + 5, x + 6, y)
-    graphics.rectangle(x + 4, y + 4, 2, 2)
-
-
 # sets up a handy function we can call to clear the screen
 def clear():
     graphics.set_pen(BLACK)
     graphics.clear()
 
 
-mode = "auto"  # set auto brightness on
+def draw_percentage(x, y):
+    graphics.rectangle(x + 1, y + 1, 2, 2)
+    graphics.line(x + 1, y + 5, x + 6, y)
+    graphics.rectangle(x + 4, y + 4, 2, 2)
+
+
+# draws a sun icon
+def draw_sun(x, y, r):
+    circle_x = x + 3 + r
+    circle_y = y + 3 + r
+    graphics.circle(circle_x, circle_y, r)
+    graphics.line(circle_x, y, circle_x, y + 2)
+    graphics.line(x, circle_y, x + 2, circle_y)
+    graphics.line(circle_x, (y + 5 + 2 * r), circle_x, (y + 5 + 2 * r) + 2)
+    graphics.line((x + 5 + 2 * r), circle_y, (x + 5 + 2 * r) + 2, circle_y)
+    graphics.line(
+        circle_x + 1 + r, circle_y - 1 - r, circle_x + 3 + r, circle_y - 3 - r
+    )
+    graphics.line(
+        circle_x + 1 + r, circle_y + 1 + r, circle_x + 3 + r, circle_y + 3 + r
+    )
+    graphics.line(
+        circle_x - 1 - r, circle_y - 1 - r, circle_x - 3 - r, circle_y - 3 - r
+    )
+    graphics.line(
+        circle_x - 1 - r, circle_y + 1 + r, circle_x - 3 - r, circle_y + 3 + r
+    )
+
+
+mode = "auto"
 last = time.ticks_ms()
-brightness_value = MIN_RANGE  # set the initial brightness level to the specified minimum
+
+brightness_value = MIN_RANGE  # set the initial brightness level to the minimum
 while True:
     current = time.ticks_ms()
 
     # set the display brightness
     brightness_value = calculate_brightness(brightness_value)
-    gu.set_brightness(brightness_value)
+    cu.set_brightness(brightness_value)
 
     bp = (brightness_value / MAX_RANGE) * 100  # gets brightness value in percentage relative to the MAX_LS_VALUE set
 
     # deactivate auto brightness by pressing A
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_A):
         print("Auto brightness off")
         mode = "off"
 
     # reactivate auto brightness by pressing A
-    if gu.is_pressed(GalacticUnicorn.SWITCH_B):
+    if cu.is_pressed(CosmicUnicorn.SWITCH_B):
         print("Auto brightness on")
         mode = "auto"
 
     # set brightness to default value if off
     if mode == "off":
-        gu.set_brightness(0.5)
+        cu.set_brightness(0.5)
 
     # set text update rate after a certain time to reduce flickering
     if current - last >= TEXT_SLEEP:
@@ -121,20 +143,22 @@ while True:
         # draw the text
         graphics.set_pen(CURRENT_COLOUR)
         graphics.text("BRT: ", 0, 1, scale=1)
+        graphics.text(f"{bp:.0f}", 7, 23, scale=1)
+        draw_percentage((WIDTH - 10), 23)
 
-        # measure the rest of the text before drawing to right align it
-        text_width = graphics.measure_text(f"{bp:.0f}  ", scale=1)
-        graphics.text(f"{bp:.0f}", WIDTH - text_width, 1, scale=1)
-        draw_percentage((WIDTH - 8), 1)
+        # draw sun icon
+        draw_sun(0, 10, 2)
 
         # draw a bar for the background
+        bar_width = WIDTH - 12
         graphics.set_pen(GREY)
-        graphics.rectangle(0, 9, WIDTH, 10)
+        graphics.rectangle(13, 10, bar_width, 11)
 
         # draw a bar for the current brightness percentage
         graphics.set_pen(CURRENT_COLOUR)
-        graphics.rectangle(0, 9, int((bp / 100) * WIDTH), 10)
+        graphics.rectangle(13, 10, int((bp / 100) * bar_width), 11)
+
         last = current
 
     # time to update the display
-    gu.update(graphics)
+    cu.update(graphics)

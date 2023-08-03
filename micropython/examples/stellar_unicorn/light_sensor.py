@@ -1,9 +1,9 @@
 import time
-from galactic import GalacticUnicorn
-from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
+from stellar import StellarUnicorn
+from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
 
 """
-Light sensoring feature for the galactic unicorn
+Light sensoring feature for the stellar unicorn
 Uses the onboard light sensor to detect the light in the environment
 The brightness level is displayed as percentage.
 Brightness of the display is auto adjusted to the brightness level of the environment
@@ -11,7 +11,7 @@ Press A to turn auto brightness on
 Press B to turn auto brightness off
 """
 # set up unicorn and drawing variables
-gu = GalacticUnicorn()
+su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
 WIDTH, HEIGHT = graphics.get_bounds()
@@ -53,7 +53,7 @@ def map_range(
 # gets the light sensor value from onboard sensor and interpolates it
 # clamps the brightness value it outside the ranges specified
 def calculate_brightness(prev_brightness_val):
-    current_lsv = gu.light()
+    current_lsv = su.light()
     current_brightness_val = map_range(current_lsv)
 
     # uses the previous value to smooth out display changes reducing flickering
@@ -80,7 +80,7 @@ def clear():
     graphics.clear()
 
 
-mode = "auto"  # set auto brightness on
+mode = "auto"
 last = time.ticks_ms()
 brightness_value = MIN_RANGE  # set the initial brightness level to the specified minimum
 while True:
@@ -88,23 +88,26 @@ while True:
 
     # set the display brightness
     brightness_value = calculate_brightness(brightness_value)
-    gu.set_brightness(brightness_value)
+    su.set_brightness(brightness_value)
 
     bp = (brightness_value / MAX_RANGE) * 100  # gets brightness value in percentage relative to the MAX_LS_VALUE set
 
+    # calculate brightness percentage
+    bp = (brightness_value / MAX_RANGE) * 100
+
     # deactivate auto brightness by pressing A
-    if gu.is_pressed(GalacticUnicorn.SWITCH_A):
+    if su.is_pressed(StellarUnicorn.SWITCH_A):
         print("Auto brightness off")
         mode = "off"
 
     # reactivate auto brightness by pressing A
-    if gu.is_pressed(GalacticUnicorn.SWITCH_B):
+    if su.is_pressed(StellarUnicorn.SWITCH_B):
         print("Auto brightness on")
         mode = "auto"
 
     # set brightness to default value if off
     if mode == "off":
-        gu.set_brightness(0.5)
+        su.set_brightness(0.5)
 
     # set text update rate after a certain time to reduce flickering
     if current - last >= TEXT_SLEEP:
@@ -120,12 +123,11 @@ while True:
 
         # draw the text
         graphics.set_pen(CURRENT_COLOUR)
-        graphics.text("BRT: ", 0, 1, scale=1)
-
+        graphics.text(f"{bp:.0f}", 0, 1, scale=1)
         # measure the rest of the text before drawing to right align it
-        text_width = graphics.measure_text(f"{bp:.0f}  ", scale=1)
-        graphics.text(f"{bp:.0f}", WIDTH - text_width, 1, scale=1)
-        draw_percentage((WIDTH - 8), 1)
+        text_width = graphics.measure_text(f"{bp:.0f}/°", scale=1)
+
+        draw_percentage(10, 1)
 
         # draw a bar for the background
         graphics.set_pen(GREY)
@@ -136,5 +138,5 @@ while True:
         graphics.rectangle(0, 9, int((bp / 100) * WIDTH), 10)
         last = current
 
-    # time to update the display
-    gu.update(graphics)
+    # update the display
+    su.update(graphics)
