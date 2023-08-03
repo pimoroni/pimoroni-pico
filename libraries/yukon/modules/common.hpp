@@ -19,31 +19,25 @@ namespace pimoroni {
   };
 
   class YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
+  public:
+    static constexpr float ROOM_TEMP = 273.15f + 25.0f;
+    static constexpr float RESISTOR_AT_ROOM_TEMP = 10000.0f;
+    static constexpr float BETA = 3435;
 
-      static constexpr float ROOM_TEMP = 273.15f + 25.0f;
-      static constexpr float RESISTOR_AT_ROOM_TEMP = 10000.0f;
-      static constexpr float BETA = 3435;
-
-    static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
-      return false;
-    }
-
-    virtual std::string instance_name() = 0;
+    virtual std::string name() = 0;
   };
 
-  typedef bool (*module_callback)(uint, bool, bool, bool) ;
+  typedef bool (&func_is_module)(uint, bool, bool, bool);
 
-  struct ModuleInfo {
-    std::type_index type;
-    std::string name;
-    module_callback is_module;
+  struct ModuleType {
+    const std::type_index TYPE;
+    const std::string &NAME;
+    func_is_module is_module;
   };
 
-#define INFO_FUNC(module_name) \
-    static ModuleInfo info() { \
-      return { typeid(module_name), module_name::name(), &module_name::is_module }; \
-      }
+#define TYPE_FUNCTION(module_class) \
+  static ModuleType type() { \
+    return { typeid(module_class), module_class::NAME, module_class::is_module }; \
+  }
 
 }

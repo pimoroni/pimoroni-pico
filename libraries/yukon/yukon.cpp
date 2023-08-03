@@ -252,25 +252,25 @@ namespace pimoroni {
     return slot;
   }
 
-  std::vector<uint> Yukon::find_slots_with_module(ModuleInfo module_type) {
+  std::vector<uint> Yukon::find_slots_with_module(const ModuleType& module_type) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot find slots with modules whilst the main output is active\n");
     }
 
-    logging.info("> Finding slots with '" + module_type.name + "' module\n");
+    logging.info("> Finding slots with '" + module_type.NAME + "' module\n");
 
     std::vector<uint> slot_ids;
     for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
       SLOT slot = it->first;
       logging.info("[Slot" + std::to_string(slot.ID) + "] ");
-      const ModuleInfo* detected = __detect_module(slot); // Need to have a return type that can be null
+      const ModuleType* detected = __detect_module(slot);
 
-      if(detected != nullptr && detected->type == module_type.type) {
-        logging.info("Found '" + detected->name + "' module\n");
+      if(detected != nullptr && detected->TYPE == module_type.TYPE) {
+        logging.info("Found '" + detected->NAME + "' module\n");
         slot_ids.push_back(slot.ID);
       }
       else {
-        logging.info("No '" + module_type.name + "' module\n");
+        logging.info("No '" + module_type.NAME + "' module\n");
       }
     }
 
@@ -314,9 +314,9 @@ namespace pimoroni {
     }
   }
 
-  const ModuleInfo* Yukon::__match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
+  const ModuleType* Yukon::__match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
     for(uint i = 0; i < count_of(KNOWN_MODULES); i++) {
-      const ModuleInfo& m = KNOWN_MODULES[i];
+      const ModuleType& m = KNOWN_MODULES[i];
       //printf("%s\n", std::get<0>(KNOWN_MODULES[i]).name());
       //printf("%s\n", std::get<1>(KNOWN_MODULES[i]).c_str());
       //printf("%d\n", std::get<2>(KNOWN_MODULES[i])(adc_level, slow1, slow2, slow3));
@@ -328,7 +328,7 @@ namespace pimoroni {
     return nullptr;
   }
 
-  const ModuleInfo* Yukon::__detect_module(SLOT slot) {
+  const ModuleType* Yukon::__detect_module(SLOT slot) {
     set_slow_config(slot.SLOW1, false);
     set_slow_config(slot.SLOW2, false);
     set_slow_config(slot.SLOW3, false);
@@ -356,13 +356,13 @@ namespace pimoroni {
       adc_level = ADC_HIGH;
     }
 
-    const ModuleInfo* detected = __match_module(adc_level, slow1, slow2, slow3);
+    const ModuleType* detected = __match_module(adc_level, slow1, slow2, slow3);
 
     __deselect_address();
 
     return detected;
   }
-  const ModuleInfo* Yukon::detect_module(uint slot_id) {
+  const ModuleType* Yukon::detect_module(uint slot_id) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot detect modules whilst the main output is active\n");
     }
@@ -372,7 +372,7 @@ namespace pimoroni {
     return __detect_module(slot);
   }
 
-  const ModuleInfo* Yukon::detect_module(SLOT slot) {
+  const ModuleType* Yukon::detect_module(SLOT slot) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot detect modules whilst the main output is active\n");
     }
@@ -401,11 +401,11 @@ namespace pimoroni {
       YukonModule* module = it->second;
 
       logging.info("[Slot" + std::to_string(slot.ID) + "] ");
-      const ModuleInfo* detected = __detect_module(slot);
+      const ModuleType* detected = __detect_module(slot);
 
       if(detected == nullptr) {
         if(module != nullptr) {
-          logging.info("No module detected! Expected a '" + module->instance_name() + "' module.\n");
+          logging.info("No module detected! Expected a '" + module->name() + "' module.\n");
           if(!allow_undetected) {//if slot not in allow_undetected:
             raise_undetected = true;
           }
@@ -417,18 +417,18 @@ namespace pimoroni {
       }
       else {
         if(module != nullptr) {
-          if(std::type_index(typeid(*module)) == detected->type) {
-            logging.info("'" + module->instance_name() + "' module detected and registered.\n");
+          if(std::type_index(typeid(*module)) == detected->TYPE) {
+            logging.info("'" + module->name() + "' module detected and registered.\n");
           }
           else {
-            logging.info("Module discrepency! Expected a '" + module->instance_name() + "}' module, but detected a '" + detected->name + "' module.\n");
+            logging.info("Module discrepency! Expected a '" + module->name() + "}' module, but detected a '" + detected->NAME + "' module.\n");
             if(!allow_discrepencies) { //if slot not in allow_discrepencies:
               raise_discrepency = true;
             }
           }
         }
         else {
-          logging.info("'" + detected->name + "' module detected but not registered.\n");
+          logging.info("'" + detected->NAME + "' module detected but not registered.\n");
           if(!allow_unregistered) { //if slot not in allow_unregistered:
             raise_unregistered = true;
           }
@@ -472,7 +472,7 @@ namespace pimoroni {
       YukonModule* module = it->second;
 
       if(module != nullptr) {
-        logging.info("[Slot" + std::to_string(slot.ID) + " '" + module->instance_name() + "'] Initialising ... ");
+        logging.info("[Slot" + std::to_string(slot.ID) + " '" + module->name() + "'] Initialising ... ");
         //TODO module.initialise(slot, self.read_slot_adc1, self.read_slot_adc2)
         logging.info("done\n");
       }

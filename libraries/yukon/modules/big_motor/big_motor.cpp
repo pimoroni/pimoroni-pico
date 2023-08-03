@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string BigMotorModule::NAME = "Big Motor";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | LOW   | 0     | 0     | 1     | Big Motor            | Not in fault                |

@@ -5,20 +5,16 @@
 namespace pimoroni {
 
   class QuadServoDirectModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
+  public:
+    static const std::string NAME;
 
     static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
 
-    static std::string name() {
-      return "Quad Servo Direct";
+    virtual std::string name() {
+      return QuadServoDirectModule::NAME;
     }
 
-    virtual std::string instance_name() {
-      return QuadServoDirectModule::name();
-    }
-
-    INFO_FUNC(QuadServoDirectModule)
+    TYPE_FUNCTION(QuadServoDirectModule)
   };
 
 }

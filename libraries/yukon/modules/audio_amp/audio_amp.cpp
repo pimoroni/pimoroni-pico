@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  static const std::string NAME = "Audio Amp";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | FLOAT | 0     | 1     | 1     | [Proposed] Audio Amp |                             |

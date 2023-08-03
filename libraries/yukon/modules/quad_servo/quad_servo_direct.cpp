@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string QuadServoDirectModule::NAME = "Quad Servo Direct";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | LOW   | 0     | 0     | 0     | Quad Servo Direct    | A1 input near 0V            |

@@ -5,37 +5,29 @@
 namespace pimoroni {
 
   class ProtoPotModule : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
+  public:
+    static const std::string NAME;
 
     static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
 
-    static std::string name() {
-      return "Proto Potentiometer";
+    virtual std::string name() {
+      return ProtoPotModule::NAME;
     }
 
-    virtual std::string instance_name() {
-      return ProtoPotModule::name();
-    }
-
-    INFO_FUNC(ProtoPotModule)
+    TYPE_FUNCTION(ProtoPotModule)
   };
 
   class ProtoPotModule2 : public YukonModule {
-    public:
-      //static const std::string NAME = "Unnamed";
+  public:
+    static const std::string NAME;
 
     static bool is_module(uint adc_level, bool slow1, bool slow2, bool slow3);
 
-    static std::string name() {
-      return "Proto Potentiometer 2";
+    virtual std::string name() {
+      return ProtoPotModule2::NAME;
     }
 
-    virtual std::string instance_name() {
-      return ProtoPotModule2::name();
-    }
-
-    INFO_FUNC(ProtoPotModule2)
+    TYPE_FUNCTION(ProtoPotModule2)
   };
 
 }

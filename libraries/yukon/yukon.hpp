@@ -190,7 +190,7 @@ namespace pimoroni {
     SLOT __check_slot(uint slot_id);
     SLOT __check_slot(SLOT slot);
 
-    std::vector<uint> find_slots_with_module(ModuleInfo module_type);
+    std::vector<uint> find_slots_with_module(const ModuleType& module_type);
 
     void register_with_slot(YukonModule* module, uint slot_id);
     void register_with_slot(YukonModule* module, SLOT slot);
@@ -198,10 +198,10 @@ namespace pimoroni {
     void deregister_slot(uint slot_id);
     void deregister_slot(SLOT slot);
 
-    const ModuleInfo* __match_module(uint adc_level, bool slow1, bool slow2, bool slow3);
-    const ModuleInfo* __detect_module(SLOT slot);
-    const ModuleInfo* detect_module(uint slot_id);
-    const ModuleInfo* detect_module(SLOT slot);
+    const ModuleType* __match_module(uint adc_level, bool slow1, bool slow2, bool slow3);
+    const ModuleType* __detect_module(SLOT slot);
+    const ModuleType* detect_module(uint slot_id);
+    const ModuleType* detect_module(SLOT slot);
 
     void __expand_slot_list(std::vector<SLOT> slot_list);
     void __verify_modules(bool allow_unregistered, bool allow_undetected, bool allow_discrepencies, bool allow_no_modules);

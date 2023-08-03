@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string QuadServoRegModule::NAME = "Quad Servo Regulated";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | FLOAT | 0     | 1     | 0     | Quad Servo Regulated |                             |

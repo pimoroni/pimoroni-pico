@@ -13,15 +13,15 @@
 
 namespace pimoroni {
 
-  const ModuleInfo KNOWN_MODULES[] = {
-    LEDStripModule::info(),
-    QuadServoDirectModule::info(),
-    QuadServoRegModule::info(),
-    BigMotorModule::info(),
-    DualMotorModule::info(),
-    DualSwitchedModule::info(),
-    BenchPowerModule::info(),
-    //AudioAmpModule::info(),
-    ProtoPotModule::info(),
+  const ModuleType KNOWN_MODULES[] = {
+    LEDStripModule::type(),
+    QuadServoDirectModule::type(),
+    QuadServoRegModule::type(),
+    BigMotorModule::type(),
+    DualMotorModule::type(),
+    DualSwitchedModule::type(),
+    BenchPowerModule::type(),
+    //AudioAmpModule::type(),
+    ProtoPotModule::type(),
   };
 }

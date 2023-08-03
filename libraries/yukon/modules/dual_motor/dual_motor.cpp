@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string DualMotorModule::NAME = "Dual Motor";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | HIGH  | 1     | 1     | 1     | Dual Motor           |                             |

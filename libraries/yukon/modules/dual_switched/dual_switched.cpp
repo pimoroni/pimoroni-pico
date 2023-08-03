@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string DualSwitchedModule::NAME = "Dual Switched Output";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | FLOAT | 1     | 0     | 1     | Dual Switched Output |                             |

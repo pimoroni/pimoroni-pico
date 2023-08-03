@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string LEDStripModule::NAME = "LED Strip";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | LOW   | 1     | 1     | 1     | LED Strip            |                             |

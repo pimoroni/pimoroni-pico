@@ -2,6 +2,8 @@
 
 namespace pimoroni {
 
+  const std::string BenchPowerModule::NAME = "Bench Power";
+
   // | ADC1  | SLOW1 | SLOW2 | SLOW3 | Module               | Condition (if any)          |
   // |-------|-------|-------|-------|----------------------|-----------------------------|
   // | LOW   | 1     | 0     | 0     | Bench Power          |                             |
