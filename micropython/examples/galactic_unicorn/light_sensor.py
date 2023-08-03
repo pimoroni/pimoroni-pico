@@ -30,7 +30,7 @@ MAX_LS_VALUE = 295  # 4095 to use the full range
 MIN_RANGE = 0.1
 MAX_RANGE = 1
 
-# Rate of display change
+# Rate of display change i.e the lower the value the slower the transition
 TRANSITION_RATE = 1.0 / 32.0
 
 
@@ -79,7 +79,7 @@ def clear():
 
 mode = "auto"  # set auto brightness on
 last = time.ticks_ms()
-brightness_value = MIN_RANGE  # set the initial brightness level to the minimum
+brightness_value = MIN_RANGE  # set the initial brightness level to the specified minimum
 while True:
     current = time.ticks_ms()
 

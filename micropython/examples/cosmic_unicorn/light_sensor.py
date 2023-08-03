@@ -30,6 +30,8 @@ MAX_LS_VALUE = 295  # 4095 to use the full range
 MIN_RANGE = 0.1
 MAX_RANGE = 1
 
+# Rate of display change i.e the lower the value the slower the transition
+TRANSITION_RATE = 1.0 / 32.0
 
 # perform linear interpolation to map a range of values to discrete
 def map_range(
@@ -45,9 +47,14 @@ def map_range(
 
 
 # gets the light sensor value from onboard sensor and interpolates it
-# clamps the brightness values
-def calculate_brightness(current_lsv):
-    brightness_val = map_range(current_lsv)
+# clamps the brightness value it outside the ranges specified
+def calculate_brightness(prev_brightness_val):
+    current_lsv = cu.light()
+    current_brightness_val = map_range(current_lsv)
+
+    # uses the previous value to smooth out display changes reducing flickering
+    brightness_diff = current_brightness_val - prev_brightness_val
+    brightness_val = prev_brightness_val + (brightness_diff * TRANSITION_RATE)
     if brightness_val > 1:
         brightness_val = 1
     elif brightness_val < 0.1:
@@ -64,7 +71,7 @@ def clear():
 
 def draw_percentage(x, y):
     graphics.rectangle(x + 1, y + 1, 2, 2)
-    graphics.line(x, y + 6, x + 6, y)
+    graphics.line(x + 1, y + 5, x + 6, y)
     graphics.rectangle(x + 4, y + 4, 2, 2)
 
 
@@ -93,15 +100,17 @@ def draw_sun(x, y, r):
 
 mode = "auto"
 last = time.ticks_ms()
+
+brightness_value = MIN_RANGE  # set the initial brightness level to the minimum
 while True:
     current = time.ticks_ms()
 
-    # get light sensor value from the sensor
-    ls_value = cu.light()
-    brightness_value = calculate_brightness(ls_value)
+    # set the display brightness
+    brightness_value = calculate_brightness(brightness_value)
     cu.set_brightness(brightness_value)
-    # calculate brightness percentage
-    bp = (brightness_value / MAX_RANGE) * 100
+
+    bp = (brightness_value / MAX_RANGE) * 100  # gets brightness value in percentage relative to the MAX_LS_VALUE set
+
 
     # deactivate auto brightness by pressing A
     if cu.is_pressed(CosmicUnicorn.SWITCH_A):
@@ -133,20 +142,20 @@ while True:
         graphics.set_pen(CURRENT_COLOUR)
         graphics.text("BRT ", 0, 1, scale=1)
         draw_percentage(15, 1)
-        graphics.text(f"{bp:.0f}", 9, 24, scale=1)
-        draw_percentage(20, 24)
+        graphics.text(f"{bp:.0f}", 7, 23, scale=1)
+        draw_percentage((WIDTH - 10), 23)
 
         # draw sun icon
-        draw_sun(0, 12, 2)
+        draw_sun(0, 10, 2)
 
         # draw a bar for the background
         bar_width = WIDTH - 12
         graphics.set_pen(GREY)
-        graphics.rectangle(13, 12, bar_width, 10)
+        graphics.rectangle(13, 10, bar_width, 11)
 
         # draw a bar for the current brightness percentage
         graphics.set_pen(CURRENT_COLOUR)
-        graphics.rectangle(13, 12, int((bp / 100) * bar_width), 10)
+        graphics.rectangle(13, 10, int((bp / 100) * bar_width), 11)
 
         last = current
 
