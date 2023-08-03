@@ -143,6 +143,11 @@ namespace pimoroni {
   }
 
   void Yukon::reset() {
+    // Only disable the output if enabled (avoids duplicate messages)
+    if(is_main_output()) {
+      disable_main_output();
+    }
+
     // Set the first IO expander's initial state
     tca0.set_output_port(0x0000);
     tca0.set_polarity_port(0x0000);
@@ -309,7 +314,7 @@ namespace pimoroni {
 
     YukonModule* module = slot_assignments[slot];
     if(module != nullptr) {
-      //module.deregister() //TODO
+      module->deregister();
       slot_assignments[slot] = nullptr;
     }
   }
@@ -317,10 +322,6 @@ namespace pimoroni {
   const ModuleType* Yukon::__match_module(uint adc_level, bool slow1, bool slow2, bool slow3) {
     for(uint i = 0; i < count_of(KNOWN_MODULES); i++) {
       const ModuleType& m = KNOWN_MODULES[i];
-      //printf("%s\n", std::get<0>(KNOWN_MODULES[i]).name());
-      //printf("%s\n", std::get<1>(KNOWN_MODULES[i]).c_str());
-      //printf("%d\n", std::get<2>(KNOWN_MODULES[i])(adc_level, slow1, slow2, slow3));
-      //printf("%s\n", KNOWN_MODULES[i]..name());
       if(m.is_module(adc_level, slow1, slow2, slow3)) {
         return &m;
       }
@@ -473,7 +474,7 @@ namespace pimoroni {
 
       if(module != nullptr) {
         logging.info("[Slot" + std::to_string(slot.ID) + " '" + module->name() + "'] Initialising ... ");
-        //TODO module.initialise(slot, self.read_slot_adc1, self.read_slot_adc2)
+        module->initialise(slot, *this);
         logging.info("done\n");
       }
     }
@@ -687,13 +688,18 @@ namespace pimoroni {
     //if __monitor_action_callback is not None:
     //  __monitor_action_callback(voltage, current, temperature);
 
-    //for module in self.__slot_assignments.values():
-    //  if module is not None:
-    //    try:
-    //      module.monitor()
-    //    except Exception:
-    //      self.disable_main_output()
-    //      raise  # Now the output is off, let the exception continue into user code
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      YukonModule* module = it->second;
+      if(module != nullptr) {
+        try {
+          module->monitor();
+        }
+        catch(const std::exception& e) {
+          disable_main_output();
+          throw;  // Now the output is off, let the exception continue into user code
+        }
+      }
+    }
 
     readings.max_voltage = MAX(voltage, readings.max_voltage);
     readings.min_voltage = MIN(voltage, readings.min_voltage);
@@ -760,9 +766,14 @@ namespace pimoroni {
   void Yukon::print_readings() {
     __print_named_readings("[Yukon]", get_readings());
 
-    //for slot, module in self.__slot_assignments.items():
-    //  if module is not None:
-    //    self.__print_dict(f"[Slot{slot.ID}]", module.get_readings(), allowed, excluded)
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      SLOT slot = it->first;
+      YukonModule* module = it->second;
+
+      if(module != nullptr) {
+        __print_named_readings("[Slot" + std::to_string(slot.ID) + "]", module->get_readings());
+      }
+    }
     std::cout << std::endl;
     //printf("\n");
   }
@@ -789,9 +800,12 @@ namespace pimoroni {
       readings.avg_temperature /= count_avg;
     }
 
-    //for module in self.__slot_assignments.values():
-    //  if module is not None:
-    //    module.process_readings()
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      YukonModule* module = it->second;
+      if(module != nullptr) {
+        module->process_readings();
+      }
+    }
   }
 
   void Yukon::__clear_readings() {
@@ -811,9 +825,13 @@ namespace pimoroni {
   }
   void Yukon::clear_readings() {
     __clear_readings();
-    //for module in self.__slot_assignments.values():
-    //  if module is not None:
-    //    module.clear_readings()
+
+    for(auto it = slot_assignments.begin(); it != slot_assignments.end(); it++) {
+      YukonModule* module = it->second;
+      if(module != nullptr) {
+        module->clear_readings();
+      }
+    }
   }
 
   void Yukon::allow_reading(std::string name) {

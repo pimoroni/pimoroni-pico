@@ -5,65 +5,11 @@
 #include "drivers/tca9555/tca9555.hpp"
 #include "errors.hpp"
 #include <list>
-#include <iostream>
 #include "modules.hpp"
+#include "logging.hpp"
 namespace pimoroni {
 
-  struct TCA {
-    uint CHIP;
-    uint GPIO;
-  };
-
-  struct SLOT {
-    uint ID;
-    uint FAST1;
-    uint FAST2;
-    uint FAST3;
-    uint FAST4;
-    TCA SLOW1;
-    TCA SLOW2;
-    TCA SLOW3;
-    uint ADC1_ADDR;
-    uint ADC2_TEMP_ADDR;
-
-    // Needed for use with std::map
-    bool operator<(const SLOT& o) const {
-      return (ID < o.ID);
-    }
-  };
-
-
-  enum LoggingLevel {
-    LOG_NONE = 0,
-    LOG_WARN,
-    LOG_INFO,
-    LOG_DEBUG
-  };
-
-
-  struct logger {
-    uint level = LOG_INFO;
-
-    void warn(std::string message) {
-      if(level >= LOG_WARN)
-        std::cout << message;
-    }
-
-    void info(std::string message) {
-      if(level >= LOG_INFO) {
-        std::cout << message;
-      }
-    }
-
-    void debug(std::string message) {
-      if(level >= LOG_DEBUG) {
-        std::cout << message;
-      }
-    }
-  };
-
-
-  class Yukon {
+  class Yukon : public SlotAccessor {
   public:
     static const SLOT SLOT1;
     static const SLOT SLOT2;
@@ -137,7 +83,7 @@ namespace pimoroni {
     float voltage_limit;
     float current_limit;
     float temperature_limit;
-    logger logging;
+    //logger logging;
     std::map<SLOT, YukonModule*> slot_assignments;
     void* monitor_action_callback;
 
@@ -173,14 +119,14 @@ namespace pimoroni {
     TCA9555& get_tca_chip(uint chip);
 
   public:
-    bool get_slow_input(TCA gpio);
-    bool get_slow_output(TCA gpio);
-    bool get_slow_config(TCA gpio);
-    bool get_slow_polarity(TCA gpio);
+    virtual bool get_slow_input(TCA gpio);
+    virtual bool get_slow_output(TCA gpio);
+    virtual bool get_slow_config(TCA gpio);
+    virtual bool get_slow_polarity(TCA gpio);
 
-    void set_slow_output(TCA gpio, bool value);
-    void set_slow_config(TCA gpio, bool output);
-    void set_slow_polarity(TCA gpio, bool polarity);
+    virtual void set_slow_output(TCA gpio, bool value);
+    virtual void set_slow_config(TCA gpio, bool output);
+    virtual void set_slow_polarity(TCA gpio, bool polarity);
 
     void change_output_mask(uint8_t chip, uint16_t mask, uint16_t state);
     //--------------------------------------------------
@@ -225,8 +171,8 @@ namespace pimoroni {
     float read_current();
     float read_temperature();
     float read_expansion();
-    float read_slot_adc1(SLOT slot);
-    float read_slot_adc2(SLOT slot);
+    virtual float read_slot_adc1(SLOT slot);
+    virtual float read_slot_adc2(SLOT slot);
     float time();
 
     void assign_monitor_action(void* callback_function);

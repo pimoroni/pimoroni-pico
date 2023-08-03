@@ -42,7 +42,7 @@ int main() {
     //y.find_slots_with_module(LEDStripModule::info());
     //y.find_slots_with_module(DualSwitchedModule::info());
     //y.find_slots_with_module(BenchPowerModule::info());
-    y.register_with_slot(&strip, 2);
+    y.register_with_slot(&strip, 3);
     y.initialise_modules();
 
     //y.detect_module(Yukon::SLOT1);
@@ -53,6 +53,7 @@ int main() {
     //y.detect_module(Yukon::SLOT6);
 
     y.enable_main_output();
+    strip.enable();
 
     while(!y.is_boot_pressed()) {
       y.monitored_sleep_ms(100);

@@ -2,6 +2,7 @@ add_library(yukon INTERFACE)
 
 target_sources(yukon INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/yukon.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/logging.cpp
   ${CMAKE_CURRENT_LIST_DIR}/modules/led_strip/led_strip.cpp
   ${CMAKE_CURRENT_LIST_DIR}/modules/quad_servo/quad_servo_direct.cpp
   ${CMAKE_CURRENT_LIST_DIR}/modules/quad_servo/quad_servo_reg.cpp
@@ -16,4 +17,4 @@ target_sources(yukon INTERFACE
 target_include_directories(yukon INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
 # Pull in pico libraries that we need
-target_link_libraries(yukon INTERFACE pico_stdlib pico_graphics tca9555 hardware_adc)
+target_link_libraries(yukon INTERFACE pico_stdlib pico_graphics tca9555 hardware_adc plasma)
