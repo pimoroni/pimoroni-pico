@@ -3,9 +3,12 @@ from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
 
 """
-Auto brightness feature for the galactic unicorn
-Uses the onboard light sensor to detect the light
-The brightness percentage is displayed with brightness auto adjusted
+Light sensoring feature for the galactic unicorn
+Uses the onboard light sensor to detect the light in the environment
+The brightness level is displayed as percentage.
+Brightness of the display is auto adjusted to the brightness level of the environment
+Press A to turn auto brightness on
+Press B to turn auto brightness off
 """
 # set up unicorn and drawing variables
 gu = GalacticUnicorn()
