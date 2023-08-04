@@ -870,8 +870,7 @@ namespace pimoroni {
 
   void Yukon::__print_named_readings(std::string section_name, std::vector<std::pair<std::string, float>> named_readings) {
     if(!named_readings.empty()) {
-      std::cout << section_name << " ";
-      //printf("%s ", section_name.c_str());
+      logging.print(section_name + " ");
 
       for(auto it = named_readings.begin(); it != named_readings.end(); it++) {
         std::string name = it->first;
@@ -881,8 +880,7 @@ namespace pimoroni {
           //if type(value) is bool:
           //  print(f"{name} = {int(value)},", end=" ")  # Output 0 or 1 rather than True of False, so bools can appear on plotter charts
           //else:
-            //printf("%s = %f, ", name.c_str(), value);
-            std::cout << name << " = " << value << ", ";
+            logging.print(name + " = " + std::to_string(value) + ", ");
         }
       }
     }
