@@ -1,6 +1,7 @@
 add_subdirectory(analog)
 add_subdirectory(analogmux)
 add_subdirectory(esp32spi)
+add_subdirectory(io)
 add_subdirectory(ioexpander)
 add_subdirectory(ltp305)
 add_subdirectory(ltr559)

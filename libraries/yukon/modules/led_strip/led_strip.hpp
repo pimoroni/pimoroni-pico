@@ -6,6 +6,7 @@
 #include "../../errors.hpp"
 #include "apa102.hpp"
 #include "ws2812.hpp"
+#include "io.hpp"
 
 using namespace plasma;
 
@@ -40,8 +41,9 @@ namespace pimoroni {
     float __count_avg;
 
     WS2812* led_strip;
-    uint __power_good;
-    uint __power_en;
+    APA102* apa_strip;
+    IO* __power_good_io;
+    IO* __power_en_io;
 
 
 
@@ -49,7 +51,10 @@ namespace pimoroni {
       YukonModule(),
       halt_on_not_pgood(halt_on_not_pgood),
       __last_pgood(false),
-      led_strip(nullptr) { //TODO strip_type, num_pixels, brightness=1.0, halt_on_not_pgood=False):
+      led_strip(nullptr),
+      apa_strip(nullptr),
+      __power_good_io(nullptr),
+      __power_en_io(nullptr) { //TODO strip_type, num_pixels, brightness=1.0, halt_on_not_pgood=False):
       //self.__strip_type = strip_type
       //if self.__strip_type == self.NEOPIXEL:
       //  self.NAME += " (NeoPixel)"
@@ -62,6 +67,9 @@ namespace pimoroni {
 
     ~LEDStripModule() {
       delete(led_strip);
+      delete(apa_strip);
+      delete(__power_good_io);
+      delete(__power_en_io);
     }
 
     virtual void initialise(const SLOT& slot, SlotAccessor& accessor) {
@@ -81,13 +89,9 @@ namespace pimoroni {
         led_strip->set_hsv(i, hue, 1.0f, 1.0f);
       }
 
-      __power_good = slot.FAST1;
-      __power_en = slot.FAST2;
-
       // Create the power control pin objects
-      gpio_init(__power_good); // self.__power_good = DigitalInOut(slot.FAST1)
-      gpio_init(__power_en); // self.__power_en = DigitalInOut(slot.FAST2)
-
+      __power_good_io = new IO(slot.FAST1);
+      __power_en_io = new IO(slot.FAST2);
 
       // Configure strip and power pins
       configure();
@@ -97,41 +101,36 @@ namespace pimoroni {
     }
 
     virtual void configure() {
-      //self.__power_en.switch_to_output(False)
-      gpio_set_function(__power_en, GPIO_FUNC_SIO);
-      gpio_set_dir(__power_en, GPIO_OUT);
-      gpio_put(__power_en, false);
-
-      //self.__power_good.switch_to_input(Pull.UP)
-      gpio_set_function(__power_good, GPIO_FUNC_SIO);
-      gpio_set_dir(__power_good, GPIO_IN);
-      gpio_set_pulls(__power_good, true, false);
-      printf(("LED Strip Configured, apparently: " + std::to_string(__power_en) + "\n").c_str());
+      __power_en_io->to_output(false);
+      __power_good_io->to_input(true, false);
     }
 
     void enable() {
       if(!is_initialised()) {
         throw std::runtime_error("Module not initialised\n");
       }
-      gpio_put(__power_en, true); //self.__power_en.value = True
-
-      printf(("LED Strip Enabled, apparently: " + std::to_string(__power_en) + "\n").c_str());
+      __power_en_io->value(true);
     }
 
     void disable() {
       if(!is_initialised()) {
         throw std::runtime_error("Module not initialised\n");
       }
-      gpio_put(__power_en, false); //self.__power_en.value = False
+      __power_en_io->value(false);
     }
 
     bool is_enabled() {
-      // Documentation has note that this is just for debug use!
-      return gpio_get_out_level(__power_en); //return self.__power_en.value
+      if(!is_initialised()) {
+        throw std::runtime_error("Module not initialised\n");
+      }
+      return __power_en_io->value();
     }
 
     bool read_power_good() {
-      return gpio_get(__power_good); //return self.__power_en.value
+      if(!is_initialised()) {
+        throw std::runtime_error("Module not initialised\n");
+      }
+      return __power_good_io->value();
     }
 
     float read_temperature() {

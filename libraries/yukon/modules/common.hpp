@@ -38,7 +38,7 @@ namespace pimoroni {
     ADC_ANY = 3
   };
 
-  enum IO {
+  enum IOState {
     LOW = false,
     HIGH = true
   };
