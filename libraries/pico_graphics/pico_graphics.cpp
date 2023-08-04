@@ -132,7 +132,7 @@ namespace pimoroni {
     if (bitmap_font) {
       bitmap::character(bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
         rectangle(Rect(x, y, w, h));
-      }, c, p.x, p.y, std::max(1.0f, s));
+      }, c, p.x, p.y, std::max(1.0f, s), int32_t(a) % 360);
       return;
     }
 
@@ -148,7 +148,7 @@ namespace pimoroni {
     if (bitmap_font) {
       bitmap::text(bitmap_font, [this](int32_t x, int32_t y, int32_t w, int32_t h) {
         rectangle(Rect(x, y, w, h));
-      }, t, p.x, p.y, wrap, std::max(1.0f, s), letter_spacing, fixed_width);
+      }, t, p.x, p.y, wrap, std::max(1.0f, s), letter_spacing, fixed_width, int32_t(a) % 360);
       return;
     }
 

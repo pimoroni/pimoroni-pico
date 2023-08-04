@@ -24,6 +24,7 @@ typedef struct _PNG_decode_target {
     Point position = {0, 0};
     Rect source = {0, 0, 0, 0};
     Point scale = {1, 1};
+    int rotation = 0;
 } _PNG_decode_target;
 
 typedef struct _PNG_obj_t {
@@ -125,14 +126,37 @@ MICROPY_EVENT_POLL_HOOK
     Point current_position = target->position;
     uint8_t current_mode = target->mode;
     Point scale = target->scale;
+    int rotation = target->rotation;
+    Point step = {0, 0};
+
     // "pixel" is slow and clipped,
     // guaranteeing we wont draw png data out of the framebuffer..
     // Can we clip beforehand and make this faster?
 
     if(pDraw->y < target->source.y || pDraw->y >= target->source.y + target->source.h) return;
 
-    current_position.y += pDraw->y * scale.y;
-    current_position -= Point(0, target->source.y);
+    switch (rotation) {
+        case 0:
+            current_position.y += (pDraw->y - target->source.y) * scale.y;
+            step = {scale.x, 0};
+            break;
+        case 90:
+            current_position.y += target->source.w * scale.y;
+            current_position.x += target->source.h * scale.x;
+            current_position.x += (pDraw->y - target->source.y) * -scale.x;
+            step = {0, -scale.y};
+            break;
+        case 180:
+            current_position.x += target->source.w * scale.x;
+            current_position.y += target->source.h * scale.y;
+            current_position.y += (pDraw->y - target->source.y) * -scale.y;
+            step = {-scale.x, 0};
+            break;
+        case 270:
+            current_position.x += (pDraw->y - target->source.y) * scale.x;
+            step = {0, scale.y};
+            break;
+    }
 
     //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", y, pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
     uint8_t *pixel = (uint8_t *)pDraw->pPixels;
@@ -144,7 +168,7 @@ MICROPY_EVENT_POLL_HOOK
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             current_graphics->set_pen(r, g, b);
             current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
-            current_position.x += scale.x;
+            current_position += step;
         }
     } else if (pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
         for(int x = 0; x < pDraw->iWidth; x++) {
@@ -157,7 +181,7 @@ MICROPY_EVENT_POLL_HOOK
                 current_graphics->set_pen(r, g, b);
                 current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
             }
-            current_position.x += scale.x;
+            current_position += step;
         }
     } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
         for(int x = 0; x < pDraw->iWidth; x++) {
@@ -219,7 +243,7 @@ MICROPY_EVENT_POLL_HOOK
                     current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                 }
             }
-            current_position.x += scale.x;
+            current_position += step;
         }
     }
 }
@@ -292,7 +316,7 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
@@ -300,6 +324,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = nullptr} },
+        { MP_QSTR_rotate, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -320,6 +345,18 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         };
     } else {
         self->decode_target->source = {0, 0, self->width, self->height};
+    }
+
+    self->decode_target->rotation = args[ARG_rotate].u_int;
+    switch(self->decode_target->rotation) {
+        case 0:
+        case 90:
+        case 180:
+        case 270:
+            break;
+        default:
+            mp_raise_ValueError("decode(): rotation must be one of 0, 90, 180 or 270");
+            break;
     }
 
     // Scale is a single int, corresponds to both width/height
