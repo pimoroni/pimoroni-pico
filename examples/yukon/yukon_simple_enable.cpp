@@ -1,5 +1,4 @@
 #include "pico/stdlib.h"
-#include <tusb.h>
 
 #include "yukon.hpp"
 using namespace pimoroni;
@@ -7,38 +6,62 @@ using namespace pimoroni;
 Demonstrates how to create a Servo object and control it.
 */
 
-// How many sweeps of the servo to perform
-const uint SWEEPS = 3;
-
-// The number of discrete sweep steps
-const uint STEPS = 10;
-
-// The time in milliseconds between each step of the sequence
-const uint STEPS_INTERVAL_MS = 500;
-
-// How far from zero to move the servo when sweeping
-constexpr float SWEEP_EXTENT = 90.0f;
-
-
 Yukon y = Yukon();
 
+#define CHAR_CTRL_A (1)
+#define CHAR_CTRL_B (2)
+#define CHAR_CTRL_C (3)
+#define CHAR_CTRL_D (4)
+
+int last_char = PICO_ERROR_TIMEOUT;
+
+bool check_for_ctrla() {
+  int c = getchar_timeout_us(0);
+  if(c != PICO_ERROR_TIMEOUT)
+    printf(std::to_string(c).c_str());
+  return c == CHAR_CTRL_A;
+}
+
+bool check_for_ctrlb() {
+  int c = getchar_timeout_us(0);
+  if(c != PICO_ERROR_TIMEOUT)
+    printf(std::to_string(c).c_str());
+  return c == CHAR_CTRL_B;
+}
+
+bool check_for_ctrlc() {
+  int c = getchar_timeout_us(0);
+  if(c == CHAR_CTRL_C) {
+    printf("CTRL-C\n");
+    return true;
+  }
+  return false;
+}
+
+bool check_for_ctrld() {
+  int c = getchar_timeout_us(0);
+  if(c != PICO_ERROR_TIMEOUT)
+    printf(std::to_string(c).c_str());
+  return c == CHAR_CTRL_D;
+}
 
 int main() {
   stdio_init_all();
-
   y.change_logging(3);
 
   try {
     // Initialise the servo
     y.init();
 
-    while (!tud_cdc_connected()) {
+    while (!stdio_usb_connected()) {
       sleep_ms(100);
     }
-    sleep_ms(1000);
-    printf("tud_cdc_connected()\n");
+    while(!check_for_ctrlc());
+    while(!check_for_ctrlc());
+    printf("stdio_usb_connected()\n");
 
-    LEDStripModule strip;
+    LEDStripModule strip(LEDStripModule::DOTSTAR, 60);
+    //LEDStripModule strip(LEDStripModule::NEOPIXEL, 60);
     //y.find_slots_with_module(LEDStripModule::info());
     //y.find_slots_with_module(DualSwitchedModule::info());
     //y.find_slots_with_module(BenchPowerModule::info());
@@ -57,14 +80,25 @@ int main() {
 
     while(!y.is_boot_pressed()) {
       y.monitored_sleep_ms(100);
-      //printf("[Yukon] V = %f, C = %f, T = %f, ", y.read_voltage(), y.read_current(), y.read_temperature());
-      printf("[Slot1] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT1), y.read_slot_adc2(Yukon::SLOT1));
-      printf("[Slot2] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT2), y.read_slot_adc2(Yukon::SLOT2));
-      printf("[Slot3] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT3), y.read_slot_adc2(Yukon::SLOT3));
-      printf("[Slot4] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT4), y.read_slot_adc2(Yukon::SLOT4));
-      printf("[Slot5] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT5), y.read_slot_adc2(Yukon::SLOT5));
-      printf("[Slot6] A1 = %f, A2 = %f, ", y.read_slot_adc1(Yukon::SLOT6), y.read_slot_adc2(Yukon::SLOT6));
-      printf("\n");
+
+      if(stdio_usb_connected()) {
+        int c = getchar_timeout_us(0);
+        if(c != PICO_ERROR_TIMEOUT) {
+          if(c == CHAR_CTRL_C) {
+            printf("CTRL-C\n");
+            if(last_char == CHAR_CTRL_C) {
+              printf("exiting\n");
+              break;
+            }
+          }
+          if(c == CHAR_CTRL_D) {
+            printf("CTRL-D\n");
+            printf("exiting\n");
+            break;
+          }
+          last_char = c;
+        }
+      } 
     }
   }
   catch(const std::exception &e) {
