@@ -1,1 +1,2 @@
 include(yukon_simple_enable.cmake)
+include(yukon_switched_output.cmake)

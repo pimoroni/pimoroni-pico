@@ -13,4 +13,37 @@ namespace pimoroni {
     return slow1 == LOW && slow2 == LOW && slow3 == LOW;
   }
 
+  QuadServoDirectModule::QuadServoDirectModule() :
+    YukonModule(),
+    servos(nullptr) {
+  }
+
+  QuadServoDirectModule::~QuadServoDirectModule() {
+    delete(servos);
+  }
+
+  std::string QuadServoDirectModule::name() {
+    return QuadServoDirectModule::NAME;
+  }
+
+  void QuadServoDirectModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
+    // Configure strip and power pins
+    configure();
+
+    // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
+    YukonModule::initialise(slot, accessor);
+  }
+
+  void QuadServoDirectModule::configure() {
+
+  }
+
+  float QuadServoDirectModule::read_adc1() {
+    return __read_adc1();
+  }
+
+  float QuadServoDirectModule::read_adc2() {
+    return __read_adc2();
+  }
+
 }

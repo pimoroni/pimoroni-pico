@@ -86,7 +86,7 @@ namespace pimoroni {
     void enable();
     void disable();
     bool is_enabled();
-    bool read_power_good() ;
+    bool read_power_good();
     float read_temperature();
 
     //--------------------------------------------------
