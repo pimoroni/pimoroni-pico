@@ -43,7 +43,7 @@ int main() {
 
     // Create a DualSwitchedModule and register it with a slot on Yukon
     DualSwitchedModule switches;
-    yukon.register_with_slot(&switches, SLOT_ID);
+    yukon.register_with_slot(switches, SLOT_ID);
 
     // Initialise Yukon's registered modules
     yukon.initialise_modules();

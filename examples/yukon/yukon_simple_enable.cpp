@@ -65,7 +65,7 @@ int main() {
     //y.find_slots_with_module(LEDStripModule::info());
     //y.find_slots_with_module(DualSwitchedModule::info());
     //y.find_slots_with_module(BenchPowerModule::info());
-    y.register_with_slot(&strip, 3);
+    y.register_with_slot(strip, 3);
     y.initialise_modules();
 
     //y.detect_module(Yukon::SLOT1);

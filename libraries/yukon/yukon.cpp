@@ -282,12 +282,12 @@ namespace pimoroni {
     return slot_ids;
   }
 
-  void Yukon::register_with_slot(YukonModule* module, uint slot_id) {
+  void Yukon::register_with_slot(YukonModule& module, uint slot_id) {
     SLOT slot = __check_slot(slot_id);
     register_with_slot(module, slot);
   }
 
-  void Yukon::register_with_slot(YukonModule* module, SLOT slot) {
+  void Yukon::register_with_slot(YukonModule& module, SLOT slot) {
     if(is_main_output()) {
       throw std::runtime_error("Cannot register modules with slots whilst the main output is active\n");
     }
@@ -295,7 +295,7 @@ namespace pimoroni {
     slot = __check_slot(slot);
 
     if(slot_assignments[slot] == nullptr)
-      slot_assignments[slot] = module;
+      slot_assignments[slot] = &module;
     else
       throw std::invalid_argument("The selected slot is already populated\n");
   }
