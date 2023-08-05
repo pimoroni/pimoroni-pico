@@ -30,9 +30,6 @@ namespace pimoroni {
     // Create servo cluster object
     servos = new ServoCluster(pio0, 0, slot.FAST1, NUM_SERVOS);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }

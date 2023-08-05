@@ -44,14 +44,12 @@ namespace pimoroni {
     motors_toff = new TCA_IO(slot.SLOW2, accessor);
     motors_en = new TCA_IO(slot.SLOW3, accessor);
 
-    // Configure motors
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void DualMotorModule::configure() {
+    CHECK_INITIALISED
     motors->disable_all();
 
     motors_decay->to_output(false);

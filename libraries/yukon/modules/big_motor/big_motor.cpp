@@ -42,14 +42,12 @@ namespace pimoroni {
     motor_en = new TCA_IO(slot.SLOW3, accessor);
     motor_nfault = new TCA_IO(slot.SLOW2, accessor);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void BigMotorModule::configure() {
+    CHECK_INITIALISED
     motor->disable_all();
     motor->decay_mode(0, SLOW_DECAY);
 

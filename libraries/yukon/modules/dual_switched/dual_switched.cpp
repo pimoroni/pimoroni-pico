@@ -44,14 +44,12 @@ namespace pimoroni {
     power_good[0] = new TCA_IO(slot.SLOW1, accessor);
     power_good[1] = new TCA_IO(slot.SLOW3, accessor);
 
-    // Configure switch and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void DualSwitchedModule::configure() {
+    CHECK_INITIALISED
     sw_output[0]->to_output(false);
     sw_output[1]->to_output(false);
 

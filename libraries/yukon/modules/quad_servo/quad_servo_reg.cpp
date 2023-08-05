@@ -39,14 +39,12 @@ namespace pimoroni {
     power_en = new TCA_IO(slot.SLOW1, accessor);
     power_good = new TCA_IO(slot.SLOW2, accessor);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void QuadServoRegModule::configure() {
+    CHECK_INITIALISED
     servos->disable_all();
 
     power_en->to_output(false);

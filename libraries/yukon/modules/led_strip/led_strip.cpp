@@ -73,14 +73,12 @@ namespace pimoroni {
     power_good = new IO(slot.FAST1);
     power_en = new IO(slot.FAST2);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void LEDStripModule::configure() {
+    CHECK_INITIALISED
     power_en->to_output(false);
     power_good->to_input(true, false);
   }

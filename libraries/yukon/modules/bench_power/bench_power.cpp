@@ -41,14 +41,12 @@ namespace pimoroni {
     power_en = new IO(slot.FAST1);
     power_good = new TCA_IO(slot.SLOW1, accessor);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void BenchPowerModule::configure() {
+    CHECK_INITIALISED
     // Calculate a suitable pwm wrap period for this frequency
     uint32_t period; uint32_t div256;
     if(pimoroni::PWMCluster::calculate_pwm_factors(250000, period, div256)) {

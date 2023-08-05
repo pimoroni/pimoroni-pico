@@ -37,14 +37,12 @@ namespace pimoroni {
     // Create the enable pin object
     amp_en = new TCA_IO(slot.SLOW3, accessor);
 
-    // Configure strip and power pins
-    configure();
-
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
   }
 
   void AudioAmpModule::configure() {
+    CHECK_INITIALISED
     slow_sda->to_output(true);
     slow_scl->to_output(true);
     amp_en->to_output(false);
