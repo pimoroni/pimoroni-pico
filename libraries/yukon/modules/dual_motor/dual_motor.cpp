@@ -18,11 +18,17 @@ namespace pimoroni {
     YukonModule(),
     motor_type(DUAL),
     frequency(frequency),
-    motors(nullptr) {
+    motors(nullptr),
+    motors_decay(nullptr),
+    motors_toff(nullptr),
+    motors_en(nullptr) {
   }
 
   DualMotorModule::~DualMotorModule() {
     delete(motors);
+    delete(motors_decay);
+    delete(motors_toff);
+    delete(motors_en);
   }
 
   std::string DualMotorModule::name() {
@@ -30,7 +36,15 @@ namespace pimoroni {
   }
 
   void DualMotorModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
-    // Configure strip and power pins
+    // Create motor objects
+    motors = new MotorCluster(pio0, 0, slot.FAST1, NUM_MOTORS);
+
+    // Create motor control pin objects
+    motors_decay = new TCA_IO(slot.SLOW1, accessor);
+    motors_toff = new TCA_IO(slot.SLOW2, accessor);
+    motors_en = new TCA_IO(slot.SLOW3, accessor);
+
+    // Configure motors
     configure();
 
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
@@ -38,35 +52,46 @@ namespace pimoroni {
   }
 
   void DualMotorModule::configure() {
+    motors->disable_all();
 
+    motors_decay->to_output(false);
+    motors_toff->to_output(false);
+    motors_en->to_output(false);
   }
 
   void DualMotorModule::enable() {
-
+    CHECK_INITIALISED
+    motors_en->value(true);
   }
 
   void DualMotorModule::disable() {
-
+    CHECK_INITIALISED
+    motors_en->value(false);
   }
 
   bool DualMotorModule::is_enabled() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return motors_en->value();
   }
 
   bool DualMotorModule::decay() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return motors_decay->value();
   }
 
   void DualMotorModule::decay(bool val) {
-
+    CHECK_INITIALISED
+    motors_decay->value(val);
   }
 
   bool DualMotorModule::toff() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return motors_toff->value();
   }
 
   void DualMotorModule::toff(bool val) {
-
+    CHECK_INITIALISED
+    return motors_toff->value(val);
   }
 
   bool DualMotorModule::read_fault() {

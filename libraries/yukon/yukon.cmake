@@ -2,6 +2,7 @@ add_library(yukon INTERFACE)
 
 target_sources(yukon INTERFACE
   ${CMAKE_CURRENT_LIST_DIR}/yukon.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/modules/common.cpp
   ${CMAKE_CURRENT_LIST_DIR}/logging.cpp
   ${CMAKE_CURRENT_LIST_DIR}/modules/led_strip/led_strip.cpp
   ${CMAKE_CURRENT_LIST_DIR}/modules/quad_servo/quad_servo_direct.cpp

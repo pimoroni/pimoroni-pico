@@ -27,6 +27,9 @@ namespace pimoroni {
   }
 
   void QuadServoDirectModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
+    // Create servo cluster object
+    servos = new ServoCluster(pio0, 0, slot.FAST1, NUM_SERVOS);
+
     // Configure strip and power pins
     configure();
 
@@ -35,7 +38,7 @@ namespace pimoroni {
   }
 
   void QuadServoDirectModule::configure() {
-
+    servos->disable_all();
   }
 
   float QuadServoDirectModule::read_adc1() {

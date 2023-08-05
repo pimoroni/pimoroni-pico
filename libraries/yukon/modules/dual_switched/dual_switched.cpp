@@ -27,6 +27,8 @@ namespace pimoroni {
     delete(sw_output[1]);
     delete(sw_enable[0]);
     delete(sw_enable[1]);
+    delete(power_good[0]);
+    delete(power_good[1]);
   }
 
   std::string DualSwitchedModule::name() {
@@ -39,8 +41,8 @@ namespace pimoroni {
     sw_output[1] = new IO(slot.FAST3);
     sw_enable[0] = new IO(slot.FAST1);
     sw_enable[1] = new IO(slot.FAST3);
-    power_good[0] = slot.SLOW1;
-    power_good[1] = slot.SLOW3;
+    power_good[0] = new TCA_IO(slot.SLOW1, accessor);
+    power_good[1] = new TCA_IO(slot.SLOW3, accessor);
 
     // Configure switch and power pins
     configure();
@@ -56,14 +58,12 @@ namespace pimoroni {
     sw_enable[0]->to_output(false);
     sw_enable[1]->to_output(false);
 
-    __accessor->set_slow_config(power_good[0], false);
-    __accessor->set_slow_config(power_good[1], false);
+    power_good[0]->to_input();
+    power_good[1]->to_input();
   }
 
   void DualSwitchedModule::enable(uint output) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
@@ -72,9 +72,7 @@ namespace pimoroni {
   }
 
   void DualSwitchedModule::disable(uint output) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
@@ -83,9 +81,7 @@ namespace pimoroni {
   }
 
   bool DualSwitchedModule::is_enabled(uint output) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
@@ -94,9 +90,7 @@ namespace pimoroni {
   }
 
   void DualSwitchedModule::output(uint output, bool val) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
@@ -105,9 +99,7 @@ namespace pimoroni {
   }
 
   bool DualSwitchedModule:: read_output(uint output) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
@@ -116,14 +108,12 @@ namespace pimoroni {
   }
 
   bool DualSwitchedModule::read_power_good(uint output) {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     if(output < 1 || output > NUM_SWITCHES) {
       throw std::runtime_error("switch index out of range. Expected 1 to 2\n");
     }
 
-    return __accessor->get_slow_input(power_good[output - 1]);
+    return power_good[output - 1]->value();
   }
 
   float DualSwitchedModule::read_temperature() {

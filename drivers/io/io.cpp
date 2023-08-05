@@ -3,14 +3,14 @@
 namespace pimoroni {
   IO::IO(uint pin) :
     pin(pin) {
-      gpio_init(pin);
-    };
+    gpio_init(pin);
+  };
 
   IO::IO(uint pin, bool out, bool pull_up, bool pull_down) :
     pin(pin) {
-      gpio_init(pin);
-      direction(out, pull_up, pull_down);
-    };
+    gpio_init(pin);
+    direction(out, pull_up, pull_down);
+  };
 
   bool IO::direction() {
     return gpio_is_dir_out(pin);

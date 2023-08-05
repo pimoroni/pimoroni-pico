@@ -55,9 +55,9 @@ namespace pimoroni {
     //--------------------------------------------------
   private:
     MotorCluster* motors;
-    TCA motors_decay;
-    TCA motors_toff;
-    TCA motors_en;
+    TCA_IO* motors_decay;
+    TCA_IO* motors_toff;
+    TCA_IO* motors_en;
 
 
     //--------------------------------------------------

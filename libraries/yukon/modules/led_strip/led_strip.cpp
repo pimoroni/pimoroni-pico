@@ -86,30 +86,22 @@ namespace pimoroni {
   }
 
   void LEDStripModule::enable() {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     power_en->value(true);
   }
 
   void LEDStripModule::disable() {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     power_en->value(false);
   }
 
   bool LEDStripModule::is_enabled() {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     return power_en->value();
   }
 
   bool LEDStripModule::read_power_good() {
-    if(!is_initialised()) {
-      throw std::runtime_error("Module not initialised\n");
-    }
+    CHECK_INITIALISED
     return power_good->value();
   }
 

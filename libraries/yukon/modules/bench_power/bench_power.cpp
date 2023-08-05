@@ -34,6 +34,13 @@ namespace pimoroni {
   }
 
   void BenchPowerModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
+    // Create the voltage pwm object
+    voltage_pwm = new PWMCluster(pio0, 0, slot.FAST2, 1, true);
+
+    // Create the power control pin objects
+    power_en = new IO(slot.FAST1);
+    power_good = new TCA_IO(slot.SLOW1, accessor);
+
     // Configure strip and power pins
     configure();
 
@@ -42,47 +49,87 @@ namespace pimoroni {
   }
 
   void BenchPowerModule::configure() {
+    // Calculate a suitable pwm wrap period for this frequency
+    uint32_t period; uint32_t div256;
+    if(pimoroni::PWMCluster::calculate_pwm_factors(250000, period, div256)) {
+      pwm_period = period;
 
+      // Update the pwm before setting the new wrap
+      voltage_pwm->set_chan_level(0, 0, false);
+      voltage_pwm->set_chan_offset(0, 0, false);
+
+      // Set the new wrap (should be 1 less than the period to get full 0 to 100%)
+      voltage_pwm->set_wrap(pwm_period, true); // NOTE Minus 1 not needed here. Maybe should change Wrap behaviour so it is needed, for consistency with hardware pwm?
+
+      // Apply the new divider
+      // This is done after loading new PWM values to avoid a lockup condition
+      uint8_t div = div256 >> 8;
+      uint8_t mod = div256 % 256;
+      voltage_pwm->set_clkdiv_int_frac(div, mod);
+    }
+
+    power_en->to_output(false);
+    power_good->to_input();
   }
 
   void BenchPowerModule::enable() {
-
+    CHECK_INITIALISED
+    power_en->value(true);
   }
 
   void BenchPowerModule::disable() {
-
+    CHECK_INITIALISED
+    power_en->value(false);
   }
 
   bool BenchPowerModule::is_enabled() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return power_en->value();
   }
 
   void BenchPowerModule::set_pwm(float percent) {
-
+    voltage_pwm->set_chan_level(0, (uint32_t)(percent * (float)pwm_period));
   }
 
   void BenchPowerModule::set_target_voltage(float voltage) {
-
+    CHECK_INITIALISED
+    float percent;
+    if(voltage >= VOLTAGE_MID) {
+      percent = (voltage - VOLTAGE_MID) * 0.5f / (VOLTAGE_MAX - VOLTAGE_MID) + 0.5f;
+      percent = MIN(percent, 1.0f);
+    }
+    else {
+      percent = (voltage - VOLTAGE_MIN) * 0.5f / (VOLTAGE_MID - VOLTAGE_MIN);
+      percent = MAX(percent, 0.0);
+    }
+    set_target(percent);
   }
 
   void BenchPowerModule::set_target(float percent) {
+    CHECK_INITIALISED
+    if(percent < 0.0f || percent > 1.0f) {
+      throw std::invalid_argument("percent out of range. Expected 0.0 to 1.0\n");
+    }
 
+    set_pwm((percent * (PWM_MAX - PWM_MIN)) + PWM_MIN);
   }
 
   float BenchPowerModule::read_voltage() {
     // return (self.__shared_adc_voltage() * (100 + 22)) / 22
     float value = __read_adc1();
+    float voltage;
     if(value >= VOLTAGE_MID_MEASURE) {
-      return ((value - VOLTAGE_MID_MEASURE) * (VOLTAGE_MAX - VOLTAGE_MID)) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MID_MEASURE) + VOLTAGE_MID;
+      voltage = ((value - VOLTAGE_MID_MEASURE) * (VOLTAGE_MAX - VOLTAGE_MID)) / (VOLTAGE_MAX_MEASURE - VOLTAGE_MID_MEASURE) + VOLTAGE_MID;
     }
     else {
-      float voltage = ((value - VOLTAGE_MIN_MEASURE) * (VOLTAGE_MID - VOLTAGE_MIN)) / (VOLTAGE_MID_MEASURE - VOLTAGE_MIN_MEASURE) + VOLTAGE_MIN;
-      return MAX(voltage, 0.0);
+      voltage = ((value - VOLTAGE_MIN_MEASURE) * (VOLTAGE_MID - VOLTAGE_MIN)) / (VOLTAGE_MID_MEASURE - VOLTAGE_MIN_MEASURE) + VOLTAGE_MIN;
+      voltage = MAX(voltage, 0.0);
     }
+    return voltage;
   }
 
   bool BenchPowerModule::read_power_good() {
-    return 0; // TODO
+    return power_good->value();
   }
 
   float BenchPowerModule::read_temperature() {

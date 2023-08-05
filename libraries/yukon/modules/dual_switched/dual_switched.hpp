@@ -43,7 +43,7 @@ namespace pimoroni {
   private:
     IO* sw_output[2];
     IO* sw_enable[2];
-    TCA power_good[2];
+    TCA_IO* power_good[2];
 
 
     //--------------------------------------------------

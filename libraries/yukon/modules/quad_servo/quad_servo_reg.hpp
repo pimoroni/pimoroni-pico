@@ -44,8 +44,8 @@ public:
   public:
     ServoCluster* servos;
   private:
-    IO* power_en;
-    IO* power_good;
+    TCA_IO* power_en;
+    TCA_IO* power_good;
 
 
     //--------------------------------------------------

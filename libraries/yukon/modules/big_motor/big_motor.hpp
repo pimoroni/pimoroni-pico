@@ -15,6 +15,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     static const std::string NAME;
+    static const uint NUM_MOTORS = 2;
     static constexpr float DEFAULT_FREQUENCY = 25000.0f;
     static constexpr float TEMPERATURE_THRESHOLD = 50.0f;
     static constexpr float CURRENT_THRESHOLD = 25.0f;
@@ -50,8 +51,8 @@ namespace pimoroni {
     MotorCluster* motor;
     Encoder* encoder;
   private:
-    TCA motor_en;
-    TCA motor_nfault;
+    TCA_IO* motor_en;
+    TCA_IO* motor_nfault;
 
 
     //--------------------------------------------------

@@ -44,10 +44,9 @@ namespace pimoroni {
     uint I2S_CLK;
     uint I2S_FS;
   private:
-    TCA slow_sda;
-    TCA slow_scl;
-    TCA amp_en;
-
+    TCA_IO* slow_sda;
+    TCA_IO* slow_scl;
+    TCA_IO* amp_en;
 
 
     //--------------------------------------------------

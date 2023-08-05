@@ -18,12 +18,16 @@ namespace pimoroni {
     YukonModule(),
     frequency(frequency),
     motor(nullptr),
-    encoder(nullptr) {
+    encoder(nullptr),
+    motor_en(nullptr),
+    motor_nfault(nullptr) {
   }
 
   BigMotorModule::~BigMotorModule() {
     delete(motor);
     delete(encoder);
+    delete(motor_en);
+    delete(motor_nfault);
   }
 
   std::string BigMotorModule::name() {
@@ -31,6 +35,13 @@ namespace pimoroni {
   }
 
   void BigMotorModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
+    // Create motor object
+    motor = new MotorCluster(pio0, 0, slot.FAST3, NUM_MOTORS);
+
+    // Create motor control pin objects
+    motor_en = new TCA_IO(slot.SLOW3, accessor);
+    motor_nfault = new TCA_IO(slot.SLOW2, accessor);
+
     // Configure strip and power pins
     configure();
 
@@ -39,23 +50,31 @@ namespace pimoroni {
   }
 
   void BigMotorModule::configure() {
+    motor->disable_all();
+    motor->decay_mode(0, SLOW_DECAY);
 
+    motor_nfault ->to_input();
+    motor_en->to_output(false);
   }
 
   void BigMotorModule::enable() {
-
+    CHECK_INITIALISED
+    motor_en->value(true);
   }
 
   void BigMotorModule::disable() {
-
+    CHECK_INITIALISED
+    motor_en->value(true);
   }
 
   bool BigMotorModule::is_enabled() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return motor_en->value();
   }
 
   bool BigMotorModule::read_fault() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return !motor_nfault->value();
   }
 
   bool BigMotorModule::read_current() {

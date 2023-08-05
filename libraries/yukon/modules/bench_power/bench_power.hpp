@@ -47,12 +47,14 @@ namespace pimoroni {
     float min_temperature;
     float avg_temperature;
     float count_avg;
+    
 
     //--------------------------------------------------
   private:
     PWMCluster* voltage_pwm;
     IO* power_en;
-    IO* power_good;
+    TCA_IO* power_good;
+    uint32_t pwm_period;
 
 
     //--------------------------------------------------

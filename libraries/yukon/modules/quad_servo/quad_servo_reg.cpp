@@ -16,11 +16,15 @@ namespace pimoroni {
   QuadServoRegModule::QuadServoRegModule(bool halt_on_not_pgood) :
     YukonModule(),
     halt_on_not_pgood(halt_on_not_pgood),
-    servos(nullptr) {
+    servos(nullptr),
+    power_en(nullptr),
+    power_good(nullptr) {
   }
 
   QuadServoRegModule::~QuadServoRegModule() {
     delete(servos);
+    delete(power_en);
+    delete(power_good);
   }
 
   std::string QuadServoRegModule::name() {
@@ -28,6 +32,13 @@ namespace pimoroni {
   }
 
   void QuadServoRegModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
+    // Create servo cluster object
+    servos = new ServoCluster(pio0, 0, slot.FAST1, NUM_SERVOS);
+
+    // Create the power control pin objects
+    power_en = new TCA_IO(slot.SLOW1, accessor);
+    power_good = new TCA_IO(slot.SLOW2, accessor);
+
     // Configure strip and power pins
     configure();
 
@@ -36,23 +47,30 @@ namespace pimoroni {
   }
 
   void QuadServoRegModule::configure() {
+    servos->disable_all();
 
+    power_en->to_output(false);
+    power_good->to_input();
   }
 
   void QuadServoRegModule::enable() {
-
+    CHECK_INITIALISED
+    power_en->value(true);
   }
 
   void QuadServoRegModule::disable() {
-
+    CHECK_INITIALISED
+    power_en->value(false);
   }
 
   bool QuadServoRegModule::is_enabled() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return power_en->value();
   }
 
   bool QuadServoRegModule::read_power_good() {
-    return 0; // TODO
+    CHECK_INITIALISED
+    return power_good->value();
   }
 
   float QuadServoRegModule::read_temperature() {

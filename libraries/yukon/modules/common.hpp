@@ -8,6 +8,11 @@
 #include <stdexcept>
 namespace pimoroni {
 
+#define CHECK_INITIALISED \
+  if(!is_initialised()) { \
+    throw std::runtime_error("Module not initialised\n"); \
+  }
+
   struct TCA {
     uint CHIP;
     uint GPIO;
@@ -43,7 +48,7 @@ namespace pimoroni {
     HIGH = true
   };
 
-  class SlotAccessor {
+  class TCAAccessor {
   public:
     virtual bool get_slow_input(TCA gpio) = 0;
     virtual bool get_slow_output(TCA gpio) = 0;
@@ -53,9 +58,28 @@ namespace pimoroni {
     virtual void set_slow_output(TCA gpio, bool value) = 0;
     virtual void set_slow_config(TCA gpio, bool output) = 0;
     virtual void set_slow_polarity(TCA gpio, bool polarity) = 0;
+  };
 
+  class SlotAccessor : public TCAAccessor {
+  public:
     virtual float read_slot_adc1(SLOT slot) = 0;
     virtual float read_slot_adc2(SLOT slot) = 0;
+  };
+
+  class TCA_IO {
+  public:
+    TCA_IO(TCA pin, TCAAccessor& accessor);
+    TCA_IO(TCA pin, TCAAccessor& accessor, bool out);
+    //~TCA_IO();
+    bool direction();
+    void direction(bool out);
+    void to_output(bool val);
+    void to_input();
+    bool value();
+    void value(bool val);
+  private:
+    TCA pin;
+    TCAAccessor& accessor;
   };
 
   class YukonModule {
@@ -102,23 +126,17 @@ namespace pimoroni {
     }
 
     float __read_adc1() {
-      if(!is_initialised()) {
-        throw std::runtime_error("Module not initialised\n");
-      }
+      CHECK_INITIALISED
       return __accessor->read_slot_adc1(slot);
     }
 
     float __read_adc2() {
-      if(!is_initialised()) {
-        throw std::runtime_error("Module not initialised\n");
-      }
+      CHECK_INITIALISED
       return __accessor->read_slot_adc2(slot);
     }
 
     float __read_adc2_as_temp() {
-      if(!is_initialised()) {
-        throw std::runtime_error("Module not initialised\n");
-      }
+      CHECK_INITIALISED
       float sense = __accessor->read_slot_adc2(slot);
       float r_thermistor = sense / ((3.3f - sense) / 5100.0f);
       float t_kelvin = (BETA * ROOM_TEMP) / (BETA + (ROOM_TEMP * log(r_thermistor / RESISTOR_AT_ROOM_TEMP)));
