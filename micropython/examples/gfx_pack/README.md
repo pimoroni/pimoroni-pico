@@ -12,6 +12,7 @@
   - [CO2](#co2)
   - [Thermometer](#thermometer)
 - [Wireless Examples](#wireless-examples)
+  - [Carbon Intensity Graph](#carbon-intensity-graph)
   - [Sunrise / Sunset](#sunrise--sunset)
   - [Zoo Facts](#zoo-facts)
 - [Other Resources](#other-resources)
@@ -103,6 +104,14 @@ To use the Pico's internal temperature sensor in place of the BME68x breakout, j
 These wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `common` directory to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
 - [micropython/examples/common](../../examples/common)
+
+### Carbon Intensity Graph
+
+[carbon_intensity.py](carbon_intensity.py)
+
+Displays near realtime information about the different types of electricity generation for a given UK postcode area.  Uses the backlight and a bar graph to show the current mix of generation sources, and updates itself periodically or when button E is pressed.
+
+Find out more about the Carbon Intensity API here:  https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
 
 ### Sunrise / Sunset
 
