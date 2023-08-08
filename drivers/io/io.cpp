@@ -12,6 +12,10 @@ namespace pimoroni {
     direction(out, pull_up, pull_down);
   };
 
+  IO::~IO() {
+    gpio_deinit(pin);
+  }
+
   bool IO::direction() {
     return gpio_is_dir_out(pin);
   }

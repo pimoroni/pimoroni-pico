@@ -43,7 +43,7 @@ namespace pimoroni {
   public:
     virtual std::string name();
     virtual void initialise(const SLOT& slot, SlotAccessor& accessor);
-    virtual void configure();
+    virtual void reset();
 
     //--------------------------------------------------
     float read_adc1();

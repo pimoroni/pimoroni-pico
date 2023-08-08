@@ -24,9 +24,11 @@ namespace pimoroni {
   }
 
   BenchPowerModule::~BenchPowerModule() {
+    logging.debug("[BenchPowerModule] Destructor Started\n");
     delete(voltage_pwm);
     delete(power_en);
     delete(power_good);
+    logging.debug("[BenchPowerModule] Destructor Done\n");
   }
 
   std::string BenchPowerModule::name() {
@@ -45,7 +47,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void BenchPowerModule::configure() {
+  void BenchPowerModule::reset() {
+    logging.debug("[BenchPowerModule] Resetting\n");
     CHECK_INITIALISED
     // Calculate a suitable pwm wrap period for this frequency
     uint32_t period; uint32_t div256;

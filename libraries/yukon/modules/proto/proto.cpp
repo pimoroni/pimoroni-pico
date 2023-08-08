@@ -17,9 +17,6 @@ namespace pimoroni {
     YukonModule() {
   }
 
-  ProtoPotModule::~ProtoPotModule() {
-  }
-
   std::string ProtoPotModule::name() {
     return ProtoPotModule::NAME;
   }
@@ -46,9 +43,6 @@ namespace pimoroni {
     const_a = (4 * pu) + 1;
     const_b = (6 * pu) + 2;
     const_c = (pu * pu) + (2 * pu) + 1;
-  }
-
-  ProtoPotModule2::~ProtoPotModule2() {
   }
 
   std::string ProtoPotModule2::name() {

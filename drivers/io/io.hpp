@@ -8,6 +8,7 @@ namespace pimoroni {
   public:
     IO(uint pin);
     IO(uint pin, bool out, bool pull_up = false, bool pull_down = false);
+    ~IO();
     bool direction();
     void direction(bool out, bool pull_up = false, bool pull_down = false);
     void to_output(bool val);

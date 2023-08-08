@@ -1,4 +1,5 @@
 #include "quad_servo_direct.hpp"
+#include "../../logging.hpp"
 
 namespace pimoroni {
 
@@ -19,7 +20,9 @@ namespace pimoroni {
   }
 
   QuadServoDirectModule::~QuadServoDirectModule() {
+    logging.debug("[QuadServoDirectModule] Destructor Started\n");
     delete(servos);
+    logging.debug("[QuadServoDirectModule] Destructor Done\n");
   }
 
   std::string QuadServoDirectModule::name() {
@@ -34,7 +37,9 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void QuadServoDirectModule::configure() {
+  void QuadServoDirectModule::reset() {
+    logging.debug("[QuadServoDirectModule] Resetting\n");
+    CHECK_INITIALISED
     servos->disable_all();
   }
 

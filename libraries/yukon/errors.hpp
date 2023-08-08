@@ -74,11 +74,11 @@ namespace pimoroni {
     std::string message;
 
   public:
-    VerificationError(std::string msg) : message(msg) {
+    VerificationError(std::string msg) : message("VerificationError: " + msg) {
     }
 
     virtual const char* what() const noexcept {
-      return ("VerificationError: " + message).c_str();
+      return message.c_str();
     }
   };
 

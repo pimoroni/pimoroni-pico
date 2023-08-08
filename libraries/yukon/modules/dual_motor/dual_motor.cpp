@@ -25,10 +25,12 @@ namespace pimoroni {
   }
 
   DualMotorModule::~DualMotorModule() {
+    logging.debug("[DualMotorModule] Destructor Started\n");
     delete(motors);
     delete(motors_decay);
     delete(motors_toff);
     delete(motors_en);
+    logging.debug("[DualMotorModule] Destructor Done\n");
   }
 
   std::string DualMotorModule::name() {
@@ -48,7 +50,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void DualMotorModule::configure() {
+  void DualMotorModule::reset() {
+    logging.debug("[DualMotorModule] Resetting\n");
     CHECK_INITIALISED
     motors->disable_all();
 

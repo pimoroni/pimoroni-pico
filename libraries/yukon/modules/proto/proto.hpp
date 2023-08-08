@@ -24,7 +24,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     ProtoPotModule();
-    virtual ~ProtoPotModule();
+    virtual ~ProtoPotModule() {}
 
 
     //--------------------------------------------------
@@ -69,7 +69,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     ProtoPotModule2(float pot_resistance);
-    virtual ~ProtoPotModule2();
+    virtual ~ProtoPotModule2() {}
 
 
     //--------------------------------------------------

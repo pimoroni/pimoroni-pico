@@ -22,9 +22,11 @@ namespace pimoroni {
   }
 
   QuadServoRegModule::~QuadServoRegModule() {
+    logging.debug("[QuadServoRegModule] Destructor Started\n");
     delete(servos);
     delete(power_en);
     delete(power_good);
+    logging.debug("[QuadServoRegModule] Destructor Done\n");
   }
 
   std::string QuadServoRegModule::name() {
@@ -43,7 +45,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void QuadServoRegModule::configure() {
+  void QuadServoRegModule::reset() {
+    logging.debug("[QuadServoRegModule] Resetting\n");
     CHECK_INITIALISED
     servos->disable_all();
 

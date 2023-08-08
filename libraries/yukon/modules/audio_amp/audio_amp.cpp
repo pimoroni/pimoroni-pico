@@ -23,6 +23,7 @@ namespace pimoroni {
   }
 
   AudioAmpModule::~AudioAmpModule() {
+    logging.debug("[AudioAmpModule] Destructor\n");
   }
 
   std::string AudioAmpModule::name() {
@@ -41,7 +42,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void AudioAmpModule::configure() {
+  void AudioAmpModule::reset() {
+    logging.debug("[AudioAmpModule] Resetting\n");
     CHECK_INITIALISED
     slow_sda->to_output(true);
     slow_scl->to_output(true);

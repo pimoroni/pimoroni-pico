@@ -1,17 +1,15 @@
 #pragma once
 
 #include "pico/stdlib.h"
-#include <typeindex>
-#include <string>
-#include <vector>
+#include "tca_io.hpp"
+
 #include <math.h>
 #include <stdexcept>
-namespace pimoroni {
+#include <string>
+#include <typeindex>
+#include <vector>
 
-  struct TCA {
-    uint CHIP;
-    uint GPIO;
-  };
+namespace pimoroni {
 
   struct SLOT {
     uint ID;
@@ -43,40 +41,15 @@ namespace pimoroni {
     HIGH = true
   };
 
-  class TCAAccessor {
-  public:
-    virtual bool get_slow_input(TCA gpio) = 0;
-    virtual bool get_slow_output(TCA gpio) = 0;
-    virtual bool get_slow_config(TCA gpio) = 0;
-    virtual bool get_slow_polarity(TCA gpio) = 0;
-
-    virtual void set_slow_output(TCA gpio, bool value) = 0;
-    virtual void set_slow_config(TCA gpio, bool output) = 0;
-    virtual void set_slow_polarity(TCA gpio, bool polarity) = 0;
-  };
+  class YukonModule;  // Forward declaration
 
   class SlotAccessor : public TCAAccessor {
   public:
     virtual float read_slot_adc1(SLOT slot) = 0;
     virtual float read_slot_adc2(SLOT slot) = 0;
-  };
 
-  class TCA_IO {
-  public:
-    TCA_IO(TCA pin, TCAAccessor& accessor);
-    TCA_IO(TCA pin, TCAAccessor& accessor, bool out);
-    //~TCA_IO();
-    bool direction();
-    void direction(bool out);
-    void to_output(bool val);
-    void to_input();
-    bool value();
-    void value(bool val);
-  private:
-    TCA pin;
-    TCAAccessor& accessor;
+    virtual void deregister(YukonModule& module) = 0;
   };
-
 
   typedef bool (&func_is_module)(uint, bool, bool, bool);
 
@@ -112,6 +85,7 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     YukonModule();
+    virtual ~YukonModule();
 
 
     //--------------------------------------------------
@@ -122,11 +96,11 @@ namespace pimoroni {
     virtual std::string name() = 0;
 
     // Initialise the module once it has been assigned a slot
-    // Any overriding function must call this at its end
+    // Any overriding function must call this parent function at its end
     virtual void initialise(const SLOT& slot, SlotAccessor& accessor);
 
-    // Override this to configure the module once initialised, or return it to a default state (called from initialise)
-    virtual void configure() {}
+    // Override this to put the module into a known state
+    virtual void reset() {}
 
     //--------------------------------------------------
     bool is_initialised();

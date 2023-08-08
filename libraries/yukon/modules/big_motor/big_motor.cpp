@@ -24,10 +24,12 @@ namespace pimoroni {
   }
 
   BigMotorModule::~BigMotorModule() {
+    logging.debug("[BigMotorModule] Destructor Started\n");
     delete(motor);
     delete(encoder);
     delete(motor_en);
     delete(motor_nfault);
+    logging.debug("[BigMotorModule] Destructor Done\n");
   }
 
   std::string BigMotorModule::name() {
@@ -46,7 +48,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void BigMotorModule::configure() {
+  void BigMotorModule::reset() {
+    logging.debug("[DualSwitchedModule] Resetting\n");
     CHECK_INITIALISED
     motor->disable_all();
     motor->decay_mode(0, SLOW_DECAY);

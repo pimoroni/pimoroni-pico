@@ -18,17 +18,23 @@ namespace pimoroni {
     halt_on_not_pgood(halt_on_not_pgood),
     last_pgood1(false),
     last_pgood2(false) {
-    //sw_output(nullptr, nullptr), TODO
-    //sw_enable(nullptr, nullptr) {
+    sw_output[0] = nullptr;
+    sw_output[1] = nullptr;
+    sw_enable[0] = nullptr;
+    sw_enable[1] = nullptr;
+    power_good[0] = nullptr;
+    power_good[1] = nullptr;
   }
 
   DualSwitchedModule::~DualSwitchedModule() {
+    logging.debug("[DualSwitchedModule] Destructor Started\n");
     delete(sw_output[0]);
     delete(sw_output[1]);
     delete(sw_enable[0]);
     delete(sw_enable[1]);
     delete(power_good[0]);
     delete(power_good[1]);
+    logging.debug("[DualSwitchedModule] Destructor Done\n");
   }
 
   std::string DualSwitchedModule::name() {
@@ -39,8 +45,8 @@ namespace pimoroni {
     // Create the switch and power control pin objects
     sw_output[0] = new IO(slot.FAST1);
     sw_output[1] = new IO(slot.FAST3);
-    sw_enable[0] = new IO(slot.FAST1);
-    sw_enable[1] = new IO(slot.FAST3);
+    sw_enable[0] = new IO(slot.FAST2);
+    sw_enable[1] = new IO(slot.FAST4);
     power_good[0] = new TCA_IO(slot.SLOW1, accessor);
     power_good[1] = new TCA_IO(slot.SLOW3, accessor);
 
@@ -48,7 +54,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void DualSwitchedModule::configure() {
+  void DualSwitchedModule::reset() {
+    logging.debug("[DualSwitchedModule] Resetting\n");
     CHECK_INITIALISED
     sw_output[0]->to_output(false);
     sw_output[1]->to_output(false);

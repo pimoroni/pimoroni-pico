@@ -1,54 +1,7 @@
 #include "common.hpp"
+#include "../logging.hpp"
 
 namespace pimoroni {
-  TCA_IO::TCA_IO(TCA pin, TCAAccessor& accessor) :
-    pin(pin),
-    accessor(accessor) {
-    to_input();
-  };
-
-  TCA_IO::TCA_IO(TCA pin, TCAAccessor& accessor, bool out) :
-    pin(pin),
-    accessor(accessor) {
-    direction(out);
-  };
-
-  //TCA_IO::~TCA_IO() {
-  //  to_input();
-  //}
-
-  bool TCA_IO::direction() {
-    return accessor.get_slow_config(pin);
-  }
-
-  void TCA_IO::direction(bool out) {
-    accessor.set_slow_config(pin, out);
-  }
-
-  void TCA_IO::to_output(bool val) {
-    value(val);
-    direction(GPIO_OUT);
-  }
-
-  void TCA_IO::to_input() {
-    direction(GPIO_IN);
-    value(false);
-  }
-
-  bool TCA_IO::value() {
-    if(direction()) {
-        return accessor.get_slow_output(pin);
-    }
-    else {
-        return accessor.get_slow_input(pin);
-    }
-  }
-
-  void TCA_IO::value(bool val) {
-    accessor.set_slow_output(pin, val);
-  }
-
-
 
   YukonModule::YukonModule() :
     slot(),
@@ -61,14 +14,31 @@ namespace pimoroni {
     //self.__monitor_action_callback = None
   }
 
+  YukonModule::~YukonModule() {
+    logging.debug("[YukonModule] Destructor Started\n");
+    if(is_initialised()) {
+      // Modules make use of IO and TCA_IO classes for pin control then the below changes are redundant
+      gpio_deinit(slot.FAST1);
+      gpio_deinit(slot.FAST2);
+      gpio_deinit(slot.FAST3);
+      gpio_deinit(slot.FAST4);
+      __accessor->set_slow_config(slot.SLOW1, false);
+      __accessor->set_slow_config(slot.SLOW2, false);
+      __accessor->set_slow_config(slot.SLOW3, false);
+
+      __accessor->deregister(*this);
+    }
+    logging.debug("[YukonModule] Destructor Done\n");
+  }
+
   void YukonModule::initialise(const SLOT& slot, SlotAccessor& accessor) {
     // Record the slot we are in, and the ADC functions to call
     this->slot = slot;
     this->__accessor = &accessor;
     initialised = true;
 
-    // Configure any objects created during initialisation
-    configure();
+    // Put any objects created during initialisation into a known state
+    reset();
   }
 
   bool YukonModule::is_initialised() {
@@ -76,6 +46,7 @@ namespace pimoroni {
   }
 
   void YukonModule::deregister() {
+    logging.debug("[YukonModule] Deregistering\n");
     initialised = false;
     __accessor = nullptr;
   }

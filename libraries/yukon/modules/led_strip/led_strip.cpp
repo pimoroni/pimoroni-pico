@@ -25,6 +25,7 @@ namespace pimoroni {
   }
 
   LEDStripModule::~LEDStripModule() {
+    logging.debug("[LEDStripModule] Destructor Started\n");
     if(strip_type == NEOPIXEL) {
       if(ws_pixels != nullptr) {
         ws_pixels->stop();
@@ -39,6 +40,7 @@ namespace pimoroni {
     }
     delete(power_good);
     delete(power_en);
+    logging.debug("[LEDStripModule] Destructor Done\n");
   }
 
   std::string LEDStripModule::name() {
@@ -77,7 +79,8 @@ namespace pimoroni {
     YukonModule::initialise(slot, accessor);
   }
 
-  void LEDStripModule::configure() {
+  void LEDStripModule::reset() {
+    logging.debug("[LEDStripModule] Resetting\n");
     CHECK_INITIALISED
     power_en->to_output(false);
     power_good->to_input(true, false);
