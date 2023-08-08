@@ -1022,58 +1022,6 @@ mp_obj_t ModPicoGraphics_measure_text(size_t n_args, const mp_obj_t *pos_args, m
     return mp_obj_new_int(width);
 }
 
-/*
-pretty_polygon((
-    (0, 0),
-    (0, 0)
-), (
-
-), (
-
-))
-*/
-
-mp_obj_t ModPicoGraphics_pretty_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    size_t num_tuples = n_args - 1;
-    const mp_obj_t *lists = pos_args + 1;
-
-    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], ModPicoGraphics_obj_t);
-
-    std::vector<pretty_poly::contour_t<int>> contours;
-
-    for(auto i = 0u; i < num_tuples; i++) {
-        mp_obj_t c_obj = lists[i];
-
-        if(!mp_obj_is_exact_type(c_obj, &mp_type_list)) mp_raise_ValueError("Not a list");
-
-        mp_obj_list_t *t_contour = MP_OBJ_TO_PTR2(c_obj, mp_obj_list_t);
-
-        pretty_poly::point_t<int> *points = new pretty_poly::point_t<int>[t_contour->len];
-
-        for(auto p = 0u; p < t_contour->len; p++) {
-            mp_obj_t p_obj = t_contour->items[p];
-
-            if(!mp_obj_is_exact_type(p_obj, &mp_type_tuple)) mp_raise_ValueError("Not a tuple");
-
-            mp_obj_tuple_t *t_point = MP_OBJ_TO_PTR2(p_obj, mp_obj_tuple_t);
-            points[p] = {
-                mp_obj_get_int(t_point->items[0]),
-                mp_obj_get_int(t_point->items[1]),
-            };
-        }
-
-        contours.push_back({points, t_contour->len});
-    }
-
-    self->graphics->polygon(contours);
-
-    for(auto contour : contours) {
-        delete contour.points;
-    }
-
-    return mp_const_none;
-}
-
 mp_obj_t ModPicoGraphics_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     size_t num_tuples = n_args - 1;
     const mp_obj_t *tuples = pos_args + 1;
