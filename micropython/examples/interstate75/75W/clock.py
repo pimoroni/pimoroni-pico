@@ -129,7 +129,7 @@ def sync_time():
 
         redraw_display_if_reqd()
 
-    if max_wait > 0:
+    if wlan.status() == 3:
         print("Connected")
 
         try:
