@@ -1,32 +1,45 @@
 import time
-from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
-from motor import Motor
-from pimoroni import Button, Analog, Buzzer
+from picographics import PicoGraphics, DISPLAY_PICO_W_EXPLORER
+from servo import Servo
+from pimoroni import Button, Analog, Speaker
+from machine import Pin
 
-display = PicoGraphics(display=DISPLAY_PICO_EXPLORER)
+display = PicoGraphics(display=DISPLAY_PICO_W_EXPLORER)
 
 adc0 = Analog(26)
 adc1 = Analog(27)
 adc2 = Analog(28)
 
-button_a = Button(12)
-button_b = Button(13)
-button_x = Button(14)
-button_y = Button(15)
+button_a = Button(6)
+button_b = Button(7)
+button_x = Button(10)
+button_y = Button(11)
 
+speaker = Speaker(22)
+amp_en = Pin(8, Pin.OUT)
+amp_en.value(1)
+
+servo0 = Servo(12)
+servo1 = Servo(13)
+servo2 = Servo(14)
+servo3 = Servo(15)
+servo0.enable()
+servo1.enable()
+servo2.enable()
+servo3.enable()
+
+# constants
 BG = display.create_pen(32, 32, 64)
 WHITE = display.create_pen(255, 255, 255)
 
 ADC0_PEN = display.create_pen(255, 0, 0)
 ADC1_PEN = display.create_pen(0, 255, 0)
 ADC2_PEN = display.create_pen(0, 0, 255)
-
-MOTOR1 = Motor((8, 9))
-MOTOR2 = Motor((10, 11))
-
-BUZZER = Buzzer(0)
+VOLUME = 0.3
 
 i = 1
+
+display.set_font("bitmap8")
 
 while True:
     display.set_pen(BG)
@@ -77,24 +90,35 @@ while True:
     else:
         # no button press was detected
         display.set_pen(WHITE)
-        display.text("Plug a jumper wire from GP0 to AUDIO to hear noise!", 20, 110, 200)
+        display.text("Press a button!", 20, 110, 200)
 
-    BUZZER.set_tone(i)
+    speaker.set_tone(i, VOLUME)
 
-    # Motors
+    # servo shenanigans
     if i > 600:
-        display.text("Motor 1: Forwards", 20, 180, 200)
-        MOTOR1.full_positive()
+        display.text("Servo 0: Forwards", 20, 150, 200)
+        servo0.to_min()
     else:
-        display.text("Motor 1: Backwards", 20, 180, 200)
-        MOTOR1.full_negative()
-
+        display.text("Servo 0: Backwards", 20, 150, 200)
+        servo0.to_max()
     if i > 600:
-        display.text("Motor 2: Forwards", 20, 200, 200)
-        MOTOR2.full_positive()
+        display.text("Servo 1: Forwards", 20, 170, 200)
+        servo1.to_min()
     else:
-        display.text("Motor 2: Backwards", 20, 200, 200)
-        MOTOR2.full_negative()
+        display.text("Servo 1: Backwards", 20, 170, 200)
+        servo1.to_max()
+    if i > 600:
+        display.text("Servo 2: Forwards", 20, 190, 200)
+        servo2.to_min()
+    else:
+        display.text("Servo 2: Backwards", 20, 190, 200)
+        servo2.to_max()
+    if i > 600:
+        display.text("Servo 3: Forwards", 20, 210, 200)
+        servo3.to_min()
+    else:
+        display.text("Servo 3: Backwards", 20, 210, 200)
+        servo3.to_max()
 
     i = i + 20
     if i > 1000:

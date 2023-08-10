@@ -3,22 +3,25 @@
 
 import time
 from picographics import PicoGraphics, DISPLAY_PICO_W_EXPLORER
-from pimoroni import Buzzer
+from pimoroni import Speaker
 from machine import Pin
 
 display = PicoGraphics(display=DISPLAY_PICO_W_EXPLORER)
 
-# pull GP8 high to enable amp
+# pull GP8 high to enable speaker
 amp_en = Pin(8, Pin.OUT)
 amp_en.on()
 
-# Create a buzzer on pin 22  # this is VERY LOUD on Pico W Explorer
-BUZZER = Buzzer(22)
+# Create a speaker on pin 22
+speaker = Speaker(22)
 
+# constants
 BLACK = display.create_pen(0, 0, 0)
 GREEN = display.create_pen(0, 255, 0)
 
 WIDTH, HEIGHT = display.get_bounds()
+
+VOLUME = 0.4
 
 # this handy list converts notes into frequencies
 tones = {
@@ -124,11 +127,11 @@ def clear():                        # this function clears Pico W Explorer's scr
 
 
 def playtone(frequency):            # this function tells your program how to make noise
-    BUZZER.set_tone(frequency, duty=0.25)
+    speaker.set_tone(frequency, VOLUME)
 
 
 def bequiet():                      # this function tells your program how not to make noise
-    BUZZER.set_tone(-1)
+    speaker.set_tone(-1)
 
 
 def playsong(song):                 # this function plays your song
