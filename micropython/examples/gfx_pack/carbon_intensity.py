@@ -9,13 +9,13 @@ Find out more about the Carbon Intensity API here:
 https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
 '''
 
-from gfx_pack import GfxPack, SWITCH_E
-from network_manager import NetworkManager
-
 import WIFI_CONFIG
 import time
 import uasyncio
 import urequests
+from gfx_pack import GfxPack, SWITCH_E
+from network_manager import NetworkManager
+
 
 gp = GfxPack()
 display = gp.display
@@ -143,7 +143,6 @@ def refresh_intensity_display():
 
 # Utility function used when connecting to wifi.
 def display_status():
-    global sys_status
     display.set_pen(0)  # Set pen to white
     display.clear()
     display.set_pen(15)
@@ -169,7 +168,11 @@ def status_handler(mode, status, ip):
 try:
     # Attempt to connect to the wifi.
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    uasyncio.get_event_loop().run_until_complete(
+        network_manager.client(WIFI_CONFIG.SSID,
+                               WIFI_CONFIG.PSK
+        )
+    )
 
     # Update the display, then count down to the next update drawing a
     # countdown bar periodically.  Update immediately if button E pressed.
@@ -179,7 +182,7 @@ try:
     ticks_before = last_updated
     bar_width = DISPLAY_WIDTH
     BAR_UPDATE_FREQUENCY = 1000
-    
+  
     while True:
         time.sleep(0.01)
 
@@ -190,7 +193,7 @@ try:
             bar_width = DISPLAY_WIDTH
 
         ticks_now = time.ticks_ms()
-        
+
         if time.ticks_diff(ticks_now, ticks_before) > BAR_UPDATE_FREQUENCY:
             bar_width = bar_width - (DISPLAY_WIDTH // CARBON_INTENSITY_UPDATE_FREQUENCY)
             ticks_before = time.ticks_ms()
