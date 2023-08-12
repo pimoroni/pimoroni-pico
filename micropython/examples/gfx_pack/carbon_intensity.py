@@ -9,10 +9,10 @@ Find out more about the Carbon Intensity API here:
 https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
 '''
 
-import WIFI_CONFIG
 import time
 import uasyncio
 import urequests
+import WIFI_CONFIG
 from gfx_pack import GfxPack, SWITCH_E
 from network_manager import NetworkManager
 
