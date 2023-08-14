@@ -3,6 +3,10 @@
 #include <optional>
 #include <cstring>
 #include <new>
+#include <filesystem>
+#include <fstream>
+
+#include "pretty_poly.hpp"
 
 
 #ifdef PP_DEBUG
@@ -13,21 +17,7 @@
 
 namespace pretty_poly {
 
-  //typedef void (*tile_callback_t)(const tile_t &tile);
-
-  typedef std::function<void(const tile_t &tile)> tile_callback_t;
-
-  // buffer that each tile is rendered into before callback
-  constexpr unsigned tile_buffer_size = 1024;
-  //uint8_t tile_buffer[tile_buffer_size];
   uint8_t *tile_buffer;
-
-  // polygon node buffer handles at most 16 line intersections per scanline
-  // is this enough for cjk/emoji? (requires a 2kB buffer)
-  constexpr unsigned node_buffer_size = 32;
-
-  //int nodes[node_buffer_size][32];
-  //unsigned node_counts[node_buffer_size];
 
   int (*nodes)[32];
   unsigned *node_counts;
@@ -40,10 +30,6 @@ namespace pretty_poly {
     rect_t clip(0, 0, 320, 240);
     tile_callback_t callback;
     antialias_t antialias = antialias_t::NONE;
-  }
-
-  size_t buffer_size() {
-    return tile_buffer_size + (node_buffer_size * sizeof(unsigned)) + (node_buffer_size * 32 * sizeof(int));
   }
 
   void init(void *memory) {
@@ -130,7 +116,7 @@ namespace pretty_poly {
   }
 
   template<typename T>
-  void build_nodes(const contour_t<T> &contour, const tile_t &tile, point_t<int> origin = point_t<int>(0, 0), int scale = 65536) {
+  void build_nodes(const contour_t<T> &contour, const tile_t &tile, point_t<int> origin, int scale) {
     int ox = (origin.x - tile.bounds.x) << settings::antialias;
     int oy = (origin.y - tile.bounds.y) << settings::antialias;
 
@@ -186,7 +172,7 @@ namespace pretty_poly {
   }
   
   template<typename T>
-  void draw_polygon(std::vector<contour_t<T>> contours, point_t<int> origin = point_t<int>(0, 0), int scale = 65536) {    
+  void draw_polygon(std::vector<contour_t<T>> contours, point_t<int> origin, int scale) {    
 
     debug("> draw polygon with %lu contours\n", contours.size());
 
@@ -246,3 +232,7 @@ namespace pretty_poly {
     }
   }
 }
+
+template void pretty_poly::draw_polygon<int>(std::vector<contour_t<int>> contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<uint8_t>(std::vector<contour_t<uint8_t>> contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<int8_t>(std::vector<contour_t<int8_t>> contours, point_t<int> origin, int scale);

@@ -2,11 +2,16 @@
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_polygon_obj, 2, VECTOR_polygon);
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_regular_polygon_obj, 6, VECTOR_regular_polygon);
+STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_text_obj, 4, VECTOR_text);
+STATIC MP_DEFINE_CONST_FUN_OBJ_3(VECTOR_set_font_obj, VECTOR_set_font);
+
 
 // class
 STATIC const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_polygon), MP_ROM_PTR(&VECTOR_polygon_obj) },
     { MP_ROM_QSTR(MP_QSTR_regular_polygon), MP_ROM_PTR(&VECTOR_regular_polygon_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_font), MP_ROM_PTR(&VECTOR_set_font_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&VECTOR_text_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(VECTOR_locals_dict, VECTOR_locals_dict_table);
