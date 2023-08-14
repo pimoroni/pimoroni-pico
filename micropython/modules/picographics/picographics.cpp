@@ -7,7 +7,6 @@
 #include "drivers/inky73/inky73.hpp"
 #include "drivers/psram_display/psram_display.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
-#include "libraries/pico_graphics/pretty-poly-types.hpp"
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_bus.hpp"
 #include "common/pimoroni_i2c.hpp"
@@ -442,9 +441,6 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7) {
         self->display->update(self->graphics);
     }
-
-    self->graphics->pretty_poly_init(m_tracked_calloc(self->graphics->pretty_poly_buffer_size(), sizeof(uint8_t)));
-
     return MP_OBJ_FROM_PTR(self);
 }
 
