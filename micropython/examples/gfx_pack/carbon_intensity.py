@@ -170,9 +170,7 @@ try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(
         network_manager.client(WIFI_CONFIG.SSID,
-                               WIFI_CONFIG.PSK
-        )
-    )
+                               WIFI_CONFIG.PSK))
 
     # Update the display, then count down to the next update drawing a
     # countdown bar periodically.  Update immediately if button E pressed.
@@ -182,7 +180,7 @@ try:
     ticks_before = last_updated
     bar_width = DISPLAY_WIDTH
     BAR_UPDATE_FREQUENCY = 1000
-  
+
     while True:
         time.sleep(0.01)
 
