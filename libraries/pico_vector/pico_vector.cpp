@@ -9,6 +9,29 @@ namespace pimoroni {
         scale);
   }
 
+  void PicoVector::rotate(std::vector<pretty_poly::contour_t<int>> &contours, Point origin, float angle) {
+    pretty_poly::mat3_t t2 = pretty_poly::mat3_t::translation(origin.x, origin.y);
+    pretty_poly::mat3_t t1 = pretty_poly::mat3_t::translation(-origin.x, -origin.y);
+    angle = 2 * M_PI * (angle / 360.0f);
+    pretty_poly::mat3_t r = pretty_poly::mat3_t::rotation(angle);
+    for(auto &contour : contours) {
+      for(auto i = 0u; i < contour.count; i++) {
+        contour.points[i] *= t1;
+        contour.points[i] *= r;
+        contour.points[i] *= t2;
+      }
+    }
+  }
+
+  void PicoVector::translate(std::vector<pretty_poly::contour_t<int>> &contours, Point translation) {
+    pretty_poly::mat3_t t = pretty_poly::mat3_t::translation(translation.x, translation.y);
+    for(auto &contour : contours) {
+      for(auto i = 0u; i < contour.count; i++) {
+        contour.points[i] *= t;
+      }
+    }
+  }
+
   Point PicoVector::text(std::string_view text, Point origin) {
     // TODO: Normalize types somehow, so we're not converting?
     pretty_poly::point_t<int> caret = pretty_poly::point_t<int>(origin.x, origin.y);

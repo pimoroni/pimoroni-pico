@@ -239,7 +239,11 @@ mp_obj_t VECTOR_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_ar
 
     int offset_x = 0;
     int offset_y = 0;
+    float angle = 0.0f;
 
+    // TODO: We should probably convert this to a full-fat argument parser
+    // with optional kwargs for translation and rotation
+    // this is very, very hacky
     if(mp_obj_is_int(pos_args[1])) {
         offset_x = mp_obj_get_int(pos_args[1]);
         lists++;
@@ -248,6 +252,12 @@ mp_obj_t VECTOR_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_ar
 
     if (mp_obj_is_int(pos_args[2])) {
         offset_y = mp_obj_get_int(pos_args[2]);
+        lists++;
+        num_tuples--;
+    }
+
+    if (mp_obj_is_float(pos_args[3])) {
+        angle = mp_obj_get_float(pos_args[3]);
         lists++;
         num_tuples--;
     }
@@ -278,7 +288,17 @@ mp_obj_t VECTOR_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_ar
         contours.push_back({points, t_contour->len});
     }
 
-    self->vector->polygon(contours, Point(offset_x, offset_y));
+    // TODO: This is pretty awful
+    // Translating contours could be another operation
+    // But it's costly to convert to/from a list of lists of tuples
+    // Perhaps polygons should be a purely internal C++ concept
+    // And we could have make_polygon(list(tuple, tuple)) ?
+    if(angle != 0.0f) {
+        self->vector->rotate(contours, Point(offset_x, offset_y), angle);
+        self->vector->polygon(contours, Point(0, 0));
+    } else {
+        self->vector->polygon(contours, Point(offset_x, offset_y));
+    }
 
     for(auto contour : contours) {
         delete contour.points;
