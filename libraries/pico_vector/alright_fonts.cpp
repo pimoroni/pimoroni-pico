@@ -12,6 +12,19 @@ using namespace pretty_poly;
 
 namespace alright_fonts {
   /*
+    utility functions
+  */
+  pretty_poly::rect_t measure_character(text_metrics_t &tm, uint16_t codepoint) {
+    if(tm.face.glyphs.count(codepoint) == 1) {
+      glyph_t glyph = tm.face.glyphs[codepoint];
+
+      return {0, 0, ((glyph.advance * tm.size) / 128), tm.size};
+    }
+
+    return {0, 0, 0, 0};
+  }
+
+  /*
     render functions
   */
 

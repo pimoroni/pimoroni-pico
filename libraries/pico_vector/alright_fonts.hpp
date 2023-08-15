@@ -52,13 +52,18 @@ namespace alright_fonts {
 
     void set_size(int s) {
       size = s;
-      line_height = size * 1.2;
+      line_height = size;
       letter_spacing = 0;
-      word_spacing = size;
+      word_spacing = size / 2;
     }
 
     text_metrics_t() {};
   };
+
+  /*
+    utility functions
+  */
+  pretty_poly::rect_t measure_character(text_metrics_t &tm, uint16_t codepoint);
 
   /* 
     render functions
