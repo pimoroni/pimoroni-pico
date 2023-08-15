@@ -111,6 +111,10 @@ namespace pretty_poly {
     contour_t(std::vector<point_t<T>> v) : points(v.data()), count(v.size()) {};
     contour_t(point_t<T> *points, unsigned count) : points(points), count(count) {};
 
+    // TODO: Make this work, it's so much nicer to use auto point : contour
+    //point_t<T> *begin() const { return points; };
+    //point_t<T> *end() const { return points + count * sizeof(point_t<T>); };
+
     rect_t bounds() {
       T minx = this->points[0].x, maxx = minx;
       T miny = this->points[0].y, maxy = miny;

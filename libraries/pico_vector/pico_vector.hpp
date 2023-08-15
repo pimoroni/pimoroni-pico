@@ -59,6 +59,9 @@ namespace pimoroni {
                 return result;
             }
 
+            void rotate(std::vector<pretty_poly::contour_t<int>> &contours, Point origin, float angle);
+            void translate(std::vector<pretty_poly::contour_t<int>> &contours, Point translation);
+
             Point text(std::string_view text, Point origin);
 
             void polygon(std::vector<pretty_poly::contour_t<int>> contours, Point origin = Point(0, 0), int scale=65536);
