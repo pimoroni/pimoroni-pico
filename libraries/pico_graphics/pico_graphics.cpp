@@ -8,6 +8,7 @@ namespace pimoroni {
   int PicoGraphics::reset_pen(uint8_t i) {return -1;};
   int PicoGraphics::create_pen(uint8_t r, uint8_t g, uint8_t b) {return -1;};
   int PicoGraphics::create_pen_hsv(float h, float s, float v){return -1;};
+  void PicoGraphics::set_pixel_alpha(const Point &p, const uint8_t a) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const uint8_t &c) {};
@@ -16,6 +17,7 @@ namespace pimoroni {
 
   int PicoGraphics::get_palette_size() {return 0;}
   RGB* PicoGraphics::get_palette() {return nullptr;}
+  bool PicoGraphics::supports_alpha_blend() {return false;}
 
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};
