@@ -13,12 +13,14 @@ namespace pimoroni {
             PicoVector(PicoGraphics *graphics, void *mem = nullptr) : graphics(graphics) {
                 pretty_poly::init(mem);
 
+                set_options([this](const pretty_poly::tile_t &tile) -> void {
+                    uint8_t *tile_data = tile.data;
 
-                if(graphics->supports_alpha_blend()) {
-                    set_options([this](const pretty_poly::tile_t &tile) -> void {
+                    if(this->graphics->supports_alpha_blend() && pretty_poly::settings::antialias != pretty_poly::NONE) {
                         for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < tile.bounds.w; x++) {
-                                uint8_t alpha = tile.get_value(x, y);
+                            for(auto x = 0; x < (int)tile.stride; x++) {
+                                uint8_t alpha = *tile_data++;
+                                if(x > tile.bounds.w) continue;
                                 if (alpha >= 4) {
                                     this->graphics->pixel({x + tile.bounds.x, y + tile.bounds.y});
                                 } else if (alpha > 0) {
@@ -27,25 +29,32 @@ namespace pimoroni {
                                 }
                             }
                         }
-                    }, pretty_poly::X4, {0, 0, graphics->bounds.w, graphics->bounds.h});
-                } else {
-                    set_options([this](const pretty_poly::tile_t &tile) -> void {
+                    } else {
                         for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < tile.bounds.w; x++) {
-                                uint8_t alpha = tile.get_value(x, y);
-                                if (alpha > 0) {
+                            for(auto x = 0; x < (int)tile.stride; x++) {
+                                uint8_t alpha =  *tile_data++;
+                                if(x > tile.bounds.w) continue;
+                                if (alpha) {
                                     this->graphics->pixel({x + tile.bounds.x, y + tile.bounds.y});
                                 }
                             }
                         }
-                    }, pretty_poly::NONE, {0, 0, graphics->bounds.w, graphics->bounds.h});
-                }
-            };
+                    }
+                }, graphics->supports_alpha_blend() ? pretty_poly::X4 : pretty_poly::NONE, {0, 0, graphics->bounds.w, graphics->bounds.h});
+            }
+
+            void set_antialiasing(pretty_poly::antialias_t antialias) {
+                set_options(pretty_poly::settings::callback, antialias, pretty_poly::settings::clip);
+            }
+
+            void set_font_size(unsigned int font_size) {
+                text_metrics.set_size(font_size);
+            }
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
                 bool result = text_metrics.face.load(font_path);
 
-                text_metrics.set_size(font_size);
+                set_font_size(font_size);
 
                 return result;
             }

@@ -141,6 +141,21 @@ mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
     return result ? mp_const_true : mp_const_false;
 }
 
+mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+
+    int font_size = mp_obj_get_int(size);
+    self->vector->set_font_size(font_size);
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+
+    self->vector->set_antialiasing((pretty_poly::antialias_t)mp_obj_get_int(aa));
+    return mp_const_none;
+}
+
 mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_text, ARG_x, ARG_y };
     static const mp_arg_t allowed_args[] = {

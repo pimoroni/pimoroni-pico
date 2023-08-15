@@ -97,7 +97,7 @@ namespace pretty_poly {
 
     tile_t() {};
 
-    int get_value(int x, int y) const {
+    inline int get_value(int x, int y) const {
       return this->data[x + y * this->stride];
     }
   };

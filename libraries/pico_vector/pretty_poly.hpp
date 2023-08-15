@@ -34,6 +34,13 @@ namespace pretty_poly {
 
   typedef std::function<void(const tile_t &tile)> tile_callback_t;
 
+  // user settings
+  namespace settings {
+    extern rect_t clip;
+    extern tile_callback_t callback;
+    extern antialias_t antialias;
+  }
+
   constexpr size_t buffer_size() {
     return tile_buffer_size + (node_buffer_size * sizeof(unsigned)) + (node_buffer_size * 32 * sizeof(int));
   }

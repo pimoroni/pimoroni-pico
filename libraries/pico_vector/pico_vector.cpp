@@ -45,13 +45,13 @@ namespace pimoroni {
       }
 
       if(caret.x != 0 && caret.x + word_width > graphics->clip.w) {
-        caret.x = 0;
+        caret.x = origin.x;
         caret.y += text_metrics.line_height;
       }
 
       for(size_t j = i; j < std::min(next_break + 1, text.length()); j++) {
         if (text[j] == '\n') { // Linebreak
-          caret.x = 0;
+          caret.x = origin.x;
           caret.y += text_metrics.line_height;
         } else if (text[j] == ' ') { // Space
           caret.x += space_width;
