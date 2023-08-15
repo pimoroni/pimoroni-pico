@@ -21,7 +21,7 @@ namespace pimoroni {
                             }
                         }
                     }
-                }, pretty_poly::NONE, {0, 0, graphics->bounds.w, graphics->bounds.h});
+                }, pretty_poly::X4, {0, 0, graphics->bounds.w, graphics->bounds.h});
             };
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
