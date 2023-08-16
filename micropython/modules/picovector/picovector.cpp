@@ -217,8 +217,7 @@ void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t ki
     (void)kind;
     _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
 
-    mp_print_str(print, "Polygon(");
-    mp_print_str(print, ", points = ");
+    mp_print_str(print, "Polygon(points = ");
     mp_obj_print_helper(print, mp_obj_new_int(self->contour.count), PRINT_REPR);
     mp_print_str(print, ", bounds = ");
     mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().x), PRINT_REPR);
@@ -236,6 +235,38 @@ mp_obj_t POLYGON__del__(mp_obj_t self_in) {
     (void)self;
     // TODO: Do we actually need to free anything here, if it's on GC heap it should get collected
     return mp_const_none;
+}
+
+typedef struct _mp_obj_polygon_it_t {
+    mp_obj_base_t base;
+    mp_fun_1_t iternext;
+    mp_obj_t polygon;
+    size_t cur;
+} mp_obj_polygon_it_t;
+
+STATIC mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
+    mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
+    _POLYGON_obj_t *polygon = MP_OBJ_TO_PTR2(self->polygon, _POLYGON_obj_t);
+
+    //mp_printf(&mp_plat_print, "points: %d, current: %d\n", polygon->contour.count, self->cur);
+
+    if(self->cur >= polygon->contour.count) return MP_OBJ_STOP_ITERATION;
+
+    mp_obj_t tuple[2];
+    tuple[0] = mp_obj_new_int((int)(polygon->contour.points[self->cur].x));
+    tuple[1] = mp_obj_new_int((int)(polygon->contour.points[self->cur].y));
+
+    self->cur++;
+    return mp_obj_new_tuple(2, tuple);
+}
+
+mp_obj_t POLYGON_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
+    mp_obj_polygon_it_t *o = (mp_obj_polygon_it_t *)iter_buf;
+    o->base.type = &mp_type_polymorph_iter;
+    o->iternext = py_image_it_iternext;
+    o->polygon = o_in;
+    o->cur = 0;
+    return MP_OBJ_FROM_PTR(o);
 }
 
 /* VECTOR */
