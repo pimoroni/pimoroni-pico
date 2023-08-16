@@ -36,7 +36,7 @@ namespace pretty_poly {
     static mat3_t identity() {mat3_t m; m.v00 = m.v11 = m.v22 = 1.0f; return m;}
     static mat3_t rotation(float a) {
       float c = cosf(a), s = sinf(a); mat3_t r = mat3_t::identity();
-      r.v00 = c; r.v01 = s; r.v10 = -s; r.v11 = c; return r;}
+      r.v00 = c; r.v01 = -s; r.v10 = s; r.v11 = c; return r;}
     static mat3_t translation(float x, float y) {
       mat3_t r = mat3_t::identity(); r.v02 = x; r.v12 = y; return r;}
     static mat3_t scale(float x, float y) {
@@ -56,8 +56,9 @@ namespace pretty_poly {
     inline point_t& operator/= (const float a) {x /= a; y /= a; return *this;}
     inline point_t& operator/= (const point_t &a) {x /= a.x; y /= a.y; return *this;}
     void transform(const mat3_t &m) {
-      this->x = (m.v00 * float(this->x) + m.v01 * float(this->y) + m.v02);
-      this->y = (m.v10 * float(this->x) + m.v11 * float(this->y) + m.v12);
+      float tx = x, ty = y;
+      this->x = (m.v00 * tx + m.v01 * ty + m.v02);
+      this->y = (m.v10 * tx + m.v11 * ty + m.v12);
     }
 
   };
