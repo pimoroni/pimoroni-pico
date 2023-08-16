@@ -122,14 +122,14 @@ namespace pretty_poly {
 
     // start with the last point to close the loop
     point_t<int> last(
-      (((contour.points[contour.count - 1].x * scale) << settings::antialias) / 65536) + ox, 
-      (((contour.points[contour.count - 1].y * scale) << settings::antialias) / 65536) + oy
+      (((int(contour.points[contour.count - 1].x) * scale) << settings::antialias) / 65536) + ox,
+      (((int(contour.points[contour.count - 1].y) * scale) << settings::antialias) / 65536) + oy
     );
 
     for(auto i = 0u; i < contour.count; i++) {
       point_t<int> point(
-        (((contour.points[i].x * scale) << settings::antialias) / 65536) + ox,
-        (((contour.points[i].y * scale) << settings::antialias) / 65536) + oy
+        (((int(contour.points[i].x) * scale) << settings::antialias) / 65536) + ox,
+        (((int(contour.points[i].y) * scale) << settings::antialias) / 65536) + oy
       );
 
       add_line_segment_to_nodes(last, point);
@@ -234,5 +234,6 @@ namespace pretty_poly {
 }
 
 template void pretty_poly::draw_polygon<int>(std::vector<contour_t<int>> contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<float>(std::vector<contour_t<float>> contours, point_t<int> origin, int scale);
 template void pretty_poly::draw_polygon<uint8_t>(std::vector<contour_t<uint8_t>> contours, point_t<int> origin, int scale);
 template void pretty_poly::draw_polygon<int8_t>(std::vector<contour_t<int8_t>> contours, point_t<int> origin, int scale);

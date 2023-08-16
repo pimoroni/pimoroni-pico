@@ -23,6 +23,10 @@ typedef struct _VECTOR_obj_t {
     PicoVector *vector;
 } _VECTOR_obj_t;
 
+typedef struct _POLYGON_obj_t {
+    mp_obj_base_t base;
+    pretty_poly::contour_t<picovector_point_type> contour;
+} _POLYGON_obj_t;
 
 pretty_poly::file_io::file_io(std::string_view filename) {
     mp_obj_t fn = mp_obj_new_str(filename.data(), (mp_uint_t)filename.size());
@@ -102,6 +106,139 @@ static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
     }
     mp_raise_TypeError("can't convert object to str implicitly");
 }
+
+/* POLYGON */
+
+mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    enum { ARG_x, ARG_y, ARG_w, ARG_h };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
+    self->base.type = &POLYGON_type;
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+    int w = args[ARG_w].u_int;
+    int h = args[ARG_h].u_int;
+
+    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, 4);
+    self->contour.count = 4;
+
+    self->contour.points[0] = {float(x), float(y)};
+    self->contour.points[1] = {float(x + w), float(y)};
+    self->contour.points[2] = {float(x + w), float(y + h)};
+    self->contour.points[3] = {float(x), float(y + h)};
+
+    return self;
+}
+
+mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    enum { ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_rotation };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_sides, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
+    self->base.type = &POLYGON_type;
+
+    Point origin(args[ARG_x].u_int, args[ARG_y].u_int);
+    unsigned int sides = args[ARG_sides].u_int;
+    float radius =  mp_obj_get_float(args[ARG_radius].u_obj);
+    float rotation = 0.0f;
+    if (args[ARG_rotation].u_obj != mp_const_none) {
+        rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
+        rotation *= (M_PI / 180.0f);
+    }
+    int o_x = args[ARG_x].u_int;
+    int o_y = args[ARG_y].u_int;
+
+    float angle = (360.0f / sides) * (M_PI / 180.0f);
+
+    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, sides);
+    self->contour.count = sides;
+
+    for(auto s = 0u; s < sides; s++) {
+        float current_angle = angle * s + rotation;
+        self->contour.points[s] = {
+            (picovector_point_type)(cos(current_angle) * radius) + o_x,
+            (picovector_point_type)(sin(current_angle) * radius) + o_y
+        };
+    }
+
+    return self;
+}
+
+mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
+    self->base.type = &POLYGON_type;
+
+    size_t num_points = n_args;
+    const mp_obj_t *points = all_args;
+
+    if(num_points < 3) mp_raise_ValueError("Polygon: At least 3 points required.");
+
+    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, num_points);
+    self->contour.count = num_points;
+
+    for(auto i = 0u; i < num_points; i++) {
+        mp_obj_t c_obj = points[i];
+
+        if(!mp_obj_is_exact_type(c_obj, &mp_type_tuple)) mp_raise_ValueError("Not a tuple");
+
+        mp_obj_tuple_t *t_point = MP_OBJ_TO_PTR2(c_obj, mp_obj_tuple_t);
+
+        if(t_point->len != 2) mp_raise_ValueError("Tuple must have X, Y");
+
+        self->contour.points[i] = {
+            (picovector_point_type)mp_obj_get_int(t_point->items[0]),
+            (picovector_point_type)mp_obj_get_int(t_point->items[1]),
+        };
+    }
+
+    return self;
+}
+
+void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+    (void)kind;
+    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+
+    mp_print_str(print, "Polygon(");
+    mp_print_str(print, ", points = ");
+    mp_obj_print_helper(print, mp_obj_new_int(self->contour.count), PRINT_REPR);
+    mp_print_str(print, ", bounds = ");
+    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().x), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().y), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().w), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().h), PRINT_REPR);
+    mp_print_str(print, ")");
+}
+
+mp_obj_t POLYGON__del__(mp_obj_t self_in) {
+    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+    (void)self;
+    // TODO: Do we actually need to free anything here, if it's on GC heap it should get collected
+    return mp_const_none;
+}
+
+/* VECTOR */
 
 mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     enum {
@@ -186,15 +323,14 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     return mp_const_none;
 }
 
-mp_obj_t VECTOR_regular_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_rotation };
+mp_obj_t VECTOR_rotate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_polygon, ARG_angle, ARG_origin_x, ARG_origin_y };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_sides, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_rotation, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_polygon, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_angle, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_origin_x, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_origin_y, MP_ARG_INT, {.u_int = 0} }
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -202,107 +338,63 @@ mp_obj_t VECTOR_regular_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_
 
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
 
-    Point origin(args[ARG_x].u_int, args[ARG_y].u_int);
-    unsigned int sides = args[ARG_sides].u_int;
-    float radius =  mp_obj_get_float(args[ARG_radius].u_obj);
-    float rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
-    int o_x = args[ARG_x].u_int;
-    int o_y = args[ARG_y].u_int;
+    if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
 
-    float angle = (360.0f / sides) * (M_PI / 180.0f);
+    _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _POLYGON_obj_t);
 
-    pretty_poly::point_t<int> *points = new pretty_poly::point_t<int>[sides];
+    Point origin = Point(args[ARG_origin_x].u_int, args[ARG_origin_y].u_int);
 
-    for(auto s = 0u; s < sides; s++) {
-        float current_angle = angle * s + rotation;
-        points[s] = {
-            int(cos(current_angle) * radius),
-            int(sin(current_angle) * radius)
-        };
-    }
+    float angle = mp_obj_get_float(args[ARG_angle].u_obj);
 
-    std::vector<pretty_poly::contour_t<int>> contours;
-    contours.push_back({points, sides});
-    self->vector->polygon(contours, Point(o_x, o_y));
-
-    delete points;
+    self->vector->rotate(poly->contour, origin, angle);
 
     return mp_const_none;
 }
 
-mp_obj_t VECTOR_polygon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+mp_obj_t VECTOR_translate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_polygon, ARG_x, ARG_y };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_polygon, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} }
+    };
 
-    size_t num_tuples = n_args - 1;
-    const mp_obj_t *lists = pos_args + 1;
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
+
+    if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
+
+    _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _POLYGON_obj_t);
+
+    Point translate = Point(args[ARG_x].u_int, args[ARG_y].u_int);
+
+    self->vector->translate(poly->contour, translate);
+
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+
+    size_t num_polygons = n_args - 1;
+    const mp_obj_t *polygons = pos_args + 1;
 
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], _VECTOR_obj_t);
 
-    int offset_x = 0;
-    int offset_y = 0;
-    float angle = 0.0f;
+    std::vector<pretty_poly::contour_t<picovector_point_type>> contours;
 
-    // TODO: We should probably convert this to a full-fat argument parser
-    // with optional kwargs for translation and rotation
-    // this is very, very hacky
-    if(mp_obj_is_int(pos_args[1])) {
-        offset_x = mp_obj_get_int(pos_args[1]);
-        lists++;
-        num_tuples--;
+    for(auto i = 0u; i < num_polygons; i++) {
+        mp_obj_t poly_obj = polygons[i];
+
+        if(!MP_OBJ_IS_TYPE(poly_obj, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
+
+        _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _POLYGON_obj_t);
+        contours.push_back(poly->contour);
     }
 
-    if (mp_obj_is_int(pos_args[2])) {
-        offset_y = mp_obj_get_int(pos_args[2]);
-        lists++;
-        num_tuples--;
-    }
-
-    if (mp_obj_is_float(pos_args[3])) {
-        angle = mp_obj_get_float(pos_args[3]);
-        lists++;
-        num_tuples--;
-    }
-
-    std::vector<pretty_poly::contour_t<int>> contours;
-
-    for(auto i = 0u; i < num_tuples; i++) {
-        mp_obj_t c_obj = lists[i];
-
-        if(!mp_obj_is_exact_type(c_obj, &mp_type_list)) mp_raise_ValueError("Not a list");
-
-        mp_obj_list_t *t_contour = MP_OBJ_TO_PTR2(c_obj, mp_obj_list_t);
-
-        pretty_poly::point_t<int> *points = new pretty_poly::point_t<int>[t_contour->len];
-
-        for(auto p = 0u; p < t_contour->len; p++) {
-            mp_obj_t p_obj = t_contour->items[p];
-
-            if(!mp_obj_is_exact_type(p_obj, &mp_type_tuple)) mp_raise_ValueError("Not a tuple");
-
-            mp_obj_tuple_t *t_point = MP_OBJ_TO_PTR2(p_obj, mp_obj_tuple_t);
-            points[p] = {
-                mp_obj_get_int(t_point->items[0]),
-                mp_obj_get_int(t_point->items[1]),
-            };
-        }
-
-        contours.push_back({points, t_contour->len});
-    }
-
-    // TODO: This is pretty awful
-    // Translating contours could be another operation
-    // But it's costly to convert to/from a list of lists of tuples
-    // Perhaps polygons should be a purely internal C++ concept
-    // And we could have make_polygon(list(tuple, tuple)) ?
-    if(angle != 0.0f) {
-        self->vector->rotate(contours, Point(offset_x, offset_y), angle);
-        self->vector->polygon(contours, Point(0, 0));
-    } else {
-        self->vector->polygon(contours, Point(offset_x, offset_y));
-    }
-
-    for(auto contour : contours) {
-        delete contour.points;
-    }
+    self->vector->polygon(contours);
 
     return mp_const_none;
 }

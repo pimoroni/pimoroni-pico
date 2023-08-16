@@ -3,6 +3,10 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
+
+    // Integer point types cause compound error in transformations
+    typedef float picovector_point_type;
+
     class PicoVector {
         private:
             PicoGraphics *graphics;
@@ -59,12 +63,15 @@ namespace pimoroni {
                 return result;
             }
 
-            void rotate(std::vector<pretty_poly::contour_t<int>> &contours, Point origin, float angle);
-            void translate(std::vector<pretty_poly::contour_t<int>> &contours, Point translation);
+            void rotate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point origin, float angle);
+            void translate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point translation);
+
+            void rotate(pretty_poly::contour_t<picovector_point_type> &contour, Point origin, float angle);
+            void translate(pretty_poly::contour_t<picovector_point_type> &contour, Point translation);
 
             Point text(std::string_view text, Point origin);
 
-            void polygon(std::vector<pretty_poly::contour_t<int>> contours, Point origin = Point(0, 0), int scale=65536);
+            void polygon(std::vector<pretty_poly::contour_t<picovector_point_type>> contours, Point origin = Point(0, 0), int scale=65536);
 
             static constexpr size_t pretty_poly_buffer_size() {
                 return pretty_poly::buffer_size();

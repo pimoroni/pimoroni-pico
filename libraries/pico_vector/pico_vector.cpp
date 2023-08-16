@@ -2,14 +2,14 @@
 #include <vector>
 
 namespace pimoroni {
-  void PicoVector::polygon(std::vector<pretty_poly::contour_t<int>> contours, Point origin, int scale) {
-    pretty_poly::draw_polygon<int>(
+  void PicoVector::polygon(std::vector<pretty_poly::contour_t<picovector_point_type>> contours, Point origin, int scale) {
+    pretty_poly::draw_polygon<picovector_point_type>(
         contours,
         pretty_poly::point_t<int>(origin.x, origin.y),
         scale);
   }
 
-  void PicoVector::rotate(std::vector<pretty_poly::contour_t<int>> &contours, Point origin, float angle) {
+  void PicoVector::rotate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point origin, float angle) {
     pretty_poly::mat3_t t2 = pretty_poly::mat3_t::translation(origin.x, origin.y);
     pretty_poly::mat3_t t1 = pretty_poly::mat3_t::translation(-origin.x, -origin.y);
     angle = 2 * M_PI * (angle / 360.0f);
@@ -23,12 +23,31 @@ namespace pimoroni {
     }
   }
 
-  void PicoVector::translate(std::vector<pretty_poly::contour_t<int>> &contours, Point translation) {
+  void PicoVector::translate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point translation) {
     pretty_poly::mat3_t t = pretty_poly::mat3_t::translation(translation.x, translation.y);
     for(auto &contour : contours) {
       for(auto i = 0u; i < contour.count; i++) {
         contour.points[i] *= t;
       }
+    }
+  }
+
+  void PicoVector::rotate(pretty_poly::contour_t<picovector_point_type> &contour, Point origin, float angle) {
+    pretty_poly::mat3_t t2 = pretty_poly::mat3_t::translation(origin.x, origin.y);
+    pretty_poly::mat3_t t1 = pretty_poly::mat3_t::translation(-origin.x, -origin.y);
+    angle = 2 * M_PI * (angle / 360.0f);
+    pretty_poly::mat3_t r = pretty_poly::mat3_t::rotation(angle);
+    for(auto i = 0u; i < contour.count; i++) {
+      contour.points[i] *= t1;
+      contour.points[i] *= r;
+      contour.points[i] *= t2;
+    }
+  }
+
+  void PicoVector::translate(pretty_poly::contour_t<picovector_point_type> &contour, Point translation) {
+    pretty_poly::mat3_t t = pretty_poly::mat3_t::translation(translation.x, translation.y);
+    for(auto i = 0u; i < contour.count; i++) {
+      contour.points[i] *= t;
     }
   }
 
