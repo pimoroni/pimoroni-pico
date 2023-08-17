@@ -70,4 +70,5 @@ namespace alright_fonts {
   */
 
   void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin);
+  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat3_t transform);
 }

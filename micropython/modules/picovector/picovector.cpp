@@ -325,12 +325,13 @@ mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa) {
 }
 
 mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_text, ARG_x, ARG_y };
+    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_angle };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT }
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_angle, MP_ARG_OBJ, {.u_obj = mp_const_none} }
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -349,7 +350,11 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
 
-    self->vector->text(t, Point(x, y));
+    if(args[ARG_angle].u_obj == mp_const_none) {
+        self->vector->text(t, Point(x, y));
+    } else {
+        self->vector->text(t, Point(x, y), mp_obj_get_float(args[ARG_angle].u_obj));
+    }
 
     return mp_const_none;
 }

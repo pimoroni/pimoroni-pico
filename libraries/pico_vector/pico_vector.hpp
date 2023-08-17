@@ -70,6 +70,7 @@ namespace pimoroni {
             void translate(pretty_poly::contour_t<picovector_point_type> &contour, Point translation);
 
             Point text(std::string_view text, Point origin);
+            Point text(std::string_view text, Point origin, float angle);
 
             void polygon(std::vector<pretty_poly::contour_t<picovector_point_type>> contours, Point origin = Point(0, 0), int scale=65536);
 

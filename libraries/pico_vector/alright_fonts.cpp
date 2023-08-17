@@ -41,6 +41,36 @@ namespace alright_fonts {
     }
   }
 
+  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat3_t transform) {
+    if(tm.face.glyphs.count(codepoint) == 1) {
+      glyph_t glyph = tm.face.glyphs[codepoint];
+
+      // scale is a fixed point 16:16 value, our font data is already scaled to
+      // -128..127 so to get the pixel size we want we can just shift the
+      // users requested size up one bit
+      unsigned scale = tm.size << 9;
+
+      std::vector<pretty_poly::contour_t<int8_t>> contours;
+
+      for(auto i = 0u; i < glyph.contours.size(); i++) {
+        unsigned int count = glyph.contours[i].count;
+        point_t<int8_t> *points = (point_t<int8_t> *)malloc(sizeof(point_t<int8_t>) * count);
+        for(auto j = 0u; j < count; j++) {
+          point_t<float> point(glyph.contours[i].points[j].x, glyph.contours[i].points[j].y);
+          point *= transform;
+          points[j] = point_t<int8_t>(point.x, point.y);
+        }
+        contours.emplace_back(points, count);
+      }
+
+      pretty_poly::draw_polygon<int8_t>(contours, origin, scale);
+
+      for(auto contour : contours) {
+        free(contour.points);
+      }
+    }
+  }
+
   /*
     load functions
   */
