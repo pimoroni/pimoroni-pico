@@ -20,6 +20,7 @@ typedef struct _ModPicoGraphics_obj_t {
 
 typedef struct _VECTOR_obj_t {
     mp_obj_base_t base;
+    void *mem;
     PicoVector *vector;
 } _VECTOR_obj_t;
 
@@ -132,10 +133,10 @@ mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
     self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, 4);
     self->contour.count = 4;
 
-    self->contour.points[0] = {float(x), float(y)};
-    self->contour.points[1] = {float(x + w), float(y)};
-    self->contour.points[2] = {float(x + w), float(y + h)};
-    self->contour.points[3] = {float(x), float(y + h)};
+    self->contour.points[0] = {picovector_point_type(x), picovector_point_type(y)};
+    self->contour.points[1] = {picovector_point_type(x + w), picovector_point_type(y)};
+    self->contour.points[2] = {picovector_point_type(x + w), picovector_point_type(y + h)};
+    self->contour.points[3] = {picovector_point_type(x), picovector_point_type(y + h)};
 
     return self;
 }
@@ -286,10 +287,12 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     _VECTOR_obj_t *self = m_new_obj(_VECTOR_obj_t);
     self->base.type = &VECTOR_type;
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
-    
-    void *mem = m_tracked_calloc(PicoVector::pretty_poly_buffer_size(), sizeof(uint8_t));
 
-    self->vector = m_new_class(PicoVector, graphics->graphics, mem);
+    // The PicoVector class calls `pretty_poly::init()` with the memory region
+    // it does not store a pointer to this, so we need to store one ourselves
+    self->mem = m_new(uint8_t, PicoVector::pretty_poly_buffer_size());
+
+    self->vector = m_new_class(PicoVector, graphics->graphics, self->mem);
 
     return self;
 }
@@ -427,7 +430,7 @@ mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         if(!MP_OBJ_IS_TYPE(poly_obj, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
 
         _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _POLYGON_obj_t);
-        contours.push_back(poly->contour);
+        contours.emplace_back(poly->contour.points, poly->contour.count);
     }
 
     self->vector->polygon(contours);
