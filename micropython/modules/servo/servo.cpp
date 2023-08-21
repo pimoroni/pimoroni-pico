@@ -1,6 +1,7 @@
 #include "drivers/servo/servo.hpp"
 #include "drivers/servo/servo_cluster.hpp"
 #include "micropython/modules/util.hpp"
+#include "micropython/modules/pin.hpp"
 #include <cstdio>
 
 
@@ -855,7 +856,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     enum { ARG_pin, ARG_calibration, ARG_freq };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_calibration, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
@@ -864,7 +865,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    int pin = args[ARG_pin].u_int;
+    int pin = pimoroni_gpio_from_obj(args[ARG_pin].u_obj);
 
     servo::Calibration *calib = nullptr;
     servo::CalibrationType calibration_type = servo::CalibrationType::ANGULAR;

@@ -11,6 +11,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_state.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/calibration.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../pin.cpp
 )
 # pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.pio)
 
