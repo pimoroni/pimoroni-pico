@@ -35,11 +35,13 @@ WHITE = display.create_pen(255, 255, 255)
 ADC0_PEN = display.create_pen(255, 0, 0)
 ADC1_PEN = display.create_pen(0, 255, 0)
 ADC2_PEN = display.create_pen(0, 0, 255)
-VOLUME = 0.3
+VOLUME = 0.2
 
 i = 1
 
 display.set_font("bitmap8")
+
+WIDTH, HEIGHT = display.get_bounds()
 
 while True:
     display.set_pen(BG)
@@ -69,56 +71,59 @@ while True:
     # On-board A/B/X/Y buttons
     if button_a.is_pressed:
         display.set_pen(WHITE)
-        display.text("Button A pressed", 20, 110, 200)
+        display.text("Button A pressed", 20, 90, 200)
 
     elif button_b.is_pressed:
         display.set_pen(WHITE)
-        display.text("Button B pressed", 20, 110, 200)
+        display.text("Button B pressed", 20, 90, 200)
 
     elif button_x.is_pressed and button_y.is_pressed:
         display.set_pen(WHITE)
-        display.text("Buttons X and Y pressed", 20, 110, 200)
+        display.text("Buttons X and Y pressed", 20, 90, 200)
+        amp_en.toggle()
+        time.sleep(0.5)
 
     elif button_x.is_pressed:
         display.set_pen(WHITE)
-        display.text("Button X pressed", 20, 110, 200)
+        display.text("Button X pressed", 20, 90, 200)
 
     elif button_y.is_pressed:
         display.set_pen(WHITE)
-        display.text("Button Y pressed", 20, 110, 200)
+        display.text("Button Y pressed", 20, 90, 200)
 
     else:
         # no button press was detected
         display.set_pen(WHITE)
-        display.text("Press a button!", 20, 110, 200)
+        display.text("Press a button!", 20, 90, 200)
+        display.text("Press X and Y to toggle audio", 20, 110, WIDTH - 20)
 
     speaker.set_tone(i, VOLUME)
 
     # servo shenanigans
     if i > 600:
         display.text("Servo 0: Forwards", 20, 150, 200)
-        servo0.to_min()
+        servo0.value(-70)
     else:
         display.text("Servo 0: Backwards", 20, 150, 200)
-        servo0.to_max()
+        servo0.value(70)
     if i > 600:
         display.text("Servo 1: Forwards", 20, 170, 200)
-        servo1.to_min()
+        servo1.value(-70)
     else:
         display.text("Servo 1: Backwards", 20, 170, 200)
-        servo1.to_max()
+        servo1.value(70)
     if i > 600:
         display.text("Servo 2: Forwards", 20, 190, 200)
-        servo2.to_min()
+        servo2.value(-70)
     else:
         display.text("Servo 2: Backwards", 20, 190, 200)
-        servo2.to_max()
+        servo2.value(70)
     if i > 600:
         display.text("Servo 3: Forwards", 20, 210, 200)
-        servo3.to_min()
+        servo3.value(-70)
     else:
         display.text("Servo 3: Backwards", 20, 210, 200)
-        servo3.to_max()
+        servo3.value(70)
 
     i = i + 20
     if i > 1000:
