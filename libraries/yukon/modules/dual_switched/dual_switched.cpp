@@ -47,8 +47,8 @@ namespace pimoroni {
     sw_output[1] = new IO(slot.FAST3);
     sw_enable[0] = new IO(slot.FAST2);
     sw_enable[1] = new IO(slot.FAST4);
-    power_good[0] = new TCA_IO(slot.SLOW1, accessor);
-    power_good[1] = new TCA_IO(slot.SLOW3, accessor);
+    power_good[0] = new TCA_IO(slot.SLOW3, accessor);
+    power_good[1] = new TCA_IO(slot.SLOW1, accessor);
 
     // Pass the slot and adc functions up to the parent now that module specific initialisation has finished
     YukonModule::initialise(slot, accessor);
