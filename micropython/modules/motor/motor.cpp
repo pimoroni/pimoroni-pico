@@ -2,6 +2,7 @@
 #include "drivers/motor/motor_cluster.hpp"
 #include "common/pimoroni_common.hpp"
 #include "micropython/modules/util.hpp"
+#include "micropython/modules/pin.hpp"
 #include <cstdio>
 
 
@@ -136,8 +137,8 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     else if(pin_count != 2)
         mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must only contain two integers"));
     else {
-        int pos = mp_obj_get_int(items[0]);
-        int neg = mp_obj_get_int(items[1]);
+        int pos = pimoroni_gpio_from_obj(items[0]);
+        int neg = pimoroni_gpio_from_obj(items[1]);
         if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
            (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
             mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
