@@ -1,7 +1,7 @@
 # Add a SCD41 sensor breakout to your Stellar Unicorn to make a handy CO2 detector!
 # https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 # Press A for CO2, B for temperature and C for humidity
-# This example uses a custom tiny font - find 3x5.bitmapfont in pimoroni-pico/fonts
+# This example uses a custom tiny font - find 3x5.bitmapfont in /common/fonts
 
 from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
