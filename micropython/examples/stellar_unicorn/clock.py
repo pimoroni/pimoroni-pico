@@ -9,7 +9,7 @@
 #
 # Clock synchronizes time on start, and resynchronizes if you press the A button
 #
-# This example uses a custom tiny font - find 3x5.bitmapfont in pimoroni-pico/fonts
+# This example uses a custom tiny font - find 3x5.bitmapfont in /common/fonts
 
 import time
 import math
