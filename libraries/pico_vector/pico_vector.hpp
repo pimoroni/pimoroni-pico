@@ -22,26 +22,26 @@ namespace pimoroni {
 
                     if(this->graphics->supports_alpha_blend() && pretty_poly::settings::antialias != pretty_poly::NONE) {
                         for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < (int)tile.stride; x++) {
+                            for(auto x = 0; x < tile.bounds.w; x++) {
                                 uint8_t alpha = *tile_data++;
-                                if(x > tile.bounds.w) continue;
                                 if (alpha >= 4) {
-                                    this->graphics->pixel({x + tile.bounds.x, y + tile.bounds.y});
+                                    this->graphics->set_pixel({x + tile.bounds.x, y + tile.bounds.y});
                                 } else if (alpha > 0) {
                                     alpha = alpha_map[alpha];
                                     this->graphics->set_pixel_alpha({x + tile.bounds.x, y + tile.bounds.y}, alpha);
                                 }
                             }
+                            tile_data += tile.stride - tile.bounds.w;
                         }
                     } else {
                         for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < (int)tile.stride; x++) {
-                                uint8_t alpha =  *tile_data++;
-                                if(x > tile.bounds.w) continue;
+                            for(auto x = 0; x < tile.bounds.w; x++) {
+                                uint8_t alpha = *tile_data++;
                                 if (alpha) {
-                                    this->graphics->pixel({x + tile.bounds.x, y + tile.bounds.y});
+                                    this->graphics->set_pixel({x + tile.bounds.x, y + tile.bounds.y});
                                 }
                             }
+                            tile_data += tile.stride - tile.bounds.w;
                         }
                     }
                 }, graphics->supports_alpha_blend() ? pretty_poly::X4 : pretty_poly::NONE, {0, 0, graphics->bounds.w, graphics->bounds.h});
