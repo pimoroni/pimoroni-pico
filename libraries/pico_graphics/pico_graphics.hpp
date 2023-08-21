@@ -47,7 +47,19 @@ namespace pimoroni {
       g((c >> 8) & 0xff),
       b(c & 0xff) {}
     constexpr RGB(int16_t r, int16_t g, int16_t b) : r(r), g(g), b(b) {}
-  
+
+    constexpr uint8_t blend(uint8_t s, uint8_t d, uint8_t a) {
+      return d + ((a * (s - d) + 127) >> 8);
+    }
+
+    constexpr RGB blend(RGB with, const uint8_t alpha) {
+      return RGB(
+        blend(with.r, r, alpha),
+        blend(with.g, g, alpha),
+        blend(with.b, b, alpha)
+      );
+    }
+
     static RGB from_hsv(float h, float s, float v) {
       float i = floor(h * 6.0f);
       float f = h * 6.0f - i;
@@ -268,6 +280,7 @@ namespace pimoroni {
 
     virtual int get_palette_size();
     virtual RGB* get_palette();
+    virtual bool supports_alpha_blend();
 
     virtual int create_pen(uint8_t r, uint8_t g, uint8_t b);
     virtual int create_pen_hsv(float h, float s, float v);
@@ -276,6 +289,7 @@ namespace pimoroni {
     virtual void set_pixel_dither(const Point &p, const RGB &c);
     virtual void set_pixel_dither(const Point &p, const RGB565 &c);
     virtual void set_pixel_dither(const Point &p, const uint8_t &c);
+    virtual void set_pixel_alpha(const Point &p, const uint8_t a);
     virtual void frame_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
@@ -471,6 +485,9 @@ namespace pimoroni {
       void set_pixel_span(const Point &p, uint l) override;
       void set_pixel_dither(const Point &p, const RGB &c) override;
       void set_pixel_dither(const Point &p, const RGB565 &c) override;
+      void set_pixel_alpha(const Point &p, const uint8_t a) override;
+
+      bool supports_alpha_blend() override {return true;}
 
       void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
 
