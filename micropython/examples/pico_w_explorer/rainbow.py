@@ -1,14 +1,20 @@
 # This example borrows a CircuitPython hsv_to_rgb function to cycle through some rainbows on Pico Explorer's screen. If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
 # We're using a RAM intensive 64K colour palette here to get a nice smooth colour transition.
+#
+# Wire up a four legged RGB LED to GP0, GP1 and GP2 (and the long leg to ground) for extra rainbows!
 
 import time
 from picographics import PicoGraphics, DISPLAY_PICO_W_EXPLORER, PEN_RGB565
+from pimoroni import RGBLED
 
 display = PicoGraphics(display=DISPLAY_PICO_W_EXPLORER, pen_type=PEN_RGB565)
 
 WIDTH, HEIGHT = display.get_bounds()
 
 BLACK = display.create_pen(0, 0, 0)
+
+# set up an old school 4 pin RGB LED connected to GP0, GP1 and GP2
+led = RGBLED(0, 1, 2, invert=False)
 
 
 # From CPython Lib/colorsys.py
@@ -40,6 +46,7 @@ h = 0
 while True:
     h += 1
     r, g, b = [int(255 * c) for c in hsv_to_rgb(h / 360.0, 1.0, 1.0)]  # rainbow magic
+    led.set_rgb(r, g, b)      # set the LED
     RAINBOW = display.create_pen(r, g, b)  # Create pen with converted HSV value
     display.set_pen(RAINBOW)  # Set pen
     display.clear()           # Fill the screen with the colour
