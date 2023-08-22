@@ -142,11 +142,13 @@ MICROPY_EVENT_POLL_HOOK
                         // Dithered output to RGB332
                         current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, (RGB565)(pDraw->pPixels[i]));
                     }
-                } else if (current_graphics->pen_type == PicoGraphics::PEN_RGB888) {
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_RGB888
+                || current_graphics->pen_type == PicoGraphics::PEN_DV_RGB888) {
                     current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb888());
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                 } else if (current_graphics->pen_type == PicoGraphics::PEN_P8 
                 || current_graphics->pen_type == PicoGraphics::PEN_P4
+                || current_graphics->pen_type == PicoGraphics::PEN_DV_P5
                 || current_graphics->pen_type == PicoGraphics::PEN_3BIT
                 || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
                     if (current_flags & FLAG_NO_DITHER) {
@@ -159,6 +161,9 @@ MICROPY_EVENT_POLL_HOOK
                     } else {
                         current_graphics->set_pixel_dither({pDraw->x + x, pDraw->y + y}, RGB((RGB565)pDraw->pPixels[i]));
                     }
+                } else if (current_graphics->pen_type == PicoGraphics::PEN_DV_RGB555) {
+                    current_graphics->set_pen(RGB((RGB565)pDraw->pPixels[i]).to_rgb555());
+                    current_graphics->pixel({pDraw->x + x, pDraw->y + y});
                 } else {
                     current_graphics->set_pen(pDraw->pPixels[i]);
                     current_graphics->pixel({pDraw->x + x, pDraw->y + y});
@@ -273,6 +278,9 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
         case PicoGraphics::PEN_P4:
         case PicoGraphics::PEN_3BIT:
         case PicoGraphics::PEN_INKY7:
+        case PicoGraphics::PEN_DV_RGB555:
+        case PicoGraphics::PEN_DV_RGB888:
+        case PicoGraphics::PEN_DV_P5:
             self->jpeg->setPixelType(RGB565_BIG_ENDIAN);
             break;
         // TODO 2-bit is currently unsupported

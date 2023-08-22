@@ -26,6 +26,7 @@
 namespace pimoroni {
   typedef uint8_t RGB332;
   typedef uint16_t RGB565;
+  typedef uint16_t RGB555;
   typedef uint32_t RGB888;
 
 
@@ -106,6 +107,14 @@ namespace pimoroni {
                    ((b & 0b11111000) >> 3);
 
       return __builtin_bswap16(p);
+    }
+
+    constexpr RGB555 to_rgb555() {
+      uint16_t p = ((r & 0b11111000) << 7) |
+                   ((g & 0b11111000) << 2) |
+                   ((b & 0b11111000) >> 3);
+
+      return p;
     }
 
     constexpr RGB565 to_rgb332() {
@@ -192,7 +201,10 @@ namespace pimoroni {
       PEN_RGB332,
       PEN_RGB565,
       PEN_RGB888,
-      PEN_INKY7
+      PEN_INKY7,
+      PEN_DV_RGB555,
+      PEN_DV_P5,
+      PEN_DV_RGB888,
     };
 
     void *frame_buffer;
@@ -528,6 +540,12 @@ namespace pimoroni {
        virtual void read_pixel_span(const Point &p, uint l, T *data) {};
    };
 
+  class IPaletteDisplayDriver {
+    public:
+      virtual void write_palette_pixel(const Point &p, uint8_t colour) = 0;
+      virtual void write_palette_pixel_span(const Point &p, uint l, uint8_t colour) = 0;
+      virtual void set_palette_colour(uint8_t entry, RGB888 colour) = 0;
+  };
 
   class PicoGraphics_PenInky7 : public PicoGraphics {
     public:
