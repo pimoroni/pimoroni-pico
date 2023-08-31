@@ -1,3 +1,7 @@
+if(NOT TARGET ltr559)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/ltr559/ltr559.cmake)
+endif()
+
 set(LIB_NAME breakout_ltr559)
 add_library(${LIB_NAME} INTERFACE)
 

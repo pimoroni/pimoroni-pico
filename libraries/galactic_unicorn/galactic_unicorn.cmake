@@ -1,3 +1,7 @@
+if(NOT TARGET pico_graphics)
+  include(${CMAKE_CURRENT_LIST_DIR}/../pico_graphics/pico_graphics.cmake)
+endif()
+
 add_library(galactic_unicorn INTERFACE)
 
 pico_generate_pio_header(galactic_unicorn ${CMAKE_CURRENT_LIST_DIR}/galactic_unicorn.pio)

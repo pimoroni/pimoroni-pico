@@ -1,3 +1,7 @@
+if(NOT TARGET rv3028)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/rv3028/rv3028.cmake)
+endif()
+
 set(LIB_NAME breakout_rtc)
 add_library(${LIB_NAME} INTERFACE)
 

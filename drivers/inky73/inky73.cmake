@@ -1,3 +1,7 @@
+if(NOT TARGET shiftregister)
+  include(${CMAKE_CURRENT_LIST_DIR}/../shiftregister/shiftregister.cmake)
+endif()
+
 set(DRIVER_NAME inky73)
 add_library(${DRIVER_NAME} INTERFACE)
 

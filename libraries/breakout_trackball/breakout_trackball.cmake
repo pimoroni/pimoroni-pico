@@ -1,3 +1,7 @@
+if(NOT TARGET trackball)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/trackball/trackball.cmake)
+endif()
+
 set(LIB_NAME breakout_trackball)
 add_library(${LIB_NAME} INTERFACE)
 

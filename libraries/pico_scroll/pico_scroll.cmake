@@ -1,3 +1,7 @@
+if(NOT TARGET pico_graphics)
+  include(${CMAKE_CURRENT_LIST_DIR}/../pico_graphics/pico_graphics.cmake)
+endif()
+
 add_library(pico_scroll INTERFACE)
 
 set(PICO_SCROLL_SOURCES

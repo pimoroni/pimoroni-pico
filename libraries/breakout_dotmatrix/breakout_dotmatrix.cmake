@@ -1,3 +1,7 @@
+if(NOT TARGET ltp305)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/ltp305/ltp305.cmake)
+endif()
+
 set(LIB_NAME breakout_dotmatrix)
 add_library(${LIB_NAME} INTERFACE)
 
