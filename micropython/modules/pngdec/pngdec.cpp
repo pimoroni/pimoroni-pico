@@ -96,7 +96,7 @@ int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
 void pngdec_open_helper(_PNG_obj_t *self) {
     int result = -1;
 
-    if(mp_obj_is_str_or_bytes(self->file)){
+    if(mp_obj_is_str(self->file)){
         GET_STR_DATA_LEN(self->file, str, str_len);
 
         result = self->png->open(
@@ -188,10 +188,16 @@ MICROPY_EVENT_POLL_HOOK
             uint8_t i = 0;
             if(pDraw->iBpp == 8) {
                 i = *pixel++;
-            } else {
-                i = pixel[x / 2];
+            } else if (pDraw->iBpp == 4) {
+                i = *pixel;
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
+                if (x & 1) pixel++;
+            } else {
+                i = *pixel;
+                i >>= 6 - ((x & 0b11) << 1);
+                i &= 0x3;
+                if ((x & 0b11) == 0b11) pixel++;
             }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             // grab the colour from the palette
