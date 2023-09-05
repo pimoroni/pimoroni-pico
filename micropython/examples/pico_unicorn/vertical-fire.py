@@ -56,7 +56,7 @@ def draw():
 
     for y in range(picounicorn.get_height()):
         for x in range(picounicorn.get_width()):
-            value = _heat[y][x]
+            value = _heat[y + 1][x]
             if value < 0.15:
                 _set_pen(_fire_colours[0])
             elif value < 0.25:
