@@ -73,6 +73,7 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * Interstate75 and 75W - HUB75 Matrix driver - `DISPLAY_INTERSTATE75_SIZEOFMATRIX` please read below!
 * Cosmic Unicorn - 32x32 LED Matrix - `DISPLAY_COSMIC_UNICORN`
 * Stellar Unicorn - 16x16 LED Matrix - `DISPLAY_STELLAR_UNICORN`
+* Pico Unicorn Pack - 16x7 LED Matrix - `DISPLAY_UNICORN_PACK`
 
 #### Interstate75 and Interstate75W Display modes
 
@@ -274,7 +275,7 @@ Send the contents of your Pico Graphics buffer to your screen:
 display.update()
 ```
 
-If you are using a Galactic Unicorn, then the process for updating the display is different. Instead of the above, do:
+If you are using a Unicorn (Galactic, Cosmic, Stellar or Pico), then the process for updating the display is different. Instead of the above, do:
 
 ```python
 galactic_unicorn.update(display)
