@@ -34,6 +34,15 @@ namespace pimoroni {
             *buf++ = color;
         }
     }
+    void PicoGraphics_PenRGB332::set_pixel_alpha(const Point &p, const uint8_t a) {
+        if(!bounds.contains(p)) return;
+
+        uint8_t *buf = (uint8_t *)frame_buffer;
+
+        RGB332 blended = RGB(buf[p.y * bounds.w + p.x]).blend(RGB(color), a).to_rgb332();
+
+        buf[p.y * bounds.w + p.x] = blended;
+    };
     void PicoGraphics_PenRGB332::set_pixel_dither(const Point &p, const RGB &c) {
         if(!bounds.contains(p)) return;
         uint8_t _dmv = dither16_pattern[(p.x & 0b11) | ((p.y & 0b11) << 2)];

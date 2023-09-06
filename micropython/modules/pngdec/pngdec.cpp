@@ -96,7 +96,7 @@ int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
 void pngdec_open_helper(_PNG_obj_t *self) {
     int result = -1;
 
-    if(mp_obj_is_str_or_bytes(self->file)){
+    if(mp_obj_is_str(self->file)){
         GET_STR_DATA_LEN(self->file, str, str_len);
 
         result = self->png->open(
@@ -188,10 +188,16 @@ MICROPY_EVENT_POLL_HOOK
             uint8_t i = 0;
             if(pDraw->iBpp == 8) {
                 i = *pixel++;
-            } else {
-                i = pixel[x / 2];
+            } else if (pDraw->iBpp == 4) {
+                i = *pixel;
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
+                if (x & 1) pixel++;
+            } else {
+                i = *pixel;
+                i >>= 6 - ((x & 0b11) << 1);
+                i &= 0x3;
+                if ((x & 0b11) == 0b11) pixel++;
             }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             // grab the colour from the palette
@@ -264,7 +270,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
     self->base.type = &PNG_type;
     self->png = m_new_class(PNG);
 
-    mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
+    //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
 
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
