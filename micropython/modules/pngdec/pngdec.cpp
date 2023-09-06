@@ -270,7 +270,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
     self->base.type = &PNG_type;
     self->png = m_new_class(PNG);
 
-    mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
+    //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
 
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
