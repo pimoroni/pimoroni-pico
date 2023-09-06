@@ -214,6 +214,24 @@ mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     return self;
 }
 
+mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
+    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+
+    pretty_poly::point_t<picovector_point_type> sum(0, 0);
+
+    for(auto i = 0u; i < self->contour.count; i++) {
+        sum += self->contour.points[i];
+    }
+
+    sum /= (float)self->contour.count;
+
+    mp_obj_t tuple[2];
+    tuple[0] = mp_obj_new_int((int)(sum.x));
+    tuple[1] = mp_obj_new_int((int)(sum.y));
+
+    return mp_obj_new_tuple(2, tuple);
+}
+
 void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind;
     _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);

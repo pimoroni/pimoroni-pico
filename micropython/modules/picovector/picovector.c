@@ -3,10 +3,12 @@
 /* Polygon */
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_1(POLYGON__del__obj, POLYGON__del__);
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(POLYGON_centroid_obj, POLYGON_centroid);
 
 
 STATIC const mp_rom_map_elem_t POLYGON_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&POLYGON__del__obj) },
+    { MP_ROM_QSTR(MP_QSTR_centroid), MP_ROM_PTR(&POLYGON_centroid_obj) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(POLYGON_locals_dict, POLYGON_locals_dict_table);

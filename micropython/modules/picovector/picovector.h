@@ -10,6 +10,7 @@ extern mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_
 extern mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
+extern mp_obj_t POLYGON_centroid(mp_obj_t self_in);
 extern mp_obj_t POLYGON_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf);
 
 extern mp_obj_t POLYGON__del__(mp_obj_t self_in);
