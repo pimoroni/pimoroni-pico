@@ -1,3 +1,7 @@
+if(NOT TARGET sgp30)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/sgp30/sgp30.cmake)
+endif()
+
 set(LIB_NAME breakout_sgp30)
 add_library(${LIB_NAME} INTERFACE)
 

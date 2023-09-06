@@ -1,3 +1,7 @@
+if(NOT TARGET bh1745)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/bh1745/bh1745.cmake)
+endif()
+
 set(LIB_NAME breakout_bh1745)
 add_library(${LIB_NAME} INTERFACE)
 
