@@ -2,11 +2,11 @@ import math
 import time
 from pimoroni_i2c import PimoroniI2C
 from breakout_as7262 import BreakoutAS7262
-from picographics import PicoGraphics, DISPLAY_PICO_W_EXPLORER, PEN_RGB332
+from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_RGB332
 from picovector import PicoVector, Polygon, RegularPolygon, ANTIALIAS_X4
 
-PINS_PICO_EXPLORER = {"sda": 20, "scl": 21}
-i2c = PimoroniI2C(**PINS_PICO_EXPLORER)
+PINS_TUFTY_2040 = {"sda": 4, "scl": 5}
+i2c = PimoroniI2C(**PINS_TUFTY_2040)
 
 # Set up the AS7262 Spectrometer
 as7262 = BreakoutAS7262(i2c)
@@ -17,7 +17,7 @@ as7262.set_indicator_current(BreakoutAS7262.MA4)
 as7262.set_leds(True, True)
 
 # Set up the display
-display = PicoGraphics(DISPLAY_PICO_W_EXPLORER, pen_type=PEN_RGB332)
+display = PicoGraphics(DISPLAY_TUFTY_2040, pen_type=PEN_RGB332)
 display.set_backlight(0.8)
 
 # Set up PicoVector
