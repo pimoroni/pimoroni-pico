@@ -1,7 +1,10 @@
 #include "pwm_cluster.hpp"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
+
+#ifndef NO_QSTR
 #include "pwm_cluster.pio.h"
+#endif
 
 // Uncomment the below line to enable debugging
 //#define DEBUG_MULTI_PWM

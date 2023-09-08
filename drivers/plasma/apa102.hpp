@@ -14,7 +14,9 @@ found here: https://github.com/raspberrypi/pico-examples/tree/master/pio/apa102
 #include <math.h>
 #include <cstdint>
 
+#ifndef NO_QSTR
 #include "apa102.pio.h"
+#endif
 
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
