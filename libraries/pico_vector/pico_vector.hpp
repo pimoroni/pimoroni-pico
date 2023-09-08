@@ -21,6 +21,12 @@ namespace pimoroni {
                     uint8_t *tile_data = tile.data;
 
                     if(this->graphics->supports_alpha_blend() && pretty_poly::settings::antialias != pretty_poly::NONE) {
+                        if (this->graphics->render_pico_vector_tile({tile.bounds.x, tile.bounds.y, tile.bounds.w, tile.bounds.h},
+                                                                    tile.data,
+                                                                    tile.stride,
+                                                                    (uint8_t)pretty_poly::settings::antialias)) {
+                            return;
+                        }
                         for(auto y = 0; y < tile.bounds.h; y++) {
                             for(auto x = 0; x < tile.bounds.w; x++) {
                                 uint8_t alpha = *tile_data++;
