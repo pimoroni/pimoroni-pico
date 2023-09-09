@@ -79,35 +79,42 @@ namespace pretty_poly {
       std::swap(sx, ex);
     }
 
+    if (ey < 0 || sy >= (int)node_buffer_size) return;
+
     /*sx <<= settings::antialias;
     ex <<= settings::antialias;
     sy <<= settings::antialias;
     ey <<= settings::antialias;*/
 
     int x = sx;
-    int y = sy;
     int e = 0;
 
     int xinc = sign(ex - sx);
     int einc = abs(ex - sx) + 1;
-
-    // todo: preclamp sy and ey (and therefore count) no need to perform
-    // that test inside the loop
     int dy = ey - sy;
-    int count = dy;
+
+    if (sy < 0) {
+      e = einc * -sy;
+      int xjump = e / dy;
+      e -= dy * xjump;
+      x += xinc * xjump;
+      sy = 0;
+    }
+
+    int y = sy;
+
+    int count = std::min((int)node_buffer_size, ey) - sy;
     debug("      + line segment from %d, %d to %d, %d\n", sx, sy, ex, ey);
     // loop over scanlines
     while(count--) {
       // consume accumulated error
       while(e > dy) {e -= dy; x += xinc;}
 
-      if(y >= 0 && y < (int)node_buffer_size) {  
-        // clamp node x value to tile bounds
-        int nx = std::max(std::min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
-        debug("      + adding node at %d, %d\n", x, y);
-        // add node to node list
-        nodes[y][node_counts[y]++] = nx;
-      }
+      // clamp node x value to tile bounds
+      int nx = std::max(std::min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
+      debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      nodes[y][node_counts[y]++] = nx;
 
       // step to next scanline and accumulate error
       y++;
@@ -138,11 +145,17 @@ namespace pretty_poly {
     }
   }
 
-  void render_nodes(const tile_t &tile) {
+  void render_nodes(const tile_t &tile, rect_t &bounds) {
+    int maxy = -1;
+    bounds.y = 0;
+    bounds.x = tile.bounds.w;
+    int maxx = 0;
     for(auto y = 0; y < (int)node_buffer_size; y++) {
       if(node_counts[y] == 0) {
+        if (y == bounds.y) ++bounds.y;
         continue;
       }
+      maxy = y;
 
       std::sort(&nodes[y][0], &nodes[y][0] + node_counts[y]);
 
@@ -154,6 +167,9 @@ namespace pretty_poly {
           continue;
         }
 
+        bounds.x = std::min(sx >> settings::antialias, bounds.x);
+        maxx = std::max((ex - 1) >> settings::antialias, maxx);
+
         debug(" - render span at %d from %d to %d\n", y, sx, ex);
 
         for(int x = sx; x < ex; x++) {
@@ -161,6 +177,9 @@ namespace pretty_poly {
         }       
       }
     }
+
+    bounds.w = (maxx >= bounds.x) ? maxx + 1 - bounds.x : 0;
+    bounds.h = (maxy >= bounds.y) ? maxy + 1 - bounds.y : 0;
   }
 
   template<typename T>
@@ -225,7 +244,16 @@ namespace pretty_poly {
 
         debug("    : render the tile\n");
         // render the tile
-        render_nodes(tile);
+        rect_t bounds;
+        render_nodes(tile, bounds);
+
+        tile.data += bounds.x + tile.stride * bounds.y;
+        bounds.x += tile.bounds.x;
+        bounds.y += tile.bounds.y;
+        tile.bounds = bounds.intersection(tile.bounds);
+        if (tile.bounds.empty()) {
+          continue;
+        }
 
         settings::callback(tile);
       }

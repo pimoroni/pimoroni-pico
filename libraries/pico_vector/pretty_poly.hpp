@@ -62,7 +62,7 @@ namespace pretty_poly {
   template<typename T>
   void build_nodes(const contour_t<T> &contour, const tile_t &tile, point_t<int> origin = point_t<int>(0, 0), int scale = 65536);
 
-  void render_nodes(const tile_t &tile);
+  void render_nodes(const tile_t &tile, rect_t &bounds);
 
   template<typename T>
   void draw_polygon(T *points, unsigned count);
