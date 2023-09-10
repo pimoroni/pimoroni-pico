@@ -18,4 +18,6 @@ target_compile_definitions(usermod_picovector INTERFACE
     MODULE_PICOVECTOR_ENABLED=1
 )
 
+target_link_libraries(usermod_picovector INTERFACE hardware_interp)
+
 target_link_libraries(usermod INTERFACE usermod_picovector)

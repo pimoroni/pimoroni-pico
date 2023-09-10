@@ -8,6 +8,7 @@
 
 #include "pretty_poly.hpp"
 
+#include "hardware/interp.h"
 
 #ifdef PP_DEBUG
 #define debug(...) printf(__VA_ARGS__)
@@ -79,8 +80,8 @@ namespace pretty_poly {
       std::swap(sx, ex);
     }
 
-    // Early out if line is completely outside the tile
-    if (ey < 0 || sy >= (int)node_buffer_size) return;
+    // Early out if line is completely outside the tile, or has no lines
+    if (ey < 0 || sy >= (int)node_buffer_size || sy == ey) return;
 
     debug("      + line segment from %d, %d to %d, %d\n", sx, sy, ex, ey);
 
@@ -123,13 +124,16 @@ namespace pretty_poly {
       x += xinc * xjump;
     }
 
+    interp1->base[1] = full_tile_width;
+    interp1->accum[0] = x;
+
     // loop over scanlines
     while(count--) {
       // consume accumulated error
-      while(e > dy) {e -= dy; x += xinc;}
+      while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
 
       // clamp node x value to tile bounds
-      int nx = std::max(std::min(x, full_tile_width), 0);        
+      const int nx = interp1->peek[0];
       debug("      + adding node at %d, %d\n", x, y);
       // add node to node list
       nodes[y][node_counts[y]++] = nx;
@@ -270,6 +274,14 @@ namespace pretty_poly {
     debug("  - bounds %d, %d (%d x %d)\n", polygon_bounds.x, polygon_bounds.y, polygon_bounds.w, polygon_bounds.h);
     debug("  - clip %d, %d (%d x %d)\n", settings::clip.x, settings::clip.y, settings::clip.w, settings::clip.h);
 
+    interp_hw_save_t interp1_save;
+    interp_save(interp1, &interp1_save);
+
+    interp_config cfg = interp_default_config();
+    interp_config_set_clamp(&cfg, true);
+    interp_config_set_signed(&cfg, true);
+    interp_set_config(interp1, 0, &cfg);
+    interp1->base[0] = 0;
 
     //memset(nodes, 0, node_buffer_size * sizeof(unsigned) * 32);
 
@@ -303,18 +315,21 @@ namespace pretty_poly {
         // render the tile
         rect_t bounds;
         render_nodes(tile, bounds);
-
-        tile.data += bounds.x + tile.stride * bounds.y;
-        bounds.x += tile.bounds.x;
-        bounds.y += tile.bounds.y;
-        tile.bounds = bounds.intersection(tile.bounds);
-        if (tile.bounds.empty()) {
+        if (bounds.empty()) {
           continue;
         }
+
+        tile.data += bounds.x + tile.stride * bounds.y;
+        tile.bounds.x += bounds.x;
+        tile.bounds.y += bounds.y;
+        tile.bounds.w = bounds.w;
+        tile.bounds.h = bounds.h;
 
         settings::callback(tile);
       }
     }
+
+    interp_restore(interp1, &interp1_save);
   }
 }
 

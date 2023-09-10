@@ -14,7 +14,7 @@ namespace pretty_poly {
 
   // 3x3 matrix for coordinate transformations
   struct mat3_t {
-    float v00, v10, v20, v01, v11, v21, v02, v12, v22 = 0.0f;
+    float v00 = 0.0f, v10 = 0.0f, v20 = 0.0f, v01 = 0.0f, v11 = 0.0f, v21 = 0.0f, v02 = 0.0f, v12 = 0.0f, v22 = 0.0f;
     mat3_t() = default;
     mat3_t(const mat3_t &m) = default;
     inline mat3_t& operator*= (const mat3_t &m) {        
@@ -43,6 +43,29 @@ namespace pretty_poly {
       mat3_t r = mat3_t::identity(); r.v00 = x; r.v11 = y; return r;}
   };
 
+  // 2x2 matrix for rotations and scales
+  struct mat2_t {
+    float v00 = 0.0f, v10 = 0.0f, v01 = 0.0f, v11 = 0.0f;
+    mat2_t() = default;
+    mat2_t(const mat2_t &m) = default;
+    inline mat2_t& operator*= (const mat2_t &m) {        
+      float r00 = this->v00 * m.v00 + this->v01 * m.v10;
+      float r01 = this->v00 * m.v01 + this->v01 * m.v11;
+      float r10 = this->v10 * m.v00 + this->v11 * m.v10;
+      float r11 = this->v10 * m.v01 + this->v11 * m.v11;
+      this->v00 = r00; this->v01 = r01;
+      this->v10 = r10; this->v11 = r11;
+      return *this;
+    }
+
+    static mat2_t identity() {mat2_t m; m.v00 = m.v11 = 1.0f; return m;}
+    static mat2_t rotation(float a) {
+      float c = cosf(a), s = sinf(a); mat2_t r;
+      r.v00 = c; r.v01 = -s; r.v10 = s; r.v11 = c; return r;}
+    static mat2_t scale(float x, float y) {
+      mat2_t r; r.v00 = x; r.v11 = y; return r;}
+  };
+
   // point type for contour points
   template<typename T = int>
   struct __attribute__ ((packed)) point_t {
@@ -52,6 +75,7 @@ namespace pretty_poly {
     inline point_t& operator-= (const point_t &a) {x -= a.x; y -= a.y; return *this;}
     inline point_t& operator+= (const point_t &a) {x += a.x; y += a.y; return *this;}
     inline point_t& operator*= (const float a) {x *= a; y *= a; return *this;}
+    inline point_t& operator*= (const mat2_t &a) {this->transform(a); return *this;}
     inline point_t& operator*= (const mat3_t &a) {this->transform(a); return *this;}
     inline point_t& operator/= (const float a) {x /= a; y /= a; return *this;}
     inline point_t& operator/= (const point_t &a) {x /= a.x; y /= a.y; return *this;}
@@ -59,6 +83,11 @@ namespace pretty_poly {
       float tx = x, ty = y;
       this->x = (m.v00 * tx + m.v01 * ty + m.v02);
       this->y = (m.v10 * tx + m.v11 * ty + m.v12);
+    }
+    void transform(const mat2_t &m) {
+      float tx = x, ty = y;
+      this->x = (m.v00 * tx + m.v01 * ty);
+      this->y = (m.v10 * tx + m.v11 * ty);
     }
 
   };
@@ -78,7 +107,7 @@ namespace pretty_poly {
     int x, y, w, h;    
     rect_t() : x(0), y(0), w(0), h(0) {}
     rect_t(int x, int y, int w, int h) : x(x), y(y), w(w), h(h) {}
-    bool empty() const {return this->w == 0 && this->h == 0;}
+    bool empty() const {return this->w == 0 || this->h == 0;}
     rect_t intersection(const rect_t &c) {
       return rect_t(std::max(this->x, c.x), std::max(this->y, c.y),
         std::max(0, std::min(this->x + this->w, c.x + c.w) - std::max(this->x, c.x)),

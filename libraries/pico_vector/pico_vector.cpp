@@ -10,44 +10,42 @@ namespace pimoroni {
   }
 
   void PicoVector::rotate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point origin, float angle) {
-    pretty_poly::mat3_t t2 = pretty_poly::mat3_t::translation(origin.x, origin.y);
-    pretty_poly::mat3_t t1 = pretty_poly::mat3_t::translation(-origin.x, -origin.y);
-    angle = 2 * M_PI * (angle / 360.0f);
-    pretty_poly::mat3_t r = pretty_poly::mat3_t::rotation(angle);
+    pretty_poly::point_t<picovector_point_type> t{(picovector_point_type)origin.x, (picovector_point_type)origin.y};
+    angle = (2 * (float)M_PI / 360.f) * angle;
+    pretty_poly::mat2_t r = pretty_poly::mat2_t::rotation(angle);
     for(auto &contour : contours) {
       for(auto i = 0u; i < contour.count; i++) {
-        contour.points[i] *= t1;
+        contour.points[i] -= t;
         contour.points[i] *= r;
-        contour.points[i] *= t2;
+        contour.points[i] += t;
       }
     }
   }
 
   void PicoVector::translate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point translation) {
-    pretty_poly::mat3_t t = pretty_poly::mat3_t::translation(translation.x, translation.y);
+    pretty_poly::point_t<picovector_point_type> t{(picovector_point_type)translation.x, (picovector_point_type)translation.y};
     for(auto &contour : contours) {
       for(auto i = 0u; i < contour.count; i++) {
-        contour.points[i] *= t;
+        contour.points[i] += t;
       }
     }
   }
 
   void PicoVector::rotate(pretty_poly::contour_t<picovector_point_type> &contour, Point origin, float angle) {
-    pretty_poly::mat3_t t2 = pretty_poly::mat3_t::translation(origin.x, origin.y);
-    pretty_poly::mat3_t t1 = pretty_poly::mat3_t::translation(-origin.x, -origin.y);
-    angle = 2 * M_PI * (angle / 360.0f);
-    pretty_poly::mat3_t r = pretty_poly::mat3_t::rotation(angle);
+    pretty_poly::point_t<picovector_point_type> t{(picovector_point_type)origin.x, (picovector_point_type)origin.y};
+    angle = (2 * (float)M_PI / 360.f) * angle;
+    pretty_poly::mat2_t r = pretty_poly::mat2_t::rotation(angle);
     for(auto i = 0u; i < contour.count; i++) {
-      contour.points[i] *= t1;
+      contour.points[i] -= t;
       contour.points[i] *= r;
-      contour.points[i] *= t2;
+      contour.points[i] += t;
     }
   }
 
   void PicoVector::translate(pretty_poly::contour_t<picovector_point_type> &contour, Point translation) {
-    pretty_poly::mat3_t t = pretty_poly::mat3_t::translation(translation.x, translation.y);
+    pretty_poly::point_t<picovector_point_type> t{(picovector_point_type)translation.x, (picovector_point_type)translation.y};
     for(auto i = 0u; i < contour.count; i++) {
-      contour.points[i] *= t;
+      contour.points[i] += t;
     }
   }
 
@@ -115,7 +113,7 @@ namespace pimoroni {
     pretty_poly::point_t<float> caret(0, 0);
 
     // Prepare a transformation matrix for character and offset rotation
-    angle = 2 * M_PI * (angle / 360.0f);
+    angle = (2 * (float)M_PI / 360.f) * angle;
     pretty_poly::mat3_t transform = pretty_poly::mat3_t::rotation(angle);
 
     // Align text from the bottom left
