@@ -14,7 +14,7 @@ namespace pretty_poly {
 
   // 3x3 matrix for coordinate transformations
   struct mat3_t {
-    float v00, v10, v20, v01, v11, v21, v02, v12, v22 = 0.0f;
+    float v00 = 0.0f, v10 = 0.0f, v20 = 0.0f, v01 = 0.0f, v11 = 0.0f, v21 = 0.0f, v02 = 0.0f, v12 = 0.0f, v22 = 0.0f;
     mat3_t() = default;
     mat3_t(const mat3_t &m) = default;
     inline mat3_t& operator*= (const mat3_t &m) {        
