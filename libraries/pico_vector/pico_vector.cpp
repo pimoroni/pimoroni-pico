@@ -114,7 +114,7 @@ namespace pimoroni {
 
     // Prepare a transformation matrix for character and offset rotation
     angle = (2 * (float)M_PI / 360.f) * angle;
-    pretty_poly::mat3_t transform = pretty_poly::mat3_t::rotation(angle);
+    pretty_poly::mat2_t transform = pretty_poly::mat2_t::rotation(angle);
 
     // Align text from the bottom left
     caret.y += text_metrics.line_height;

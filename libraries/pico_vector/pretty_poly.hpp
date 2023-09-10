@@ -68,5 +68,5 @@ namespace pretty_poly {
   void draw_polygon(T *points, unsigned count);
 
   template<typename T>
-  void draw_polygon(std::vector<contour_t<T>> contours, point_t<int> origin = point_t<int>(0, 0), int scale = 65536);
+  void draw_polygon(const std::vector<contour_t<T>>& contours, point_t<int> origin = point_t<int>(0, 0), int scale = 65536);
 }

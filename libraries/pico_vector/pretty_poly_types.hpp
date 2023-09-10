@@ -145,7 +145,7 @@ namespace pretty_poly {
     //point_t<T> *begin() const { return points; };
     //point_t<T> *end() const { return points + count * sizeof(point_t<T>); };
 
-    rect_t bounds() {
+    rect_t bounds() const {
       T minx = this->points[0].x, maxx = minx;
       T miny = this->points[0].y, maxy = miny;
       for(auto i = 1u; i < this->count; i++) {

@@ -252,7 +252,7 @@ namespace pretty_poly {
   }
   
   template<typename T>
-  void draw_polygon(std::vector<contour_t<T>> contours, point_t<int> origin, int scale) {    
+  void draw_polygon(const std::vector<contour_t<T>>& contours, point_t<int> origin, int scale) {    
 
     debug("> draw polygon with %lu contours\n", contours.size());
 
@@ -306,7 +306,7 @@ namespace pretty_poly {
         memset(tile.data, 0, tile_buffer_size);
 
         // build the nodes for each contour
-        for(contour_t<T> &contour : contours) {
+        for(const contour_t<T> &contour : contours) {
           debug("    : build nodes for contour\n");
           build_nodes(contour, tile, origin, scale);
         }
@@ -333,7 +333,7 @@ namespace pretty_poly {
   }
 }
 
-template void pretty_poly::draw_polygon<int>(std::vector<contour_t<int>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<float>(std::vector<contour_t<float>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<uint8_t>(std::vector<contour_t<uint8_t>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<int8_t>(std::vector<contour_t<int8_t>> contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<int>(const std::vector<contour_t<int>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<float>(const std::vector<contour_t<float>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<uint8_t>(const std::vector<contour_t<uint8_t>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<int8_t>(const std::vector<contour_t<int8_t>>& contours, point_t<int> origin, int scale);
