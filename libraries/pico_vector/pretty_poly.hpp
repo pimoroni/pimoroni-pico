@@ -6,6 +6,7 @@
 #include <new>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 
 #include "pretty_poly_types.hpp"
 

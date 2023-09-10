@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <math.h>
+#include <vector>
 
 #ifdef PP_DEBUG
 #define debug(...) printf(__VA_ARGS__)
@@ -138,7 +139,7 @@ namespace pretty_poly {
     unsigned count;
 
     contour_t() {}
-    contour_t(std::vector<point_t<T>> v) : points(v.data()), count(v.size()) {};
+    contour_t(const std::vector<point_t<T>>& v) : points(v.data()), count(v.size()) {};
     contour_t(point_t<T> *points, unsigned count) : points(points), count(count) {};
 
     // TODO: Make this work, it's so much nicer to use auto point : contour
