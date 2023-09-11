@@ -7,7 +7,9 @@
 #define _PIO_SPI_H
 
 #include "hardware/pio.h"
+#ifndef NO_QSTR
 #include "spi.pio.h"
+#endif
 
 typedef struct pio_spi_inst {
     PIO pio;

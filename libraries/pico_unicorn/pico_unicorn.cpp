@@ -2,7 +2,9 @@
 #include "hardware/irq.h"
 #include "common/pimoroni_common.hpp"
 
+#ifndef NO_QSTR
 #include "pico_unicorn.pio.h"
+#endif
 #include "pico_unicorn.hpp"
 
 // pixel data is stored as a stream of bits delivered in the

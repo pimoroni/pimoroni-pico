@@ -14,7 +14,9 @@ found here: https://github.com/raspberrypi/pico-examples/tree/master/pio/ws2812
 #include <math.h>
 #include <cstdint>
 
+#ifndef NO_QSTR
 #include "ws2812.pio.h"
+#endif
 
 #include "pico/stdlib.h"
 #include "hardware/pio.h"

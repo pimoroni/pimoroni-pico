@@ -6,8 +6,10 @@
 #include "hardware/clocks.h"
 
 
+#ifndef NO_QSTR
 #include "stellar_unicorn.pio.h"
 #include "audio_i2s.pio.h"
+#endif
 
 #include "stellar_unicorn.hpp"
 

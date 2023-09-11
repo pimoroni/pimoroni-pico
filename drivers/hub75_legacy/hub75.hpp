@@ -4,7 +4,10 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/irq.h"
+
+#ifndef NO_QSTR
 #include "hub75.pio.h"
+#endif
 
 const uint DATA_BASE_PIN = 0;
 const uint DATA_N_PINS = 6;

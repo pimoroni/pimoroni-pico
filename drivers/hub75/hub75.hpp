@@ -5,7 +5,10 @@
 #include "hardware/dma.h"
 #include "hardware/irq.h"
 #include "libraries/pico_graphics/pico_graphics.hpp"
+
+#ifndef NO_QSTR
 #include "hub75.pio.h"
+#endif
 
 namespace pimoroni {
 const uint DATA_BASE_PIN = 0;
