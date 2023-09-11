@@ -6,4 +6,4 @@ add_library(pico_vector
 
 target_include_directories(pico_vector INTERFACE ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(pico_vector pico_stdlib)
+target_link_libraries(pico_vector pico_stdlib hardware_interp)

@@ -41,7 +41,8 @@ namespace alright_fonts {
     }
   }
 
-  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat3_t transform) {
+  template<typename mat_t>
+  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, mat_t transform) {
     if(tm.face.glyphs.count(codepoint) == 1) {
       glyph_t glyph = tm.face.glyphs[codepoint];
 
@@ -51,25 +52,34 @@ namespace alright_fonts {
       unsigned scale = tm.size << 9;
 
       std::vector<pretty_poly::contour_t<int8_t>> contours;
+      contours.reserve(glyph.contours.size());
+
+      unsigned int total_points = 0;
+      for(auto i = 0u; i < glyph.contours.size(); i++) {
+        total_points += glyph.contours[i].count;;
+      }
+
+      point_t<int8_t> *points = (point_t<int8_t> *)malloc(sizeof(point_t<int8_t>) * total_points);
 
       for(auto i = 0u; i < glyph.contours.size(); i++) {
-        unsigned int count = glyph.contours[i].count;
-        point_t<int8_t> *points = (point_t<int8_t> *)malloc(sizeof(point_t<int8_t>) * count);
+        const unsigned int count = glyph.contours[i].count;
         for(auto j = 0u; j < count; j++) {
           point_t<float> point(glyph.contours[i].points[j].x, glyph.contours[i].points[j].y);
           point *= transform;
           points[j] = point_t<int8_t>(point.x, point.y);
         }
         contours.emplace_back(points, count);
+        points += count;
       }
 
       pretty_poly::draw_polygon<int8_t>(contours, origin, scale);
 
-      for(auto contour : contours) {
-        free(contour.points);
-      }
+      free(contours[0].points);
     }
   }
+
+  template void render_character<pretty_poly::mat3_t>(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat3_t transform);
+  template void render_character<pretty_poly::mat2_t>(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat2_t transform);
 
   /*
     load functions

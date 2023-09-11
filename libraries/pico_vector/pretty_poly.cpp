@@ -8,6 +8,7 @@
 
 #include "pretty_poly.hpp"
 
+#include "hardware/interp.h"
 
 #ifdef PP_DEBUG
 #define debug(...) printf(__VA_ARGS__)
@@ -79,35 +80,63 @@ namespace pretty_poly {
       std::swap(sx, ex);
     }
 
-    /*sx <<= settings::antialias;
-    ex <<= settings::antialias;
-    sy <<= settings::antialias;
-    ey <<= settings::antialias;*/
+    // Early out if line is completely outside the tile, or has no lines
+    if (ey < 0 || sy >= (int)node_buffer_size || sy == ey) return;
 
+    debug("      + line segment from %d, %d to %d, %d\n", sx, sy, ex, ey);
+
+    // Determine how many in-bounds lines to render
+    int y = std::max(0, sy);
+    int count = std::min((int)node_buffer_size, ey) - y;
+
+    // Handle cases where x is completely off to one side or other
+    if (std::max(sx, ex) <= 0) {
+      while (count--) {
+        nodes[y][node_counts[y]++] = 0;
+        ++y;
+      }
+      return;
+    }
+
+    const int full_tile_width = (tile_bounds.w << settings::antialias);
+    if (std::min(sx, ex) >= full_tile_width) {
+      while (count--) {
+        nodes[y][node_counts[y]++] = full_tile_width;
+        ++y;
+      }
+      return;
+    }
+
+    // Normal case
     int x = sx;
-    int y = sy;
     int e = 0;
 
-    int xinc = sign(ex - sx);
-    int einc = abs(ex - sx) + 1;
+    const int xinc = sign(ex - sx);
+    const int einc = abs(ex - sx) + 1;
+    const int dy = ey - sy;
 
-    // todo: preclamp sy and ey (and therefore count) no need to perform
-    // that test inside the loop
-    int dy = ey - sy;
-    int count = dy;
-    debug("      + line segment from %d, %d to %d, %d\n", sx, sy, ex, ey);
+    // If sy < 0 jump to the start, note this does use a divide
+    // but potentially saves many wasted loops below, so is likely worth it.
+    if (sy < 0) {
+      e = einc * -sy;
+      int xjump = e / dy;
+      e -= dy * xjump;
+      x += xinc * xjump;
+    }
+
+    interp1->base[1] = full_tile_width;
+    interp1->accum[0] = x;
+
     // loop over scanlines
     while(count--) {
       // consume accumulated error
-      while(e > dy) {e -= dy; x += xinc;}
+      while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
 
-      if(y >= 0 && y < (int)node_buffer_size) {  
-        // clamp node x value to tile bounds
-        int nx = std::max(std::min(x, (int)(tile_bounds.w << settings::antialias)), 0);        
-        debug("      + adding node at %d, %d\n", x, y);
-        // add node to node list
-        nodes[y][node_counts[y]++] = nx;
-      }
+      // clamp node x value to tile bounds
+      const int nx = interp1->peek[0];
+      debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      nodes[y][node_counts[y]++] = nx;
 
       // step to next scanline and accumulate error
       y++;
@@ -138,14 +167,23 @@ namespace pretty_poly {
     }
   }
 
-  void render_nodes(const tile_t &tile) {
+  void render_nodes(const tile_t &tile, rect_t &bounds) {
+    int maxy = -1;
+    bounds.y = 0;
+    bounds.x = tile.bounds.w;
+    int maxx = 0;
+    int anitialias_mask = (1 << settings::antialias) - 1;
+
     for(auto y = 0; y < (int)node_buffer_size; y++) {
       if(node_counts[y] == 0) {
+        if (y == bounds.y) ++bounds.y;
         continue;
       }
 
       std::sort(&nodes[y][0], &nodes[y][0] + node_counts[y]);
 
+      uint8_t* row_data = &tile.data[(y >> settings::antialias) * tile.stride];
+      bool rendered_any = false;
       for(auto i = 0u; i < node_counts[y]; i += 2) {
         int sx = nodes[y][i + 0];
         int ex = nodes[y][i + 1];
@@ -154,13 +192,55 @@ namespace pretty_poly {
           continue;
         }
 
+        rendered_any = true;
+
+        maxx = std::max((ex - 1) >> settings::antialias, maxx);
+
         debug(" - render span at %d from %d to %d\n", y, sx, ex);
 
-        for(int x = sx; x < ex; x++) {
-          tile.data[(x >> settings::antialias) + (y >> settings::antialias) * tile.stride]++;
-        }       
+        if (settings::antialias) {
+          int ax = sx >> settings::antialias;
+          const int aex = ex >> settings::antialias;
+
+          bounds.x = std::min(ax, bounds.x);
+
+          if (ax == aex) {
+            row_data[ax] += ex - sx;
+            continue;
+          }
+
+          row_data[ax] += (1 << settings::antialias) - (sx & anitialias_mask);
+          for(ax++; ax < aex; ax++) {
+            row_data[ax] += (1 << settings::antialias);
+          }
+
+          // This might add 0 to the byte after the end of the row, we pad the tile data
+          // by 1 byte to ensure that is OK
+          row_data[ax] += ex & anitialias_mask;
+        }
+        else {
+          bounds.x = std::min(sx, bounds.x);
+          for(int x = sx; x < ex; x++) {
+            row_data[x]++;
+          }       
+        }
+      }
+
+      if (rendered_any) {
+        debug("  - rendered line %d\n", y);
+        maxy = y;
+      }
+      else if (y == bounds.y) {
+        debug(" - render nothing on line %d\n", y);
+        ++bounds.y;
       }
     }
+
+    bounds.y >>= settings::antialias;
+    maxy >>= settings::antialias;
+    bounds.w = (maxx >= bounds.x) ? maxx + 1 - bounds.x : 0;
+    bounds.h = (maxy >= bounds.y) ? maxy + 1 - bounds.y : 0;
+    debug(" - rendered tile bounds %d, %d (%d x %d)\n", bounds.x, bounds.y, bounds.w, bounds.h);
   }
 
   template<typename T>
@@ -172,7 +252,7 @@ namespace pretty_poly {
   }
   
   template<typename T>
-  void draw_polygon(std::vector<contour_t<T>> contours, point_t<int> origin, int scale) {    
+  void draw_polygon(const std::vector<contour_t<T>>& contours, point_t<int> origin, int scale) {    
 
     debug("> draw polygon with %lu contours\n", contours.size());
 
@@ -194,8 +274,16 @@ namespace pretty_poly {
     debug("  - bounds %d, %d (%d x %d)\n", polygon_bounds.x, polygon_bounds.y, polygon_bounds.w, polygon_bounds.h);
     debug("  - clip %d, %d (%d x %d)\n", settings::clip.x, settings::clip.y, settings::clip.w, settings::clip.h);
 
+    interp_hw_save_t interp1_save;
+    interp_save(interp1, &interp1_save);
 
-    memset(nodes, 0, node_buffer_size * sizeof(unsigned) * 32);
+    interp_config cfg = interp_default_config();
+    interp_config_set_clamp(&cfg, true);
+    interp_config_set_signed(&cfg, true);
+    interp_set_config(interp1, 0, &cfg);
+    interp1->base[0] = 0;
+
+    //memset(nodes, 0, node_buffer_size * sizeof(unsigned) * 32);
 
     // iterate over tiles
     debug("  - processing tiles\n");
@@ -218,22 +306,34 @@ namespace pretty_poly {
         memset(tile.data, 0, tile_buffer_size);
 
         // build the nodes for each contour
-        for(contour_t<T> &contour : contours) {
+        for(const contour_t<T> &contour : contours) {
           debug("    : build nodes for contour\n");
           build_nodes(contour, tile, origin, scale);
         }
 
         debug("    : render the tile\n");
         // render the tile
-        render_nodes(tile);
+        rect_t bounds;
+        render_nodes(tile, bounds);
+        if (bounds.empty()) {
+          continue;
+        }
+
+        tile.data += bounds.x + tile.stride * bounds.y;
+        tile.bounds.x += bounds.x;
+        tile.bounds.y += bounds.y;
+        tile.bounds.w = bounds.w;
+        tile.bounds.h = bounds.h;
 
         settings::callback(tile);
       }
     }
+
+    interp_restore(interp1, &interp1_save);
   }
 }
 
-template void pretty_poly::draw_polygon<int>(std::vector<contour_t<int>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<float>(std::vector<contour_t<float>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<uint8_t>(std::vector<contour_t<uint8_t>> contours, point_t<int> origin, int scale);
-template void pretty_poly::draw_polygon<int8_t>(std::vector<contour_t<int8_t>> contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<int>(const std::vector<contour_t<int>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<float>(const std::vector<contour_t<float>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<uint8_t>(const std::vector<contour_t<uint8_t>>& contours, point_t<int> origin, int scale);
+template void pretty_poly::draw_polygon<int8_t>(const std::vector<contour_t<int8_t>>& contours, point_t<int> origin, int scale);
