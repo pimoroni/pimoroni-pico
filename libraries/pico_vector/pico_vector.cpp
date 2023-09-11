@@ -123,7 +123,7 @@ namespace pimoroni {
     caret *= transform;
 
     pretty_poly::point_t<float> space;
-    pretty_poly::point_t<float> carriage_return(0, text_metrics.line_height);
+    pretty_poly::point_t<float> carriage_return(0, -text_metrics.line_height);
 
     space.x = alright_fonts::measure_character(text_metrics, ' ').w;
     if (space.x == 0) {
@@ -132,6 +132,7 @@ namespace pimoroni {
 
     space *= transform;
     carriage_return *= transform;
+    const pretty_poly::point_t<float> initial_carriage_return = carriage_return;
 
     size_t i = 0;
 
@@ -158,13 +159,13 @@ namespace pimoroni {
 
       if(caret.x != 0 && caret.x + word_width > graphics->clip.w) {
         caret -= carriage_return;
-        carriage_return.x = 0;
+        carriage_return = initial_carriage_return;
       }
 
       for(size_t j = i; j < std::min(next_break + 1, text.length()); j++) {
         if (text[j] == '\n') { // Linebreak
           caret -= carriage_return;
-          carriage_return.x = 0;
+          carriage_return = initial_carriage_return;
         } else if (text[j] == ' ') { // Space
           caret += space;
           carriage_return += space;
