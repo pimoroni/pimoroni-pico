@@ -107,7 +107,7 @@ while True:
         shift -= char_size
         current_char += 1
 
-        message_display = MESSAGE[current_char:current_char+CHARS_TO_RENDER]
+        message_display = MESSAGE[current_char:current_char + CHARS_TO_RENDER]
         if (len(message_display) < CHARS_LEFT_RESET):
             state = STATE_POST_SCROLL
         last_time = time_ms
