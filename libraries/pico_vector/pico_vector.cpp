@@ -3,6 +3,7 @@
 
 namespace pimoroni {
   void PicoVector::polygon(std::vector<pretty_poly::contour_t<picovector_point_type>> contours, Point origin, int scale) {
+    pretty_poly::settings::clip = {graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h};
     pretty_poly::draw_polygon<picovector_point_type>(
         contours,
         pretty_poly::point_t<int>(origin.x, origin.y),
@@ -50,6 +51,8 @@ namespace pimoroni {
   }
 
   Point PicoVector::text(std::string_view text, Point origin) {
+    // Copy clipping bounds from the PicoGraphics instance
+    pretty_poly::settings::clip = {graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h};
     // TODO: Normalize types somehow, so we're not converting?
     pretty_poly::point_t<int> caret = pretty_poly::point_t<int>(origin.x, origin.y);
 
@@ -109,6 +112,8 @@ namespace pimoroni {
   }
 
   Point PicoVector::text(std::string_view text, Point origin, float angle) {
+    // Copy clipping bounds from the PicoGraphics instance
+    pretty_poly::settings::clip = {graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h};
     // TODO: Normalize types somehow, so we're not converting?
     pretty_poly::point_t<float> caret(0, 0);
 

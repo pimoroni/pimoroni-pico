@@ -232,6 +232,18 @@ mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
     return mp_obj_new_tuple(2, tuple);
 }
 
+mp_obj_t POLYGON_bounds(mp_obj_t self_in) {
+    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+
+    mp_obj_t tuple[4];
+    tuple[0] = mp_obj_new_int((int)(self->contour.bounds().x));
+    tuple[1] = mp_obj_new_int((int)(self->contour.bounds().y));
+    tuple[2] = mp_obj_new_int((int)(self->contour.bounds().w));
+    tuple[3] = mp_obj_new_int((int)(self->contour.bounds().h));
+
+    return mp_obj_new_tuple(4, tuple);
+}
+
 void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind;
     _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
