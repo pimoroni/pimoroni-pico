@@ -50,7 +50,7 @@ namespace pimoroni {
                             tile_data += tile.stride - tile.bounds.w;
                         }
                     }
-                }, graphics->supports_alpha_blend() ? pretty_poly::X4 : pretty_poly::NONE, {0, 0, graphics->bounds.w, graphics->bounds.h});
+                }, graphics->supports_alpha_blend() ? pretty_poly::X4 : pretty_poly::NONE, {graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h});
             }
 
             void set_antialiasing(pretty_poly::antialias_t antialias) {
