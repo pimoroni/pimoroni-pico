@@ -163,3 +163,5 @@ Here are some cool Galactic Unicorn community projects and resources that you mi
 - :link: [Giant Pomodoro timer using Galactic Unicorn](https://www.raspberrypi.com/news/make-a-giant-pomodoro-timer-using-galactic-unicorn/)
 - :link: [Galactic Weather Clock](https://github.com/raphv/galactic-weather-clock)
 - :link: [Unicorn Clock](https://github.com/hugokernel/UnicornClock)
+- :link: [Unicorn Weather Station](https://github.com/TagWolf/UnicornWeatherStation)
+- :link: [Unicorn News/RSS Feed Display](https://github.com/TagWolf/UnicornRSSDisplay)
