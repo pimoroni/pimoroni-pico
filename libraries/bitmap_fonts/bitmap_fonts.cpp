@@ -152,6 +152,9 @@ namespace bitmap {
     uint32_t line_offset = 0; // line (if wrapping) offset
     unicode_sorta::codepage_t codepage = unicode_sorta::PAGE_195;
 
+    int32_t space_width = measure_character(font, ' ', scale, codepage, fixed_width);
+    space_width += letter_spacing * scale;
+
     size_t i = 0;
     while(i < t.length()) {
       // find length of current word
@@ -201,7 +204,7 @@ namespace bitmap {
           line_offset += (font->height + 1) * scale;
           char_offset = 0;
         } else if (t[j] == ' ') { // Space
-          char_offset += font->widths[0] * scale;
+          char_offset += space_width;
         } else {
           switch(rotation) {
             case 0:
