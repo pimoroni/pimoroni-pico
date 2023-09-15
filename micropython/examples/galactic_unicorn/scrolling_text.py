@@ -99,7 +99,7 @@ while True:
         # MESSAGE_COLOUR = (random.randint(0,255), random.randint(0,255), random.randint(0,255)) # Uncomment this and the random import to make the display a new colour each rotation
         shift = 0
         last_time = time_ms
-        
+
     if (partial_text == 1 and PADDING - shift < -10):
         char_size = graphics.measure_text(message_display[0:1], 1)
         if (message_display[0:1] == ' '):
