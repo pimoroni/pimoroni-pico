@@ -1,4 +1,5 @@
 #include "profiler.hpp"
+#include <cstring>
 
 namespace pimoroni {
     void Probe::reset() {
@@ -35,6 +36,25 @@ namespace pimoroni {
             return new_probe;
         }
 
+        void reset() {
+            Probe *p = probes[0];
+            for(auto x = 0u; x < probe_count; x++) {
+                p->reset();
+                p++;
+            }
+        }
+
+        Probe* get_probe(const char *name) {
+            Probe *p = probes[0];
+            for(auto x = 0u; x < probe_count; x++) {
+                if (strncmp(name, p->name.data(), p->name.length()) == 0) {
+                    return p;
+                }
+                p++;
+            }
+            return nullptr;
+        }
+
         Probe** get_probes() {
             return probes;
         }
@@ -43,4 +63,54 @@ namespace pimoroni {
             return probe_count;
         }
     }
+}
+
+extern "C" {
+#include "profiler.h"
+
+mp_obj_t profiler_reset() {
+    pimoroni::Profiler::reset();
+
+    return mp_const_none;
+}
+
+mp_obj_t profiler_get_probe(mp_obj_t name) {
+    if(mp_obj_is_str_or_bytes(name)) {
+        GET_STR_DATA_LEN(name, str, str_len);
+        pimoroni::Probe *probe = pimoroni::Profiler::get_probe((const char *)str);
+
+        mp_obj_t tuple_probe[3] = {
+            mp_obj_new_str(probe->name.data(), probe->name.length()),
+            mp_obj_new_int(probe->get_avg_runtime()),
+            mp_obj_new_int(probe->get_exec_count())
+        };
+
+        return mp_obj_new_tuple(3, tuple_probe);
+    }
+    return mp_const_none;
+}
+
+mp_obj_t profiler_get_probes() {
+    pimoroni::Probe* probe = pimoroni::Profiler::get_probes()[0];
+    uint16_t count = pimoroni::Profiler::count();
+
+    mp_obj_t list_probes[count];
+
+    for(auto x = 0u; x < count; x++){
+        //mp_printf(&mp_plat_print, "Probe: %s\n", probe->name.data());
+        //mp_printf(&mp_plat_print, "  Avg (us): %lu\n", probe->get_avg_runtime());
+        //mp_printf(&mp_plat_print, "  Runs: %lu\n", probe->get_exec_count());
+
+        mp_obj_t tuple_probe[3] = {
+            mp_obj_new_str(probe->name.data(), probe->name.length()),
+            mp_obj_new_int(probe->get_avg_runtime()),
+            mp_obj_new_int(probe->get_exec_count())
+        };
+
+        list_probes[x] = mp_obj_new_tuple(3, tuple_probe);
+        probe++;
+    }
+    return mp_obj_new_list(count, list_probes);
+}
+
 }
