@@ -8,13 +8,11 @@
 
 #include "alright_fonts.hpp"
 
-using namespace pretty_poly;
-
 namespace alright_fonts {
   /*
     utility functions
   */
-  pretty_poly::rect_t measure_character(text_metrics_t &tm, uint16_t codepoint) {
+  pp_rect_t measure_character(text_metrics_t &tm, uint16_t codepoint) {
     if(tm.face.glyphs.count(codepoint) == 1) {
       glyph_t glyph = tm.face.glyphs[codepoint];
 
@@ -28,59 +26,13 @@ namespace alright_fonts {
     render functions
   */
 
-  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin) {
+  void render_character(text_metrics_t &tm, uint16_t codepoint, pp_point_t origin, pp_mat3_t *transform) {
     if(tm.face.glyphs.count(codepoint) == 1) {
       glyph_t glyph = tm.face.glyphs[codepoint];
-
-      // scale is a fixed point 16:16 value, our font data is already scaled to
-      // -128..127 so to get the pixel size we want we can just shift the
-      // users requested size up one bit
-      unsigned scale = tm.size << 9;
-
-      pretty_poly::draw_polygon<int8_t>(glyph.contours, origin, scale);
+      pp_transform(transform);
+      pp_render(&glyph.contours);
     }
   }
-
-  template<typename mat_t>
-  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, mat_t transform) {
-    if(tm.face.glyphs.count(codepoint) == 1) {
-      glyph_t glyph = tm.face.glyphs[codepoint];
-
-      // scale is a fixed point 16:16 value, our font data is already scaled to
-      // -128..127 so to get the pixel size we want we can just shift the
-      // users requested size up one bit
-      unsigned scale = tm.size << 9;
-
-      std::vector<pretty_poly::contour_t<int8_t>> contours;
-      contours.reserve(glyph.contours.size());
-
-      unsigned int total_points = 0;
-      for(auto i = 0u; i < glyph.contours.size(); i++) {
-        total_points += glyph.contours[i].count;;
-      }
-
-      point_t<int8_t> *points = (point_t<int8_t> *)malloc(sizeof(point_t<int8_t>) * total_points);
-
-      for(auto i = 0u; i < glyph.contours.size(); i++) {
-        const unsigned int count = glyph.contours[i].count;
-        for(auto j = 0u; j < count; j++) {
-          point_t<float> point(glyph.contours[i].points[j].x, glyph.contours[i].points[j].y);
-          point *= transform;
-          points[j] = point_t<int8_t>(point.x, point.y);
-        }
-        contours.emplace_back(points, count);
-        points += count;
-      }
-
-      pretty_poly::draw_polygon<int8_t>(contours, origin, scale);
-
-      free(contours[0].points);
-    }
-  }
-
-  template void render_character<pretty_poly::mat3_t>(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat3_t transform);
-  template void render_character<pretty_poly::mat2_t>(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, pretty_poly::mat2_t transform);
-
   /*
     load functions
   */
@@ -124,6 +76,8 @@ namespace alright_fonts {
       g.bounds.h  = ru8(ifs);
       g.advance   = ru8(ifs);
 
+      g.contours.paths = (pp_path_t *)malloc(sizeof(pp_path_t) * 10);
+
       if(ifs.fail()) {
         // could not read glyph dictionary entry
         return false;
@@ -148,10 +102,11 @@ namespace alright_fonts {
 
         // allocate space to store point data for contour and read
         // from file
-        pretty_poly::point_t<int8_t> *points = new pretty_poly::point_t<int8_t>[count];
-        ifs.read((char *)points, count * 2);
+        g.contours.paths[g.contours.count].points = (pp_point_t *)malloc(sizeof(pp_point_t) * count);
 
-        g.contours.push_back({points, count});
+        ifs.read((char *)g.contours.paths[g.contours.count].points, sizeof(pp_point_t) * count);
+
+        g.contours.count ++;
       }
 
       // return back to position in dictionary
