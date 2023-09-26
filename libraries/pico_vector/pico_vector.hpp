@@ -1,4 +1,4 @@
-#include "pretty_poly.hpp"
+#include "pretty_poly/pretty-poly.h"
 #include "alright_fonts.hpp"
 #include "pico_graphics.hpp"
 
@@ -9,52 +9,58 @@ namespace pimoroni {
 
     class PicoVector {
         private:
-            PicoGraphics *graphics;
+            static PicoGraphics *graphics;
             alright_fonts::text_metrics_t text_metrics;
-            const uint8_t alpha_map[4] {0, 128, 192, 255};
+            static constexpr uint8_t alpha_map[4] {0, 128, 192, 255};
 
         public:
-            PicoVector(PicoGraphics *graphics, void *mem = nullptr) : graphics(graphics) {
-                pretty_poly::init(mem);
+            PicoVector(PicoGraphics *graphics, void *mem = nullptr) {
+                PicoVector::graphics = graphics;
 
-                set_options([this](const pretty_poly::tile_t &tile) -> void {
-                    uint8_t *tile_data = tile.data;
+                pp_tile_callback(PicoVector::tile_callback);
 
-                    if(this->graphics->supports_alpha_blend() && pretty_poly::settings::antialias != pretty_poly::NONE) {
-                        if (this->graphics->render_pico_vector_tile({tile.bounds.x, tile.bounds.y, tile.bounds.w, tile.bounds.h},
-                                                                    tile.data,
-                                                                    tile.stride,
-                                                                    (uint8_t)pretty_poly::settings::antialias)) {
-                            return;
-                        }
-                        for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < tile.bounds.w; x++) {
-                                uint8_t alpha = *tile_data++;
-                                if (alpha >= 4) {
-                                    this->graphics->set_pixel({x + tile.bounds.x, y + tile.bounds.y});
-                                } else if (alpha > 0) {
-                                    alpha = alpha_map[alpha];
-                                    this->graphics->set_pixel_alpha({x + tile.bounds.x, y + tile.bounds.y}, alpha);
-                                }
-                            }
-                            tile_data += tile.stride - tile.bounds.w;
-                        }
-                    } else {
-                        for(auto y = 0; y < tile.bounds.h; y++) {
-                            for(auto x = 0; x < tile.bounds.w; x++) {
-                                uint8_t alpha = *tile_data++;
-                                if (alpha) {
-                                    this->graphics->set_pixel({x + tile.bounds.x, y + tile.bounds.y});
-                                }
-                            }
-                            tile_data += tile.stride - tile.bounds.w;
-                        }
-                    }
-                }, graphics->supports_alpha_blend() ? pretty_poly::X4 : pretty_poly::NONE, {graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h});
+                pp_antialias(graphics->supports_alpha_blend() ? PP_AA_X4 : PP_AA_NONE);
+
+                pp_clip(graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h);
             }
 
-            void set_antialiasing(pretty_poly::antialias_t antialias) {
-                set_options(pretty_poly::settings::callback, antialias, pretty_poly::settings::clip);
+            static void tile_callback(const pp_tile_t *tile) {
+                uint8_t *tile_data = tile->data;
+
+                if(PicoVector::graphics->supports_alpha_blend() && _pp_antialias != PP_AA_NONE) {
+                    if (PicoVector::graphics->render_pico_vector_tile({tile->x, tile->y, tile->w, tile->h},
+                                                                tile->data,
+                                                                tile->stride,
+                                                                (uint8_t)_pp_antialias)) {
+                        return;
+                    }
+                    for(auto y = 0; y < tile->h; y++) {
+                        for(auto x = 0; x < tile->w; x++) {
+                            uint8_t alpha = *tile_data++;
+                            if (alpha >= 4) {
+                                PicoVector::graphics->set_pixel({x + tile->x, y + tile->y});
+                            } else if (alpha > 0) {
+                                alpha = alpha_map[alpha];
+                                PicoVector::graphics->set_pixel_alpha({x + tile->x, y + tile->y}, alpha);
+                            }
+                        }
+                        tile_data += tile->stride - tile->w;
+                    }
+                } else {
+                    for(auto y = 0; y < tile->h; y++) {
+                        for(auto x = 0; x < tile->w; x++) {
+                            uint8_t alpha = *tile_data++;
+                            if (alpha) {
+                                PicoVector::graphics->set_pixel({x + tile->x, y + tile->y});
+                            }
+                        }
+                        tile_data += tile->stride - tile->w;
+                    }
+                }
+            }
+
+            void set_antialiasing(pp_antialias_t antialias) {
+                pp_antialias(antialias);
             }
 
             void set_font_size(unsigned int font_size) {
@@ -69,19 +75,32 @@ namespace pimoroni {
                 return result;
             }
 
-            void rotate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point origin, float angle);
-            void translate(std::vector<pretty_poly::contour_t<picovector_point_type>> &contours, Point translation);
+            pp_point_t text(std::string_view text, pp_point_t origin, pp_mat3_t *t);
 
-            void rotate(pretty_poly::contour_t<picovector_point_type> &contour, Point origin, float angle);
-            void translate(pretty_poly::contour_t<picovector_point_type> &contour, Point translation);
+            void transform(pp_path_t *path, pp_mat3_t *t);
+            void transform(pp_poly_t *poly, pp_mat3_t *t);
 
-            Point text(std::string_view text, Point origin);
-            Point text(std::string_view text, Point origin, float angle);
+            void rotate(pp_path_t *path, pp_point_t origin, float angle);
+            void rotate(pp_poly_t *poly, pp_point_t origin, float angle);
 
-            void polygon(std::vector<pretty_poly::contour_t<picovector_point_type>> contours, Point origin = Point(0, 0), int scale=65536);
+            void translate(pp_path_t *path, pp_point_t translation);
+            void translate(pp_poly_t *poly, pp_point_t translation);
+
+            void draw(pp_poly_t *poly);
+            void draw(pp_poly_t *poly, pp_mat3_t *t);
+
+            void draw(pp_path_t *path) {
+                pp_poly_t poly = {.paths = path, .count = 1};
+                draw(&poly);
+            };
+
+            void draw(pp_path_t *path, pp_mat3_t *t) {
+                pp_poly_t poly = {.paths = path, .count = 1};
+                draw(&poly, t);
+            };
 
             static constexpr size_t pretty_poly_buffer_size() {
-                return pretty_poly::buffer_size();
+                return 0;
             };
     };
 }
