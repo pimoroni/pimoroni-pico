@@ -6,15 +6,16 @@
 #include <optional>
 #include <map>
 
-#include "pretty_poly.hpp"
+#include "pretty_poly/pretty-poly.h"
+#include "file_io.hpp"
 
 namespace alright_fonts {
 
   struct glyph_t {
     uint16_t codepoint;
-    pretty_poly::rect_t bounds;
+    pp_rect_t bounds;
     uint8_t advance;
-    std::vector<pretty_poly::contour_t<int8_t>> contours;
+    pp_poly_t contours;
   };
 
   struct face_t {
@@ -23,10 +24,10 @@ namespace alright_fonts {
     std::map<uint16_t, glyph_t> glyphs;
 
     face_t() {};
-    face_t(pretty_poly::file_io &ifs) {load(ifs);}
+    face_t(file_io &ifs) {load(ifs);}
     face_t(std::string_view path) {load(path);}
 
-    bool load(pretty_poly::file_io &ifs);
+    bool load(file_io &ifs);
     bool load(std::string_view path);
   };
 
@@ -48,7 +49,7 @@ namespace alright_fonts {
     int word_spacing;                 // spacing between words
     alignment_t align;                // horizontal and vertical alignment
     //optional<mat3_t> transform;     // arbitrary transformation
-    pretty_poly::antialias_t antialiasing = pretty_poly::X4;    // level of antialiasing to apply
+    pp_antialias_t antialiasing = PP_AA_X4;    // level of antialiasing to apply
 
     void set_size(int s) {
       size = s;
@@ -63,13 +64,11 @@ namespace alright_fonts {
   /*
     utility functions
   */
-  pretty_poly::rect_t measure_character(text_metrics_t &tm, uint16_t codepoint);
+  pp_rect_t measure_character(text_metrics_t &tm, uint16_t codepoint);
 
   /* 
     render functions
   */
 
-  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin);
-  template<typename mat_t>
-  void render_character(text_metrics_t &tm, uint16_t codepoint, pretty_poly::point_t<int> origin, mat_t transform);
+  void render_character(text_metrics_t &tm, uint16_t codepoint, pp_point_t origin, pp_mat3_t *transform);
 }

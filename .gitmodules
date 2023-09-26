@@ -25,3 +25,6 @@
 [submodule "drivers/mlx90640/src"]
 	path = drivers/mlx90640/src
 	url = https://github.com/melexis/mlx90640-library
+[submodule "libraries/pico_vector/pretty_poly"]
+	path = libraries/pico_vector/pretty_poly
+	url = https://github.com/lowfatcode/pretty-poly/
