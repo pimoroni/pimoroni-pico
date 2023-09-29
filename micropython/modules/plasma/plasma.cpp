@@ -468,7 +468,7 @@ mp_obj_t PlasmaAPA102_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
 }
 
 mp_obj_t PlasmaAPA102_num_leds(mp_obj_t self_in) {
-    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PlasmaAPA102_obj_t);
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
     return mp_obj_new_int(self->apa102->num_leds);
 }
 
