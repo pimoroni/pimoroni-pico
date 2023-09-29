@@ -24,12 +24,12 @@ typedef struct _VECTOR_obj_t {
     PicoVector *vector;
 } _VECTOR_obj_t;
 
-typedef struct _POLYGON_obj_t {
+typedef struct _PATH_obj_t {
     mp_obj_base_t base;
-    pretty_poly::contour_t<picovector_point_type> contour;
-} _POLYGON_obj_t;
+    pp_path_t path;
+} _PATH_obj_t;
 
-pretty_poly::file_io::file_io(std::string_view filename) {
+file_io::file_io(std::string_view filename) {
     mp_obj_t fn = mp_obj_new_str(filename.data(), (mp_uint_t)filename.size());
 
     //mp_printf(&mp_plat_print, "Opening file %s\n", filename.data());
@@ -50,18 +50,18 @@ pretty_poly::file_io::file_io(std::string_view filename) {
     this->state = (void *)fhandle;
 }
 
-pretty_poly::file_io::~file_io() {
+file_io::~file_io() {
     mp_stream_close((mp_obj_t)this->state);
 }
 
-size_t pretty_poly::file_io::read(void *buf, size_t len) {
+size_t file_io::read(void *buf, size_t len) {
     //mp_printf(&mp_plat_print, "Reading %lu bytes\n", len);
     mp_obj_t fhandle = this->state;
     int error;
     return mp_stream_read_exactly(fhandle, buf, len, &error);
 }
 
-size_t pretty_poly::file_io::tell() {
+size_t file_io::tell() {
     mp_obj_t fhandle = this->state;
     struct mp_stream_seek_t seek_s;
     seek_s.offset = 0;
@@ -78,12 +78,12 @@ size_t pretty_poly::file_io::tell() {
     return seek_s.offset;
 }
 
-bool pretty_poly::file_io::fail() {
+bool file_io::fail() {
     return false;
 }
 
-// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
-size_t pretty_poly::file_io::seek(size_t pos) {
+// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+size_t file_io::seek(size_t pos) {
     mp_obj_t fhandle = this->state;
     struct mp_stream_seek_t seek_s;
     seek_s.offset = pos;
@@ -100,6 +100,7 @@ size_t pretty_poly::file_io::seek(size_t pos) {
     return seek_s.offset;
 }
 
+/*
 static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
     if(mp_obj_is_str_or_bytes(obj)) {
         GET_STR_DATA_LEN(obj, str, str_len);
@@ -107,6 +108,7 @@ static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
     }
     mp_raise_TypeError("can't convert object to str implicitly");
 }
+*/
 
 /* POLYGON */
 
@@ -122,20 +124,20 @@ mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
+    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     int w = args[ARG_w].u_int;
     int h = args[ARG_h].u_int;
 
-    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, 4);
-    self->contour.count = 4;
+    self->path.points = m_new(pp_point_t, 4);
+    self->path.count = 4;
 
-    self->contour.points[0] = {picovector_point_type(x), picovector_point_type(y)};
-    self->contour.points[1] = {picovector_point_type(x + w), picovector_point_type(y)};
-    self->contour.points[2] = {picovector_point_type(x + w), picovector_point_type(y + h)};
-    self->contour.points[3] = {picovector_point_type(x), picovector_point_type(y + h)};
+    self->path.points[0] = {picovector_point_type(x), picovector_point_type(y)};
+    self->path.points[1] = {picovector_point_type(x + w), picovector_point_type(y)};
+    self->path.points[2] = {picovector_point_type(x + w), picovector_point_type(y + h)};
+    self->path.points[3] = {picovector_point_type(x), picovector_point_type(y + h)};
 
     return self;
 }
@@ -153,7 +155,7 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
+    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
 
     Point origin(args[ARG_x].u_int, args[ARG_y].u_int);
     unsigned int sides = args[ARG_sides].u_int;
@@ -168,12 +170,12 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     float angle = (360.0f / sides) * (M_PI / 180.0f);
 
-    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, sides);
-    self->contour.count = sides;
+    self->path.points = m_new(pp_point_t, sides);
+    self->path.count = sides;
 
     for(auto s = 0u; s < sides; s++) {
         float current_angle = angle * s + rotation;
-        self->contour.points[s] = {
+        self->path.points[s] = {
             (picovector_point_type)(cos(current_angle) * radius) + o_x,
             (picovector_point_type)(sin(current_angle) * radius) + o_y
         };
@@ -183,15 +185,15 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
 }
 
 mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
+    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
 
     size_t num_points = n_args;
     const mp_obj_t *points = all_args;
 
     if(num_points < 3) mp_raise_ValueError("Polygon: At least 3 points required.");
 
-    self->contour.points = m_new(pretty_poly::point_t<picovector_point_type>, num_points);
-    self->contour.count = num_points;
+    self->path.points = m_new(pp_point_t, num_points);
+    self->path.count = num_points;
 
     for(auto i = 0u; i < num_points; i++) {
         mp_obj_t c_obj = points[i];
@@ -202,7 +204,7 @@ mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
         if(t_point->len != 2) mp_raise_ValueError("Tuple must have X, Y");
 
-        self->contour.points[i] = {
+        self->path.points[i] = {
             (picovector_point_type)mp_obj_get_int(t_point->items[0]),
             (picovector_point_type)mp_obj_get_int(t_point->items[1]),
         };
@@ -212,54 +214,61 @@ mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 }
 
 mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
-    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
 
-    pretty_poly::point_t<picovector_point_type> sum(0, 0);
+    PP_COORD_TYPE sum_x = (PP_COORD_TYPE)0;
+    PP_COORD_TYPE sum_y = (PP_COORD_TYPE)0;
 
-    for(auto i = 0u; i < self->contour.count; i++) {
-        sum += self->contour.points[i];
+    for(auto i = 0u; i < self->path.count; i++) {
+        sum_x += self->path.points[i].x;
+        sum_y += self->path.points[i].y;
     }
 
-    sum /= (float)self->contour.count;
+    sum_x /= (float)self->path.count;
+    sum_y /= (float)self->path.count;
 
     mp_obj_t tuple[2];
-    tuple[0] = mp_obj_new_int((int)(sum.x));
-    tuple[1] = mp_obj_new_int((int)(sum.y));
+    tuple[0] = mp_obj_new_int((int)(sum_x));
+    tuple[1] = mp_obj_new_int((int)(sum_y));
 
     return mp_obj_new_tuple(2, tuple);
 }
 
 mp_obj_t POLYGON_bounds(mp_obj_t self_in) {
-    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
+
+    pp_rect_t bounds = pp_contour_bounds(&self->path);
 
     mp_obj_t tuple[4];
-    tuple[0] = mp_obj_new_int((int)(self->contour.bounds().x));
-    tuple[1] = mp_obj_new_int((int)(self->contour.bounds().y));
-    tuple[2] = mp_obj_new_int((int)(self->contour.bounds().w));
-    tuple[3] = mp_obj_new_int((int)(self->contour.bounds().h));
+    tuple[0] = mp_obj_new_int((int)(bounds.x));
+    tuple[1] = mp_obj_new_int((int)(bounds.y));
+    tuple[2] = mp_obj_new_int((int)(bounds.w));
+    tuple[3] = mp_obj_new_int((int)(bounds.h));
 
     return mp_obj_new_tuple(4, tuple);
 }
 
 void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
     (void)kind;
-    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
+
+    pp_rect_t bounds = pp_contour_bounds(&self->path);
 
     mp_print_str(print, "Polygon(points = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->contour.count), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(self->path.count), PRINT_REPR);
     mp_print_str(print, ", bounds = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().x), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(bounds.x), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().y), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(bounds.y), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().w), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(bounds.w), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->contour.bounds().h), PRINT_REPR);
+    mp_obj_print_helper(print, mp_obj_new_int(bounds.h), PRINT_REPR);
     mp_print_str(print, ")");
 }
 
 mp_obj_t POLYGON__del__(mp_obj_t self_in) {
-    _POLYGON_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLYGON_obj_t);
+    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
     (void)self;
     // TODO: Do we actually need to free anything here, if it's on GC heap it should get collected
     return mp_const_none;
@@ -272,26 +281,26 @@ typedef struct _mp_obj_polygon_it_t {
     size_t cur;
 } mp_obj_polygon_it_t;
 
-static mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
+static mp_obj_t py_path_it_iternext(mp_obj_t self_in) {
     mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
-    _POLYGON_obj_t *polygon = MP_OBJ_TO_PTR2(self->polygon, _POLYGON_obj_t);
+    _PATH_obj_t *path = MP_OBJ_TO_PTR2(self->polygon, _PATH_obj_t);
 
     //mp_printf(&mp_plat_print, "points: %d, current: %d\n", polygon->contour.count, self->cur);
 
-    if(self->cur >= polygon->contour.count) return MP_OBJ_STOP_ITERATION;
+    if(self->cur >= path->path.count) return MP_OBJ_STOP_ITERATION;
 
     mp_obj_t tuple[2];
-    tuple[0] = mp_obj_new_int((int)(polygon->contour.points[self->cur].x));
-    tuple[1] = mp_obj_new_int((int)(polygon->contour.points[self->cur].y));
+    tuple[0] = mp_obj_new_int((int)(path->path.points[self->cur].x));
+    tuple[1] = mp_obj_new_int((int)(path->path.points[self->cur].y));
 
     self->cur++;
     return mp_obj_new_tuple(2, tuple);
 }
 
-mp_obj_t POLYGON_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
+mp_obj_t PATH_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
     mp_obj_polygon_it_t *o = (mp_obj_polygon_it_t *)iter_buf;
     o->base.type = &mp_type_polymorph_iter;
-    o->iternext = py_image_it_iternext;
+    o->iternext = py_path_it_iternext;
     o->polygon = o_in;
     o->cur = 0;
     return MP_OBJ_FROM_PTR(o);
@@ -317,7 +326,8 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
     // The PicoVector class calls `pretty_poly::init()` with the memory region
     // it does not store a pointer to this, so we need to store one ourselves
-    self->mem = m_new(uint8_t, PicoVector::pretty_poly_buffer_size());
+    // TODO: C Pretty Poly does not support runtime memory allocation
+    //self->mem = m_new(uint8_t, PicoVector::pretty_poly_buffer_size());
 
     self->vector = m_new_class(PicoVector, graphics->graphics, self->mem);
 
@@ -326,12 +336,15 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
 mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
 
     int font_size = mp_obj_get_int(size);
+    (void)font_size;
     bool result = false;
 
     if (mp_obj_is_str(font)) {
-        result = self->vector->set_font(mp_obj_to_string_r(font), font_size);
+        // TODO: Implement when Alright Fonts rewrite is ready
+        //result = self->vector->set_font(mp_obj_to_string_r(font), font_size);
     }
     else {
         
@@ -341,16 +354,19 @@ mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
 
 mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
 
     int font_size = mp_obj_get_int(size);
-    self->vector->set_font_size(font_size);
+    (void)font_size;
+    // TODO: Implement when Alright Fonts rewrite is ready
+    //self->vector->set_font_size(font_size);
     return mp_const_none;
 }
 
 mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
 
-    self->vector->set_antialiasing((pretty_poly::antialias_t)mp_obj_get_int(aa));
+    self->vector->set_antialiasing((pp_antialias_t)mp_obj_get_int(aa));
     return mp_const_none;
 }
 
@@ -368,6 +384,7 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
+    (void)self;
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
 
@@ -379,11 +396,14 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
+    (void)x;
+    (void)y;
 
     if(args[ARG_angle].u_obj == mp_const_none) {
-        self->vector->text(t, Point(x, y));
+        // TODO: Implement when Alright Fonts rewrite is ready
+        //self->vector->text(t, Point(x, y));
     } else {
-        self->vector->text(t, Point(x, y), mp_obj_get_float(args[ARG_angle].u_obj));
+        //self->vector->text(t, Point(x, y), mp_obj_get_float(args[ARG_angle].u_obj));
     }
 
     return mp_const_none;
@@ -406,13 +426,13 @@ mp_obj_t VECTOR_rotate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_arg
 
     if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
 
-    _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _POLYGON_obj_t);
+    _PATH_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _PATH_obj_t);
 
-    Point origin = Point(args[ARG_origin_x].u_int, args[ARG_origin_y].u_int);
+    pp_point_t origin = {(PP_COORD_TYPE)args[ARG_origin_x].u_int, (PP_COORD_TYPE)args[ARG_origin_y].u_int};
 
     float angle = mp_obj_get_float(args[ARG_angle].u_obj);
 
-    self->vector->rotate(poly->contour, origin, angle);
+    self->vector->rotate(&poly->path, origin, angle);
 
     return mp_const_none;
 }
@@ -433,11 +453,11 @@ mp_obj_t VECTOR_translate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
 
     if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
 
-    _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _POLYGON_obj_t);
+    _PATH_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _PATH_obj_t);
 
-    Point translate = Point(args[ARG_x].u_int, args[ARG_y].u_int);
+    pp_point_t translate = {(PP_COORD_TYPE)args[ARG_x].u_int, (PP_COORD_TYPE)args[ARG_y].u_int};
 
-    self->vector->translate(poly->contour, translate);
+    self->vector->translate(&poly->path, translate);
 
     return mp_const_none;
 }
@@ -449,18 +469,23 @@ mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], _VECTOR_obj_t);
 
-    std::vector<pretty_poly::contour_t<picovector_point_type>> contours;
+    pp_poly_t group;
+    group.count = num_polygons;
+    group.paths = (pp_path_t *)malloc(sizeof(pp_path_t) * num_polygons);
 
     for(auto i = 0u; i < num_polygons; i++) {
         mp_obj_t poly_obj = polygons[i];
 
         if(!MP_OBJ_IS_TYPE(poly_obj, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
 
-        _POLYGON_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _POLYGON_obj_t);
-        contours.emplace_back(poly->contour.points, poly->contour.count);
+        _PATH_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _PATH_obj_t);
+        group.paths[i].points = poly->path.points;
+        group.paths[i].count = poly->path.count;
     }
 
-    self->vector->polygon(contours);
+    self->vector->draw(&group);
+
+    free(group.paths);
 
     return mp_const_none;
 }
