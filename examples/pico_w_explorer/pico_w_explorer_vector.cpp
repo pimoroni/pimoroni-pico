@@ -20,6 +20,8 @@ int main() {
   Pen WHITE = graphics.create_pen(255, 255, 255);
   Pen BLACK = graphics.create_pen(0, 0, 0);
 
+  float angle = 0.0f;
+
   while(true) {
     graphics.set_pen(BLACK);
     graphics.clear();
@@ -35,16 +37,18 @@ int main() {
     };
     pp_poly_t poly = {.paths = paths, .count = 2};
 
-    vector.rotate(&poly, {0, 0}, 45.0f);
-    vector.translate(&poly, {128, 128});
+    vector.rotate(&poly, {0, 0}, angle);
+    vector.translate(&poly, {160, 120});
 
     vector.draw(&poly);
 
-    pp_mat3_t t = pp_mat3_identity();
-    vector.text("Hello World", {0, 0}, &t);
+    //pp_mat3_t t = pp_mat3_identity();
+    //vector.text("Hello World", {0, 0}, &t);
 
     // update screen
     st7789.update(&graphics);
+
+    angle += 1.0f;
   }
 
     return 0;
