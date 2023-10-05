@@ -1,5 +1,6 @@
 # cmake file for Pimoroni Inky with Raspberry Pi Pico W
-set(MICROPY_BOARD PICO_W)
+set(MICROPY_BOARD RPI_PICO_W)
+set(PICO_BOARD "pico_w")
 
 # The C malloc is needed by cyw43-driver Bluetooth and Pimoroni Pico modules
 set(MICROPY_C_HEAP_SIZE 4096)

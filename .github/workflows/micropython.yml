@@ -69,9 +69,9 @@ jobs:
       matrix:
         include:
         - name: pico
-          board: PICO
+          board: RPI_PICO
         - name: picow
-          board: PICO_W
+          board: RPI_PICO_W
         - name: tiny2040
           board: PIMORONI_TINY2040
         - name: picolipo_4mb
@@ -84,11 +84,11 @@ jobs:
           board: PICO_W_ENVIRO
           patch: true
         - name: galactic_unicorn
-          board: PICO_W
+          board: RPI_PICO_W
         - name: cosmic_unicorn
-          board: PICO_W
+          board: RPI_PICO_W
         - name: stellar_unicorn
-          board: PICO_W
+          board: RPI_PICO_W
         - name: inky_frame
           board: PICO_W_INKY
           patch: true
