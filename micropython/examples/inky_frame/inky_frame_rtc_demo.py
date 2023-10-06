@@ -1,5 +1,5 @@
 import time
-import uasyncio
+import asyncio
 import WIFI_CONFIG
 import inky_frame
 from network_manager import NetworkManager
@@ -45,7 +45,7 @@ if inky_frame.woken_by_rtc() or inky_frame.woken_by_button():
 
         t_start = time.time()
         try:
-            uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+            asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
             connected = True
         except RuntimeError:
             pass

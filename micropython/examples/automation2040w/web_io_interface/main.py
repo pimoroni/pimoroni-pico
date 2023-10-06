@@ -2,7 +2,7 @@
 
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 from automation import Automation2040W
 import time
 

@@ -8,7 +8,7 @@
 
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 import urequests
 import time
 from machine import Timer, Pin
@@ -101,7 +101,7 @@ colour_array = ["#000000"] * 583
 # set up wifi
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 except Exception as e:
     print(f'Wifi connection failed! {e}')
 

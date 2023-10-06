@@ -13,7 +13,7 @@ from gfx_pack import GfxPack
 from network_manager import NetworkManager
 import ntptime
 import urequests
-import uasyncio
+import asyncio
 import machine
 
 
@@ -252,7 +252,7 @@ def draw_sun(sunrise, sunset, time, cycle):
 
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 except Exception as e:
     print(f'Wifi connection failed! {e}')
 

@@ -1,9 +1,9 @@
 import gc
-import uos
+import os
 import random
 import machine
 import jpegdec
-import uasyncio
+import asyncio
 import sdcard
 import WIFI_CONFIG
 from urllib import urequest
@@ -27,7 +27,7 @@ def status_handler(mode, status, ip):
 
 
 network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
 
 graphics = PicoGraphics(DISPLAY)
@@ -39,7 +39,7 @@ ENDPOINT = "http://placekitten.com/{0}/{1}"
 
 sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
 sd = sdcard.SDCard(sd_spi, machine.Pin(22))
-uos.mount(sd, "/sd")
+os.mount(sd, "/sd")
 gc.collect()  # Claw back some RAM!
 
 url = ENDPOINT.format(WIDTH, HEIGHT + random.randint(0, 10))

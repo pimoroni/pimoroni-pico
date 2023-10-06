@@ -1,8 +1,8 @@
 import gc
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
-import ujson
+import asyncio
+import json
 from urllib import urequest
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
@@ -97,7 +97,7 @@ rtc.enable_timer_interrupt(True)
 
 while True:
     # Connect to WiFi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     # Clear the screen
     graphics.set_pen(1)
@@ -106,7 +106,7 @@ while True:
 
     # Grab the data
     socket = urequest.urlopen(URL)
-    j = ujson.load(socket)
+    j = json.load(socket)
     socket.close()
 
     text = [j['activity'], j['type'], j['participants']]

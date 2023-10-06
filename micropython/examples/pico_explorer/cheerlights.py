@@ -1,10 +1,10 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 from urllib import urequest
 from picographics import PicoGraphics, DISPLAY_PICO_EXPLORER
 import time
-import ujson
+import json
 from pimoroni import RGBLED
 
 """
@@ -62,12 +62,12 @@ led = RGBLED(0, 1, 2, invert=False)
 
 while True:
     # connect to wifi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     # open the json file
     print(f"Requesting URL: {URL}")
     socket = urequest.urlopen(URL)
-    data = ujson.load(socket)
+    data = json.load(socket)
     socket.close()
     print("Data obtained!")
 

@@ -2,7 +2,7 @@
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 from urllib import urequest
 import WIFI_CONFIG
 import gc
@@ -148,7 +148,7 @@ rtc.enable_timer_interrupt(True)
 
 while True:
     # Connect to WiFi
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     # Gets Feed Data
     feed = get_rss()

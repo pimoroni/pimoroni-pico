@@ -15,7 +15,7 @@ import time
 from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_D, SWITCH_E
 from network_manager import NetworkManager
 import urequests
-import uasyncio
+import asyncio
 
 URL = 'https://zoo-animal-api.herokuapp.com/animals/rand/5'
 
@@ -125,7 +125,7 @@ def display_animal(animal, stat_page):
 
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 except Exception as e:
     print(f'Wifi connection failed! {e}')
 

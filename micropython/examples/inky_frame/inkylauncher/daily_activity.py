@@ -1,5 +1,5 @@
 import gc
-import ujson
+import json
 from urllib import urequest
 
 # Length of time between updates in Seconds.
@@ -70,7 +70,7 @@ def update():
     try:
         # Grab the data
         socket = urequest.urlopen(URL)
-        j = ujson.load(socket)
+        j = json.load(socket)
         socket.close()
         text = [j['activity'], j['type'], j['participants']]
         gc.collect()

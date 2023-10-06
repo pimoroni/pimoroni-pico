@@ -1,7 +1,7 @@
 import gc
 import random
 from urllib import urequest
-from ujson import load
+from json import load
 import qrcode
 
 gc.collect()  # We're really gonna need that RAM!

@@ -9,7 +9,7 @@ from pms5003 import PMS5003
 import umqtt.simple
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 
 """
 This example reads from all the sensors on Enviro+.
@@ -98,7 +98,7 @@ mqtt_success = False
 e = "Wait a minute"
 
 # connect to wifi
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
 while True:
 

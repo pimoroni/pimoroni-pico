@@ -3,7 +3,7 @@ from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio as asyncio
+import asyncio as asyncio
 import urequests
 import jpegdec
 

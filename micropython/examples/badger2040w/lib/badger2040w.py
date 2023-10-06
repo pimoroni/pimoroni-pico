@@ -4,7 +4,7 @@ from picographics import PicoGraphics, DISPLAY_INKY_PACK
 import network
 from network_manager import NetworkManager
 import WIFI_CONFIG
-import uasyncio
+import asyncio
 import time
 import gc
 import wakeup
@@ -177,5 +177,5 @@ class Badger2040W():
             raise RuntimeError("You must populate WIFI_CONFIG.py for networking.")
         self.display.set_update_speed(2)
         network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=self.status_handler)
-        uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+        asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
         gc.collect()

@@ -1,10 +1,10 @@
 import gc
-import uos
+import os
 import random
 import machine
 import jpegdec
 import WIFI_CONFIG
-import uasyncio
+import asyncio
 from network_manager import NetworkManager
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
@@ -20,7 +20,7 @@ def status_handler(mode, status, ip):
 
 
 network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
 
 graphics = PicoGraphics(DISPLAY)
@@ -34,7 +34,7 @@ JOKE_IMG = "https://pimoroni.github.io/feed2image/jokeapi-{}-{}x{}.jpg"
 import sdcard  # noqa: E402 - putting this at the top causes an MBEDTLS OOM error!?
 sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))
 sd = sdcard.SDCard(sd_spi, machine.Pin(22))
-uos.mount(sd, "/sd")
+os.mount(sd, "/sd")
 gc.collect()  # Claw back some RAM!
 
 # We don't have the RAM to store the list of Joke IDs in memory.

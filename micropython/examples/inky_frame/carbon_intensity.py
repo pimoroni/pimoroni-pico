@@ -16,7 +16,7 @@ from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
 import urequests
 import inky_frame
-import uasyncio
+import asyncio
 from network_manager import NetworkManager
 import WIFI_CONFIG
 
@@ -129,7 +129,7 @@ network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_hand
 
 # connect to wifi
 try:
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 except ImportError:
     print("Add WIFI_CONFIG.py with your WiFi credentials")
 

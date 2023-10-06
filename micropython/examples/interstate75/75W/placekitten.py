@@ -1,6 +1,6 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio
+import asyncio
 from urllib import urequest
 from interstate75 import Interstate75, DISPLAY_INTERSTATE75_128X64
 import jpegdec
@@ -47,7 +47,7 @@ def status_handler(mode, status, ip):
 
 # connect to wifi
 network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
 url = ENDPOINT.format(WIDTH, HEIGHT + random.randint(0, 10))
 print("Requesting URL: {}".format(url))

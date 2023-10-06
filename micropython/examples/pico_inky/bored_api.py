@@ -1,8 +1,8 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
 import time
-import uasyncio
-import ujson
+import asyncio
+import json
 from urllib import urequest
 from picographics import PicoGraphics, DISPLAY_INKY_PACK
 from pimoroni import Button
@@ -46,11 +46,11 @@ network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_hand
 
 
 def update():
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     url = ENDPOINT
     print("Requesting URL: {}".format(url))
-    j = ujson.load(urequest.urlopen(url))
+    j = json.load(urequest.urlopen(url))
 
     print(j)
 

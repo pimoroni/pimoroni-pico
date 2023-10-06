@@ -10,7 +10,7 @@ https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
 '''
 
 import time
-import uasyncio
+import asyncio
 import urequests
 import WIFI_CONFIG
 from gfx_pack import GfxPack, SWITCH_E
@@ -168,7 +168,7 @@ def status_handler(mode, status, ip):
 try:
     # Attempt to connect to the wifi.
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
-    uasyncio.get_event_loop().run_until_complete(
+    asyncio.get_event_loop().run_until_complete(
         network_manager.client(WIFI_CONFIG.SSID,
                                WIFI_CONFIG.PSK))
 

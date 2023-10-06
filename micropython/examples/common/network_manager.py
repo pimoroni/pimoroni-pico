@@ -1,7 +1,7 @@
 import rp2
 import network
 import machine
-import uasyncio
+import asyncio
 
 
 class NetworkManager:
@@ -53,7 +53,7 @@ class NetworkManager:
     async def wait(self, mode):
         while not self.isconnected():
             self._handle_status(mode, None)
-            await uasyncio.sleep_ms(1000)
+            await asyncio.sleep_ms(1000)
 
     def _handle_status(self, mode, status):
         if callable(self._status_handler):
@@ -78,10 +78,10 @@ class NetworkManager:
         self._sta_if.connect(ssid, psk)
 
         try:
-            await uasyncio.wait_for(self.wait(network.STA_IF), self._client_timeout)
+            await asyncio.wait_for(self.wait(network.STA_IF), self._client_timeout)
             self._handle_status(network.STA_IF, True)
 
-        except uasyncio.TimeoutError:
+        except asyncio.TimeoutError:
             self._sta_if.active(False)
             self._handle_status(network.STA_IF, False)
             self._handle_error(network.STA_IF, "WIFI Client Failed")
@@ -99,10 +99,10 @@ class NetworkManager:
         self._ap_if.active(True)
 
         try:
-            await uasyncio.wait_for(self.wait(network.AP_IF), self._access_point_timeout)
+            await asyncio.wait_for(self.wait(network.AP_IF), self._access_point_timeout)
             self._handle_status(network.AP_IF, True)
 
-        except uasyncio.TimeoutError:
+        except asyncio.TimeoutError:
             self._sta_if.active(False)
             self._handle_status(network.AP_IF, False)
             self._handle_error(network.AP_IF, "WIFI Client Failed")

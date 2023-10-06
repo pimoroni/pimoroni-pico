@@ -1,8 +1,8 @@
 import WIFI_CONFIG
 from network_manager import NetworkManager
 import time
-import uasyncio
-import ujson
+import asyncio
+import json
 from urllib import urequest
 from picographics import PicoGraphics, DISPLAY_INKY_PACK
 
@@ -54,7 +54,7 @@ while True:
     graphics.set_font("bitmap8")
     graphics.set_update_speed(1)
 
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     date = list(time.localtime())[:3]
     date.append(MONTHNAMES[date[1] - 1])
@@ -65,7 +65,7 @@ while True:
 
     url = ENDPOINT.format(*date)
     print("Requesting URL: {}".format(url))
-    j = ujson.load(urequest.urlopen(url))
+    j = json.load(urequest.urlopen(url))
 
     text = j['expandtemplates']['wikitext']
 

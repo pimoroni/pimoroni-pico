@@ -1,7 +1,7 @@
 import gc
 import jpegdec
 from urllib import urequest
-from ujson import load
+from json import load
 
 gc.collect()
 

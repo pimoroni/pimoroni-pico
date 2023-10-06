@@ -3,8 +3,8 @@ from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
 import WIFI_CONFIG
 from network_manager import NetworkManager
-import uasyncio as asyncio
-import uasyncio.core
+import asyncio as asyncio
+import asyncio.core
 from tinyweb.server import webserver
 
 '''

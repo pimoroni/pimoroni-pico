@@ -1,7 +1,7 @@
 import gc
 import time
-import ujson
-import uasyncio
+import json
+import asyncio
 import WIFI_CONFIG
 from urllib import urequest
 from network_manager import NetworkManager
@@ -131,7 +131,7 @@ def display_quote(text, ox, oy, scale, wordwrap):
 while True:
     gc.collect()
 
-    uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+    asyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
     date = list(time.localtime())[:3]
     date.append(MONTHNAMES[date[1] - 1])
@@ -143,7 +143,7 @@ while True:
     url = ENDPOINT.format(*date)
     print("Requesting URL: {}".format(url))
     socket = urequest.urlopen(url)
-    j = ujson.load(socket)
+    j = json.load(socket)
     socket.close()
 
     text = j['expandtemplates']['wikitext']
