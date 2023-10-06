@@ -249,7 +249,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     // Source is a filename
     int result = -1;
 
-    if(mp_obj_is_str_or_bytes(self->file)){
+    if(mp_obj_is_str(self->file)){
         GET_STR_DATA_LEN(self->file, str, str_len);
 
         result = self->jpeg->open(
