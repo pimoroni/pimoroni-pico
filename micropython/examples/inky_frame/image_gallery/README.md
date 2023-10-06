@@ -24,11 +24,18 @@ Copy the images to your Pico W using Thonny.
 
 ### image_gallery_sd.py / image_gallery_sd_random.py
 
-Pop an SD card into your computer to copy the images across. (Alternatively, you can transfer them using Thonny, but you will have to mount the SD card using the REPL first).
+Pop an SD card into your computer to copy the images across.
 
-The SD card examples require `sdcard.mpy` from `common/lib`  - copy this file into the `lib` directory on your Pico W.
+Alternatively, you can transfer them using Thonny, but you will have to mount the SD card using the REPL first:
 
-- [/micropython/examples/common](../../common)
+```python
+import os
+import sdcard
+from machine import Pin
+sd_spi = SPI(0, sck=Pin(18, Pin.OUT), mosi=Pin(19, Pin.OUT), miso=Pin(16, Pin.OUT))
+sd = sdcard.SDCard(sd_spi, Pin(22))
+os.mount(sd, "/sd")
+```
 
 ## Image Credits
 

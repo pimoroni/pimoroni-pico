@@ -27,10 +27,6 @@ The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `c
 
 You'll also need to install the `micropython-urllib.urequest` library using Thonny's 'Tools' > 'Manage Packages' or `common/lib/urllib` which contains a compiled `.mpy` version that uses less RAM. You should place this directory in `lib` on your Pico W.
 
-Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`. You should place this file in `lib` on your Pico W.
-
-- [/micropython/examples/common](../common)
-
 ### Button Test
 [button_test.py](button_test.py)
 
