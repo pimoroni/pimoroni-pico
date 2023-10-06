@@ -5,6 +5,9 @@ require("bundle-networking")
 require("urllib.urequest")
 require("umqtt.simple")
 
+# SD Card
+require("sdcard")
+
 # Bluetooth
 require("aioble")
 
