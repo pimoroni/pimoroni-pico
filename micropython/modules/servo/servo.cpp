@@ -1288,7 +1288,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
             // Create and populate a local array of pins
             pins = m_new(uint8_t, pin_count);
             for(size_t i = 0; i < pin_count; i++) {
-                int pin = mp_obj_get_int(items[i]);
+                int pin = pimoroni_gpio_from_obj(items[i]);
                 if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
                     m_free(pins);
                     mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));

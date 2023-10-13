@@ -24,4 +24,21 @@ extern int pimoroni_gpio_from_obj(const mp_obj_t &object) {
     }
     return gpio;
 }
+
+extern int pimoroni_obj_is_int_or_gpio(const mp_obj_t &object) {
+    int is_int_or_gpio = false;
+    if (mp_obj_is_type(object, &machine_pin_type)) {
+        #if MICROPY_HW_PIN_EXT_COUNT
+        machine_pin_obj_t *pin = MP_OBJ_TO_PTR2(object, machine_pin_obj_t);
+        is_int_or_gpio = !pin->is_ext;
+        #else
+        is_int_or_gpio = true;
+        #endif
+    }
+    else {
+        is_int_or_gpio = mp_obj_is_int(object);
+    }
+
+    return is_int_or_gpio;
+}
 }
