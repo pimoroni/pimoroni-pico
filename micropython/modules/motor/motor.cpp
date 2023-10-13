@@ -635,12 +635,12 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one pair tuple"));
     else {
         // Specific check for is a single 2 pin list/tuple was provided
-        if(pair_count == 2 && mp_obj_is_int(items[0]) && mp_obj_is_int(items[1])) {
+        if(pair_count == 2 && pimoroni_obj_is_int_or_gpio(items[0]) && pimoroni_obj_is_int_or_gpio(items[1])) {
             pins = m_new(pin_pair, 1);
             pair_count = 1;
 
-            int pos = mp_obj_get_int(items[0]);
-            int neg = mp_obj_get_int(items[1]);
+            int pos = pimoroni_gpio_from_obj(items[0]);
+            int neg = pimoroni_gpio_from_obj(items[1]);
             if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
                (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
                 delete[] pins;
@@ -669,8 +669,8 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
                         delete[] pins;
                         mp_raise_ValueError(MP_ERROR_TEXT("pair tuple must only contain two integers"));
                     }
-                    int pos = mp_obj_get_int(tuple->items[0]);
-                    int neg = mp_obj_get_int(tuple->items[1]);
+                    int pos = pimoroni_gpio_from_obj(tuple->items[0]);
+                    int neg = pimoroni_gpio_from_obj(tuple->items[1]);
                     if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
                        (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
                         delete[] pins;
