@@ -268,7 +268,7 @@ namespace pimoroni {
           int32_t ex = points[j].x;
           int32_t px = int32_t(sx + float(fy - sy) / float(ey - sy) * float(ex - sx));
 
-          nodes[n++] = px < clip.x ? clip.x : (px >= clip.x + clip.w ? clip.x + clip.w - 1 : px);// clamp(int32_t(sx + float(fy - sy) / float(ey - sy) * float(ex - sx)), clip.x, clip.x + clip.w);
+          nodes[n++] = px;
         }
       }
 
