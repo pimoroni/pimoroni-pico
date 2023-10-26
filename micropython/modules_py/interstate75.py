@@ -10,7 +10,6 @@ SWITCH_B = 1
 SWITCH_BOOT = 1
 
 
-
 class Interstate75:
     I2C_SDA_PIN = 20
     I2C_SCL_PIN = 21
