@@ -7,6 +7,12 @@ from network_manager import NetworkManager
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
 from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
 
+# Set tz_offset to be the number of hours off of UTC for your local zone.
+# Examples:  tz_offset = -7 # Pacific time (PST)
+#            tz_offset =  1 # CEST (Paris)
+tz_offset = 0
+tz_seconds = tz_offset * 3600
+
 # Sync the Inky (always on) RTC to the Pico W so that "time.localtime()" works.
 inky_frame.pcf_to_pico_rtc()
 
@@ -36,7 +42,7 @@ if inky_frame.woken_by_rtc() or inky_frame.woken_by_button():
     def status_handler(mode, status, ip):
         print(mode, status, ip)
 
-    year, month, day, hour, minute, second, dow, _ = time.localtime()
+    year, month, day, hour, minute, second, dow, _ = time.localtime(time.time() + tz_seconds)
 
     # Connect to the network and get the time if it's not set
     if year < 2023:
@@ -60,7 +66,7 @@ if inky_frame.woken_by_rtc() or inky_frame.woken_by_button():
             graphics.text("Failed to connect!", 0, 40)
 
     # Display the date and time
-    year, month, day, hour, minute, second, dow, _ = time.localtime()
+    year, month, day, hour, minute, second, dow, _ = time.localtime(time.time() + tz_seconds)
 
     date_time = f"{year:04}/{month:02}/{day:02} {hour:02}:{minute:02}:{second:02}"
 
