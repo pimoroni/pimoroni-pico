@@ -75,10 +75,9 @@ jobs:
         source $BUILD_TOOLS
         build_deps
       
-    - name: Checkout MicroPython & MicroPython Libs
+    - name: Checkout MicroPython & Submodules
       run: |
         source $BUILD_TOOLS
-        clone_micropython_lib
         clone_micropython
 
     - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"

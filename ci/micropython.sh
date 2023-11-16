@@ -12,10 +12,6 @@ function log_warning {
 	echo -e "$(tput setaf 1)$1$(tput sgr0)"
 }
 
-function clone_micropython_lib {
-    git clone https://github.com/micropython/micropython-lib --depth=1
-}
-
 function clone_micropython {
     log_inform "Using MicroPython $MICROPYTHON_VERSION"
     git clone https://github.com/micropython/micropython --depth=1 --branch=$MICROPYTHON_VERSION
@@ -34,10 +30,6 @@ function clone_micropython {
 
 function build_deps {
     sudo apt update && sudo apt install ccache
-}
-
-function clone_pimoroni_pico {
-    git clone https://github.com/micropython/micropython --branch=$PIMORONI_PICO_SHA --depth=1
 }
 
 function micropython_version {
