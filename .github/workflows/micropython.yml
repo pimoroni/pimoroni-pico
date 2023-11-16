@@ -97,6 +97,7 @@ jobs:
       shell: bash
       run: |
         source $BUILD_TOOLS
+        micropython_version
         cmake_configure
 
     - name: Build MicroPython

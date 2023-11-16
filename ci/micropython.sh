@@ -41,8 +41,8 @@ function clone_pimoroni_pico {
 }
 
 function micropython_version {
-    echo "MICROPY_GIT_TAG=\"$MICROPYTHON_VERSION, $BOARD_NAME $TAG_OR_SHA\"" >> $GITHUB_ENV
-    echo "MICROPY_GIT_HASH=\"$MICROPYTHON_VERSION-$TAG_OR_SHA\"" >> $GITHUB_ENV
+    echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, $BOARD_NAME $TAG_OR_SHA" >> $GITHUB_ENV
+    echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-$TAG_OR_SHA" >> $GITHUB_ENV
 }
 
 function hack_patch_micropython_disable_exceptions {
