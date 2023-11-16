@@ -12,7 +12,7 @@ function log_warning {
 	echo -e "$(tput setaf 1)$1$(tput sgr0)"
 }
 
-function clone_micropython {
+function micropython_clone {
     log_inform "Using MicroPython $MICROPYTHON_VERSION"
     git clone https://github.com/micropython/micropython --depth=1 --branch=$MICROPYTHON_VERSION
     cd micropython
@@ -23,12 +23,18 @@ function clone_micropython {
     git submodule update --init lib/micropython-lib
     git submodule update --init lib/tinyusb
     git submodule update --init lib/btstack
-    cd mpy-cross
-    make
+    cd ../
+}
+
+function micropython_build_mpy_cross {
+    cd micropython/mpy-cross
+    ccache --zero-stats || true
+    CROSS_COMPILE="ccache " make
+    ccache --show-stats || true
     cd ../../
 }
 
-function build_deps {
+function apt_install_build_deps {
     sudo apt update && sudo apt install ccache
 }
 

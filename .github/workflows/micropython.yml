@@ -73,12 +73,17 @@ jobs:
     - name: Install CCache
       run: |
         source $BUILD_TOOLS
-        build_deps
+        apt_install_build_deps
       
     - name: Checkout MicroPython & Submodules
       run: |
         source $BUILD_TOOLS
-        clone_micropython
+        micropython_clone
+
+    - name: Build MPY Cross
+      run: |
+        source $BUILD_TOOLS
+        micropython_build_mpy_cross
 
     - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
       shell: bash
