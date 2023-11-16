@@ -59,13 +59,18 @@ jobs:
         restore-keys: |
           ccache-micropython-${{ matrix.name }}-${{ github.ref }}
           ccache-micropython-${{ matrix.name }}-
-  
+
     - uses: actions/checkout@v4
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
-      
-    - name: Install Compiler & CCache
+
+    - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '9-2020-q2'
+
+    - name: Install CCache
       run: |
         source $BUILD_TOOLS
         build_deps

@@ -33,7 +33,7 @@ function clone_micropython {
 }
 
 function build_deps {
-    sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+    sudo apt update && sudo apt install ccache
 }
 
 function clone_pimoroni_pico {
