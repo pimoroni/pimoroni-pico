@@ -92,7 +92,7 @@ namespace pimoroni {
     if(unicorn != nullptr) {
       partial_teardown();
     }
-  
+
     // setup pins
     gpio_init(pin::LED_DATA); gpio_set_dir(pin::LED_DATA, GPIO_OUT);
     gpio_init(pin::LED_CLOCK); gpio_set_dir(pin::LED_CLOCK, GPIO_OUT);
@@ -150,7 +150,7 @@ namespace pimoroni {
       bitstream_sm = pio_claim_unused_sm(bitstream_pio, true);
       bitstream_sm_offset = pio_add_program(bitstream_pio, &unicorn_program);
     }
-  
+
     pio_gpio_init(bitstream_pio, pin::LED_DATA);
     pio_gpio_init(bitstream_pio, pin::LED_CLOCK);
     pio_gpio_init(bitstream_pio, pin::LED_LATCH);
@@ -182,7 +182,7 @@ namespace pimoroni {
     // setup chained dma transfer for pixel data to the pio
     dma_channel = dma_claim_unused_channel(true);
     dma_ctrl_channel = dma_claim_unused_channel(true);
-  
+
     dma_channel_config ctrl_config = dma_channel_get_default_config(dma_ctrl_channel);
     channel_config_set_transfer_data_size(&ctrl_config, DMA_SIZE_32);
     channel_config_set_read_increment(&ctrl_config, false);
@@ -202,7 +202,7 @@ namespace pimoroni {
     channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
     channel_config_set_bswap(&config, false); // byte swap to reverse little endian
     channel_config_set_dreq(&config, pio_get_dreq(bitstream_pio, bitstream_sm, true));
-    channel_config_set_chain_to(&config, dma_ctrl_channel); 
+    channel_config_set_chain_to(&config, dma_ctrl_channel);
 
     dma_channel_configure(
       dma_channel,
@@ -230,6 +230,17 @@ namespace pimoroni {
   }
 
   void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t gr = pimoroni::GAMMA_14BIT[r];
+    uint16_t gg = pimoroni::GAMMA_14BIT[g];
+    uint16_t gb = pimoroni::GAMMA_14BIT[b];
+
+    set_pixel(x, y, gr, gg, gb);
+  }
+
+  void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, int r, int g, int b) {
+    set_pixel(x, y, uint8_t(r), uint8_t(g), uint8_t(b));
+  }
+  void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb) {
     if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
     // make those coordinates sane
@@ -241,10 +252,6 @@ namespace pimoroni {
     // check if it's the high or low nibble and create mask and shift value
     uint8_t shift = x % 2 == 0 ? 0 : 4;
     uint8_t nibble_mask = 0b00001111 << shift;
-
-    uint16_t gr = pimoroni::GAMMA_14BIT[r];
-    uint16_t gg = pimoroni::GAMMA_14BIT[g];
-    uint16_t gb = pimoroni::GAMMA_14BIT[b];
 
     // set the appropriate bits in the separate bcd frames
     for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {

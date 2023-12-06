@@ -23,7 +23,7 @@ namespace pimoroni {
     static PIO bitstream_pio;
     static uint bitstream_sm;
     static uint bitstream_sm_offset;
-  
+
     // must be aligned for 32bit dma transfer
     alignas(4) uint8_t bitstream[BITSTREAM_LENGTH] = {0};
     const uint32_t bitstream_addr = (uint32_t)bitstream;
@@ -36,7 +36,9 @@ namespace pimoroni {
     void init();
 
     void clear();
+    void set_pixel(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb);
     void set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
+    void set_pixel(uint8_t x, uint8_t y, int r, int g, int b);
     void set_pixel(uint8_t x, uint8_t y, uint8_t v);
 
     bool is_pressed(uint8_t button);
