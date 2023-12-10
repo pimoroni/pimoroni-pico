@@ -240,6 +240,15 @@ namespace pimoroni {
     set_pixel_(x, y, gr, gg, gb);
   }
 
+  // // Original version
+  // void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
+  //   uint16_t gr = pimoroni::GAMMA_14BIT[r];
+  //   uint16_t gg = pimoroni::GAMMA_14BIT[g];
+  //   uint16_t gb = pimoroni::GAMMA_14BIT[b];
+
+  //   set_pixel_(x, y, gr, gg, gb);
+  // }
+
   void PicoUnicorn::set_pixel_(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb) {
     if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 

@@ -16,12 +16,11 @@ namespace pimoroni {
 
     static const uint32_t ROW_COUNT = 7;
     static const uint32_t ROW_BYTES = 12;
-    // static const uint32_t BCD_FRAMES = 15; // includes fet discharge frame
-    // static const uint32_t BCD_FRAMES = 14;
+    // static const uint32_t BCD_FRAMES = 14; // Original version
     static const uint32_t BCD_FRAMES = 12;
     static const uint32_t DISCHARGE_FRAMES = 1;
-    // static const uint32_t DISCHARGE_FRAMES = 6;
     static const uint32_t DISCHARGE_TICKS = 65535; // how long to run the discharge frame
+    // static const uint16_t FRAME_DELAY = 0; // Original version
     static const uint16_t FRAME_DELAY = 4;
     static const uint16_t TOTAL_FRAMES = BCD_FRAMES + DISCHARGE_FRAMES;
     static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * TOTAL_FRAMES);
