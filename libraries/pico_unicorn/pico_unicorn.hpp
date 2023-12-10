@@ -16,8 +16,15 @@ namespace pimoroni {
 
     static const uint32_t ROW_COUNT = 7;
     static const uint32_t ROW_BYTES = 12;
-    static const uint32_t BCD_FRAMES = 15; // includes fet discharge frame
-    static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * BCD_FRAMES);
+    // static const uint32_t BCD_FRAMES = 15; // includes fet discharge frame
+    // static const uint32_t BCD_FRAMES = 14;
+    static const uint32_t BCD_FRAMES = 12;
+    static const uint32_t DISCHARGE_FRAMES = 1;
+    // static const uint32_t DISCHARGE_FRAMES = 6;
+    static const uint32_t DISCHARGE_TICKS = 65535; // how long to run the discharge frame
+    static const uint16_t FRAME_DELAY = 4;
+    static const uint16_t TOTAL_FRAMES = BCD_FRAMES + DISCHARGE_FRAMES;
+    static const uint32_t BITSTREAM_LENGTH = (ROW_COUNT * ROW_BYTES * TOTAL_FRAMES);
 
   private:
     static PIO bitstream_pio;
@@ -36,8 +43,8 @@ namespace pimoroni {
     void init();
 
     void clear();
-    void set_pixel(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb);
     void set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b);
+    void set_pixel_(uint8_t x, uint8_t y, uint16_t r, uint16_t g, uint16_t b);
     void set_pixel(uint8_t x, uint8_t y, int r, int g, int b);
     void set_pixel(uint8_t x, uint8_t y, uint8_t v);
 

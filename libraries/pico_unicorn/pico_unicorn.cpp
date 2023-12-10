@@ -109,29 +109,32 @@ namespace pimoroni {
 
     // initialise the bcd timing values and row selects in the bitstream
     for(uint8_t row = 0; row < HEIGHT; row++) {
-      for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {
+      for(uint8_t frame = 0; frame < TOTAL_FRAMES; frame++) {
         // determine offset in the buffer for this row/frame
-        uint16_t offset = (row * ROW_BYTES * BCD_FRAMES) + (ROW_BYTES * frame);
+        uint16_t offset = (row * ROW_BYTES * TOTAL_FRAMES) + (ROW_BYTES * frame);
 
         uint16_t row_select_offset = offset + 9;
         uint16_t bcd_offset = offset + 10;
 
         // the last bcd frame is used to allow the fets to discharge to avoid ghosting
-        if(frame == BCD_FRAMES - 1) {
+        if(frame >= BCD_FRAMES) {
           bitstream[row_select_offset] = 0b11111111;
 
-          uint16_t bcd_ticks = 65535;
+          uint16_t bcd_ticks = DISCHARGE_TICKS;
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
 
           for(uint8_t col = 0; col < 6; col++) {
             bitstream[offset + col] = 0xff;
           }
-        }else{
+        } else {
           uint8_t row_select_mask = ~(1 << (7 - row));
           bitstream[row_select_offset] = row_select_mask;
 
+	  // uint16_t frameperiod = std::max(uint16_t(1), FRAME_DELAY) << frame;
+	  // uint16_t bcd_ticks = frameperiod - FRAME_DELAY;
           uint16_t bcd_ticks = 1 << frame;
+	  
           bitstream[bcd_offset + 1] = (bcd_ticks &  0xff00) >> 8;
           bitstream[bcd_offset]     = (bcd_ticks &  0xff);
         }
@@ -230,17 +233,14 @@ namespace pimoroni {
   }
 
   void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint8_t r, uint8_t g, uint8_t b) {
-    uint16_t gr = pimoroni::GAMMA_14BIT[r];
-    uint16_t gg = pimoroni::GAMMA_14BIT[g];
-    uint16_t gb = pimoroni::GAMMA_14BIT[b];
+    uint16_t gr = pimoroni::GAMMA_12BIT[r];
+    uint16_t gg = pimoroni::GAMMA_12BIT[g];
+    uint16_t gb = pimoroni::GAMMA_12BIT[b];
 
-    set_pixel(x, y, gr, gg, gb);
+    set_pixel_(x, y, gr, gg, gb);
   }
 
-  void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, int r, int g, int b) {
-    set_pixel(x, y, uint8_t(r), uint8_t(g), uint8_t(b));
-  }
-  void PicoUnicorn::set_pixel(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb) {
+  void PicoUnicorn::set_pixel_(uint8_t x, uint8_t y, uint16_t gr, uint16_t gg, uint16_t gb) {
     if(x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
 
     // make those coordinates sane
@@ -254,9 +254,9 @@ namespace pimoroni {
     uint8_t nibble_mask = 0b00001111 << shift;
 
     // set the appropriate bits in the separate bcd frames
-    for(uint8_t frame = 0; frame < BCD_FRAMES; frame++) {
+    for(uint8_t frame = 0; frame < TOTAL_FRAMES; frame++) {
       // determine offset in the buffer for this row/frame
-      uint16_t offset = (y * ROW_BYTES * BCD_FRAMES) + (ROW_BYTES * frame);
+      uint16_t offset = (y * ROW_BYTES * TOTAL_FRAMES) + (ROW_BYTES * frame);
 
       uint8_t rgbd = ((gr & 0b1) << 1) | ((gg & 0b1) << 3) | ((gb & 0b1) << 2);
 
@@ -264,10 +264,10 @@ namespace pimoroni {
       rgbd <<= shift;
 
       // clear existing data
-      bitstream[offset + byte_offset] &= ~nibble_mask;
+      uint16_t othernibble = bitstream[offset + byte_offset] & ~nibble_mask;
 
       // set new data
-      bitstream[offset + byte_offset] |= rgbd;
+      bitstream[offset + byte_offset] = othernibble | rgbd;
 
       gr >>= 1;
       gg >>= 1;
