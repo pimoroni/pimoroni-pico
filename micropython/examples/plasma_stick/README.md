@@ -188,3 +188,4 @@ Here are some Plasma Stick community projects and resources that you might find 
 
 - :link: [MQTT Script for Plasma Stick](https://github.com/digitalurban/MQTT-Plasma-Stick-2040W)
 - :link: [Pimoroni Wireless Plasma Kit - Server](https://github.com/brunon/Starlight)
+- :link: [Plasma LEDs](https://github.com/bitcdr/plasma-leds)
