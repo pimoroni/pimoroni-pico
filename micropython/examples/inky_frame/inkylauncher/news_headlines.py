@@ -5,7 +5,7 @@ import qrcode
 # Uncomment one URL to use (Top Stories, World News and technology)
 # URL = "http://feeds.bbci.co.uk/news/rss.xml"
 # URL = "http://feeds.bbci.co.uk/news/world/rss.xml"
-URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
+URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
 
 # Length of time between updates in minutes.
 # Frequent updates will reduce battery life!
