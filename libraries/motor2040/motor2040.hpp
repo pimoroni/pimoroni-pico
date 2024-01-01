@@ -49,6 +49,9 @@ namespace motor {
 
     const uint USER_SW = 23;
 
+    const uint I2C_SDA = 20;
+    const uint I2C_SCL = 21;
+
     const uint ADC_ADDR_0 = 22;
     const uint ADC_ADDR_1 = 24;
     const uint ADC_ADDR_2 = 25;
