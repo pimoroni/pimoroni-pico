@@ -39,6 +39,7 @@ def update():
         # Image for Inky Frame 4.0
         IMG_URL = "https://pimoroni.github.io/feed2image/nasa-apod-640x400-daily.jpg"
     elif HEIGHT == 480:
+        # Image for Inky Frame 7.3
         IMG_URL = "https://pimoroni.github.io/feed2image/nasa-apod-800x480-daily.jpg"
 
     try:
