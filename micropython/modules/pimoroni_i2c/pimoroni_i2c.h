@@ -1,6 +1,6 @@
 // Include MicroPython API.
 #include "py/runtime.h"
-#include "extmod/machine_i2c.h"
+#include "extmod/modmachine.h"
 #include "hardware/i2c.h"
 
 /***** Extern of Class Definition *****/
