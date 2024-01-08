@@ -623,16 +623,16 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 */
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
     self->display->update(self->graphics);
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
@@ -647,8 +647,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
@@ -660,8 +660,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     });
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 

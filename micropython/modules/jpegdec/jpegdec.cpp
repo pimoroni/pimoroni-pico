@@ -84,8 +84,8 @@ int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
 }
 
 int JPEGDraw(JPEGDRAW *pDraw) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     PicoGraphics *current_graphics = (PicoGraphics *)pDraw->pUser;
     // "pixel" is slow and clipped,

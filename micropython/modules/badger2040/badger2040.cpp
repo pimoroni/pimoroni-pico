@@ -122,8 +122,8 @@ mp_obj_t Badger2040_update(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
 
     while(self->badger2040->is_busy()) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -133,8 +133,8 @@ MICROPY_EVENT_POLL_HOOK
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
     while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -166,8 +166,8 @@ mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_m
 
 
     while(self->badger2040->is_busy()) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -177,8 +177,8 @@ MICROPY_EVENT_POLL_HOOK
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
     while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -199,8 +199,8 @@ mp_obj_t Badger2040_halt(mp_obj_t self_in) {
 
     self->badger2040->update_button_states();
     while (self->badger2040->button_states() == 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
       self->badger2040->update_button_states();
     }

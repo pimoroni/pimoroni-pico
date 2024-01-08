@@ -118,8 +118,8 @@ void pngdec_open_helper(_PNG_obj_t *self) {
 }
 
 void PNGDraw(PNGDRAW *pDraw) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     _PNG_decode_target *target = (_PNG_decode_target*)pDraw->pUser;
     PicoGraphics *current_graphics = (PicoGraphics *)target->target;
