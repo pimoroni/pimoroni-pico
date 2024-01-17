@@ -306,7 +306,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     // We need to store a pointer to the PicoGraphics surface
     self->jpeg->setUserPointer((void *)self->graphics->graphics);
 
-    result = self->jpeg->decode(x, y, f);
+    int result = self->jpeg->decode(x, y, f);
 
     current_flags = 0;
 
