@@ -110,7 +110,7 @@ mp_obj_t picoscroll_scroll_text(mp_uint_t n_args, const mp_obj_t *args) {
             self->scroll->clear();
             self->scroll->set_bitmap_1d((const char *)draw_buffer, draw_buffer_len, brightness, offset);
             self->scroll->update();
-    MICROPY_EVENT_POLL_HOOK
+    mp_event_handle_nowait();
             sleep_ms(delay_ms);
         }
 

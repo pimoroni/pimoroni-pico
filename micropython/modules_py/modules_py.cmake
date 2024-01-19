@@ -2,28 +2,28 @@ set(MODULES_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 function (copy_module MODULE)
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE}
+        OUTPUT ${MICROPY_PORT_DIR}/modules/${MODULE}
 
         COMMAND
-            cp ${MODULES_DIR}/${MODULE} ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE}
+            cp ${MODULES_DIR}/${MODULE} ${MICROPY_PORT_DIR}/modules/${MODULE}
 
         DEPENDS ${MODULES_DIR}/${MODULE}
     )
 
-    target_sources(usermod_modules_py INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE})
+    target_sources(usermod_modules_py INTERFACE ${MICROPY_PORT_DIR}/modules/${MODULE})
 endfunction()
 
 function (genversion VERSION_FILE)
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE}
+        OUTPUT ${MICROPY_PORT_DIR}/modules/${VERSION_FILE}
 
         COMMAND
-            bash ${MODULES_DIR}/genversion.sh ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE}
+            bash ${MODULES_DIR}/genversion.sh ${MICROPY_PORT_DIR}/modules/${VERSION_FILE}
 
         DEPENDS ${MODULES_DIR}/genversion.sh
     )
 
-    target_sources(usermod_modules_py INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE})
+    target_sources(usermod_modules_py INTERFACE ${MICROPY_PORT_DIR}/modules/${VERSION_FILE})
 endfunction()
 
 # Create a dummy usermod to hang our .py copies from

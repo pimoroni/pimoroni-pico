@@ -1,11 +1,11 @@
 diff --git a/ports/rp2/CMakeLists.txt b/ports/rp2/CMakeLists.txt
-index 094031c6852a..5f268414c08f 100644
+index 281b0c3bc..7e04bb549 100644
 --- a/ports/rp2/CMakeLists.txt
 +++ b/ports/rp2/CMakeLists.txt
-@@ -374,6 +374,15 @@ target_compile_options(${MICROPY_TARGET} PRIVATE
- target_link_options(${MICROPY_TARGET} PRIVATE
-     -Wl,--defsym=__micropy_c_heap_size__=${MICROPY_C_HEAP_SIZE}
+@@ -453,6 +453,16 @@ target_link_options(${MICROPY_TARGET} PRIVATE
+     -Wl,--wrap=dcd_event_handler
  )
+ 
 +# Do not include stack unwinding & exception handling for C++ user modules
 +target_compile_definitions(usermod INTERFACE PICO_CXX_ENABLE_EXCEPTIONS=0)
 +target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:
@@ -15,6 +15,7 @@ index 094031c6852a..5f268414c08f 100644
 +    -fno-use-cxa-atexit
 +>)
 +target_link_options(usermod INTERFACE -specs=nano.specs)
- 
++
  set_source_files_properties(
      ${PICO_SDK_PATH}/src/rp2_common/pico_double/double_math.c
+     ${PICO_SDK_PATH}/src/rp2_common/pico_float/float_math.c

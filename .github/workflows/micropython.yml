@@ -7,63 +7,11 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.21.0
-  WORKFLOW_VERSION: v1
+  MICROPYTHON_VERSION: v1.22.1
 
 jobs:
-  deps:
-    runs-on: ubuntu-20.04
-    name: Dependencies
-    steps:
-    - name: Workspace Cache
-      id: cache
-      uses: actions/cache@v3
-      with:
-        path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
-        restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
-
-    # Check out MicroPython
-    - name: Checkout MicroPython
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/checkout@v3
-      with:
-        repository: micropython/micropython
-        ref: ${{env.MICROPYTHON_VERSION}}
-        submodules: false  # MicroPython submodules are hideously broken
-        path: micropython
-
-    # Check out MicroPython Libs
-    - name: Checkout MicroPython Libs
-      if: steps.cache.outputs.cache-hit != 'true'
-      uses: actions/checkout@v3
-      with:
-        repository: micropython/micropython-lib
-        path: micropython-lib
-
-    - name: Fetch Pico submodules
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: micropython/ports/rp2
-      run: |
-        git submodule update --init ../../lib/pico-sdk
-        git submodule update --init ../../lib/cyw43-driver
-        git submodule update --init ../../lib/lwip
-        git submodule update --init ../../lib/mbedtls
-        git submodule update --init ../../lib/micropython-lib
-        git submodule update --init ../../lib/tinyusb
-        git submodule update --init ../../lib/btstack
-
-    - name: Build mpy-cross
-      if: steps.cache.outputs.cache-hit != 'true'
-      shell: bash
-      working-directory: micropython/mpy-cross
-      run: make
-
   build:
-    needs: deps
-    name: ${{matrix.name}} (${{matrix.board}})
+    name: ${{ matrix.name }} (${{ matrix.board }})
     runs-on: ubuntu-20.04
     strategy:
       matrix:
@@ -82,7 +30,6 @@ jobs:
           board: PIMORONI_TUFTY2040
         - name: enviro
           board: PICO_W_ENVIRO
-          patch: true
         - name: galactic_unicorn
           board: RPI_PICO_W
         - name: cosmic_unicorn
@@ -91,93 +38,91 @@ jobs:
           board: RPI_PICO_W
         - name: inky_frame
           board: PICO_W_INKY
-          patch: true
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: pimoroni-${{matrix.name}}-${{github.event.release.tag_name || github.sha}}-micropython
-      MICROPY_BOARD_DIR: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
-      USER_C_MODULES: "$GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{matrix.name}}.cmake"
+      RELEASE_FILE: pimoroni-${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
+      PIMORONI_PICO_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}"
+      MICROPY_BOARD_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
+      USER_C_MODULES: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{ matrix.name }}.cmake"
+      TAG_OR_SHA: ${{ github.event.release.tag_name || github.sha }}
+      MICROPY_BOARD: ${{ matrix.board }}
+      BOARD_NAME: ${{ matrix.name }}
+      BUILD_TOOLS: pimoroni-pico-${{ github.sha }}/ci/micropython.sh
 
     steps:
     - name: Compiler Cache
       uses: actions/cache@v3
       with:
         path: /home/runner/.ccache
-        key: ccache-micropython-${{matrix.name}}-${{github.ref}}-${{github.sha}}
+        key: ccache-micropython-${{ matrix.name }}-${{ github.ref }}-${{ github.sha }}
         restore-keys: |
-          ccache-micropython-${{matrix.name}}-${{github.ref}}
-          ccache-micropython-${{matrix.name}}-
-  
-    - name: Workspace Cache
-      uses: actions/cache@v3
-      with:
-        path: ${{runner.workspace}}
-        key: workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
-        restore-keys: |
-          workspace-micropython-${{env.MICROPYTHON_VERSION}}-${{env.WORKFLOW_VERSION}}
+          ccache-micropython-${{ matrix.name }}-${{ github.ref }}
+          ccache-micropython-${{ matrix.name }}-
 
-    - name: Install Compiler & CCache
-      if: runner.os == 'Linux'
-      run: |
-        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
-  
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
         path: pimoroni-pico-${{ github.sha }}
 
-    - name: Set MicroPython Version Env Vars
-      shell: bash
+    - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '9-2020-q2'
+
+    - name: Install CCache
       run: |
-        echo "MICROPY_GIT_TAG=$MICROPYTHON_VERSION, ${{matrix.name}} ${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
-        echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-${{github.event.release.tag_name || github.sha}}" >> $GITHUB_ENV
+        source $BUILD_TOOLS
+        apt_install_build_deps
+      
+    - name: Checkout MicroPython & Submodules
+      run: |
+        source $BUILD_TOOLS
+        micropython_clone
+
+    - name: Build MPY Cross
+      run: |
+        source $BUILD_TOOLS
+        micropython_build_mpy_cross
 
     - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
       shell: bash
-      working-directory: micropython
-      run: git apply $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/micropython_nano_specs.patch
+      run: |
+        source $BUILD_TOOLS
+        hack_patch_micropython_disable_exceptions
 
     - name: "HACK: Pico SDK Patch"
-      if: matrix.patch == true
       shell: bash
-      working-directory: micropython
       run: |
-        $GITHUB_WORKSPACE/pimoroni-pico-${{ github.sha }}/micropython/board/pico-sdk-patch.sh ${{matrix.board}}
+        source $BUILD_TOOLS
+        hack_patch_pico_sdk
 
     - name: Configure MicroPython
       shell: bash
-      working-directory: micropython/ports/rp2
       run: |
-        cmake -S . -B build-${{matrix.name}} -DPICO_BUILD_DOCS=0 -DUSER_C_MODULES=${{env.USER_C_MODULES}} -DMICROPY_BOARD_DIR=${{env.MICROPY_BOARD_DIR}} -DMICROPY_BOARD=${{matrix.board}} -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+        source $BUILD_TOOLS
+        micropython_version
+        cmake_configure
 
-    - name: Build MicroPython  # Multiple simultaneous jobs trigger https://github.com/pimoroni/pimoroni-pico/issues/761
+    - name: Build MicroPython
       shell: bash
-      working-directory: micropython/ports/rp2
       run: |
-        ccache --zero-stats || true
-        cmake --build build-${{matrix.name}} -j 1
-        ccache --show-stats || true
-
-    - name: Rename .uf2 for artifact
-      shell: bash
-      working-directory: micropython/ports/rp2/build-${{matrix.name}}
-      run: |
-        cp firmware.uf2 $RELEASE_FILE.uf2
+        source $BUILD_TOOLS
+        cmake_build
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ${{env.RELEASE_FILE}}.uf2
-        path: micropython/ports/rp2/build-${{matrix.name}}/${{env.RELEASE_FILE}}.uf2
+        name: ${{ env.RELEASE_FILE }}.uf2
+        path: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        asset_path: micropython/ports/rp2/build-${{matrix.name}}/firmware.uf2
-        upload_url: ${{github.event.release.upload_url}}
-        asset_name: ${{env.RELEASE_FILE}}.uf2
+        asset_path: build-${{ matrix.name }}/firmware.uf2
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: ${{ env.RELEASE_FILE }}.uf2
         asset_content_type: application/octet-stream
