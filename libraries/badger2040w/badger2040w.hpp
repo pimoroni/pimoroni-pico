@@ -9,25 +9,18 @@ namespace pimoroni {
 
   class Badger2040W {
   protected:
-    UC8151 uc8151;
     uint32_t _button_states = 0;
     uint32_t _wake_button_states = 0;
   private:
 
   public:
-    PicoGraphics_Pen1BitY graphics;
-    Badger2040W()
-      : uc8151(296, 128, ROTATE_0, SPIPins{spi0, CS, CLK, MOSI, PIN_UNUSED, DC, PIN_UNUSED}), graphics(296, 128, nullptr) {
-    };
+    UC8151* uc8151 = nullptr;
+    PicoGraphics_Pen1BitY* graphics = nullptr;
+    Badger2040W(){};
     void init();
     void update();
     void partial_update(Rect region);
-    void update_speed(uint8_t speed);
-    uint32_t update_time();
     void halt();
-    bool is_busy();
-    void power_off();
-    void invert(bool invert);
 
     // state
     void led(uint8_t brightness);

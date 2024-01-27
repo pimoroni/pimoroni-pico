@@ -9,10 +9,6 @@
 namespace pimoroni {
 
   void Badger2040W::init() {
-    // set clock speed to 12MHz to reduce the maximum current draw on the
-    // battery. when updating a small, monochrome, display only every few
-    // seconds or so then you don't need much processing power anyway...
-    //set_sys_clock_khz(48000, true);
 
     gpio_set_function(ENABLE_3V3, GPIO_FUNC_SIO);
     gpio_set_dir(ENABLE_3V3, GPIO_OUT);
@@ -48,6 +44,9 @@ namespace pimoroni {
     pwm_init(pwm_gpio_to_slice_num(LED), &cfg, true);
     gpio_set_function(LED, GPIO_FUNC_PWM);
     led(0);
+
+    uc8151 = new UC8151(296, 128, ROTATE_0);
+    graphics = new PicoGraphics_Pen1BitY(296, 128, nullptr);
   }
 
   void Badger2040W::halt() {
@@ -73,32 +72,12 @@ namespace pimoroni {
     return _button_states;
   }
 
-  bool Badger2040W::is_busy() {
-    return uc8151.is_busy();
-  }
-
-  void Badger2040W::power_off() {
-    uc8151.power_off();
-  }
-
-  void Badger2040W::invert(bool invert) {
-    // Not implemented by uc8151 driver
-  }
-
-  void Badger2040W::update_speed(uint8_t speed) {
-    uc8151.set_update_speed(speed);
-  }
-
-  uint32_t Badger2040W::update_time() {
-    return uc8151.update_time();
-  }
-
   void Badger2040W::partial_update(Rect region) {
-    uc8151.partial_update(&graphics, region);
+    uc8151->partial_update(graphics, region);
   }
 
   void Badger2040W::update() {
-    uc8151.update(&graphics);
+    uc8151->update(graphics);
   }
 
 

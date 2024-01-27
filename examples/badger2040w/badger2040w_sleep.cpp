@@ -19,7 +19,7 @@ Badger2040W badger;
 int main() {
 
   badger.init();
-  badger.update_speed(2);
+  badger.uc8151->set_update_speed(2);
 
   // find which button was used to wake up
   std::string button = "";
@@ -34,29 +34,29 @@ int main() {
     message = "woken up by button " + button + ".";
   }
 
-  badger.graphics.set_thickness(2);
+  badger.graphics->set_thickness(2);
 
-  badger.graphics.set_pen(15);
-  badger.graphics.clear();
-  badger.graphics.set_pen(0);
-  badger.graphics.text(message, Point(10, 20), 286, 2);
-  badger.graphics.text("(press any button to go to sleep.)", Point(10, 100), 200, 2);
+  badger.graphics->set_pen(15);
+  badger.graphics->clear();
+  badger.graphics->set_pen(0);
+  badger.graphics->text(message, Point(10, 20), 286, 2);
+  badger.graphics->text("(press any button to go to sleep.)", Point(10, 100), 200, 2);
   badger.update();
 
   badger.led(255);
   badger.wait_for_press();
 
-  badger.graphics.set_pen(15);
-  badger.graphics.clear();
-  badger.graphics.set_pen(0);
-  badger.graphics.text("going back to sleep...", Point(10, 20), 200, 3);
-  badger.graphics.text("z", Point(220, 50), 200, 3);
-  badger.graphics.text("z", Point(235, 30), 200, 4);
-  badger.graphics.text("z", Point(255, 5), 200, 5);
-  badger.graphics.text("(press any button to wake up.)", Point(10, 100), 200, 2);
+  badger.graphics->set_pen(15);
+  badger.graphics->clear();
+  badger.graphics->set_pen(0);
+  badger.graphics->text("going back to sleep...", Point(10, 20), 200, 3);
+  badger.graphics->text("z", Point(220, 50), 200, 3);
+  badger.graphics->text("z", Point(235, 30), 200, 4);
+  badger.graphics->text("z", Point(255, 5), 200, 5);
+  badger.graphics->text("(press any button to wake up.)", Point(10, 100), 200, 2);
   badger.update();
 
-  while (badger.is_busy()) {
+  while (badger.uc8151->is_busy()) {
     sleep_ms(10);
   }
   badger.led(0);
