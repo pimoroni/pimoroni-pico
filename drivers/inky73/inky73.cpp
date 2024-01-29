@@ -55,7 +55,7 @@ namespace pimoroni {
     return true;
   }
   
-  void Inky73::busy_wait(uint maximum_wait_ms=30000) {
+  void Inky73::busy_wait(uint maximum_wait_ms=45000) {
     timeout = make_timeout_time_ms(maximum_wait_ms);
     while(is_busy()) {
       tight_loop_contents();
@@ -65,7 +65,7 @@ namespace pimoroni {
   void Inky73::reset() {
     gpio_put(RESET, 0); sleep_ms(10);
     gpio_put(RESET, 1); sleep_ms(10);
-    busy_wait(5000);
+    busy_wait();
   }
    
   void Inky73::init() {
