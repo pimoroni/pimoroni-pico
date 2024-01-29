@@ -43,11 +43,20 @@ namespace pimoroni {
     TSSET = 0xE6 // E5 or E6
   };
 
+  int timeout = 0;
+
   bool Inky73::is_busy() {
-    return !(sr.read() & 128);
+    bool busy = !(sr.read() & 128);
+    if (!busy) {
+      return false;
+    } else if(absolute_time_diff_us(get_absolute_time(), timeout) < 0) {
+      return false;
+    }
+    return true;
   }
   
-  void Inky73::busy_wait() {
+  void Inky73::busy_wait(uint maximum_wait_ms=30000) {
+    timeout = make_timeout_time_ms(maximum_wait_ms);
     while(is_busy()) {
       tight_loop_contents();
     }
@@ -56,7 +65,7 @@ namespace pimoroni {
   void Inky73::reset() {
     gpio_put(RESET, 0); sleep_ms(10);
     gpio_put(RESET, 1); sleep_ms(10);
-    busy_wait();
+    busy_wait(5000);
   }
    
   void Inky73::init() {
