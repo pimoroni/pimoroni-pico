@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "drivers/uc8151/uc8151.hpp"
+#include "drivers/pcf85063a/pcf85063a.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 namespace pimoroni {
@@ -18,6 +19,7 @@ namespace pimoroni {
   public:
     std::unique_ptr<UC8151> uc8151;
     std::unique_ptr<PicoGraphics_Pen1BitY> graphics;
+    std::unique_ptr<PCF85063A> pcf85063a;
     Badger2040W(){};
     void init();
     void update();
@@ -39,6 +41,7 @@ namespace pimoroni {
 
   public:
     enum pin {
+      RTC         = 8,
       A           = 12,
       B           = 13,
       C           = 14,

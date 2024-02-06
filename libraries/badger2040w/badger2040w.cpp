@@ -4,6 +4,7 @@
 #include "hardware/pwm.h"
 #include "hardware/watchdog.h"
 
+#include "pimoroni_i2c.hpp"
 #include "badger2040w.hpp"
 
 namespace pimoroni {
@@ -47,6 +48,7 @@ namespace pimoroni {
 
     uc8151 = std::make_unique<UC8151>(296, 128, ROTATE_0);
     graphics = std::make_unique<PicoGraphics_Pen1BitY>(296, 128, nullptr);
+    pcf85063a = std::make_unique<PCF85063A>(new I2C(I2C_BG_SDA, I2C_BG_SCL), (uint)RTC);
   }
 
   void Badger2040W::halt() {
