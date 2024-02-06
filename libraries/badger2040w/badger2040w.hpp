@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 #include "drivers/uc8151/uc8151.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
@@ -12,10 +13,11 @@ namespace pimoroni {
     uint32_t _button_states = 0;
     uint32_t _wake_button_states = 0;
   private:
+    void imageRow(const uint8_t *data, Rect rect);
 
   public:
-    UC8151* uc8151 = nullptr;
-    PicoGraphics_Pen1BitY* graphics = nullptr;
+    std::unique_ptr<UC8151> uc8151;
+    std::unique_ptr<PicoGraphics_Pen1BitY> graphics;
     Badger2040W(){};
     void init();
     void update();
@@ -31,6 +33,9 @@ namespace pimoroni {
     void wait_for_press();
     void update_button_states();
     uint32_t button_states();
+
+    // void icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy);
+    void image(const uint8_t *data, Rect rect);
 
   public:
     enum pin {

@@ -45,8 +45,8 @@ namespace pimoroni {
     gpio_set_function(LED, GPIO_FUNC_PWM);
     led(0);
 
-    uc8151 = new UC8151(296, 128, ROTATE_0);
-    graphics = new PicoGraphics_Pen1BitY(296, 128, nullptr);
+    uc8151 = std::make_unique<UC8151>(296, 128, ROTATE_0);
+    graphics = std::make_unique<PicoGraphics_Pen1BitY>(296, 128, nullptr);
   }
 
   void Badger2040W::halt() {
@@ -72,12 +72,39 @@ namespace pimoroni {
     return _button_states;
   }
 
+  // // Display a portion of an image (icon sheet) at dx, dy
+  // void Badger2040W::icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy) {
+  //   image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
+  // }
+
+  void Badger2040W::imageRow(const uint8_t *data, Rect rect) {
+    for(auto x = 0; x < rect.w; x++) {
+        // work out byte offset in source data
+        uint32_t o = (x >> 3);
+
+        // extract bitmask for this pixel
+        uint32_t bm = 0b10000000 >> (x & 0b111);
+
+        // set pixel color
+        graphics->set_pen(data[o] & bm ? 15 : 0);
+        // draw the pixel
+        graphics->set_pixel(Point(x + rect.x, rect.y));
+    }
+  }
+  // Display an image smaller than the screen (sw*sh) at dx, dy
+  void Badger2040W::image(const uint8_t *data, Rect rect) {
+    for(auto y = 0; y < rect.h; y++) {
+      const uint8_t *scanline = data + ((y * rect.w) >> 3);
+      Badger2040W::imageRow(scanline, Rect(rect.x, y + rect.y, rect.w, 0));
+    }
+  }
+
   void Badger2040W::partial_update(Rect region) {
-    uc8151->partial_update(graphics, region);
+    uc8151->partial_update(graphics.get(), region);
   }
 
   void Badger2040W::update() {
-    uc8151->update(graphics);
+    uc8151->update(graphics.get());
   }
 
 
