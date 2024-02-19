@@ -172,7 +172,7 @@ void ntp_callback(datetime_t *datetime, void *arg) {
 
 void retrieve_time(bool from_ntp) {
     ntp_time_set = false;
-    // Check if RTC has been initialised previously, if not or if the RTC int is high get the internet time via NTP
+    // Check if RTC has been initialised previously, if not get the internet time via NTP
     if (from_ntp) {
         printf("Retrieving time from NTP\n");
         ntp_get_time(ntp_callback, NULL);
@@ -222,11 +222,6 @@ int main() {
         badger.graphics->clear();
 
         badger.graphics->set_pen(0);
-        badger.graphics->rectangle(Rect(0, badger.DISPLAY_HEIGHT / 4, badger.DISPLAY_WIDTH, badger.DISPLAY_HEIGHT / 2));
-        badger.graphics->set_pen(15);
-        badger.graphics->rectangle(Rect(5, badger.DISPLAY_HEIGHT / 4 + 5, badger.DISPLAY_WIDTH - 10, badger.DISPLAY_HEIGHT / 2 - 10));
-
-        badger.graphics->set_pen(0);
         rtc_get_datetime(&datetime);
         sprintf(time_str, "%02d/%02d/%02d %02d:%02d\n", datetime.day, datetime.month, datetime.year, datetime.hour, datetime.min);
         int32_t time_x_centered = (badger.DISPLAY_WIDTH - badger.graphics->measure_text(time_str, 2.0f)) / 2;
@@ -235,6 +230,7 @@ int main() {
 
         badger.update();
 
+        // Wait for next minute before redrawing
         do {
           rtc_get_datetime(&datetime);
         } while(datetime.sec != 0);
