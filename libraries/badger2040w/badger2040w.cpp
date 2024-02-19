@@ -35,8 +35,11 @@ namespace pimoroni {
     gpio_set_dir(E, GPIO_IN);
     gpio_set_pulls(E, false, true);
 
+    // PCF85063a handles the initialisation of the RTC GPIO pin
+    pcf85063a = std::make_unique<PCF85063A>(new I2C(I2C_BG_SDA, I2C_BG_SCL), (uint)RTC);
+
     // read initial button states
-    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
+    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E) | (1UL << RTC);
     _wake_button_states |= gpio_get_all() & mask;
 
     // led control pin
@@ -46,9 +49,9 @@ namespace pimoroni {
     gpio_set_function(LED, GPIO_FUNC_PWM);
     led(0);
 
-    uc8151 = std::make_unique<UC8151>(296, 128, ROTATE_0);
-    graphics = std::make_unique<PicoGraphics_Pen1BitY>(296, 128, nullptr);
-    pcf85063a = std::make_unique<PCF85063A>(new I2C(I2C_BG_SDA, I2C_BG_SCL), (uint)RTC);
+    // Initialise display driver and pico graphics library
+    uc8151 = std::make_unique<UC8151>(DISPLAY_WIDTH, DISPLAY_HEIGHT, ROTATE_0);
+    graphics = std::make_unique<PicoGraphics_Pen1BitY>(DISPLAY_WIDTH, DISPLAY_HEIGHT, nullptr);
   }
 
   void Badger2040W::halt() {
@@ -66,18 +69,13 @@ namespace pimoroni {
   }
 
   void Badger2040W::update_button_states() {
-    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
+    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E) | (1UL << RTC);
     _button_states = gpio_get_all() & mask;
   }
 
   uint32_t Badger2040W::button_states() {
     return _button_states;
   }
-
-  // // Display a portion of an image (icon sheet) at dx, dy
-  // void Badger2040W::icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy) {
-  //   image(data, sheet_width, icon_size * index, 0, icon_size, icon_size, dx, dy);
-  // }
 
   void Badger2040W::imageRow(const uint8_t *data, Rect rect) {
     for(auto x = 0; x < rect.w; x++) {
@@ -88,17 +86,31 @@ namespace pimoroni {
         uint32_t bm = 0b10000000 >> (x & 0b111);
 
         // set pixel color
-        graphics->set_pen(data[o] & bm ? 15 : 0);
+        graphics->set_pen(data[o] & bm ? 0 : 15);
         // draw the pixel
         graphics->set_pixel(Point(x + rect.x, rect.y));
     }
   }
-  // Display an image smaller than the screen (sw*sh) at dx, dy
+
+  // Display a portion of an image (icon sheet) at rect 
+  void Badger2040W::icon(const uint8_t *data, int index, int sheet_width, Rect rect) {
+    for(auto y = 0; y < rect.h; y++) {
+      const uint8_t *scanline = data + ((y * sheet_width) >> 3) + ((rect.w * index) >> 3);
+      imageRow(scanline, Rect(rect.x, y + rect.y, rect.w, 0));
+    }
+  }
+
+  // Display an image at rect
   void Badger2040W::image(const uint8_t *data, Rect rect) {
     for(auto y = 0; y < rect.h; y++) {
       const uint8_t *scanline = data + ((y * rect.w) >> 3);
-      Badger2040W::imageRow(scanline, Rect(rect.x, y + rect.y, rect.w, 0));
+      imageRow(scanline, Rect(rect.x, y + rect.y, rect.w, 0));
     }
+  }
+
+  // Display an image that covers the entire screen
+  void Badger2040W::image(const uint8_t *data) {
+    image(data, Rect(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT));
   }
 
   void Badger2040W::partial_update(Rect region) {
@@ -132,7 +144,7 @@ namespace pimoroni {
       tight_loop_contents();
     }
 
-    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E);
+    uint32_t mask = (1UL << A) | (1UL << B) | (1UL << C) | (1UL << D) | (1UL << E) | (1UL << RTC);
     while(gpio_get_all() & mask) {
       tight_loop_contents();
     }

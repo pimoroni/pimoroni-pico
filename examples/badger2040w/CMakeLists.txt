@@ -1,1 +1,6 @@
 include(badger2040w_sleep.cmake)
+include(badger2040w_drawing.cmake)
+include(badger2040w_fonts.cmake)
+include(badger2040w_image.cmake)
+include(badger2040w_icon.cmake)
+include(badger2040w_rtc.cmake)

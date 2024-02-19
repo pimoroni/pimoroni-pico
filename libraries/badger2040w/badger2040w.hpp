@@ -20,6 +20,9 @@ namespace pimoroni {
     std::unique_ptr<UC8151> uc8151;
     std::unique_ptr<PicoGraphics_Pen1BitY> graphics;
     std::unique_ptr<PCF85063A> pcf85063a;
+    uint DISPLAY_WIDTH = 296;
+    uint DISPLAY_HEIGHT = 128;
+    
     Badger2040W(){};
     void init();
     void update();
@@ -36,8 +39,9 @@ namespace pimoroni {
     void update_button_states();
     uint32_t button_states();
 
-    // void icon(const uint8_t *data, int sheet_width, int icon_size, int index, int dx, int dy);
+    void icon(const uint8_t *data, int index, int sheet_width, Rect rect);
     void image(const uint8_t *data, Rect rect);
+    void image(const uint8_t *data);
 
   public:
     enum pin {
