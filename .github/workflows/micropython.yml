@@ -7,7 +7,8 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.23.0
+  MICROPYTHON_VERSION: rp2-add-rp2350
+  MICROPYTHON_FLAVOUR: dpgeorge
 
 jobs:
   build:
