@@ -186,18 +186,23 @@ mp_event_handle_nowait();
     } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
         for(int x = 0; x < pDraw->iWidth; x++) {
             uint8_t i = 0;
-            if(pDraw->iBpp == 8) {
+            if(pDraw->iBpp == 8) {  // 8bpp
                 i = *pixel++;
-            } else if (pDraw->iBpp == 4) {
+            } else if (pDraw->iBpp == 4) {  // 4bpp
                 i = *pixel;
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
                 if (x & 1) pixel++;
-            } else {
+            } else if (pDraw->iBpp == 2) {  // 2bpp
                 i = *pixel;
                 i >>= 6 - ((x & 0b11) << 1);
                 i &= 0x3;
                 if ((x & 0b11) == 0b11) pixel++;
+            } else {  // 1bpp
+                i = *pixel;
+                i >>= 7 - (x & 0b111);
+                i &= 0b1;
+                if ((x & 0b111) == 0b111) pixel++;
             }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             // grab the colour from the palette
@@ -243,7 +248,6 @@ mp_event_handle_nowait();
                                 }
                             }
                         }
-
                 } else {
                     current_graphics->set_pen(r, g, b);
                     current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
