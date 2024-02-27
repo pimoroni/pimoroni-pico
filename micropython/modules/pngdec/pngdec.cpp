@@ -326,8 +326,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _PNG_obj_t *self = m_new_obj_with_finaliser(_PNG_obj_t);
-    self->base.type = &PNG_type;
+    _PNG_obj_t *self = mp_obj_malloc_with_finaliser(_PNG_obj_t, &PNG_type);
     self->png = m_new_class(PNG);
 
     //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);

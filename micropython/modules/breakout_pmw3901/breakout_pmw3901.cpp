@@ -74,8 +74,7 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
 
         int slot = args[ARG_slot].u_int;
         if(slot == BG_SPI_FRONT || slot == BG_SPI_BACK) {
-            self = m_new_obj_with_finaliser(breakout_pmw3901_BreakoutPMW3901_obj_t);
-            self->base.type = &breakout_pmw3901_BreakoutPMW3901_type;
+            self = mp_obj_malloc_with_finaliser(breakout_pmw3901_BreakoutPMW3901_obj_t, &breakout_pmw3901_BreakoutPMW3901_type);
 
             if(chip == ChipType::PMW3901) {
                 BreakoutPMW3901 *breakout = m_new_class(BreakoutPMW3901, (BG_SPI_SLOT)slot);
@@ -137,8 +136,7 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
             mp_raise_ValueError(MP_ERROR_TEXT("bad MISO pin"));
         }
 
-        self = m_new_obj_with_finaliser(breakout_pmw3901_BreakoutPMW3901_obj_t);
-        self->base.type = &breakout_pmw3901_BreakoutPMW3901_type;
+        self = mp_obj_malloc_with_finaliser(breakout_pmw3901_BreakoutPMW3901_obj_t, &breakout_pmw3901_BreakoutPMW3901_type);
 
         spi_inst_t *spi = (spi_id == 0) ? spi0 : spi1;
         if(chip == ChipType::PMW3901) {
