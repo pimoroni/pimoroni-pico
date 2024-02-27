@@ -144,8 +144,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this Encoder. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
-    self = m_new_obj_with_finaliser(_Encoder_obj_t);
-    self->base.type = &Encoder_type;
+    self = mp_obj_malloc_with_finaliser(_Encoder_obj_t, &Encoder_type);
     self->encoder = encoder;
 
     return MP_OBJ_FROM_PTR(self);

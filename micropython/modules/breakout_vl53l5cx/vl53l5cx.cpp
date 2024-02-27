@@ -60,8 +60,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
 
     int addr = args[ARG_addr].u_int;
 
-    self = m_new_obj_with_finaliser(_VL53L5CX_obj_t);
-    self->base.type = &VL53L5CX_type;
+    self = mp_obj_malloc_with_finaliser(_VL53L5CX_obj_t, &VL53L5CX_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 

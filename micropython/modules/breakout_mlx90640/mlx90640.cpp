@@ -51,8 +51,7 @@ mp_obj_t MLX90640_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _ModMLX90640_obj_t *self = m_new_obj_with_finaliser(_ModMLX90640_obj_t);
-    self->base.type = &MLX90640_type;
+    _ModMLX90640_obj_t *self = mp_obj_malloc_with_finaliser(_ModMLX90640_obj_t, &MLX90640_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
     self->address = args[ARG_address].u_int;

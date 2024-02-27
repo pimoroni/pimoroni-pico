@@ -21,8 +21,7 @@ mp_obj_t adcfft_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    adcfft_obj_t *self = m_new_obj_with_finaliser(adcfft_obj_t);
-    self->base.type = &adcfft_type;
+    adcfft_obj_t *self = mp_obj_malloc_with_finaliser(adcfft_obj_t, &adcfft_type);
 
     unsigned int adc_channel = args[ARG_adc_channel].u_int;
     unsigned int adc_gpio = args[ARG_adc_gpio].u_int;
