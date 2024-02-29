@@ -299,7 +299,7 @@ extern mp_obj_t Encoder_capture(mp_obj_t self_in) {
         mp_obj_new_float(capture.radians_per_second()),
     };
 
-    STATIC const qstr tuple_fields[] = {
+    static const qstr tuple_fields[] = {
         MP_QSTR_count,
         MP_QSTR_delta,
         MP_QSTR_frequency,

@@ -67,7 +67,7 @@ int32_t jpegdec_read_callback(JPEGFILE *jpeg, uint8_t *p, int32_t c) {
     return mp_stream_read_exactly(fhandle, p, c, &error);
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
     mp_obj_t fhandle = jpeg->fHandle;
     struct mp_stream_seek_t seek_s;
