@@ -77,7 +77,7 @@ int32_t pngdec_read_callback(PNGFILE *png, uint8_t *p, int32_t c) {
     return mp_stream_read_exactly(fhandle, p, c, &error);
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     mp_obj_t fhandle = png->fHandle;
     struct mp_stream_seek_t seek_s;

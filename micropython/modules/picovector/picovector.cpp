@@ -82,7 +82,7 @@ bool pretty_poly::file_io::fail() {
     return false;
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 size_t pretty_poly::file_io::seek(size_t pos) {
     mp_obj_t fhandle = this->state;
     struct mp_stream_seek_t seek_s;
@@ -272,7 +272,7 @@ typedef struct _mp_obj_polygon_it_t {
     size_t cur;
 } mp_obj_polygon_it_t;
 
-STATIC mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
+static mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
     mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
     _POLYGON_obj_t *polygon = MP_OBJ_TO_PTR2(self->polygon, _POLYGON_obj_t);
 

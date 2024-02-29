@@ -61,7 +61,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_decay_mode_obj, 2, MotorCluster_decay_mo
 MP_DEFINE_CONST_FUN_OBJ_KW(MotorCluster_all_decay_modes_obj, 1, MotorCluster_all_decay_modes);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t Motor_locals_dict_table[] = {
+static const mp_rom_map_elem_t Motor_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Motor___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_pins), MP_ROM_PTR(&Motor_pins_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&Motor_enable_obj) },
@@ -83,7 +83,7 @@ STATIC const mp_rom_map_elem_t Motor_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_decay_mode), MP_ROM_PTR(&Motor_decay_mode_obj) },
 };
 
-STATIC const mp_rom_map_elem_t MotorCluster_locals_dict_table[] = {
+static const mp_rom_map_elem_t MotorCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&MotorCluster___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_count), MP_ROM_PTR(&MotorCluster_count_obj) },
     { MP_ROM_QSTR(MP_QSTR_pins), MP_ROM_PTR(&MotorCluster_pins_obj) },
@@ -124,8 +124,8 @@ STATIC const mp_rom_map_elem_t MotorCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_all_decay_modes), MP_ROM_PTR(&MotorCluster_all_decay_modes_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(Motor_locals_dict, Motor_locals_dict_table);
-STATIC MP_DEFINE_CONST_DICT(MotorCluster_locals_dict, MotorCluster_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Motor_locals_dict, Motor_locals_dict_table);
+static MP_DEFINE_CONST_DICT(MotorCluster_locals_dict, MotorCluster_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -210,7 +210,7 @@ mp_obj_float_t motor2040_current_offset = {{&mp_type_float}, -0.005f};
 
 
 /***** Globals Table *****/
-STATIC const mp_rom_map_elem_t pico_motor_shim_globals_table[] = {
+static const mp_rom_map_elem_t pico_motor_shim_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pico_motor_shim) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(2) },
     { MP_ROM_QSTR(MP_QSTR_MOTOR_1), MP_ROM_PTR(&pico_motor_shim_motor1_pins) },
@@ -220,7 +220,7 @@ STATIC const mp_rom_map_elem_t pico_motor_shim_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SCL), MP_ROM_INT(5) },
 };
 
-STATIC const mp_rom_map_elem_t motor2040_globals_table[] = {
+static const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_motor2040) },
     { MP_ROM_QSTR(MP_QSTR_MOTOR_A), MP_ROM_PTR(&motor2040_motorA_pins) },
     { MP_ROM_QSTR(MP_QSTR_MOTOR_B), MP_ROM_PTR(&motor2040_motorB_pins) },
@@ -262,8 +262,8 @@ STATIC const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MP_ROM_PTR(&motor2040_current_offset) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(mp_module_pico_motor_shim_globals, pico_motor_shim_globals_table);
-STATIC MP_DEFINE_CONST_DICT(mp_module_motor2040_globals, motor2040_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_pico_motor_shim_globals, pico_motor_shim_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_motor2040_globals, motor2040_globals_table);
 
 const mp_obj_module_t pico_motor_shim_user_cmodule = {
     .base = { &mp_type_module },
@@ -275,7 +275,7 @@ const mp_obj_module_t motor2040_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_motor2040_globals,
 };
 
-STATIC const mp_map_elem_t motor_globals_table[] = {
+static const mp_map_elem_t motor_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_motor) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Motor), (mp_obj_t)&Motor_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_MotorCluster), (mp_obj_t)&MotorCluster_type },
@@ -285,7 +285,7 @@ STATIC const mp_map_elem_t motor_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_FAST_DECAY), MP_ROM_INT(0x00) },
     { MP_ROM_QSTR(MP_QSTR_SLOW_DECAY), MP_ROM_INT(0x01) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_motor_globals, motor_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_motor_globals, motor_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t motor_user_cmodule = {

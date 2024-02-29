@@ -36,13 +36,13 @@ const mp_obj_type_t ParallelPins_type = {
 };
 #endif
 
-STATIC const mp_map_elem_t pimoroni_bus_globals_table[] = {
+static const mp_map_elem_t pimoroni_bus_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pimoroni_bus) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_SPIBus), (mp_obj_t)&SPIPins_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_ParallelBus), (mp_obj_t)&ParallelPins_type },
     { MP_ROM_QSTR(MP_QSTR_SPISlot), MP_ROM_PTR(&SPISlot_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_pimoroni_bus_globals, pimoroni_bus_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_pimoroni_bus_globals, pimoroni_bus_globals_table);
 
 const mp_obj_module_t pimoroni_bus_user_cmodule = {
     .base = { &mp_type_module },

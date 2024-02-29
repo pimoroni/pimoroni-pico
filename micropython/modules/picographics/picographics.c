@@ -1,11 +1,11 @@
 #include "picographics.h"
 
 // Module functions
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB332_obj, ModPicoGraphics_module_RGB_to_RGB332);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB565_obj, ModPicoGraphics_module_RGB_to_RGB565);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB332_to_RGB_obj, ModPicoGraphics_module_RGB332_to_RGB);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB565_to_RGB_obj, ModPicoGraphics_module_RGB565_to_RGB);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_get_required_buffer_size_obj, ModPicoGraphics_get_required_buffer_size);
+static MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB332_obj, ModPicoGraphics_module_RGB_to_RGB332);
+static MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_module_RGB_to_RGB565_obj, ModPicoGraphics_module_RGB_to_RGB565);
+static MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB332_to_RGB_obj, ModPicoGraphics_module_RGB332_to_RGB);
+static MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_module_RGB565_to_RGB_obj, ModPicoGraphics_module_RGB565_to_RGB);
+static MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_get_required_buffer_size_obj, ModPicoGraphics_get_required_buffer_size);
 
 // Class Methods
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_update_obj, ModPicoGraphics_update);
@@ -54,7 +54,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_framebuffer_obj, ModPicoGraphics_s
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics__del__obj, ModPicoGraphics__del__);
 
 
-STATIC const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
+static const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&ModPicoGraphics_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&ModPicoGraphics_set_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_thickness), MP_ROM_PTR(&ModPicoGraphics_set_thickness_obj) },
@@ -94,7 +94,7 @@ STATIC const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&ModPicoGraphics__del__obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(ModPicoGraphics_locals_dict, ModPicoGraphics_locals_dict_table);
+static MP_DEFINE_CONST_DICT(ModPicoGraphics_locals_dict, ModPicoGraphics_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -117,7 +117,7 @@ const mp_obj_type_t ModPicoGraphics_type = {
 #endif
 
 /***** Module Globals *****/
-STATIC const mp_map_elem_t picographics_globals_table[] = {
+static const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_picographics) },
     { MP_ROM_QSTR(MP_QSTR_PicoGraphics), (mp_obj_t)&ModPicoGraphics_type },
     { MP_ROM_QSTR(MP_QSTR_get_buffer_size), MP_ROM_PTR(&ModPicoGraphics_get_required_buffer_size_obj) },
@@ -165,7 +165,7 @@ STATIC const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PEN_RGB565), MP_ROM_INT(PEN_RGB565) },
     { MP_ROM_QSTR(MP_QSTR_PEN_RGB888), MP_ROM_INT(PEN_RGB888) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_picographics_globals, picographics_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_picographics_globals, picographics_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t picographics_user_cmodule = {

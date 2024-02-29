@@ -256,7 +256,7 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
         tuple_motion_data[i] = mp_obj_new_int(results->motion_indicator.motion[i]);
     }
 
-    STATIC const qstr tuple_motion_fields[] = {MP_QSTR_global_indicator_1, MP_QSTR_global_indicator_2, MP_QSTR_motion};
+    static const qstr tuple_motion_fields[] = {MP_QSTR_global_indicator_1, MP_QSTR_global_indicator_2, MP_QSTR_motion};
 
     mp_obj_t tuple_motion[] = {
         mp_obj_new_int(results->motion_indicator.global_indicator_1),
@@ -273,7 +273,7 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
         mp_obj_new_tuple(tuple_size, tuple_reflectance)  // Full reflectange results
     };
 
-    STATIC const qstr tuple_fields[] = {MP_QSTR_distance_avg, MP_QSTR_reflectance_avg, MP_QSTR_motion_indicator, MP_QSTR_results, MP_QSTR_distance, MP_QSTR_reflectance};
+    static const qstr tuple_fields[] = {MP_QSTR_distance_avg, MP_QSTR_reflectance_avg, MP_QSTR_motion_indicator, MP_QSTR_results, MP_QSTR_distance, MP_QSTR_reflectance};
 
     return mp_obj_new_attrtuple(tuple_fields, sizeof(tuple) / sizeof(mp_obj_t), tuple);
 }

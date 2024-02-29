@@ -19,7 +19,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(BreakoutAS7343_set_illumination_led_obj, BreakoutAS734
 MP_DEFINE_CONST_FUN_OBJ_2(BreakoutAS7343_set_channels_obj, BreakoutAS7343_set_channels);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutAS7343_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutAS7343_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&BreakoutAS7343_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_version), MP_ROM_PTR(&BreakoutAS7343_version_obj) },
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutAS7343_read_obj) },
@@ -31,7 +31,7 @@ STATIC const mp_rom_map_elem_t BreakoutAS7343_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_illumination_led), MP_ROM_PTR(&BreakoutAS7343_set_illumination_led_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_channels), MP_ROM_PTR(&BreakoutAS7343_set_channels_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutAS7343_locals_dict, BreakoutAS7343_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutAS7343_locals_dict, BreakoutAS7343_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -57,11 +57,11 @@ const mp_obj_type_t breakout_as7343_BreakoutAS7343_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_as7343_globals_table[] = {
+static const mp_map_elem_t breakout_as7343_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_as7343) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutAS7343), (mp_obj_t)&breakout_as7343_BreakoutAS7343_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_as7343_globals, breakout_as7343_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_as7343_globals, breakout_as7343_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_as7343_user_cmodule = {
