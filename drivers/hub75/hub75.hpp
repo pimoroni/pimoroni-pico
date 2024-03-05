@@ -73,7 +73,7 @@ class Hub75 {
     Pixel background = 0;
 
     // DMA & PIO
-    uint dma_channel = 0;
+    int dma_channel = -1;
     uint bit = 0;
     uint row = 0;
 
