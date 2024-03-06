@@ -113,12 +113,6 @@ void Hub75::FM6126A_setup() {
 
 void Hub75::start(irq_handler_t handler) {
     if(handler) {
-        dma_channel = 0;
-
-        // Try as I might, I can't seem to coax MicroPython into leaving PIO in a known state upon soft reset
-        // check for claimed PIO and prepare a clean slate.
-        stop(handler);
-
         if (panel_type == PANEL_FM6126A) {
             FM6126A_setup();
         }
@@ -139,7 +133,7 @@ void Hub75::start(irq_handler_t handler) {
         // Prevent flicker in Python caused by the smaller dataset just blasting through the PIO too quickly
         pio_sm_set_clkdiv(pio, sm_data, width <= 32 ? 2.0f : 1.0f);
 
-        dma_channel_claim(dma_channel);
+        dma_channel = dma_claim_unused_channel(true);
         dma_channel_config config = dma_channel_get_default_config(dma_channel);
         channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
         channel_config_set_bswap(&config, false);
@@ -148,14 +142,12 @@ void Hub75::start(irq_handler_t handler) {
 
 
         // Same handler for both DMA channels
-        irq_set_exclusive_handler(DMA_IRQ_0, handler);
-        irq_set_exclusive_handler(DMA_IRQ_1, handler);
+        irq_add_shared_handler(DMA_IRQ_0, handler, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
 
         dma_channel_set_irq0_enabled(dma_channel, true);
 
         irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
         irq_set_enabled(DMA_IRQ_0, true);
-
 
         row = 0;
         bit = 0;
@@ -169,10 +161,9 @@ void Hub75::start(irq_handler_t handler) {
 void Hub75::stop(irq_handler_t handler) {
 
     irq_set_enabled(DMA_IRQ_0, false);
-    irq_set_enabled(DMA_IRQ_1, false);
     irq_set_enabled(pio_get_dreq(pio, sm_data, true), false);
 
-    if(dma_channel_is_claimed(dma_channel)) {
+    if(dma_channel != -1 &&  dma_channel_is_claimed(dma_channel)) {
         dma_channel_set_irq0_enabled(dma_channel, false);
         irq_remove_handler(DMA_IRQ_0, handler);
         //dma_channel_wait_for_finish_blocking(dma_channel);
@@ -184,16 +175,20 @@ void Hub75::stop(irq_handler_t handler) {
     if(pio_sm_is_claimed(pio, sm_data)) {
         pio_sm_set_enabled(pio, sm_data, false);
         pio_sm_drain_tx_fifo(pio, sm_data);
+        pio_remove_program(pio, &hub75_data_rgb888_program, data_prog_offs);
         pio_sm_unclaim(pio, sm_data);
     }
 
     if(pio_sm_is_claimed(pio, sm_row)) {
         pio_sm_set_enabled(pio, sm_row, false);
         pio_sm_drain_tx_fifo(pio, sm_row);
+        if (inverted_stb) {
+            pio_remove_program(pio, &hub75_row_inverted_program, row_prog_offs);
+        } else {
+            pio_remove_program(pio, &hub75_row_program, row_prog_offs);
+        }
         pio_sm_unclaim(pio, sm_row);
     }
-
-    pio_clear_instruction_memory(pio);
 
     // Make sure the GPIO is in a known good state
     // since we don't know what the PIO might have done with it
