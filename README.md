@@ -44,6 +44,10 @@ You can find MicroPython examples for supported sensors, packs and bases in the 
 
 * [MicroPython Examples](micropython/examples)
 
+You can also install MicroPython stubs into Visual Studio Code to give you auto-complete, see:
+
+* [MicroPython Stubs](https://github.com/pimoroni/pimoroni-pico-stubs)
+
 # C/C++
 
 Advanced users that want to unleash the full power of Pico can use our C++ libraries. If you know what you're doing and want to build your own Pimoroni Pico project then start with the [Pimoroni Pico SDK Boilerplate](https://github.com/pimoroni/pico-boilerplate).
