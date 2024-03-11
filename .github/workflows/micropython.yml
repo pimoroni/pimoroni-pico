@@ -20,6 +20,8 @@ jobs:
           board: RPI_PICO
         - name: picow
           board: RPI_PICO_W
+        - name: pico_lte
+          board: RPI_PICO_LTE
         - name: tiny2040
           board: PIMORONI_TINY2040
         - name: picolipo_4mb
