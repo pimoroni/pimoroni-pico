@@ -12,15 +12,23 @@
 #define ALLOWS_UNALIGNED
 #endif
 
+#ifndef REGISTER_WIDTH
 #if INTPTR_MAX == INT64_MAX
 #define REGISTER_WIDTH 64
+#else
+#define REGISTER_WIDTH 32
+#endif // native register size
+#endif
+
+#if REGISTER_WIDTH == 64
+#pragma message("REGISTER_WIDTH: 64bit")
 typedef uint64_t BIGUINT;
 typedef uint32_t SMALLUINT;
 #else
-#define REGISTER_WIDTH 32
+#pragma message("REGISTER_WIDTH: 32bit")
 typedef uint32_t BIGUINT;
 typedef uint16_t SMALLUINT;
-#endif // native register size
+#endif 
 
 #ifdef ASMINF
 #  pragma message("Assembler code may have bugs -- use at your own risk")

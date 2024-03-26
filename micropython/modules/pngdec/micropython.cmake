@@ -21,6 +21,7 @@ target_include_directories(usermod_pngdec INTERFACE
 )
 
 target_compile_definitions(usermod_pngdec INTERFACE
+    REGISTER_WIDTH=32
     MODULE_PNGDEC_ENABLED=1
 )
 
