@@ -98,7 +98,8 @@ struct inflate_state {
     unsigned wnext;             /* window write index */
     unsigned char FAR *window;  /* allocated sliding window, if needed */
         /* bit accumulator */
-    unsigned long hold;         /* input bit accumulator */
+    uint64_t hold;         /* input bit accumulator */
+//    unsigned long hold;         /* input bit accumulator */
     unsigned bits;              /* number of bits in "in" */
         /* for string and stored block copying */
     unsigned length;            /* literal or length of data to copy */

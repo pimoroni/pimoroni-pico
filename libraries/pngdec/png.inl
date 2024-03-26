@@ -243,15 +243,33 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
             }
             break;
         case PNG_PIXEL_GRAYSCALE:
-            for (x=0; x<pDraw->iWidth; x++) {
-                c = *s++;
-                usPixel = (c >> 3); // blue
-                usPixel |= ((c >> 2) << 5); // green
-                usPixel |= ((c >> 3) << 11); // red
-                if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
-                    usPixel = __builtin_bswap16(usPixel);
-                *pDest++ = usPixel;
-            }
+            switch (pDraw->iBpp) {
+               case 8:
+                for (x=0; x<pDraw->iWidth; x++) {
+                    c = *s++;
+                    usPixel = (c >> 3); // blue
+                    usPixel |= ((c >> 2) << 5); // green
+                    usPixel |= ((c >> 3) << 11); // red
+                    if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
+                        usPixel = __builtin_bswap16(usPixel);
+                    *pDest++ = usPixel;
+                }
+                break;
+                case 1:
+                   for (x=0; x<pDraw->iWidth; x++) {
+                       if ((x & 7) == 0) {
+                           c = *s++;
+                       }
+                       if (c & 0x80) {
+                           usPixel = 0xffff;
+                       } else {
+                           usPixel = 0;
+                       }
+                       *pDest++ = usPixel;
+                       c <<= 1;
+                   }
+                break;
+            } // switch on bpp
             break;
         case PNG_PIXEL_TRUECOLOR:
             for (x=0; x<pDraw->iWidth; x++) {
@@ -302,15 +320,15 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
                        }
                        break;
                    case 1:
-                       for (x=0; x<pDraw->iWidth; x+=4) {
-                           c = *s++;
-                           for (j=0; j<8; j++) { // work on pairs of bits
-                               usPixel = pDraw->pFastPalette[c >> 7];
-                               if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
-                                   usPixel = __builtin_bswap16(usPixel);
-                               *pDest++ = usPixel;
-                               c <<= 1;
+                       for (x=0; x<pDraw->iWidth; x++) {
+                           if ((x & 7) == 0) {
+                               c = *s++;
                            }
+                           usPixel = pDraw->pFastPalette[c >> 7];
+                           if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
+                               usPixel = __builtin_bswap16(usPixel);
+                           *pDest++ = usPixel;
+                           c <<= 1;
                        }
                        break;
                } // switch on bpp 
@@ -379,18 +397,18 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
                     }
                     break;
                 case 1:
-                    for (x=0; x<pDraw->iWidth; x+=4) {
-                        c = *s++;
-                        for (j=0; j<8; j++) { // work on pairs of bits
-                            pPal = &pDraw->pPalette[(c >> 7) * 3];
-                            usPixel = (pPal[2] >> 3); // blue
-                            usPixel |= ((pPal[1] >> 2) << 5); // green
-                            usPixel |= ((pPal[0] >> 3) << 11); // red
-                            if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
-                                usPixel = __builtin_bswap16(usPixel);
-                            *pDest++ = usPixel;
-                            c <<= 1;
+                    for (x=0; x<pDraw->iWidth; x++) {
+                        if ((x & 7) == 0) {
+                            c = *s++;
                         }
+                        pPal = &pDraw->pPalette[(c >> 7) * 3];
+                        usPixel = (pPal[2] >> 3); // blue
+                        usPixel |= ((pPal[1] >> 2) << 5); // green
+                        usPixel |= ((pPal[0] >> 3) << 11); // red
+                        if (iEndiannes == PNG_RGB565_BIG_ENDIAN)
+                            usPixel = __builtin_bswap16(usPixel);
+                        *pDest++ = usPixel;
+                        c <<= 1;
                     }
                     break;
             } // switch on bits per pixel
