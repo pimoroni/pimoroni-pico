@@ -256,6 +256,7 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
                 }
                 break;
                 case 1:
+                   c = 0; // PH: initialize C to suppress compiler warnings
                    for (x=0; x<pDraw->iWidth; x++) {
                        if ((x & 7) == 0) {
                            c = *s++;
@@ -320,6 +321,7 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
                        }
                        break;
                    case 1:
+                       c = 0; // PH: initialize C to suppress compiler warnings
                        for (x=0; x<pDraw->iWidth; x++) {
                            if ((x & 7) == 0) {
                                c = *s++;
@@ -397,6 +399,7 @@ PNG_STATIC void PNGRGB565(PNGDRAW *pDraw, uint16_t *pPixels, int iEndiannes, uin
                     }
                     break;
                 case 1:
+                    c = 0; // PH: initialize C to suppress compiler warnings
                     for (x=0; x<pDraw->iWidth; x++) {
                         if ((x & 7) == 0) {
                             c = *s++;
