@@ -9,7 +9,8 @@
 #include "inffast.h"
 
 #if (INTPTR_MAX == INT64_MAX) || defined(HAL_ESP32_HAL_H_) || defined(TEENSYDUINO) || defined(ARM_MATH_CM4) || defined(ARM_MATH_CM7)
-#define ALLOWS_UNALIGNED
+//#pragma message("ALLOWS_UNALIGNED: enabled")
+//#define ALLOWS_UNALIGNED
 #endif
 
 #ifndef REGISTER_WIDTH
@@ -86,7 +87,10 @@ unsigned start;         /* inflate()'s starting value for strm->avail_out */
     unsigned whave;             /* valid bytes in the window */
     unsigned wnext;             /* window write index */
     unsigned char FAR *window;  /* allocated sliding window, if wsize != 0 */
-    BIGUINT hold, tmpbits;         /* local strm->hold */
+    BIGUINT hold;               /* local strm->hold */
+#ifdef ALLOWS_UNALIGNED
+    BIGUINT tmpbits;
+#endif
 //    unsigned long hold;         /* local strm->hold */
     unsigned bits;              /* local strm->bits */
     code const FAR *lcode;      /* local strm->lencode */
