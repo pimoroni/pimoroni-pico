@@ -98,8 +98,7 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
         buffer = m_new(uint8_t, width * height / 8);
     }
 
-    badger2040_obj = m_new_obj_with_finaliser(_Badger2040_obj_t);
-    badger2040_obj->base.type = &Badger2040_type;
+    badger2040_obj = mp_obj_malloc_with_finaliser(_Badger2040_obj_t, &Badger2040_type);
     badger2040_obj->buf = buffer;
     badger2040_obj->badger2040 = m_new_class(pimoroni::Badger2040, buffer);
     badger2040_obj->badger2040->init();

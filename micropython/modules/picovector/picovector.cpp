@@ -82,7 +82,7 @@ bool pretty_poly::file_io::fail() {
     return false;
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 size_t pretty_poly::file_io::seek(size_t pos) {
     mp_obj_t fhandle = this->state;
     struct mp_stream_seek_t seek_s;
@@ -122,8 +122,7 @@ mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
-    self->base.type = &POLYGON_type;
+    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
@@ -154,8 +153,7 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
-    self->base.type = &POLYGON_type;
+    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
 
     Point origin(args[ARG_x].u_int, args[ARG_y].u_int);
     unsigned int sides = args[ARG_sides].u_int;
@@ -185,8 +183,7 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
 }
 
 mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    _POLYGON_obj_t *self = m_new_obj_with_finaliser(_POLYGON_obj_t);
-    self->base.type = &POLYGON_type;
+    _POLYGON_obj_t *self = mp_obj_malloc_with_finaliser(_POLYGON_obj_t, &POLYGON_type);
 
     size_t num_points = n_args;
     const mp_obj_t *points = all_args;
@@ -275,7 +272,7 @@ typedef struct _mp_obj_polygon_it_t {
     size_t cur;
 } mp_obj_polygon_it_t;
 
-STATIC mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
+static mp_obj_t py_image_it_iternext(mp_obj_t self_in) {
     mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
     _POLYGON_obj_t *polygon = MP_OBJ_TO_PTR2(self->polygon, _POLYGON_obj_t);
 

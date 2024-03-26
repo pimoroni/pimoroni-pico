@@ -71,7 +71,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(ServoCluster_calibration_obj, 2, ServoCluster_calibra
 MP_DEFINE_CONST_FUN_OBJ_1(ServoCluster_load_obj, ServoCluster_load);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
+static const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Calibration___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_apply_blank_pairs), MP_ROM_PTR(&Calibration_apply_blank_pairs_obj) },
     { MP_ROM_QSTR(MP_QSTR_apply_two_pairs), MP_ROM_PTR(&Calibration_apply_two_pairs_obj) },
@@ -95,7 +95,7 @@ STATIC const mp_rom_map_elem_t Calibration_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pulse_to_value), MP_ROM_PTR(&Calibration_pulse_to_value_obj) },
 };
 
-STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {
+static const mp_rom_map_elem_t Servo_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Servo___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_pin), MP_ROM_PTR(&Servo_pin_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&Servo_enable_obj) },
@@ -114,7 +114,7 @@ STATIC const mp_rom_map_elem_t Servo_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_calibration), MP_ROM_PTR(&Servo_calibration_obj) },
 };
 
-STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
+static const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&ServoCluster___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_count), MP_ROM_PTR(&ServoCluster_count_obj) },
     { MP_ROM_QSTR(MP_QSTR_pin), MP_ROM_PTR(&ServoCluster_pin_obj) },
@@ -145,9 +145,9 @@ STATIC const mp_rom_map_elem_t ServoCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_load), MP_ROM_PTR(&ServoCluster_load_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(Calibration_locals_dict, Calibration_locals_dict_table);
-STATIC MP_DEFINE_CONST_DICT(Servo_locals_dict, Servo_locals_dict_table);
-STATIC MP_DEFINE_CONST_DICT(ServoCluster_locals_dict, ServoCluster_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Calibration_locals_dict, Calibration_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Servo_locals_dict, Servo_locals_dict_table);
+static MP_DEFINE_CONST_DICT(ServoCluster_locals_dict, ServoCluster_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -216,7 +216,7 @@ mp_obj_float_t servo2040_voltage_gain = {{&mp_type_float}, 3.9f / 13.9f};
 mp_obj_float_t servo2040_current_offset = {{&mp_type_float}, -0.02f};
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t servo2040_globals_table[] = {
+static const mp_map_elem_t servo2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_servo2040) },
     { MP_ROM_QSTR(MP_QSTR_SERVO_1), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_SERVO_2), MP_ROM_INT(1) },
@@ -264,14 +264,14 @@ STATIC const mp_map_elem_t servo2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_VOLTAGE_GAIN), MP_ROM_PTR(&servo2040_voltage_gain) },
     { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MP_ROM_PTR(&servo2040_current_offset) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_servo2040_globals, servo2040_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_servo2040_globals, servo2040_globals_table);
 
 const mp_obj_module_t servo2040_user_cmodule = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t*)&mp_module_servo2040_globals,
 };
 
-STATIC const mp_map_elem_t servo_globals_table[] = {
+static const mp_map_elem_t servo_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_servo) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Calibration), (mp_obj_t)&Calibration_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Servo), (mp_obj_t)&Servo_type },
@@ -282,7 +282,7 @@ STATIC const mp_map_elem_t servo_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_LINEAR), MP_ROM_INT(0x01) },
     { MP_ROM_QSTR(MP_QSTR_CONTINUOUS), MP_ROM_INT(0x02) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_servo_globals, servo_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_servo_globals, servo_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t servo_user_cmodule = {

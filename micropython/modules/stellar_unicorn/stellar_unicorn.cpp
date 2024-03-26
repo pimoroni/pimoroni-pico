@@ -391,8 +391,7 @@ mp_obj_t StellarUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_
     StellarUnicorn *stellar = m_new_class(StellarUnicorn);
     stellar->init();
 
-    self = m_new_obj_with_finaliser(_StellarUnicorn_obj_t);
-    self->base.type = &StellarUnicorn_type;
+    self = mp_obj_malloc_with_finaliser(_StellarUnicorn_obj_t, &StellarUnicorn_type);
     self->stellar = stellar;
 
     return MP_OBJ_FROM_PTR(self);
@@ -507,8 +506,7 @@ extern mp_obj_t StellarUnicorn_synth_channel(mp_obj_t self_in, mp_obj_t channel_
 
     // NOTE This seems to work, in that it give MP access to the calibration object
     // Could very easily mess up in weird ways once object deletion is considered?
-    _Channel_obj_t *channel_obj = m_new_obj_with_finaliser(_Channel_obj_t);
-    channel_obj->base.type = &Channel_type;
+    _Channel_obj_t *channel_obj = mp_obj_malloc_with_finaliser(_Channel_obj_t, &Channel_type);
     channel_obj->channel = &self->stellar->synth_channel(channel);
 
     return MP_OBJ_FROM_PTR(channel_obj);

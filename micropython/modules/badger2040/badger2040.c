@@ -38,7 +38,7 @@ MP_DEFINE_CONST_FUN_OBJ_0(Badger2040_woken_by_button_obj, Badger2040_woken_by_bu
 MP_DEFINE_CONST_FUN_OBJ_1(Badger2040_system_speed_obj, Badger2040_system_speed);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
+static const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Badger2040___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_is_busy), MP_ROM_PTR(&Badger2040_is_busy_obj) },
     { MP_ROM_QSTR(MP_QSTR_update_speed), MP_ROM_PTR(&Badger2040_update_speed_obj) },
@@ -72,7 +72,7 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_command), MP_ROM_PTR(&Badger2040_command_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -94,7 +94,7 @@ const mp_obj_type_t Badger2040_type = {
 
 /***** Globals Table *****/
 
-STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
+static const mp_rom_map_elem_t badger2040_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_badger2040) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Badger2040), (mp_obj_t)&Badger2040_type },
 
@@ -140,7 +140,7 @@ STATIC const mp_rom_map_elem_t badger2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PIN_BATTERY), MP_ROM_INT(29) },
     { MP_ROM_QSTR(MP_QSTR_PIN_ENABLE_3V3), MP_ROM_INT(10) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_badger2040_globals, badger2040_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_badger2040_globals, badger2040_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t badger2040_user_cmodule = {

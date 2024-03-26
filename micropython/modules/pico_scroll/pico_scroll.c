@@ -15,21 +15,21 @@ enum buttons
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Module Functions *****/
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll___del___obj, picoscroll___del__);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_get_width_obj, picoscroll_get_width);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_get_height_obj, picoscroll_get_height);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_show_obj, picoscroll_show);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_set_pixel_obj, 4, 4, picoscroll_set_pixel);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_set_pixels_obj, picoscroll_set_pixels);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_show_text_obj, 4, 4, picoscroll_show_text);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_scroll_text_obj, 4, 4, picoscroll_scroll_text);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_show_bitmap_1d_obj, 4, 4, picoscroll_show_bitmap_1d);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_clear_obj, picoscroll_clear);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_is_pressed_obj, picoscroll_is_pressed);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_update_obj, picoscroll_update);
+static MP_DEFINE_CONST_FUN_OBJ_1(picoscroll___del___obj, picoscroll___del__);
+static MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_get_width_obj, picoscroll_get_width);
+static MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_get_height_obj, picoscroll_get_height);
+static MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_show_obj, picoscroll_show);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_set_pixel_obj, 4, 4, picoscroll_set_pixel);
+static MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_set_pixels_obj, picoscroll_set_pixels);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_show_text_obj, 4, 4, picoscroll_show_text);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_scroll_text_obj, 4, 4, picoscroll_scroll_text);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picoscroll_show_bitmap_1d_obj, 4, 4, picoscroll_show_bitmap_1d);
+static MP_DEFINE_CONST_FUN_OBJ_1(picoscroll_clear_obj, picoscroll_clear);
+static MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_is_pressed_obj, picoscroll_is_pressed);
+static MP_DEFINE_CONST_FUN_OBJ_2(picoscroll_update_obj, picoscroll_update);
 
 /* Class Methods */
-STATIC const mp_rom_map_elem_t picoscroll_locals[] = {
+static const mp_rom_map_elem_t picoscroll_locals[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&picoscroll___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&picoscroll_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_show), MP_ROM_PTR(&picoscroll_show_obj) },
@@ -49,7 +49,7 @@ STATIC const mp_rom_map_elem_t picoscroll_locals[] = {
     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_picoscroll_locals, picoscroll_locals);
+static MP_DEFINE_CONST_DICT(mp_module_picoscroll_locals, picoscroll_locals);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -69,7 +69,7 @@ const mp_obj_type_t PicoScroll_type = {
 #endif
 
 /* Module Globals */
-STATIC const mp_map_elem_t picoscroll_globals[] = {
+static const mp_map_elem_t picoscroll_globals[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_picoscroll) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PicoScroll), (mp_obj_t)&PicoScroll_type },
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(17) },
@@ -79,7 +79,7 @@ STATIC const mp_map_elem_t picoscroll_globals[] = {
     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_picoscroll_globals, picoscroll_globals);
+static MP_DEFINE_CONST_DICT(mp_module_picoscroll_globals, picoscroll_globals);
 
 const mp_obj_module_t picoscroll_user_cmodule = {
     .base = { &mp_type_module },

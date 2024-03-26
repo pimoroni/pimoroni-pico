@@ -189,8 +189,7 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         mp_raise_ValueError("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)");
     }
 
-    self = m_new_obj_with_finaliser(_Motor_obj_t);
-    self->base.type = &Motor_type;
+    self = mp_obj_malloc_with_finaliser(_Motor_obj_t, &Motor_type);
 
     self->motor = m_new_class(Motor, pins, (Direction)direction, speed_scale, zeropoint, deadzone, freq, (DecayMode)mode, args[ARG_ph_en_driver].u_bool);
     self->motor->init();
@@ -741,8 +740,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this MotorCluster. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
-    self = m_new_obj_with_finaliser(_MotorCluster_obj_t);
-    self->base.type = &MotorCluster_type;
+    self = mp_obj_malloc_with_finaliser(_MotorCluster_obj_t, &MotorCluster_type);
     self->cluster = cluster;
 
     return MP_OBJ_FROM_PTR(self);

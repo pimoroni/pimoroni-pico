@@ -16,16 +16,16 @@ enum buttons
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Module Functions *****/
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn__del__obj, picounicorn__del__);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picounicorn_set_pixel_obj, 6, 6, picounicorn_set_pixel);
-STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picounicorn_set_pixel_value_obj, 4, 4, picounicorn_set_pixel_value);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_clear_obj, picounicorn_clear);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_is_pressed_obj, picounicorn_is_pressed);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_width_obj, picounicorn_get_width);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_height_obj, picounicorn_get_height);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_update_obj, picounicorn_update);
+static MP_DEFINE_CONST_FUN_OBJ_1(picounicorn__del__obj, picounicorn__del__);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picounicorn_set_pixel_obj, 6, 6, picounicorn_set_pixel);
+static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(picounicorn_set_pixel_value_obj, 4, 4, picounicorn_set_pixel_value);
+static MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_clear_obj, picounicorn_clear);
+static MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_is_pressed_obj, picounicorn_is_pressed);
+static MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_width_obj, picounicorn_get_width);
+static MP_DEFINE_CONST_FUN_OBJ_1(picounicorn_get_height_obj, picounicorn_get_height);
+static MP_DEFINE_CONST_FUN_OBJ_2(picounicorn_update_obj, picounicorn_update);
 
-STATIC const mp_rom_map_elem_t picounicorn_locals_dict_table[] = {   
+static const mp_rom_map_elem_t picounicorn_locals_dict_table[] = {   
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&picounicorn__del__obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&picounicorn_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&picounicorn_set_pixel_obj) },
@@ -42,7 +42,7 @@ STATIC const mp_rom_map_elem_t picounicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(picounicorn_locals_dict, picounicorn_locals_dict_table);
+static MP_DEFINE_CONST_DICT(picounicorn_locals_dict, picounicorn_locals_dict_table);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -62,7 +62,7 @@ const mp_obj_type_t picounicorn_type = {
 #endif
 
 /***** Globals Table *****/
-STATIC const mp_rom_map_elem_t picounicorn_globals_table[] = {
+static const mp_rom_map_elem_t picounicorn_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_picounicorn) }, 
     { MP_OBJ_NEW_QSTR(MP_QSTR_PicoUnicorn), (mp_obj_t)&picounicorn_type },
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(16) },
@@ -72,7 +72,7 @@ STATIC const mp_rom_map_elem_t picounicorn_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_BUTTON_X), MP_ROM_INT(BUTTON_X) },
     { MP_ROM_QSTR(MP_QSTR_BUTTON_Y), MP_ROM_INT(BUTTON_Y) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_picounicorn_globals, picounicorn_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_picounicorn_globals, picounicorn_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t picounicorn_user_cmodule = {

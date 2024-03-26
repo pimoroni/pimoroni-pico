@@ -391,8 +391,7 @@ mp_obj_t CosmicUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     CosmicUnicorn *cosmic = m_new_class(CosmicUnicorn);
     cosmic->init();
 
-    self = m_new_obj_with_finaliser(_CosmicUnicorn_obj_t);
-    self->base.type = &CosmicUnicorn_type;
+    self = mp_obj_malloc_with_finaliser(_CosmicUnicorn_obj_t, &CosmicUnicorn_type);
     self->cosmic = cosmic;
 
     return MP_OBJ_FROM_PTR(self);
@@ -507,8 +506,7 @@ extern mp_obj_t CosmicUnicorn_synth_channel(mp_obj_t self_in, mp_obj_t channel_i
 
     // NOTE This seems to work, in that it give MP access to the calibration object
     // Could very easily mess up in weird ways once object deletion is considered?
-    _Channel_obj_t *channel_obj = m_new_obj_with_finaliser(_Channel_obj_t);
-    channel_obj->base.type = &Channel_type;
+    _Channel_obj_t *channel_obj = mp_obj_malloc_with_finaliser(_Channel_obj_t, &Channel_type);
     channel_obj->channel = &self->cosmic->synth_channel(channel);
 
     return MP_OBJ_FROM_PTR(channel_obj);

@@ -28,7 +28,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutIOExpander_setup_rotary_encoder_obj, 4, Break
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutIOExpander_read_rotary_encoder_obj, 2, BreakoutIOExpander_read_rotary_encoder);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutIOExpander_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutIOExpander_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_chip_id), MP_ROM_PTR(&BreakoutIOExpander_get_chip_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_address), MP_ROM_PTR(&BreakoutIOExpander_set_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_adc_vref), MP_ROM_PTR(&BreakoutIOExpander_get_adc_vref_obj) },
@@ -60,7 +60,7 @@ STATIC const mp_rom_map_elem_t BreakoutIOExpander_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_LOW), MP_ROM_INT(IOE_LOW) },
     { MP_ROM_QSTR(MP_QSTR_HIGH), MP_ROM_INT(IOE_HIGH) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutIOExpander_locals_dict, BreakoutIOExpander_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutIOExpander_locals_dict, BreakoutIOExpander_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -85,7 +85,7 @@ const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_ioexpander_globals_table[] = {
+static const mp_map_elem_t breakout_ioexpander_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_ioexpander) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutIOExpander), (mp_obj_t)&breakout_ioexpander_BreakoutIOExpander_type },
     { MP_ROM_QSTR(MP_QSTR_IN), MP_ROM_INT(IOE_PIN_IN) },
@@ -94,7 +94,7 @@ STATIC const mp_map_elem_t breakout_ioexpander_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PWM), MP_ROM_INT(IOE_PIN_PWM) },
     { MP_ROM_QSTR(MP_QSTR_ADC), MP_ROM_INT(IOE_PIN_ADC) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_ioexpander_globals, breakout_ioexpander_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_ioexpander_globals, breakout_ioexpander_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_ioexpander_user_cmodule = {

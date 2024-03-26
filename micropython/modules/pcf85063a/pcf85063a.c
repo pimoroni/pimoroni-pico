@@ -26,7 +26,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(PCF85063A_set_byte_obj, PCF85063A_set_byte);
 MP_DEFINE_CONST_FUN_OBJ_1(PCF85063A_get_byte_obj, PCF85063A_get_byte);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
+static const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&PCF85063A_reset_obj) },
     { MP_ROM_QSTR(MP_QSTR_datetime), MP_ROM_PTR(&PCF85063A_datetime_obj) },
 
@@ -61,7 +61,7 @@ STATIC const mp_rom_map_elem_t PCF85063A_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_TIMER_TICK_1HZ), MP_ROM_INT(0b10) },
     { MP_ROM_QSTR(MP_QSTR_TIMER_TICK_1_OVER_60HZ), MP_ROM_INT(0b11) },
 };
-STATIC MP_DEFINE_CONST_DICT(PCF85063A_locals_dict, PCF85063A_locals_dict_table);
+static MP_DEFINE_CONST_DICT(PCF85063A_locals_dict, PCF85063A_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -86,7 +86,7 @@ const mp_obj_type_t pcf85063a_PCF85063A_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t pcf85063a_globals_table[] = {
+static const mp_map_elem_t pcf85063a_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pcf85063a) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PCF85063A), (mp_obj_t)&pcf85063a_PCF85063A_type },
     { MP_ROM_QSTR(MP_QSTR_MONDAY), MP_ROM_INT(0) },
@@ -97,7 +97,7 @@ STATIC const mp_map_elem_t pcf85063a_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SATURDAY), MP_ROM_INT(5) },
     { MP_ROM_QSTR(MP_QSTR_SUNDAY), MP_ROM_INT(6) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_pcf85063a_globals, pcf85063a_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_pcf85063a_globals, pcf85063a_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t pcf85063a_user_cmodule = {

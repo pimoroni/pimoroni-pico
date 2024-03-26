@@ -40,8 +40,7 @@ typedef struct _ModPicoGraphics_obj_t {
 mp_obj_t picoscroll_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PicoScroll_obj_t *self = nullptr;
 
-    self = m_new_obj_with_finaliser(PicoScroll_obj_t);
-    self->base.type = &PicoScroll_type;
+    self = mp_obj_malloc_with_finaliser(PicoScroll_obj_t, &PicoScroll_type);
 
     self->scroll = m_new_class(PicoScroll);
     self->scroll->init();

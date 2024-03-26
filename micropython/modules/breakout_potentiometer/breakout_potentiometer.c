@@ -16,7 +16,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutPotentiometer_read_obj, BreakoutPotentiometer_
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutPotentiometer_read_raw_obj, BreakoutPotentiometer_read_raw);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_address), MP_ROM_PTR(&BreakoutPotentiometer_set_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_adc_vref), MP_ROM_PTR(&BreakoutPotentiometer_get_adc_vref_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_adc_vref), MP_ROM_PTR(&BreakoutPotentiometer_set_adc_vref_obj) },
@@ -29,7 +29,7 @@ STATIC const mp_rom_map_elem_t BreakoutPotentiometer_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_DIRECTION_CW), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_DIRECTION_CCW), MP_ROM_INT(0) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutPotentiometer_locals_dict, BreakoutPotentiometer_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutPotentiometer_locals_dict, BreakoutPotentiometer_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -55,11 +55,11 @@ const mp_obj_type_t breakout_potentiometer_BreakoutPotentiometer_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_potentiometer_globals_table[] = {
+static const mp_map_elem_t breakout_potentiometer_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_potentiometer) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutPotentiometer), (mp_obj_t)&breakout_potentiometer_BreakoutPotentiometer_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_potentiometer_globals, breakout_potentiometer_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_potentiometer_globals, breakout_potentiometer_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_potentiometer_user_cmodule = {

@@ -35,7 +35,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(CosmicUnicorn_stop_playing_obj, CosmicUnicorn_stop_pla
 MP_DEFINE_CONST_FUN_OBJ_2(CosmicUnicorn_synth_channel_obj, CosmicUnicorn_synth_channel);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t Channel_locals_dict_table[] = {
+static const mp_rom_map_elem_t Channel_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Channel___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_configure), MP_ROM_PTR(&Channel_configure_obj) },
     { MP_ROM_QSTR(MP_QSTR_restore), MP_ROM_PTR(&Channel_restore_obj) },
@@ -59,7 +59,7 @@ STATIC const mp_rom_map_elem_t Channel_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_WAVE), MP_ROM_INT(1) },
 };
 
-STATIC const mp_rom_map_elem_t CosmicUnicorn_locals_dict_table[] = {
+static const mp_rom_map_elem_t CosmicUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&CosmicUnicorn___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&CosmicUnicorn_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&CosmicUnicorn_update_obj) },
@@ -90,8 +90,8 @@ STATIC const mp_rom_map_elem_t CosmicUnicorn_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SWITCH_BRIGHTNESS_DOWN), MP_ROM_INT(26) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(Channel_locals_dict, Channel_locals_dict_table);
-STATIC MP_DEFINE_CONST_DICT(CosmicUnicorn_locals_dict, CosmicUnicorn_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Channel_locals_dict, Channel_locals_dict_table);
+static MP_DEFINE_CONST_DICT(CosmicUnicorn_locals_dict, CosmicUnicorn_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -131,12 +131,12 @@ const mp_obj_type_t CosmicUnicorn_type = {
 #endif
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t cosmic_globals_table[] = {
+static const mp_map_elem_t cosmic_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_cosmic) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Channel), (mp_obj_t)&Channel_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_CosmicUnicorn), (mp_obj_t)&CosmicUnicorn_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_cosmic_globals, cosmic_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_cosmic_globals, cosmic_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t cosmic_user_cmodule = {
