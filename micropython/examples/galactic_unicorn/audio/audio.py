@@ -62,6 +62,7 @@ class WavPlayer:
         self.__tone_samples = None
         self.__queued_samples = None
 
+
     def set_root(self, root):
         self.__root = root.rstrip("/") + "/"
 
@@ -75,7 +76,10 @@ class WavPlayer:
         self.__loop_wav = loop                                  # Record if the user wants the file to loop
 
         # Parse the WAV file, returning the necessary parameters to initialise I2S communication
-        format, sample_rate, bits_per_sample, self.__first_sample_offset = WavPlayer.__parse_wav(self.__wav_file)
+        format, sample_rate, bits_per_sample, self.__first_sample_offset, self.sample_size = WavPlayer.__parse_wav(self.__wav_file)
+
+        # Keep a track of total bytes read from WAV File
+        self.total_bytes_read = 0
 
         self.__wav_file.seek(self.__first_sample_offset)        # Advance to first byte of sample data
 
@@ -179,7 +183,7 @@ class WavPlayer:
         if self.__state == WavPlayer.PLAY:
             if self.__mode == WavPlayer.MODE_WAV:
                 num_read = self.__wav_file.readinto(self.__wav_samples_mv)      # Read the next section of the WAV file
-
+                self.total_bytes_read += num_read
                 # Have we reached the end of the file?
                 if num_read == 0:
                     # Do we want to loop the WAV playback?
@@ -191,6 +195,8 @@ class WavPlayer:
 
                     self.__audio_out.write(self.__silence_samples)              # In both cases play silence to end this callback
                 else:
+                    if num_read > 0 and num_read < self.WAV_BUFFER_LENGTH:
+                        num_read = num_read - (self.total_bytes_read - self.sample_size)
                     self.__audio_out.write(self.__wav_samples_mv[: num_read])   # We are within the file, so write out the next audio samples
             else:
                 if self.__queued_samples is not None:
@@ -255,4 +261,7 @@ class WavPlayer:
         if offset == -1:
             raise ValueError("WAV sub chunk 2 ID not found")
 
-        return (format, sample_rate, bits_per_sample, 44 + offset)
+        wav_file.seek(40)
+        sub_chunk2_size = struct.unpack("<I", wav_file.read(4))[0]
+
+        return (format, sample_rate, bits_per_sample, 44 + offset, sub_chunk2_size)
