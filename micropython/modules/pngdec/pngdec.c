@@ -49,6 +49,7 @@ STATIC const mp_map_elem_t PNG_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PNG_POSTERISE), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_PNG_DITHER), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_PNG_COPY), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_PNG_PEN), MP_ROM_INT(3) },
 };
 
 STATIC MP_DEFINE_CONST_DICT(mp_module_PNG_globals, PNG_globals_table);

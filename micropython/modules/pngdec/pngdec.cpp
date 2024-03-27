@@ -44,6 +44,7 @@ enum DECODE_MODE : uint8_t {
     MODE_POSTERIZE = 0u,
     MODE_DITHER = 1u,
     MODE_COPY = 2u,
+    MODE_PEN = 3u,
 };
 
 void *pngdec_open_callback(const char *filename, int32_t *size) {
@@ -158,7 +159,7 @@ mp_event_handle_nowait();
             break;
     }
 
-    //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", y, pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
+    //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", pDraw->y , pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
     uint8_t *pixel = (uint8_t *)pDraw->pPixels;
     if(pDraw->iPixelType == PNG_PIXEL_TRUECOLOR ) {
         for(int x = 0; x < pDraw->iWidth; x++) {
@@ -181,6 +182,43 @@ mp_event_handle_nowait();
                 current_graphics->set_pen(r, g, b);
                 current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
             }
+            current_position += step;
+        }
+    } else if (pDraw->iPixelType == PNG_PIXEL_GRAYSCALE) {
+        for(int x = 0; x < pDraw->iWidth; x++) {
+            uint8_t i = 0;
+            if(pDraw->iBpp == 8) {  // 8bpp
+                i = *pixel++; // Already 8bpc
+            } else if (pDraw->iBpp == 4) {  // 4bpp
+                i = *pixel;
+                i >>= (x & 0b1) ? 0 : 4;
+                i &= 0xf;
+                if (x & 1) pixel++;
+                i = (i << 4) | i;
+            } else if (pDraw->iBpp == 2) {  // 2bpp
+                i = *pixel;
+                i >>= 6 - ((x & 0b11) << 1);
+                i &= 0x3;
+                if ((x & 0b11) == 0b11) pixel++;
+                // Evenly spaced 4-colour palette
+                i = (0xFFB86800 >> (i * 8)) & 0xFF;
+            } else {  // 1bpp
+                i = *pixel;
+                i >>= 7 - (x & 0b111);
+                i &= 0b1;
+                if ((x & 0b111) == 0b111) pixel++;
+                i = i ? 255 : 0;
+            }
+            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
+
+            //mp_printf(&mp_plat_print, "Drawing pixel at %dx%d, %dbpp, value %d\n", current_position.x, current_position.y, pDraw->iBpp, i);
+            if (current_mode != MODE_PEN) {
+                current_graphics->set_pen(i, i, i);
+            }
+            if (current_mode != MODE_PEN || i == 0) {
+                current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
+            }
+
             current_position += step;
         }
     } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
