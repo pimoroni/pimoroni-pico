@@ -1,12 +1,6 @@
-from machine import Pin
 from audio import WavPlayer
-from cosmic import CosmicUnicorn
 
-cu = CosmicUnicorn()
-amp_enable = Pin(22, Pin.OUT)
-amp_enable.on()
-
-sound = WavPlayer(0, 10, 11, 9)
+sound = WavPlayer(0, 10, 11, 9, amp_enable=22)
 
 sound.play_wav("beepboop.wav", False)
 

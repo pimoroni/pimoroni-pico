@@ -3,7 +3,6 @@
 # Use Brightness +/- to move up and down
 # Press Sleep to play the selected sound
 
-from machine import Pin
 from audio import WavPlayer
 from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
@@ -12,10 +11,7 @@ from time import sleep
 su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-amp_enable = Pin(22, Pin.OUT)
-amp_enable.on()
-
-audio = WavPlayer(0, 10, 11, 9)
+audio = WavPlayer(0, 10, 11, 9, amp_enable=22)
 
 WHITE = graphics.create_pen(255, 255, 255)
 RED = graphics.create_pen(255, 0, 0)

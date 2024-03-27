@@ -1,4 +1,3 @@
-from machine import Pin
 from audio import WavPlayer
 from cosmic import CosmicUnicorn
 from picographics import PicoGraphics, DISPLAY_COSMIC_UNICORN as DISPLAY
@@ -7,10 +6,7 @@ from time import sleep
 cu = CosmicUnicorn()
 graphics = PicoGraphics(DISPLAY)
 
-amp_enable = Pin(22, Pin.OUT)
-amp_enable.on()
-
-audio = WavPlayer(0, 10, 11, 9)
+audio = WavPlayer(0, 10, 11, 9, amp_enable=22)
 
 WHITE = graphics.create_pen(255, 255, 255)
 RED = graphics.create_pen(255, 0, 0)

@@ -5,7 +5,7 @@
 import os
 import math
 import struct
-from machine import I2S
+from machine import I2S, Pin
 
 """
 A class for playing Wav files out of an I2S audio amp. It can also play pure tones.
@@ -34,12 +34,16 @@ class WavPlayer:
     TONE_BITS_PER_SAMPLE = 16
     TONE_FULL_WAVES = 2
 
-    def __init__(self, id, sck_pin, ws_pin, sd_pin, ibuf_len=INTERNAL_BUFFER_LENGTH, root="/"):
+    def __init__(self, id, sck_pin, ws_pin, sd_pin, amp_enable=None, ibuf_len=INTERNAL_BUFFER_LENGTH, root="/"):
         self.__id = id
         self.__sck_pin = sck_pin
         self.__ws_pin = ws_pin
         self.__sd_pin = sd_pin
         self.__ibuf_len = ibuf_len
+        self.__enable = None
+
+        if amp_enable is not None:
+            self.__enable = Pin(amp_enable, Pin.OUT)
 
         # Set the directory to search for files in
         self.set_root(root)
@@ -167,10 +171,16 @@ class WavPlayer:
         self.__audio_out.irq(self.__i2s_callback)
         self.__audio_out.write(self.__silence_samples)
 
+        if self.__enable is not None:
+            self.__enable.on()
+
     def __stop_i2s(self):
         self.stop()                     # Stop any active playback
         while self.is_playing():        # and wait for it to complete
             pass
+
+        if self.__enable is not None:
+            self.__enable.off()
 
         if self.__audio_out is not None:
             self.__audio_out.deinit()   # Deinit any active I2S comms

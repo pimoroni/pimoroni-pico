@@ -3,7 +3,7 @@
 # Use VOL +/- to increase/decrease the amount of time
 # Use the Sleep ZZZ button to start the countdown
 
-from machine import Pin, Timer
+from machine import Timer
 from audio import WavPlayer
 from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
@@ -11,9 +11,6 @@ import time
 
 su = StellarUnicorn()
 graphics = PicoGraphics(DISPLAY)
-
-amp_enable = Pin(22, Pin.OUT)
-amp_enable.on()
 
 graphics.set_font("bitmap6")
 WHITE = graphics.create_pen(255, 255, 255)
@@ -23,7 +20,7 @@ RED = graphics.create_pen(255, 0, 0)
 GREEN = graphics.create_pen(0, 255, 0)
 su.set_brightness(0.5)
 
-audio = WavPlayer(0, 10, 11, 9)
+audio = WavPlayer(0, 10, 11, 9, amp_enable=22)
 
 
 class Countdown(object):

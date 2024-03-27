@@ -1,4 +1,4 @@
-from machine import Pin, Timer
+from machine import Timer
 from audio import WavPlayer
 from galactic import GalacticUnicorn
 from picographics import PicoGraphics, DISPLAY_GALACTIC_UNICORN as DISPLAY
@@ -6,9 +6,6 @@ import time
 
 gu = GalacticUnicorn()
 graphics = PicoGraphics(DISPLAY)
-
-amp_enable = Pin(22, Pin.OUT)
-amp_enable.on()
 
 graphics.set_font("bitmap6")
 WHITE = graphics.create_pen(255, 255, 255)
@@ -18,7 +15,7 @@ RED = graphics.create_pen(255, 0, 0)
 GREEN = graphics.create_pen(0, 255, 0)
 gu.set_brightness(0.7)
 
-audio = WavPlayer(0, 10, 11, 9)
+audio = WavPlayer(0, 10, 11, 9, amp_enable=22)
 
 
 class Countdown(object):
