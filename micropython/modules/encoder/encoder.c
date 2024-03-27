@@ -19,7 +19,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(Encoder_counts_per_rev_obj, 1, Encoder_counts_per_rev
 MP_DEFINE_CONST_FUN_OBJ_1(Encoder_capture_obj, Encoder_capture);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
+static const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Encoder___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_pins), MP_ROM_PTR(&Encoder_pins_obj) },
     { MP_ROM_QSTR(MP_QSTR_common_pin), MP_ROM_PTR(&Encoder_common_pin_obj) },
@@ -37,7 +37,7 @@ STATIC const mp_rom_map_elem_t Encoder_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_capture), MP_ROM_PTR(&Encoder_capture_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(Encoder_locals_dict, Encoder_locals_dict_table);
+static MP_DEFINE_CONST_DICT(Encoder_locals_dict, Encoder_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -60,14 +60,14 @@ const mp_obj_type_t Encoder_type = {
 #endif
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t encoder_globals_table[] = {
+static const mp_map_elem_t encoder_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_encoder) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Encoder), (mp_obj_t)&Encoder_type },
 
     { MP_ROM_QSTR(MP_QSTR_MMME_CPR), MP_ROM_INT(12) },
     { MP_ROM_QSTR(MP_QSTR_ROTARY_CPR), MP_ROM_INT(24) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_encoder_globals, encoder_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_encoder_globals, encoder_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t encoder_user_cmodule = {

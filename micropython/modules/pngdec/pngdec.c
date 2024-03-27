@@ -1,15 +1,15 @@
 #include "pngdec.h"
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_del_obj, _PNG_del);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(PNG_openRAM_obj, _PNG_openRAM);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(PNG_openFILE_obj, _PNG_openFILE);
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(PNG_decode_obj, 1, _PNG_decode);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getWidth_obj, _PNG_getWidth);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getHeight_obj, _PNG_getHeight);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(PNG_getPalette_obj, _PNG_getPalette);
+static MP_DEFINE_CONST_FUN_OBJ_1(PNG_del_obj, _PNG_del);
+static MP_DEFINE_CONST_FUN_OBJ_2(PNG_openRAM_obj, _PNG_openRAM);
+static MP_DEFINE_CONST_FUN_OBJ_2(PNG_openFILE_obj, _PNG_openFILE);
+static MP_DEFINE_CONST_FUN_OBJ_KW(PNG_decode_obj, 1, _PNG_decode);
+static MP_DEFINE_CONST_FUN_OBJ_1(PNG_getWidth_obj, _PNG_getWidth);
+static MP_DEFINE_CONST_FUN_OBJ_1(PNG_getHeight_obj, _PNG_getHeight);
+static MP_DEFINE_CONST_FUN_OBJ_1(PNG_getPalette_obj, _PNG_getPalette);
 
 // class
-STATIC const mp_rom_map_elem_t PNG_locals_dict_table[] = {
+static const mp_rom_map_elem_t PNG_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&PNG_del_obj) },
     { MP_ROM_QSTR(MP_QSTR_open_RAM), MP_ROM_PTR(&PNG_openRAM_obj) },
     { MP_ROM_QSTR(MP_QSTR_open_file), MP_ROM_PTR(&PNG_openFILE_obj) },
@@ -19,7 +19,7 @@ STATIC const mp_rom_map_elem_t PNG_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_palette), MP_ROM_PTR(&PNG_getPalette_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(PNG_locals_dict, PNG_locals_dict_table);
+static MP_DEFINE_CONST_DICT(PNG_locals_dict, PNG_locals_dict_table);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -41,7 +41,7 @@ const mp_obj_type_t PNG_type = {
 #endif
 
 // module
-STATIC const mp_map_elem_t PNG_globals_table[] = {
+static const mp_map_elem_t PNG_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pngdec) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PNG), (mp_obj_t)&PNG_type },
 
@@ -52,7 +52,7 @@ STATIC const mp_map_elem_t PNG_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_PNG_PEN), MP_ROM_INT(3) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(mp_module_PNG_globals, PNG_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_PNG_globals, PNG_globals_table);
 
 const mp_obj_module_t PNG_user_cmodule = {
     .base = { &mp_type_module },

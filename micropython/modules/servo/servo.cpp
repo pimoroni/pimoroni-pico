@@ -73,8 +73,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             }
             servo::CalibrationType calibration_type = (servo::CalibrationType)type;
 
-            self = m_new_obj_with_finaliser(_Calibtration_obj_t);
-            self->base.type = &Calibration_type;
+            self = mp_obj_malloc_with_finaliser(_Calibtration_obj_t, &Calibration_type);
             self->calibration = m_new_class(Calibration, calibration_type);
         }
         else {
@@ -82,8 +81,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         }
     }
     else {
-        self = m_new_obj_with_finaliser(_Calibtration_obj_t);
-        self->base.type = &Calibration_type;
+        self = mp_obj_malloc_with_finaliser(_Calibtration_obj_t, &Calibration_type);
         self->calibration = m_new_class(Calibration);
     }
 
@@ -892,8 +890,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         freq = mp_obj_get_float(args[ARG_freq].u_obj);
     }
 
-    self = m_new_obj_with_finaliser(_Servo_obj_t);
-    self->base.type = &Servo_type;
+    self = mp_obj_malloc_with_finaliser(_Servo_obj_t, &Servo_type);
 
     void *servo_target = m_new(Servo, 1);
 
@@ -1161,8 +1158,7 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
         _Servo_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Servo_obj_t);
 
         // Create a new MP Calibration instance and assign a copy of the servo's calibration to it
-        _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
-        calib->base.type = &Calibration_type;
+        _Calibration_obj_t *calib = mp_obj_malloc_with_finaliser(_Calibration_obj_t, &Calibration_type);
 
         calib->calibration = m_new_class(Calibration, self->servo->calibration());
         return MP_OBJ_FROM_PTR(calib);
@@ -1355,8 +1351,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it");
     }
 
-    self = m_new_obj_with_finaliser(_ServoCluster_obj_t);
-    self->base.type = &ServoCluster_type;
+    self = mp_obj_malloc_with_finaliser(_ServoCluster_obj_t, &ServoCluster_type);
     self->cluster = cluster;
 
     return MP_OBJ_FROM_PTR(self);
@@ -2655,8 +2650,7 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
         else {
             // Create a new MP Calibration instance and assign a copy of the servo's calibration to it
-            _Calibration_obj_t *calib = m_new_obj_with_finaliser(_Calibration_obj_t);
-            calib->base.type = &Calibration_type;
+            _Calibration_obj_t *calib = mp_obj_malloc_with_finaliser(_Calibration_obj_t, &Calibration_type);
 
             calib->calibration = m_new_class(Calibration, self->cluster->calibration((uint)servo));
             return MP_OBJ_FROM_PTR(calib);

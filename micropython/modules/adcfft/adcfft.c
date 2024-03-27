@@ -5,13 +5,13 @@ MP_DEFINE_CONST_FUN_OBJ_1(adcfft_update_obj, adcfft_update);
 MP_DEFINE_CONST_FUN_OBJ_3(adcfft_get_scaled_obj, adcfft_get_scaled);
 MP_DEFINE_CONST_FUN_OBJ_1(adcfft__del__obj, adcfft__del__);
 
-STATIC const mp_rom_map_elem_t adcfft_locals_dict_table[] = {
+static const mp_rom_map_elem_t adcfft_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&adcfft__del__obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&adcfft_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_scaled), MP_ROM_PTR(&adcfft_get_scaled_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(adcfft_locals_dict, adcfft_locals_dict_table);
+static MP_DEFINE_CONST_DICT(adcfft_locals_dict, adcfft_locals_dict_table);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -31,11 +31,11 @@ const mp_obj_type_t adcfft_type = {
 #endif
 
 // Module
-STATIC const mp_map_elem_t adcfft_globals_table[] = {
+static const mp_map_elem_t adcfft_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_adcfft) },  // Module name
     { MP_OBJ_NEW_QSTR(MP_QSTR_ADCFFT), (mp_obj_t)&adcfft_type },             // Class name & type
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_adcfft_globals, adcfft_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_adcfft_globals, adcfft_globals_table);
 
 
 const mp_obj_module_t adcfft_user_cmodule = {

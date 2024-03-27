@@ -23,6 +23,11 @@ function micropython_clone {
     git submodule update --init lib/micropython-lib
     git submodule update --init lib/tinyusb
     git submodule update --init lib/btstack
+    cd lib/micropython-lib
+    git remote add usb https://github.com/projectgus/micropython-lib
+    git fetch usb feature/usbd_python
+    git checkout feature/usbd_python
+    cd ../../
     cd ../
 }
 

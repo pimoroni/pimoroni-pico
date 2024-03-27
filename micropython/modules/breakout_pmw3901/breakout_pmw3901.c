@@ -14,7 +14,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutPMW3901_get_motion_slow_obj, 1, BreakoutPMW39
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutPMW3901_frame_capture_obj, 2, BreakoutPMW3901_frame_capture);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutPMW3901_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutPMW3901_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_id), MP_ROM_PTR(&BreakoutPMW3901_get_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_revision), MP_ROM_PTR(&BreakoutPMW3901_get_revision_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_rotation), MP_ROM_PTR(&BreakoutPMW3901_set_rotation_obj) },
@@ -29,7 +29,7 @@ STATIC const mp_rom_map_elem_t BreakoutPMW3901_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_FRAME_SIZE), MP_ROM_INT(35) },
     { MP_ROM_QSTR(MP_QSTR_FRAME_BYTES), MP_ROM_INT(1225) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutPMW3901_locals_dict, BreakoutPMW3901_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutPMW3901_locals_dict, BreakoutPMW3901_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -56,11 +56,11 @@ const mp_obj_type_t breakout_pmw3901_BreakoutPMW3901_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_pmw3901_globals_table[] = {
+static const mp_map_elem_t breakout_pmw3901_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_pmw3901) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutPMW3901), (mp_obj_t)&breakout_pmw3901_BreakoutPMW3901_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_pmw3901_globals, breakout_pmw3901_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_pmw3901_globals, breakout_pmw3901_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_pmw3901_user_cmodule = {

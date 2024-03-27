@@ -16,7 +16,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutTrackball_set_white_obj, 1, BreakoutTrackball
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutTrackball_read_obj, BreakoutTrackball_read);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutTrackball_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutTrackball_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_change_address), MP_ROM_PTR(&BreakoutTrackball_change_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_enable_interrupt), MP_ROM_PTR(&BreakoutTrackball_enable_interrupt_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_interrupt), MP_ROM_PTR(&BreakoutTrackball_get_interrupt_obj) },
@@ -33,7 +33,7 @@ STATIC const mp_rom_map_elem_t BreakoutTrackball_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SW_CHANGED), MP_ROM_INT(SW_CHANGED) },
     { MP_ROM_QSTR(MP_QSTR_SW_PRESSED), MP_ROM_INT(SW_PRESSED) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutTrackball_locals_dict, BreakoutTrackball_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutTrackball_locals_dict, BreakoutTrackball_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -59,11 +59,11 @@ const mp_obj_type_t breakout_trackball_BreakoutTrackball_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_trackball_globals_table[] = {
+static const mp_map_elem_t breakout_trackball_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_trackball) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutTrackball), (mp_obj_t)&breakout_trackball_BreakoutTrackball_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_trackball_globals, breakout_trackball_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_trackball_globals, breakout_trackball_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_trackball_user_cmodule = {
