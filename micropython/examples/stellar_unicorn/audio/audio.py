@@ -62,7 +62,6 @@ class WavPlayer:
         self.__tone_samples = None
         self.__queued_samples = None
 
-
     def set_root(self, root):
         self.__root = root.rstrip("/") + "/"
 
