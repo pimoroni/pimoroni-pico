@@ -217,7 +217,7 @@ mp_event_handle_nowait();
                     || current_graphics->pen_type == PicoGraphics::PEN_3BIT
                     || current_graphics->pen_type == PicoGraphics::PEN_INKY7)) {
                     if(current_palette_offset > 0) {
-                        i += ((int16_t)(i) + current_palette_offset) & 0xff;
+                        i = ((int16_t)(i) + current_palette_offset) & 0xff;
                     }
                     current_graphics->set_pen(i);
                 } else {
@@ -279,7 +279,7 @@ mp_event_handle_nowait();
                         // Copy raw palette indexes over
                         if(current_mode == MODE_COPY) {
                             if(current_palette_offset > 0) {
-                                i += ((int16_t)(i) + current_palette_offset) & 0xff;
+                                i = ((int16_t)(i) + current_palette_offset) & 0xff;
                             }
                             current_graphics->set_pen(i);
                             current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
