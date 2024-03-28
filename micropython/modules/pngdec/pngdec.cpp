@@ -209,7 +209,20 @@ mp_event_handle_nowait();
 
             //mp_printf(&mp_plat_print, "Drawing pixel at %dx%d, %dbpp, value %d\n", current_position.x, current_position.y, pDraw->iBpp, i);
             if (current_mode != MODE_PEN) {
-                current_graphics->set_pen(i, i, i);
+                // Allow greyscale PNGs to be copied just like an indexed PNG
+                // since we might want to offset and recolour them.
+                if(current_mode == MODE_COPY
+                    && (current_graphics->pen_type == PicoGraphics::PEN_P8
+                    || current_graphics->pen_type == PicoGraphics::PEN_P4
+                    || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                    || current_graphics->pen_type == PicoGraphics::PEN_INKY7)) {
+                    if(current_palette_offset > 0) {
+                        i += ((int16_t)(i) + current_palette_offset) & 0xff;
+                    }
+                    current_graphics->set_pen(i);
+                } else {
+                    current_graphics->set_pen(i, i, i);
+                }
             }
             if (current_mode != MODE_PEN || i == 0) {
                 current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
