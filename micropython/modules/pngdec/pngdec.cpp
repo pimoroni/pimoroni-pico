@@ -190,20 +190,26 @@ mp_event_handle_nowait();
                 i &= 0xf;
                 if (x & 1) pixel++;
                 // Just copy the colour into the upper and lower nibble
-                i = (i << 4) | i;
+                if(current_mode != MODE_COPY) {
+                    i = (i << 4) | i;
+                }
             } else if (pDraw->iBpp == 2) {  // 2bpp
                 i = *pixel;
                 i >>= 6 - ((x & 0b11) << 1);
                 i &= 0x3;
                 if ((x & 0b11) == 0b11) pixel++;
                 // Evenly spaced 4-colour palette
-                i = (0xFFB86800 >> (i * 8)) & 0xFF;
+                if(current_mode != MODE_COPY) {
+                    i = (0xFFB86800 >> (i * 8)) & 0xFF;
+                }
             } else {  // 1bpp
                 i = *pixel;
                 i >>= 7 - (x & 0b111);
                 i &= 0b1;
                 if ((x & 0b111) == 0b111) pixel++;
-                i = i ? 255 : 0;
+                if(current_mode != MODE_COPY) {
+                    i = i ? 255 : 0;
+                }
             }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
 
