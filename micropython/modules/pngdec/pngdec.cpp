@@ -25,6 +25,7 @@ typedef struct _PNG_decode_target {
     Rect source = {0, 0, 0, 0};
     Point scale = {1, 1};
     int rotation = 0;
+    uint8_t palette_offset = 0;
 } _PNG_decode_target;
 
 typedef struct _PNG_obj_t {
@@ -126,6 +127,7 @@ mp_event_handle_nowait();
     PicoGraphics *current_graphics = (PicoGraphics *)target->target;
     Point current_position = target->position;
     uint8_t current_mode = target->mode;
+    uint8_t current_palette_offset = target->palette_offset;
     Point scale = target->scale;
     int rotation = target->rotation;
     Point step = {0, 0};
@@ -161,22 +163,15 @@ mp_event_handle_nowait();
 
     //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", pDraw->y , pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
     uint8_t *pixel = (uint8_t *)pDraw->pPixels;
-    if(pDraw->iPixelType == PNG_PIXEL_TRUECOLOR ) {
+    if(pDraw->iPixelType == PNG_PIXEL_TRUECOLOR || pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
         for(int x = 0; x < pDraw->iWidth; x++) {
             uint8_t r = *pixel++;
             uint8_t g = *pixel++;
             uint8_t b = *pixel++;
-            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
-            current_graphics->set_pen(r, g, b);
-            current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
-            current_position += step;
-        }
-    } else if (pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
-        for(int x = 0; x < pDraw->iWidth; x++) {
-            uint8_t r = *pixel++;
-            uint8_t g = *pixel++;
-            uint8_t b = *pixel++;
-            uint8_t a = *pixel++;
+            uint8_t a = 1;
+            if (pDraw->iHasAlpha) {
+                a = *pixel++;
+            }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             if (a) {
                 current_graphics->set_pen(r, g, b);
@@ -194,6 +189,7 @@ mp_event_handle_nowait();
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
                 if (x & 1) pixel++;
+                // Just copy the colour into the upper and lower nibble
                 i = (i << 4) | i;
             } else if (pDraw->iBpp == 2) {  // 2bpp
                 i = *pixel;
@@ -269,6 +265,9 @@ mp_event_handle_nowait();
 
                         // Copy raw palette indexes over
                         if(current_mode == MODE_COPY) {
+                            if(current_palette_offset > 0) {
+                                i += ((int16_t)(i) + current_palette_offset) & 0xff;
+                            }
                             current_graphics->set_pen(i);
                             current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                         // Posterized output to the available palete
@@ -364,7 +363,7 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_palette_offset };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
@@ -373,6 +372,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_rotate, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_palette_offset, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -431,6 +431,8 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     self->decode_target->mode = args[ARG_mode].u_int;
 
     self->decode_target->position = {args[ARG_x].u_int, args[ARG_y].u_int};
+
+    self->decode_target->palette_offset = args[ARG_palette_offset].u_int;
 
     // Just-in-time open of the filename/buffer we stored in self->file via open_RAM or open_file
 
