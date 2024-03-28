@@ -52,7 +52,7 @@ jobs:
 
     steps:
     - name: Compiler Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /home/runner/.ccache
         key: ccache-micropython-${{ matrix.name }}-${{ github.ref }}-${{ github.sha }}
@@ -111,7 +111,7 @@ jobs:
         cmake_build
 
     - name: Store .uf2 as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.RELEASE_FILE }}.uf2
         path: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
