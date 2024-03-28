@@ -19,19 +19,18 @@ graphics.clear()
 graphics.set_pen(0)
 
 # Few lines of text.
-graphics.text("Display PNG Image...", 10, 40, 300, 3)
+graphics.text("PNG Pencil", 70, 100, WIDTH, 3)
 
-# Open our PNG File from flash. In this example we're using a green check mark.
+# Open our PNG File from flash. In this example we're using a cartoon pencil.
 # You can use Thonny to transfer PNG Images to your Inky Frame.
 try:
-    png.open_file("success.png")
+    png.open_file("pencil_256x256.png")
 
     # Decode our PNG file and set the X and Y
-    png.decode(130, 70)
+    png.decode(200, 100)
 
-    graphics.text("Success!", 10, 70, WIDTH, 3)
 except OSError:
-    graphics.text("Unable to find PNG file! Copy 'success.png' to your Inky Frame using Thonny :)", 10, 70, WIDTH, 3)
+    graphics.text("Unable to find PNG file! Copy 'pencil_256x256.png' to your Inky Frame using Thonny :)", 10, 70, WIDTH, 3)
 
 # Start the screen update
 graphics.update()
