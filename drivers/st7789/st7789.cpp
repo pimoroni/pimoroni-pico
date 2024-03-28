@@ -133,8 +133,6 @@ namespace pimoroni {
 
   void ST7789::configure_display(Rotation rotate) {
 
-    bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
-
     if(rotate == ROTATE_90 || rotate == ROTATE_270) {
       std::swap(width, height);
     }
@@ -185,20 +183,30 @@ namespace pimoroni {
     // Pico Display
     if(width == 240 && height == 135) {
       caset[0] = 40;   // 240 cols
-      caset[1] = 279;
-      raset[0] = 53;   // 135 rows
-      raset[1] = 187;
-      madctl = rotate180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
+      caset[1] = 40 + width - 1;
+      raset[0] = 52;   // 135 rows
+      raset[1] = 52 + height - 1;
+      if (rotate == ROTATE_0) {
+        raset[0] += 1;
+        raset[1] += 1;
+      }
+      madctl = rotate == ROTATE_180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
       madctl |= MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
     }
 
     // Pico Display at 90 degree rotation
     if(width == 135 && height == 240) {
       caset[0] = 52;   // 135 cols
-      caset[1] = 186;
+      caset[1] = 52 + width - 1;
       raset[0] = 40;   // 240 rows
-      raset[1] = 279;
-      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+      raset[1] = 40 + height - 1;
+      madctl = 0;
+      if (rotate == ROTATE_90) {
+        caset[0] += 1;
+        caset[1] += 1;
+        madctl = MADCTL::COL_ORDER | MADCTL::ROW_ORDER;
+      }
+      madctl = rotate == ROTATE_90 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
     }
 
     // Pico Display 2.0
@@ -207,7 +215,7 @@ namespace pimoroni {
       caset[1] = 319;
       raset[0] = 0;
       raset[1] = 239;
-      madctl = rotate180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
+      madctl = (rotate == ROTATE_180 || rotate == ROTATE_90) ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
       madctl |= MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
     }
 
@@ -217,7 +225,7 @@ namespace pimoroni {
       caset[1] = 239;
       raset[0] = 0;
       raset[1] = 319;
-      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+      madctl = (rotate == ROTATE_180 || rotate == ROTATE_90) ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
     }
 
     // Byte swap the 16bit rows/cols values
