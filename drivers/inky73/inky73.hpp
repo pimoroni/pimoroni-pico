@@ -70,7 +70,7 @@ namespace pimoroni {
     // Methods
     //--------------------------------------------------
   public:
-    void busy_wait();
+    void busy_wait(uint maximum_wait_ms);
     void reset();
     void power_off();
   
