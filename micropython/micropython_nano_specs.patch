@@ -1,9 +1,9 @@
 diff --git a/ports/rp2/CMakeLists.txt b/ports/rp2/CMakeLists.txt
-index 281b0c3bc..7e04bb549 100644
+index fcc435b7b..efabcb3a3 100644
 --- a/ports/rp2/CMakeLists.txt
 +++ b/ports/rp2/CMakeLists.txt
-@@ -453,6 +453,16 @@ target_link_options(${MICROPY_TARGET} PRIVATE
-     -Wl,--wrap=dcd_event_handler
+@@ -464,6 +464,16 @@ set_source_files_properties(
+     COMPILE_OPTIONS "-O2"
  )
  
 +# Do not include stack unwinding & exception handling for C++ user modules
