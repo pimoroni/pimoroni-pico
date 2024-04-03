@@ -6,6 +6,7 @@ This library offers an `Encoder` class that uses Programmable IO (PIO) hardware 
 
 
 ## Table of Content
+- [Table of Content](#table-of-content)
 - [Encoder](#encoder)
   - [Getting Started](#getting-started)
   - [Count and Angle](#count-and-angle)
@@ -102,7 +103,22 @@ degrees_per_second
 radians_per_second
 ```
 
-Internally `.capture()` does the same up-front reading of values but does so more optimally within the underlying C++ driver. As an added bonus, it calculates encoder speeds too, by using the captured `delta` along with timing information returned by the PIO, more accurately than estimating a speed from the `delta` alone.
+Internally `.capture()` does the same up-front reading of values but does so more optimally within the underlying C++ driver. It calculates encoder speeds too, by using the difference between the current `count` and the **last capture's** `count` (aka the `delta`), along with timing information returned by the PIO. This produces speed readings that are more accurate than estimating a speed from the `delta` alone.
+
+:information_source: **It is recommended to perform captures frequently and at a consistent rate.** If this is not possible for your project, consider performing a dummy capture at the start of the time window you actually wish to measure the encoder's speed over.
+
+```python
+# Perform a dummy capture to clear the encoder
+enc.capture()
+
+# Wait for the capture time to pass
+time.sleep(CAPTURE_TIME)
+
+# Perform a capture and read the measured speed
+capture = enc.capture()
+
+print("Speed =", capture.revolutions_per_second)
+```
 
 
 ### State
