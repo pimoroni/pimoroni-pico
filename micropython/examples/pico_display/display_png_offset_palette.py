@@ -25,6 +25,10 @@ for i in range(16):
 for i in range(16):
     display.create_pen(0, 0, i * 16)
 
+# Adding in an white background colour at the beginning of each offset.
+for i in range(3):
+    display.update_pen(i * 16, 200, 200, 200)
+
 # Clear the screen
 display.set_pen(BG)
 display.clear()
