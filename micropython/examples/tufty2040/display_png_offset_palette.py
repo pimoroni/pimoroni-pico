@@ -11,7 +11,7 @@ BG = display.create_pen(200, 200, 200)
 TEXT = display.create_pen(0, 0, 0)
 
 # 16 Reds
-for i in range(16):
+for i in range(15):
     display.create_pen(i * 16, 0, 0)
 
 # 16 Greens
@@ -19,8 +19,12 @@ for i in range(16):
     display.create_pen(0, i * 16, 0)
 
 # 16 Blues
-for i in range(16):
+for i in range(15):
     display.create_pen(0, 0, i * 16)
+
+# Adding in an white background colour at the beginning of each offset.
+for i in range(3):
+    display.update_pen(i * 16, 200, 200, 200)
 
 # Clear the screen
 display.set_pen(BG)
