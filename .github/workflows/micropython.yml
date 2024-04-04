@@ -38,6 +38,8 @@ jobs:
           board: RPI_PICO_W
         - name: inky_frame
           board: PICO_W_INKY
+        - name: inventor2040w
+          board: RPI_PICO_W
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
