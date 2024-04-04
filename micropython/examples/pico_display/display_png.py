@@ -27,7 +27,7 @@ try:
     png.open_file("pencil.png")
 
     # Decode our PNG file and set the X and Y
-    png.decode(50, 100)
+    png.decode(20, 100, scale=3)
 
 # Handle the error if the image doesn't exist on the flash.
 except OSError:
