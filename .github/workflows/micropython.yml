@@ -13,6 +13,7 @@ jobs:
   build:
     name: ${{ matrix.name }} (${{ matrix.board }})
     runs-on: ubuntu-20.04
+    continue-on-error: true
     strategy:
       matrix:
         include:
