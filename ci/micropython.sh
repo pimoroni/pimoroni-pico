@@ -49,6 +49,12 @@ function hack_patch_micropython_disable_exceptions {
     cd ../
 }
 
+function hack_patch_micropython_print_memory_usage {
+    cd micropython
+    git apply $PIMORONI_PICO_DIR/micropython/micropython_print_memory_usage.patch
+    cd ../
+}
+
 function hack_patch_pico_sdk {
     # pico-sdk-patch.sh will apply the patch if it exists
     cd micropython

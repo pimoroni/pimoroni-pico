@@ -1,0 +1,12 @@
+diff --git a/ports/rp2/CMakeLists.txt b/ports/rp2/CMakeLists.txt
+index 2697efe28..cd35392be 100644
+--- a/ports/rp2/CMakeLists.txt
++++ b/ports/rp2/CMakeLists.txt
+@@ -451,6 +451,7 @@ target_compile_options(${MICROPY_TARGET} PRIVATE
+ target_link_options(${MICROPY_TARGET} PRIVATE
+     -Wl,--defsym=__micropy_c_heap_size__=${MICROPY_C_HEAP_SIZE}
+     -Wl,--wrap=dcd_event_handler
++    -Wl,--print-memory-usage
+ )
+ 
+ # Do not include stack unwinding & exception handling for C++ user modules
