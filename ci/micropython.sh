@@ -55,6 +55,14 @@ function hack_patch_micropython_print_memory_usage {
     cd ../
 }
 
+function hack_patch_micropython_enable_custom_linker {
+    if [ -f "$MICROPY_BOARD_DIR/memmap_mp.ld" ]; then
+        cd micropython
+        git apply $PIMORONI_PICO_DIR/micropython/micropython_board_linker.patch
+        cd ../
+    fi
+}
+
 function hack_patch_pico_sdk {
     # pico-sdk-patch.sh will apply the patch if it exists
     cd micropython

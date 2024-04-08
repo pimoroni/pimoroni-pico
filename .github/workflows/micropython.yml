@@ -98,6 +98,12 @@ jobs:
         source $BUILD_TOOLS
         hack_patch_micropython_print_memory_usage
 
+    - name: "HACK: CMakeLists.txt Enable Custom Linker Patch"
+      shell: bash
+      run: |
+        source $BUILD_TOOLS
+        hack_patch_micropython_enable_custom_linker
+
     - name: "HACK: Pico SDK Patch"
       shell: bash
       run: |
