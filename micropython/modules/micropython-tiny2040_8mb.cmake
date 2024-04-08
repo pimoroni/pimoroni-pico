@@ -9,5 +9,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(micropython-common)
 
+# Tiny 2040 has 8MB flash with 1MB reserved for app,
+# weighs about 612k without ulab
+enable_ulab()
+
 # C++ Magic Memory
 include(cppmem/micropython)
