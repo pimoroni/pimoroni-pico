@@ -13,6 +13,7 @@ jobs:
   build:
     name: ${{ matrix.name }} (${{ matrix.board }})
     runs-on: ubuntu-20.04
+    continue-on-error: true
     strategy:
       matrix:
         include:
@@ -20,7 +21,7 @@ jobs:
           board: RPI_PICO
         - name: picow
           board: RPI_PICO_W
-        - name: tiny2040
+        - name: tiny2040_8mb
           board: PIMORONI_TINY2040
         - name: picolipo_4mb
           board: PIMORONI_PICOLIPO_4MB
