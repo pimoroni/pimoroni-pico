@@ -95,7 +95,7 @@ def draw():
                 y += line_space
                 x = default_x
 
-            graphics.text(letter.upper(), x, y, 640, scale, spacing)
+            graphics.text(letter.upper(), x, y, 640, scale=scale, spacing=spacing)
             x += letter_space
 
     graphics.update()
