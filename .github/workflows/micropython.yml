@@ -42,7 +42,7 @@ jobs:
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: pimoroni-${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-micropython
+      RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-pimoroni-micropython
       PIMORONI_PICO_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}"
       MICROPY_BOARD_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
       USER_C_MODULES: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{ matrix.name }}.cmake"
