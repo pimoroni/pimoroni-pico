@@ -20,3 +20,9 @@ target_compile_definitions(usermod_picovector INTERFACE
 target_link_libraries(usermod_picovector INTERFACE hardware_interp)
 
 target_link_libraries(usermod INTERFACE usermod_picovector)
+
+set_source_files_properties(
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_vector/pico_vector.cpp
+    PROPERTIES COMPILE_FLAGS
+    "-Wno-narrowing"
+)
