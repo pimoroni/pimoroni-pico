@@ -1,6 +1,8 @@
-#include "pretty_poly/pretty-poly.h"
+#include "pretty-poly.h"
 #include "alright_fonts.hpp"
 #include "pico_graphics.hpp"
+
+pp_rect_t pp_contour_bounds(const pp_path_t *c);
 
 namespace pimoroni {
 
