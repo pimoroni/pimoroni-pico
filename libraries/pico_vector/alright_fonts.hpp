@@ -6,7 +6,7 @@
 #include <optional>
 #include <map>
 
-#include "pretty_poly/pretty-poly.h"
+#include "pretty-poly.h"
 #include "file_io.hpp"
 
 namespace alright_fonts {
