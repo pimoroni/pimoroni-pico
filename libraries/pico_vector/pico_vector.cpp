@@ -1,4 +1,5 @@
 #define PP_IMPLEMENTATION
+#define AF_IMPLEMENTATION
 #include "pico_vector.hpp"
 #include <vector>
 
@@ -55,7 +56,7 @@ namespace pimoroni {
     }
   }
 
-  pp_point_t PicoVector::text(std::string_view text, pp_point_t offset, pp_mat3_t *t) {
+  pp_point_t PicoVector::text(std::wstring_view text, pp_point_t offset, pp_mat3_t *t) {
     pp_point_t caret = {0, 0};
 
     // Align text from the bottom left
@@ -68,7 +69,9 @@ namespace pimoroni {
     pp_point_t space;
     pp_point_t carriage_return = {0, -(PP_COORD_TYPE)text_metrics.line_height};
 
-    space.x = alright_fonts::measure_character(text_metrics, ' ').w;
+    wchar_t spc = L' ';
+
+    space.x = af_measure(text_metrics.face, &spc, &text_metrics).w;
     if (space.x == 0) {
       space.x = text_metrics.word_spacing;
     }
@@ -97,7 +100,7 @@ namespace pimoroni {
 
       uint16_t word_width = 0;
       for(size_t j = i; j < next_break; j++) {
-        word_width += alright_fonts::measure_character(text_metrics, text[j]).w;
+        word_width += af_measure(text_metrics.face, &text[j], &text_metrics).w;
         word_width += text_metrics.letter_spacing;
       }
 
@@ -107,17 +110,22 @@ namespace pimoroni {
       }
 
       for(size_t j = i; j < std::min(next_break + 1, text.length()); j++) {
-        if (text[j] == '\n') { // Linebreak
+        if (text[j] == L'\n') { // Linebreak
           caret = pp_point_sub(&caret, &carriage_return);
           carriage_return = initial_carriage_return;
-        } else if (text[j] == ' ') { // Space
+        } else if (text[j] == L' ') { // Space
           caret = pp_point_add(&caret, &space);
           carriage_return = pp_point_add(&carriage_return, &space);
         } else {
-          alright_fonts::render_character(text_metrics, text[j], caret, t);
+          // apply the caret offset...
+          pp_mat3_t pos = pp_mat3_identity();
+          pp_mat3_mul(&pos, t);
+          pp_mat3_translate(&pos, caret.x, caret.y);
+          text_metrics.transform = &pos;
+          af_render_character(text_metrics.face, text[j], &text_metrics);
         }
         pp_point_t advance = {
-          (PP_COORD_TYPE)alright_fonts::measure_character(text_metrics, text[j]).w + text_metrics.letter_spacing,
+          (PP_COORD_TYPE)af_measure(text_metrics.face, (const wchar_t *)text[j], &text_metrics).w + text_metrics.letter_spacing,
           (PP_COORD_TYPE)0
         };
         advance = pp_point_transform(&advance, t);

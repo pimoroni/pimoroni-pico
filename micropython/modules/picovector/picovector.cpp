@@ -29,10 +29,27 @@ typedef struct _PATH_obj_t {
     pp_path_t path;
 } _PATH_obj_t;
 
-file_io::file_io(std::string_view filename) {
-    mp_obj_t fn = mp_obj_new_str(filename.data(), (mp_uint_t)filename.size());
+void *af_malloc(size_t size) {
+    mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
+    mp_event_handle_nowait();
+    return m_tracked_calloc(sizeof(uint8_t), size);
+}
 
-    //mp_printf(&mp_plat_print, "Opening file %s\n", filename.data());
+void *af_realloc(void *p, size_t size) {
+    return NULL;
+}
+
+void af_free(void *p) {
+    mp_printf(&mp_plat_print, "af_free\n");
+    mp_event_handle_nowait();
+    m_tracked_free(p);
+}
+
+void* fileio_open(const char *filename) {
+    mp_obj_t fn = mp_obj_new_str(filename, (mp_uint_t)strlen(filename));
+
+    mp_printf(&mp_plat_print, "Opening file %s\n", filename);
+    mp_event_handle_nowait();
 
     mp_obj_t args[2] = {
         fn,
@@ -43,34 +60,39 @@ file_io::file_io(std::string_view filename) {
     // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
     mp_obj_t stat = mp_vfs_stat(fn);
     mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
-    filesize = mp_obj_get_int(tuple->items[6]);
+    int filesize = mp_obj_get_int(tuple->items[6]);
+    mp_printf(&mp_plat_print, "Size %lu\n", filesize);
 
     mp_obj_t fhandle = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
 
-    this->state = (void *)fhandle;
+    return (void*)fhandle;
 }
 
-file_io::~file_io() {
-    mp_stream_close((mp_obj_t)this->state);
+void fileio_close(void* fhandle) {
+    mp_stream_close((mp_obj_t)fhandle);
 }
 
-size_t file_io::read(void *buf, size_t len) {
-    //mp_printf(&mp_plat_print, "Reading %lu bytes\n", len);
-    mp_obj_t fhandle = this->state;
+size_t fileio_read(void* fhandle, void *buf, size_t len) {
+    mp_printf(&mp_plat_print, "Reading %lu bytes\n", len);
     int error;
-    return mp_stream_read_exactly(fhandle, buf, len, &error);
+    return mp_stream_read_exactly((mp_obj_t)fhandle, buf, len, &error);
 }
 
-size_t file_io::tell() {
-    mp_obj_t fhandle = this->state;
+int fileio_getc(void* fhandle) {
+    unsigned char buf;
+    fileio_read((mp_obj_t)fhandle, &buf, 1);
+    return (int)buf;
+}
+
+size_t fileio_tell(void* fhandle) {
     struct mp_stream_seek_t seek_s;
     seek_s.offset = 0;
     seek_s.whence = SEEK_CUR;
 
-    const mp_stream_p_t *stream_p = mp_get_stream(fhandle);
+    const mp_stream_p_t *stream_p = mp_get_stream((mp_obj_t)fhandle);
 
     int error;
-    mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
+    mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
         mp_raise_OSError(error);
     }
@@ -78,21 +100,16 @@ size_t file_io::tell() {
     return seek_s.offset;
 }
 
-bool file_io::fail() {
-    return false;
-}
-
 // Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
-size_t file_io::seek(size_t pos) {
-    mp_obj_t fhandle = this->state;
+size_t fileio_seek(void* fhandle, size_t pos) {
     struct mp_stream_seek_t seek_s;
     seek_s.offset = pos;
     seek_s.whence = SEEK_SET;
 
-    const mp_stream_p_t *stream_p = mp_get_stream(fhandle);
+    const mp_stream_p_t *stream_p = mp_get_stream((mp_obj_t)fhandle);
 
     int error;
-    mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
+    mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
         mp_raise_OSError(error);
     }
@@ -344,7 +361,8 @@ mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
 
     if (mp_obj_is_str(font)) {
         // TODO: Implement when Alright Fonts rewrite is ready
-        //result = self->vector->set_font(mp_obj_to_string_r(font), font_size);
+        GET_STR_DATA_LEN(font, str, str_len);
+        result = self->vector->set_font((const char*)str, font_size);
     }
     else {
         
@@ -359,7 +377,7 @@ mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
     int font_size = mp_obj_get_int(size);
     (void)font_size;
     // TODO: Implement when Alright Fonts rewrite is ready
-    //self->vector->set_font_size(font_size);
+    self->vector->set_font_size(font_size);
     return mp_const_none;
 }
 
@@ -392,19 +410,20 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    const std::string_view t((const char*)str, str_len);
+    const std::wstring_view t((const wchar_t *)str, str_len);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
     (void)x;
     (void)y;
 
-    if(args[ARG_angle].u_obj == mp_const_none) {
-        // TODO: Implement when Alright Fonts rewrite is ready
-        //self->vector->text(t, Point(x, y));
-    } else {
-        //self->vector->text(t, Point(x, y), mp_obj_get_float(args[ARG_angle].u_obj));
+    pp_mat3_t tt = pp_mat3_identity();
+
+    if(args[ARG_angle].u_obj != mp_const_none) {
+        pp_mat3_rotate(&tt, mp_obj_get_float(args[ARG_angle].u_obj));
     }
+
+    self->vector->text(t, {(float)x, (float)y}, &tt);
 
     return mp_const_none;
 }
