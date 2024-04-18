@@ -1,5 +1,21 @@
+
+#include "af-file-io.h"
+#include "af-memory.h"
+
+#define AF_FILE void*
+#define AF_FREAD(p, size, nmemb, stream) fileio_read(stream, p, nmemb)
+#define AF_FGETC(stream) fileio_getc(stream)
+
+#define AF_MALLOC(size)         af_malloc(size)
+#define AF_REALLOC(p, size)     af_realloc(p, size)
+#define AF_FREE(p)              af_free(p)
+
+#define PP_MALLOC(size)         af_malloc(size)
+#define PP_REALLOC(p, size)     af_realloc(p, size)
+#define PP_FREE(p)              af_free(p)
+
 #include "pretty-poly.h"
-#include "alright_fonts.hpp"
+#include "alright-fonts.h"
 #include "pico_graphics.hpp"
 
 pp_rect_t pp_contour_bounds(const pp_path_t *c);
@@ -12,7 +28,7 @@ namespace pimoroni {
     class PicoVector {
         private:
             static PicoGraphics *graphics;
-            alright_fonts::text_metrics_t text_metrics;
+            af_text_metrics_t text_metrics;
             static constexpr uint8_t alpha_map[4] {0, 128, 192, 255};
 
         public:
@@ -66,18 +82,21 @@ namespace pimoroni {
             }
 
             void set_font_size(unsigned int font_size) {
-                text_metrics.set_size(font_size);
+                text_metrics.size = font_size;
             }
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
-                bool result = text_metrics.face.load(font_path);
+                //bool result = text_metrics.face.load(font_path);
+                void* font = fileio_open(font_path.data());
+                af_load_font_file(font, text_metrics.face);
+                bool result = false;
 
                 set_font_size(font_size);
 
                 return result;
             }
 
-            pp_point_t text(std::string_view text, pp_point_t origin, pp_mat3_t *t);
+            pp_point_t text(std::wstring_view text, pp_point_t origin, pp_mat3_t *t);
 
             void transform(pp_path_t *path, pp_mat3_t *t);
             void transform(pp_poly_t *poly, pp_mat3_t *t);
