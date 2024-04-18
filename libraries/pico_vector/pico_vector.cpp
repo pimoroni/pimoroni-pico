@@ -17,9 +17,9 @@ namespace pimoroni {
 
   void PicoVector::rotate(pp_path_t *path, pp_point_t origin, float angle) {
     pp_mat3_t t = pp_mat3_identity();
-    pp_mat3_translate(&t, -origin.x, -origin.y);
-    pp_mat3_rotate(&t, angle);
     pp_mat3_translate(&t, origin.x, origin.y);
+    pp_mat3_rotate(&t, angle);
+    pp_mat3_translate(&t, -origin.x, -origin.y);
     transform(path, &t);
   }
 
@@ -37,9 +37,9 @@ namespace pimoroni {
 
   void PicoVector::rotate(pp_poly_t *poly, pp_point_t origin, float angle) {
     pp_mat3_t t = pp_mat3_identity();
-    pp_mat3_translate(&t, -origin.x, -origin.y);
-    pp_mat3_rotate(&t, angle);
     pp_mat3_translate(&t, origin.x, origin.y);
+    pp_mat3_rotate(&t, angle);
+    pp_mat3_translate(&t, -origin.x, -origin.y);
     transform(poly, &t);
   }
 
