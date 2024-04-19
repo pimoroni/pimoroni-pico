@@ -10,6 +10,7 @@ extern "C" {
 #include "py/stream.h"
 #include "py/reader.h"
 #include "extmod/vfs.h"
+#include <stdarg.h>
 
 typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
@@ -29,10 +30,31 @@ typedef struct _PATH_obj_t {
     pp_path_t path;
 } _PATH_obj_t;
 
+void __printf_debug_flush() {
+    for(auto i = 0u; i < 10; i++) {
+        sleep_ms(1);
+        mp_event_handle_nowait();
+    }
+}
+
+int mp_vprintf(const mp_print_t *print, const char *fmt, va_list args);
+
+void af_debug(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int ret = mp_vprintf(&mp_plat_print, fmt, ap);
+    va_end(ap);
+    __printf_debug_flush();
+    (void)ret;
+}
+
 void *af_malloc(size_t size) {
-    mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
-    mp_event_handle_nowait();
-    return m_tracked_calloc(sizeof(uint8_t), size);
+    //mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
+    //__printf_debug_flush();
+    void *addr = m_tracked_calloc(sizeof(uint8_t), size);
+    //mp_printf(&mp_plat_print, "addr %lu\n", addr);
+    //__printf_debug_flush();
+    return addr;
 }
 
 void *af_realloc(void *p, size_t size) {
@@ -40,16 +62,16 @@ void *af_realloc(void *p, size_t size) {
 }
 
 void af_free(void *p) {
-    mp_printf(&mp_plat_print, "af_free\n");
-    mp_event_handle_nowait();
+    //mp_printf(&mp_plat_print, "af_free\n");
+    //__printf_debug_flush();
     m_tracked_free(p);
 }
 
 void* fileio_open(const char *filename) {
     mp_obj_t fn = mp_obj_new_str(filename, (mp_uint_t)strlen(filename));
 
-    mp_printf(&mp_plat_print, "Opening file %s\n", filename);
-    mp_event_handle_nowait();
+    //mp_printf(&mp_plat_print, "Opening file %s\n", filename);
+    //__printf_debug_flush();
 
     mp_obj_t args[2] = {
         fn,
@@ -58,10 +80,10 @@ void* fileio_open(const char *filename) {
 
     // Stat the file to get its size
     // example tuple response: (32768, 0, 0, 0, 0, 0, 5153, 1654709815, 1654709815, 1654709815)
-    mp_obj_t stat = mp_vfs_stat(fn);
-    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
-    int filesize = mp_obj_get_int(tuple->items[6]);
-    mp_printf(&mp_plat_print, "Size %lu\n", filesize);
+    //mp_obj_t stat = mp_vfs_stat(fn);
+    //mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(stat, mp_obj_tuple_t);
+    //int filesize = mp_obj_get_int(tuple->items[6]);
+    //mp_printf(&mp_plat_print, "Size %lu\n", filesize);
 
     mp_obj_t fhandle = mp_vfs_open(MP_ARRAY_SIZE(args), &args[0], (mp_map_t *)&mp_const_empty_map);
 
@@ -73,14 +95,17 @@ void fileio_close(void* fhandle) {
 }
 
 size_t fileio_read(void* fhandle, void *buf, size_t len) {
-    mp_printf(&mp_plat_print, "Reading %lu bytes\n", len);
+    //mp_printf(&mp_plat_print, "Reading %lu bytes\n", len);
+    //__printf_debug_flush();
     int error;
     return mp_stream_read_exactly((mp_obj_t)fhandle, buf, len, &error);
 }
 
 int fileio_getc(void* fhandle) {
     unsigned char buf;
-    fileio_read((mp_obj_t)fhandle, &buf, 1);
+    //mp_printf(&mp_plat_print, "Reading char\n");
+    //__printf_debug_flush();
+    fileio_read(fhandle, (void *)&buf, 1);
     return (int)buf;
 }
 
@@ -410,7 +435,7 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
-    const std::wstring_view t((const wchar_t *)str, str_len);
+    const std::string_view t((const char *)str, str_len);
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
@@ -423,7 +448,12 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         pp_mat3_rotate(&tt, mp_obj_get_float(args[ARG_angle].u_obj));
     }
 
-    self->vector->text(t, {(float)x, (float)y}, &tt);
+    pp_mat3_translate(&tt, (float)x, (float)y);
+
+    //mp_printf(&mp_plat_print, "self->vector->text()\n");
+    //__printf_debug_flush();
+
+    self->vector->text(t, &tt);
 
     return mp_const_none;
 }

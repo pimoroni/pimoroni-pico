@@ -14,6 +14,8 @@
 #define PP_REALLOC(p, size)     af_realloc(p, size)
 #define PP_FREE(p)              af_free(p)
 
+#define AF_DEBUG(...)          af_debug(__VA_ARGS__)
+
 #include "pretty-poly.h"
 #include "alright-fonts.h"
 #include "pico_graphics.hpp"
@@ -40,6 +42,15 @@ namespace pimoroni {
                 pp_antialias(graphics->supports_alpha_blend() ? PP_AA_X4 : PP_AA_NONE);
 
                 pp_clip(graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h);
+
+                text_metrics.align = AF_H_ALIGN_LEFT;
+                text_metrics.line_height = 110;
+                text_metrics.letter_spacing = 95;
+                text_metrics.word_spacing = 200;
+                text_metrics.size = 48;
+                // Shoud be set before rendering chars
+                //text_metrics.transform = (pp_mat3_t *)af_malloc(sizeof(pp_mat3_t));
+                //*text_metrics.transform = pp_mat3_identity();
             }
 
             static void tile_callback(const pp_tile_t *tile) {
@@ -86,17 +97,21 @@ namespace pimoroni {
             }
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
+                if(text_metrics.face) {
+                    af_free(text_metrics.face->glyphs);
+                    af_free(text_metrics.face);
+                }
+                text_metrics.face = (af_face_t *)af_malloc(sizeof(af_face_t));
                 //bool result = text_metrics.face.load(font_path);
                 void* font = fileio_open(font_path.data());
-                af_load_font_file(font, text_metrics.face);
-                bool result = false;
+                bool result = af_load_font_file(font, text_metrics.face);
 
                 set_font_size(font_size);
 
                 return result;
             }
 
-            pp_point_t text(std::wstring_view text, pp_point_t origin, pp_mat3_t *t);
+            pp_point_t text(std::string_view text, pp_mat3_t *t);
 
             void transform(pp_path_t *path, pp_mat3_t *t);
             void transform(pp_poly_t *poly, pp_mat3_t *t);
