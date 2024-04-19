@@ -52,6 +52,10 @@
   #define AF_FGETC(stream) fgetc(stream)
 #endif
 
+#ifndef AF_DEBUG
+  #define AF_DEBUG(...)
+#endif
+
 #include "pretty-poly.h"
 
 #ifdef __cplusplus
@@ -99,9 +103,9 @@ typedef struct  {
 } af_text_metrics_t;
 
 bool af_load_font_file(AF_FILE file, af_face_t *face);
-void af_render_character(af_face_t *face, wchar_t codepoint, af_text_metrics_t *tm);
-void af_render(af_face_t *face, wchar_t *text, af_text_metrics_t *tm);
-pp_rect_t af_measure(af_face_t *face, const wchar_t *text, af_text_metrics_t *tm);
+void af_render_character(af_face_t *face, const char codepoint, af_text_metrics_t *tm);
+void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm);
+pp_rect_t af_measure(af_face_t *face, const char *text, af_text_metrics_t *tm);
 
 #ifdef AF_USE_PRETTY_POLY
 #endif
@@ -146,6 +150,11 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   void *buffer = AF_MALLOC(sizeof(af_glyph_t) * glyph_count + \
                            sizeof( af_path_t) *  path_count + \
                            sizeof(af_point_t) * point_count);
+
+  if(!buffer) {
+    return false; // failed memory allocation
+  }
+
   af_glyph_t *glyphs = (af_glyph_t *) buffer;
   af_path_t   *paths = ( af_path_t *)(glyphs + (sizeof(af_glyph_t) * glyph_count));
   af_point_t *points = (af_point_t *)( paths + (sizeof( af_path_t) *  path_count));
@@ -193,7 +202,7 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   return true;
 }
 
-af_glyph_t *find_glyph(af_face_t *face, wchar_t c) {
+af_glyph_t *find_glyph(af_face_t *face, char c) {
   for(int i = 0; i < face->glyph_count; i++) {
     if(face->glyphs[i].codepoint == c) {
       return &face->glyphs[i];
@@ -223,12 +232,12 @@ void af_render_glyph(af_glyph_t* glyph, af_text_metrics_t *tm) {
 
   for(uint32_t i = 0; i < poly.count; i++) {
     pp_path_t *path = &poly.paths[i];
-    free(path->points);
+    AF_FREE(path->points);
   }
-  free(poly.paths);
+  AF_FREE(poly.paths);
 }
 
-void af_render_character(af_face_t *face, wchar_t c, af_text_metrics_t *tm) {
+void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {
   af_glyph_t *glyph = find_glyph(face, c);
   if(!glyph) {
     return;
@@ -236,10 +245,10 @@ void af_render_character(af_face_t *face, wchar_t c, af_text_metrics_t *tm) {
   af_render_glyph(glyph, tm);
 }
 
-int get_line_width(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
+int get_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   int line_width = 0;
-  wchar_t *end = wcschr(text, L'\n');
-  for(wchar_t c = *text; text < end; text++, c = *text) {
+  char *end = strchr(text, '\n');
+  for(char c = *text; text < end; text++, c = *text) {
     af_glyph_t *glyph = find_glyph(face, c);
     if(!glyph) {
       continue;
@@ -254,22 +263,22 @@ int get_line_width(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
   return line_width;
 }
 
-int get_max_line_width(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
+int get_max_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   int max_width = 0;
 
-  wchar_t *end = wcschr(text, L'\n');
+  char *end = strchr(text, '\n');
   while(end) {
     int width = get_line_width(face, text, tm);
     max_width = max_width < width ? width : max_width;
     text = end + 1;
-    end = wcschr(text, L'\n');
+    end = strchr(text, '\n');
   }
   
   return max_width;
 }
 
 
-void af_render(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
+void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   pp_mat3_t *old = pp_transform(NULL);
   
   float line_height = (tm->line_height * 128.0f) / 100.0f;
@@ -285,11 +294,11 @@ void af_render(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
   caret.x = 0;
   caret.y = 0;
 
-  wchar_t *end = wcschr(text, L'\n');
+  char *end = strchr(text, '\n');
   while(end) {
     int line_width = get_line_width(face, text, tm);
 
-    for(wchar_t c = *text; text < end; text++, c = *text) {
+    for(char c = *text; text < end; text++, c = *text) {
       af_glyph_t *glyph = find_glyph(face, c);
       if(!glyph) {
         continue;
@@ -320,7 +329,7 @@ void af_render(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
     }
 
     text = end + 1;
-    end = wcschr(text, L'\n');
+    end = strchr(text, '\n');
 
     caret.x = 0;
     caret.y += line_height;
@@ -331,12 +340,12 @@ void af_render(af_face_t *face, wchar_t *text, af_text_metrics_t *tm) {
   pp_transform(old);
 }
 
-pp_rect_t af_measure(af_face_t *face, const wchar_t *text, af_text_metrics_t *tm) {
+pp_rect_t af_measure(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   pp_rect_t result;
   bool first = true;
   pp_mat3_t t = *tm->transform;
 
-  for(size_t i = 0; i < wcslen(text); i++) {
+  for(size_t i = 0; i < strlen(text); i++) {
     af_glyph_t *glyph = find_glyph(face, text[i]);
     if(!glyph) {
       continue;
