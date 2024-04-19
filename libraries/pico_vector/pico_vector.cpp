@@ -56,9 +56,15 @@ namespace pimoroni {
     }
   }
 
-  pp_point_t PicoVector::text(std::wstring_view text, pp_point_t offset, pp_mat3_t *t) {
+  pp_point_t PicoVector::text(std::string_view text, pp_mat3_t *t) {
     pp_point_t caret = {0, 0};
 
+    text_metrics.transform = t;
+
+    af_render(text_metrics.face, text.data(), &text_metrics);
+
+    return caret;
+/*
     // Align text from the bottom left
     caret.y += (PP_COORD_TYPE)text_metrics.line_height;
 
@@ -69,7 +75,7 @@ namespace pimoroni {
     pp_point_t space;
     pp_point_t carriage_return = {0, -(PP_COORD_TYPE)text_metrics.line_height};
 
-    wchar_t spc = L' ';
+    char spc = ' ';
 
     space.x = af_measure(text_metrics.face, &spc, &text_metrics).w;
     if (space.x == 0) {
@@ -110,10 +116,10 @@ namespace pimoroni {
       }
 
       for(size_t j = i; j < std::min(next_break + 1, text.length()); j++) {
-        if (text[j] == L'\n') { // Linebreak
+        if (text[j] == '\n') { // Linebreak
           caret = pp_point_sub(&caret, &carriage_return);
           carriage_return = initial_carriage_return;
-        } else if (text[j] == L' ') { // Space
+        } else if (text[j] == ' ') { // Space
           caret = pp_point_add(&caret, &space);
           carriage_return = pp_point_add(&carriage_return, &space);
         } else {
@@ -125,7 +131,7 @@ namespace pimoroni {
           af_render_character(text_metrics.face, text[j], &text_metrics);
         }
         pp_point_t advance = {
-          (PP_COORD_TYPE)af_measure(text_metrics.face, (const wchar_t *)text[j], &text_metrics).w + text_metrics.letter_spacing,
+          (PP_COORD_TYPE)af_measure(text_metrics.face, &text[j], &text_metrics).w + text_metrics.letter_spacing,
           (PP_COORD_TYPE)0
         };
         advance = pp_point_transform(&advance, t);
@@ -137,5 +143,6 @@ namespace pimoroni {
     }
 
     return {caret.x, caret.y};
+*/
   }
 }
