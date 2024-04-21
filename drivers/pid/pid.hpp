@@ -14,6 +14,9 @@ namespace pimoroni {
     float calculate(float value);
     float calculate(float value, float value_change);
 
+    [[nodiscard]] float get_error_sum() const;
+    void reset_error_sum();
+
   public:
     float kp;
     float ki;
