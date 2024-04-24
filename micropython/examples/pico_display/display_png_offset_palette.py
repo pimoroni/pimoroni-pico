@@ -41,11 +41,11 @@ try:
     # Open our PNG File from flash. In this example we're using an image of a cartoon pencil.
     # You can use Thonny to transfer PNG Images to your Pico.
     png.open_file("pencil_gray.png")
-    
+
     # Horizontally/vertically center the three PNG Images.
     png_w = png.get_width()
     png_h = png.get_height()
-    
+
     offset_x = (width - png_w * 2) // 2
     height_y = (height // 3)
     offset_y = (height_y - png_h * 2) // 2
