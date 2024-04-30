@@ -3,6 +3,7 @@
 extern "C" {
 #include "py/runtime.h"
 #include "machine_pin.h"
+#include "extmod/modmachine.h"
 #include "pin.hpp"
 
 extern int pimoroni_gpio_from_obj(const mp_obj_t &object) {
