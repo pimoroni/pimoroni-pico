@@ -584,3 +584,37 @@ The arguments for `decode` are as follows:
 2. Decode Y
 3. Flags - one of `JPEG_SCALE_FULL`, `JPEG_SCALE_HALF`, `JPEG_SCALE_QUARTER` or `JPEG_SCALE_EIGHTH`
 4. If you want to turn off dither altogether, try `dither=False`. This is useful if you want to [pre-dither your images](https://ditherit.com/) or for artsy posterization effects.
+
+### PNG Files
+
+We've also included Bitbank's PNGdec - https://github.com/bitbank2/PNGdec - for PNG file support with Pico Graphics.
+
+Like JPEG decoding, PNG decoding supports loading files from microSD, flash and RAM, but unlike JPEG decoding there are some new options for cropping, scaling and rotating you PNG images. (Note: the order is always crop, scale and rotate.)
+
+A basic example looks something like this:
+
+```python
+from pngdec import PNG
+png = PNG(display)
+png.open_file("fire.png")
+png.decode(0, 0)
+```
+The arguments for `decode` are as follows:
+1. Decode X - where to place the decoded PNG on screen
+2. Decode Y
+3. Source - The region, in pixels, that you want to show from the PNG. The argument is given as a tuple of four values which give the offset from the left and top of the images, plus the width and height of the selected region. The whole PNG is loaded and decoded no matter what you put here, but this it makes it easier to manage multiple images for things like icons.
+4. Scale - Lets you scale images up by a fixed multiplier along the X and Y axis. If you want to make an image 4x wider and 2x taller you'd use `scale=(4,2)'.
+5. Rotate - Lets you rotate your PNG graphic in 90 degree intervals. 
+6. Mode - For indexed PNGs, you can supply a mode argument with one of `PNG COPY`, `PNG DITHER`, and `PNG_POSTERISE`. `PNG_COPY` will copy the palette indexes into a P4 or P8 graphics buffer rather than dithering or posterising (snapping to the nearest available colour).
+   `PNG_DITHER` will use a simple ordered dither matrix to dither the image colours to the available display colours.
+   `PNG_POSTERISE` will snap the colours in the PNG to their nearest display counterpart. Posterise is the default in all cases.
+
+Lets say you have a spritesheet with 8x8 sprites and you want to display a 3x2 character from it at 4x scale, you might do something like this:
+
+```python
+from pngdec import PNG
+png = PNG(display)
+png.open_file("/s4m_ur4i-pirate-characters.png")
+
+png.decode(0, 0, source=(32, 48, 24, 16), scale=(4, 4), rotate=0)
+```
