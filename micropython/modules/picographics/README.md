@@ -40,6 +40,7 @@ Pico Graphics replaces the individual drivers for displays- if you're been using
     - [Loading Sprites](#loading-sprites)
     - [Drawing Sprites](#drawing-sprites)
   - [JPEG Files](#jpeg-files)
+  - [PNG Files](#png-files)
 
 ## Setting up Pico Graphics
 
