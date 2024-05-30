@@ -86,7 +86,6 @@ def parse_xml_stream(s, accept_tags, group_by, max_items=3):
             text += char
 
 
-
 def measure_qr_code(size, code):
     w, h = code.get_size()
     module_size = int(size / w)
