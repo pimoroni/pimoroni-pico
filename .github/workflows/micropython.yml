@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.23.0
+  MICROPYTHON_VERSION: feature/psram
 
 jobs:
   build:
@@ -21,6 +21,8 @@ jobs:
           board: RPI_PICO
         - name: pico_usb
           board: RPI_PICO_USB
+        - name: pico_ppp
+          board: RPI_PICO_PPP
         - name: picow
           board: RPI_PICO_W
         - name: tiny2040_8mb
