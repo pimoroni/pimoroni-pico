@@ -25,7 +25,7 @@ int main() {
 
   while (1) {
     BME280::bme280_reading result = bme280.read_forced();
-    printf("%s %0.2lf deg C, %0.2lf hPa, %0.2lf%%\n", result.status == BME280_OK ? "OK" : "ER", result.temperature, result.pressure, result.humidity);
+    printf("%s %0.2lf deg C, %0.2lf hPa, %0.2lf%%\n", result.status ? "OK" : "ER", result.temperature, result.pressure, result.humidity);
     sleep_ms(1000);
   }
 
