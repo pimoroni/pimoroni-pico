@@ -32,11 +32,11 @@ ST7789 st7789(
 
 PicoGraphics_PenRGB332 graphics(st7789.width, st7789.height, nullptr);
 
-Button button_a(Tufty2040::A);
-Button button_b(Tufty2040::B);
-Button button_c(Tufty2040::C);
-Button button_up(Tufty2040::UP);
-Button button_down(Tufty2040::DOWN);
+Button button_a(Tufty2040::A, Polarity::ACTIVE_HIGH);
+Button button_b(Tufty2040::B, Polarity::ACTIVE_HIGH);
+Button button_c(Tufty2040::C, Polarity::ACTIVE_HIGH);
+Button button_up(Tufty2040::UP, Polarity::ACTIVE_HIGH);
+Button button_down(Tufty2040::DOWN, Polarity::ACTIVE_HIGH);
 
 uint32_t time() {
   absolute_time_t t = get_absolute_time();
