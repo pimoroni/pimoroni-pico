@@ -20,9 +20,9 @@ namespace pimoroni {
     static const uint8_t LED_B            = 2;
 
     static const uint8_t MICS_VREF        = 14;
-    static const uint8_t MICS_RED         = 12;
+    static const uint8_t MICS_RED         = 13;
     static const uint8_t MICS_NH3         = 11;
-    static const uint8_t MICS_OX          = 13;
+    static const uint8_t MICS_OX          = 12;
     static const uint8_t MICS_HEATER_EN   = 1;
 
     static const bool INVERT_OUTPUT   = true; //true for common cathode, false for common anode
