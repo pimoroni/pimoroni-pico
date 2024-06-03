@@ -1923,7 +1923,6 @@ mcu_done:
 static void JPEGIDCT(JPEGIMAGE *pJPEG, int iMCUOffset, int iQuantTable)
 {
     int iRow;
-    unsigned char ucColMask;
     int iCol;
     signed int tmp6,tmp7,tmp10,tmp11,tmp12,tmp13;
     signed int z5,z10,z11,z12,z13;
