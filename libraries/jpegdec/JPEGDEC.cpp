@@ -27,9 +27,15 @@ JPEG_STATIC int JPEGInit(JPEGIMAGE *pJPEG);
 JPEG_STATIC int JPEGParseInfo(JPEGIMAGE *pPage, int bExtractThumb);
 JPEG_STATIC void JPEGGetMoreData(JPEGIMAGE *pPage);
 JPEG_STATIC int DecodeJPEG(JPEGIMAGE *pImage);
+JPEG_STATIC void JPEG_setFramebuffer(JPEGIMAGE *pPage, void *pFramebuffer);
 
 // Include the C code which does the actual work
 #include "jpeg.inl"
+
+void JPEGDEC::setFramebuffer(void *pFramebuffer)
+{
+    JPEG_setFramebuffer(&_jpeg, pFramebuffer);
+} /* setFramebuffer() */
 
 void JPEGDEC::setPixelType(int iType)
 {
@@ -204,7 +210,6 @@ int JPEGDEC::decode(int x, int y, int iOptions)
     _jpeg.iXOffset = x;
     _jpeg.iYOffset = y;
     _jpeg.iOptions = iOptions;
-    _jpeg.pDitherBuffer = nullptr;
     return DecodeJPEG(&_jpeg);
 } /* decode() */
 //
@@ -215,11 +220,8 @@ void JPEGDEC::setUserPointer(void *p)
     _jpeg.pUser = p;
 }
 
-// TODO PR these tweaks to https://github.com/bitbank2/JPEGDEC
-int JPEGDEC::decodeDither(int x, int y, uint8_t *pDither, int iOptions)
+int JPEGDEC::decodeDither(uint8_t *pDither, int iOptions)
 {
-    _jpeg.iXOffset = x;
-    _jpeg.iYOffset = y;
     _jpeg.iOptions = iOptions;
     _jpeg.pDitherBuffer = pDither;
     return DecodeJPEG(&_jpeg);
