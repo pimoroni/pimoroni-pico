@@ -995,7 +995,7 @@ static int JPEGMakeHuffTables(JPEGIMAGE *pJPEG, int bThumbnail)
 {
     int code, repeat, count, codestart;
     int j;
-    int iLen, iTable;
+    uint16_t iLen, iTable;
     uint16_t *pTable, *pShort, *pLong;
     uint8_t *pHuffVals, *pucTable, *pucShort, *pucLong;
     uint32_t ul, *pLongTable;
