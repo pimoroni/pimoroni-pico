@@ -24,13 +24,14 @@ On the releases page you'll find a bunch of different .uf2 files for use on diff
 | Tufty 2040                                                   | **tufty2040-vx.x.x-pimoroni-micropython.uf2**                |                                                              |
 | Pimoroni Pico LiPo                                           | **picolipo_4mb-vx.x.x-pimoroni-micropython.uf2** or **pimoroni-picolipo_16mb-vx.x.x-pimoroni-micropython.uf2** | Includes support for the increased flash memory on these boards |
 | Tiny 2040 8MB                                                | **tiny2040_8mb-vx.x.x-pimoroni-micropython.uf2**                 | Includes support for the increased flash memory on this board |
-| Enviro Urban, Indoor, Weather & Grow                         | **picow_enviro-vx.x.x-pimoroni-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
-| Galactic Unicorn                                             | **picow_galactic_unicorn-vx.x.x-pimoroni-micropython.uf2**   |                                                              |
-| Inky Frame                                                   | **picow_inky_frame-vx.x.x-pimoroni-micropython.uf2**         |                                                              |
+| Enviro Urban, Indoor, Weather & Grow                         | **enviro-vx.x.x-pimoroni-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
+| Galactic Unicorn                                             | **galactic_unicorn-vx.x.x-pimoroni-micropython.uf2**   |                                                              |
+| Inky Frame                                                   | **inky_frame-vx.x.x-pimoroni-micropython.uf2**         |                                                              |
 | Badger 2040 W                                                | **badger2040w-vx.x.x-pimoroni-micropython.uf2** or **pimoroni-badger2040w-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Badger 2040                                                  | **badger2040-vx.x.x-pimoroni-micropython.uf2** or  **pimoroni-badger2040-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
-| Cosmic Unicorn                                               | **picow_cosmic_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
-| Stellar Unicorn                                               | **picow_stellar_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
+| Cosmic Unicorn                                               | **cosmic_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
+| Stellar Unicorn                                               | **stellar_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
+| Pico + USB | **pico_usb-vx.x.x-pimoroni-micropython.uf2** | :warning: Will erase your files when switching to/from a regular Pico build
 
 ## Entering DFU/bootloader mode
 
