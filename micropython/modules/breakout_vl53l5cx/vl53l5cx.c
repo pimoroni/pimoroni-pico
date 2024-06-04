@@ -23,7 +23,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(VL53L5CX_get_data_obj, VL53L5CX_get_data);
 
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t VL53L5CX_locals_dict_table[] = {
+static const mp_rom_map_elem_t VL53L5CX_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&VL53L5CX___del___obj) },
 
     { MP_ROM_QSTR(MP_QSTR_start_ranging), MP_ROM_PTR(&VL53L5CX_start_ranging_obj) },
@@ -44,7 +44,7 @@ STATIC const mp_rom_map_elem_t VL53L5CX_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_data_ready), MP_ROM_PTR(&VL53L5CX_data_ready_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_data), MP_ROM_PTR(&VL53L5CX_get_data_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(VL53L5CX_locals_dict, VL53L5CX_locals_dict_table);
+static MP_DEFINE_CONST_DICT(VL53L5CX_locals_dict, VL53L5CX_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -65,7 +65,7 @@ const mp_obj_type_t VL53L5CX_type = {
 #endif
 
 /***** Module Globals *****/
-STATIC const mp_map_elem_t vl53l5cx_globals_table[] = {
+static const mp_map_elem_t vl53l5cx_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_vl53l5cx) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_VL53L5CX), (mp_obj_t)&VL53L5CX_type },
 
@@ -81,7 +81,7 @@ STATIC const mp_map_elem_t vl53l5cx_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_POWER_MODE_SLEEP), MP_ROM_INT(VL53L5CX_POWER_MODE_SLEEP) },
     { MP_ROM_QSTR(MP_QSTR_POWER_MODE_WAKEUP), MP_ROM_INT(VL53L5CX_POWER_MODE_WAKEUP) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_vl53l5cx_globals, vl53l5cx_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_vl53l5cx_globals, vl53l5cx_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t vl53l5cx_user_cmodule = {

@@ -9,11 +9,11 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutBMP280_read_obj, BreakoutBMP280_read);
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBMP280_configure_obj, 1, BreakoutBMP280_configure);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutBMP280_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutBMP280_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_read), MP_ROM_PTR(&BreakoutBMP280_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_configure), MP_ROM_PTR(&BreakoutBMP280_configure_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutBMP280_locals_dict, BreakoutBMP280_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutBMP280_locals_dict, BreakoutBMP280_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -39,7 +39,7 @@ const mp_obj_type_t breakout_bmp280_BreakoutBMP280_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_bmp280_globals_table[] = {
+static const mp_map_elem_t breakout_bmp280_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_bmp280) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutBMP280), (mp_obj_t)&breakout_bmp280_BreakoutBMP280_type },
 
@@ -69,7 +69,7 @@ STATIC const mp_map_elem_t breakout_bmp280_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_STANDBY_TIME_2000_MS), MP_ROM_INT(BMP280_ODR_2000_MS) },
     { MP_ROM_QSTR(MP_QSTR_STANDBY_TIME_4000_MS), MP_ROM_INT(BMP280_ODR_4000_MS) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_bmp280_globals, breakout_bmp280_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_bmp280_globals, breakout_bmp280_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_bmp280_user_cmodule = {

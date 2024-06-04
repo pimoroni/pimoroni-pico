@@ -20,7 +20,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutMSA301_set_interrupt_latch_obj, 3, BreakoutMS
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutMSA301_read_interrupt_obj, 2, BreakoutMSA301_read_interrupt);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutMSA301_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutMSA301_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_part_id), MP_ROM_PTR(&BreakoutMSA301_part_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_axis), MP_ROM_PTR(&BreakoutMSA301_get_axis_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_x_axis), MP_ROM_PTR(&BreakoutMSA301_get_x_axis_obj) },
@@ -78,7 +78,7 @@ STATIC const mp_rom_map_elem_t BreakoutMSA301_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_LATCH_4S), MP_ROM_INT(MSA_LATCH_4S) },
     { MP_ROM_QSTR(MP_QSTR_LATCH_8S), MP_ROM_INT(MSA_LATCH_8S) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutMSA301_locals_dict, BreakoutMSA301_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutMSA301_locals_dict, BreakoutMSA301_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -104,11 +104,11 @@ const mp_obj_type_t breakout_msa301_BreakoutMSA301_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_msa301_globals_table[] = {
+static const mp_map_elem_t breakout_msa301_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_msa301) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutMSA301), (mp_obj_t)&breakout_msa301_BreakoutMSA301_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_msa301_globals, breakout_msa301_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_msa301_globals, breakout_msa301_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_msa301_user_cmodule = {

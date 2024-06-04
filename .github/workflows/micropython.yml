@@ -7,7 +7,7 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.22.2
+  MICROPYTHON_VERSION: 932f76c6ba64c5a3e68de3324556d9979f09303b
 
 jobs:
   build:
@@ -19,6 +19,8 @@ jobs:
         include:
         - name: pico
           board: RPI_PICO
+        - name: pico_usb
+          board: RPI_PICO_USB
         - name: picow
           board: RPI_PICO_W
         - name: tiny2040_8mb

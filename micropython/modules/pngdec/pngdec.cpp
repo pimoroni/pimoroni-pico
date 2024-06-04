@@ -77,7 +77,7 @@ int32_t pngdec_read_callback(PNGFILE *png, uint8_t *p, int32_t c) {
     return mp_stream_read_exactly(fhandle, p, c, &error);
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     mp_obj_t fhandle = png->fHandle;
     struct mp_stream_seek_t seek_s;
@@ -326,8 +326,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _PNG_obj_t *self = m_new_obj_with_finaliser(_PNG_obj_t);
-    self->base.type = &PNG_type;
+    _PNG_obj_t *self = mp_obj_malloc_with_finaliser(_PNG_obj_t, &PNG_type);
     self->png = m_new_class(PNG);
 
     //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);

@@ -31,7 +31,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoderWheel_gpio_pwm_load_obj, 1, BreakoutEn
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutEncoderWheel_gpio_pwm_frequency_obj, 2, BreakoutEncoderWheel_gpio_pwm_frequency);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutEncoderWheel_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutEncoderWheel_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_ioe_address), MP_ROM_PTR(&BreakoutEncoderWheel_set_ioe_address_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_interrupt_flag), MP_ROM_PTR(&BreakoutEncoderWheel_get_interrupt_flag_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear_interrupt_flag), MP_ROM_PTR(&BreakoutEncoderWheel_clear_interrupt_flag_obj) },
@@ -57,7 +57,7 @@ STATIC const mp_rom_map_elem_t BreakoutEncoderWheel_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_gpio_pwm_load), MP_ROM_PTR(&BreakoutEncoderWheel_gpio_pwm_load_obj) },
     { MP_ROM_QSTR(MP_QSTR_gpio_pwm_frequency), MP_ROM_PTR(&BreakoutEncoderWheel_gpio_pwm_frequency_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutEncoderWheel_locals_dict, BreakoutEncoderWheel_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutEncoderWheel_locals_dict, BreakoutEncoderWheel_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -88,7 +88,7 @@ const mp_rom_obj_tuple_t breakout_encoder_wheel_gpio_pins = {
 };
 
 /***** Globals Table *****/
-STATIC const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
+static const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_encoder_wheel) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutEncoderWheel), (mp_obj_t)&breakout_encoder_wheel_BreakoutEncoderWheel_type },
 
@@ -111,7 +111,7 @@ STATIC const mp_rom_map_elem_t breakout_encoder_wheel_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_GP9), MP_ROM_INT(9) },
     { MP_ROM_QSTR(MP_QSTR_GPIOS), MP_ROM_PTR(&breakout_encoder_wheel_gpio_pins) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_encoder_wheel_globals, breakout_encoder_wheel_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_encoder_wheel_globals, breakout_encoder_wheel_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_encoder_wheel_user_cmodule = {

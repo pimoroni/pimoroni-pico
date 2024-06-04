@@ -120,8 +120,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         buffer = m_new(Pixel, width * height);
     }
 
-    hub75_obj = m_new_obj_with_finaliser(_Hub75_obj_t);
-    hub75_obj->base.type = &Hub75_type;
+    hub75_obj = mp_obj_malloc_with_finaliser(_Hub75_obj_t, &Hub75_type);
     hub75_obj->buf = buffer;
     hub75_obj->hub75 = m_new_class(Hub75, width, height, buffer, paneltype, stb_invert, color_order);
 
