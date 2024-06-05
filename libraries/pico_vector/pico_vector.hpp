@@ -63,11 +63,12 @@ namespace pimoroni {
                                                                 (uint8_t)_pp_antialias)) {
                         return;
                     }
+
                     for(auto y = 0; y < tile->h; y++) {
                         for(auto x = 0; x < tile->w; x++) {
                             uint8_t alpha = *tile_data++;
                             if (alpha >= 4) {
-                                PicoVector::graphics->set_pixel({x + tile->x, y + tile->y});
+                                PicoVector::graphics->pixel({x + tile->x, y + tile->y});
                             } else if (alpha > 0) {
                                 alpha = alpha_map[alpha];
                                 PicoVector::graphics->set_pixel_alpha({x + tile->x, y + tile->y}, alpha);
@@ -80,7 +81,7 @@ namespace pimoroni {
                         for(auto x = 0; x < tile->w; x++) {
                             uint8_t alpha = *tile_data++;
                             if (alpha) {
-                                PicoVector::graphics->set_pixel({x + tile->x, y + tile->y});
+                                PicoVector::graphics->pixel({x + tile->x, y + tile->y});
                             }
                         }
                         tile_data += tile->stride - tile->w;
