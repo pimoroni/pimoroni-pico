@@ -250,6 +250,7 @@ void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {
 int get_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   int line_width = 0;
   char *end = strchr(text, '\n');
+  if (!end) end = (char *)text + strlen(text);
   for(char c = *text; text < end; text++, c = *text) {
     af_glyph_t *glyph = find_glyph(face, c);
     if(!glyph) {
@@ -297,7 +298,9 @@ void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   caret.y = 0;
 
   char *end = strchr(text, '\n');
-  while(end) {
+  if (!end) end = (char *)text + strlen(text);
+
+  while(true) {
     int line_width = get_line_width(face, text, tm);
 
     for(char c = *text; text < end; text++, c = *text) {
@@ -331,7 +334,9 @@ void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
     }
 
     text = end + 1;
+    if (*text == '\0') break;
     end = strchr(text, '\n');
+    if (!end) end = (char *)text + strlen(text);
 
     caret.x = 0;
     caret.y += line_height;
