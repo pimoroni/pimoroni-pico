@@ -146,18 +146,20 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   uint16_t path_count  = ru16(file);
   uint16_t point_count = ru16(file);
 
+  size_t glyph_buffer_size = sizeof(af_glyph_t) * glyph_count;
+  size_t path_buffer_size = sizeof(af_path_t) * path_count;
+  size_t point_buffer_size = sizeof(af_point_t) * point_count;
+
   // allocate buffer to store font glyph, path, and point data
-  void *buffer = AF_MALLOC(sizeof(af_glyph_t) * glyph_count + \
-                           sizeof( af_path_t) *  path_count + \
-                           sizeof(af_point_t) * point_count);
+  uint8_t *buffer = (uint8_t *)AF_MALLOC(glyph_buffer_size + path_buffer_size + point_buffer_size);
 
   if(!buffer) {
     return false; // failed memory allocation
   }
 
   af_glyph_t *glyphs = (af_glyph_t *) buffer;
-  af_path_t   *paths = ( af_path_t *)(glyphs + (sizeof(af_glyph_t) * glyph_count));
-  af_point_t *points = (af_point_t *)( paths + (sizeof( af_path_t) *  path_count));
+  af_path_t   *paths = ( af_path_t *)(buffer + glyph_buffer_size);
+  af_point_t *points = (af_point_t *)(buffer + glyph_buffer_size + path_buffer_size);
 
   // load glyph dictionary
   face->glyph_count = glyph_count;
@@ -172,7 +174,7 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
     glyph->advance    =  ru8(file);
     glyph->path_count =  ru8(file);
     glyph->paths      =      paths;
-    paths += sizeof(af_path_t) * glyph->path_count;
+    paths += glyph->path_count;
   }
 
   // load the glyph paths
@@ -182,7 +184,7 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
       af_path_t *path = &glyph->paths[j];
       path->point_count = ru8(file);
       path->points = points;
-      points += sizeof(af_point_t) * path->point_count;
+      points += path->point_count;
     }
   }
 
