@@ -14,7 +14,7 @@ function log_warning {
 
 function micropython_clone {
     log_inform "Using MicroPython $MICROPYTHON_VERSION"
-    git clone https://github.com/micropython/micropython
+    git clone https://github.com/pimoroni/micropython
     cd micropython
     git checkout $MICROPYTHON_VERSION
     git submodule update --init lib/pico-sdk

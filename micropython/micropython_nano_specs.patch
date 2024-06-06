@@ -1,5 +1,5 @@
 diff --git a/ports/rp2/CMakeLists.txt b/ports/rp2/CMakeLists.txt
-index fcc435b7b..efabcb3a3 100644
+index d3ecee586..c0b6eeb3c 100644
 --- a/ports/rp2/CMakeLists.txt
 +++ b/ports/rp2/CMakeLists.txt
 @@ -464,6 +464,16 @@ set_source_files_properties(
