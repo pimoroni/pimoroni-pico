@@ -17,30 +17,8 @@ jobs:
     strategy:
       matrix:
         include:
-        - name: pico
-          board: RPI_PICO
-        - name: pico_usb
-          board: RPI_PICO_USB
-        - name: picow
-          board: RPI_PICO_W
-        - name: tiny2040_8mb
-          board: PIMORONI_TINY2040
-        - name: picolipo_4mb
-          board: PIMORONI_PICOLIPO_4MB
-        - name: picolipo_16mb
-          board: PIMORONI_PICOLIPO_16MB
         - name: tufty2040
           board: PIMORONI_TUFTY2040
-        - name: enviro
-          board: PICO_W_ENVIRO
-        - name: galactic_unicorn
-          board: RPI_PICO_W
-        - name: cosmic_unicorn
-          board: RPI_PICO_W
-        - name: stellar_unicorn
-          board: RPI_PICO_W
-        - name: inky_frame
-          board: PICO_W_INKY
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
