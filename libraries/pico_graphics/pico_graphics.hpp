@@ -513,6 +513,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
+
+      void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
   };
 
   class PicoGraphics_PenRGB888 : public PicoGraphics {
