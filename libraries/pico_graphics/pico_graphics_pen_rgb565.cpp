@@ -50,7 +50,7 @@ namespace pimoroni {
             };
             for(o.x = 0; o.x < 8 * scale; o.x++) {
                 so.x = o.x / scale;
-                color = ptr[(s.y + so.y) * 128 + (s.x + so.x)];
+                color = ptr[(s.y + so.y) * 96 + (s.x + so.x)];
                 if(color != transparent) pixel(dest + o);
             }
         }
