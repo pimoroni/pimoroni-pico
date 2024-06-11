@@ -4,7 +4,8 @@ endif()
 
 add_library(pico_vector 
     ${CMAKE_CURRENT_LIST_DIR}/pico_vector.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/alright_fonts.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/af-file-io.c
+    ${CMAKE_CURRENT_LIST_DIR}/af-memory.c
 )
 
 target_include_directories(pico_vector INTERFACE ${CMAKE_CURRENT_LIST_DIR})
