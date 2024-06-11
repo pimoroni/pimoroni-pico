@@ -112,7 +112,20 @@ namespace pimoroni {
                 return result;
             }
 
-            pp_point_t text(std::string_view text, pp_mat3_t *t);
+            bool set_font(void* font,  unsigned int font_size) {
+                if(text_metrics.face) {
+                    af_free(text_metrics.face->glyphs);
+                    af_free(text_metrics.face);
+                }
+                text_metrics.face = (af_face_t *)af_malloc(sizeof(af_face_t));
+                bool result = af_load_font_file(font, text_metrics.face);
+
+                set_font_size(font_size);
+
+                return result;
+            }
+
+            pp_point_t text(std::string_view text, pp_mat3_t *t=nullptr);
 
             void transform(pp_path_t *path, pp_mat3_t *t);
             void transform(pp_poly_t *poly, pp_mat3_t *t);
