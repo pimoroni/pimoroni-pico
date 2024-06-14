@@ -31,7 +31,7 @@ Alternatively, you can transfer them using Thonny, but you will have to mount th
 ```python
 import os
 import sdcard
-from machine import Pin
+from machine import Pin, SPI
 sd_spi = SPI(0, sck=Pin(18, Pin.OUT), mosi=Pin(19, Pin.OUT), miso=Pin(16, Pin.OUT))
 sd = sdcard.SDCard(sd_spi, Pin(22))
 os.mount(sd, "/sd")
