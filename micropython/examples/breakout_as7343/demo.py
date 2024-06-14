@@ -3,10 +3,10 @@
 
 from breakout_as7343 import BreakoutAS7343
 from pimoroni_i2c import PimoroniI2C
+from pimoroni import BREAKOUT_GARDEN_I2C_PINS  # or PICO_EXPLORER_I2C_PINS or HEADER_I2C_PINS
 import time
 
-# use (sda=20, scl=21) if you have a Pico Explorer Base or other board that uses the alt I2C pins
-i2c = PimoroniI2C(sda=4, scl=5)
+i2c = PimoroniI2C(**BREAKOUT_GARDEN_I2C_PINS)
 as7343 = BreakoutAS7343(i2c)
 
 as7343.set_channels(18)
