@@ -5,7 +5,7 @@
 
 using namespace pimoroni;
 
-I2C i2c(6, 7);
+I2C i2c(BOARD::BREAKOUT_GARDEN);
 AS7343 as7343(&i2c);
 
 int main() {
