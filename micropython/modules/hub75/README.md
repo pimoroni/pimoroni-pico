@@ -92,3 +92,15 @@ Calling `.clear()` will clear the whole contents of the display
 ```python
 matrix.clear()
 ```
+
+### Setting the brightness
+
+You can set the global brightness of the whole display; the brightness is an
+integer value between `0` (off) and `100` (fully on):
+
+```python
+matrix.set_brightness(75)
+```
+
+If unset, the brightness of the display defaults to 100. You can also query the
+current brightness setting with `.get_brightness()`.

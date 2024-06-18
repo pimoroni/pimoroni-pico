@@ -256,6 +256,7 @@ void Hub75::update(PicoGraphics *graphics) {
                 uint8_t r = (col & 0xff0000) >> 16;
                 uint8_t g = (col & 0x00ff00) >>  8;
                 uint8_t b = (col & 0x0000ff) >>  0;
+                apply_brightness(&r, &g, &b);
                 set_pixel(x, y, r, g, b);
                 p++;
             }
@@ -269,10 +270,105 @@ void Hub75::update(PicoGraphics *graphics) {
                 uint8_t r = (col & 0b1111100000000000) >> 8;
                 uint8_t g = (col & 0b0000011111100000) >> 3;
                 uint8_t b = (col & 0b0000000000011111) << 3;
+                apply_brightness(&r, &g, &b);
                 set_pixel(x, y, r, g, b);
                 p++;
             }
         }
     }
 }
+
+void Hub75::set_brightness(uint8_t brightness)
+{
+    /* Clamp brightness to a sensible value, 0 - 100 */
+    if(brightness > 100) {
+        user_brightness = 100;
+    }
+    else {
+        user_brightness = brightness;
+    }
+}
+
+uint8_t Hub75::get_brightness()
+{
+    return user_brightness;
+}
+
+void Hub75::apply_brightness(uint8_t *r, uint8_t *g, uint8_t *b) {
+    uint8_t h, s, v;
+    uint8_t rgbMin, rgbMax;
+
+    /* If brightness is set full, no point in doing work. */
+    if(user_brightness > 98 ) {
+        return;
+    }
+
+    /* And if it's turned right down, it's off. */
+    if(user_brightness < 2 ) {
+        *r = *g = *b = 0;
+        return;
+    }
+
+    /* Convert RGB to HSV. */
+    rgbMin = *r < *g ? (*r < *b ? *r : *b) : (*g < *b ? *g : *b);
+    rgbMax = *r > *g ? (*r > *b ? *r : *b) : (*g > *b ? *g : *b);
+    v = rgbMax;
+    if(v == 0) {
+        h = s = 0;
+    } else {
+        s = 255 * long(rgbMax - rgbMin) / v;
+        if(s == 0) {
+            h = 0;
+        } else {
+            if(rgbMax == *r) {
+                h = 0 + 43 * (*g - *b) / (rgbMax - rgbMin);
+            } else if(rgbMax == *g) {
+                h = 85 + 43 * (*b - *r) / (rgbMax - rgbMin);
+            } else {
+                h = 171 + 43 * (*r - *g) / (rgbMax - rgbMin);
+            }
+        }
+    }
+
+    /* Apply the brightness factor to V. */
+    v = v * user_brightness / 100;
+
+    /* And then convert it *back* to RGB. */
+    uint8_t region,remainder, p, q, t;
+    if(s == 0)
+    {
+        *r = *g = *b = v;
+        return;
+    }
+    region = h / 43;
+    remainder = (h - (region * 43)) * 6; 
+    p = (v * (255 - s)) >> 8;
+    q = (v * (255 - ((s * remainder) >> 8))) >> 8;
+    t = (v * (255 - ((s * (255 - remainder)) >> 8))) >> 8;
+    switch(region)
+    {
+        case 0:
+            *r = v; *g = t; *b = p;
+            break;
+        case 1:
+            *r = q; *g = v; *b = p;
+            break;
+        case 2:
+            *r = p; *g = v; *b = t;
+            break;
+        case 3:
+            *r = p; *g = q; *b = v;
+            break;
+        case 4:
+            *r = t; *g = p; *b = v;
+            break;
+        default:
+            *r = v; *g = p; *b = q;
+            break;
+    }
+
+    /* All done! */
+    return;
+}
+
 }

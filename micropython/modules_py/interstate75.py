@@ -75,3 +75,9 @@ class Interstate75:
 
     def set_led(self, r, g, b):
         self.__rgb.set_rgb(r, g, b)
+
+    def set_brightness(self, brightness):
+        self.hub75.set_brightness(brightness)
+
+    def get_brightness(self):
+        return self.hub75.get_brightness()
