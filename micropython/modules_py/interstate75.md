@@ -86,6 +86,27 @@ board.set_led(0, 255, 0)  # Makes the LED Blue
 board.set_led(0, 0, 255)  # Makes the LED Green
 ```
 
+### Brightness
+
+The Interstate has a global brightness, that affects the entire display. By
+default, the display is set to full, but this can be changed via the following
+method.
+
+`.set_brightness(n)`
+
+Where n is a value between 0 (off) and 100 (full brightness)
+
+The current brightness of the display can be also be queried:
+
+`.get_brightness()`
+
+
+example:
+
+```python
+board.set_brightness(50)  # Sets the display to half-brightness
+```
+
 ## Display
 
 The display is all handled by our custom picographics drivers they can be accessed via `.display`.

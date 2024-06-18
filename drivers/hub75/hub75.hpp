@@ -86,6 +86,8 @@ class Hub75 {
 
     uint brightness = 6;
 
+    uint8_t user_brightness = 100;
+
 
     // Top half of display - 16 rows on a 32x32 panel
     unsigned int pin_r0 = 0;
@@ -138,5 +140,10 @@ class Hub75 {
     void stop(irq_handler_t handler);
     void dma_complete();
     void update(PicoGraphics *graphics);
+    void set_brightness(uint8_t brightness);
+    uint8_t get_brightness();
+
+    private:
+    void apply_brightness(uint8_t *r, uint8_t *g, uint8_t *b);
     };
 }
