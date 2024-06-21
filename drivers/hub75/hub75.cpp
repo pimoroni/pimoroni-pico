@@ -42,6 +42,7 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
         if (width >= 128) brightness = 2;
         if (width >= 160) brightness = 1;
     }
+  brightness = 1;
 }
 
 void Hub75::set_color(uint x, uint y, Pixel c) {
