@@ -10,8 +10,8 @@ display = PicoGraphics(display=DISPLAY_TUFTY_2040)
 display.set_backlight(0.8)
 
 # set up the ADCs for measuring battery voltage
-vbat_adc = ADC(29)
-vref_adc = ADC(28)
+vbat_adc = ADC(Pin(29))
+vref_adc = ADC(Pin(28))
 vref_en = Pin(27)
 vref_en.init(Pin.OUT)
 vref_en.value(0)

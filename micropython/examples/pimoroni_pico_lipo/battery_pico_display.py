@@ -13,7 +13,7 @@ display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
 
 display.set_backlight(0.8)
 
-vsys = ADC(29)                      # reads the system input voltage
+vsys = ADC(Pin(29))                 # reads the system input voltage
 charging = Pin(24, Pin.IN)          # reading GP24 tells us whether or not USB power is connected
 conversion_factor = 3 * 3.3 / 65535
 
