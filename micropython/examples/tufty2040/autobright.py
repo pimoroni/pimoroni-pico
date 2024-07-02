@@ -32,9 +32,9 @@ button_a = Button(7, invert=False)
 button_b = Button(8, invert=False)
 # Pins and analogue-digital converters we need to set up to measure sensors.
 lux_vref_pwr = Pin(27, Pin.OUT)
-lux = ADC(26)
-vbat_adc = ADC(29)
-vref_adc = ADC(28)
+lux = ADC(Pin(26))
+vbat_adc = ADC(Pin(29))
+vref_adc = ADC(Pin(28))
 usb_power = Pin(24, Pin.IN)
 
 display = PicoGraphics(display=DISPLAY_TUFTY_2040)
