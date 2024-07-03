@@ -50,3 +50,6 @@ copy_module(inky_frame.py)
 
 # C++ Magic Memory
 include(cppmem/micropython)
+
+# Disable build-busting C++ exceptions
+include(micropython-disable-exceptions)

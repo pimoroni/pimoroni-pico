@@ -44,12 +44,6 @@ function micropython_version {
     echo "MICROPY_GIT_HASH=$MICROPYTHON_VERSION-$TAG_OR_SHA" >> $GITHUB_ENV
 }
 
-function hack_patch_micropython_disable_exceptions {
-    cd micropython
-    git apply $PIMORONI_PICO_DIR/micropython/micropython_nano_specs.patch
-    cd ../
-}
-
 function hack_patch_pico_sdk {
     # pico-sdk-patch.sh will apply the patch if it exists
     cd micropython
