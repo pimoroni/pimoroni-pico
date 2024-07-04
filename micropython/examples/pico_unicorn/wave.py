@@ -1,5 +1,7 @@
 # Cody Tolene
 # Apache License 2.0
+# Part of the Unicorn-Pi project:
+# https://github.com/CodyTolene/Unicorn-Pi
 
 import time
 import math
