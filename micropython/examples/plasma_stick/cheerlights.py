@@ -18,6 +18,9 @@ UPDATE_INTERVAL = 120  # refresh interval in secs. Be nice to free APIs!
 # Set how many LEDs you have
 NUM_LEDS = 50
 
+# Set the brightness
+BRIGHTNESS = 0.5
+
 
 def status_handler(mode, status, ip):
     # reports wifi connection status
@@ -25,10 +28,10 @@ def status_handler(mode, status, ip):
     print('Connecting to wifi...')
     # flash while connecting
     for i in range(NUM_LEDS):
-        led_strip.set_rgb(i, 255, 255, 255)
+        led_strip.set_hsv(i, 0, 0, BRIGHTNESS)
         time.sleep(0.02)
     for i in range(NUM_LEDS):
-        led_strip.set_rgb(i, 0, 0, 0)
+        led_strip.set_hsv(i, 0, 0, 0)
     if status is not None:
         if status:
             print('Wifi connection successful!')
@@ -52,7 +55,7 @@ def spooky_rainbows():
             j = max(0, 1 - abs(distance - i) / (NUM_LEDS / 3))
             hue = HUE_START + j * (HUE_END - HUE_START)
 
-            led_strip.set_hsv(i, hue / 360, 1.0, 0.8)
+            led_strip.set_hsv(i, hue / 360, 1.0, BRIGHTNESS)
 
         # reverse direction at the end of colour segment to avoid an abrupt change
         distance += direction
@@ -108,6 +111,9 @@ while True:
 
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)
+
+    # adjust the brightness
+    r, g, b = (int(i * BRIGHTNESS) for i in (r, g, b))
 
     # light up the LEDs
     for i in range(NUM_LEDS):
