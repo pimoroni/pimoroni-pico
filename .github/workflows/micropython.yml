@@ -95,12 +95,6 @@ jobs:
         source $BUILD_TOOLS
         micropython_build_mpy_cross
 
-    - name: "HACK: CMakeLists.txt Disable C++ Exceptions Patch"
-      shell: bash
-      run: |
-        source $BUILD_TOOLS
-        hack_patch_micropython_disable_exceptions
-
     - name: "HACK: Pico SDK Patch"
       shell: bash
       run: |

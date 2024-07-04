@@ -14,3 +14,6 @@ enable_ulab()
 
 # C++ Magic Memory
 include(cppmem/micropython)
+
+# Disable build-busting C++ exceptions
+include(micropython-disable-exceptions)
