@@ -1,20 +1,19 @@
-# Part of the Unicorn-Pi project:
-# https://github.com/CodyTolene/Unicorn-Pi
-#
 # Cody Tolene
 # Apache License 2.0
 
-import time
 import random
 import micropython
 import uasyncio
 
+
 async def run(picoUnicorn, graphics):
-    fire_colours = [graphics.create_pen(0, 0, 0),
-                    graphics.create_pen(20, 20, 20),
-                    graphics.create_pen(180, 30, 0),
-                    graphics.create_pen(220, 160, 0),
-                    graphics.create_pen(255, 255, 180)]
+    fire_colours = [
+        graphics.create_pen(0, 0, 0),
+        graphics.create_pen(20, 20, 20),
+        graphics.create_pen(180, 30, 0),
+        graphics.create_pen(220, 160, 0),
+        graphics.create_pen(255, 255, 180),
+    ]
 
     width = picoUnicorn.get_width()
     height = picoUnicorn.get_height() + 2
@@ -36,11 +35,18 @@ async def run(picoUnicorn, graphics):
         factor = damping_factor / 5.0
         for y in range(height - 3, -1, -1):  # Ensure y doesn't go out of bounds
             for x in range(1, width - 1):
-                _heat[x][y] = (_heat[x][y] +
-                               _heat[x][y + 1] +
-                               _heat[x][y + 2] +
-                               _heat[x - 1][y + 1] +
-                               _heat[x + 1][y + 1]) * factor
+                sum_heat_y = _heat[x][y]
+                sum_heat_y1 = _heat[x][y + 1]
+                sum_heat_y2 = _heat[x][y + 2]
+                sum_heat_x1y1 = _heat[x - 1][y + 1]
+                sum_heat_x2y1 = _heat[x + 1][y + 1]
+
+                sum_heat_y = sum_heat_y + sum_heat_y1 + sum_heat_y2
+                sum_heat_x = sum_heat_x1y1 + sum_heat_x2y1
+
+                sum_heat = sum_heat_y + sum_heat_x
+
+                _heat[x][y] = sum_heat * factor
 
     @micropython.native  # noqa: F821
     def draw():
@@ -72,15 +78,19 @@ async def run(picoUnicorn, graphics):
     while True:
         update()
         draw()
-        await uasyncio.sleep(1.0 / 30)  # Increased sleep time to slow down the animation
+        await uasyncio.sleep(
+            1.0 / 30
+        )  # Increased sleep time to slow down the animation
 
         # Introduce a small delay in the update loop to reduce flickering
         await uasyncio.sleep(1.0 / 10)
+
 
 # This section of code is only for testing.
 if __name__ == "__main__":
     from picounicorn import PicoUnicorn
     from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
+
     picoUnicorn = PicoUnicorn()
     graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
     uasyncio.run(run(picoUnicorn, graphics))

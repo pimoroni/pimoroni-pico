@@ -1,11 +1,9 @@
-# Part of the Unicorn-Pi project:
-# https://github.com/CodyTolene/Unicorn-Pi
-#
 # Cody Tolene
 # Apache License 2.0
 
 import uasyncio
 import random
+
 
 class Lightning:
     def __init__(self, width, height, graphics):
@@ -44,9 +42,10 @@ class Lightning:
                 self.bolts = [self.create_bolt() for _ in range(random.randint(1, 3))]
 
         for bolt in self.bolts:
-            for (x, y) in bolt:
+            for x, y in bolt:
                 self.graphics.set_pen(self.graphics.create_pen(255, 255, 255))
                 self.graphics.pixel(x, y)
+
 
 async def run(picoUnicorn, graphics):
     width = picoUnicorn.get_width()  # Get the width of the display
@@ -62,10 +61,12 @@ async def run(picoUnicorn, graphics):
         picoUnicorn.update(graphics)  # Update the display
         await uasyncio.sleep(0.1)  # Pause for a short time before the next update
 
+
 # This section of code is only for testing.
 if __name__ == "__main__":
     from picounicorn import PicoUnicorn
     from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
+
     picoUnicorn = PicoUnicorn()
     graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
     uasyncio.run(run(picoUnicorn, graphics))

@@ -1,11 +1,9 @@
-# Part of the Unicorn-Pi project:
-# https://github.com/CodyTolene/Unicorn-Pi
-#
 # Cody Tolene
 # Apache License 2.0
 
 import uasyncio
 import random
+
 
 async def run(picoUnicorn, graphics):
     width = picoUnicorn.get_width()
@@ -20,7 +18,9 @@ async def run(picoUnicorn, graphics):
             self.y = random.uniform(0, height - 1)
             self.speed_y = random.uniform(0.3, 0.7)  # Vertical speed
             self.speed_x = direction  # Horizontal speed, determined at start
-            self.color = graphics.create_pen(0, 0, random.randint(150, 255))  # Realistic blue color with variants
+            self.color = graphics.create_pen(
+                0, 0, random.randint(150, 255)
+            )  # Realistic blue color with variants
 
         async def update(self):
             graphics.set_pen(self.color)
@@ -31,7 +31,9 @@ async def run(picoUnicorn, graphics):
                 self.y = 0
                 self.x = random.randint(0, width - 1)
 
-    raindrops = [Raindrop() for _ in range(30)]  # Increase number of raindrops for realism
+    raindrops = [
+        Raindrop() for _ in range(30)
+    ]  # Increase number of raindrops for realism
 
     while True:
         graphics.set_pen(graphics.create_pen(0, 0, 0))
@@ -43,10 +45,12 @@ async def run(picoUnicorn, graphics):
         picoUnicorn.update(graphics)
         await uasyncio.sleep(0.05)  # Faster update interval for smoother animation
 
+
 # This section of code is only for testing.
 if __name__ == "__main__":
     from picounicorn import PicoUnicorn
     from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
+
     picoUnicorn = PicoUnicorn()
     graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
     uasyncio.run(run(picoUnicorn, graphics))

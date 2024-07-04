@@ -1,11 +1,9 @@
-# Part of the Unicorn-Pi project:
-# https://github.com/CodyTolene/Unicorn-Pi
-#
 # Cody Tolene
 # Apache License 2.0
 
 import uasyncio
 import random
+
 
 async def run(picoUnicorn, graphics):
     width = picoUnicorn.get_width()
@@ -16,7 +14,11 @@ async def run(picoUnicorn, graphics):
             self.x = random.randint(0, width - 1)
             self.y = random.uniform(0, height - 1)
             self.speed_y = random.uniform(0.1, 0.3)
-            self.color = graphics.create_pen(random.randint(200, 255), random.randint(200, 255), random.randint(200, 255))
+            self.color = graphics.create_pen(
+                random.randint(200, 255),
+                random.randint(200, 255),
+                random.randint(200, 255),
+            )
             self.drift_direction = random.choice([-0.1, 0.1])  # Initial drift direction
 
         async def update(self):
@@ -33,8 +35,14 @@ async def run(picoUnicorn, graphics):
             if self.y >= height or self.x < 0 or self.x >= width:
                 self.y = 0
                 self.x = random.randint(0, width - 1)
-                self.color = graphics.create_pen(random.randint(200, 255), random.randint(200, 255), random.randint(200, 255))  # New random shade of white
-                self.drift_direction = random.choice([-0.1, 0.1])  # Reset drift direction
+                self.color = graphics.create_pen(
+                    random.randint(200, 255),
+                    random.randint(200, 255),
+                    random.randint(200, 255),
+                )  # New random shade of white
+                self.drift_direction = random.choice(
+                    [-0.1, 0.1]
+                )  # Reset drift direction
 
     snowflakes = [Snowflake() for _ in range(20)]
 
@@ -48,10 +56,12 @@ async def run(picoUnicorn, graphics):
         picoUnicorn.update(graphics)
         await uasyncio.sleep(0.1)
 
+
 # This section of code is only for testing.
 if __name__ == "__main__":
     from picounicorn import PicoUnicorn
     from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
+
     picoUnicorn = PicoUnicorn()
     graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
     uasyncio.run(run(picoUnicorn, graphics))

@@ -1,11 +1,9 @@
-# Part of the Unicorn-Pi project:
-# https://github.com/CodyTolene/Unicorn-Pi
-#
 # Cody Tolene
 # Apache License 2.0
 
 import uasyncio
 import random
+
 
 class Blob:
     def __init__(self, width, height, graphics):
@@ -16,7 +14,9 @@ class Blob:
         self.y = random.uniform(0, height)
         self.dx = random.uniform(-0.5, 0.5)
         self.dy = random.uniform(-0.5, 0.5)
-        self.color = graphics.create_pen(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        self.color = graphics.create_pen(
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        )
 
     async def update(self):
         self.x += self.dx
@@ -28,6 +28,7 @@ class Blob:
 
         self.graphics.set_pen(self.color)
         self.graphics.circle(int(self.x), int(self.y), 3)
+
 
 async def run(picoUnicorn, graphics):
     width = picoUnicorn.get_width()
@@ -44,10 +45,12 @@ async def run(picoUnicorn, graphics):
         picoUnicorn.update(graphics)
         await uasyncio.sleep(0.1)
 
+
 # This section of code is only for testing.
 if __name__ == "__main__":
     from picounicorn import PicoUnicorn
     from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
+
     picoUnicorn = PicoUnicorn()
     graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
     uasyncio.run(run(picoUnicorn, graphics))
