@@ -145,6 +145,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
 * RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
+* AS7343 14-Channel Multi-Spectral Sensor Breakout - https://shop.pimoroni.com/products/as7343-breakout
 
 ## Kits
 
