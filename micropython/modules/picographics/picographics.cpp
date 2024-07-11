@@ -860,6 +860,18 @@ mp_obj_t ModPicoGraphics_set_clip(size_t n_args, const mp_obj_t *args) {
     return mp_const_none;
 }
 
+mp_obj_t ModPicoGraphics_get_clip(mp_obj_t self_in) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    mp_obj_t tuple[4] = {
+        mp_obj_new_int(self->graphics->clip.x),
+        mp_obj_new_int(self->graphics->clip.y),
+        mp_obj_new_int(self->graphics->clip.w),
+        mp_obj_new_int(self->graphics->clip.h)
+    };
+    return mp_obj_new_tuple(4, tuple);
+}
+
 mp_obj_t ModPicoGraphics_remove_clip(mp_obj_t self_in) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
