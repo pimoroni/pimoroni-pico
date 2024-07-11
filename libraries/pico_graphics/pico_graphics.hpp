@@ -532,6 +532,9 @@ namespace pimoroni {
       }
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void set_pixel_alpha(const Point &p, const uint8_t a) override;
+
+      bool supports_alpha_blend() override {return true;}
   };
 
   class PicoGraphics_PenRGB888 : public PicoGraphics {

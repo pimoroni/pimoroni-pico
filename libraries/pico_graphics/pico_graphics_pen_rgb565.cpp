@@ -62,6 +62,16 @@ namespace pimoroni {
         }
     }
 
+    void PicoGraphics_PenRGB565::set_pixel_alpha(const Point &p, const uint8_t a) {
+        if(!bounds.contains(p)) return;
+
+        uint16_t *buf = (uint16_t *)frame_buffer;
+
+        RGB565 blended = RGB(buf[p.y * bounds.w + p.x]).blend(RGB(color), a).to_rgb565();
+
+        buf[p.y * bounds.w + p.x] = blended;
+    };
+
     void PicoGraphics_PenRGB565::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {
         //int sprite_x = (sprite & 0x0f) << 3;
         //int sprite_y = (sprite & 0xf0) >> 1;
