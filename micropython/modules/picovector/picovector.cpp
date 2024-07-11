@@ -37,6 +37,9 @@ void __printf_debug_flush() {
     }
 }
 
+#define mp_picovector_get_point_type mp_obj_get_float
+#define mp_picovector_set_point_type mp_obj_new_float
+
 int mp_vprintf(const mp_print_t *print, const char *fmt, va_list args);
 
 void af_debug(const char *fmt, ...) {
@@ -157,10 +160,10 @@ static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
 mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     enum { ARG_x, ARG_y, ARG_w, ARG_h };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -168,10 +171,10 @@ mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
 
     _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
 
-    int x = args[ARG_x].u_int;
-    int y = args[ARG_y].u_int;
-    int w = args[ARG_w].u_int;
-    int h = args[ARG_h].u_int;
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type w = mp_picovector_get_point_type(args[ARG_w].u_obj);
+    picovector_point_type h = mp_picovector_get_point_type(args[ARG_h].u_obj);
 
     self->path.points = m_new(pp_point_t, 4);
     self->path.count = 4;
@@ -187,8 +190,8 @@ mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
 mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     enum { ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_rotation };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_sides, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_const_none} },
@@ -207,8 +210,8 @@ mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size
         rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
         rotation *= (M_PI / 180.0f);
     }
-    int o_x = args[ARG_x].u_int;
-    int o_y = args[ARG_y].u_int;
+    picovector_point_type o_x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type o_y = mp_picovector_get_point_type(args[ARG_y].u_obj);
 
     float angle = (360.0f / sides) * (M_PI / 180.0f);
 
@@ -247,8 +250,8 @@ mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         if(t_point->len != 2) mp_raise_ValueError("Tuple must have X, Y");
 
         self->path.points[i] = {
-            (picovector_point_type)mp_obj_get_int(t_point->items[0]),
-            (picovector_point_type)mp_obj_get_int(t_point->items[1]),
+            (picovector_point_type)mp_picovector_get_point_type(t_point->items[0]),
+            (picovector_point_type)mp_picovector_get_point_type(t_point->items[1]),
         };
     }
 
@@ -270,8 +273,8 @@ mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
     sum_y /= (float)self->path.count;
 
     mp_obj_t tuple[2];
-    tuple[0] = mp_obj_new_int((int)(sum_x));
-    tuple[1] = mp_obj_new_int((int)(sum_y));
+    tuple[0] = mp_picovector_set_point_type((int)(sum_x));
+    tuple[1] = mp_picovector_set_point_type((int)(sum_y));
 
     return mp_obj_new_tuple(2, tuple);
 }
@@ -282,10 +285,10 @@ mp_obj_t POLYGON_bounds(mp_obj_t self_in) {
     pp_rect_t bounds = pp_contour_bounds(&self->path);
 
     mp_obj_t tuple[4];
-    tuple[0] = mp_obj_new_int((int)(bounds.x));
-    tuple[1] = mp_obj_new_int((int)(bounds.y));
-    tuple[2] = mp_obj_new_int((int)(bounds.w));
-    tuple[3] = mp_obj_new_int((int)(bounds.h));
+    tuple[0] = mp_picovector_set_point_type((int)(bounds.x));
+    tuple[1] = mp_picovector_set_point_type((int)(bounds.y));
+    tuple[2] = mp_picovector_set_point_type((int)(bounds.w));
+    tuple[3] = mp_picovector_set_point_type((int)(bounds.h));
 
     return mp_obj_new_tuple(4, tuple);
 }
@@ -297,15 +300,15 @@ void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t ki
     pp_rect_t bounds = pp_contour_bounds(&self->path);
 
     mp_print_str(print, "Polygon(points = ");
-    mp_obj_print_helper(print, mp_obj_new_int(self->path.count), PRINT_REPR);
+    mp_obj_print_helper(print, mp_picovector_set_point_type(self->path.count), PRINT_REPR);
     mp_print_str(print, ", bounds = ");
-    mp_obj_print_helper(print, mp_obj_new_int(bounds.x), PRINT_REPR);
+    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.x), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(bounds.y), PRINT_REPR);
+    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.y), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(bounds.w), PRINT_REPR);
+    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.w), PRINT_REPR);
     mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_obj_new_int(bounds.h), PRINT_REPR);
+    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.h), PRINT_REPR);
     mp_print_str(print, ")");
 }
 
@@ -332,8 +335,8 @@ static mp_obj_t py_path_it_iternext(mp_obj_t self_in) {
     if(self->cur >= path->path.count) return MP_OBJ_STOP_ITERATION;
 
     mp_obj_t tuple[2];
-    tuple[0] = mp_obj_new_int((int)(path->path.points[self->cur].x));
-    tuple[1] = mp_obj_new_int((int)(path->path.points[self->cur].y));
+    tuple[0] = mp_picovector_set_point_type((int)(path->path.points[self->cur].x));
+    tuple[1] = mp_picovector_set_point_type((int)(path->path.points[self->cur].y));
 
     self->cur++;
     return mp_obj_new_tuple(2, tuple);
