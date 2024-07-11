@@ -6,6 +6,9 @@
 namespace pimoroni {
   PicoGraphics *PicoVector::graphics = nullptr;
 
+  uint8_t PicoVector::max_alpha = 4;
+  const uint8_t *PicoVector::alpha_map = alpha_map_x4;
+
   void PicoVector::draw(pp_poly_t *poly) {
     pp_transform(NULL);
     pp_render(poly);
