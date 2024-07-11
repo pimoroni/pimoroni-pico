@@ -513,6 +513,9 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
+      void set_pixel_alpha(const Point &p, const uint8_t a) override;
+
+      bool supports_alpha_blend() override {return true;}
   };
 
   class PicoGraphics_PenRGB888 : public PicoGraphics {
