@@ -31,7 +31,10 @@ namespace pimoroni {
         private:
             static PicoGraphics *graphics;
             af_text_metrics_t text_metrics;
-            static constexpr uint8_t alpha_map[4] {0, 128, 192, 255};
+            static constexpr uint8_t alpha_map_x4[4] {0, 128, 192, 255};
+            static constexpr uint8_t alpha_map_x16[16] {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 255};
+            static uint8_t max_alpha;
+            static const uint8_t *alpha_map;
 
         public:
             PicoVector(PicoGraphics *graphics, void *mem = nullptr) {
@@ -39,7 +42,7 @@ namespace pimoroni {
 
                 pp_tile_callback(PicoVector::tile_callback);
 
-                pp_antialias(graphics->supports_alpha_blend() ? PP_AA_X4 : PP_AA_NONE);
+                set_antialiasing(graphics->supports_alpha_blend() ? PP_AA_X4 : PP_AA_NONE);
 
                 pp_clip(graphics->clip.x, graphics->clip.y, graphics->clip.w, graphics->clip.h);
 
@@ -67,7 +70,7 @@ namespace pimoroni {
                     for(auto y = 0; y < tile->h; y++) {
                         for(auto x = 0; x < tile->w; x++) {
                             uint8_t alpha = *tile_data++;
-                            if (alpha >= 4) {
+                            if (alpha >= max_alpha) {
                                 PicoVector::graphics->pixel({x + tile->x, y + tile->y});
                             } else if (alpha > 0) {
                                 alpha = alpha_map[alpha];
@@ -91,6 +94,13 @@ namespace pimoroni {
 
             void set_antialiasing(pp_antialias_t antialias) {
                 pp_antialias(antialias);
+                if(antialias == PP_AA_X16) {
+                    alpha_map = alpha_map_x16;
+                    max_alpha = 16;
+                } else {
+                    alpha_map = alpha_map_x4;
+                    max_alpha = 4;
+                }
             }
 
             void set_font_size(unsigned int font_size) {
