@@ -520,7 +520,7 @@ mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     pp_poly_t group;
     group.count = num_polygons;
-    group.paths = (pp_path_t *)malloc(sizeof(pp_path_t) * num_polygons);
+    group.paths = (pp_path_t *)m_new(pp_path_t, num_polygons);
 
     for(auto i = 0u; i < num_polygons; i++) {
         mp_obj_t poly_obj = polygons[i];
@@ -534,7 +534,7 @@ mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     self->vector->draw(&group);
 
-    free(group.paths);
+    m_free(group.paths);
 
     return mp_const_none;
 }
