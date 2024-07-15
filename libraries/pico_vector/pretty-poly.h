@@ -353,26 +353,26 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
     x += xinc * xjump;
   }
 
-#ifdef USE_RP2040_INTERP
-  interp1->base[1] = full_tile_width;
-  interp1->accum[0] = x;
+// #ifdef USE_RP2040_INTERP
+//   interp1->base[1] = full_tile_width;
+//   interp1->accum[0] = x;
 
-  // loop over scanlines
-  while(count--) {
-    // consume accumulated error
-    while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
+//   // loop over scanlines
+//   while(count--) {
+//     // consume accumulated error
+//     while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
 
-    // clamp node x value to tile bounds
-    const int nx = interp1->peek[0];
-    debug("      + adding node at %d, %d\n", x, y);
-    // add node to node list
-    nodes[y][node_counts[y]++] = nx;
+//     // clamp node x value to tile bounds
+//     const int nx = interp1->peek[0];
+//     debug("      + adding node at %d, %d\n", x, y);
+//     // add node to node list
+//     nodes[y][node_counts[y]++] = nx;
 
-    // step to next scanline and accumulate error
-    y++;
-    e += einc;
-  }
-#else
+//     // step to next scanline and accumulate error
+//     y++;
+//     e += einc;
+//   }
+// #else
   // loop over scanlines
   while(count--) {
     // consume accumulated error
@@ -388,7 +388,7 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
     y++;
     e += einc;
   }
-#endif
+//#endif
 }
 
 void build_nodes(pp_path_t *contour, pp_rect_t *bounds) {
@@ -427,7 +427,7 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
 
   debug("  + render tile %d, %d - %d, %d\n", tb->x, tb->y, tb->w, tb->h);
 
-  for(uint32_t y = 0; y < (PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
+  for(uint32_t y = 0; y < ((uint32_t)PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
 
     // debug("    : row %d node count %d\n", y, node_counts[y]);
 
