@@ -43,4 +43,42 @@ namespace pimoroni {
 
         buf[p.y * bounds.w + p.x] = blended;
     };
+
+    bool PicoGraphics_PenRGB565::render_pico_vector_tile(const pp_tile_t &tile) {
+        // fix pico vector clipping here
+        
+        for(int y = tile.y; y < tile.y + tile.h; y++) {
+            uint8_t *palpha = &tile.data[((y - tile.y) * tile.stride)];            
+            uint16_t *pdest = &((uint16_t *)frame_buffer)[tile.x + (tile.y * bounds.w)];
+            for(int x = tile.x; x < tile.x + tile.w; x++) {
+                uint16_t dest = *pdest;
+                uint8_t alpha = *palpha >> 3;
+
+                // blend tha pixel                
+                // expand the pen colour to provide space to multiple all 
+                // channels at once
+                uint32_t cs = 0;
+                cs |= ((color & 0b1111100000000000) << 11); // red
+                cs |= ((color & 0b0000011111100000) <<  5); // green
+                cs |= ((color & 0b0000000000011111)      ); // blue
+
+                uint32_t cd = 0;
+                cd |= ((dest  & 0b1111100000000000) << 11); // red
+                cd |= ((dest  & 0b0000011111100000) <<  5); // green
+                cd |= ((dest  & 0b0000000000011111)      ); // blue
+
+                uint32_t cr = ((cs * alpha) + (cd * (31 - alpha)))>> 5;
+
+                // recombine the channels
+                *pdest  = ((cr >> 27) & 0b1111100000000000);
+                *pdest |= ((cr >> 11) & 0b0000011111100000);
+                *pdest |= ((cr >> 5) & 0b0000000000011111);
+
+                pdest++;
+                palpha++;
+            }
+        }
+
+        return true;
+    }    
 }

@@ -14,8 +14,10 @@
 #include "libraries/bitmap_fonts/font6_data.hpp"
 #include "libraries/bitmap_fonts/font8_data.hpp"
 #include "libraries/bitmap_fonts/font14_outline_data.hpp"
+#include "libraries/pico_vector/pretty-poly.h"
 
 #include "common/pimoroni_common.hpp"
+
 
 // A tiny graphics library for our Pico products
 // supports:
@@ -28,7 +30,6 @@ namespace pimoroni {
   typedef uint16_t RGB565;
   typedef uint16_t RGB555;
   typedef uint32_t RGB888;
-
 
   struct RGB {
     int16_t r, g, b;
@@ -293,7 +294,7 @@ namespace pimoroni {
     virtual void frame_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
-    virtual bool render_pico_vector_tile(const Rect &bounds, uint8_t* alpha_data, uint32_t stride, uint8_t alpha_type) { return false; }
+    virtual bool render_pico_vector_tile(const pp_tile_t &tile) { return false; }
 
     void set_font(const bitmap::font_t *font);
     void set_font(const hershey::font_t *font);
@@ -514,7 +515,7 @@ namespace pimoroni {
         return w * h * sizeof(RGB565);
       }
       void set_pixel_alpha(const Point &p, const uint8_t a) override;
-
+      bool render_pico_vector_tile(const pp_tile_t &tile) override;
       bool supports_alpha_blend() override {return true;}
   };
 
