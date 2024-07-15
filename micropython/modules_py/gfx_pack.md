@@ -71,6 +71,7 @@ example:
 
 ```python
 display = board.display
+display.set_pen(15)
 display.text("Hello World!", 0, 0)
 display.line(0, 0, 128, 64) 
 display.update()  # Update display with the above items
