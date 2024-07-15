@@ -1,3 +1,5 @@
+# If you have a Display Pack 2.0" or 2.8" use DISPLAY_PICO_DISPLAY_2 instead of DISPLAY_PICO_DISPLAY
+
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 import qrcode
 

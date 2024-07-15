@@ -1,24 +1,30 @@
-# This example takes the temperature from the Pico's onboard temperature sensor, and displays it on Pico Display Pack, along with a little pixelly graph.
-# It's based on the thermometer example in the "Getting Started with MicroPython on the Raspberry Pi Pico" book, which is a great read if you're a beginner!
+# This example takes the temperature from the Pico's onboard temperature sensor, and displays it on Pico Display Pack.
+# It's based on the thermometer example in the "Getting Started with MicroPython on the Raspberry Pi Pico" book.
 
 import machine
 import time
 from pimoroni import RGBLED
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 
-# set up the hardware
+# set up the display and drawing constants
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, rotate=0)
-sensor_temp = machine.ADC(4)
-led = RGBLED(6, 7, 8)
 
 # set the display backlight to 50%
 display.set_backlight(0.5)
 
-# set up constants for drawing
 WIDTH, HEIGHT = display.get_bounds()
 
 BLACK = display.create_pen(0, 0, 0)
 WHITE = display.create_pen(255, 255, 255)
+
+# set up the internal temperature sensor
+sensor_temp = machine.ADC(4)
+
+# Set up the RGB LED For Display Pack and Display Pack 2.0":
+led = RGBLED(6, 7, 8)
+
+# For Display Pack 2.8" uncomment the following line and comment out the line above:
+# led = RGBLED(26, 27, 28)
 
 conversion_factor = 3.3 / (65535)  # used for calculating a temperature from the raw sensor reading
 
