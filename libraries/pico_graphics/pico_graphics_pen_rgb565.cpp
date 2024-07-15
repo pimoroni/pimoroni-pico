@@ -47,14 +47,14 @@ namespace pimoroni {
     bool PicoGraphics_PenRGB565::render_pico_vector_tile(const pp_tile_t *tile) {
         // fix pico vector clipping here
         
-        for(int y = tile->y; y < tile->y + tile->h; y++) {
-            uint8_t *palpha = &tile.data[((y - tile->y) * tile.stride)];            
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile.data[(y * tile.stride)];            
             uint16_t *pdest = &((uint16_t *)frame_buffer)[tile->x + (tile->y * bounds.w)];
-            for(int x = tile->x; x < tile->x + tile->w; x++) {
+            for(int x = 0; x < tile->w; x++) {
                 uint16_t dest = *pdest;
                 uint8_t alpha = *palpha >> 3;
 
-                if(alpha == 255) {
+                if(alpha == 31) {
                   *pdest = color;
                 }if(alpha == 0) {
                 }else{
