@@ -31,6 +31,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <limits.h>
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
@@ -45,16 +46,16 @@
 #define PP_COORD_TYPE float
 #endif
 
-#ifndef PP_NODE_BUFFER_HEIGHT
-#define PP_NODE_BUFFER_HEIGHT 16
-#endif
-
 #ifndef PP_MAX_NODES_PER_SCANLINE
 #define PP_MAX_NODES_PER_SCANLINE 16
 #endif
 
 #ifndef PP_TILE_BUFFER_SIZE
-#define PP_TILE_BUFFER_SIZE 4096
+#define PP_TILE_BUFFER_SIZE 64
+#endif
+
+#ifndef PP_SCALE_TO_ALPHA
+#define PP_SCALE_TO_ALPHA 1
 #endif
 
 #if defined(PICO_ON_DEVICE) && PICO_ON_DEVICE
@@ -103,7 +104,7 @@ pp_rect_t pp_rect_merge(pp_rect_t *r1, pp_rect_t *r2);
 pp_rect_t pp_rect_transform(pp_rect_t *r, pp_mat3_t *m);
 
 // antialias levels
-typedef enum {PP_AA_NONE = 0, PP_AA_X4 = 1, PP_AA_X16 = 2} pp_antialias_t;
+typedef enum {PP_AA_NONE = 0, PP_AA_FAST = 1, PP_AA_X4 = 1, PP_AA_BEST = 2, PP_AA_X16 = 2} pp_antialias_t;
 
 typedef struct {
   int32_t x, y, w, h;
@@ -245,7 +246,7 @@ pp_rect_t pp_rect_transform(pp_rect_t *r, pp_mat3_t *m) {
 
 // pp_tile_t implementation
 uint8_t pp_tile_get(const pp_tile_t *tile, const int32_t x, const int32_t y) {
-  return tile->data[(x - tile->x) + (y - tile->y) * tile->stride] * (255 >> _pp_antialias >> _pp_antialias);
+  return tile->data[(x - tile->x) + (y - tile->y) * PP_TILE_BUFFER_SIZE];
 }
 
 // pp_contour_t implementation
@@ -273,14 +274,16 @@ pp_rect_t pp_polygon_bounds(pp_poly_t *p) {
 
 // buffer that each tile is rendered into before callback
 // allocate one extra byte to allow a small optimization in the row renderer
-const uint32_t tile_buffer_size = PP_TILE_BUFFER_SIZE;
-uint8_t tile_buffer[PP_TILE_BUFFER_SIZE + 1];
+uint8_t tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
 
 // polygon node buffer handles at most 16 line intersections per scanline
 // is this enough for cjk/emoji? (requires a 2kB buffer)
-int32_t nodes[PP_NODE_BUFFER_HEIGHT][PP_MAX_NODES_PER_SCANLINE * 2];
-uint32_t node_counts[PP_NODE_BUFFER_HEIGHT];
+int32_t nodes[PP_TILE_BUFFER_SIZE * 4][PP_MAX_NODES_PER_SCANLINE * 2];
+uint32_t node_counts[PP_TILE_BUFFER_SIZE * 4];
 
+uint8_t _pp_alpha_map_none[2] = {0, 255};
+uint8_t _pp_alpha_map_x4[5] = {0, 63, 127, 190, 255};
+uint8_t _pp_alpha_map_x16[17] = {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255};
 
 void pp_clip(int32_t x, int32_t y, int32_t w, int32_t h) {
   _pp_clip = (pp_rect_t){.x = x, .y = y, .w = w, .h = h};
@@ -291,12 +294,8 @@ void pp_tile_callback(pp_tile_callback_t callback) {
 }
 
 // maximum tile bounds determined by antialias level
-uint32_t _pp_tile_width, _pp_tile_height;
 void pp_antialias(pp_antialias_t antialias) {
   _pp_antialias = antialias;
-  // recalculate the tile size for rendering based on antialiasing level
-  _pp_tile_height = PP_NODE_BUFFER_HEIGHT >> _pp_antialias;
-  _pp_tile_width = (int)(tile_buffer_size / _pp_tile_height);
 }
 
 pp_mat3_t *pp_transform(pp_mat3_t *transform) {
@@ -329,34 +328,15 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
     int32_t tx = sx; sx = ex; ex = tx;
   }
 
-  // Early out if line is completely outside the tile, or has no lines
-  if (ey < 0 || sy >= (int)PP_NODE_BUFFER_HEIGHT || sy == ey) return;
+  // early out if line is completely outside the tile, or has no gradient
+  if (ey < 0 || sy >= (int)(PP_TILE_BUFFER_SIZE << _pp_antialias) || sy == ey) return;
 
   debug("      + line segment from %d, %d to %d, %d\n", sx, sy, ex, ey);
 
-  // Determine how many in-bounds lines to render
+  // determine how many in-bounds lines to render
   int y = _pp_max(0, sy);
-  int count = _pp_min((int)PP_NODE_BUFFER_HEIGHT, ey) - y;
+  int count = _pp_min((int)(PP_TILE_BUFFER_SIZE << _pp_antialias), ey) - y;
 
-  // Handle cases where x is completely off to one side or other
-  if (_pp_max(sx, ex) <= 0) {
-    while (count--) {
-      nodes[y][node_counts[y]++] = 0;
-      ++y;
-    }
-    return;
-  }
-
-  const int full_tile_width = (_pp_tile_width << _pp_antialias);
-  if (_pp_min(sx, ex) >= full_tile_width) {
-    while (count--) {
-      nodes[y][node_counts[y]++] = full_tile_width;
-      ++y;
-    }
-    return;
-  }
-
-  // Normal case
   int x = sx;
   int e = 0;
 
@@ -364,7 +344,7 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
   const int einc = abs(ex - sx) + 1;
   const int dy = ey - sy;
 
-  // If sy < 0 jump to the start, note this does use a divide
+  // if sy < 0 jump to the start, note this does use a divide
   // but potentially saves many wasted loops below, so is likely worth it.
   if (sy < 0) {
     e = einc * -sy;
@@ -399,8 +379,8 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
     while(e > dy) {e -= dy; x += xinc;}
 
     // clamp node x value to tile bounds
-    int nx = _pp_max(_pp_min(x, full_tile_width), 0);        
-    debug("      + adding node at %d, %d\n", x, y);
+    int nx = _pp_max(_pp_min(x, (PP_TILE_BUFFER_SIZE << _pp_antialias)), 0);        
+    //debug("      + adding node at %d, %d\n", x, y);
     // add node to node list
     nodes[y][node_counts[y]++] = nx;
 
@@ -419,34 +399,17 @@ void build_nodes(pp_path_t *contour, pp_rect_t *bounds) {
     .y = bounds->y * aa_scale
   };
 
-  // start with the last point to close the loop
-  pp_point_t last = {
-    .x = (contour->points[contour->count - 1].x),
-    .y = (contour->points[contour->count - 1].y)
-  };
-
-  if(_pp_transform) {
-    last = pp_point_transform(&last, _pp_transform);
-  }
-
-  last.x *= aa_scale;
-  last.y *= aa_scale;
-
+  // start with the last point to close the loop, transform it, scale for antialiasing, and offset to tile origin  
+  pp_point_t last = contour->points[contour->count - 1];
+  if(_pp_transform) last = pp_point_transform(&last, _pp_transform);
+  last.x *= aa_scale; last.y *= aa_scale;
   last = pp_point_sub(&last, &tile_origin);
 
   for(uint32_t i = 0; i < contour->count; i++) {
-    pp_point_t point = {
-      .x = (contour->points[i].x),
-      .y = (contour->points[i].y)
-    };
-
-    if(_pp_transform) {
-      point = pp_point_transform(&point, _pp_transform);
-    }
-
-    point.x *= aa_scale;
-    point.y *= aa_scale;
-
+    // fetch next point, transform it, scale for antialiasing, and offset to tile origin
+    pp_point_t point = contour->points[i];
+    if(_pp_transform) point = pp_point_transform(&point, _pp_transform);
+    point.x *= aa_scale; point.y *= aa_scale;
     point = pp_point_sub(&point, &tile_origin);
 
     add_line_segment_to_nodes(last, point);
@@ -459,81 +422,72 @@ int compare_nodes(const void* a, const void* b) {
   return *((int*)a) - *((int*)b);
 }
 
-pp_rect_t render_nodes(uint8_t *buffer, pp_rect_t *tb) {
-  int maxy = -1;
+pp_rect_t render_nodes(pp_rect_t *tb) {
+  pp_rect_t rb = {PP_TILE_BUFFER_SIZE << _pp_antialias, PP_TILE_BUFFER_SIZE << _pp_antialias, 0, 0}; // render bounds
 
-  pp_rect_t rb; // render bounds
-  rb.y = 0;
-  rb.x = tb->w;
-  int maxx = 0;
-  PP_COORD_TYPE aa_scale = (PP_COORD_TYPE)(1 << _pp_antialias);
-  int anitialias_mask = (1 << _pp_antialias) - 1;
+  debug("  + render tile %d, %d - %d, %d\n", tb->x, tb->y, tb->w, tb->h);
 
-  for(int32_t y = 0; y < PP_NODE_BUFFER_HEIGHT; y++) {
-    if(node_counts[y] == 0) {
-      if (y == rb.y) ++rb.y;
-      continue;
-    }
+  for(uint32_t y = 0; y < (PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
+
+    // debug("    : row %d node count %d\n", y, node_counts[y]);
+
+    if(node_counts[y] == 0) continue; // no nodes on this raster line
 
     qsort(&nodes[y][0], node_counts[y], sizeof(int), compare_nodes);
 
-    unsigned char* row_data = &buffer[(y >> _pp_antialias) * _pp_tile_width];
-    bool rendered_any = false;
+    unsigned char* row_data = &tile_buffer[(y >> _pp_antialias) * PP_TILE_BUFFER_SIZE];
+
     for(uint32_t i = 0; i < node_counts[y]; i += 2) {
       int sx = nodes[y][i + 0];
       int ex = nodes[y][i + 1];
 
-      if(sx == ex) {
+      if(sx == ex) { // empty span, nothing to do
         continue;
       }
 
-      rendered_any = true;
+      // update render bounds
+      rb.x = _pp_min(rb.x, sx);
+      rb.y = _pp_min(rb.y, y);
+      rb.w = _pp_max(rb.w, ex - rb.x);
+      rb.h = _pp_max(rb.h, y - rb.y + 1);
 
-      maxx = _pp_max((ex - 1) >> _pp_antialias, maxx);
+      //debug(" - render span at %d from %d to %d\n", y, sx, ex);
 
-      debug(" - render span at %d from %d to %d\n", y, sx, ex);
-
-      if (_pp_antialias) {
-        int ax = sx / aa_scale;
-        const int aex = ex / aa_scale;
-
-        rb.x = _pp_min(ax, rb.x);
-
-        if (ax == aex) {
-          row_data[ax] += ex - sx;
-          continue;
-        }
-
-        row_data[ax] += aa_scale - (sx & anitialias_mask);
-        for(ax++; ax < aex; ax++) {
-          row_data[ax] += aa_scale;
-        }
-
-        // This might add 0 to the byte after the end of the row, we pad the tile data
-        // by 1 byte to ensure that is OK
-        row_data[ax] += ex & anitialias_mask;
-      } else {
-        rb.x = _pp_min(sx, rb.x);
-        for(int x = sx; x < ex; x++) {
-          row_data[x]++;
-        }       
-      }
-    }
-
-    if (rendered_any) {
-      debug("  - rendered line %d\n", y);
-      maxy = y;
-    }
-    else if (y == rb.y) {
-      debug(" - render nothing on line %d\n", y);
-      ++rb.y;
+      // rasterise the span into the tile buffer
+      do {
+        row_data[sx >> _pp_antialias]++;
+      } while(++sx < ex);
     }
   }
 
+  // shifting the width and height effectively "floors" the result which can
+  // mean we lose a pixel off the right or bottom edge of the tile. by adding
+  // either 1 (at x4) or 3 (at x16) we change that to a "ceil" instead ensuring
+  // the full tile bounds are returned
+  if(_pp_antialias) {
+    rb.w += (_pp_antialias | 0b1);
+    rb.h += (_pp_antialias | 0b1);
+  }
+
+  rb.x >>= _pp_antialias;
   rb.y >>= _pp_antialias;
-  maxy >>= _pp_antialias;
-  rb.w = (maxx >= rb.x) ? maxx + 1 - rb.x : 0;
-  rb.h = (maxy >= rb.y) ? maxy + 1 - rb.y : 0;
+  rb.w >>= _pp_antialias;
+  rb.h >>= _pp_antialias;
+
+  uint8_t *p_alpha_map = _pp_alpha_map_none;
+  if(_pp_antialias == 1) p_alpha_map = _pp_alpha_map_x4;
+  if(_pp_antialias == 2) p_alpha_map = _pp_alpha_map_x16;
+  #if PP_SCALE_TO_ALPHA == 1
+    for(int y = rb.y; y < rb.y + rb.h; y++) {
+      unsigned char* row_data = &tile_buffer[y * PP_TILE_BUFFER_SIZE + rb.x];
+      for(int x = rb.x; x < rb.x + rb.w; x++) {      
+        *row_data = p_alpha_map[*row_data];
+        row_data++;
+      }
+    }
+  #endif
+
+  debug("    : rendered tile bounds %d, %d (%d x %d)\n", rb.x, rb.y, rb.w, rb.h);
 
   return rb;
 }
@@ -569,9 +523,9 @@ void pp_render(pp_poly_t *polygon) {
 
   // iterate over tiles
   debug("  - processing tiles\n");
-  for(int32_t y = polygon_bounds.y; y < polygon_bounds.y + polygon_bounds.h; y += _pp_tile_height) {
-    for(int32_t x = polygon_bounds.x; x < polygon_bounds.x + polygon_bounds.w; x += _pp_tile_width) {
-      pp_rect_t tb = (pp_rect_t){.x = x, .y = y, .w = _pp_tile_width, .h = _pp_tile_height};
+  for(int32_t y = polygon_bounds.y; y < polygon_bounds.y + polygon_bounds.h; y += PP_TILE_BUFFER_SIZE) {
+    for(int32_t x = polygon_bounds.x; x < polygon_bounds.x + polygon_bounds.w; x += PP_TILE_BUFFER_SIZE) {
+      pp_rect_t tb = (pp_rect_t){.x = x, .y = y, .w = PP_TILE_BUFFER_SIZE, .h = PP_TILE_BUFFER_SIZE};
       tb = pp_rect_intersection(&tb, &_pp_clip);
       debug("    : %d, %d (%d x %d)\n", tb.x, tb.y, tb.w, tb.h);
 
@@ -580,7 +534,7 @@ void pp_render(pp_poly_t *polygon) {
 
       // clear existing tile data and nodes
       memset(node_counts, 0, sizeof(node_counts));
-      memset(tile_buffer, 0, tile_buffer_size);
+      memset(tile_buffer, 0, PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE);
 
       // build the nodes for each pp_path_t
       for(uint32_t i = 0; i < polygon->count; i++) {
@@ -592,17 +546,15 @@ void pp_render(pp_poly_t *polygon) {
       debug("    : render the tile\n");
       // render the tile
 
-      pp_rect_t rb = render_nodes(tile_buffer, &tb);
+      pp_rect_t rb = render_nodes(&tb);
       tb.x += rb.x; tb.y += rb.y; tb.w = rb.w; tb.h = rb.h;
-
-      debug(" - adjusted render tile bounds %d, %d (%d x %d)\n", rb.x, rb.y, rb.w, rb.h);
 
       if(pp_rect_empty(&tb)) { debug("    : empty after rendering, skipping\n"); continue; }
 
       pp_tile_t tile = {        
         .x = tb.x, .y = tb.y, .w = tb.w, .h = tb.h,
-        .stride = (uint32_t)_pp_tile_width,
-        .data = tile_buffer + rb.x + _pp_tile_width * rb.y
+        .stride = PP_TILE_BUFFER_SIZE,
+        .data = tile_buffer + rb.x + (PP_TILE_BUFFER_SIZE * rb.y)
       };
 
       _pp_tile_callback(&tile);
