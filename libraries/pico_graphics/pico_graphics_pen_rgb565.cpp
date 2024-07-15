@@ -54,25 +54,30 @@ namespace pimoroni {
                 uint16_t dest = *pdest;
                 uint8_t alpha = *palpha >> 3;
 
-                // blend tha pixel                
-                // expand the pen colour to provide space to multiple all 
-                // channels at once
-                uint32_t cs = 0;
-                cs |= ((color & 0b1111100000000000) << 11); // red
-                cs |= ((color & 0b0000011111100000) <<  5); // green
-                cs |= ((color & 0b0000000000011111)      ); // blue
+                if(alpha == 255) {
+                  *pdest = color;
+                }if(alpha == 0) {
+                }else{
+                  // blend tha pixel                
+                  // expand the pen colour to provide space to multiple all 
+                  // channels at once
+                  uint32_t cs = 0;
+                  cs |= ((color & 0b1111100000000000) << 11); // red
+                  cs |= ((color & 0b0000011111100000) <<  5); // green
+                  cs |= ((color & 0b0000000000011111)      ); // blue
 
-                uint32_t cd = 0;
-                cd |= ((dest  & 0b1111100000000000) << 11); // red
-                cd |= ((dest  & 0b0000011111100000) <<  5); // green
-                cd |= ((dest  & 0b0000000000011111)      ); // blue
+                  uint32_t cd = 0;
+                  cd |= ((dest  & 0b1111100000000000) << 11); // red
+                  cd |= ((dest  & 0b0000011111100000) <<  5); // green
+                  cd |= ((dest  & 0b0000000000011111)      ); // blue
 
-                uint32_t cr = ((cs * alpha) + (cd * (31 - alpha)))>> 5;
+                  uint32_t cr = ((cs * alpha) + (cd * (31 - alpha)))>> 5;
 
-                // recombine the channels
-                *pdest  = ((cr >> 27) & 0b1111100000000000);
-                *pdest |= ((cr >> 11) & 0b0000011111100000);
-                *pdest |= ((cr >> 5) & 0b0000000000011111);
+                  // recombine the channels
+                  *pdest  = ((cr >> 27) & 0b1111100000000000);
+                  *pdest |= ((cr >> 11) & 0b0000011111100000);
+                  *pdest |= ((cr >> 5) & 0b0000000000011111);
+                }
 
                 pdest++;
                 palpha++;
