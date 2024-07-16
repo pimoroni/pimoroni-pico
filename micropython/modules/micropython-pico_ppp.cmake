@@ -11,3 +11,6 @@ include(micropython-common)
 
 # C++ Magic Memory
 include(cppmem/micropython)
+
+# Disable build-busting C++ exceptions
+include(micropython-disable-exceptions)
