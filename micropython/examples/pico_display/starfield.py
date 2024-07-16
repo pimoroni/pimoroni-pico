@@ -1,5 +1,5 @@
 # Travel through a Windows 3.1-esque starfield, with stars growing as they get 'closer'.
-# # If you have a Display Pack 2.0" or 2.8" use DISPLAY_PICO_DISPLAY_2 instead of DISPLAY_PICO_DISPLAY
+# If you have a Display Pack 2.0" or 2.8" use DISPLAY_PICO_DISPLAY_2 instead of DISPLAY_PICO_DISPLAY
 
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 import random
