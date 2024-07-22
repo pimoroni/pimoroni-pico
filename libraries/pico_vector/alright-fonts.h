@@ -216,27 +216,20 @@ af_glyph_t *find_glyph(af_face_t *face, char c) {
 void af_render_glyph(af_glyph_t* glyph, af_text_metrics_t *tm) {
   assert(glyph != NULL);
 
-  pp_poly_t poly;
-  poly.count = glyph->path_count;
-  poly.paths = (pp_path_t *)AF_MALLOC(poly.count * sizeof(pp_path_t));
-  for(uint32_t i = 0; i < poly.count; i++) {
-    pp_path_t *path = &poly.paths[i];
-    path->count = glyph->paths[i].point_count;
-    path->points = (pp_point_t *)AF_MALLOC(glyph->paths[i].point_count * sizeof(pp_point_t));
-    for(uint32_t j = 0; j < path->count; j++) {
-      pp_point_t *point = &path->points[j];
-      point->x = glyph->paths[i].points[j].x;
-      point->y = glyph->paths[i].points[j].y;
+  pp_poly_t *poly = pp_poly_new();
+  for(uint32_t i = 0; i < glyph->path_count; i++) {
+    pp_path_t *path = pp_poly_add_path(poly);
+    for(uint32_t j = 0; j < glyph->paths[i].point_count; j++) {
+      pp_path_add_point(path, {
+        glyph->paths[i].points[j].x,
+        glyph->paths[i].points[j].y
+      });
     }
   }
 
-  pp_render(&poly);
+  pp_render(poly);
 
-  for(uint32_t i = 0; i < poly.count; i++) {
-    pp_path_t *path = &poly.paths[i];
-    AF_FREE(path->points);
-  }
-  AF_FREE(poly.paths);
+  pp_poly_free(poly);
 }
 
 void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {

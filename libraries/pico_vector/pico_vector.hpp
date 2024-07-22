@@ -109,13 +109,19 @@ namespace pimoroni {
             void draw(pp_poly_t *poly, pp_mat3_t *t);
 
             void draw(pp_path_t *path) {
-                pp_poly_t poly = {.paths = path, .count = 1};
-                draw(&poly);
+                pp_poly_t *poly = pp_poly_new();
+                poly->paths = path;
+                draw(poly);
+                poly->paths = NULL; // Don't free our non-owned path
+                pp_poly_free(poly);
             };
 
             void draw(pp_path_t *path, pp_mat3_t *t) {
-                pp_poly_t poly = {.paths = path, .count = 1};
-                draw(&poly, t);
+                pp_poly_t *poly = pp_poly_new();
+                poly->paths = path;
+                draw(poly, t);
+                poly->paths = NULL; // Don't free our non-owned path
+                pp_poly_free(poly);
             };
 
             static constexpr size_t pretty_poly_buffer_size() {
