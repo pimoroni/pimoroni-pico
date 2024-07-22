@@ -128,11 +128,28 @@ namespace pimoroni {
             uint8_t *pdest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
             for(int x = 0; x < tile->w; x++) {
                 uint8_t alpha = *palpha;
+                uint8_t dest = *pdest;
 
                 // TODO: Try to alpha blend RGB332... somewhat?
-                if(alpha == 0) {
-                } else {
+                if(alpha == 255) {
                   *pdest = color;
+                }else if(alpha == 0) {
+                }else{
+                  // blend tha pixel
+                  uint16_t sr = (color & 0b11100000) >> 5;
+                  uint16_t sg = (color & 0b00011100) >> 2;
+                  uint16_t sb = (color & 0b00000011);
+
+                  uint16_t dr = (dest & 0b11100000) >> 5;
+                  uint16_t dg = (dest & 0b00011100) >> 2;
+                  uint16_t db = (dest & 0b00000011);
+
+                  uint8_t r = ((sr * alpha) + (dr * (255 - alpha))) >> 8;
+                  uint8_t g = ((sg * alpha) + (dg * (255 - alpha))) >> 8;
+                  uint8_t b = ((sb * alpha) + (db * (255 - alpha))) >> 8;
+
+                  // recombine the channels
+                  *pdest  = (r << 5) | (g << 2) | (b);
                 }
 
                 pdest++;

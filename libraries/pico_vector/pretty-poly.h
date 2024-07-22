@@ -100,15 +100,26 @@ typedef struct {
   uint8_t *data;
 } pp_tile_t;
 
-typedef struct {
+typedef struct _pp_path_t {
   pp_point_t *points;
-  uint32_t count;
+  int count;                  // number of points currently stored in points buffer
+  int storage;                // size of *points buffer
+  struct _pp_path_t *next;            // next path in the linked list
 } pp_path_t;
+void pp_path_add_point(pp_path_t *path, pp_point_t p);
+void pp_path_add_points(pp_path_t *path, pp_point_t *p, int count);
+void pp_path_add_path(pp_path_t *path, pp_path_t *other);
+pp_rect_t pp_path_bounds(const pp_path_t *c);
 
 typedef struct {
-  pp_path_t *paths;
-  uint32_t count;
+  pp_path_t *paths;  
 } pp_poly_t;
+pp_poly_t *pp_poly_new();
+void pp_poly_free(pp_poly_t *poly);
+pp_path_t* pp_poly_tail_path(pp_poly_t *p);
+pp_path_t* pp_poly_add_path(pp_poly_t *p);
+pp_rect_t pp_poly_bounds(pp_poly_t *p);
+int pp_poly_path_count(pp_poly_t *p);
 
 // user settings
 typedef void (*pp_tile_callback_t)(const pp_tile_t *tile);
@@ -124,8 +135,6 @@ void pp_antialias(pp_antialias_t antialias);
 pp_mat3_t *pp_transform(pp_mat3_t *transform);
 void pp_render(pp_poly_t *polygon);
 
-pp_rect_t pp_contour_bounds(const pp_path_t *c);
-pp_rect_t pp_polygon_bounds(pp_poly_t *p);
 
 #ifdef __cplusplus
 }
@@ -249,25 +258,102 @@ uint8_t pp_tile_get(const pp_tile_t *tile, const int32_t x, const int32_t y) {
   return tile->data[(x - tile->x) + (y - tile->y) * PP_TILE_BUFFER_SIZE];
 }
 
+pp_poly_t *pp_poly_new() {
+  pp_poly_t *poly = (pp_poly_t *)PP_MALLOC(sizeof(pp_poly_t));
+  poly->paths = NULL;
+  return poly;
+}
+
+void pp_poly_free(pp_poly_t *poly) {
+  if(poly->paths) {
+    pp_path_t *path = poly->paths;
+    while(path) {
+      PP_FREE(path->points);
+      pp_path_t *free_path = path;
+      path = path->next;
+      PP_FREE(free_path);
+    }
+  }
+  PP_FREE(poly);
+}
+
+// polygon and path implementation
+pp_path_t* pp_poly_tail_path(pp_poly_t *poly) {
+  pp_path_t *path = poly->paths;
+  while(path->next) path = path->next;
+  return path;
+}
+
+int pp_poly_path_count(pp_poly_t *poly) {
+  if(!poly->paths) return 0;
+  pp_path_t *path = poly->paths;
+  int i = 0;
+  while(path->next) {
+    i++;
+    path = path->next;
+  }
+  return i;
+}
+
+pp_path_t* pp_poly_add_path(pp_poly_t *poly) {  
+  pp_path_t *path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
+  memset(path, 0, sizeof(pp_path_t));
+  path->storage = 8;
+  path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * path->storage);
+
+  if(!poly->paths) {
+    poly->paths = path;
+  }else{
+    pp_path_t *tail = pp_poly_tail_path(poly);
+    tail->next = path;
+  }
+  
+  return path;
+}
+
+pp_point_t* pp_path_tail_point(pp_path_t *path) {
+  return (path->count > 0) ? &path->points[path->count -1] : NULL;
+}
+
+void pp_path_add_point(pp_path_t *path, pp_point_t p) {
+  if(path->count == path->storage) { // no storage left, double buffer size
+    path->points = (pp_point_t *)PP_REALLOC(path->points, sizeof(pp_point_t) * (path->storage * 2));
+    path->storage *= 2;
+  }
+  path->points[path->count] = p;
+  path->count++;
+}
+
+void pp_path_add_points(pp_path_t *path, pp_point_t *points, int count) {
+  if(count + path->count > path->storage) { // not enough storage, allocate
+    path->points = (pp_point_t *)PP_REALLOC(path->points, sizeof(pp_point_t) * (count + path->count));
+    path->storage = count + path->count;
+  }
+  memcpy(&path->points[count], points, sizeof(pp_point_t) * count);
+  path->count += count; 
+}
+
 // pp_contour_t implementation
-pp_rect_t pp_contour_bounds(const pp_path_t *c) {
-  int minx = c->points[0].x, maxx = minx;
-  int miny = c->points[0].y, maxy = miny;
-  for(uint32_t i = 1; i < c->count; i++) {
-    minx = _pp_min(minx, c->points[i].x);
-    miny = _pp_min(miny, c->points[i].y);
-    maxx = _pp_max(maxx, c->points[i].x); 
-    maxy = _pp_max(maxy, c->points[i].y);
-  }  
-  return (pp_rect_t){.x = minx, .y = miny, .w = maxx - minx, .h = maxy - miny};
+pp_rect_t pp_path_bounds(const pp_path_t *path) {  
+  int minx = INT_MAX, maxx = -INT_MAX, miny = INT_MAX, maxy = -INT_MAX;
+  for(int i = 0; i < path->count; i++) {
+    minx = _pp_min(minx, path->points[i].x);
+    miny = _pp_min(miny, path->points[i].y);
+    maxx = _pp_max(maxx, path->points[i].x); 
+    maxy = _pp_max(maxy, path->points[i].y);
+  }
+  return (pp_rect_t){minx, miny, maxx - minx, maxy - miny};
 }
 
 pp_rect_t pp_polygon_bounds(pp_poly_t *p) {
-  if(p->count == 0) {return (pp_rect_t){};}
-  pp_rect_t b = pp_contour_bounds(&p->paths[0]);
-  for(uint32_t i = 1; i < p->count; i++) {
-    pp_rect_t cb = pp_contour_bounds(&p->paths[i]);
+  pp_path_t *path = p->paths;
+  if(!path) return (pp_rect_t){};  
+  pp_rect_t b = pp_path_bounds(path);
+  path = path->next;
+  while(path) {
+    pp_rect_t cb = pp_path_bounds(path);
     b = pp_rect_merge(&b, &cb);
+    path = path->next;
   }
   return b;
 }
@@ -391,30 +477,24 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end) {
 //#endif
 }
 
-void build_nodes(pp_path_t *contour, pp_rect_t *bounds) {
+void build_nodes(pp_path_t *path, pp_rect_t *tb) {
   PP_COORD_TYPE aa_scale = (PP_COORD_TYPE)(1 << _pp_antialias);
 
-  pp_point_t tile_origin = (pp_point_t) {
-    .x = bounds->x * aa_scale,
-    .y = bounds->y * aa_scale
-  };
+  pp_point_t tile_origin = (pp_point_t){tb->x * aa_scale, tb->y * aa_scale};
 
   // start with the last point to close the loop, transform it, scale for antialiasing, and offset to tile origin  
-  pp_point_t last = contour->points[contour->count - 1];
+  pp_point_t last = path->points[path->count - 1];
   if(_pp_transform) last = pp_point_transform(&last, _pp_transform);
   last.x *= aa_scale; last.y *= aa_scale;
   last = pp_point_sub(&last, &tile_origin);
-
-  for(uint32_t i = 0; i < contour->count; i++) {
-    // fetch next point, transform it, scale for antialiasing, and offset to tile origin
-    pp_point_t point = contour->points[i];
-    if(_pp_transform) point = pp_point_transform(&point, _pp_transform);
-    point.x *= aa_scale; point.y *= aa_scale;
-    point = pp_point_sub(&point, &tile_origin);
-
-    add_line_segment_to_nodes(last, point);
-    
-    last = point;
+  
+  for(int i = 0; i < path->count; i++) {
+    pp_point_t next = path->points[i];      
+    if(_pp_transform) next = pp_point_transform(&next, _pp_transform);
+    next.x *= aa_scale; next.y *= aa_scale;
+    next = pp_point_sub(&next, &tile_origin);
+    add_line_segment_to_nodes(last, next);
+    last = next;
   }
 }
 
@@ -497,20 +577,18 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
 
 void pp_render(pp_poly_t *polygon) {
 
-  debug("> draw polygon with %u contours\n", polygon->count);
+  debug("> draw polygon with %u contours\n", pp_poly_path_count(polygon));
 
-  if(polygon->count == 0) {
-    return;
-  }
+  if(!polygon->paths) return;
 
   // determine extreme bounds
-  pp_rect_t polygon_bounds = pp_polygon_bounds(polygon);
+  pp_rect_t pb = pp_polygon_bounds(polygon);
 
   if(_pp_transform) {
-    polygon_bounds = pp_rect_transform(&polygon_bounds, _pp_transform);
+    pb = pp_rect_transform(&pb, _pp_transform);
   }
 
-  debug("  - polygon bounds %d, %d (%d x %d)\n", polygon_bounds.x, polygon_bounds.y, polygon_bounds.w, polygon_bounds.h);
+  debug("  - polygon bounds %d, %d (%d x %d)\n", pb.x, pb.y, pb.w, pb.h);
   debug("  - clip %d, %d (%d x %d)\n", _pp_clip.x, _pp_clip.y, _pp_clip.w, _pp_clip.h);
 
 #ifdef USE_RP2040_INTERP
@@ -526,8 +604,8 @@ void pp_render(pp_poly_t *polygon) {
 
   // iterate over tiles
   debug("  - processing tiles\n");
-  for(int32_t y = polygon_bounds.y; y < polygon_bounds.y + polygon_bounds.h; y += PP_TILE_BUFFER_SIZE) {
-    for(int32_t x = polygon_bounds.x; x < polygon_bounds.x + polygon_bounds.w; x += PP_TILE_BUFFER_SIZE) {
+  for(int32_t y = pb.y; y < pb.y + pb.h; y += PP_TILE_BUFFER_SIZE) {
+    for(int32_t x = pb.x; x < pb.x + pb.w; x += PP_TILE_BUFFER_SIZE) {
       pp_rect_t tb = (pp_rect_t){.x = x, .y = y, .w = PP_TILE_BUFFER_SIZE, .h = PP_TILE_BUFFER_SIZE};
       tb = pp_rect_intersection(&tb, &_pp_clip);
       debug("    : %d, %d (%d x %d)\n", tb.x, tb.y, tb.w, tb.h);
@@ -540,11 +618,13 @@ void pp_render(pp_poly_t *polygon) {
       memset(tile_buffer, 0, PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE);
 
       // build the nodes for each pp_path_t
-      for(uint32_t i = 0; i < polygon->count; i++) {
-        pp_path_t pp_path_t = polygon->paths[i];
-        debug("    : build nodes for path\n");
-        build_nodes(&pp_path_t, &tb);
-      }
+      pp_path_t *path = polygon->paths;
+      if(!path) return;
+      do {
+        debug("    : build nodes for path (%d points)\n", path->count);
+        build_nodes(path, &tb);
+        path = path->next;
+      } while(path);
 
       debug("    : render the tile\n");
       // render the tile

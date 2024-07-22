@@ -31,7 +31,7 @@ namespace pimoroni {
   }
 
   void PicoVector::transform(pp_path_t *path, pp_mat3_t *t) {
-    for (auto j = 0u; j < path->count; j++) {
+    for (auto j = 0; j < path->count; j++) {
       path->points[j] = pp_point_transform(&path->points[j], t);
     }
   }
@@ -51,8 +51,10 @@ namespace pimoroni {
   }
 
   void PicoVector::transform(pp_poly_t *poly, pp_mat3_t *t) {
-    for (auto i = 0u; i < poly->count; i++) {
-      transform(&poly->paths[i], t);
+    pp_path_t *path = poly->paths;
+    while(path) {
+      transform(path, t);
+      path = path->next;
     }
   }
 
