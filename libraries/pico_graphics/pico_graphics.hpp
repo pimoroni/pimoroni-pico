@@ -142,6 +142,12 @@ namespace pimoroni {
 
   typedef int Pen;
 
+  struct Tile {
+    int32_t x, y, w, h;
+    uint32_t stride;
+    uint8_t *data;
+  };
+
   struct Rect;
 
   struct Point {
@@ -293,7 +299,7 @@ namespace pimoroni {
     virtual void frame_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
-    virtual bool render_pico_vector_tile(const Rect &bounds, uint8_t* alpha_data, uint32_t stride, uint8_t alpha_type) { return false; }
+    virtual bool render_tile(const Tile *tile) { return false; }
 
     void set_font(const bitmap::font_t *font);
     void set_font(const hershey::font_t *font);
@@ -440,6 +446,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenP8 : public PicoGraphics {
@@ -473,6 +481,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB332 : public PicoGraphics {
@@ -497,6 +507,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB565 : public PicoGraphics {
@@ -516,6 +528,8 @@ namespace pimoroni {
       void set_pixel_alpha(const Point &p, const uint8_t a) override;
 
       bool supports_alpha_blend() override {return true;}
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB888 : public PicoGraphics {
@@ -532,6 +546,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(uint32_t);
       }
+
+      bool render_tile(const Tile *tile);
   };
 
 
