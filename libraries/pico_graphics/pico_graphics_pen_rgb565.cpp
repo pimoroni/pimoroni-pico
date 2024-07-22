@@ -93,4 +93,41 @@ namespace pimoroni {
             }
         }
     }
+
+    bool PicoGraphics_PenRGB565::render_tile(const Tile *tile) {
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+            uint16_t *pdest = &((uint16_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            for(int x = 0; x < tile->w; x++) {
+                uint16_t dest = *pdest;
+                uint8_t alpha = *palpha;
+
+                if(alpha == 255) {
+                  *pdest = color;
+                }else if(alpha == 0) {
+                }else{
+                  // blend tha pixel
+                  uint16_t sr = (color & 0b1111100000000000) >> 11;
+                  uint16_t sg = (color & 0b0000011111100000) >> 5;
+                  uint16_t sb = (color & 0b0000000000011111);
+
+                  uint16_t dr = (dest & 0b1111100000000000) >> 11;
+                  uint16_t dg = (dest & 0b0000011111100000) >> 5;
+                  uint16_t db = (dest & 0b0000000000011111);
+
+                  uint8_t r = ((sr * alpha) + (dr * (255 - alpha))) >> 8;
+                  uint8_t g = ((sg * alpha) + (dg * (255 - alpha))) >> 8;
+                  uint8_t b = ((sb * alpha) + (db * (255 - alpha))) >> 8;
+
+                  // recombine the channels
+                  *pdest  = (r << 11) | (g << 5) | (b);
+                }
+
+                pdest++;
+                palpha++;
+            }
+        }
+
+        return true;
+    }
 }
