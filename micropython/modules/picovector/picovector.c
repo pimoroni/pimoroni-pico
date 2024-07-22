@@ -114,6 +114,8 @@ static const mp_map_elem_t VECTOR_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_NONE), MP_ROM_INT(0) },
     { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_X4), MP_ROM_INT(1) },
     { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_X16), MP_ROM_INT(2) },
+    { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_FAST), MP_ROM_INT(1) },
+    { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_BEST), MP_ROM_INT(2) },
 };
 
 static MP_DEFINE_CONST_DICT(mp_module_VECTOR_globals, VECTOR_globals_table);
