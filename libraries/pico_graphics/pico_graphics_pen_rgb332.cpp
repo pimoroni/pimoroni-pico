@@ -145,4 +145,24 @@ namespace pimoroni {
             }
         }
     }
+    bool PicoGraphics_PenRGB332::render_tile(const Tile *tile) {
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+            uint8_t *pdest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            for(int x = 0; x < tile->w; x++) {
+                uint8_t alpha = *palpha;
+
+                // TODO: Try to alpha blend RGB332... somewhat?
+                if(alpha == 0) {
+                } else {
+                  *pdest = color;
+                }
+
+                pdest++;
+                palpha++;
+            }
+        }
+
+        return true;
+    }
 }
