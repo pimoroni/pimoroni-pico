@@ -185,4 +185,27 @@ namespace pimoroni {
             }
         }
     }
+    bool PicoGraphics_PenP4::render_tile(const Tile *tile) {
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+            uint8_t *pdest = &((uint8_t *)frame_buffer)[(tile->x / 2) + ((tile->y + y) * (bounds.w / 2))];
+            for(int x = 0; x < tile->w; x++) {
+                uint8_t shift = (x & 1) ? 0 : 4;
+                uint8_t alpha = *palpha;
+
+                if(alpha == 0) {
+                } else {
+                  *pdest &= shift ? 0x0f : 0xf0;
+                  *pdest |= color << shift;
+                }
+
+                if(x & 1) {
+                    pdest++;
+                }
+                palpha++;
+            }
+        }
+
+        return true;
+    }
 }
