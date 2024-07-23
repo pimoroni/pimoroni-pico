@@ -31,16 +31,15 @@ int main() {
 
     pp_point_t outline[] = {{-128, -128}, {128, -128}, {128, 128}, {-128, 128}};
     pp_point_t hole[]    = {{ -64,   64}, { 64,   64}, { 64, -64}, { -64, -64}};
-    pp_path_t paths[] = {
-        {.points = outline, .count = 4},
-        {.points = hole,    .count = 4}
-    };
-    pp_poly_t poly = {.paths = paths, .count = 2};
 
-    vector.rotate(&poly, {0, 0}, angle);
-    vector.translate(&poly, {160, 120});
+    pp_poly_t *poly = pp_poly_new();
+    pp_path_add_points(pp_poly_add_path(poly), outline, sizeof(outline) / sizeof(pp_point_t));
+    pp_path_add_points(pp_poly_add_path(poly), hole, sizeof(hole) / sizeof(pp_point_t));
 
-    vector.draw(&poly);
+    vector.rotate(poly, {0, 0}, angle);
+    vector.translate(poly, {160, 120});
+
+    vector.draw(poly);
 
     //pp_mat3_t t = pp_mat3_identity();
     //vector.text("Hello World", {0, 0}, &t);
@@ -49,6 +48,8 @@ int main() {
     st7789.update(&graphics);
 
     angle += 1.0f;
+
+    pp_poly_free(poly);
   }
 
     return 0;
