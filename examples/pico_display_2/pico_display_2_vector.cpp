@@ -42,16 +42,15 @@ int main() {
 
         pp_point_t outline[] = {{-64, -64}, {64, -64}, {64, 64}, {-64, 64}};
         pp_point_t hole[]    = {{ -32,   32}, { 32,   32}, { 32, -32}, { -32, -32}};
-        pp_path_t paths[] = {
-            {.points = outline, .count = 4},
-            {.points = hole,    .count = 4}
-        };
-        pp_poly_t poly = {.paths = paths, .count = 2};
+
+        pp_poly_t *poly = pp_poly_new();
+        pp_path_add_points(pp_poly_add_path(poly), outline, sizeof(outline) / sizeof(pp_point_t));
+        pp_path_add_points(pp_poly_add_path(poly), hole, sizeof(hole) / sizeof(pp_point_t));
 
         pp_mat3_t pos = pp_mat3_identity();
         pp_mat3_translate(&pos, 50, 50);
         pp_mat3_rotate(&pos, a);
-        vector.draw(&poly);
+        vector.draw(poly);
         vector.text("Hello World", &pos);
 
         // update screen
@@ -60,6 +59,8 @@ int main() {
         if (a > 359) {
             a = 0;
         }
+
+        pp_poly_free(poly);
     }
 
     return 0;
