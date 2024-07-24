@@ -3,6 +3,7 @@ from network_manager import NetworkManager
 import uasyncio
 import urequests
 import time
+import gc
 import plasma
 from plasma import plasma_stick
 # Random functions! randrange is for picking integers from a range, and uniform is for floats.
@@ -258,3 +259,5 @@ while True:
 
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip
+    gc.collect()
+
