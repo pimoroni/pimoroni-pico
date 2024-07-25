@@ -1,7 +1,9 @@
 #define PP_IMPLEMENTATION
 #define AF_IMPLEMENTATION
+#define PPP_IMPLEMENTATION
 #include "pico_vector.hpp"
 #include <vector>
+
 
 namespace pimoroni {
   PicoGraphics *PicoVector::graphics = nullptr;
