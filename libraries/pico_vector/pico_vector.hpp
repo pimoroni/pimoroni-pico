@@ -17,6 +17,7 @@
 #define AF_DEBUG(...)          af_debug(__VA_ARGS__)
 
 #include "pretty-poly.h"
+#include "pretty-poly-primitives.h"
 #include "alright-fonts.h"
 #include "pico_graphics.hpp"
 
@@ -29,10 +30,10 @@ namespace pimoroni {
 
     class PicoVector {
         private:
-            static PicoGraphics *graphics;
             af_text_metrics_t text_metrics;
 
         public:
+            static PicoGraphics *graphics;
             PicoVector(PicoGraphics *graphics, void *mem = nullptr) {
                 PicoVector::graphics = graphics;
 
