@@ -25,10 +25,15 @@ typedef struct _VECTOR_obj_t {
     PicoVector *vector;
 } _VECTOR_obj_t;
 
-typedef struct _PATH_obj_t {
+typedef struct _TRANSFORM_obj_t {
     mp_obj_base_t base;
-    pp_path_t *path;
-} _PATH_obj_t;
+    pp_mat3_t transform;
+} _TRANSFORM_obj_t;
+
+typedef struct _POLY_obj_t {
+    mp_obj_base_t base;
+    pp_poly_t *poly;
+} _POLY_obj_t;
 
 void __printf_debug_flush() {
     for(auto i = 0u; i < 10; i++) {
@@ -54,20 +59,22 @@ void af_debug(const char *fmt, ...) {
 void *af_malloc(size_t size) {
     //mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
     //__printf_debug_flush();
-    void *addr = m_tracked_calloc(sizeof(uint8_t), size);
+    //void *addr = m_tracked_calloc(sizeof(uint8_t), size);
+    void *addr = m_malloc(size);
     //mp_printf(&mp_plat_print, "addr %lu\n", addr);
     //__printf_debug_flush();
     return addr;
 }
 
 void *af_realloc(void *p, size_t size) {
-    return NULL;
+    return m_realloc(p, size);
 }
 
 void af_free(void *p) {
     //mp_printf(&mp_plat_print, "af_free\n");
     //__printf_debug_flush();
-    m_tracked_free(p);
+    //m_tracked_free(p);
+    m_free(p);
 }
 
 void* fileio_open(const char *filename) {
@@ -157,89 +164,25 @@ static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
 
 /* POLYGON */
 
-mp_obj_t RECTANGLE_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    enum { ARG_x, ARG_y, ARG_w, ARG_h };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
-    self->path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
-    self->path->storage = 4;
-    self->path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * self->path->storage);
-
-    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
-    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
-    picovector_point_type w = mp_picovector_get_point_type(args[ARG_w].u_obj);
-    picovector_point_type h = mp_picovector_get_point_type(args[ARG_h].u_obj);
-
-    pp_path_add_point(self->path, {picovector_point_type(x), picovector_point_type(y)});
-    pp_path_add_point(self->path, {picovector_point_type(x + w), picovector_point_type(y)});
-    pp_path_add_point(self->path, {picovector_point_type(x + w), picovector_point_type(y + h)});
-    pp_path_add_point(self->path, {picovector_point_type(x), picovector_point_type(y + h)});
-
-    return self;
-}
-
-mp_obj_t REGULAR_POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    enum { ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_rotation };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_sides, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_rotation, MP_ARG_OBJ, {.u_obj = mp_const_none} },
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
-
-    Point origin(args[ARG_x].u_int, args[ARG_y].u_int);
-    unsigned int sides = args[ARG_sides].u_int;
-    float radius =  mp_obj_get_float(args[ARG_radius].u_obj);
-    float rotation = 0.0f;
-    if (args[ARG_rotation].u_obj != mp_const_none) {
-        rotation = mp_obj_get_float(args[ARG_rotation].u_obj);
-        rotation *= (M_PI / 180.0f);
-    }
-    picovector_point_type o_x = mp_picovector_get_point_type(args[ARG_x].u_obj);
-    picovector_point_type o_y = mp_picovector_get_point_type(args[ARG_y].u_obj);
-
-    float angle = (360.0f / sides) * (M_PI / 180.0f);
-
-
-    self->path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
-    self->path->storage = sides;
-    self->path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * self->path->storage);
-
-    for(auto s = 0u; s < sides; s++) {
-        float current_angle = angle * s + rotation;
-        pp_path_add_point(self->path, {
-            (picovector_point_type)(cos(current_angle) * radius) + o_x,
-            (picovector_point_type)(sin(current_angle) * radius) + o_y
-        });
-    }
-
-    return self;
-}
-
 mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    _PATH_obj_t *self = mp_obj_malloc_with_finaliser(_PATH_obj_t, &POLYGON_type);
+    _POLY_obj_t *self = mp_obj_malloc_with_finaliser(_POLY_obj_t, &POLYGON_type);
+    self->poly = pp_poly_new();
+    return self;
+}
 
-    size_t num_points = n_args;
-    const mp_obj_t *points = all_args;
+mp_obj_t POLYGON__del__(mp_obj_t self_in) {
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
+    pp_poly_free(self->poly);
+    return mp_const_none;
+}
 
-    self->path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
-    self->path->storage = num_points;
-    self->path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * self->path->storage);
+mp_obj_t POLYGON_path(size_t n_args, const mp_obj_t *all_args) {
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(all_args[0], _POLY_obj_t);
+
+    size_t num_points = n_args - 1;
+    const mp_obj_t *points = all_args + 1;
+
+    pp_path_t *path = pp_poly_add_path(self->poly);
 
     if(num_points < 3) mp_raise_ValueError("Polygon: At least 3 points required.");
 
@@ -252,28 +195,179 @@ mp_obj_t POLYGON_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
         if(t_point->len != 2) mp_raise_ValueError("Tuple must have X, Y");
 
-        pp_path_add_point(self->path, {
+        pp_path_add_point(path, {
             (picovector_point_type)mp_picovector_get_point_type(t_point->items[0]),
             (picovector_point_type)mp_picovector_get_point_type(t_point->items[1]),
         });
     }
 
+    return mp_const_none;
+}
+
+mp_obj_t POLYGON_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_w, ARG_h, ARG_corners, ARG_stroke };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_h, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_corners, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+        { MP_QSTR_stroke, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type w = mp_picovector_get_point_type(args[ARG_w].u_obj);
+    picovector_point_type h = mp_picovector_get_point_type(args[ARG_h].u_obj);
+    picovector_point_type s = args[ARG_stroke].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_stroke].u_obj);
+
+    picovector_point_type r1 = 0;
+    picovector_point_type r2 = 0;
+    picovector_point_type r3 = 0;
+    picovector_point_type r4 = 0;
+
+    if(mp_obj_is_exact_type(args[ARG_corners].u_obj, &mp_type_tuple)){
+        mp_obj_tuple_t *t_corners = MP_OBJ_TO_PTR2(args[ARG_corners].u_obj, mp_obj_tuple_t);
+
+        if(t_corners->len != 4) mp_raise_ValueError("Corners must have r1, r2, r3, r4");
+
+        r1 = mp_picovector_get_point_type(t_corners->items[0]);
+        r2 = mp_picovector_get_point_type(t_corners->items[1]);
+        r3 = mp_picovector_get_point_type(t_corners->items[2]);
+        r4 = mp_picovector_get_point_type(t_corners->items[3]);
+    }
+
+    pp_poly_merge(self->poly, ppp_rect({
+        x, y, w, h,
+        s,
+        r1, r2, r3, r4
+    }));
+
     return self;
 }
 
+mp_obj_t POLYGON_regular(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_stroke };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_sides, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_stroke, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type r = mp_picovector_get_point_type(args[ARG_radius].u_obj);
+    int e = args[ARG_sides].u_int;
+    picovector_point_type s = args[ARG_stroke].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_stroke].u_obj);
+
+    pp_poly_merge(self->poly, ppp_regular({
+        x, y,
+        r,
+        e,
+        s
+    }));
+
+    return self;
+}
+
+mp_obj_t POLYGON_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_radius, ARG_stroke };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_stroke, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type r = mp_picovector_get_point_type(args[ARG_radius].u_obj);
+    picovector_point_type s = args[ARG_stroke].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_stroke].u_obj);
+
+    pp_poly_merge(self->poly, ppp_circle({
+        x, y,
+        r,
+        s
+    }));
+
+    return self;
+}
+
+mp_obj_t POLYGON_arc(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_radius, ARG_from, ARG_to, ARG_stroke };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_from, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_to, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_stroke, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type r = mp_picovector_get_point_type(args[ARG_radius].u_obj);
+    picovector_point_type f = mp_picovector_get_point_type(args[ARG_from].u_obj);
+    picovector_point_type t = mp_picovector_get_point_type(args[ARG_to].u_obj);
+    picovector_point_type s = args[ARG_stroke].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_stroke].u_obj);
+
+    pp_poly_merge(self->poly, ppp_arc({
+        x, y,
+        r,
+        s,
+        f,
+        t
+    }));
+
+    return self;
+}
+
+// Utility functions
+
 mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
-    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
 
     PP_COORD_TYPE sum_x = (PP_COORD_TYPE)0;
     PP_COORD_TYPE sum_y = (PP_COORD_TYPE)0;
 
-    for(auto i = 0; i < self->path->count; i++) {
-        sum_x += self->path->points[i].x;
-        sum_y += self->path->points[i].y;
+    // TODO: Maybe include in pretty-poly?
+    // Might need to handle multiple paths
+    pp_path_t *path = self->poly->paths;
+
+    for(auto i = 0; i < path->count; i++) {
+        sum_x += path->points[i].x;
+        sum_y += path->points[i].y;
     }
 
-    sum_x /= (float)self->path->count;
-    sum_y /= (float)self->path->count;
+    sum_x /= (float)path->count;
+    sum_y /= (float)path->count;
 
     mp_obj_t tuple[2];
     tuple[0] = mp_picovector_set_point_type((int)(sum_x));
@@ -283,9 +377,9 @@ mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
 }
 
 mp_obj_t POLYGON_bounds(mp_obj_t self_in) {
-    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
 
-    pp_rect_t bounds = pp_path_bounds(self->path);
+    pp_rect_t bounds = pp_poly_bounds(self->poly);
 
     mp_obj_t tuple[4];
     tuple[0] = mp_picovector_set_point_type((int)(bounds.x));
@@ -296,63 +390,127 @@ mp_obj_t POLYGON_bounds(mp_obj_t self_in) {
     return mp_obj_new_tuple(4, tuple);
 }
 
-void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
-    (void)kind;
-    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
-
-    pp_rect_t bounds = pp_path_bounds(self->path);
-
-    mp_print_str(print, "Polygon(points = ");
-    mp_obj_print_helper(print, mp_picovector_set_point_type(self->path->count), PRINT_REPR);
-    mp_print_str(print, ", bounds = ");
-    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.x), PRINT_REPR);
-    mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.y), PRINT_REPR);
-    mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.w), PRINT_REPR);
-    mp_print_str(print, ", ");
-    mp_obj_print_helper(print, mp_picovector_set_point_type(bounds.h), PRINT_REPR);
-    mp_print_str(print, ")");
+void _pp_path_transform(pp_path_t *path, pp_mat3_t *transform) {
+    for (int i = 0; i < path->count; i++) {
+        path->points[i] = pp_point_transform(&path->points[i], transform);
+    }
 }
 
-mp_obj_t POLYGON__del__(mp_obj_t self_in) {
-    _PATH_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PATH_obj_t);
-    PP_FREE(self->path->points);
-    PP_FREE(self->path);
-    // TODO: Do we actually need to free anything here, if it's on GC heap it should get collected
+void _pp_poly_transform(pp_poly_t *poly, pp_mat3_t *transform) {
+    pp_path_t *path = poly->paths;
+
+    while(path) {
+        _pp_path_transform(path, transform);
+        path = path->next;
+    }
+}
+
+mp_obj_t POLYGON_transform(mp_obj_t self_in, mp_obj_t transform_in) {
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
+
+    if (!MP_OBJ_IS_TYPE(transform_in, &TRANSFORM_type)) mp_raise_ValueError("Transform required");
+    _TRANSFORM_obj_t *transform = (_TRANSFORM_obj_t *)MP_OBJ_TO_PTR(transform_in);
+
+    _pp_poly_transform(self->poly, &transform->transform);
+
     return mp_const_none;
+}
+
+void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+    (void)kind;
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
+    (void)self;
+
+    // TODO: Make print better
+    mp_print_str(print, "Polygon();");
 }
 
 typedef struct _mp_obj_polygon_it_t {
     mp_obj_base_t base;
     mp_fun_1_t iternext;
     mp_obj_t polygon;
-    int cur;
+    pp_path_t *cur;
 } mp_obj_polygon_it_t;
 
-static mp_obj_t py_path_it_iternext(mp_obj_t self_in) {
+static mp_obj_t POLYGON_it_iternext(mp_obj_t self_in) {
     mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
-    _PATH_obj_t *path = MP_OBJ_TO_PTR2(self->polygon, _PATH_obj_t);
+    //_POLY_obj_t *poly = MP_OBJ_TO_PTR2(self->polygon, _POLY_obj_t);
 
     //mp_printf(&mp_plat_print, "points: %d, current: %d\n", polygon->contour.count, self->cur);
 
-    if(self->cur >= path->path->count) return MP_OBJ_STOP_ITERATION;
+    if(!self->cur) return MP_OBJ_STOP_ITERATION;
 
-    mp_obj_t tuple[2];
-    tuple[0] = mp_picovector_set_point_type((int)(path->path->points[self->cur].x));
-    tuple[1] = mp_picovector_set_point_type((int)(path->path->points[self->cur].y));
+    mp_obj_t tuple[self->cur->count];
+    for (auto i = 0; i < self->cur->count; i++) {
+        mp_obj_t t_point[2] = {
+            mp_picovector_set_point_type((int)(self->cur->points[i].x)),
+            mp_picovector_set_point_type((int)(self->cur->points[i].y))
+        };
+        tuple[i] = mp_obj_new_tuple(2, t_point);
+    }
 
-    self->cur++;
-    return mp_obj_new_tuple(2, tuple);
+    self->cur = self->cur->next;
+    return mp_obj_new_tuple(self->cur->count, tuple);
 }
 
-mp_obj_t PATH_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
+mp_obj_t POLYGON_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
     mp_obj_polygon_it_t *o = (mp_obj_polygon_it_t *)iter_buf;
     o->base.type = &mp_type_polymorph_iter;
-    o->iternext = py_path_it_iternext;
+    o->iternext = POLYGON_it_iternext;
     o->polygon = o_in;
-    o->cur = 0;
+    o->cur = MP_OBJ_TO_PTR2(o_in, _POLY_obj_t)->poly->paths;
     return MP_OBJ_FROM_PTR(o);
+}
+
+/* TRANSFORM */
+
+mp_obj_t TRANSFORM_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    _TRANSFORM_obj_t *self = m_new_obj(_TRANSFORM_obj_t);
+    self->base.type = &TRANSFORM_type;
+
+    self->transform = pp_mat3_identity();
+
+    return self;
+}
+
+mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_in) {
+    _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
+
+    float angle = mp_obj_get_float(angle_in);
+
+    if(mp_obj_is_exact_type(origin_in, &mp_type_tuple)) {
+        mp_obj_tuple_t *t_origin = MP_OBJ_TO_PTR2(origin_in, mp_obj_tuple_t);
+
+        if(t_origin->len != 2) mp_raise_ValueError("Origin Tuple must have X, Y");
+    
+        picovector_point_type x = mp_picovector_get_point_type(t_origin->items[0]);
+        picovector_point_type y = mp_picovector_get_point_type(t_origin->items[1]);
+
+        pp_mat3_translate(&transform->transform, x, y);
+        pp_mat3_rotate(&transform->transform, angle);
+        pp_mat3_translate(&transform->transform, -x, -y);
+    } else {
+        pp_mat3_rotate(&transform->transform, angle);
+    }
+
+    return mp_const_none;
+}
+
+mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
+    _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
+
+    picovector_point_type o_x = mp_picovector_get_point_type(x_in);
+    picovector_point_type o_y = mp_picovector_get_point_type(y_in);
+
+    pp_mat3_translate(&transform->transform, o_x, o_y);
+
+    return mp_const_none;
+}
+
+mp_obj_t TRANSFORM_reset(mp_obj_t self_in) {
+    _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
+    transform->transform = pp_mat3_identity();
+    return mp_const_none;
 }
 
 /* VECTOR */
@@ -383,6 +541,24 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     return self;
 }
 
+mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
+
+    if(transform_in == mp_const_none) {
+        pp_mat3_t* old = pp_transform(NULL);
+        (void)old; // TODO: Return old transform?
+    } else if MP_OBJ_IS_TYPE(transform_in, &TRANSFORM_type) {
+        _TRANSFORM_obj_t *transform = (_TRANSFORM_obj_t *)MP_OBJ_TO_PTR(transform_in);
+        pp_mat3_t* old = pp_transform(&transform->transform);
+        (void)old;
+    } else {
+        // TODO: ValueError?
+    }
+
+    return mp_const_none;
+}
+
 mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
     (void)self;
@@ -410,6 +586,31 @@ mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
     (void)font_size;
     // TODO: Implement when Alright Fonts rewrite is ready
     self->vector->set_font_size(font_size);
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_set_clip(mp_obj_t self_in, mp_obj_t clip_in) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
+
+    picovector_point_type x = self->vector->graphics->bounds.x;
+    picovector_point_type y = self->vector->graphics->bounds.y;
+    picovector_point_type w = self->vector->graphics->bounds.w;
+    picovector_point_type h = self->vector->graphics->bounds.h;
+
+    if(mp_obj_is_exact_type(clip_in, &mp_type_tuple)){
+        mp_obj_tuple_t *t_clip = MP_OBJ_TO_PTR2(clip_in, mp_obj_tuple_t);
+
+        if(t_clip->len != 4) mp_raise_ValueError("Clip must have x, y, w, h");
+
+        x = mp_picovector_get_point_type(t_clip->items[0]);
+        y = mp_picovector_get_point_type(t_clip->items[1]);
+        w = mp_picovector_get_point_type(t_clip->items[2]);
+        h = mp_picovector_get_point_type(t_clip->items[3]);
+    }
+
+    pp_clip(x, y, w, h);
+
     return mp_const_none;
 }
 
@@ -465,94 +666,15 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     return mp_const_none;
 }
 
-mp_obj_t VECTOR_rotate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_polygon, ARG_angle, ARG_origin_x, ARG_origin_y };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_polygon, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_angle, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_origin_x, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_origin_y, MP_ARG_INT, {.u_int = 0} }
-    };
+mp_obj_t VECTOR_draw(mp_obj_t self_in, mp_obj_t poly_in) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
 
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+    if(!MP_OBJ_IS_TYPE(poly_in, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
 
-    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
+    _POLY_obj_t *poly = MP_OBJ_TO_PTR2(poly_in, _POLY_obj_t);
 
-    if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
-
-    _PATH_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _PATH_obj_t);
-
-    pp_point_t origin = {(PP_COORD_TYPE)args[ARG_origin_x].u_int, (PP_COORD_TYPE)args[ARG_origin_y].u_int};
-
-    float angle = mp_obj_get_float(args[ARG_angle].u_obj);
-
-    self->vector->rotate(poly->path, origin, angle);
-
-    return mp_const_none;
-}
-
-mp_obj_t VECTOR_translate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_polygon, ARG_x, ARG_y };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_polygon, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} }
-    };
-
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
-
-    if(!MP_OBJ_IS_TYPE(args[ARG_polygon].u_obj, &POLYGON_type)) mp_raise_TypeError("rotate: polygon required");
-
-    _PATH_obj_t *poly = MP_OBJ_TO_PTR2(args[ARG_polygon].u_obj, _PATH_obj_t);
-
-    pp_point_t translate = {(PP_COORD_TYPE)args[ARG_x].u_int, (PP_COORD_TYPE)args[ARG_y].u_int};
-
-    self->vector->translate(poly->path, translate);
-
-    return mp_const_none;
-}
-
-mp_obj_t VECTOR_draw(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-
-    size_t num_polygons = n_args - 1;
-    const mp_obj_t *polygons = pos_args + 1;
-
-    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(pos_args[0], _VECTOR_obj_t);
-
-    if(num_polygons == 1) {
-        mp_obj_t poly_obj = polygons[0];
-
-        if(!MP_OBJ_IS_TYPE(poly_obj, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
-
-        _PATH_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _PATH_obj_t);
-
-        self->vector->draw(poly->path);
-
-        return mp_const_none;
-    }
-
-
-    pp_poly_t *group = pp_poly_new();
-
-    for(auto i = 0u; i < num_polygons; i++) {
-        pp_path_t *path = pp_poly_add_path(group);
-        mp_obj_t poly_obj = polygons[i];
-
-        if(!MP_OBJ_IS_TYPE(poly_obj, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
-
-        _PATH_obj_t *poly = MP_OBJ_TO_PTR2(poly_obj, _PATH_obj_t);
-        pp_path_add_points(path, poly->path->points, poly->path->count);
-    }
-
-    self->vector->draw(group);
-
-    pp_poly_free(group);
+    pp_render(poly->poly);
 
     return mp_const_none;
 }
