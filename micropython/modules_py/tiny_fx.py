@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Christopher Parrott for Pimoroni Ltd
+#
+# SPDX-License-Identifier: MIT
+
 from machine import ADC, Pin, PWM
 #from pimoroni import PWMLED
 from pimoroni_i2c import PimoroniI2C
