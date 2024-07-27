@@ -106,11 +106,11 @@ int main() {
 
     // calculate dark, medium, and bright shades for rendering the 
     // lava
-    uint8_t dark_r, dark_g, dark_b;
+    uint8_t dark_r = 0, dark_g = 0, dark_b = 0;
     from_hsv(hue, 1.0f, 0.3f, dark_r, dark_g, dark_b);
-    uint8_t mid_r, mid_g, mid_b;
+    uint8_t mid_r = 0, mid_g = 0, mid_b = 0;
     from_hsv(hue, 1.0f, 0.6f, mid_r, mid_g, mid_b);
-    uint8_t bright_r, bright_g, bright_b;
+    uint8_t bright_r = 0, bright_g = 0, bright_b = 0;
     from_hsv(hue, 1.0f, 1.0f, bright_r, bright_g, bright_b);
 
     // clear the canvas
