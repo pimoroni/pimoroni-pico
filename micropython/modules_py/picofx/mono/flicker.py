@@ -2,17 +2,18 @@
 #
 # SPDX-License-Identifier: MIT
 
+import random
 from picofx import Updatable
 
 class FlickerFX(Updatable):
     
-    def __init__(self, dim_min=0.02, dim_max=0.04, lockout_min=0.05, lockout_max=0.1, high=1.0, low=0.5):
+    def __init__(self, dim_min=0.02, dim_max=0.04, lockout_min=0.05, lockout_max=0.1, brightness=1.0, dimness=0.5):
         self.dim_min = dim_min
         self.dim_max = dim_max
         self.lockout_min = lockout_min
         self.lockout_max = lockout_max
-        self.high = high
-        self.low = low
+        self.brightness = brightness
+        self.dimness = dimness
         
         self.__is_dim = False
         self.__dim_dur = 0        
@@ -20,7 +21,7 @@ class FlickerFX(Updatable):
         self.__time = 0
     
     def __call__(self):
-        return self.low if self.__is_dim else self.high
+        return (self.brightness * (1.0 - self.dimness)) if self.__is_dim else self.brightness
 
     def tick(self, delta_ms):
         self.__time += delta_ms
