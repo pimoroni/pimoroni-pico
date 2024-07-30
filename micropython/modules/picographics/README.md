@@ -342,7 +342,7 @@ display.text(text, x, y, wordwrap, scale, angle, spacing)
 * `y` - the destination Y coordinate
 * `wordwrap` - number of pixels width before trying to break text into multiple lines
 * `scale` - size
-* `angle` - rotation angle (Vector only!)
+* `angle` - rotation angle
 * `spacing` - letter spacing
 * `fixed_width` - space all characters equal distance apart (monospace)
 
