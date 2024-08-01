@@ -57,7 +57,7 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 ### Supported Displays
 
 * Pico Display - 240x135 SPI LCD - `DISPLAY_PICO_DISPLAY`
-* Pico Display 2 - 320x240 SPI LCD - `DISPLAY_PICO_DISPLAY_2`
+* Pico Display 2.0" / 2.8" - 320x240 SPI LCD - `DISPLAY_PICO_DISPLAY_2`
 * Tufty 2040 - 320x240 Parallel LCD - `DISPLAY_TUFTY_2040`
 * Pico Explorer - 240x240 SPI LCD - `DISPLAY_PICO_EXPLORER`
 * Enviro Plus - 240x240 SPI LCD - `DISPLAY_ENVIRO_PLUS`
