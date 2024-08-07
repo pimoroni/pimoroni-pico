@@ -58,9 +58,10 @@ namespace pimoroni {
       cs(pins.cs), dc(pins.dc), wr_sck(pins.wr_sck), rd_sck(pins.rd_sck), d0(pins.d0), bl(pins.bl) {
 
       parallel_pio = pio1;
+      pio_set_gpio_base(parallel_pio, d0 + 8 >= 32 ? 16 : 0);
       parallel_sm = pio_claim_unused_sm(parallel_pio, true);
       parallel_offset = pio_add_program(parallel_pio, &st7789_parallel_program);
-  
+
       //gpio_init(wr_sck);
       //gpio_set_dir(wr_sck, GPIO_OUT);
       //gpio_set_function(wr_sck, GPIO_FUNC_SIO);
