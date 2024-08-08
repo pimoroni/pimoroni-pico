@@ -6,7 +6,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(${OUTPUT_NAME} pico_stdlib mlx90640 hub75_legacy hardware_vreg)
+target_link_libraries(${OUTPUT_NAME} pico_stdlib mlx90640 hub75_legacy hardware_vreg hardware_clocks)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(${OUTPUT_NAME})
