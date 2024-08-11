@@ -64,13 +64,18 @@ namespace pimoroni {
   }
 
   void LTP305::set_character(uint8_t x, uint16_t ch) {
-    std::map<uint16_t, DotChar>::const_iterator it = dotfont.find(ch);
+    const uint8_t *data = nullptr;
+    for(const auto& c : dotfont) {
+      if(c.code == ch) {
+        data = &c.data[0];
+        break;
+      }
+    }
 
-    if(it != dotfont.end()) {
-      DotChar dchar = it->second;
+    if(data) {
       for(uint8_t cx = 0; cx < DOT_CHAR_WIDTH; cx++) {
         for(uint8_t cy = 0; cy < HEIGHT; cy++) {
-          uint8_t c = dchar.data[cx] & (0b1 << cy);
+          uint8_t c = data[cx] & (0b1 << cy);
           set_pixel(x + cx, cy, c);
         }
       }

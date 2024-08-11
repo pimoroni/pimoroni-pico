@@ -97,15 +97,6 @@ namespace pimoroni {
     float lux;
   } ltr559_reading;
 
-  class lookup {
-    private:
-      std::vector<uint16_t> lut;
-    public:
-      lookup(std::initializer_list<uint16_t> values);
-      uint8_t index(uint16_t value);
-      uint16_t value(uint8_t index);
-  };
-
   class LTR559 {
     //--------------------------------------------------
     // Constants
@@ -131,14 +122,13 @@ namespace pimoroni {
     const uint8_t address    = DEFAULT_I2C_ADDRESS;
     uint interrupt           = PIN_UNUSED;
 
-    static pimoroni::lookup lookup_led_current; 
-    static pimoroni::lookup lookup_led_duty_cycle;
-    static pimoroni::lookup lookup_led_pulse_freq;
-    static pimoroni::lookup lookup_proximity_meas_rate;
-    static pimoroni::lookup lookup_light_integration_time;
-    static pimoroni::lookup lookup_light_repeat_rate;
-    static pimoroni::lookup lookup_light_gain;
-
+    static constexpr uint16_t lookup_led_current[5] = {5, 10, 20, 50, 100};
+    static constexpr uint16_t lookup_led_duty_cycle[4] = {25, 50, 75, 100};
+    static constexpr uint16_t lookup_led_pulse_freq[8] = {30, 40, 50, 60, 70, 80, 90, 100};
+    static constexpr uint16_t lookup_proximity_meas_rate[8] = {10, 50, 70, 100, 200, 500, 1000, 2000};
+    static constexpr uint16_t lookup_light_integration_time[8] = {100, 50, 200, 400, 150, 250, 300, 350};
+    static constexpr uint16_t lookup_light_repeat_rate[6] = {50, 100, 200, 500, 1000, 2000};
+    static constexpr uint16_t lookup_light_gain[8] = {1, 2, 4, 8, 0, 0, 48, 96};
 
     //--------------------------------------------------
     // Constructors/Destructor
@@ -176,6 +166,15 @@ namespace pimoroni {
     void light_measurement_rate(uint16_t integration_time, uint16_t rate);
     void proximity_measurement_rate(uint16_t rate);
     void proximity_offset(uint16_t offset);
+
+    template<auto T>
+    const uint16_t lookup(uint16_t value) {
+      size_t length = sizeof(T) / sizeof(uint16_t);
+      for(auto i = 0u; i < length; i++) {
+        if(T[i] == value) return i;
+      }
+      return 0;
+    }
 
   private:
     uint16_t bit12_to_uint16(uint16_t value);

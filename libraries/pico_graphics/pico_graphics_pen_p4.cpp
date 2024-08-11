@@ -44,6 +44,10 @@ namespace pimoroni {
         }
         return -1;
     }
+    int PicoGraphics_PenP4::create_pen_hsv(float h, float s, float v) {
+        RGB p = RGB::from_hsv(h, s, v);
+        return create_pen(p.r, p.g, p.b);
+    }
     int PicoGraphics_PenP4::reset_pen(uint8_t i) {
         palette[i] = {0, 0, 0};
         used[i] = false;

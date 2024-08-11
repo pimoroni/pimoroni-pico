@@ -1,5 +1,10 @@
-include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/st7789/st7789.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/../pico_graphics/pico_graphics.cmake)
+if(NOT TARGET st7789)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/st7789/st7789.cmake)
+endif()
+
+if(NOT TARGET pico_graphics)
+  include(${CMAKE_CURRENT_LIST_DIR}/../pico_graphics/pico_graphics.cmake)
+endif()
 
 add_library(pico_explorer INTERFACE)
 

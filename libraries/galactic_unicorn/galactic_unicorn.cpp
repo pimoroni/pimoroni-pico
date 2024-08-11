@@ -6,8 +6,10 @@
 #include "hardware/clocks.h"
 
 
+#ifndef NO_QSTR
 #include "galactic_unicorn.pio.h"
 #include "audio_i2s.pio.h"
+#endif
 
 #include "galactic_unicorn.hpp"
 
@@ -37,10 +39,6 @@
 //      57 - 59: tttttttt, tttttttt, tttttttt       // bcd tick count (0-65536)
 //
 //  .. and back to the start
-
-static uint16_t r_gamma_lut[256] = {0};
-static uint16_t g_gamma_lut[256] = {0};
-static uint16_t b_gamma_lut[256] = {0};
 
 static uint32_t dma_channel;
 static uint32_t dma_ctrl_channel;
@@ -122,19 +120,6 @@ namespace pimoroni {
       // Tear down the old GU instance's hardware resources
       partial_teardown();
     }
-
-
-    // create 14-bit gamma luts
-    for(uint16_t v = 0; v < 256; v++) {
-      // gamma correct the provided 0-255 brightness value onto a
-      // 0-65535 range for the pwm counter
-      float r_gamma = 1.8f;
-      r_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, r_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-      float g_gamma = 1.8f;
-      g_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, g_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-      float b_gamma = 1.8f;
-      b_gamma_lut[v] = (uint16_t)(powf((float)(v) / 255.0f, b_gamma) * (float(1U << (BCD_FRAME_COUNT)) - 1.0f) + 0.5f);
-    }
                 
     // for each row:
     //   for each bcd frame:
@@ -154,18 +139,19 @@ namespace pimoroni {
         uint8_t *p = &bitstream[row * ROW_BYTES + (BCD_FRAME_BYTES * frame)];
 
         p[ 0] = WIDTH - 1;               // row pixel count
-        p[56] = row;                     // row select
+        p[ 1] = row;                     // row select
 
         // set the number of bcd ticks for this frame
         uint32_t bcd_ticks = (1 << frame);
-        p[57] = (bcd_ticks &     0xff) >>  0;
-        p[58] = (bcd_ticks &   0xff00) >>  8;
-        p[59] = (bcd_ticks & 0xff0000) >> 16;
+        p[56] = (bcd_ticks &       0xff) >>  0;
+        p[57] = (bcd_ticks &     0xff00) >>  8;
+        p[58] = (bcd_ticks &   0xff0000) >> 16;
+        p[59] = (bcd_ticks & 0xff000000) >> 24;
       }
     }
 
     // setup light sensor adc
-    adc_init();
+    if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
     adc_gpio_init(LIGHT_SENSOR);
 
     gpio_init(COLUMN_CLOCK); gpio_set_dir(COLUMN_CLOCK, GPIO_OUT); gpio_put(COLUMN_CLOCK, false);
@@ -469,9 +455,9 @@ namespace pimoroni {
     g = (g * this->brightness) >> 8;
     b = (b * this->brightness) >> 8;
 
-    uint16_t gamma_r = r_gamma_lut[r];
-    uint16_t gamma_g = g_gamma_lut[g];
-    uint16_t gamma_b = b_gamma_lut[b];
+    uint16_t gamma_r = GAMMA_14BIT[r];
+    uint16_t gamma_g = GAMMA_14BIT[g];
+    uint16_t gamma_b = GAMMA_14BIT[b];
 
     // for each row:
     //   for each bcd frame:
@@ -485,7 +471,7 @@ namespace pimoroni {
 
     // set the appropriate bits in the separate bcd frames
     for(uint8_t frame = 0; frame < BCD_FRAME_COUNT; frame++) {
-      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 1 + x];
+      uint8_t *p = &bitstream[y * ROW_BYTES + (BCD_FRAME_BYTES * frame) + 2 + x];
 
       uint8_t red_bit = gamma_r & 0b1;
       uint8_t green_bit = gamma_g & 0b1;
@@ -517,6 +503,7 @@ namespace pimoroni {
     value = value < 0.0f ? 0.0f : value;
     value = value > 1.0f ? 1.0f : value;
     this->volume = floor(value * 255.0f);
+    this->synth.volume = this->volume * 255.0f;
   }
 
   float GalacticUnicorn::get_volume() {
@@ -558,6 +545,40 @@ namespace pimoroni {
 
           set_pixel(x, y, r, g, b);
         }
+      }
+      else if(graphics->pen_type == PicoGraphics::PEN_RGB332) {
+        uint8_t *p = (uint8_t *)graphics->frame_buffer;
+        for(size_t j = 0; j < 53 * 11; j++) {
+          int x = j % 53;
+          int y = j / 53;
+
+          uint8_t col = *p;
+          uint8_t r = (col & 0b11100000);
+          uint8_t g = (col & 0b00011100) << 3;
+          uint8_t b = (col & 0b00000011) << 6;
+          p++;
+
+          set_pixel(x, y, r, g, b);
+        }
+      }
+      else if(graphics->pen_type == PicoGraphics::PEN_P8 || graphics->pen_type == PicoGraphics::PEN_P4) {
+        int offset = 0;
+        graphics->frame_convert(PicoGraphics::PEN_RGB888, [this, offset](void *data, size_t length) mutable {
+          uint32_t *p = (uint32_t *)data;
+          for(auto i = 0u; i < length / 4; i++) {
+            int x = offset % 53;
+            int y = offset / 53;
+
+            uint32_t col = *p;
+            uint8_t r = (col & 0xff0000) >> 16;
+            uint8_t g = (col & 0x00ff00) >>  8;
+            uint8_t b = (col & 0x0000ff) >>  0;
+
+            set_pixel(x, y, r, g, b);
+            offset++;
+            p++;
+          }
+        });
       }
     }
   }

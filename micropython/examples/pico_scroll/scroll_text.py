@@ -1,7 +1,7 @@
 import time
-import picoscroll as scroll
+from picoscroll import PicoScroll
 
-scroll.init()
+scroll = PicoScroll()
 
 while True:
     scroll.scroll_text("Hello World", 128, 80)

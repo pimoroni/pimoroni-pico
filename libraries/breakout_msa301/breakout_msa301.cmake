@@ -1,3 +1,7 @@
+if(NOT TARGET msa301)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/msa301/msa301.cmake)
+endif()
+
 set(LIB_NAME breakout_msa301)
 add_library(${LIB_NAME} INTERFACE)
 

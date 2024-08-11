@@ -17,6 +17,11 @@ enum pin {
 
 namespace pimoroni {
 
+  PicoRGBKeypad::~PicoRGBKeypad() {
+    clear();
+    update();
+  }
+
   void PicoRGBKeypad::init() {
     memset(buffer, 0, sizeof(buffer));
     led_data = buffer + 4;

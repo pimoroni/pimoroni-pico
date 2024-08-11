@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Cosmic Paint</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/static/paint.css">
+</head>
+<body>
+    <div class="window">
+        <h1>Cosmic Paint</h1>
+        <table cellspacing="0" cellpadding="0" border-collapse="collapse">
+            <tbody></tbody>
+        </table>
+        <div id="palette">
+            <ul>
+                <li class="selected" style="background:rgb(0,0,0);"></li>
+                <li style="background:rgb(132,0,0);"></li>
+                <li style="background:rgb(0,132,0);"></li>
+                <li style="background:rgb(132,132,0);"></li>
+                <li style="background:rgb(0,0,132);"></li>
+                <li style="background:rgb(132,0,132);"></li>
+                <li style="background:rgb(0,132,132);"></li>
+                <li style="background:rgb(132,132,132);"></li>
+                <li style="background:rgb(198,198,198);"></li>
+                <li style="background:rgb(255,0,0);"></li>
+                <li style="background:rgb(0,255,0);"></li>
+                <li style="background:rgb(255,255,0);"></li>
+                <li style="background:rgb(0,0,255);"></li>
+                <li style="background:rgb(255,0,255);"></li>
+                <li style="background:rgb(0,255,255);"></li>
+                <li style="background:rgb(255,255,255);"></li>
+            </ul>
+
+            <input type="color" id="custom" name="custom" value="#ff0000">
+        </div>
+        <ul class="tools">
+            <li data-tool="paint" class="paint selected"><span class="fa fa-pencil"></span></li>
+            <li data-tool="fill" class="fill"><span class="fa fa-bitbucket"></span></li>
+            <li data-tool="erase" class="erase"><span class="fa fa-eraser"></span></li>
+            <li data-tool="pick" class="pick"><span class="fa fa-eyedropper"></span></li>
+            <li data-tool="lighten" class="lighten"><span class="fa fa-sun-o"></span></li>
+            <li data-tool="darken" class="darken"><span class="fa fa-adjust"></span></li>
+            <li data-tool="trash" class="trash"><span class="fa fa-trash"></span></li>
+            <li data-tool="save" class="save"><span class="fa fa-save"></span></li>
+        </ul>
+    </div>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/npm/jquery@3.6.1/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/tinycolor.js"></script>
+    <script type="text/javascript" src="/static/paint.js"></script>
+</body>
+</html>
+

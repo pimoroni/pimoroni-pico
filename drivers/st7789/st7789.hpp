@@ -11,7 +11,9 @@
 #include "libraries/pico_graphics/pico_graphics.hpp"
 
 
+#ifndef NO_QSTR
 #include "st7789_parallel.pio.h"
+#endif
 
 #include <algorithm>
 

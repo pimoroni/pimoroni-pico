@@ -3,13 +3,16 @@
 - [PicoGraphics](#picographics)
 - [Examples](#examples)
   - [Button Test](#button-test)
+  - [Carbon Intensity](#carbon-intensity)
   - [Daily Activity](#daily-activity)
+  - [Dithering](#dithering)
   - [Image Gallery](#image-gallery)
   - [LED PWM](#led-pwm)
   - [News](#news)
   - [PlaceKitten](#placekitten)
   - [Quote of the Day](#quote-of-the-day)
   - [Random Joke](#random-joke)
+  - [RTC Demo](#rtc-demo)
   - [SD Card Test](#sd-card-test)
   - [XKCD Daily](#xkcd-daily)
 
@@ -24,10 +27,6 @@ The wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the `c
 
 You'll also need to install the `micropython-urllib.urequest` library using Thonny's 'Tools' > 'Manage Packages' or `common/lib/urllib` which contains a compiled `.mpy` version that uses less RAM. You should place this directory in `lib` on your Pico W.
 
-Finally for examples loading images, you'll need `sdcard.mpy` from `common/lib`. You should place this file in `lib` on your Pico W.
-
-- [/micropython/examples/common](../common)
-
 ### Button Test
 [button_test.py](button_test.py)
 
@@ -35,10 +34,22 @@ Inky Frame's buttons (and the RTC alarm, busy signal from the screen and externa
 
 This example demonstrates a simple way of reading when a button has been pushed by reading the shift register and checking if the bit in a specific position is 0 or 1.
 
+### Carbon Intensity
+[carbon_intensity.py](carbon_intensity.py)
+
+This example connects to the Carbon Intensity API to give you a regional forecast of how your (UK) electricity is being generated and its carbon impact.
+
+Find out more at https://carbonintensity.org.uk/
+
 ### Daily Activity
 [inky_frame_daily_activity.py](inky_frame_daily_activity.py)
 
 Generate a random activity from Bored API.
+
+### Dithering
+[inky_frame_dithering.py](inky_frame_dithering.py)
+
+A basic example showing automatic dithering in action, as PicoGraphics tries to use Inky Frame's limited colour palette to match arbitrary colours.
 
 ### Image Gallery
 [/image_gallery](../inky_frame/image_gallery)
@@ -77,6 +88,11 @@ Jokes are rendered into images "offline" by our feed2image service for two reaso
 
 For bugs/contributions or to complain about a joke, see: https://github.com/pimoroni/feed2image
 
+### RTC Demo
+[inky_frame_rtc_demo.py](inky_frame_rtc_demo.py)
+
+A basic example that sets the time/date from an NTP server, syncs the Inky and Pico RTCs and and makes Inky Frame wake up on a timer.
+
 ### SD Card Test
 [sd_test.py](sd_test.py)
 
@@ -90,4 +106,5 @@ Download and display the daily webcomic from https://xkcd.com/
 The webcomic is rendered "offline" by our feed2image service since xkcd.com requires TLS1.3!
 
 For bugs/contributions see: https://github.com/pimoroni/feed2image
+
 

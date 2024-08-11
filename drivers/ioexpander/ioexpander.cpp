@@ -320,8 +320,21 @@ namespace pimoroni {
           Pin::adc(1, 7, 0)}
   {}
 
-  bool IOExpander::init(bool skipChipIdCheck) {
-    bool succeeded = true;
+  bool IOExpander::init(bool skipChipIdCheck, bool perform_reset) {
+    if(!skipChipIdCheck) {
+      uint16_t chip_id = get_chip_id();
+      if(chip_id != CHIP_ID) {
+        if(debug) {
+          printf("Chip ID invalid: %04x expected: %04x\n", chip_id, CHIP_ID);
+        }
+        return false;
+      }
+    }
+
+    // Reset the chip if requested, to put it into a known state
+    if(perform_reset && !reset()) {
+      return false;
+    }
 
     if(interrupt != PIN_UNUSED) {
       gpio_set_function(interrupt, GPIO_FUNC_SIO);
@@ -331,17 +344,36 @@ namespace pimoroni {
       enable_interrupt_out(true);
     }
 
-    if(!skipChipIdCheck) {
-      uint16_t chip_id = get_chip_id();
-      if(chip_id != CHIP_ID) {
-        if(debug) {
-          printf("Chip ID invalid: %04x expected: %04x\n", chip_id, CHIP_ID);
-        }
-        succeeded = false;
+    return true;
+  }
+
+  uint8_t IOExpander::check_reset() {
+    uint8_t user_flash_reg = reg::USER_FLASH;
+    uint8_t value;
+    if(i2c_write_blocking(i2c->get_i2c(), address, &user_flash_reg, 1, false) == PICO_ERROR_GENERIC) {
+      return 0x00;
+    }
+    if(i2c_read_blocking(i2c->get_i2c(), address, (uint8_t *)&value, sizeof(uint8_t), false) == PICO_ERROR_GENERIC) {
+      return 0x00;
+    }
+
+    return value;
+  }
+
+  bool IOExpander::reset() {
+    uint32_t start_time = millis();
+    set_bits(reg::CTRL, ctrl_mask::RESET);
+    // Wait for a register to read its initialised value
+    while(check_reset() != 0x78) {
+      sleep_ms(1);
+      if(millis() - start_time >= RESET_TIMEOUT_MS) {
+        if(debug)
+          printf("Timed out waiting for Reset!");
+        return false;
       }
     }
 
-    return succeeded;
+    return true;
   }
 
   i2c_inst_t* IOExpander::get_i2c() const {
@@ -370,7 +402,7 @@ namespace pimoroni {
 
   void IOExpander::set_address(uint8_t address) {
     set_bit(reg::CTRL, 4);
-    i2c->reg_write_uint8(address, reg::ADDR, address);
+    i2c->reg_write_uint8(this->address, reg::ADDR, address);
     this->address = address;
     sleep_ms(250); //TODO Handle addr change IOError better
     //wait_for_flash()
@@ -491,13 +523,35 @@ namespace pimoroni {
     return divider_good;
   }
 
-  void IOExpander::set_pwm_period(uint16_t value, bool load) {
+  void IOExpander::set_pwm_period(uint16_t value, bool load, bool wait_for_load) {
     value &= 0xffff;
     i2c->reg_write_uint8(address, reg::PWMPL, (uint8_t)(value & 0xff));
     i2c->reg_write_uint8(address, reg::PWMPH, (uint8_t)(value >> 8));
 
     if(load)
-      pwm_load();
+      pwm_load(wait_for_load);
+  }
+
+  uint16_t IOExpander::set_pwm_frequency(float frequency, bool load, bool wait_for_load) {
+    uint32_t period = (uint32_t)(CLOCK_FREQ / frequency);
+    if (period / 128 > MAX_PERIOD) {
+      return MAX_PERIOD;
+    }
+    if (period < 2) {
+      return 2;
+    }
+
+    uint8_t divider = 1;
+    while ((period > MAX_PERIOD) && (divider < MAX_DIVIDER)) {
+      period >>= 1;
+      divider <<= 1;
+    }
+
+    period = MIN(period, MAX_PERIOD); // Should be unnecessary because of earlier raised errors, but kept in case
+    set_pwm_control(divider);
+    set_pwm_period((uint16_t)(period - 1), load, wait_for_load);
+
+    return (uint16_t)period;
   }
 
   uint8_t IOExpander::get_mode(uint8_t pin) {
@@ -669,7 +723,7 @@ namespace pimoroni {
     }
   }
 
-  void IOExpander::output(uint8_t pin, uint16_t value, bool load) {
+  void IOExpander::output(uint8_t pin, uint16_t value, bool load, bool wait_for_load) {
     if(pin < 1 || pin > NUM_PINS) {
       printf("Pin should be in range 1-14.");
       return;
@@ -685,7 +739,7 @@ namespace pimoroni {
       i2c->reg_write_uint8(address, io_pin.reg_pwml, (uint8_t)(value & 0xff));
       i2c->reg_write_uint8(address, io_pin.reg_pwmh, (uint8_t)(value >> 8));
       if(load)
-        pwm_load();
+        pwm_load(wait_for_load);
     }
     else {
       if(value == LOW) {

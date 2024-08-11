@@ -1,3 +1,7 @@
+if(NOT TARGET analog)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/analog/analog.cmake)
+endif()
+
 add_library(automation INTERFACE)
 
 target_sources(automation INTERFACE
@@ -5,8 +9,6 @@ target_sources(automation INTERFACE
 )
 
 target_include_directories(automation INTERFACE ${CMAKE_CURRENT_LIST_DIR})
-
-#include(${PIMORONI_PICO_PATH}/drivers/analog/analog.cmake)
 
 # Pull in pico libraries that we need
 target_link_libraries(automation INTERFACE pico_stdlib hardware_pwm hardware_i2c pimoroni_i2c analog)

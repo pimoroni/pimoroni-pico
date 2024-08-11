@@ -1,18 +1,21 @@
 # Galactic Unicorn MicroPython Examples <!-- omit in toc -->
- 
+
 - [About Galactic Unicorn](#about-galactic-unicorn)
 - [Galactic Unicorn and PicoGraphics](#galactic-unicorn-and-picographics)
 - [Examples](#examples)
   - [Clock](#clock)
+  - [CO2](#co2)
   - [Eighties Super Computer](#eighties-super-computer)
   - [Feature Test](#feature-test)
   - [Feature Test With Audio](#feature-test-with-audio)
   - [Fire Effect](#fire-effect)
   - [Lava Lamp](#lava-lamp)
+  - [Light Sensor](#light-sensor)
   - [Nostalgia Prompt](#nostalgia-prompt)
   - [Rainbow](#rainbow)
   - [Scrolling Text](#scrolling-text)
 - [Wireless Examples](#wireless-examples)
+  - [Cheerlights](#cheerlights)
   - [Cheerlights History](#cheerlights-history)
   - [Galactic Paint](#galactic-paint)
 - [Other Examples](#other-examples)
@@ -44,6 +47,12 @@ The easiest way to start displaying cool stuff on Galactic Unicorn is using our 
 [clock.py](clock.py)
 
 Clock example with (optional) NTP synchronization. You can adjust the brightness with LUX + and -, and resync the time by pressing A.
+
+### CO2
+
+[co2.py](co2.py)
+
+Add a [SCD41 sensor breakout](https://shop.pimoroni.com/products/scd41-co2-sensor-breakout) to make an unsubtle carbon dioxide detector. Press A to reset the high/low values.
 
 ### Eighties Super Computer
 
@@ -80,6 +89,14 @@ A pretty, procedural fire effect. Switch between landscape fire and vertical fir
 
 A 70s-tastic, procedural rainbow lava lamp. You can adjust the brightness with LUX + and -.
 
+### Light Sensor
+
+[light_sensor.py](light_sensor.py)
+
+Reads data from the on board light sensor and displays the brightness level of the environment. The display is by default set to auto brightness i.e reacts to the brightness of the environment. 
+- Button A turns auto brightness off 
+- Button B turns auto brightness on
+ 
 ### Nostalgia Prompt
 
 [nostalgia_prompt.py](nostalgia_prompt.py)
@@ -100,17 +117,20 @@ Display scrolling wisdom, quotes or greetz. You can adjust the brightness with L
 
 ## Wireless Examples
 
-These examples need `WIFI_CONFIG.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
+These examples require `WIFI_CONFIG.py` and `network_manager.py` (from the `common` directory) to be saved to your Pico W. Open up `WIFI_CONFIG.py` in Thonny to add your wifi details (and save it when you're done).
 
 - [micropython/examples/common](../../examples/common)
+
+### Cheerlights
+[cheerlights.py](cheerlights.py)
+
+Displays the most recent #Cheerlights colour. Find out more about the Cheerlights API at https://cheerlights.com/
 
 ### Cheerlights History
 
 [cheerlights_history.py](cheerlights_history.py)
 
 Updates one pixel every five minutes to display the most recent #Cheerlights colour. Discover the most popular colours over time, or use it as an avant garde (but colourful) 53 hour clock! Find out more about the Cheerlights API at https://cheerlights.com/
-
-Requires `WIFI_CONFIG.py` and `network_manager.py` from the `common` directory.
 
 You can adjust the brightness with LUX + and -.
 
@@ -140,3 +160,8 @@ Here are some cool Galactic Unicorn community projects and resources that you mi
 - :link: [Galactic Unicorn Bounce - Simple GFX Demo](https://www.instructables.com/Galactic-Unicorn-Bounce-Simple-GFX-Demo/)
 - :link: [Cheerlights + Galactic Unicorn + MicroPython (beginner-friendly tutorial)](https://cheerlights.com/cheerlights-raspberry-pi-pico-w-micropython/)
 - :link: [CheerClock (plus laser-cut templates for a fancy case/diffuser)](https://github.com/seanosteen/CheerClock)
+- :link: [Giant Pomodoro timer using Galactic Unicorn](https://www.raspberrypi.com/news/make-a-giant-pomodoro-timer-using-galactic-unicorn/)
+- :link: [Galactic Weather Clock](https://github.com/raphv/galactic-weather-clock)
+- :link: [Unicorn Clock](https://github.com/hugokernel/UnicornClock)
+- :link: [Unicorn Weather Station](https://github.com/TagWolf/UnicornWeatherStation)
+- :link: [Unicorn News/RSS Feed Display](https://github.com/TagWolf/UnicornRSSDisplay)

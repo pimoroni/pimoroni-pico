@@ -1,3 +1,7 @@
+if(NOT TARGET pwm)
+  include(${CMAKE_CURRENT_LIST_DIR}/../pwm/pwm.cmake)
+endif()
+
 set(DRIVER_NAME servo)
 add_library(${DRIVER_NAME} INTERFACE)
 

@@ -1,6 +1,6 @@
 # Pico Display 2.0" Pack <!-- omit in toc -->
 
-Our Pico Display Pack offers a vibrant 1.14" (240x135) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
+Our Pico Display Pack offers a vibrant 2.0" (320x240) IPS LCD screen for your Raspberry Pi Pico it also includes four switches and and an RGB LED!
 
 - [Example Program](#example-program)
 - [Function Reference](#function-reference)

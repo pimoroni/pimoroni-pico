@@ -1,3 +1,7 @@
+if(NOT TARGET ioexpander)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/ioexpander/ioexpander.cmake)
+endif()
+
 set(LIB_NAME breakout_encoder)
 add_library(${LIB_NAME} INTERFACE)
 

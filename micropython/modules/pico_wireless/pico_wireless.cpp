@@ -2,6 +2,7 @@
 #include "hardware/sync.h"
 #include "pico/binary_info.h"
 
+#include "micropython/modules/util.hpp"
 #include "libraries/pico_wireless/pico_wireless.hpp"
 
 using namespace pimoroni;
@@ -51,7 +52,7 @@ mp_obj_t mp_ip_to_obj(IPAddress ip) {
 
 mp_obj_t picowireless_init() {
     if(wireless == nullptr)
-        wireless = new PicoWireless();
+        wireless = m_tracked_alloc_class(PicoWireless);
     wireless->init();
     return mp_const_none;
 }

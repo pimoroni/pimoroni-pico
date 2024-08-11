@@ -1,3 +1,7 @@
+add_subdirectory(mandelbrot)
+
+set(OUTPUT_NAME pico_display2_demo)
+
 add_executable(
   pico_display2_demo
   pico_display_2_demo.cpp

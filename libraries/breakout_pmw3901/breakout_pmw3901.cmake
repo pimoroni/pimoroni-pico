@@ -1,3 +1,7 @@
+if(NOT TARGET pmw3901)
+  include(${CMAKE_CURRENT_LIST_DIR}/../../drivers/pmw3901/pmw3901.cmake)
+endif()
+
 set(LIB_NAME breakout_pmw3901)
 add_library(${LIB_NAME} INTERFACE)
 

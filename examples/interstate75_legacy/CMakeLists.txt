@@ -1,0 +1,3 @@
+include(interstate75_hello_world.cmake)
+include(interstate75_pio_dma.cmake)
+include(interstate75_scrolling_text.cmake)

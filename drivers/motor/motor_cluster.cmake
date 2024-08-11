@@ -1,3 +1,7 @@
+if(NOT TARGET pwm_cluster)
+    include(${CMAKE_CURRENT_LIST_DIR}/../pwm/pwm_cluster.cmake)
+endif()
+
 set(DRIVER_NAME motor_cluster)
 add_library(${DRIVER_NAME} INTERFACE)
 

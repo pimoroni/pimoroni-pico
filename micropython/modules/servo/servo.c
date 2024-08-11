@@ -150,6 +150,16 @@ STATIC MP_DEFINE_CONST_DICT(Servo_locals_dict, Servo_locals_dict_table);
 STATIC MP_DEFINE_CONST_DICT(ServoCluster_locals_dict, ServoCluster_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Calibration_type,
+    MP_QSTR_calibration,
+    MP_TYPE_FLAG_NONE,
+    make_new, Calibration_make_new,
+    print, Calibration_print,
+    locals_dict, (mp_obj_dict_t*)&Calibration_locals_dict
+);
+#else
 const mp_obj_type_t Calibration_type = {
     { &mp_type_type },
     .name = MP_QSTR_calibration,
@@ -157,7 +167,18 @@ const mp_obj_type_t Calibration_type = {
     .make_new = Calibration_make_new,
     .locals_dict = (mp_obj_dict_t*)&Calibration_locals_dict,
 };
+#endif
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Servo_type,
+    MP_QSTR_servo,
+    MP_TYPE_FLAG_NONE,
+    make_new, Servo_make_new,
+    print, Servo_print,
+    locals_dict, (mp_obj_dict_t*)&Servo_locals_dict
+);
+#else
 const mp_obj_type_t Servo_type = {
     { &mp_type_type },
     .name = MP_QSTR_servo,
@@ -165,7 +186,18 @@ const mp_obj_type_t Servo_type = {
     .make_new = Servo_make_new,
     .locals_dict = (mp_obj_dict_t*)&Servo_locals_dict,
 };
+#endif
 
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    ServoCluster_type,
+    MP_QSTR_servo_cluster,
+    MP_TYPE_FLAG_NONE,
+    make_new, ServoCluster_make_new,
+    print, ServoCluster_print,
+    locals_dict, (mp_obj_dict_t*)&ServoCluster_locals_dict
+);
+#else
 const mp_obj_type_t ServoCluster_type = {
     { &mp_type_type },
     .name = MP_QSTR_servo_cluster,
@@ -173,6 +205,7 @@ const mp_obj_type_t ServoCluster_type = {
     .make_new = ServoCluster_make_new,
     .locals_dict = (mp_obj_dict_t*)&ServoCluster_locals_dict,
 };
+#endif
 
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;

@@ -1,5 +1,6 @@
-from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
+# from picographics import PicoGraphics, DISPLAY_INKY_FRAME as DISPLAY      # 5.7"
 # from picographics import PicoGraphics, DISPLAY_INKY_FRAME_4 as DISPLAY  # 4.0"
+from picographics import PicoGraphics, DISPLAY_INKY_FRAME_7 as DISPLAY  # 7.3"
 from network_manager import NetworkManager
 import uasyncio
 from urllib import urequest
@@ -173,11 +174,11 @@ while True:
         graphics.text(feed[2]["description"], 10, 395 if graphics.measure_text(feed[2]["title"]) < 650 else 375, WIDTH - 150, 2)
 
         code.set_text(feed[0]["guid"])
-        draw_qr_code(490, 40, 100, code)
+        draw_qr_code(WIDTH - 110, 40, 100, code)
         code.set_text(feed[1]["guid"])
         draw_qr_code(10, 180, 100, code)
         code.set_text(feed[2]["guid"])
-        draw_qr_code(490, 320, 100, code)
+        draw_qr_code(WIDTH - 110, 320, 100, code)
 
     else:
         graphics.set_pen(4)

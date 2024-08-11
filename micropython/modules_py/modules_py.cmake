@@ -1,25 +1,37 @@
-function (copy_module TARGET SRC DST)
+set(MODULES_DIR ${CMAKE_CURRENT_LIST_DIR})
+
+function (copy_module MODULE)
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../modules/${DST}.py
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE}
 
         COMMAND
-            cp ${SRC} ${CMAKE_CURRENT_BINARY_DIR}/../modules/${DST}.py
+            cp ${MODULES_DIR}/${MODULE} ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE}
 
-        DEPENDS ${src}
+        DEPENDS ${MODULES_DIR}/${MODULE}
     )
 
-    target_sources(${TARGET} INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${DST}.py)
+    target_sources(usermod_modules_py INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${MODULE})
+endfunction()
+
+function (genversion VERSION_FILE)
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE}
+
+        COMMAND
+            bash ${MODULES_DIR}/genversion.sh ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE}
+
+        DEPENDS ${MODULES_DIR}/genversion.sh
+    )
+
+    target_sources(usermod_modules_py INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/../modules/${VERSION_FILE})
 endfunction()
 
 # Create a dummy usermod to hang our .py copies from
 add_library(usermod_modules_py INTERFACE)
 target_link_libraries(usermod INTERFACE usermod_modules_py)
 
+genversion(version.py)
+
 # .py files to copy from modules_py to ports/rp2/modules
-#copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/picosystem.py picosystem)
-copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/pimoroni.py pimoroni)
-copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/gfx_pack.py gfx_pack)
-if(PICO_BOARD STREQUAL "pico_w")
-    copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/automation.py automation)
-    copy_module(usermod_modules_py ${CMAKE_CURRENT_LIST_DIR}/inventor.py inventor)
-endif()
+# copy_module(pimoroni.py)
+# copy_module(boot.py)

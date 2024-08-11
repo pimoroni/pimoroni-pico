@@ -99,6 +99,15 @@ namespace pimoroni {
       command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
     }
 
+    if(width == 240 && height == 135) { // Pico Display Pack (1.14" 240x135)
+      command(reg::VRHS, 1, "\x00"); // VRH Voltage setting
+      command(reg::GCTRL, 1, "\x75"); // VGH and VGL voltages
+      command(reg::VCOMS, 1, "\x3D"); // VCOM voltage
+      command(0xd6, 1, "\xa1"); // ???
+      command(reg::GMCTRP1, 14, "\x70\x04\x08\x09\x09\x05\x2A\x33\x41\x07\x13\x13\x29\x2f");
+      command(reg::GMCTRN1, 14, "\x70\x03\x09\x0A\x09\x06\x2B\x34\x41\x07\x12\x14\x28\x2E");
+    }
+
     command(reg::INVON);   // set inversion mode
     command(reg::SLPOUT);  // leave sleep mode
     command(reg::DISPON);  // turn display on
@@ -261,20 +270,13 @@ namespace pimoroni {
   }
 
   void ST7789::write_blocking_parallel(const uint8_t *src, size_t len) {
-    const uint8_t *p = src;
-    while(len--) {
-      // Does not byte align correctly
-      //pio_sm_put_blocking(parallel_pio, parallel_sm, *p);
-      while (pio_sm_is_tx_fifo_full(parallel_pio, parallel_sm))
-        ;
-      *(volatile uint8_t*)&parallel_pio->txf[parallel_sm] = *p;
-      p++;
-    }
+    write_blocking_dma(src, len);
+    dma_channel_wait_for_finish_blocking(st_dma_data);
 
-    uint32_t sm_stall_mask = 1u << (parallel_sm + PIO_FDEBUG_TXSTALL_LSB);
-    parallel_pio->fdebug = sm_stall_mask;
-      while (!(parallel_pio->fdebug & sm_stall_mask))
-          ;
+    // This may cause a race between PIO and the
+    // subsequent chipselect deassert for the last pixel
+    while(!pio_sm_is_tx_fifo_empty(parallel_pio, parallel_sm))
+      ;
   }
 
   void ST7789::command(uint8_t command, size_t len, const char *data, bool use_async_dma) {

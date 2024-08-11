@@ -82,7 +82,7 @@ while True:
 
     # draw the text
     graphics.set_pen(YELLOW)
-    graphics.text(MESSAGE, round(0 - scroll), 2, -1, 0.55);    
+    graphics.text(MESSAGE, round(0 - scroll), 2, -1, 0.55)
 
     # update the display
     gu.update(graphics)

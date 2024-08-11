@@ -1289,11 +1289,11 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
             mp_raise_TypeError("list or tuple must contain at least one integer");
         else {
             // Create and populate a local array of pins
-            pins = new uint8_t[pin_count];
+            pins = m_new(uint8_t, pin_count);
             for(size_t i = 0; i < pin_count; i++) {
                 int pin = mp_obj_get_int(items[i]);
                 if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
-                    delete[] pins;
+                    m_free(pins);
                     mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
                 }
                 else {
@@ -1348,7 +1348,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     // Cleanup the pins array
     if(pins != nullptr)
-        delete[] pins;
+        m_free(pins);
 
     if(!cluster->init()) {
         m_del_class(ServoCluster, cluster);
@@ -1449,11 +1449,11 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
                 mp_raise_TypeError("list or tuple must contain at least one integer");
             else {
                 // Create and populate a local array of servo indices
-                uint8_t *servos = new uint8_t[length];
+                uint8_t *servos = m_new(uint8_t, length);
                 for(size_t i = 0; i < length; i++) {
                     int servo = mp_obj_get_int(items[i]);
                     if(servo < 0 || servo >= servo_count) {
-                        delete[] servos;
+                        m_free(servos);
                         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                     }
                     else {
@@ -1461,7 +1461,7 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
                     }
                 }
                 self->cluster->enable(servos, length, args[ARG_load].u_bool);
-                delete[] servos;
+                m_free(servos);
             }
         }
     }
@@ -1533,11 +1533,11 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
                 mp_raise_TypeError("list or tuple must contain at least one integer");
             else {
                 // Create and populate a local array of servo indices
-                uint8_t *servos = new uint8_t[length];
+                uint8_t *servos = m_new(uint8_t, length);
                 for(size_t i = 0; i < length; i++) {
                     int servo = mp_obj_get_int(items[i]);
                     if(servo < 0 || servo >= servo_count) {
-                        delete[] servos;
+                        m_free(servos);
                         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                     }
                     else {
@@ -1545,7 +1545,7 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
                     }
                 }
                 self->cluster->disable(servos, length, args[ARG_load].u_bool);
-                delete[] servos;
+                m_free(servos);
             }
         }
     }
@@ -1668,11 +1668,11 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -1681,7 +1681,7 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
                     }
                     float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
                     self->cluster->pulse(servos, length, pulse, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }
@@ -1786,11 +1786,11 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -1799,7 +1799,7 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
                     }
                     float value = mp_obj_get_float(args[ARG_value].u_obj);
                     self->cluster->value(servos, length, value, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }
@@ -1904,11 +1904,11 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -1917,7 +1917,7 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
                     }
                     float phase = mp_obj_get_float(args[ARG_phase].u_obj);
                     self->cluster->phase(servos, length, phase, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }
@@ -2108,11 +2108,11 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
                 mp_raise_TypeError("list or tuple must contain at least one integer");
             else {
                 // Create and populate a local array of servo indices
-                uint8_t *servos = new uint8_t[length];
+                uint8_t *servos = m_new(uint8_t, length);
                 for(size_t i = 0; i < length; i++) {
                     int servo = mp_obj_get_int(items[i]);
                     if(servo < 0 || servo >= servo_count) {
-                        delete[] servos;
+                        m_free(servos);
                         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                     }
                     else {
@@ -2120,7 +2120,7 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
                     }
                 }
                 self->cluster->to_min(servos, length, args[ARG_load].u_bool);
-                delete[] servos;
+                m_free(servos);
             }
         }
     }
@@ -2196,11 +2196,11 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
                 mp_raise_TypeError("list or tuple must contain at least one integer");
             else {
                 // Create and populate a local array of servo indices
-                uint8_t *servos = new uint8_t[length];
+                uint8_t *servos = m_new(uint8_t, length);
                 for(size_t i = 0; i < length; i++) {
                     int servo = mp_obj_get_int(items[i]);
                     if(servo < 0 || servo >= servo_count) {
-                        delete[] servos;
+                        m_free(servos);
                         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                     }
                     else {
@@ -2208,7 +2208,7 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
                     }
                 }
                 self->cluster->to_mid(servos, length, args[ARG_load].u_bool);
-                delete[] servos;
+                m_free(servos);
             }
         }
     }
@@ -2284,11 +2284,11 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
                 mp_raise_TypeError("list or tuple must contain at least one integer");
             else {
                 // Create and populate a local array of servo indices
-                uint8_t *servos = new uint8_t[length];
+                uint8_t *servos = m_new(uint8_t, length);
                 for(size_t i = 0; i < length; i++) {
                     int servo = mp_obj_get_int(items[i]);
                     if(servo < 0 || servo >= servo_count) {
-                        delete[] servos;
+                        m_free(servos);
                         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                     }
                     else {
@@ -2296,7 +2296,7 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
                     }
                 }
                 self->cluster->to_max(servos, length, args[ARG_load].u_bool);
-                delete[] servos;
+                m_free(servos);
             }
         }
     }
@@ -2376,11 +2376,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -2389,7 +2389,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     }
                     float in = mp_obj_get_float(args[ARG_in].u_obj);
                     self->cluster->to_percent(servos, length, in, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }
@@ -2448,11 +2448,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -2463,7 +2463,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
                     float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
                     self->cluster->to_percent(servos, length, in, in_min, in_max, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }
@@ -2526,11 +2526,11 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     mp_raise_TypeError("list or tuple must contain at least one integer");
                 else {
                     // Create and populate a local array of servo indices
-                    uint8_t *servos = new uint8_t[length];
+                    uint8_t *servos = m_new(uint8_t, length);
                     for(size_t i = 0; i < length; i++) {
                         int servo = mp_obj_get_int(items[i]);
                         if(servo < 0 || servo >= servo_count) {
-                            delete[] servos;
+                            m_free(servos);
                             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
                         }
                         else {
@@ -2543,7 +2543,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                     float value_min = mp_obj_get_float(args[ARG_value_min].u_obj);
                     float value_max = mp_obj_get_float(args[ARG_value_max].u_obj);
                     self->cluster->to_percent(servos, length, in, in_min, in_max, value_min, value_max, args[ARG_load].u_bool);
-                    delete[] servos;
+                    m_free(servos);
                 }
             }
         }

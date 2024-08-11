@@ -7,7 +7,11 @@
 
 #include "JPEGDEC.h"
 
+#ifdef INKY_FRAME_7
+#include "libraries/inky_frame_7/inky_frame_7.hpp"
+#else
 #include "libraries/inky_frame/inky_frame.hpp"
+#endif
 
 using namespace pimoroni;
 
@@ -65,6 +69,36 @@ int jpegdec_draw_callback(JPEGDRAW *draw) {
   return 1; // continue drawing
 }
 
+// Draw to the nearest colour instead of dithering
+int jpegdec_draw_posterize_callback(JPEGDRAW *draw) {
+  uint16_t *p = draw->pPixels;
+
+  int xo = jpeg_decode_options.x;
+  int yo = jpeg_decode_options.y;
+
+  for(int y = 0; y < draw->iHeight; y++) {
+    for(int x = 0; x < draw->iWidth; x++) {
+      int sx = ((draw->x + x + xo) * jpeg_decode_options.w) / jpeg.getWidth();
+      int sy = ((draw->y + y + yo) * jpeg_decode_options.h) / jpeg.getHeight();
+
+      if(xo + sx > 0 && xo + sx < inky.bounds.w && yo + sy > 0 && yo + sy < inky.bounds.h) {
+        int closest = RGB(RGB565(*p)).closest(inky.palette, inky.palette_size);
+        if (closest != -1) {
+          inky.set_pen(closest);
+          inky.set_pixel({xo + sx, yo + sy});
+        } else {
+          inky.set_pen(0);
+          inky.set_pixel({xo + sx, yo + sy});
+        }
+      }
+
+      p++;
+    }
+  }
+
+  return 1; // continue drawing
+}
+
 void draw_jpeg(std::string filename, int x, int y, int w, int h) {
 
   // TODO: this is a horrible way to do it but we need to pass some parameters
@@ -81,7 +115,8 @@ void draw_jpeg(std::string filename, int x, int y, int w, int h) {
     jpegdec_close_callback,
     jpegdec_read_callback,
     jpegdec_seek_callback,
-    jpegdec_draw_callback);
+    jpegdec_draw_callback // Try jpegdec_draw_posterize_callback
+  );
 
   jpeg.setPixelType(RGB565_BIG_ENDIAN);
 
@@ -130,7 +165,7 @@ int main() {
     }; // Wait for debugger
   }
   
-  filename = "butterfly-600x448.jpg";
+  filename = "shutterstock_172537049.jpg";
 
   //inky.led(InkyFrame::LED_E, 255);
   //sleep_ms(1000);
@@ -169,7 +204,7 @@ int main() {
   printf("done!\n");
 
   printf("Displaying file: %s\n", filename.c_str());
-  draw_jpeg(filename, 0, 0, 600, 448);
+  draw_jpeg(filename, 0, 0, inky.width, inky.height);
   printf("done!\n");
 
   inky.update();

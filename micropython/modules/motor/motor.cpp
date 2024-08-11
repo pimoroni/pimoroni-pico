@@ -32,11 +32,11 @@ void pimoroni_tuple_or_list(const mp_obj_t &object, mp_obj_t **items, size_t *le
 }
 
 uint8_t* pimoroni_motors_from_items(mp_obj_t *items, size_t length, int motor_count) {
-    uint8_t *motors = new uint8_t[length];
+    uint8_t *motors = m_new(uint8_t, length);
     for(size_t i = 0; i < length; i++) {
         int motor = mp_obj_get_int(items[i]);
         if(motor < 0 || motor >= motor_count) {
-            delete[] motors;
+            m_free(motors);
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a motor in the list or tuple is out of range. Expected 0 to %d"), motor_count - 1);
         }
         else {
@@ -636,7 +636,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     else {
         // Specific check for is a single 2 pin list/tuple was provided
         if(pair_count == 2 && mp_obj_is_int(items[0]) && mp_obj_is_int(items[1])) {
-            pins = new pin_pair[1];
+            pins = m_new(pin_pair, 1);
             pair_count = 1;
 
             int pos = mp_obj_get_int(items[0]);
@@ -656,7 +656,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         }
         else {
             // Create and populate a local array of pins
-            pins = new pin_pair[pair_count];
+            pins = m_new(pin_pair, pair_count);
             for(size_t i = 0; i < pair_count; i++) {
                 mp_obj_t obj = items[i];
                 if(!mp_obj_is_type(obj, &mp_type_tuple)) {

@@ -5,28 +5,27 @@ Our Pico Scroll Pack offers a 17x7 white LED matrix for your Raspberry Pi Pico. 
 We've included helper functions to handle every aspect of drawing to the matrix and interfacing with the buttons. See the [function reference](#function-reference) for details.
 
 - [Example Program](#example-program)
-- [Function Reference](#function-reference)
-  - [init](#init)
-  - [get_width](#get_width)
-  - [get_height](#get_height)
-  - [set_pixel](#set_pixel)
-  - [set_pixels](#set_pixels)
-  - [show_text](#show_text)
-  - [scroll_text](#scroll_text)
-  - [show_bitmap_1d](#show_bitmap_1d)
+- [Function reference](#function-reference)
+  - [get\_width](#get_width)
+  - [get\_height](#get_height)
+  - [set\_pixel](#set_pixel)
+  - [set\_pixels](#set_pixels)
+  - [show\_text](#show_text)
+  - [scroll\_text](#scroll_text)
+  - [show\_bitmap\_1d](#show_bitmap_1d)
   - [update](#update)
   - [clear](#clear)
-  - [is_pressed](#is_pressed)
+  - [is\_pressed](#is_pressed)
 
 ## Example Program
 
 The following example sets up the matrix, sets each pixel to an increasing brightnesses level, and then clears the matrix only after button A is pressed.
 
 ```python
-import picoscroll
+from picoscroll import PicoScroll
 
 # Initialise the board
-picoscroll.init()
+picoscroll = PicoScroll()
 
 brightness = 0
 
@@ -50,14 +49,6 @@ picoscroll.update()
 ```
 
 ## Function reference
-
-### init
-
-Sets up the Pico Scroll Pack. The `init` function must be called before any other functions as it configures the required pins on the Pico board.
-
-```python
-picoscroll.init()
-```
 
 ### get_width
 ### get_height

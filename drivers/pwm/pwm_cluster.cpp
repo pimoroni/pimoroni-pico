@@ -1,7 +1,10 @@
 #include "pwm_cluster.hpp"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
+
+#ifndef NO_QSTR
 #include "pwm_cluster.pio.h"
+#endif
 
 // Uncomment the below line to enable debugging
 //#define DEBUG_MULTI_PWM
@@ -27,7 +30,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, bool loading_zone)
 , sm(sm)
 , pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -48,7 +50,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, bool loa
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -68,7 +69,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, b
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -90,7 +90,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bo
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -111,7 +110,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t len
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -137,7 +135,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pai
 , sm(sm)
 , pin_mask(0x00000000)
 , channel_count(0)
-, channels(nullptr)
 , wrap_level(0)
 , loading_zone(loading_zone) {
 
@@ -159,8 +156,8 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pai
 
 void PWMCluster::constructor_common() {
   // Initialise all the channels this PWM will control
-  if(channel_count > 0) {
-    channels = new ChannelState[channel_count];
+  for(uint i = 0; i < channel_count; i++) {
+    channels[i] = ChannelState();
   }
 
   // Set up the transition buffers
@@ -216,8 +213,6 @@ PWMCluster::~PWMCluster() {
       gpio_set_function(channel_to_pin_map[channel], GPIO_FUNC_NULL);
     }
   }
-
-  delete[] channels;
 }
 
 void PWMCluster::dma_interrupt_handler() {

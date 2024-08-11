@@ -48,11 +48,15 @@ mp_obj_t BreakoutBME280_read(mp_obj_t self_in) {
     breakout_bme280_BreakoutBME280_obj_t *self = MP_OBJ_TO_PTR2(self_in, breakout_bme280_BreakoutBME280_obj_t);
     BME280::bme280_reading result = self->breakout->read_forced();
 
-    mp_obj_t tuple[3];
-    tuple[0] = mp_obj_new_float(result.temperature);
-    tuple[1] = mp_obj_new_float(result.pressure);
-    tuple[2] = mp_obj_new_float(result.humidity);
-    return mp_obj_new_tuple(3, tuple);
+    if(result.status) {
+        mp_obj_t tuple[3];
+        tuple[0] = mp_obj_new_float(result.temperature);
+        tuple[1] = mp_obj_new_float(result.pressure);
+        tuple[2] = mp_obj_new_float(result.humidity);
+        return mp_obj_new_tuple(3, tuple);
+    }
+
+    mp_raise_msg(&mp_type_RuntimeError, "BME280: read failed.");
 }
 
 mp_obj_t BreakoutBME280_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {

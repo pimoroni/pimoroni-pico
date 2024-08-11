@@ -75,12 +75,22 @@ STATIC const mp_rom_map_elem_t Badger2040_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(Badger2040_locals_dict, Badger2040_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    Badger2040_type,
+    MP_QSTR_Badger2040,
+    MP_TYPE_FLAG_NONE,
+    make_new, Badger2040_make_new,
+    locals_dict, (mp_obj_dict_t*)&Badger2040_locals_dict
+);
+#else
 const mp_obj_type_t Badger2040_type = {
     { &mp_type_type },
     .name = MP_QSTR_Badger2040,
     .make_new = Badger2040_make_new,
     .locals_dict = (mp_obj_dict_t*)&Badger2040_locals_dict,
 };
+#endif
 
 /***** Globals Table *****/
 

@@ -63,6 +63,7 @@ def adjust_to_sea_pressure(pressure_hpa, temperature, altitude):
 
 def describe_pressure(pressure_hpa):
     """Convert pressure into barometer-type description."""
+    pressure_hpa += 0.5
     if pressure_hpa < 970:
         description = "storm"
     elif 970 <= pressure_hpa < 990:
@@ -80,6 +81,7 @@ def describe_pressure(pressure_hpa):
 
 def describe_humidity(corrected_humidity):
     """Convert relative humidity into good/bad description."""
+    corrected_humidity += 0.5
     if 40 < corrected_humidity < 60:
         description = "good"
     else:
@@ -89,6 +91,7 @@ def describe_humidity(corrected_humidity):
 
 def describe_light(lux):
     """Convert light level in lux to descriptive value."""
+    lux += 0.5
     if lux < 50:
         description = "dark"
     elif 50 <= lux < 100:
@@ -186,7 +189,7 @@ temperature, pressure, humidity, gas, status, _, _ = bme.read()
 time.sleep(0.5)
 
 while True:
-    # turn off the backlight with A and turn it back on with B
+    # turn on the backlight with A and turn it back off with B
     # switch between sensor and equaliser mode with X and Y
     if button_a.is_pressed:
         display.set_backlight(BRIGHTNESS)
@@ -263,7 +266,7 @@ while True:
                 display.set_pen(RED)
             if corrected_temperature < 10:
                 display.set_pen(CYAN)
-            display.text(f"{corrected_temperature:.1f}°c", 5, 15, WIDTH, scale=4)
+            display.text(f"{corrected_temperature:.1f}°C", 5, 15, WIDTH, scale=4)
 
             # draw temp max and min
             display.set_pen(CYAN)
@@ -275,7 +278,7 @@ while True:
             display.set_pen(WHITE)
             display.text(f"rh {corrected_humidity:.0f}%", 0, 75, WIDTH, scale=3)
             display.text(f"{pressure_hpa:.0f}hPa", 0, 125, WIDTH, scale=3)
-            display.text(f"{lux} lux", 0, 175, WIDTH, scale=3)
+            display.text(f"{lux:.0f} lux", 0, 175, WIDTH, scale=3)
 
             # draw the second column of text
             display.text(f"{describe_humidity(corrected_humidity)}", 125, 75, WIDTH, scale=3)

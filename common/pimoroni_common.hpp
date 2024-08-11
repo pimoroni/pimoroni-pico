@@ -78,7 +78,7 @@ namespace pimoroni {
       return to_ms_since_boot(get_absolute_time());
     }
 
-    constexpr uint8_t GAMMA_8BIT[256] = {
+    inline constexpr uint8_t GAMMA_8BIT[256] = {
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
       2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
@@ -98,7 +98,7 @@ namespace pimoroni {
 
     /* Moved from pico_unicorn.cpp
     v = (uint16_t)(powf((float)(n) / 255.0f, 2.2) * 16383.0f + 0.5f) */
-    constexpr uint16_t GAMMA_14BIT[256] = {
+    inline constexpr uint16_t GAMMA_14BIT[256] = {
       0, 0, 0, 1, 2, 3, 4, 6, 8, 10, 13, 16, 20, 23, 28, 32,
       37, 42, 48, 54, 61, 67, 75, 82, 90, 99, 108, 117, 127, 137, 148, 159,
       170, 182, 195, 207, 221, 234, 249, 263, 278, 294, 310, 326, 343, 361, 379, 397,

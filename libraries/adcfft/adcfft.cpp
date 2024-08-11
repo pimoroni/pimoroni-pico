@@ -47,7 +47,7 @@ void ADCFFT::init() {
 
     // Initialize the ADC harware
     // (resets it, enables the clock, spins until the hardware is ready)
-    adc_init();
+    if (!(adc_hw->cs & ADC_CS_EN_BITS)) adc_init();
 
     // Select analog mux input (0...3 are GPIO 26, 27, 28, 29; 4 is temp sensor)
     adc_select_input(adc_channel);

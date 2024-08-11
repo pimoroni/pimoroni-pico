@@ -10,7 +10,7 @@ namespace servo {
   }
 
   Calibration::Calibration()
-    : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
+    : calibration_size(0), limit_lower(true), limit_upper(true) {
   }
 
   Calibration::Calibration(CalibrationType default_type)
@@ -19,7 +19,7 @@ namespace servo {
   }
 
   Calibration::Calibration(const Calibration &other)
-    : calibration(nullptr), calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
+    : calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
     uint size = other.size();
     apply_blank_pairs(size);
     for(uint i = 0; i < size; i++) {
@@ -28,10 +28,6 @@ namespace servo {
   }
 
   Calibration::~Calibration() {
-    if(calibration != nullptr) {
-      delete[] calibration;
-      calibration = nullptr;
-    }
   }
 
   Calibration &Calibration::operator=(const Calibration &other) {
@@ -57,16 +53,13 @@ namespace servo {
   }
 
   void Calibration::apply_blank_pairs(uint size) {
-    if(calibration != nullptr) {
-      delete[] calibration;
-    }
-
     if(size > 0) {
-      calibration = new Pair[size];
+      for(auto i = 0u; i < size; i++) {
+        calibration[i] = Pair();
+      }
       calibration_size = size;
     }
     else {
-      calibration = nullptr;
       calibration_size = 0;
     }
   }

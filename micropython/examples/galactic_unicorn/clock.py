@@ -119,6 +119,7 @@ def sync_time():
     # Start connection
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
+    wlan.config(pm=0xa11140)  # Turn WiFi power saving off for some slow APs
     wlan.connect(WIFI_SSID, WIFI_PASSWORD)
 
     # Wait for connect success or failure
@@ -158,11 +159,13 @@ down_button = machine.Pin(GalacticUnicorn.SWITCH_VOLUME_DOWN, machine.Pin.IN, ma
 
 
 def adjust_utc_offset(pin):
-    global utc_offset
+    global utc_offset, last_second
     if pin == up_button:
         utc_offset += 1
+        last_second = None
     if pin == down_button:
         utc_offset -= 1
+        last_second = None
 
 
 up_button.irq(trigger=machine.Pin.IRQ_FALLING, handler=adjust_utc_offset)
@@ -180,7 +183,7 @@ def redraw_display_if_reqd():
 
     year, month, day, wd, hour, minute, second, _ = rtc.datetime()
     if second != last_second:
-        hour += utc_offset
+        hour = (hour + utc_offset) % 24
         time_through_day = (((hour * 60) + minute) * 60) + second
         percent_through_day = time_through_day / 86400
         percent_to_midday = 1.0 - ((math.cos(percent_through_day * math.pi * 2) + 1) / 2)
@@ -195,9 +198,6 @@ def redraw_display_if_reqd():
 
         clock = "{:02}:{:02}:{:02}".format(hour, minute, second)
 
-        # set the font
-        graphics.set_font("bitmap8")
-
         # calculate text position so that it is centred
         w = graphics.measure_text(clock, 1)
         x = int(width / 2 - w / 2 + 1)
@@ -208,6 +208,8 @@ def redraw_display_if_reqd():
         last_second = second
 
 
+# set the font
+graphics.set_font("bitmap8")
 gu.set_brightness(0.5)
 
 sync_time()
@@ -215,9 +217,11 @@ sync_time()
 while True:
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_UP):
         gu.adjust_brightness(+0.01)
+        last_second = None
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_BRIGHTNESS_DOWN):
         gu.adjust_brightness(-0.01)
+        last_second = None
 
     if gu.is_pressed(GalacticUnicorn.SWITCH_A):
         sync_time()

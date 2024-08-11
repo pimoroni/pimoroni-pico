@@ -10,38 +10,37 @@ env:
 
 jobs:
   build:
-    name: ${{matrix.name}}
+    name: ${{matrix.name}} (C++)
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         include:
-          - os: ubuntu-20.04
-            name: Linux
-            cache-key: linux
-            cmake-args: '-DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras'
-            apt-packages: ccache gcc-arm-none-eabi
-
-    runs-on: ${{matrix.os}}
+          - name: Pico
+            board: pico
+          - name: Pico W
+            board: pico_w
 
     env:
       PICO_SDK_PATH: $GITHUB_WORKSPACE/pico-sdk
 
     steps:
     - name: Compiler Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: /home/runner/.ccache
-        key: ccache-cmake-${{github.ref}}-${{github.sha}}
+        key: ccache-cmake-${{github.ref}}-${{matrix.board}}-${{github.sha}}
         restore-keys: |
+          ccache-cmake-${{github.ref}}-${{matrix.board}}
           ccache-cmake-${{github.ref}}
           ccache-cmake
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
     # Check out the Pico SDK
     - name: Checkout Pico SDK
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: raspberrypi/pico-sdk
         path: pico-sdk
@@ -49,7 +48,7 @@ jobs:
 
     # Check out the Pico Extras
     - name: Checkout Pico Extras
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: raspberrypi/pico-extras
         path: pico-extras
@@ -59,7 +58,7 @@ jobs:
     - name: Install deps
       if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ${{matrix.apt-packages}}
+        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build
@@ -67,7 +66,7 @@ jobs:
     - name: Configure CMake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache ${{matrix.cmake-args}}
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DPICO_SDK_PATH=$GITHUB_WORKSPACE/pico-sdk -DPICO_SDK_POST_LIST_DIRS=$GITHUB_WORKSPACE/pico-extras -DPICO_BOARD=${{matrix.board}}
 
     - name: Build
       working-directory: ${{runner.workspace}}/build

@@ -13,7 +13,7 @@
 //
 #ifndef __JPEGDEC__
 #define __JPEGDEC__
-#if defined( __MACH__ ) || defined( __LINUX__ ) || defined( __MCUXPRESSO ) || defined( PICO_BUILD )
+#if defined( __MACH__ ) || defined( __LINUX__ ) || defined( __MCUXPRESSO ) || defined( ESP_PLATFORM ) || defined( PICO_BUILD )
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -68,6 +68,7 @@
 enum {
     RGB565_LITTLE_ENDIAN = 0,
     RGB565_BIG_ENDIAN,
+    RGB888_LITTLE_ENDIAN,
     EIGHT_BIT_GRAYSCALE,
     FOUR_BIT_DITHERED,
     TWO_BIT_DITHERED,
@@ -108,8 +109,10 @@ typedef struct jpeg_draw_tag
 {
     int x, y; // upper left corner of current MCU
     int iWidth, iHeight; // size of this MCU
+    int iWidthUsed; // clipped size for odd/edges
     int iBpp; // bit depth of the pixels (8 or 16)
     uint16_t *pPixels; // 16-bit pixels
+    void *pUser;
 } JPEGDRAW;
 
 // Callback function prototypes
@@ -185,6 +188,7 @@ typedef struct jpeg_image_tag
     JPEGCOMPINFO JPCI[MAX_COMPS_IN_SCAN]; /* Max color components */
     JPEGFILE JPEGFile;
     BUFFERED_BITS bb;
+    void *pUser;
     uint8_t *pDitherBuffer; // provided externally to do Floyd-Steinberg dithering
     uint16_t usPixels[MAX_BUFFERED_PIXELS];
     int16_t sMCUs[DCTSIZE * MAX_MCU_COUNT]; // 4:2:0 needs 6 DCT blocks per MCU
@@ -208,6 +212,7 @@ class JPEGDEC
     int openRAM(uint8_t *pData, int iDataSize, JPEG_DRAW_CALLBACK *pfnDraw);
     int openFLASH(uint8_t *pData, int iDataSize, JPEG_DRAW_CALLBACK *pfnDraw);
     int open(const char *szFilename, JPEG_OPEN_CALLBACK *pfnOpen, JPEG_CLOSE_CALLBACK *pfnClose, JPEG_READ_CALLBACK *pfnRead, JPEG_SEEK_CALLBACK *pfnSeek, JPEG_DRAW_CALLBACK *pfnDraw);
+    int open(void *fHandle, int iDataSize, JPEG_CLOSE_CALLBACK *pfnClose, JPEG_READ_CALLBACK *pfnRead, JPEG_SEEK_CALLBACK *pfnSeek, JPEG_DRAW_CALLBACK *pfnDraw);
 #ifdef FS_H
     int open(File &file, JPEG_DRAW_CALLBACK *pfnDraw);
 #endif
@@ -218,6 +223,7 @@ class JPEGDEC
     int getWidth();
     int getHeight();
     int getBpp();
+    void setUserPointer(void *p);
     int getSubSample();
     int hasThumb();
     int getThumbWidth();

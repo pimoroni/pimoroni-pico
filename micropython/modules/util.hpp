@@ -14,3 +14,6 @@
 
 #define m_new_class(cls, ...) new(m_new(cls, 1)) cls(__VA_ARGS__)
 #define m_del_class(cls, ptr) ptr->~cls();m_del(cls, ptr, 1)
+
+#define m_tracked_alloc_class(cls, ...) new(m_tracked_calloc(1, sizeof(cls))) cls(__VA_ARGS__)
+#define m_tracked_free_class(cls, ptr) ptr->~cls();m_tracked_free(ptr)

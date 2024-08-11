@@ -3,7 +3,11 @@
 #include "pico_explorer.hpp"
 #include "pico/stdlib.h"
 #include "encoder.hpp"
+
+#ifndef NO_QSTR
 #include "quadrature_out.pio.h"
+#endif
+
 #include "drivers/st7789/st7789.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "button.hpp"
@@ -217,8 +221,10 @@ bool repeating_timer_callback(struct repeating_timer *t) {
 void setup() {
   stdio_init_all();
 
+#ifdef PICO_DEFAULT_LED_PIN
   gpio_init(PICO_DEFAULT_LED_PIN);
   gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+#endif
 
   if(ENCODER_SWITCH_PIN != PIN_UNUSED) {
     gpio_init(ENCODER_SWITCH_PIN);
@@ -270,7 +276,9 @@ int main() {
     if(current_time > last_time + MAIN_LOOP_TIME_US) {
       last_time = current_time;
 
+#ifdef PICO_DEFAULT_LED_PIN
       gpio_put(PICO_DEFAULT_LED_PIN, true);    // Show the screen refresh has stated
+#endif
 
       // If the user has wired up their encoder switch, and it is pressed, set the encoder count to zero
       if(ENCODER_SWITCH_PIN != PIN_UNUSED && gpio_get(ENCODER_SWITCH_PIN)) {
@@ -384,7 +392,10 @@ int main() {
       }
 
       st7789.update(&graphics);                 // Refresh the screen
+
+#ifdef PICO_DEFAULT_LED_PIN
       gpio_put(PICO_DEFAULT_LED_PIN, false);  // Show the screen refresh has ended
+#endif
     }
   }
 }

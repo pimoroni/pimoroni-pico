@@ -4,9 +4,9 @@ Welcome to the brave new world of Pico!
 
 This repository contains the C/C++ and MicroPython libraries for our range of RP2040-based boards, Raspberry Pi Pico addons & [supported Breakout Garden sensors](#breakouts).
 
-[![CMake Build Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/CMake?label=C%2B%2B)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/cmake.yml)
-[![MicroPython Build Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/MicroPython?label=MicroPython)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython.yml)
-[![MicroPython+Blinka Status](https://img.shields.io/github/workflow/status/pimoroni/pimoroni-pico/MicroPython+Blinka?label=MicroPython%2BBlinka)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython-with-blinka.yml)
+[![CMake Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/cmake.yml?branch=main&label=CMake)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/cmake.yml)
+[![MicroPython Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/micropython.yml?branch=main&label=MicroPython)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython.yml)
+[![MicroPython PicoW Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/micropython-picow.yml?branch=main&label=MicroPython%20PicoW)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython-picow.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/pimoroni/pimoroni-pico)](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
 
 
@@ -89,7 +89,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 ## RP2040 Boards
 
 * Plasma 2040 (LED strip driver) - https://shop.pimoroni.com/products/plasma-2040
-* Interstate 75 (HUB75 driver) - https://shop.pimoroni.com/products/interstate-75
+* Interstate 75 (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75
 * Badger 2040 (E Ink badge) - https://shop.pimoroni.com/products/badger-2040
 * Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
 * Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
@@ -102,7 +102,12 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Inky Frame 5.7" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-5-7
 * Automation 2040 W Mini (inputs, outputs and a relay, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w-mini
 * Plasma Stick 2040 W (bijou LED strip controller) - https://shop.pimoroni.com/products/plasma-stick-2040-w
-* Galactic Unicorn (dazzling 53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
+* Galactic Unicorn (53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
+* Interstate 75 W (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75-w
+* Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
+* Badger 2040 W (E Ink badge) - https://shop.pimoroni.com/products/badger-2040-w
+* Cosmic Unicorn (32 x 32 LED matrix) - https://shop.pimoroni.com/products/cosmic-unicorn
+* Inky Frame 7.3" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-7-3
 
 ## Breakouts
 
@@ -111,6 +116,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * MICS6814 - Gas Sensor - https://shop.pimoroni.com/products/mics6814-gas-sensor-breakout
 * RGB Potentiometer - https://shop.pimoroni.com/products/rgb-potentiometer-breakout
 * RGB Encoder - https://shop.pimoroni.com/products/rgb-encoder-breakout
+* RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
 * IO Expander - https://shop.pimoroni.com/products/io-expander
 * RV3028 - Real-Time Clock (RTC) - https://shop.pimoroni.com/products/rv3028-real-time-clock-rtc-breakout
 * ST7735 - 0.96" LCD - https://shop.pimoroni.com/products/0-96-spi-colour-lcd-160x80-breakout
@@ -134,6 +140,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * ICP10125 - High Accuracy Pressure / Altitude / Temperature Sensor - https://shop.pimoroni.com/products/icp10125-air-pressure-breakout
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
+* RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
 
 ## Kits
 
@@ -143,7 +150,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 - :link: [Getting Started with (MicroPython on) Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 - :link: [Pico C/C++ Development on Windows / WSL](https://learn.pimoroni.com/article/pico-development-using-wsl)
-- :link: [Getting Started with Interstate 75](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
+- :link: [Getting Started with Interstate 75 (and W)](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
 - :link: [Getting Started with Plasma 2040](https://learn.pimoroni.com/article/plasma-2040)
 - :link: [Assembling Keybow 2040](https://learn.pimoroni.com/article/assembling-keybow-2040)
 - :link: [Getting Started with Badger 2040](https://learn.pimoroni.com/article/getting-started-with-badger-2040)
@@ -152,3 +159,4 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 - :link: [Getting Started with Inky Frame](https://learn.pimoroni.com/article/getting-started-with-inky-frame)
 - :link: [Getting Started with Automation 2040 W (and Mini)](https://learn.pimoroni.com/article/getting-started-with-automation-2040-w)
 - :link: [Assembling Wireless Plasma Kit](https://learn.pimoroni.com/article/assembling-wireless-plasma-kit)
+- :link: [Getting Started with Badger 2040 W](https://learn.pimoroni.com/article/getting-started-with-badger-2040-w)

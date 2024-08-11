@@ -63,13 +63,22 @@ STATIC const mp_rom_map_elem_t BreakoutIOExpander_locals_dict_table[] = {
 STATIC MP_DEFINE_CONST_DICT(BreakoutIOExpander_locals_dict, BreakoutIOExpander_locals_dict_table);
 
 /***** Class Definition *****/
+#ifdef MP_DEFINE_CONST_OBJ_TYPE
+MP_DEFINE_CONST_OBJ_TYPE(
+    breakout_ioexpander_BreakoutIOExpander_type,
+    MP_QSTR_BreakoutIOExpander,
+    MP_TYPE_FLAG_NONE,
+    make_new, BreakoutIOExpander_make_new,
+    locals_dict, (mp_obj_dict_t*)&BreakoutIOExpander_locals_dict
+);
+#else
 const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type = {
     { &mp_type_type },
     .name = MP_QSTR_BreakoutIOExpander,
     .make_new = BreakoutIOExpander_make_new,
     .locals_dict = (mp_obj_dict_t*)&BreakoutIOExpander_locals_dict,
 };
-
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // breakout_ioexpander Module
@@ -79,6 +88,11 @@ const mp_obj_type_t breakout_ioexpander_BreakoutIOExpander_type = {
 STATIC const mp_map_elem_t breakout_ioexpander_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_ioexpander) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutIOExpander), (mp_obj_t)&breakout_ioexpander_BreakoutIOExpander_type },
+    { MP_ROM_QSTR(MP_QSTR_IN), MP_ROM_INT(IOE_PIN_IN) },
+    { MP_ROM_QSTR(MP_QSTR_IN_PU), MP_ROM_INT(IOE_PIN_IN_PU) },
+    { MP_ROM_QSTR(MP_QSTR_OUT), MP_ROM_INT(IOE_PIN_OUT) },
+    { MP_ROM_QSTR(MP_QSTR_PWM), MP_ROM_INT(IOE_PIN_PWM) },
+    { MP_ROM_QSTR(MP_QSTR_ADC), MP_ROM_INT(IOE_PIN_ADC) },
 };
 STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_ioexpander_globals, breakout_ioexpander_globals_table);
 

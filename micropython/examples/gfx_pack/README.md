@@ -12,8 +12,10 @@
   - [CO2](#co2)
   - [Thermometer](#thermometer)
 - [Wireless Examples](#wireless-examples)
+  - [Carbon Intensity Graph](#carbon-intensity-graph)
   - [Sunrise / Sunset](#sunrise--sunset)
   - [Zoo Facts](#zoo-facts)
+- [Other Resources](#other-resources)
 
 ## About Pico GFX Pack
 
@@ -103,6 +105,14 @@ These wireless examples need `network_manager.py` and `WIFI_CONFIG.py` from the 
 
 - [micropython/examples/common](../../examples/common)
 
+### Carbon Intensity Graph
+
+[carbon_intensity.py](carbon_intensity.py)
+
+Displays near realtime information about the different types of electricity generation for a given UK postcode area.  Uses the backlight and a bar graph to show the current mix of generation sources, and updates itself periodically or when button E is pressed.
+
+Find out more about the Carbon Intensity API here:  https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
+
 ### Sunrise / Sunset
 
 [sunrise.py](sunrise.py)
@@ -121,5 +131,13 @@ Find out more about Zoo Animal API here: https://zoo-animal-api.herokuapp.com/
 - B = Last animal
 - D = Show stats
 - E = Fetch a different 5 animals
+
+## Other Resources
+
+Here are some GFX Pack community projects and resources that you might find useful! Note that code at the links below has not been tested by us and we're not able to offer support with it.
+
+- :link: [Octopus Energy Monitor](https://github.com/MaverickUK/OctopusEnergyMonitorPicoW)
+- :link: [Redis MicroPython Workshop](https://github.com/simonprickett/micropython-workshop)
+
 
 
