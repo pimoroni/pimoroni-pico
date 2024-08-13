@@ -17,7 +17,7 @@ log = logging.getLogger('WEB')
 
 type_gen = type((lambda: (yield))())
 
-# with v1.21.0 release all u-modules where renamend without the u prefix 
+# with v1.21.0 release all u-modules where renamend without the u prefix
 # -> uasyncio no named asyncio
 # asyncio v3 is shipped with MicroPython 1.13, and contains some subtle
 # but breaking changes. See also https://github.com/peterhinch/micropython-async/blob/master/v3/README.md
@@ -350,13 +350,13 @@ async def restful_resource_handler(req, resp, param=None):
             gc.collect()
         await resp.send('0\r\n\r\n')
     else:
-        if type(res) == tuple:
+        if isinstance(res, tuple):
             resp.code = res[1]
             res = res[0]
         elif res is None:
             raise Exception('Result expected')
         # Send response
-        if type(res) is dict:
+        if isinstance(res, dict):
             res_str = json.dumps(res)
         else:
             res_str = res
@@ -491,7 +491,7 @@ class webserver:
                 # Send exception info if desired
                 if self.debug:
                     sys.print_exception(e, resp.writer.s)
-            except Exception as e:
+            except Exception:
                 pass
         finally:
             await writer.aclose()
