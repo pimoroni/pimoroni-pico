@@ -11,6 +11,9 @@
 #include "TestClass.h"
 #include "lwmem/lwmem.hpp"
 
+#include <vector>
+#include "lwmemAllocator.h"
+
 void TestMem(size_t uMemSize)
 {
     uint32_t *p = (uint32_t *)PSRAM_LOCATION;
@@ -70,11 +73,19 @@ void TestCpp(void)
 {
     TestClass *tc = new TestClass(1);
 
-    if(tc)
+    std::vector<int, LwmemAllocator<int>> v;
+    v.push_back(1);
+    v.push_back(2);
+    
+
+    if(tc && v[0] == 1 && v[1] == 2)
     {
         printf("C++ test passed");
         delete tc;
     }
+    else
+        printf("C++ test failed");
+
 }
 
 int main() {
