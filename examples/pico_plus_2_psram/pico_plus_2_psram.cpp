@@ -8,7 +8,7 @@
 #include "hardware/clocks.h"
 #include "hardware/sync.h"
 #include "rp2_psram.h"
-
+#include "TestClass.h"
 #include "lwmem/lwmem.hpp"
 
 void TestMem(size_t uMemSize)
@@ -66,6 +66,17 @@ void TestHeap(size_t uHeapSize)
 
 }
 
+void TestCpp(void)
+{
+    TestClass *tc = new TestClass(1);
+
+    if(tc)
+    {
+        printf("C++ test passed");
+        delete tc;
+    }
+}
+
 int main() {
 	stdio_init_all();
 
@@ -81,6 +92,8 @@ int main() {
         TestMem(uRamSize);
 
         TestHeap(uRamSize);
+
+        TestCpp();
 	}
     else
         printf("No ram found, tests not run\n");

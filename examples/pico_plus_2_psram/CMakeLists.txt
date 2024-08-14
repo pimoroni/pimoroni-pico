@@ -4,7 +4,6 @@ add_executable(
   ${OUTPUT_NAME}
   pico_plus_2_psram.cpp
   rp2_psram.cpp
-  test.c
 )
 
 add_subdirectory(lwmem)
