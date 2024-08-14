@@ -17,15 +17,14 @@
 
 // 128 kb
 
-#define TEST_SPEED_SIZE         32768
+#define TEST_SPEED_SIZE         (16384)
 #define TEST_BYTE_SIZE          (TEST_SPEED_SIZE*sizeof(uint32_t))
-#define TEST_SPEED_ITTERATIONS  64
+#define TEST_SPEED_ITTERATIONS  128
 #define TEST_MEM_ITTERATIONS    1
 
 #pragma GCC push_options
-#pragma GCC optimize ("-O3")
+#pragma GCC optimize ("-O2")
 
-uint32_t randValues[1024];
 
 class ElapsedUs
 {
@@ -153,8 +152,43 @@ void TestMem(volatile uint32_t *pMem, uint32_t uSize)
     ElapsedUs timer;
     for(uint32_t i = 0; i < TEST_SPEED_ITTERATIONS; i++)
     {
-        for(uint32_t u = 0; u < uSize; u++)
-            pMem[i] = u;
+        volatile uint32_t *p = pMem;
+
+        for(uint32_t u = 0; u < uSize/32; u++)
+        {
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+            *p++ = u;
+        }
     }
     float fWrite = timer.elapsed();
     printf("Write took %fms %fMB/Sec\n", fWrite, CalcMbPerSec(uTotalSize, fWrite));
@@ -162,8 +196,42 @@ void TestMem(volatile uint32_t *pMem, uint32_t uSize)
     bool bReadOk = true;
     for(uint32_t i = 0; i < TEST_SPEED_ITTERATIONS; i++)
     {
-        for(uint32_t u = 0; u < uSize; u++)
-            bReadOk = pMem[i] == u;
+        volatile uint32_t *p = pMem;
+        for(uint32_t u = 0; u < uSize/32; u++)
+        {
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+            bReadOk = *p++ == u;
+        }
     }
     float fRead = timer.elapsed();
     printf("Read (%u) took %fms %fMB/Sec\n", bReadOk, fRead, CalcMbPerSec(uTotalSize, fRead));
@@ -191,8 +259,6 @@ void TestSpeed(void)
 int main() {
 	stdio_init_all();
 
-    for(uint32_t u =0; u < 1024; u++)
-        u = rand();
         
 	printf("Pico Plus 2 PSRAM tests\n\n");
 
