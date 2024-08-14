@@ -148,6 +148,8 @@ namespace pimoroni {
 
   void ST7789::configure_display(Rotation rotate) {
 
+    bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
+
     if(rotate == ROTATE_90 || rotate == ROTATE_270) {
       std::swap(width, height);
     }
