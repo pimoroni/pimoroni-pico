@@ -26,6 +26,7 @@ MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_thickness_obj, ModPicoGraphics_set
 
 // Primitives
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_set_clip_obj, 5, 5, ModPicoGraphics_set_clip);
+MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_get_clip_obj, ModPicoGraphics_get_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_remove_clip_obj, ModPicoGraphics_remove_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_clear_obj, ModPicoGraphics_clear);
 MP_DEFINE_CONST_FUN_OBJ_3(ModPicoGraphics_pixel_obj, ModPicoGraphics_pixel);
@@ -64,6 +65,7 @@ static const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_partial_update), MP_ROM_PTR(&ModPicoGraphics_partial_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_update_speed), MP_ROM_PTR(&ModPicoGraphics_set_update_speed_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_clip), MP_ROM_PTR(&ModPicoGraphics_set_clip_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_clip), MP_ROM_PTR(&ModPicoGraphics_get_clip_obj) },
     { MP_ROM_QSTR(MP_QSTR_remove_clip), MP_ROM_PTR(&ModPicoGraphics_remove_clip_obj) },
     { MP_ROM_QSTR(MP_QSTR_pixel_span), MP_ROM_PTR(&ModPicoGraphics_pixel_span_obj) },
     { MP_ROM_QSTR(MP_QSTR_rectangle), MP_ROM_PTR(&ModPicoGraphics_rectangle_obj) },
