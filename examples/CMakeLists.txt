@@ -62,3 +62,5 @@ add_subdirectory(galactic_unicorn)
 add_subdirectory(gfx_pack)
 add_subdirectory(cosmic_unicorn)
 add_subdirectory(stellar_unicorn)
+
+add_subdirectory(pico_plus_2_psram)
