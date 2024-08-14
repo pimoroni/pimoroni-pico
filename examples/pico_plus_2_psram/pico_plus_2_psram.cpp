@@ -23,7 +23,7 @@
 #define TEST_MEM_ITTERATIONS    1
 
 #pragma GCC push_options
-#pragma GCC optimize ("-O3")
+#pragma GCC optimize ("-Og")
 
 uint32_t randValues[1024];
 
