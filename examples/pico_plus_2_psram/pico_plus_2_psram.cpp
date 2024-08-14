@@ -17,9 +17,11 @@
 
 // 128 kb
 
-#define TEST_SPEED_SIZE         (16384)
-#define TEST_BYTE_SIZE          (TEST_SPEED_SIZE*sizeof(uint32_t))
-#define TEST_SPEED_ITTERATIONS  128
+// #define TEST_SPEED_SIZE         (16384)
+// #define TEST_SPEED_ITTERATIONS  128
+// #define TEST_SPEED_SIZE         (16384/8)
+// #define TEST_SPEED_ITTERATIONS  (128*8)
+
 #define TEST_MEM_ITTERATIONS    1
 
 #pragma GCC push_options
@@ -56,6 +58,60 @@ float CalcMbPerSec(uint32_t uSize, float fMsecs)
 }
 
 
+absolute_time_t abs_start_time;
+uint64_t microsecs;
+double secs;
+float fMySecs;
+int    *xi;
+
+void start_time()
+{
+    abs_start_time = get_absolute_time();
+}
+
+void end_time()
+{
+    microsecs = absolute_time_diff_us(abs_start_time, get_absolute_time());
+    secs = microsecs * 1e-6;
+}  
+
+int testI(int jmax, int arraymax)    
+{
+    int i, j;
+    int toti;
+    volatile int* xvi = xi;
+    
+    ElapsedUs timer;
+    start_time();
+    
+    for (j=0; j<jmax; j++)
+    {
+        toti = 0;
+        for (i=0; i<arraymax; i=i+16)
+        {
+            (void)xvi[i+0];
+            (void)xvi[i+1];
+            (void)xvi[i+2];
+            (void)xvi[i+3];
+            (void)xvi[i+4];
+            (void)xvi[i+5];
+            (void)xvi[i+6];
+            (void)xvi[i+7];
+            (void)xvi[i+8];
+            (void)xvi[i+9];
+            (void)xvi[i+10];
+            (void)xvi[i+11];
+            (void)xvi[i+12];
+            (void)xvi[i+13];
+            (void)xvi[i+14];
+            (void)xvi[i+15];            
+        }
+    }
+    end_time();
+    fMySecs = timer.elapsed()/1000.0f;
+        
+    return toti;
+}
 
 void TestMem(size_t uMemSize)
 {
@@ -93,16 +149,19 @@ void TestMem(size_t uMemSize)
 
 }
 
-void TestHeap(size_t uHeapSize)
+void InitHeap(size_t uHeapSize)
 {
-    lwmem_region_t regions[] = 
+    static lwmem_region_t regions[] = 
     {
         {(void *)PSRAM_LOCATION, uHeapSize}, 
         {nullptr, 0}
     };
 
     lwmem_assignmem(regions);
+}
 
+void TestHeap(void)
+{
     constexpr size_t allocSize = 1024;
     uint32_t *p = (uint32_t *)lwmem_malloc(allocSize * sizeof(uint32_t));
     if(p)
@@ -145,12 +204,16 @@ void TestCpp(void)
 
 }
 
-void TestMem(volatile uint32_t *pMem, uint32_t uSize)
+void TestMem(volatile uint32_t *pMem, uint32_t uSize, uint32_t uIterations, const char *str)
 {
-    uint32_t uTotalSize = uSize * TEST_SPEED_ITTERATIONS;
-    printf("Total size for test = %lu bytes using addr %p\n", uTotalSize, pMem);
+    uint32_t uTotalSize = uSize * uIterations;
+    printf("%s Block Size = %lu bytes, Iterations = %lu,  Total size for = %lu bytes, using addr %p\n", str, uSize*sizeof(uint32_t), uIterations, uTotalSize, pMem);
     ElapsedUs timer;
-    for(uint32_t i = 0; i < TEST_SPEED_ITTERATIONS; i++)
+
+    float fWriteTime = 0.0f;
+    float fReadTime = 0.0f;
+
+    for(uint32_t i = 0; i < uIterations; i++)
     {
         volatile uint32_t *p = pMem;
 
@@ -189,80 +252,87 @@ void TestMem(volatile uint32_t *pMem, uint32_t uSize)
             *p++ = u;
             *p++ = u;
         }
-    }
-    float fWrite = timer.elapsed();
-    printf("Write took %fms %fMB/Sec\n", fWrite, CalcMbPerSec(uTotalSize, fWrite));
-    timer.elapsed();
-    bool bReadOk = true;
-    for(uint32_t i = 0; i < TEST_SPEED_ITTERATIONS; i++)
-    {
-        volatile uint32_t *p = pMem;
+
+        fWriteTime += timer.elapsed();
+
         for(uint32_t u = 0; u < uSize/32; u++)
         {
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
-            bReadOk = *p++ == u;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
+            (void)*p++;
         }
+        fReadTime += timer.elapsed();
     }
-    float fRead = timer.elapsed();
-    printf("Read (%u) took %fms %fMB/Sec\n", bReadOk, fRead, CalcMbPerSec(uTotalSize, fRead));
+    printf(" Read: %fMB/Sec, Write %fMB/Sec\n\n", CalcMbPerSec(uTotalSize*4, fReadTime), CalcMbPerSec(uTotalSize*4, fWriteTime));
+    // printf("Write took %fms %fMB/Sec\n", fWriteTime, CalcMbPerSec(uTotalSize, fWriteTime));
+    // printf("Read  took %fms %fMB/Sec (%u)\n", fReadTime, CalcMbPerSec(uTotalSize, fReadTime), bReadOk);
 }
 
-void TestSpeed(void)
+void TestSpeed(uint32_t uSize, uint32_t uIterations)
 {
-    printf("Testing normal ram\n");
-    volatile uint32_t *pNormalRam = (uint32_t *)malloc(TEST_BYTE_SIZE);
-    if(pNormalRam)
+    volatile uint32_t *pNormalRam = (uint32_t *)malloc(uSize * sizeof(uint32_t));
+    if(pNormalRam) 
     {
-        TestMem(pNormalRam, TEST_BYTE_SIZE);
+        TestMem(pNormalRam, uSize, uIterations, "RAM:");
         free((uint32_t *)pNormalRam);
     }
 
-    printf("Testing psram\n");
-    volatile uint32_t *pPsram = (uint32_t *)lwmem_malloc(TEST_BYTE_SIZE);
+    volatile uint32_t *pPsram = (uint32_t *)lwmem_malloc(uSize * sizeof(uint32_t));
     if(pPsram)
     {
-        TestMem(pPsram, TEST_BYTE_SIZE);
+        TestMem(pPsram, uSize, uIterations, "PSRAM:");
         lwmem_free((uint32_t *)pPsram);
     }
 }
 
+void TestXI(void)
+{
+    uint32_t uXiTestSize = (1536);
+    xi = (int *)lwmem_malloc(uXiTestSize * sizeof(int));
+    testI(1000, uXiTestSize);
+    uint32_t uTotalMem = uXiTestSize * 4 * 1000;
+    float fBytesSecs = (float)uTotalMem/secs;
+    float fSpeedMBS = fBytesSecs/1024/1024;
+    printf("XI Test 6k = %f, %f, %f\n", secs, fMySecs, fSpeedMBS);
+}
+
 int main() {
+	size_t uRamSize = psram_init(PIMORONI_PICO_PLUS2_PSRAM_CS_PIN);
+
 	stdio_init_all();
 
         
 	printf("Pico Plus 2 PSRAM tests\n\n");
 
-	size_t uRamSize = psram_init(PIMORONI_PICO_PLUS2_PSRAM_CS_PIN);
 
 	printf("Psram installed = %u bytes, %u KB, %u MB\n", uRamSize, uRamSize/1024, uRamSize/1024/1024);
 
@@ -270,11 +340,18 @@ int main() {
 	{
         TestMem(uRamSize);
 
-        TestHeap(uRamSize);
+        InitHeap(uRamSize);
 
         TestCpp();
 
-        TestSpeed();
+        TestXI();
+
+        TestSpeed(1024,1024);
+        TestSpeed(1024*2,1024/2);
+        TestSpeed(1024*4,1024/4);
+        TestSpeed(1024*8,1024/8);
+        TestSpeed(1024*16,1024/16);
+        TestSpeed(1024*32,1024/32);
 	}
     else
         printf("No ram found, tests not run\n");
