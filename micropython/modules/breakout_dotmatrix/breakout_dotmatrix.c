@@ -14,7 +14,7 @@ MP_DEFINE_CONST_FUN_OBJ_1(BreakoutDotMatrix_clear_obj, BreakoutDotMatrix_clear);
 MP_DEFINE_CONST_FUN_OBJ_1(BreakoutDotMatrix_show_obj, BreakoutDotMatrix_show);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutDotMatrix_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutDotMatrix_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_brightness), MP_ROM_PTR(&BreakoutDotMatrix_set_brightness_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_decimal), MP_ROM_PTR(&BreakoutDotMatrix_set_decimal_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_pixel), MP_ROM_PTR(&BreakoutDotMatrix_set_pixel_obj) },
@@ -25,7 +25,7 @@ STATIC const mp_rom_map_elem_t BreakoutDotMatrix_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_WIDTH), MP_ROM_INT(WIDTH) },
     { MP_ROM_QSTR(MP_QSTR_HEIGHT), MP_ROM_INT(HEIGHT) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutDotMatrix_locals_dict, BreakoutDotMatrix_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutDotMatrix_locals_dict, BreakoutDotMatrix_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -51,11 +51,11 @@ const mp_obj_type_t breakout_dotmatrix_BreakoutDotMatrix_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_dotmatrix_globals_table[] = {
+static const mp_map_elem_t breakout_dotmatrix_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_dotmatrix) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutDotMatrix), (mp_obj_t)&breakout_dotmatrix_BreakoutDotMatrix_type },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_dotmatrix_globals, breakout_dotmatrix_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_dotmatrix_globals, breakout_dotmatrix_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_dotmatrix_user_cmodule = {

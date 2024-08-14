@@ -94,7 +94,6 @@ namespace pimoroni {
     if(width == 320 && height == 240) {
       command(reg::GCTRL, 1, "\x35");
       command(reg::VCOMS, 1, "\x1f");
-      command(0xd6, 1, "\xa1"); // ???
       command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
       command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
     }
@@ -148,8 +147,6 @@ namespace pimoroni {
   }
 
   void ST7789::configure_display(Rotation rotate) {
-
-    bool rotate180 = rotate == ROTATE_180 || rotate == ROTATE_90;
 
     if(rotate == ROTATE_90 || rotate == ROTATE_270) {
       std::swap(width, height);
@@ -235,7 +232,7 @@ namespace pimoroni {
       caset[1] = 319;
       raset[0] = 0;
       raset[1] = 239;
-      madctl = rotate180 ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
+      madctl = (rotate == ROTATE_180 || rotate == ROTATE_90) ? MADCTL::ROW_ORDER : MADCTL::COL_ORDER;
       madctl |= MADCTL::SWAP_XY | MADCTL::SCAN_ORDER;
     }
 
@@ -245,7 +242,7 @@ namespace pimoroni {
       caset[1] = 239;
       raset[0] = 0;
       raset[1] = 319;
-      madctl = rotate180 ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
+      madctl = (rotate == ROTATE_180 || rotate == ROTATE_90) ? (MADCTL::COL_ORDER | MADCTL::ROW_ORDER) : 0;
     }
 
     // Byte swap the 16bit rows/cols values

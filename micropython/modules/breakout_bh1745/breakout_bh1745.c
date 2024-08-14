@@ -15,7 +15,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBH1745_threshold_obj, 3, BreakoutBH1745_thres
 MP_DEFINE_CONST_FUN_OBJ_KW(BreakoutBH1745_measurement_time_ms_obj, 2, BreakoutBH1745_measurement_time_ms);
 
 /***** Binding of Methods *****/
-STATIC const mp_rom_map_elem_t BreakoutBH1745_locals_dict_table[] = {
+static const mp_rom_map_elem_t BreakoutBH1745_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_chip_id), MP_ROM_PTR(&BreakoutBH1745_chip_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_manufacturer_id), MP_ROM_PTR(&BreakoutBH1745_manufacturer_id_obj) },
     { MP_ROM_QSTR(MP_QSTR_rgbc_raw), MP_ROM_PTR(&BreakoutBH1745_rgbc_raw_obj) },
@@ -25,7 +25,7 @@ STATIC const mp_rom_map_elem_t BreakoutBH1745_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_measurement_time_ms), MP_ROM_PTR(&BreakoutBH1745_measurement_time_ms_obj) },
     { MP_ROM_QSTR(MP_QSTR_leds), MP_ROM_PTR(&BreakoutBH1745_leds_obj) },
 };
-STATIC MP_DEFINE_CONST_DICT(BreakoutBH1745_locals_dict, BreakoutBH1745_locals_dict_table);
+static MP_DEFINE_CONST_DICT(BreakoutBH1745_locals_dict, BreakoutBH1745_locals_dict_table);
 
 /***** Class Definition *****/
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
@@ -51,14 +51,14 @@ const mp_obj_type_t breakout_bh1745_BreakoutBH1745_type = {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /***** Globals Table *****/
-STATIC const mp_map_elem_t breakout_bh1745_globals_table[] = {
+static const mp_map_elem_t breakout_bh1745_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_breakout_bh1745) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BreakoutBH1745), (mp_obj_t)&breakout_bh1745_BreakoutBH1745_type },
 
     { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_DEFAULT), MP_ROM_INT(BH1745_I2C_ADDRESS_DEFAULT) },
     { MP_ROM_QSTR(MP_QSTR_I2C_ADDRESS_ALT), MP_ROM_INT(BH1745_I2C_ADDRESS_ALTERNATE) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_breakout_bh1745_globals, breakout_bh1745_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_breakout_bh1745_globals, breakout_bh1745_globals_table);
 
 /***** Module Definition *****/
 const mp_obj_module_t breakout_bh1745_user_cmodule = {

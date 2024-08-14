@@ -3,9 +3,9 @@ import gc
 import qrcode
 
 # Uncomment one URL to use (Top Stories, World News and technology)
-# URL = "http://feeds.bbci.co.uk/news/rss.xml"
-# URL = "http://feeds.bbci.co.uk/news/world/rss.xml"
-URL = "http://feeds.bbci.co.uk/news/technology/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/rss.xml"
+# URL = "https://feeds.bbci.co.uk/news/world/rss.xml"
+URL = "https://feeds.bbci.co.uk/news/technology/rss.xml"
 
 # Length of time between updates in minutes.
 # Frequent updates will reduce battery life!
@@ -17,18 +17,16 @@ HEIGHT = None
 code = qrcode.QRCode()
 
 
-def read_until(stream, char):
+def read_until(stream, find):
     result = b""
-    while True:
-        c = stream.read(1)
-        if c == char:
+    while len(c := stream.read(1)) > 0:
+        if c == find:
             return result
         result += c
 
 
-def discard_until(stream, c):
-    while stream.read(1) != c:
-        pass
+def discard_until(stream, find):
+    _ = read_until(stream, find)
 
 
 def parse_xml_stream(s, accept_tags, group_by, max_items=3):
@@ -36,6 +34,7 @@ def parse_xml_stream(s, accept_tags, group_by, max_items=3):
     text = b""
     count = 0
     current = {}
+
     while True:
         char = s.read(1)
         if len(char) == 0:
@@ -79,9 +78,9 @@ def parse_xml_stream(s, accept_tags, group_by, max_items=3):
 
             else:
                 current_tag = read_until(s, b">")
-                tag += [next_char + current_tag.split(b" ")[0]]
-                text = b""
-                gc.collect()
+                if not current_tag.endswith(b"/"):
+                    tag += [next_char + current_tag.split(b" ")[0]]
+                    text = b""
 
         else:
             text += char
@@ -113,7 +112,7 @@ def get_rss():
 
     except OSError as e:
         print(e)
-        return False
+        return []
 
 
 feed = None
@@ -135,7 +134,7 @@ def draw():
     graphics.set_pen(0)
 
     # Draws 2 articles from the feed if they're available.
-    if feed:
+    if len(feed) > 0:
 
         # Title
         graphics.set_pen(graphics.create_pen(200, 0, 0))

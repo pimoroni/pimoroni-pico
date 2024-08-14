@@ -18,8 +18,7 @@ typedef struct _PicoKeypad_obj_t {
 mp_obj_t picokeypad_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _PicoKeypad_obj_t *self = nullptr;
 
-    self = m_new_obj_with_finaliser(PicoKeypad_obj_t);
-    self->base.type = &PicoKeypad_type;
+    self = mp_obj_malloc_with_finaliser(PicoKeypad_obj_t, &PicoKeypad_type);
 
     self->keypad = m_new_class(PicoRGBKeypad);
     self->keypad->init();

@@ -8,7 +8,7 @@ using namespace pimoroni;
 extern "C" {
 #include "pimoroni_i2c.h"
 #include "py/mperrno.h"
-#include "extmod/machine_i2c.h"
+#include "extmod/modmachine.h"
 
 
 _PimoroniI2C_obj_t*  PimoroniI2C_from_machine_i2c_or_native(mp_obj_t i2c_obj) {

@@ -92,7 +92,6 @@ namespace pimoroni {
 
       int __not_in_flash_func(SpiSetBlocking)(const uint16_t uSrc, size_t uLen) 
       {
-        //invalid_params_if(SPI, 0 > (int)uLen);
         // Deliberately overflow FIFO, then clean up afterward, to minimise amount
         // of APB polling required per halfword
         for (size_t i = 0; i < uLen; ++i) {

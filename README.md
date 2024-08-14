@@ -44,6 +44,10 @@ You can find MicroPython examples for supported sensors, packs and bases in the 
 
 * [MicroPython Examples](micropython/examples)
 
+You can also install MicroPython stubs into Visual Studio Code to give you auto-complete, see:
+
+* [MicroPython Stubs](https://github.com/pimoroni/pimoroni-pico-stubs)
+
 # C/C++
 
 Advanced users that want to unleash the full power of Pico can use our C++ libraries. If you know what you're doing and want to build your own Pimoroni Pico project then start with the [Pimoroni Pico SDK Boilerplate](https://github.com/pimoroni/pico-boilerplate).
@@ -76,10 +80,11 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * Pico Unicorn Pack - https://shop.pimoroni.com/products/pico-unicorn-pack
 * Pico Audio Pack (C++ only) - https://shop.pimoroni.com/products/pico-audio-pack
 * Pico Wireless Pack - https://shop.pimoroni.com/products/pico-wireless-pack
-* Pico Display 2.0 - https://shop.pimoroni.com/products/pico-display-pack-2-0
+* Pico Display 2.0" - https://shop.pimoroni.com/products/pico-display-pack-2-0
 * Pico Enviro+ Pack - https://shop.pimoroni.com/products/pico-enviro-pack
 * Pico Inky Pack - https://shop.pimoroni.com/products/pico-inky-pack
 * Pico GFX Pack - https://shop.pimoroni.com/products/pico-gfx-pack
+* Pico Display 2.8" - https://shop.pimoroni.com/products/pico-display-pack-2-8
 
 ## SHIMs
 
@@ -141,6 +146,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * SCD41 CO2 Sensor (Carbon Dioxide / Temperature / Humidity) - https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
 * RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
+* AS7343 14-Channel Multi-Spectral Sensor Breakout - https://shop.pimoroni.com/products/as7343-breakout
 
 ## Kits
 

@@ -30,6 +30,10 @@ namespace servo {
     const uint LED_DATA = 18;
     const uint NUM_LEDS = 6;
 
+    const uint I2C_INT = 19;
+    const uint I2C_SDA = 20;
+    const uint I2C_SCL = 21;
+
     const uint USER_SW = 23;
 
     const uint ADC_ADDR_0 = 22;

@@ -4,8 +4,7 @@ MIT license
 (C) Konstantin Belyalov 2017-2018
 """
 import logging
-import uasyncio as asyncio
-import uasyncio.core
+import asyncio
 import ujson as json
 import gc
 import uos as os
@@ -16,15 +15,18 @@ import usocket as socket
 
 log = logging.getLogger('WEB')
 
-type_gen = type((lambda: (yield))())  # noqa: E275
+type_gen = type((lambda: (yield))())
 
-# uasyncio v3 is shipped with MicroPython 1.13, and contains some subtle
+# with v1.21.0 release all u-modules where renamend without the u prefix
+# -> uasyncio no named asyncio
+# asyncio v3 is shipped with MicroPython 1.13, and contains some subtle
 # but breaking changes. See also https://github.com/peterhinch/micropython-async/blob/master/v3/README.md
-IS_UASYNCIO_V3 = hasattr(asyncio, "__version__") and asyncio.__version__ >= (3,)
+IS_ASYNCIO_V3 = hasattr(asyncio, "__version__") and asyncio.__version__ >= (3,)
 
 
 def urldecode_plus(s):
     """Decode urlencoded string (including '+' char).
+
     Returns decoded string
     """
     s = s.replace('+', ' ')
@@ -42,6 +44,7 @@ def urldecode_plus(s):
 
 def parse_query_string(s):
     """Parse urlencoded string into dict.
+
     Returns dict
     """
     res = {}
@@ -75,6 +78,7 @@ class request:
     async def read_request_line(self):
         """Read and parse first line (AKA HTTP Request Line).
         Function is generator.
+
         Request line is something like:
         GET /something/script?param1=val1 HTTP/1.1
         """
@@ -97,7 +101,9 @@ class request:
         """Read and parse HTTP headers until \r\n\r\n:
         Optional argument 'save_headers' controls which headers to save.
             This is done mostly to deal with memory constrains.
+
         Function is generator.
+
         HTTP headers could be like:
         Host: google.com
         Content-Type: blah
@@ -111,12 +117,13 @@ class request:
             frags = line.split(b':', 1)
             if len(frags) != 2:
                 raise HTTPException(400)
-            if frags[0] in save_headers:
+            if frags[0].lower() in save_headers:
                 self.headers[frags[0]] = frags[1].strip()
 
     async def read_parse_form_data(self):
         """Read HTTP form data (payload), if any.
         Function is generator.
+
         Returns:
             - dict of key / value pairs
             - None in case of no form data present
@@ -163,6 +170,7 @@ class response:
         - HTTP request line
         - HTTP headers following by \r\n.
         This function is generator.
+
         P.S.
         Because of usually we have only a few HTTP headers (2-5) it doesn't make sense
         to send them separately - sometimes it could increase latency.
@@ -181,8 +189,10 @@ class response:
     async def error(self, code, msg=None):
         """Generate HTTP error response
         This function is generator.
+
         Arguments:
             code - HTTP response code
+
         Example:
             # Not enough permissions. Send HTTP 403 - Forbidden
             await resp.error(403)
@@ -197,8 +207,10 @@ class response:
     async def redirect(self, location, msg=None):
         """Generate HTTP redirect response to 'location'.
         Basically it will generate HTTP 302 with 'Location' header
+
         Arguments:
             location - URL to redirect to
+
         Example:
             # Redirect to /something
             await resp.redirect('/something')
@@ -213,9 +225,11 @@ class response:
 
     def add_header(self, key, value):
         """Add HTTP response header
+
         Arguments:
             key - header name
             value - header value
+
         Example:
             resp.add_header('Content-Encoding', 'gzip')
         """
@@ -232,6 +246,7 @@ class response:
     async def start_html(self):
         """Start response with HTML content type.
         This function is generator.
+
         Example:
             await resp.start_html()
             await resp.send('<html><h1>Hello, world!</h1></html>')
@@ -242,6 +257,7 @@ class response:
     async def send_file(self, filename, content_type=None, content_encoding=None, max_age=2592000, buf_size=128):
         """Send local file as HTTP response.
         This function is generator.
+
         Arguments:
             filename - Name of file which exists in local filesystem
         Keyword arguments:
@@ -249,10 +265,13 @@ class response:
             max_age - Cache control. How long browser can keep this file on disk.
                       By default - 30 days
                       Set to 0 - to disable caching.
+
         Example 1: Default use case:
             await resp.send_file('images/cat.jpg')
+
         Example 2: Disable caching:
             await resp.send_file('static/index.html', max_age=0)
+
         Example 3: Override content type:
             await resp.send_file('static/file.bin', content_type='application/octet-stream')
         """
@@ -331,13 +350,13 @@ async def restful_resource_handler(req, resp, param=None):
             gc.collect()
         await resp.send('0\r\n\r\n')
     else:
-        if type(res) is tuple:
+        if isinstance(res, tuple):
             resp.code = res[1]
             res = res[0]
         elif res is None:
             raise Exception('Result expected')
         # Send response
-        if type(res) is dict:
+        if isinstance(res, dict):
             res_str = json.dumps(res)
         else:
             res_str = res
@@ -457,16 +476,16 @@ class webserver:
                 try:
                     await resp.error(500)
                 except Exception as e:
-                    log.exc(e, "")
+                    log.exception(f"Failed to send 500 error after OSError. Original error: {e}")
         except HTTPException as e:
             try:
                 await resp.error(e.code)
             except Exception as e:
-                log.exc(e)
+                log.exception(f"Failed to send error after HTTPException. Original error: {e}")
         except Exception as e:
             # Unhandled expection in user's method
             log.error(req.path.decode())
-            log.exc(e, "")
+            log.exception(f"Unhandled exception in user's method. Original error: {e}")
             try:
                 await resp.error(500)
                 # Send exception info if desired
@@ -485,9 +504,11 @@ class webserver:
 
     def add_route(self, url, f, **kwargs):
         """Add URL to function mapping.
+
         Arguments:
             url - url to map function with
             f - function to map
+
         Keyword arguments:
             methods - list of allowed methods. Defaults to ['GET', 'POST']
             save_headers - contains list of HTTP headers to be saved. Case sensitive. Default - empty.
@@ -507,8 +528,8 @@ class webserver:
         params.update(kwargs)
         params['allowed_access_control_methods'] = ', '.join(params['methods'])
         # Convert methods/headers to bytestring
-        params['methods'] = [x.encode() for x in params['methods']]
-        params['save_headers'] = [x.encode() for x in params['save_headers']]
+        params['methods'] = [x.encode().upper() for x in params['methods']]
+        params['save_headers'] = [x.encode().lower() for x in params['save_headers']]
         # If URL has a parameter
         if url.endswith('>'):
             idx = url.rfind('<')
@@ -526,14 +547,18 @@ class webserver:
 
     def add_resource(self, cls, url, **kwargs):
         """Map resource (RestAPI) to URL
+
         Arguments:
             cls - Resource class to map to
             url - url to map to class
             kwargs - User defined key args to pass to the handler.
+
         Example:
             class myres():
                 def get(self, data):
                     return {'hello': 'world'}
+
+
             app.add_resource(myres, '/api/myres')
         """
         methods = []
@@ -556,6 +581,7 @@ class webserver:
 
     def catchall(self):
         """Decorator for catchall()
+
         Example:
             @app.catchall()
             def catchall_handler(req, resp):
@@ -572,6 +598,7 @@ class webserver:
 
     def route(self, url, **kwargs):
         """Decorator for add_route()
+
         Example:
             @app.route('/')
             def index(req, resp):
@@ -585,10 +612,12 @@ class webserver:
 
     def resource(self, url, method='GET', **kwargs):
         """Decorator for add_resource() method
+
         Examples:
             @app.resource('/users')
             def users(data):
                 return {'a': 1}
+
             @app.resource('/messages/<topic_id>')
             async def index(data, topic_id):
                 yield '{'
@@ -617,8 +646,8 @@ class webserver:
         sock.listen(backlog)
         try:
             while True:
-                if IS_UASYNCIO_V3:
-                    yield uasyncio.core._io_queue.queue_read(sock)
+                if IS_ASYNCIO_V3:
+                    yield asyncio.core._io_queue.queue_read(sock)
                 else:
                     yield asyncio.IORead(sock)
                 csock, caddr = sock.accept()
@@ -645,6 +674,7 @@ class webserver:
 
     def run(self, host="127.0.0.1", port=8081, loop_forever=True):
         """Run Web Server. By default it runs forever.
+
         Keyword arguments:
             host - host to listen on. By default - localhost (127.0.0.1)
             port - port to listen on. By default - 8081

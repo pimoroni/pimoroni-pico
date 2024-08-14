@@ -1,7 +1,0 @@
-mustelid inc
-H. Badger
-RP2040
-2MB Flash
-E ink
-296x128px
-/badges/badge.jpg

@@ -34,10 +34,15 @@ int main() {
   while(true) {
 
     offset += float(SPEED) / 2000.0f;
+    if (offset > 1.0) {
+      offset -= 1.0;
+    }
 
     for(auto i = 0u; i < NUM_LEDS; ++i) {
       float hue = float(i) / NUM_LEDS;
-      led_strip.set_hsv(i, hue + offset, 1.0f, 1.0f);
+      hue += offset;
+      hue -= floor(hue);
+      led_strip.set_hsv(i, hue, 1.0f, 1.0f);
     }
 
     sleep_ms(1000 / UPDATES);

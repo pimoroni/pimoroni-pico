@@ -155,6 +155,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
+        case DISPLAY_INTERSTATE75_96X48:
+            width = 96;
+            height = 48;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         case DISPLAY_INTERSTATE75_128X32:
             width = 128;
             height = 32;
@@ -280,8 +288,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj_with_finaliser(ModPicoGraphics_obj_t);
-    self->base.type = &ModPicoGraphics_type;
+    self = mp_obj_malloc_with_finaliser(ModPicoGraphics_obj_t, &ModPicoGraphics_type);
 
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
 
@@ -623,16 +630,16 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 */
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
     self->display->update(self->graphics);
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
@@ -647,8 +654,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 
@@ -660,8 +667,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     });
 
     while(self->display->is_busy()) {
-    #ifdef MICROPY_EVENT_POLL_HOOK
-    MICROPY_EVENT_POLL_HOOK
+    #ifdef mp_event_handle_nowait
+    mp_event_handle_nowait();
     #endif
     }
 

@@ -45,7 +45,7 @@ int main() {
 
     while(true) {
       BME280::bme280_reading result = bme.read_forced();
-      printf("%s %0.2lf deg C, %0.2lf hPa, %0.2lf%%\n", result.status == BME280_OK ? "OK" : "ER", result.temperature, result.pressure, result.humidity);
+      printf("%s %0.2lf deg C, %0.2lf hPa, %0.2lf%%\n", result.status ? "OK" : "ER", result.temperature, result.pressure, result.humidity);
       
       // calculates a colour
       float hue = HUE_START + ((float)(result.temperature - MIN) * (float)(HUE_END - HUE_START) / (float)(MAX - MIN));

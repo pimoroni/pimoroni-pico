@@ -30,7 +30,7 @@ int main() {
     //   }
     // }
 
-    graphics.set_pen(1);
+    graphics.set_pen(15);
     graphics.clear();
 
     float s = (sin(i / 10.0f) * 1.0f) + 1.5f;

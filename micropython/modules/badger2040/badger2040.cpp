@@ -98,8 +98,7 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
         buffer = m_new(uint8_t, width * height / 8);
     }
 
-    badger2040_obj = m_new_obj_with_finaliser(_Badger2040_obj_t);
-    badger2040_obj->base.type = &Badger2040_type;
+    badger2040_obj = mp_obj_malloc_with_finaliser(_Badger2040_obj_t, &Badger2040_type);
     badger2040_obj->buf = buffer;
     badger2040_obj->badger2040 = m_new_class(pimoroni::Badger2040, buffer);
     badger2040_obj->badger2040->init();
@@ -122,8 +121,8 @@ mp_obj_t Badger2040_update(mp_obj_t self_in) {
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Badger2040_obj_t);
 
     while(self->badger2040->is_busy()) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -133,8 +132,8 @@ MICROPY_EVENT_POLL_HOOK
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
     while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -166,8 +165,8 @@ mp_obj_t Badger2040_partial_update(size_t n_args, const mp_obj_t *pos_args, mp_m
 
 
     while(self->badger2040->is_busy()) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -177,8 +176,8 @@ MICROPY_EVENT_POLL_HOOK
     // Ensure blocking for the minimum amount of time
     // in cases where "is_busy" is unreliable.
     while(self->badger2040->is_busy() || absolute_time_diff_us(get_absolute_time(), t_end) > 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     }
 
@@ -199,8 +198,8 @@ mp_obj_t Badger2040_halt(mp_obj_t self_in) {
 
     self->badger2040->update_button_states();
     while (self->badger2040->button_states() == 0) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
       self->badger2040->update_button_states();
     }

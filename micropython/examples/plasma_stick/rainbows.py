@@ -28,9 +28,10 @@ while True:
 
     SPEED = min(255, max(1, SPEED))
     offset += float(SPEED) / 2000.0
+    offset %= 1
 
     for i in range(NUM_LEDS):
-        hue = float(i) / NUM_LEDS
+        hue = (offset + float(i) / NUM_LEDS) % 1
         led_strip.set_hsv(i, hue + offset, 1.0, 1.0)
 
     time.sleep(1.0 / UPDATES)

@@ -7,6 +7,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  PICO_SDK_VERSION: 2.0.0
 
 jobs:
   build:
@@ -25,7 +26,7 @@ jobs:
 
     steps:
     - name: Compiler Cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: /home/runner/.ccache
         key: ccache-cmake-${{github.ref}}-${{matrix.board}}-${{github.sha}}
@@ -34,21 +35,22 @@ jobs:
           ccache-cmake-${{github.ref}}
           ccache-cmake
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
     # Check out the Pico SDK
     - name: Checkout Pico SDK
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: raspberrypi/pico-sdk
+        ref: ${{ env.PICO_SDK_VERSION }}
         path: pico-sdk
         submodules: true
 
     # Check out the Pico Extras
     - name: Checkout Pico Extras
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: raspberrypi/pico-extras
         path: pico-extras

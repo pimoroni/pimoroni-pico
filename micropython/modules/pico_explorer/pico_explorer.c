@@ -8,7 +8,7 @@ const mp_rom_obj_tuple_t PicoExplorer_MOTOR2_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(11), MP_ROM_INT(10) },
 };
 
-STATIC const mp_map_elem_t picoexplorer_globals_table[] = {
+static const mp_map_elem_t picoexplorer_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_picoexplorer) },
 
     { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
@@ -32,7 +32,7 @@ STATIC const mp_map_elem_t picoexplorer_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_GP6), MP_ROM_INT(6) },
     { MP_ROM_QSTR(MP_QSTR_GP7), MP_ROM_INT(7) },
 };
-STATIC MP_DEFINE_CONST_DICT(mp_module_picoexplorer_globals, picoexplorer_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_picoexplorer_globals, picoexplorer_globals_table);
 
 const mp_obj_module_t picoexplorer_user_cmodule = {
     .base = { &mp_type_module },

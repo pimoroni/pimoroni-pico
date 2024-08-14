@@ -4,6 +4,7 @@
   - [Read ADCs](#read-adcs)
   - [Read GPIOs](#read-gpios)
   - [Read Encoders](#read-encoders)
+  - [Read Speeds](#read-speeds)
   - [LED Rainbow](#led-rainbow)
   - [Reset Inventor](#reset-inventor)
 - [Motor Examples](#motor-examples)
@@ -22,13 +23,14 @@
   - [Velocity Tuning](#velocity-tuning)
   - [Position on Velocity Tuning](#position-on-velocity-tuning)
 - [Servo Examples](#servo-examples)
-  - [Single Servos](#single-servo)
+  - [Single Servo](#single-servo)
   - [Multiple Servos](#multiple-servos)
   - [Simple Easing](#simple-easing)
   - [Servo Wave](#servo-wave)
   - [Calibration](#calibration)
 - [Audio Examples](#audio-examples)
   - [Tone Song](#tone-song)
+  - [Motor Song](#motor-song)
 
 ## Function Examples
 
@@ -48,6 +50,12 @@ Shows how to initialise and read the 6 GPIO headers of Inventor 2040 W.
 [read_encoders.py](read_encoders.py)
 
 Demonstrates how to read the angles of Inventor 2040 W's two encoders.
+
+
+### Read Speeds
+[read_speeds.py](read_speeds.py)
+
+Demonstrates how to read the speeds of Inventor 2040 W's two encoders.
 
 
 ### LED Rainbow

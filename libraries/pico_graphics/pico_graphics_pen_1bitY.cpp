@@ -15,7 +15,7 @@ namespace pimoroni {
   }
 
   void PicoGraphics_Pen1BitY::set_pen(uint8_t r, uint8_t g, uint8_t b) {
-    color = std::max(r, std::max(g, b));
+    color = std::max(r, std::max(g, b)) >> 4;
   }
 
   void PicoGraphics_Pen1BitY::set_pixel(const Point &p) {

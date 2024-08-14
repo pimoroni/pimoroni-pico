@@ -96,8 +96,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         buffer = m_new(WS2812::RGB, num_leds);
     }
 
-    self = m_new_obj_with_finaliser(_PlasmaWS2812_obj_t);
-    self->base.type = &PlasmaWS2812_type;
+    self = mp_obj_malloc_with_finaliser(_PlasmaWS2812_obj_t, &PlasmaWS2812_type);
     self->buf = buffer;
 
     self->ws2812 = m_new_class(WS2812, num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
@@ -307,8 +306,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         buffer[i].brightness(15);
     }
 
-    self = m_new_obj_with_finaliser(_PlasmaAPA102_obj_t);
-    self->base.type = &PlasmaAPA102_type;
+    self = mp_obj_malloc_with_finaliser(_PlasmaAPA102_obj_t, &PlasmaAPA102_type);
     self->buf = buffer;
 
     self->apa102 = m_new_class(APA102, num_leds, pio, sm, dat, clk, freq, buffer);

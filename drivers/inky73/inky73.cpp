@@ -47,8 +47,9 @@ namespace pimoroni {
     return !(sr.read() & 128);
   }
   
-  void Inky73::busy_wait() {
-    while(is_busy()) {
+  void Inky73::busy_wait(uint timeout_ms) {
+    absolute_time_t timeout = make_timeout_time_ms(timeout_ms);
+    while(is_busy() && !time_reached(timeout)) {
       tight_loop_contents();
     }
   }

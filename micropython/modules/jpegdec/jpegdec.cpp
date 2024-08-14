@@ -26,6 +26,8 @@ typedef struct _JPEG_obj_t {
     mp_obj_t file;
     mp_buffer_info_t buf;
     ModPicoGraphics_obj_t *graphics;
+    int width;
+    int height;
 } _JPEG_obj_t;
 
 
@@ -65,7 +67,7 @@ int32_t jpegdec_read_callback(JPEGFILE *jpeg, uint8_t *p, int32_t c) {
     return mp_stream_read_exactly(fhandle, p, c, &error);
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
     mp_obj_t fhandle = jpeg->fHandle;
     struct mp_stream_seek_t seek_s;
@@ -84,8 +86,8 @@ int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
 }
 
 int JPEGDraw(JPEGDRAW *pDraw) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     PicoGraphics *current_graphics = (PicoGraphics *)pDraw->pUser;
     // "pixel" is slow and clipped,
@@ -174,6 +176,30 @@ MICROPY_EVENT_POLL_HOOK
     return 1;
 }
 
+void jpegdec_open_helper(_JPEG_obj_t *self) {
+    int result = -1;
+
+    if(mp_obj_is_str(self->file)){
+        GET_STR_DATA_LEN(self->file, str, str_len);
+
+        result = self->jpeg->open(
+            (const char*)str,
+            jpegdec_open_callback,
+            jpegdec_close_callback,
+            jpegdec_read_callback,
+            jpegdec_seek_callback,
+            JPEGDraw);
+
+    // Source is a buffer
+    } else {
+        mp_get_buffer_raise(self->file, &self->buf, MP_BUFFER_READ);
+
+        result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
+    }
+
+    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, "JPEG: could not read file/buffer.");
+}
+
 mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     enum {
         ARG_picographics
@@ -186,8 +212,7 @@ mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _JPEG_obj_t *self = m_new_obj_with_finaliser(_JPEG_obj_t);
-    self->base.type = &JPEG_type;
+    _JPEG_obj_t *self = mp_obj_malloc_with_finaliser(_JPEG_obj_t, &JPEG_type);
     self->jpeg = m_new_class(JPEGDEC);
     self->graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
@@ -208,6 +233,11 @@ mp_obj_t _JPEG_openFILE(mp_obj_t self_in, mp_obj_t filename) {
 
     self->file = filename;
 
+    jpegdec_open_helper(self); 
+    self->width = self->jpeg->getWidth(); 
+    self->height = self->jpeg->getHeight(); 
+    self->jpeg->close();
+
     return mp_const_true;
 }
 
@@ -218,6 +248,11 @@ mp_obj_t _JPEG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
     // TODO Check for valid buffer
 
     self->file = buffer;
+
+    jpegdec_open_helper(self); 
+    self->width = self->jpeg->getWidth(); 
+    self->height = self->jpeg->getHeight(); 
+    self->jpeg->close();
 
     return mp_const_true;
 }
@@ -244,30 +279,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
 
     current_flags = args[ARG_dither].u_obj == mp_const_false ? FLAG_NO_DITHER : 0;
 
-    // Just-in-time open of the filename/buffer we stored in self->file via open_RAM or open_file
-
-    // Source is a filename
-    int result = -1;
-
-    if(mp_obj_is_str(self->file)){
-        GET_STR_DATA_LEN(self->file, str, str_len);
-
-        result = self->jpeg->open(
-            (const char*)str,
-            jpegdec_open_callback,
-            jpegdec_close_callback,
-            jpegdec_read_callback,
-            jpegdec_seek_callback,
-            JPEGDraw);
-
-    // Source is a buffer
-    } else {
-        mp_get_buffer_raise(self->file, &self->buf, MP_BUFFER_READ);
-
-        result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
-    }
-    
-    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, "JPEG: could not read file/buffer.");
+    jpegdec_open_helper(self);
 
     // Force a specific data output type to best match our PicoGraphics buffer
     switch(self->graphics->graphics->pen_type) {
@@ -293,7 +305,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
     // We need to store a pointer to the PicoGraphics surface
     self->jpeg->setUserPointer((void *)self->graphics->graphics);
 
-    result = self->jpeg->decode(x, y, f);
+    int result = self->jpeg->decode(x, y, f);
 
     current_flags = 0;
 
@@ -306,13 +318,13 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
 // get_width
 mp_obj_t _JPEG_getWidth(mp_obj_t self_in) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    return mp_obj_new_int(self->jpeg->getWidth());
+    return mp_obj_new_int(self->width);
 }
 
 // get_height
 mp_obj_t _JPEG_getHeight(mp_obj_t self_in) {
     _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    return mp_obj_new_int(self->jpeg->getHeight());
+    return mp_obj_new_int(self->height);
 }
 
 }

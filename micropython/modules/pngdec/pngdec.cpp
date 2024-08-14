@@ -25,6 +25,7 @@ typedef struct _PNG_decode_target {
     Rect source = {0, 0, 0, 0};
     Point scale = {1, 1};
     int rotation = 0;
+    uint8_t palette_offset = 0;
 } _PNG_decode_target;
 
 typedef struct _PNG_obj_t {
@@ -44,6 +45,7 @@ enum DECODE_MODE : uint8_t {
     MODE_POSTERIZE = 0u,
     MODE_DITHER = 1u,
     MODE_COPY = 2u,
+    MODE_PEN = 3u,
 };
 
 void *pngdec_open_callback(const char *filename, int32_t *size) {
@@ -75,7 +77,7 @@ int32_t pngdec_read_callback(PNGFILE *png, uint8_t *p, int32_t c) {
     return mp_stream_read_exactly(fhandle, p, c, &error);
 }
 
-// Re-implementation of stream.c/STATIC mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
+// Re-implementation of stream.c/static mp_obj_t stream_seek(size_t n_args, const mp_obj_t *args)
 int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     mp_obj_t fhandle = png->fHandle;
     struct mp_stream_seek_t seek_s;
@@ -118,13 +120,14 @@ void pngdec_open_helper(_PNG_obj_t *self) {
 }
 
 void PNGDraw(PNGDRAW *pDraw) {
-#ifdef MICROPY_EVENT_POLL_HOOK
-MICROPY_EVENT_POLL_HOOK
+#ifdef mp_event_handle_nowait
+mp_event_handle_nowait();
 #endif
     _PNG_decode_target *target = (_PNG_decode_target*)pDraw->pUser;
     PicoGraphics *current_graphics = (PicoGraphics *)target->target;
     Point current_position = target->position;
     uint8_t current_mode = target->mode;
+    uint8_t current_palette_offset = target->palette_offset;
     Point scale = target->scale;
     int rotation = target->rotation;
     Point step = {0, 0};
@@ -158,24 +161,17 @@ MICROPY_EVENT_POLL_HOOK
             break;
     }
 
-    //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", y, pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
+    //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", pDraw->y , pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
     uint8_t *pixel = (uint8_t *)pDraw->pPixels;
-    if(pDraw->iPixelType == PNG_PIXEL_TRUECOLOR ) {
+    if(pDraw->iPixelType == PNG_PIXEL_TRUECOLOR || pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
         for(int x = 0; x < pDraw->iWidth; x++) {
             uint8_t r = *pixel++;
             uint8_t g = *pixel++;
             uint8_t b = *pixel++;
-            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
-            current_graphics->set_pen(r, g, b);
-            current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
-            current_position += step;
-        }
-    } else if (pDraw->iPixelType == PNG_PIXEL_TRUECOLOR_ALPHA) {
-        for(int x = 0; x < pDraw->iWidth; x++) {
-            uint8_t r = *pixel++;
-            uint8_t g = *pixel++;
-            uint8_t b = *pixel++;
-            uint8_t a = *pixel++;
+            uint8_t a = 1;
+            if (pDraw->iHasAlpha) {
+                a = *pixel++;
+            }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             if (a) {
                 current_graphics->set_pen(r, g, b);
@@ -183,21 +179,83 @@ MICROPY_EVENT_POLL_HOOK
             }
             current_position += step;
         }
-    } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
+    } else if (pDraw->iPixelType == PNG_PIXEL_GRAYSCALE) {
         for(int x = 0; x < pDraw->iWidth; x++) {
             uint8_t i = 0;
-            if(pDraw->iBpp == 8) {
-                i = *pixel++;
-            } else if (pDraw->iBpp == 4) {
+            if(pDraw->iBpp == 8) {  // 8bpp
+                i = *pixel++; // Already 8bpc
+            } else if (pDraw->iBpp == 4) {  // 4bpp
                 i = *pixel;
                 i >>= (x & 0b1) ? 0 : 4;
                 i &= 0xf;
                 if (x & 1) pixel++;
-            } else {
+                // Just copy the colour into the upper and lower nibble
+                if(current_mode != MODE_COPY) {
+                    i = (i << 4) | i;
+                }
+            } else if (pDraw->iBpp == 2) {  // 2bpp
                 i = *pixel;
                 i >>= 6 - ((x & 0b11) << 1);
                 i &= 0x3;
                 if ((x & 0b11) == 0b11) pixel++;
+                // Evenly spaced 4-colour palette
+                if(current_mode != MODE_COPY) {
+                    i = (0xFFB86800 >> (i * 8)) & 0xFF;
+                }
+            } else {  // 1bpp
+                i = *pixel;
+                i >>= 7 - (x & 0b111);
+                i &= 0b1;
+                if ((x & 0b111) == 0b111) pixel++;
+                if(current_mode != MODE_COPY) {
+                    i = i ? 255 : 0;
+                }
+            }
+            if(x < target->source.x || x >= target->source.x + target->source.w) continue;
+
+            //mp_printf(&mp_plat_print, "Drawing pixel at %dx%d, %dbpp, value %d\n", current_position.x, current_position.y, pDraw->iBpp, i);
+            if (current_mode != MODE_PEN) {
+                // Allow greyscale PNGs to be copied just like an indexed PNG
+                // since we might want to offset and recolour them.
+                if(current_mode == MODE_COPY
+                    && (current_graphics->pen_type == PicoGraphics::PEN_P8
+                    || current_graphics->pen_type == PicoGraphics::PEN_P4
+                    || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                    || current_graphics->pen_type == PicoGraphics::PEN_INKY7)) {
+                    if(current_palette_offset > 0) {
+                        i = ((int16_t)(i) + current_palette_offset) & 0xff;
+                    }
+                    current_graphics->set_pen(i);
+                } else {
+                    current_graphics->set_pen(i, i, i);
+                }
+            }
+            if (current_mode != MODE_PEN || i == 0) {
+                current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
+            }
+
+            current_position += step;
+        }
+    } else if (pDraw->iPixelType == PNG_PIXEL_INDEXED) {
+        for(int x = 0; x < pDraw->iWidth; x++) {
+            uint8_t i = 0;
+            if(pDraw->iBpp == 8) {  // 8bpp
+                i = *pixel++;
+            } else if (pDraw->iBpp == 4) {  // 4bpp
+                i = *pixel;
+                i >>= (x & 0b1) ? 0 : 4;
+                i &= 0xf;
+                if (x & 1) pixel++;
+            } else if (pDraw->iBpp == 2) {  // 2bpp
+                i = *pixel;
+                i >>= 6 - ((x & 0b11) << 1);
+                i &= 0x3;
+                if ((x & 0b11) == 0b11) pixel++;
+            } else {  // 1bpp
+                i = *pixel;
+                i >>= 7 - (x & 0b111);
+                i &= 0b1;
+                if ((x & 0b111) == 0b111) pixel++;
             }
             if(x < target->source.x || x >= target->source.x + target->source.w) continue;
             // grab the colour from the palette
@@ -226,6 +284,9 @@ MICROPY_EVENT_POLL_HOOK
 
                         // Copy raw palette indexes over
                         if(current_mode == MODE_COPY) {
+                            if(current_palette_offset > 0) {
+                                i = ((int16_t)(i) + current_palette_offset) & 0xff;
+                            }
                             current_graphics->set_pen(i);
                             current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
                         // Posterized output to the available palete
@@ -243,7 +304,6 @@ MICROPY_EVENT_POLL_HOOK
                                 }
                             }
                         }
-
                 } else {
                     current_graphics->set_pen(r, g, b);
                     current_graphics->rectangle({current_position.x, current_position.y, scale.x, scale.y});
@@ -266,8 +326,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _PNG_obj_t *self = m_new_obj_with_finaliser(_PNG_obj_t);
-    self->base.type = &PNG_type;
+    _PNG_obj_t *self = mp_obj_malloc_with_finaliser(_PNG_obj_t, &PNG_type);
     self->png = m_new_class(PNG);
 
     //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
@@ -322,7 +381,7 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_palette_offset };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
@@ -331,6 +390,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_rotate, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_palette_offset, MP_ARG_INT, {.u_int = 0} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -389,6 +449,8 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     self->decode_target->mode = args[ARG_mode].u_int;
 
     self->decode_target->position = {args[ARG_x].u_int, args[ARG_y].u_int};
+
+    self->decode_target->palette_offset = args[ARG_palette_offset].u_int;
 
     // Just-in-time open of the filename/buffer we stored in self->file via open_RAM or open_file
 

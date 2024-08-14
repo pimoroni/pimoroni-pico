@@ -2,18 +2,18 @@
 
 /* Polygon */
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(POLYGON__del__obj, POLYGON__del__);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(POLYGON_centroid_obj, POLYGON_centroid);
-STATIC MP_DEFINE_CONST_FUN_OBJ_1(POLYGON_bounds_obj, POLYGON_bounds);
+static MP_DEFINE_CONST_FUN_OBJ_1(POLYGON__del__obj, POLYGON__del__);
+static MP_DEFINE_CONST_FUN_OBJ_1(POLYGON_centroid_obj, POLYGON_centroid);
+static MP_DEFINE_CONST_FUN_OBJ_1(POLYGON_bounds_obj, POLYGON_bounds);
 
 
-STATIC const mp_rom_map_elem_t POLYGON_locals_dict_table[] = {
+static const mp_rom_map_elem_t POLYGON_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&POLYGON__del__obj) },
     { MP_ROM_QSTR(MP_QSTR_centroid), MP_ROM_PTR(&POLYGON_centroid_obj) },
     { MP_ROM_QSTR(MP_QSTR_bounds), MP_ROM_PTR(&POLYGON_bounds_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(POLYGON_locals_dict, POLYGON_locals_dict_table);
+static MP_DEFINE_CONST_DICT(POLYGON_locals_dict, POLYGON_locals_dict_table);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -64,16 +64,16 @@ const mp_obj_type_t RECTANGLE_type = {
 
 /* PicoVector */
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_text_obj, 4, VECTOR_text);
-STATIC MP_DEFINE_CONST_FUN_OBJ_3(VECTOR_set_font_obj, VECTOR_set_font);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_size_obj, VECTOR_set_font_size);
-STATIC MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_antialiasing_obj, VECTOR_set_antialiasing);
+static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_text_obj, 4, VECTOR_text);
+static MP_DEFINE_CONST_FUN_OBJ_3(VECTOR_set_font_obj, VECTOR_set_font);
+static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_size_obj, VECTOR_set_font_size);
+static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_antialiasing_obj, VECTOR_set_antialiasing);
 
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_draw_obj, 2, VECTOR_draw);
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_rotate_obj, 3, VECTOR_rotate);
-STATIC MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_translate_obj, 4, VECTOR_translate);
+static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_draw_obj, 2, VECTOR_draw);
+static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_rotate_obj, 3, VECTOR_rotate);
+static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_translate_obj, 4, VECTOR_translate);
 
-STATIC const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
+static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_font), MP_ROM_PTR(&VECTOR_set_font_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_font_size), MP_ROM_PTR(&VECTOR_set_font_size_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_antialiasing), MP_ROM_PTR(&VECTOR_set_antialiasing_obj) },
@@ -84,7 +84,7 @@ STATIC const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_translate), MP_ROM_PTR(&VECTOR_translate_obj) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(VECTOR_locals_dict, VECTOR_locals_dict_table);
+static MP_DEFINE_CONST_DICT(VECTOR_locals_dict, VECTOR_locals_dict_table);
 
 #ifdef MP_DEFINE_CONST_OBJ_TYPE
 MP_DEFINE_CONST_OBJ_TYPE(
@@ -105,7 +105,7 @@ const mp_obj_type_t VECTOR_type = {
 
 /* Module */
 
-STATIC const mp_map_elem_t VECTOR_globals_table[] = {
+static const mp_map_elem_t VECTOR_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_picovector) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PicoVector), (mp_obj_t)&VECTOR_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_Polygon), (mp_obj_t)&POLYGON_type },
@@ -116,7 +116,7 @@ STATIC const mp_map_elem_t VECTOR_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_ANTIALIAS_X16), MP_ROM_INT(2) },
 };
 
-STATIC MP_DEFINE_CONST_DICT(mp_module_VECTOR_globals, VECTOR_globals_table);
+static MP_DEFINE_CONST_DICT(mp_module_VECTOR_globals, VECTOR_globals_table);
 
 const mp_obj_module_t VECTOR_user_cmodule = {
     .base = { &mp_type_module },
