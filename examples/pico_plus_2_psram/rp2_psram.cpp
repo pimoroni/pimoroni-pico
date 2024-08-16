@@ -5,7 +5,7 @@
 #include "hardware/sync.h"
 #include "rp2_psram.h"
 
-
+ 
 size_t __no_inline_not_in_flash_func(psram_detect)() {
     int psram_size = 0;
 

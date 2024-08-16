@@ -5,7 +5,7 @@ add_executable(
   pico_plus_2_psram.cpp
   rp2_psram.cpp
 )
- 
+   
 add_subdirectory(lwmem)
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME} pico_stdlib lwmem)
