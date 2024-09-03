@@ -140,6 +140,7 @@ namespace pimoroni {
 
     void register_with_slot(YukonModule& module, uint slot_id);
     void register_with_slot(YukonModule& module, SLOT slot);
+    virtual void deregister(YukonModule& module) {}
 
     void deregister_slot(uint slot_id);
     void deregister_slot(SLOT slot);
