@@ -62,6 +62,8 @@ int main() {
       reading.F8
     );
 
+    printf("Gain: C1: %fx C2: %fx C3: %fx\n", reading.gain(1), reading.gain(2), reading.gain(3));
+
     sleep_ms(1000);
   }
 
