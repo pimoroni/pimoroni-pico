@@ -30,7 +30,7 @@ namespace pimoroni {
     i2c->set_bits(address, reg::FIFO_MAP, 0, FIFO_MAP_CH5 | FIFO_MAP_CH4 | FIFO_MAP_CH3 | FIFO_MAP_CH2 | FIFO_MAP_CH1 | FIFO_MAP_CH0 | FIFO_MAP_ASTATUS);
 
     // Set the PON bit
-    i2c->reg_write_uint8(address, reg::ENABLE, ENABLE_WEN | ENABLE_SMUXEN | ENABLE_SP_EN | ENABLE_PON);
+    i2c->reg_write_uint8(address, reg::ENABLE, ENABLE_WEN | ENABLE_SP_EN | ENABLE_PON);
 
     return true;
   }
@@ -135,9 +135,22 @@ namespace pimoroni {
     }
   }
 
+  void AS7343::start_measurement() {
+    if(running) return;
+    i2c->set_bits(address, reg::ENABLE, 0, ENABLE_SMUXEN);
+    running = true;
+  }
+
+  void AS7343::stop_measurement() {
+    i2c->set_bits(address, reg::ENABLE, 0, ENABLE_SMUXEN);
+    running = false;
+  }
+
   void AS7343::read_fifo(uint16_t *buf) {
     uint16_t expected_results = read_cycles * 7;
     uint16_t result_slot = 0;
+
+    start_measurement();
 
     while (i2c->reg_read_uint8(address, reg::FIFO_LVL) < expected_results) {
         sleep_ms(1);
