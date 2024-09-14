@@ -142,6 +142,19 @@ mp_obj_t Hub75_update(mp_obj_t self_in, mp_obj_t graphics_in) {
     return mp_const_none;
 }
 
+mp_obj_t Hub75_set_brightness(mp_obj_t self_in, mp_obj_t brightness) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+
+    self->hub75->set_brightness(mp_obj_get_int(brightness));
+
+    return mp_const_none;
+}
+
+mp_obj_t Hub75_get_brightness(mp_obj_t self_in) {
+    _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
+    return mp_obj_new_int(self->hub75->get_brightness());
+}
+
 mp_obj_t Hub75_start(mp_obj_t self_in) {
     _Hub75_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Hub75_obj_t);
     self->hub75->start(dma_complete);
