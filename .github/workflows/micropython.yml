@@ -7,8 +7,8 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: rp2-add-rp2350
-  MICROPYTHON_FLAVOUR: dpgeorge
+  MICROPYTHON_VERSION: feature/psram
+  MICROPYTHON_FLAVOUR: pimoroni
 
 jobs:
   build:
