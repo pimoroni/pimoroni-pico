@@ -1,18 +1,30 @@
 #include "hardware/gpio.h"
 #include "wakeup.config.hpp"
 
-extern uint32_t runtime_wakeup_gpio_state;
 
 namespace {
     struct Wakeup {
         public:
             uint8_t shift_register_state = 0b0;
+            uint32_t gpio_state = 0;
 
             Wakeup() {
                 // Assert wakeup pins (indicator LEDs, VSYS hold etc)
-                //gpio_init_mask(WAKEUP_PIN_MASK);
-                //gpio_set_dir_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_DIR);
-                //gpio_put_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_VALUE);
+                gpio_init_mask(WAKEUP_PIN_MASK);
+                gpio_set_dir_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_DIR);
+                gpio_put_masked(WAKEUP_PIN_MASK, WAKEUP_PIN_VALUE);
+
+                // Init all GPIOS not specified in the wakeup mask
+#if PICO_RP2350
+                gpio_init_mask(~WAKEUP_PIN_MASK);
+                gpio_set_dir_in_masked(~WAKEUP_PIN_MASK);
+#endif
+                gpio_state = gpio_get_all();
+                sleep_ms(5);
+                gpio_state |= gpio_get_all();
+#if PICO_RP2350
+                gpio_init_mask(~WAKEUP_PIN_MASK);
+#endif
 
 #if WAKEUP_HAS_RTC==1
                 // Set up RTC I2C pins and send reset command
@@ -59,11 +71,11 @@ extern "C" {
 #include "wakeup.h"
 
 mp_obj_t Wakeup_get_gpio_state() {
-    return mp_obj_new_int(runtime_wakeup_gpio_state);
+    return mp_obj_new_int(wakeup.gpio_state);
 }
 
 mp_obj_t Wakeup_reset_gpio_state() {
-    runtime_wakeup_gpio_state = 0;
+    wakeup.gpio_state = 0;
     return mp_const_none;
 }
 
