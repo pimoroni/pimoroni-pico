@@ -33,6 +33,9 @@ include(wakeup/micropython)
 target_compile_definitions(usermod_wakeup INTERFACE
     -DWAKEUP_HAS_RTC=1
     -DWAKEUP_HAS_SHIFT_REGISTER=1
+    -DWAKEUP_PIN_MASK=0b01000100
+    -DWAKEUP_PIN_DIR=0b01000100
+    -DWAKEUP_PIN_VALUE=0b01000100
 )
 
 # LEDs & Matrices
