@@ -25,10 +25,10 @@ uint8_t PWMCluster::claimed_sms[] = { 0x0, 0x0 };
 uint PWMCluster::pio_program_offset = 0;
 
 
-PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_mask, bool loading_zone)
+PWMCluster::PWMCluster(PIO pio, uint sm, uint64_t pin_mask, bool loading_zone)
 : pio(pio)
 , sm(sm)
-, pin_mask(pin_mask & ((1u << NUM_BANK0_GPIOS) - 1))
+, pin_mask(pin_mask & ((1llu << NUM_BANK0_GPIOS) - 1))
 , channel_count(0)
 , wrap_level(0)
 , loading_zone(loading_zone) {
