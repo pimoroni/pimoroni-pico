@@ -1,3 +1,6 @@
+# Note: This example is intended for use on the Pico Display 2.0 and Pico Display 2.8
+# and will not display correctly on the smaller Pico Display due to the difference in resolution.
+
 # A scrolling menu example
 # Use X and Y buttons to navigate up and down the menu
 # Press A to select a character. Selected characters are shown at the bottom of the display.
