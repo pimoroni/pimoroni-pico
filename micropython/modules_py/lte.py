@@ -1,8 +1,9 @@
-from machine import UART, Pin
-from network import PPP
-from micropython import const
 import time
 
+from machine import UART, Pin
+from network import PPP
+
+from micropython import const
 
 DEFAULT_PIN_RST = 35
 DEFAULT_PIN_NETLIGHT = 34
@@ -18,8 +19,8 @@ DEFAULT_UART_BAUD = const(460800)
 
 
 class CellularError(Exception):
-  def __init__(self, message=None):
-    self.message = "CellularError: " + message
+    def __init__(self, message=None):
+        self.message = "CellularError: " + message
 
 
 class LTE():
@@ -30,13 +31,13 @@ class LTE():
             DEFAULT_UART_ID,
             tx=Pin(DEFAULT_PIN_TX, Pin.OUT),
             rx=Pin(DEFAULT_PIN_RX, Pin.OUT))
-        
+
         # Set PPP timeouts and rxbuf
         self._uart.init(
             timeout=DEFAULT_UART_TIMEOUT,
             timeout_char=DEFAULT_UART_TIMEOUT_CHAR,
             rxbuf=DEFAULT_UART_RXBUF)
-        
+
         if not skip_reset:
             self._reset.value(0)
             time.sleep(1.0)
@@ -46,7 +47,7 @@ class LTE():
             self._led = netlight_led
             self._netlight = netlight_pin or Pin(DEFAULT_PIN_NETLIGHT, Pin.IN)
             self._netlight.irq(self._netlight_irq)
-        
+
     def _netlight_irq(self, pin):
         self._led.value(pin.value())
 
@@ -60,23 +61,24 @@ class LTE():
         try:
             return self._send_at_command("AT+CICCID", 1)
         except CellularError:
-           return None
+            return None
 
     def status(self):
         lte_status = self._send_at_command("AT+CEREG?", 1)
         gsm_status = self._send_at_command("AT+CGREG?", 1)
         return lte_status, gsm_status
-    
+
     def signal_quality(self):
         try:
             response = self._send_at_command("AT+CSQ", 1)
             quality = int(response.split(":")[1].split(",")[0])
-            db = -113 + (2 * quality) # conversion as per AT command set datasheet
+            # Conversion as per AT command set datasheet
+            db = -113 + (2 * quality)
             return db
         except CellularError:
             pass
         return None
-    
+
     def stop_ppp(self):
         self._ppp.disconnect()
         self._send_at_command(f"AT+IPR={DEFAULT_UART_STARTUP_BAUD}")
@@ -99,18 +101,10 @@ class LTE():
         if connect:
             self.connect()
 
-        # This will just always time out!?
-        # try:
-        #    self._send_at_command("ATD*99#", timeout=300)
-        # except CellularError as e:
-        #    print(e)
-
         # Force PPP to use modem's default settings...
-        #time.sleep(2.0)
         self._flush_uart()
         self._uart.write("ATD*99#\r")
         self._uart.flush()
-        #time.sleep(2.0)
 
         self._ppp = PPP(self._uart)
         self._ppp.connect()
@@ -121,29 +115,29 @@ class LTE():
 
     def connect(self, timeout=60):
         print("  - setting up cellular uart")
-        # connect to and flush the uart
-        # consume any unsolicited messages first, we don't need those  
+        # Connect to and flush the uart
+        # Discard any unsolicited messages first, we don't need those
         self._flush_uart()
 
         print("  - waiting for cellular module to be ready")
 
-        # wait for the cellular module to respond to AT commands
-        self._wait_ready()   
+        # Wait for the cellular module to respond to AT commands
+        self._wait_ready()
 
-        self._send_at_command("ATE0") # disable local echo  
-        self._send_at_command(f"AT+CGDCONT=1,\"IP\",\"{self._apn}\"") # set apn and activate pdp context  
+        self._send_at_command("ATE0")                                  # Disable local echo
+        self._send_at_command(f"AT+CGDCONT=1,\"IP\",\"{self._apn}\"")  # Set apn and activate pdp context
 
-        # wait for roaming lte connection to be established
+        # Wait for roaming lte connection to be established
         giveup = time.time() + timeout
         status = None
         while status != "+CEREG: 0,5" and status != "+CEREG: 0,1":
             status = self._send_at_command("AT+CEREG?", 1)
             time.sleep(0.25)
             if time.time() > giveup:
-                raise CellularError("timed out getting network registration")    
+                raise CellularError("timed out getting network registration")
 
-        # disable server and client certification validation
-        self._send_at_command("AT+CSSLCFG=\"authmode\",0,0") 
+        # Disable server and client certification validation
+        self._send_at_command("AT+CSSLCFG=\"authmode\",0,0")
         self._send_at_command("AT+CSSLCFG=\"enableSNI\",0,1")
 
         print(f"  - SIM ICCID is {self.iccid()}")
@@ -153,12 +147,12 @@ class LTE():
         while time.time() <= giveup:
             try:
                 self._send_at_command("AT")
-                return # if __send_at_command doesn't throw an exception then we're good!
+                return  # If __send_at_command doesn't throw an exception then we're good!
             except CellularError as e:
                 print(e)
                 time.sleep(poll_time)
 
-        raise CellularError("timed out waiting for AT response")  
+        raise CellularError("timed out waiting for AT response")
 
     def _flush_uart(self):
         self._uart.flush()
@@ -168,28 +162,25 @@ class LTE():
             time.sleep(0.25)
 
     def _send_at_command(self, command, result_lines=0, timeout=5.0):
-        # consume any unsolicited messages first, we don't need those    
+        # Discard any unsolicited messages first, we don't need those
         self._flush_uart()
 
         self._uart.write(command + "\r")
-        #print(f"  - tx: {command}")
         self._uart.flush()
         status, data = self._read_result(result_lines, timeout=timeout)
 
         print("  -", command, status, data)
 
         if status == "TIMEOUT":
-            #print.error("  !", command, status, data)
             raise CellularError(f"cellular module timed out for command {command}")
 
         if status not in ["OK", "DOWNLOAD"]:
-            #print("  !", command, status, data)
             raise CellularError(f"non 'OK' or 'DOWNLOAD' result for command {command}")
 
         if result_lines == 1:
             return data[0]
         if result_lines > 1:
-            return data  
+            return data
         return None
 
     def _read_result(self, result_lines, timeout=1.0):
@@ -212,4 +203,3 @@ class LTE():
                 start = time.ticks_ms()
 
         return status, result
-
