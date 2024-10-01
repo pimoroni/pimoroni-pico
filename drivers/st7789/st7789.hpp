@@ -47,7 +47,13 @@ namespace pimoroni {
 
     // The ST7789 requires 16 ns between SPI rising edges.
     // 16 ns = 62,500,000 Hz
-    static const uint32_t SPI_BAUD = 62'500'000;
+    // 2350 doesn't support 62,500,000 so use 75,000,000 seems to work.
+    #if !PICO_RP2350
+      static const uint32_t SPI_BAUD = 62'500'000;
+    #else
+      static const uint32_t SPI_BAUD = 75'000'000;
+    #endif
+
 
 
   public:
