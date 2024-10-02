@@ -5,13 +5,13 @@
 
 import time
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB565
-from pimoroni import RGBLED
+from pimoroni import RGBLED, Button
 from machine import Pin
 
-button_a = Pin(12, Pin.IN)
-button_b = Pin(13, Pin.IN)
-button_x = Pin(14, Pin.IN)
-button_y = Pin(15, Pin.IN)
+button_a = Button(12)
+button_b = Button(13)
+button_x = Button(14)
+button_y = Button(15)
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
@@ -85,7 +85,7 @@ class Menu(object):
     def user_input(self):
 
         # Process the user input and update the currently selected item
-        if button_y.value() == 0:
+        if button_y.read():
             if self.selected < len(self.items) - 1:
                 self.selected += 1
             if self.stop < len(self.items) + 4:
@@ -96,7 +96,7 @@ class Menu(object):
                 self.stop = self.start + 5
                 self.selected = 0
 
-        if button_x.value() == 0:
+        if button_x.read():
             if self.selected > 0:
                 self.selected -= 1
             if self.stop > 5:
@@ -107,10 +107,10 @@ class Menu(object):
                 self.stop = self.start + 5
                 self.selected = len(self.items) - 1
 
-        if button_a.value() == 0:
+        if button_a.read():
             self.process_selected()
 
-        if button_b.value() == 0:
+        if button_b.read():
             self.remove_last_char()
 
 
