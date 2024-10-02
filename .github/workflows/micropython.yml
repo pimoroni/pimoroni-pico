@@ -71,7 +71,7 @@ jobs:
     - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
       uses: carlosperate/arm-none-eabi-gcc-action@v1
       with:
-        release: '9-2020-q2'
+        release: '13.3.Rel1'
 
     - name: Install CCache
       run: |
