@@ -12,7 +12,7 @@ env:
 jobs:
   build:
     name: ${{matrix.name}} (C++)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
