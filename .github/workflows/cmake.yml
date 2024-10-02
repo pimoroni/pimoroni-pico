@@ -12,7 +12,7 @@ env:
 jobs:
   build:
     name: ${{matrix.name}} (C++)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
@@ -56,11 +56,15 @@ jobs:
         path: pico-extras
         submodules: false  # lwip breaks audio submodule fetching
 
+    - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
+      uses: carlosperate/arm-none-eabi-gcc-action@v1
+      with:
+        release: '13.3.Rel1'
+
     # Linux deps
     - name: Install deps
-      if: runner.os == 'Linux'
       run: |
-        sudo apt update && sudo apt install ccache gcc-arm-none-eabi
+        sudo apt update && sudo apt install ccache
 
     - name: Create Build Environment
       run: cmake -E make_directory ${{runner.workspace}}/build

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "hardware/i2c.h"
-#include "hardware/rtc.h"
+#include "pico/types.h"
 
 #include "common/pimoroni_common.hpp"
 #include "common/pimoroni_i2c.hpp"
