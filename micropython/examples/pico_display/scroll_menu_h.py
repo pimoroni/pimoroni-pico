@@ -1,3 +1,6 @@
+# Note: This example is intended for use on the Pico Display 2.0 and Pico Display 2.8
+# and will not display correctly on the smaller Pico Display due to the difference in resolution.
+
 # A scrolling menu example
 # Use B and Y buttons to navigate LEFT and RIGHT
 # Press A to select a character. Selected characters are shown at the top of the display.
@@ -8,10 +11,10 @@ from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB565
 from pimoroni import RGBLED
 from machine import Pin
 
-button_a = Pin(12, Pin.IN)
-button_b = Pin(13, Pin.IN)
-button_x = Pin(14, Pin.IN)
-button_y = Pin(15, Pin.IN)
+button_a = Pin(12, Pin.IN, Pin.PULL_UP)
+button_b = Pin(13, Pin.IN, Pin.PULL_UP)
+button_x = Pin(14, Pin.IN, Pin.PULL_UP)
+button_y = Pin(15, Pin.IN, Pin.PULL_UP)
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
