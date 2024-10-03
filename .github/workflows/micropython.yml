@@ -12,7 +12,7 @@ env:
 jobs:
   build:
     name: ${{ matrix.name }} (${{ matrix.board }})
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
       matrix:
@@ -71,7 +71,7 @@ jobs:
     - name: Install Arm GNU Toolchain (arm-none-eabi-gcc)
       uses: carlosperate/arm-none-eabi-gcc-action@v1
       with:
-        release: '9-2020-q2'
+        release: '13.3.Rel1'
 
     - name: Install CCache
       run: |
