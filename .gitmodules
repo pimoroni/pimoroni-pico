@@ -25,3 +25,6 @@
 [submodule "drivers/mlx90640/src"]
 	path = drivers/mlx90640/src
 	url = https://github.com/melexis/mlx90640-library
+[submodule "examples/pico_plus_2_psram/lwmem"]
+	path = examples/pico_plus_2_psram/lwmem
+	url = https://github.com/MaJerle/lwmem

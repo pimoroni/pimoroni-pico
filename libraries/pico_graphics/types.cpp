@@ -28,6 +28,10 @@ namespace pimoroni {
     return !(x > r.x + r.w || x + w < r.x || y > r.y + r.h || y + h < r.y);
   }
 
+  bool Rect::equals(const Rect &r) const {
+    return r.x == x && r.y == y && r.w == w && r.h == h; 
+  }
+
   Rect Rect::intersection(const Rect &r) const {
     return Rect(std::max(x, r.x),
                 std::max(y, r.y),
