@@ -24,14 +24,14 @@ namespace pimoroni {
     void PicoGraphics_PenRGB565::set_pixel(const Point &p) {
         uint16_t *buf = (uint16_t *)frame_buffer;
         // We can't use buffer_size because our pointer is uint16_t
-        buf += this->bounds.w * this->bounds.h * layer;
+        buf += this->layer_offset;
         buf[p.y * bounds.w + p.x] = color;
     }
     void PicoGraphics_PenRGB565::set_pixel_span(const Point &p, uint l) {
         // pointer to byte in framebuffer that contains this pixel
         uint16_t *buf = (uint16_t *)frame_buffer;
         // We can't use buffer_size because our pointer is uint16_t
-        buf += this->bounds.w * this->bounds.h * layer;
+        buf += this->layer_offset;
         buf = &buf[p.y * bounds.w + p.x];
 
         while(l--) {
@@ -46,10 +46,8 @@ namespace pimoroni {
 
             if(layers > 1) {
                 // Assume only two layers for now
-                uint16_t *src_layer2 = src;
-
                 // We can't use buffer_size because our pointer is uint16_t
-                src_layer2 += this->bounds.w * this->bounds.h * layer;
+                uint16_t *src_layer2 = src + this->bounds.w * this->bounds.h;
 
                 frame_convert_rgb565(callback, [&]() {
                     RGB565 c1 = *src++;
