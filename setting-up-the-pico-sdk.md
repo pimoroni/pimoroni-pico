@@ -40,8 +40,7 @@ sudo apt install cmake gcc-arm-none-eabi build-essential
 brew install cmake
 
 # Install the arm eabi toolchain
-brew tap ArmMbed/homebrew-formulae
-brew install arm-none-eabi-gcc
+brew install --cask gcc-arm-embedded
 
 # The equivalent to build-essential on linux, you probably already have this.
 xcode-select --install

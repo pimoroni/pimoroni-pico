@@ -282,7 +282,7 @@ namespace pimoroni {
   void ST7789::update(PicoGraphics *graphics) {
     uint8_t cmd = reg::RAMWR;
 
-    if(graphics->pen_type == PicoGraphics::PEN_RGB565) { // Display buffer is screen native
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565 && graphics->layers == 1) { // Display buffer is screen native
       command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
     } else {
       gpio_put(dc, 0); // command mode

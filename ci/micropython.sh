@@ -13,11 +13,9 @@ function log_warning {
 }
 
 function micropython_clone {
-    log_inform "Using MicroPython $MICROPYTHON_VERSION"
-    git clone https://github.com/micropython/micropython
+    log_inform "Using MicroPython $MICROPYTHON_FLAVOUR/$MICROPYTHON_VERSION"
+    git clone https://github.com/$MICROPYTHON_FLAVOUR/micropython -b $MICROPYTHON_VERSION --depth=1
     cd micropython
-    git checkout $MICROPYTHON_VERSION
-    git cherry-pick -n 932f76c6ba64c5a3e68de3324556d9979f09303b
     git submodule update --init lib/pico-sdk
     git submodule update --init lib/cyw43-driver
     git submodule update --init lib/lwip

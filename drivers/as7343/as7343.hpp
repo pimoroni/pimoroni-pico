@@ -49,6 +49,9 @@ namespace pimoroni {
   public:
     struct reading {
         // Cycle 1
+        uint16_t c1_astatus = 0; // (c1_astatus >> 8) & 0b10001111
+                                 // 0b10000000 = saturated
+                                 // 0b00001111 = gain lowest nibble
         uint16_t FZ = 0;   // 428-480 nm
         uint16_t FY = 0;   // 534-593 nm
         uint16_t FXL = 0;  // 593-628 nm
@@ -56,11 +59,10 @@ namespace pimoroni {
 
         uint16_t c1_vis_tl = 0;  // Visible top-left
         uint16_t c1_vis_br = 0;  // Visible bottom-right
-        uint16_t c1_astatus = 0; // (c1_astatus >> 8) & 0b10001111
-                                 // 0b10000000 = saturated
-                                 // 0b00001111 = gain lowest nibble
+        //uint16_t c1_fd = 0;    // This is where flicker detect *would* be
 
         // Cycle 2
+        uint16_t c2_astatus = 0;
         uint16_t F2 = 0;   // 408-448 nm
         uint16_t F3 = 0;   // 448-500 mn
         uint16_t F4 = 0;   // 500-534 nm
@@ -68,17 +70,47 @@ namespace pimoroni {
 
         uint16_t c2_vis_tl = 0;
         uint16_t c2_vis_br = 0;
-        uint16_t c2_astatus = 0;
+        //uint16_t c2_fd = 0;
 
         // Cycle 3
+        uint16_t c3_astatus = 0;
         uint16_t F1 = 0;   // 396-408 nm
-        uint16_t F5 = 0;   // 531-594 nm
         uint16_t F7 = 0;   // 685-715 nm
         uint16_t F8 = 0;   // 715-766 nm
+        uint16_t F5 = 0;   // 531-594 nm
 
         uint16_t c3_vis_tl = 0;
         uint16_t c3_vis_br = 0;
-        uint16_t c3_astatus = 0;
+        //uint16_t c3_fd = 0;
+
+        float gain(uint8_t cycle) {
+          uint8_t status = 0;
+          switch(cycle) {
+            case 1:
+              status = c1_astatus & 0xf;
+              break;
+            case 2:
+              status = c2_astatus & 0xf;
+              break;
+            case 3:
+              status = c3_astatus & 0xf;
+              break;
+          }
+          return status ? 1 << (status - 1) : 0.5f;
+        }
+
+        bool saturated(uint8_t cycle) {
+          switch(cycle) {
+            case 1:
+              return c1_astatus & 0x80;
+            case 2:
+              return c2_astatus & 0x80;
+            case 3:
+              return c3_astatus & 0x80;
+            default:
+              return false;
+          }
+        }
     };
 
 
@@ -94,6 +126,8 @@ namespace pimoroni {
 
     uint8_t read_cycles = 1;
     uint8_t ch_count = (uint8_t)channel_count::SIX_CHANNEL;
+
+    bool running = false;
 
 
     //--------------------------------------------------
@@ -119,6 +153,9 @@ namespace pimoroni {
     int get_int() const;
 
     void get_version(uint8_t &auxid, uint8_t &revid, uint8_t &hwid);
+
+    void start_measurement();
+    void stop_measurement();
 
     reading read();
 

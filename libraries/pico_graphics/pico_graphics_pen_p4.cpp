@@ -2,8 +2,8 @@
 
 namespace pimoroni {
 
-    PicoGraphics_PenP4::PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer)
-    : PicoGraphics(width, height, frame_buffer) {
+    PicoGraphics_PenP4::PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers)
+    : PicoGraphics(width, height, layers, frame_buffer) {
         this->pen_type = PEN_P4;
         if(this->frame_buffer == nullptr) {
             this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
@@ -59,6 +59,7 @@ namespace pimoroni {
 
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset / 2;
         uint8_t *f = &buf[i / 2];
 
         uint8_t  o = (~i & 0b1) * 4;   // bit offset within byte
@@ -74,6 +75,7 @@ namespace pimoroni {
 
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset / 2;
         uint8_t *f = &buf[i / 2];
 
         // doubled up color value, so the color is stored in both nibbles
@@ -144,16 +146,39 @@ namespace pimoroni {
             uint8_t *src = (uint8_t *)frame_buffer;
             uint8_t o = 4;
 
-            frame_convert_rgb565(callback, [&]() {
-                uint8_t c = *src;
-                uint8_t b = (c >> o) & 0xf; // bit value shifted to position
-                
-                // Increment to next 4-bit entry 
-                o ^= 4;
-                if (o != 0) ++src;
+            if(this->layers > 1) {
 
-                return cache[b];
-            });
+                uint offset = this->bounds.w * this->bounds.h / 2;
+
+                frame_convert_rgb565(callback, [&]() {
+                    uint8_t b = 0;
+
+                    // Iterate through layers in reverse order
+                    // Return the first nonzero (not transparent) pixel
+                    for(auto layer = this->layers; layer > 0; layer--) {
+                        uint8_t c = *(src + offset * (layer - 1));
+                        b = (c >> o) & 0xf; // bit value shifted to position
+                        if (b) break;
+                    }
+
+                    // Increment to next 4-bit entry 
+                    o ^= 4;
+                    if (o != 0) src++;
+
+                    return cache[b];
+                });
+            } else {
+                frame_convert_rgb565(callback, [&]() {
+                    uint8_t c = *src;
+                    uint8_t b = (c >> o) & 0xf; // bit value shifted to position
+                    
+                    // Increment to next 4-bit entry 
+                    o ^= 4;
+                    if (o != 0) ++src;
+
+                    return cache[b];
+                });
+            }
         }
     }
 }
