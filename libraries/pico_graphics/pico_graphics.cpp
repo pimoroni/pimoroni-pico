@@ -21,6 +21,7 @@ namespace pimoroni {
 
   void PicoGraphics::set_layer(uint l) {
     this->layer = l;
+    this->layer_offset = this->bounds.w * this->bounds.h * l;
   };
   uint PicoGraphics::get_layer() {
     return this->layer;
