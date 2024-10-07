@@ -2,11 +2,11 @@
 #include <string.h>
 
 namespace pimoroni {
-    PicoGraphics_PenRGB332::PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer)
-    : PicoGraphics(width, height, frame_buffer) {
+    PicoGraphics_PenRGB332::PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers)
+    : PicoGraphics(width, height, layers, frame_buffer) {
         this->pen_type = PEN_RGB332;
         if(this->frame_buffer == nullptr) {
-            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height) * layers]);
         }
     }
     void PicoGraphics_PenRGB332::set_pen(uint c) {
@@ -23,12 +23,14 @@ namespace pimoroni {
     }
     void PicoGraphics_PenRGB332::set_pixel(const Point &p) {
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += buffer_size(this->bounds.w, this->bounds.h) * layer;
         buf[p.y * bounds.w + p.x] = color;
     }
     void PicoGraphics_PenRGB332::set_pixel_span(const Point &p, uint l) {
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
-        buf = &buf[p.y * bounds.w + p.x];
+        buf += buffer_size(this->bounds.w, this->bounds.h) * layer;
+        buf += p.y * bounds.w + p.x;
 
         while(l--) {
             *buf++ = color;
@@ -38,6 +40,7 @@ namespace pimoroni {
         if(!bounds.contains(p)) return;
 
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += buffer_size(this->bounds.w, this->bounds.h) * layer;
 
         RGB332 blended = RGB(buf[p.y * bounds.w + p.x]).blend(RGB(color), a).to_rgb332();
 
@@ -96,9 +99,20 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            frame_convert_rgb565(callback, [&]() {
-                return rgb332_to_rgb565_lut[*src++];
-            });
+            if(this->layers > 1) {
+                // Assume only two layers for now
+                uint8_t *src_layer2 = src + buffer_size(this->bounds.w, this->bounds.h);
+
+                frame_convert_rgb565(callback, [&]() {
+                    RGB565 c1 = rgb332_to_rgb565_lut[*src++];
+                    RGB565 c2 = rgb332_to_rgb565_lut[*src_layer2++];
+                    return c2 ? c2 : c1;
+                });
+            } else {
+                frame_convert_rgb565(callback, [&]() {
+                    return rgb332_to_rgb565_lut[*src++];
+                });
+            }
         }
     }
     void PicoGraphics_PenRGB332::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {
