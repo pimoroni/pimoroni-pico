@@ -282,30 +282,26 @@ namespace pimoroni {
   void ST7789::update(PicoGraphics *graphics) {
     uint8_t cmd = reg::RAMWR;
 
-    if(graphics->pen_type == PicoGraphics::PEN_RGB565) { // Display buffer is screen native
-      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
-    } else {
-      gpio_put(dc, 0); // command mode
-      gpio_put(cs, 0);
-      if(spi) { // SPI Bus
-        spi_write_blocking(spi, &cmd, 1);
-      } else { // Parallel Bus
-        write_blocking_parallel(&cmd, 1);
-      }
-
-      gpio_put(dc, 1); // data mode
-
-      graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
-        if (length > 0) {
-          write_blocking_dma((const uint8_t*)data, length);
-        }
-        else {
-          dma_channel_wait_for_finish_blocking(st_dma);
-        }
-      });
-
-      gpio_put(cs, 1);
+    gpio_put(dc, 0); // command mode
+    gpio_put(cs, 0);
+    if(spi) { // SPI Bus
+      spi_write_blocking(spi, &cmd, 1);
+    } else { // Parallel Bus
+      write_blocking_parallel(&cmd, 1);
     }
+
+    gpio_put(dc, 1); // data mode
+
+    graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+      if (length > 0) {
+        write_blocking_dma((const uint8_t*)data, length);
+      }
+      else {
+        dma_channel_wait_for_finish_blocking(st_dma);
+      }
+    });
+
+    gpio_put(cs, 1);
   }
 
   void ST7789::set_backlight(uint8_t brightness) {
