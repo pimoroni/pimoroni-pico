@@ -79,6 +79,7 @@ namespace pimoroni {
       }
   }
 
+    constexpr operator bool() {return r || g || b;};
     constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
     constexpr RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
     constexpr RGB& operator-=(const RGB& c) {r -= c.r; g -= c.g; b -= c.b; return *this;}
@@ -228,6 +229,7 @@ namespace pimoroni {
 
     uint layers = 1;
     uint layer = 0;
+    uint layer_offset = 0;
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;

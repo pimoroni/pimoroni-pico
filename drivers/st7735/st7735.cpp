@@ -165,17 +165,21 @@ namespace pimoroni {
 
   // Native 16-bit framebuffer update
   void ST7735::update(PicoGraphics *graphics) {
-    command(reg::RAMWR);
-    gpio_put(dc, 1); // data mode
-    gpio_put(cs, 0);
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565 && graphics->layers == 1) {
+      command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
+    } else {
+      command(reg::RAMWR);
+      gpio_put(dc, 1); // data mode
+      gpio_put(cs, 0);
 
-    graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
-      if (length > 0) {
-        spi_write_blocking(spi, (const uint8_t*)data, length);
-      }
-    });
+      graphics->frame_convert(PicoGraphics::PEN_RGB565, [this](void *data, size_t length) {
+        if (length > 0) {
+          spi_write_blocking(spi, (const uint8_t*)data, length);
+        }
+      });
 
-    gpio_put(cs, 1);
+      gpio_put(cs, 1);
+    }
   }
 
   void ST7735::set_backlight(uint8_t brightness) {
