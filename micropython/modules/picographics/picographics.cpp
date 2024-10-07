@@ -254,24 +254,24 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
     return true;
 }
 
-size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint height) {
+size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint height, uint layers) {
     switch(pen_type) {
         case PEN_1BIT:
-            return PicoGraphics_Pen1Bit::buffer_size(width, height);
+            return PicoGraphics_Pen1Bit::buffer_size(width, height) * layers;
         case PEN_3BIT:
-            return PicoGraphics_Pen3Bit::buffer_size(width, height);
+            return PicoGraphics_Pen3Bit::buffer_size(width, height) * layers;
         case PEN_P4:
-            return PicoGraphics_PenP4::buffer_size(width, height);
+            return PicoGraphics_PenP4::buffer_size(width, height) * layers;
         case PEN_P8:
-            return PicoGraphics_PenP8::buffer_size(width, height);
+            return PicoGraphics_PenP8::buffer_size(width, height) * layers;
         case PEN_RGB332:
-            return PicoGraphics_PenRGB332::buffer_size(width, height);
+            return PicoGraphics_PenRGB332::buffer_size(width, height) * layers;
         case PEN_RGB565:
-            return PicoGraphics_PenRGB565::buffer_size(width, height);
+            return PicoGraphics_PenRGB565::buffer_size(width, height) * layers;
         case PEN_RGB888:
-            return PicoGraphics_PenRGB888::buffer_size(width, height);
+            return PicoGraphics_PenRGB888::buffer_size(width, height) * layers;
         case PEN_INKY7:
-            return PicoGraphics_PenInky7::buffer_size(width, height);
+            return PicoGraphics_PenInky7::buffer_size(width, height) * layers;
         default:
             return 0;
     }
@@ -280,7 +280,7 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
 mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     ModPicoGraphics_obj_t *self = nullptr;
 
-    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address };
+    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address, ARG_layers };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
@@ -289,6 +289,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         { MP_QSTR_pen_type, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_extra_pins, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_i2c_address, MP_ARG_INT, { .u_int = -1 } },
+        { MP_QSTR_layers, MP_ARG_INT, { .u_int = 1 } },
     };
 
     // Parse args.
@@ -304,6 +305,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     int height = 0;
     int pen_type = args[ARG_pen_type].u_int;
     int rotate = args[ARG_rotate].u_int;
+    int layers = args[ARG_layers].u_int;
     PicoGraphicsBusType bus_type = BUS_SPI;
     if(!get_display_settings(display, width, height, rotate, pen_type, bus_type)) mp_raise_ValueError("Unsupported display!");
     if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
@@ -395,7 +397,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     }
 
     // Create or fetch buffer
-    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
+    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height, layers);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
     if(pen_type == PEN_INKY7) {
@@ -418,31 +420,31 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     switch((PicoGraphicsPenType)pen_type) {
         case PEN_1BIT:
             if (display == DISPLAY_INKY_PACK) {
-                self->graphics = m_new_class(PicoGraphics_Pen1BitY, self->display->width, self->display->height, self->buffer);
+                self->graphics = m_new_class(PicoGraphics_Pen1BitY, self->display->width, self->display->height, self->buffer, layers);
             } else {
-                self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer);
+                self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer, layers);
             }
             break;
         case PEN_3BIT:
-            self->graphics = m_new_class(PicoGraphics_Pen3Bit, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_Pen3Bit, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_P4:
-            self->graphics = m_new_class(PicoGraphics_PenP4, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenP4, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_P8:
-            self->graphics = m_new_class(PicoGraphics_PenP8, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenP8, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_RGB332:
-            self->graphics = m_new_class(PicoGraphics_PenRGB332, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenRGB332, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_RGB565:
-            self->graphics = m_new_class(PicoGraphics_PenRGB565, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenRGB565, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_RGB888:
-            self->graphics = m_new_class(PicoGraphics_PenRGB888, self->display->width, self->display->height, self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenRGB888, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_INKY7:
-            self->graphics = m_new_class(PicoGraphics_PenInky7, self->display->width, self->display->height, *(IDirectDisplayDriver<uint8_t> *)self->buffer);
+            self->graphics = m_new_class(PicoGraphics_PenInky7, self->display->width, self->display->height, *(IDirectDisplayDriver<uint8_t> *)self->buffer, layers);
             break;
         default:
             break;
@@ -453,8 +455,15 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     self->spritedata = nullptr;
 
     // Clear the buffer
+    self->graphics->set_layer(0);
     self->graphics->set_pen(0);
     self->graphics->clear();
+    if(layers > 1) {
+        self->graphics->set_layer(1);
+        self->graphics->set_pen(0);
+        self->graphics->clear();
+        self->graphics->set_layer(0);
+    }
 
     // Update the LCD from the graphics library
     if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7) {
@@ -477,7 +486,7 @@ mp_obj_t ModPicoGraphics_set_spritesheet(mp_obj_t self_in, mp_obj_t spritedata) 
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(spritedata, &bufinfo, MP_BUFFER_RW);
 
-        int required_size = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, 128, 128);
+        int required_size = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, 128, 128, 1);
 
         if(bufinfo.len != (size_t)(required_size)) {
             mp_raise_ValueError("Spritesheet the wrong size!");
@@ -562,7 +571,7 @@ mp_int_t ModPicoGraphics_get_framebuffer(mp_obj_t self_in, mp_buffer_info_t *buf
         mp_raise_ValueError("No local framebuffer.");
     }
     bufinfo->buf = self->graphics->frame_buffer;
-    bufinfo->len = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, self->graphics->bounds.w, self->graphics->bounds.h);
+    bufinfo->len = get_required_buffer_size((PicoGraphicsPenType)self->graphics->pen_type, self->graphics->bounds.w, self->graphics->bounds.h, 1);
     bufinfo->typecode = 'B';
     return 0;
 }
@@ -603,7 +612,7 @@ mp_obj_t ModPicoGraphics_get_required_buffer_size(mp_obj_t display_in, mp_obj_t 
     int pen_type = mp_obj_get_int(pen_type_in);
     PicoGraphicsBusType bus_type = BUS_SPI;
     if(!get_display_settings(display, width, height, rotation, pen_type, bus_type)) mp_raise_ValueError("Unsupported display!");
-    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height);
+    size_t required_size = get_required_buffer_size((PicoGraphicsPenType)pen_type, width, height, 1);
     if(required_size == 0) mp_raise_ValueError("Unsupported pen type!");
 
     return mp_obj_new_int(required_size);
@@ -751,6 +760,14 @@ mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
     self->graphics->set_pen(mp_obj_get_int(pen));
+
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_set_layer(mp_obj_t self_in, mp_obj_t layer) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    self->graphics->set_layer(mp_obj_get_int(layer));
 
     return mp_const_none;
 }
