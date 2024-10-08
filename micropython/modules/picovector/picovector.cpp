@@ -507,6 +507,17 @@ mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
     return mp_const_none;
 }
 
+mp_obj_t TRANSFORM_scale(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
+    _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
+
+    picovector_point_type o_x = mp_picovector_get_point_type(x_in);
+    picovector_point_type o_y = mp_picovector_get_point_type(y_in);
+
+    pp_mat3_scale(&transform->transform, o_x, o_y);
+
+    return mp_const_none;
+}
+
 mp_obj_t TRANSFORM_reset(mp_obj_t self_in) {
     _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
     transform->transform = pp_mat3_identity();
@@ -583,9 +594,31 @@ mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
     (void)self;
 
     int font_size = mp_obj_get_int(size);
-    (void)font_size;
-    // TODO: Implement when Alright Fonts rewrite is ready
     self->vector->set_font_size(font_size);
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_set_font_word_spacing(mp_obj_t self_in, mp_obj_t spacing) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
+
+    self->vector->set_font_word_spacing(mp_obj_get_int(spacing));
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_set_font_letter_spacing(mp_obj_t self_in, mp_obj_t spacing) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
+
+    self->vector->set_font_letter_spacing(mp_obj_get_int(spacing));
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_set_font_line_height(mp_obj_t self_in, mp_obj_t spacing) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+    (void)self;
+
+    self->vector->set_font_line_height(mp_obj_get_int(spacing));
     return mp_const_none;
 }
 
@@ -657,6 +690,7 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     }
 
     pp_mat3_translate(&tt, (float)x, (float)y);
+    //pp_mat3_mul(&tt, _pp_transform);
 
     //mp_printf(&mp_plat_print, "self->vector->text()\n");
     //__printf_debug_flush();

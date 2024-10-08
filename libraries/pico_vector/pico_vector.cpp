@@ -65,7 +65,7 @@ namespace pimoroni {
 
     text_metrics.transform = t;
 
-    af_render(text_metrics.face, text.data(), &text_metrics);
+    af_render(text_metrics.face, text.data(), text.size(), &text_metrics);
 
     return caret;
 /*

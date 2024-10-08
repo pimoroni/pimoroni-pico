@@ -67,6 +67,18 @@ namespace pimoroni {
                 text_metrics.size = font_size;
             }
 
+            void set_font_word_spacing(unsigned int font_wordspacing) {
+                text_metrics.word_spacing = font_wordspacing;
+            }
+
+            void set_font_letter_spacing(unsigned int font_letterspacing) {
+                text_metrics.letter_spacing = font_letterspacing;
+            }
+
+            void set_font_line_height(unsigned int font_line_height) {
+                text_metrics.line_height = font_line_height;
+            }
+
             bool set_font(std::string_view font_path, unsigned int font_size) {
                 if(text_metrics.face) {
                     af_free(text_metrics.face->glyphs);
