@@ -66,6 +66,7 @@ namespace pimoroni {
         if(!bounds.contains(p)) return;
 
         uint16_t *buf = (uint16_t *)frame_buffer;
+        buf += this->layer_offset;
 
         RGB565 blended = RGB(buf[p.y * bounds.w + p.x]).blend(RGB(color), a).to_rgb565();
 
@@ -96,14 +97,22 @@ namespace pimoroni {
 
     bool PicoGraphics_PenRGB565::render_tile(const Tile *tile) {
         for(int y = 0; y < tile->h; y++) {
-            uint8_t *palpha = &tile->data[(y * tile->stride)];
-            uint16_t *pdest = &((uint16_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            uint8_t *p_alpha = &tile->data[(y * tile->stride)];
+
+            uint16_t *p_dest = &((uint16_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            p_dest += this->layer_offset;
+
+            uint16_t *p_layer0 = &((uint16_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+
             for(int x = 0; x < tile->w; x++) {
-                uint16_t dest = *pdest;
-                uint8_t alpha = *palpha;
+                uint16_t dest = *p_dest;
+                if(dest == 0) {
+                    dest = *p_layer0;
+                }
+                uint8_t alpha = *p_alpha;
 
                 if(alpha == 255) {
-                  *pdest = color;
+                  *p_dest = color;
                 }else if(alpha == 0) {
                 }else{
                   // blend tha pixel
@@ -120,11 +129,12 @@ namespace pimoroni {
                   uint8_t b = ((sb * alpha) + (db * (255 - alpha))) >> 8;
 
                   // recombine the channels
-                  *pdest  = __builtin_bswap16((r << 11) | (g << 5) | (b));
+                  *p_dest  = __builtin_bswap16((r << 11) | (g << 5) | (b));
                 }
 
-                pdest++;
-                palpha++;
+                p_layer0++;
+                p_dest++;
+                p_alpha++;
             }
         }
 
