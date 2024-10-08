@@ -26,6 +26,7 @@ extern mp_obj_t POLYGON__del__(mp_obj_t self_in);
 extern mp_obj_t TRANSFORM_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 extern mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_in);
 extern mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in);
+extern mp_obj_t TRANSFORM_scale(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in);
 extern mp_obj_t TRANSFORM_reset(mp_obj_t self_in);
 
 /* Vector */
@@ -35,6 +36,9 @@ extern mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t
 extern mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size);
 extern mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size);
+extern mp_obj_t VECTOR_set_font_word_spacing(mp_obj_t self_in, mp_obj_t size);
+extern mp_obj_t VECTOR_set_font_letter_spacing(mp_obj_t self_in, mp_obj_t size);
+extern mp_obj_t VECTOR_set_font_line_height(mp_obj_t self_in, mp_obj_t size);
 extern mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa);
 extern mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in);
 extern mp_obj_t VECTOR_set_clip(mp_obj_t self_in, mp_obj_t clip_in);
