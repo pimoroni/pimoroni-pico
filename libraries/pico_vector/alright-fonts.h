@@ -273,8 +273,7 @@ int get_max_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm)
   return max_width;
 }
 
-
-void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
+void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
   pp_mat3_t *old = pp_transform(NULL);
   
   float line_height = (tm->line_height * 128.0f) / 100.0f;
@@ -290,8 +289,9 @@ void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   caret.x = 0;
   caret.y = 0;
 
+  char *done = (char *)text + tlen;
   char *end = strchr(text, '\n');
-  if (!end) end = (char *)text + strlen(text);
+  if (!end) end = done;
 
   while(true) {
     int line_width = get_line_width(face, text, tm);
@@ -327,9 +327,9 @@ void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
     }
 
     text = end + 1;
-    if (*text == '\0') break;
+    if (*text == '\0' || text > done) break;
     end = strchr(text, '\n');
-    if (!end) end = (char *)text + strlen(text);
+    if (!end) end = (char *)text + tlen;
 
     caret.x = 0;
     caret.y += line_height;
@@ -338,6 +338,10 @@ void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
 
 
   pp_transform(old);
+}
+
+void _af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
+  af_render(face, text, strlen(text), tm);
 }
 
 pp_rect_t af_measure(af_face_t *face, const char *text, af_text_metrics_t *tm) {
