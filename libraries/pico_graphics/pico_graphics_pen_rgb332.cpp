@@ -99,7 +99,7 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-                if(this->layers > 1) {
+            if(this->layers > 1) {
                 // The size of a single layer
                 uint offset = this->bounds.w * this->bounds.h;
 
@@ -148,14 +148,23 @@ namespace pimoroni {
     bool PicoGraphics_PenRGB332::render_tile(const Tile *tile) {
         for(int y = 0; y < tile->h; y++) {
             uint8_t *palpha = &tile->data[(y * tile->stride)];
-            uint8_t *pdest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+
+            uint8_t *p_dest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            p_dest += this->layer_offset;
+
+            uint8_t *p_layer0 = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+
+
             for(int x = 0; x < tile->w; x++) {
                 uint8_t alpha = *palpha;
-                uint8_t dest = *pdest;
+                uint8_t dest = *p_dest;
+                if(dest == 0) {
+                    dest = *p_layer0;
+                }
 
                 // TODO: Try to alpha blend RGB332... somewhat?
                 if(alpha == 255) {
-                  *pdest = color;
+                  *p_dest = color;
                 }else if(alpha == 0) {
                 }else{
                   // blend tha pixel
@@ -172,10 +181,10 @@ namespace pimoroni {
                   uint8_t b = ((sb * alpha) + (db * (255 - alpha))) >> 8;
 
                   // recombine the channels
-                  *pdest  = (r << 5) | (g << 2) | (b);
+                  *p_dest  = (r << 5) | (g << 2) | (b);
                 }
 
-                pdest++;
+                p_dest++;
                 palpha++;
             }
         }
