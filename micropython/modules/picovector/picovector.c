@@ -57,11 +57,13 @@ MP_DEFINE_CONST_OBJ_TYPE(
 
 static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_rotate_obj, TRANSFORM_rotate);
 static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_translate_obj, TRANSFORM_translate);
+static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_scale_obj, TRANSFORM_scale);
 static MP_DEFINE_CONST_FUN_OBJ_1(TRANSFORM_reset_obj, TRANSFORM_reset);
 
 static const mp_rom_map_elem_t TRANSFORM_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_rotate), MP_ROM_PTR(&TRANSFORM_rotate_obj) },
     { MP_ROM_QSTR(MP_QSTR_translate), MP_ROM_PTR(&TRANSFORM_translate_obj) },
+    { MP_ROM_QSTR(MP_QSTR_scale), MP_ROM_PTR(&TRANSFORM_scale_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&TRANSFORM_reset_obj) },
 };
 
@@ -80,6 +82,9 @@ MP_DEFINE_CONST_OBJ_TYPE(
 static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_text_obj, 4, VECTOR_text);
 static MP_DEFINE_CONST_FUN_OBJ_3(VECTOR_set_font_obj, VECTOR_set_font);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_size_obj, VECTOR_set_font_size);
+static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_word_spacing_obj, VECTOR_set_font_word_spacing);
+static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_letter_spacing_obj, VECTOR_set_font_letter_spacing);
+static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_line_height_obj, VECTOR_set_font_line_height);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_antialiasing_obj, VECTOR_set_antialiasing);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_transform_obj, VECTOR_set_transform);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_clip_obj, VECTOR_set_clip);
@@ -89,6 +94,9 @@ static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_draw_obj, VECTOR_draw);
 static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_font), MP_ROM_PTR(&VECTOR_set_font_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_font_size), MP_ROM_PTR(&VECTOR_set_font_size_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_font_word_spacing), MP_ROM_PTR(&VECTOR_set_font_word_spacing_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_font_letter_spacing), MP_ROM_PTR(&VECTOR_set_font_letter_spacing_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_font_line_height), MP_ROM_PTR(&VECTOR_set_font_line_height_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_antialiasing), MP_ROM_PTR(&VECTOR_set_antialiasing_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_transform), MP_ROM_PTR(&VECTOR_set_transform_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_clip), MP_ROM_PTR(&VECTOR_set_clip_obj) },
