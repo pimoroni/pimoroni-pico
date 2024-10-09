@@ -79,6 +79,15 @@ namespace pimoroni {
                 text_metrics.line_height = font_line_height;
             }
 
+            void set_font_align(unsigned int font_align) {
+                text_metrics.align = font_align;
+            }
+
+            pp_rect_t measure_text(std::string_view text, pp_mat3_t *t) {
+                text_metrics.transform = t;
+                return af_measure(text_metrics.face, text.data(), text.size(), &text_metrics);
+            }
+
             bool set_font(std::string_view font_path, unsigned int font_size) {
                 if(text_metrics.face) {
                     af_free(text_metrics.face->glyphs);
