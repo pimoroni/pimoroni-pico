@@ -98,14 +98,14 @@ typedef struct  {
   float line_height;                // spacing between lines (%)
   float letter_spacing;             // spacing between characters (%)   
   float word_spacing;               // spacing between words (%)
-  af_align_t align;                 // horizontal and vertical alignment
+  unsigned int align;               // horizontal and vertical alignment
   pp_mat3_t *transform;             // arbitrary transformation
 } af_text_metrics_t;
 
 bool af_load_font_file(AF_FILE file, af_face_t *face);
 void af_render_character(af_face_t *face, const char codepoint, af_text_metrics_t *tm);
-void af_render(af_face_t *face, const char *text, af_text_metrics_t *tm);
-pp_rect_t af_measure(af_face_t *face, const char *text, af_text_metrics_t *tm);
+void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm);
+pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm);
 
 #ifdef AF_USE_PRETTY_POLY
 #endif
@@ -240,10 +240,9 @@ void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {
   af_render_glyph(glyph, tm);
 }
 
-int get_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
+int get_line_width(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
   int line_width = 0;
-  char *end = strchr(text, '\n');
-  if (!end) end = (char *)text + strlen(text);
+  char *end = (char *)text + tlen;
   for(char c = *text; text < end; text++, c = *text) {
     af_glyph_t *glyph = find_glyph(face, c);
     if(!glyph) {
@@ -259,28 +258,43 @@ int get_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   return line_width;
 }
 
-int get_max_line_width(af_face_t *face, const char *text, af_text_metrics_t *tm) {
-  int max_width = 0;
+size_t line_length(const char *text, const char *end) {
+  if(text >= end) return 0;
 
-  char *end = strchr(text, '\n');
-  while(end) {
-    int width = get_line_width(face, text, tm);
+  char *line_ending = (char *)memchr(text, '\n', end - text);
+
+  if(line_ending == NULL || line_ending > end) {
+    line_ending = (char *)end;
+  }
+
+  return line_ending - text;
+}
+
+int get_max_line_width(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
+  int max_width = 0;
+  char *line = (char *)text;
+  char *tend = line + tlen;
+
+  size_t line_len = line_length(line, tend);
+  while(line_len) {
+    int width = get_line_width(face, line, line_len, tm);
     max_width = max_width < width ? width : max_width;
-    text = end + 1;
-    end = strchr(text, '\n');
+    line += line_len + 1;
+    line_len = line_length(line, tend);
   }
   
   return max_width;
 }
 
 void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
+  char *line = (char *)text;
+  char *tend = line + tlen;
+  size_t line_len = 0;
+
   pp_mat3_t *old = pp_transform(NULL);
   
   float line_height = (tm->line_height * 128.0f) / 100.0f;
   float scale = tm->size / 128.0f;
-
-  // find maximum line length
-  int max_line_width = get_max_line_width(face, text, tm);
 
   struct {
     float x, y;
@@ -289,14 +303,17 @@ void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t
   caret.x = 0;
   caret.y = 0;
 
-  char *done = (char *)text + tlen;
-  char *end = strchr(text, '\n');
-  if (!end) end = done;
+  // find maximum line length
+  int max_line_width = get_max_line_width(face, text, tlen, tm);
 
-  while(true) {
-    int line_width = get_line_width(face, text, tm);
+  line_len = line_length(line, tend);
 
-    for(char c = *text; text < end; text++, c = *text) {
+  while(line_len) {
+    char *end = line + line_len;
+
+    int line_width = get_line_width(face, line, line_len, tm);
+
+    for(char c = *line; line < end; line++, c = *line) {
       af_glyph_t *glyph = find_glyph(face, c);
       if(!glyph) {
         continue;
@@ -306,11 +323,11 @@ void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t
       pp_mat3_scale(&caret_transform, scale, scale);
       pp_mat3_translate(&caret_transform, caret.x, caret.y);
       
-      if(tm->align == AF_H_ALIGN_CENTER) {
+      if(tm->align & AF_H_ALIGN_CENTER) {
         pp_mat3_translate(&caret_transform, (max_line_width - line_width) / 2, 0);
       }
 
-      if(tm->align == AF_H_ALIGN_RIGHT) {
+      if(tm->align & AF_H_ALIGN_RIGHT) {
         pp_mat3_translate(&caret_transform, (max_line_width - line_width), 0);
       }
 
@@ -326,10 +343,8 @@ void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t
       
     }
 
-    text = end + 1;
-    if (*text == '\0' || text > done) break;
-    end = strchr(text, '\n');
-    if (!end) end = (char *)text + tlen;
+    line += 1; // Skip over \n
+    line_len = line_length(line, tend);
 
     caret.x = 0;
     caret.y += line_height;
@@ -344,26 +359,75 @@ void _af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
   af_render(face, text, strlen(text), tm);
 }
 
-pp_rect_t af_measure(af_face_t *face, const char *text, af_text_metrics_t *tm) {
+pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
   pp_rect_t result;
   bool first = true;
-  pp_mat3_t t = *tm->transform;
+  char *line = (char *)text;
+  char *tend = line + tlen;
+  size_t line_len = 0;
 
-  for(size_t i = 0; i < strlen(text); i++) {
-    af_glyph_t *glyph = find_glyph(face, text[i]);
-    if(!glyph) {
-      continue;
-    }
-    pp_rect_t r = {glyph->x, glyph->y, glyph->x + glyph->w, glyph->y + glyph->h};
-    r = pp_rect_transform(&r, &t);
-    pp_mat3_translate(&t, glyph->advance, 0);
+  float line_height = (tm->line_height * 128.0f) / 100.0f;
+  float scale = tm->size / 128.0f;
 
-    if(first) {
-      result = r;
-      first = false;
-    }else{
-      result = pp_rect_merge(&result, &r);
+  struct {
+    float x, y;
+  } caret;
+
+  caret.x = 0;
+  caret.y = 0;
+
+  // find maximum line length
+  int max_line_width = get_max_line_width(face, text, tlen, tm);
+
+  line_len = line_length(line, tend);
+
+  while(line_len) {
+    char *end = line + line_len;
+
+    int line_width = get_line_width(face, line, line_len, tm);
+
+    for(char c = *line; line < end; line++, c = *line) {
+      af_glyph_t *glyph = find_glyph(face, c);
+      if(!glyph) {
+        continue;
+      }
+
+      pp_mat3_t caret_transform = *tm->transform;
+      pp_mat3_scale(&caret_transform, scale, scale);
+      pp_mat3_translate(&caret_transform, caret.x, caret.y);
+
+      if(tm->align & AF_H_ALIGN_CENTER) {
+        pp_mat3_translate(&caret_transform, (max_line_width - line_width) / 2, 0);
+      }
+
+      if(tm->align & AF_H_ALIGN_RIGHT) {
+        pp_mat3_translate(&caret_transform, (max_line_width - line_width), 0);
+      }
+
+      pp_rect_t r = {glyph->x, glyph->y, glyph->x + glyph->w, glyph->y + glyph->h};
+      //pp_rect_t r = af_glyph_bounds(glyph, tm);
+      r = pp_rect_transform(&r, &caret_transform);
+
+      if(first) {
+        result = r;
+        first = false;
+      } else {
+        result = pp_rect_merge(&result, &r);
+      }
+
+      if(c == L' ') {
+        caret.x += (glyph->advance * tm->word_spacing) / 100.0f;
+      } else {
+        caret.x += (glyph->advance * tm->letter_spacing) / 100.0f;
+      }
+
     }
+
+    line += 1; // Skip over \n
+    line_len = line_length(line, tend);
+
+    caret.x = 0;
+    caret.y += line_height;
   }
 
   return result;
