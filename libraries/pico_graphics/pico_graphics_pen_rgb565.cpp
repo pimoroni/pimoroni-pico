@@ -106,7 +106,7 @@ namespace pimoroni {
 
             for(int x = 0; x < tile->w; x++) {
                 uint16_t dest = *p_dest;
-                if(dest == 0) {
+                if(dest == 0 && this->layers > 1) {
                     dest = *p_layer0;
                 }
                 uint8_t alpha = *p_alpha;
