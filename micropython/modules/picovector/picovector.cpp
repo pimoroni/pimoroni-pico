@@ -572,7 +572,6 @@ mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in) {
 
 mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     int font_size = mp_obj_get_int(size);
     (void)font_size;
@@ -591,7 +590,6 @@ mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
 
 mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     int font_size = mp_obj_get_int(size);
     self->vector->set_font_size(font_size);
@@ -600,7 +598,6 @@ mp_obj_t VECTOR_set_font_size(mp_obj_t self_in, mp_obj_t size) {
 
 mp_obj_t VECTOR_set_font_word_spacing(mp_obj_t self_in, mp_obj_t spacing) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     self->vector->set_font_word_spacing(mp_obj_get_int(spacing));
     return mp_const_none;
@@ -608,7 +605,6 @@ mp_obj_t VECTOR_set_font_word_spacing(mp_obj_t self_in, mp_obj_t spacing) {
 
 mp_obj_t VECTOR_set_font_letter_spacing(mp_obj_t self_in, mp_obj_t spacing) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     self->vector->set_font_letter_spacing(mp_obj_get_int(spacing));
     return mp_const_none;
@@ -616,15 +612,66 @@ mp_obj_t VECTOR_set_font_letter_spacing(mp_obj_t self_in, mp_obj_t spacing) {
 
 mp_obj_t VECTOR_set_font_line_height(mp_obj_t self_in, mp_obj_t spacing) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     self->vector->set_font_line_height(mp_obj_get_int(spacing));
     return mp_const_none;
 }
 
+mp_obj_t VECTOR_set_font_align(mp_obj_t self_in, mp_obj_t align) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+
+    self->vector->set_font_align(mp_obj_get_int(align));
+    return mp_const_none;
+}
+
+mp_obj_t VECTOR_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_angle };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_y, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_angle, MP_ARG_OBJ, {.u_obj = mp_const_none} }
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
+
+    mp_obj_t text_obj = args[ARG_text].u_obj;
+
+    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError("text: string required");
+
+    GET_STR_DATA_LEN(text_obj, str, str_len);
+
+    const std::string_view t((const char *)str, str_len);
+
+    int x = args[ARG_x].u_int;
+    int y = args[ARG_y].u_int;
+
+    pp_mat3_t tt = pp_mat3_identity();
+
+    if(args[ARG_angle].u_obj != mp_const_none) {
+        pp_mat3_rotate(&tt, mp_obj_get_float(args[ARG_angle].u_obj));
+    }
+
+    pp_mat3_translate(&tt, (float)x, (float)y);
+
+    pp_rect_t bounds = self->vector->measure_text(t, &tt);
+
+    // TODO: Should probably add the transformations available to text here?
+    mp_obj_t tuple[4];
+    tuple[0] = mp_picovector_set_point_type((int)(bounds.x));
+    tuple[1] = mp_picovector_set_point_type((int)(bounds.y));
+    tuple[2] = mp_picovector_set_point_type((int)(bounds.w));
+    tuple[3] = mp_picovector_set_point_type((int)(bounds.h));
+
+    return mp_obj_new_tuple(4, tuple);
+}
+
 mp_obj_t VECTOR_set_clip(mp_obj_t self_in, mp_obj_t clip_in) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     picovector_point_type x = self->vector->graphics->bounds.x;
     picovector_point_type y = self->vector->graphics->bounds.y;
@@ -668,7 +715,6 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _VECTOR_obj_t);
-    (void)self;
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
 
@@ -680,8 +726,6 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    (void)x;
-    (void)y;
 
     pp_mat3_t tt = pp_mat3_identity();
 
@@ -690,10 +734,6 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     }
 
     pp_mat3_translate(&tt, (float)x, (float)y);
-    //pp_mat3_mul(&tt, _pp_transform);
-
-    //mp_printf(&mp_plat_print, "self->vector->text()\n");
-    //__printf_debug_flush();
 
     self->vector->text(t, &tt);
 
