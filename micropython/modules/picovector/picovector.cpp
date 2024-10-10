@@ -35,15 +35,13 @@ typedef struct _POLY_obj_t {
     pp_poly_t *poly;
 } _POLY_obj_t;
 
+#if DEBUG
 void __printf_debug_flush() {
     for(auto i = 0u; i < 10; i++) {
         sleep_ms(1);
         mp_event_handle_nowait();
     }
 }
-
-#define mp_picovector_get_point_type mp_obj_get_float
-#define mp_picovector_set_point_type mp_obj_new_float
 
 int mp_vprintf(const mp_print_t *print, const char *fmt, va_list args);
 
@@ -55,6 +53,11 @@ void af_debug(const char *fmt, ...) {
     __printf_debug_flush();
     (void)ret;
 }
+#endif
+
+#define mp_picovector_get_point_type mp_obj_get_float
+#define mp_picovector_set_point_type mp_obj_new_float
+
 
 void *af_malloc(size_t size) {
     //mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
