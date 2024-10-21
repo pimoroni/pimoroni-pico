@@ -190,3 +190,4 @@ Here are some Plasma Stick community projects and resources that you might find 
 - :link: [Pimoroni Wireless Plasma Kit - Server](https://github.com/brunon/Starlight)
 - :link: [Plasma LEDs](https://github.com/bitcdr/plasma-leds)
 - :link: [Album Art Bottle LEDs](https://github.com/heavyimage/Album-Art-Bottle-LEDs)
+- :link: [HomeAssistant Plasma](https://github.com/zim514/homeassistant-plasma) - Micropython script to integrate Pimoroni Plasma Stick 2040W to Home Assistant via MQTT
