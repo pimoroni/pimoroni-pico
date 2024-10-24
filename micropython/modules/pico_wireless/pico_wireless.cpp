@@ -59,15 +59,15 @@ mp_obj_t picowireless_init() {
 
 mp_obj_t picowireless_get_network_data() {
     if(wireless != nullptr) {
-        uint8_t *ip = nullptr;
-        uint8_t *mask = nullptr;
-        uint8_t *gwip = nullptr;
-        wireless->get_network_data(ip, mask, gwip);
+        IPAddress ip;
+        IPAddress mask;
+        IPAddress gwip;
+        wireless->get_network_data((uint8_t *)&ip, (uint8_t *)&mask, (uint8_t *)&gwip);
 
         mp_obj_t tuple[3];
-        tuple[0] = mp_obj_new_bytes(ip, WL_IPV4_LENGTH);
-        tuple[1] = mp_obj_new_bytes(mask, WL_IPV4_LENGTH);
-        tuple[2] = mp_obj_new_bytes(gwip, WL_IPV4_LENGTH);
+        tuple[0] = mp_obj_new_bytes((uint8_t *)&ip, WL_IPV4_LENGTH);
+        tuple[1] = mp_obj_new_bytes((uint8_t *)&mask, WL_IPV4_LENGTH);
+        tuple[2] = mp_obj_new_bytes((uint8_t *)&gwip, WL_IPV4_LENGTH);
         return mp_obj_new_tuple(3, tuple);
     }
     else
@@ -86,13 +86,13 @@ mp_obj_t picowireless_get_remote_data(size_t n_args, const mp_obj_t *pos_args, m
         mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
         mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-        uint8_t *ip = nullptr;
-        uint8_t *port = nullptr;
-        wireless->get_remote_data(args[ARG_sock].u_int, ip, port);
+        IPAddress ip;
+        uint16_t port = 0;
+        wireless->get_remote_data(args[ARG_sock].u_int, (uint8_t *)&ip, (uint8_t *)&port);
 
         mp_obj_t tuple[2];
-        tuple[0] = mp_obj_new_bytes(ip, WL_IPV4_LENGTH);
-        tuple[1] = mp_obj_new_int((uint16_t)port[0] << 8 | (uint16_t)port[1]); //TODO verify size and ordering of port
+        tuple[0] = mp_obj_new_bytes((uint8_t *)&ip, WL_IPV4_LENGTH);
+        tuple[1] = mp_obj_new_int(port); //TODO verify size and ordering of port
         return mp_obj_new_tuple(2, tuple);
     }
     else
