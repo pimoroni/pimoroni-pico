@@ -510,6 +510,8 @@ Sprites must be 8x8 pixels arranged in a 128x128 pixel spritesheet. 1-bit transp
 
 We've prepared some RGB332-compatible sprite assets for you, but you can use `spritesheet-to-rgb332.py <filename>` to convert your own.
 
+For higher quality you can use RGB565 Spritesheets on some devices, like the Tufty2040, but try using a lower spritesheet resolution of up to 128x96 pixels to not exceed device memory.
+
 #### Loading Sprites
 
 You'll need to include the [pen_type](#supported-graphics-modes-pen-type) in the import statement, and define the pen_type before using loading the spritesheet:
