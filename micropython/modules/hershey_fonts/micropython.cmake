@@ -13,3 +13,9 @@ target_include_directories(usermod_${MOD_NAME} INTERFACE
 )
 
 target_link_libraries(usermod INTERFACE usermod_${MOD_NAME})
+
+function(hershey_lite)
+    target_compile_definitions(usermod_${MOD_NAME} INTERFACE
+        PG_HERSHEY_LITE=1
+    )
+endfunction()
