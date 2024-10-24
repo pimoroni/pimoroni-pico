@@ -19,6 +19,14 @@ namespace pimoroni {
   RGB* PicoGraphics::get_palette() {return nullptr;}
   bool PicoGraphics::supports_alpha_blend() {return false;}
 
+  void PicoGraphics::set_layer(uint l) {
+    this->layer = l;
+    this->layer_offset = this->bounds.w * this->bounds.h * l;
+  };
+  uint PicoGraphics::get_layer() {
+    return this->layer;
+  };
+
   void PicoGraphics::set_dimensions(int width, int height) {
     bounds = clip = {0, 0, width, height};
   }

@@ -24,6 +24,9 @@ MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_create_pen_obj, 4, 4, ModPic
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_create_pen_hsv_obj, 4, 4, ModPicoGraphics_create_pen_hsv);
 MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_thickness_obj, ModPicoGraphics_set_thickness);
 
+// Layers
+MP_DEFINE_CONST_FUN_OBJ_2(ModPicoGraphics_set_layer_obj, ModPicoGraphics_set_layer);
+
 // Primitives
 MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(ModPicoGraphics_set_clip_obj, 5, 5, ModPicoGraphics_set_clip);
 MP_DEFINE_CONST_FUN_OBJ_1(ModPicoGraphics_remove_clip_obj, ModPicoGraphics_remove_clip);
@@ -59,6 +62,8 @@ static const mp_rom_map_elem_t ModPicoGraphics_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_pen), MP_ROM_PTR(&ModPicoGraphics_set_pen_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_thickness), MP_ROM_PTR(&ModPicoGraphics_set_thickness_obj) },
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&ModPicoGraphics_clear_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_set_layer), MP_ROM_PTR(&ModPicoGraphics_set_layer_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&ModPicoGraphics_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_partial_update), MP_ROM_PTR(&ModPicoGraphics_partial_update_obj) },
@@ -157,6 +162,7 @@ static const mp_map_elem_t picographics_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_UNICORN_PACK), MP_ROM_INT(DISPLAY_UNICORN_PACK) },
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_SCROLL_PACK), MP_ROM_INT(DISPLAY_SCROLL_PACK) },
     { MP_ROM_QSTR(MP_QSTR_DISPLAY_PICO_W_EXPLORER), MP_ROM_INT(DISPLAY_PICO_W_EXPLORER) },
+    { MP_ROM_QSTR(MP_QSTR_DISPLAY_EXPLORER), MP_ROM_INT(DISPLAY_EXPLORER) },
 
     { MP_ROM_QSTR(MP_QSTR_PEN_1BIT), MP_ROM_INT(PEN_1BIT) },
     { MP_ROM_QSTR(MP_QSTR_PEN_P4), MP_ROM_INT(PEN_P4) },
