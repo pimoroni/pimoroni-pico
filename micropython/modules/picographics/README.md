@@ -82,6 +82,7 @@ Both the Interstate75 and Interstate75W support lots of different sizes of HUB75
 
 The available display settings are listed here:
 
+* 32 x 32 Matrix - `DISPLAY_INTERSTATE75_16X16`
 * 32 x 32 Matrix - `DISPLAY_INTERSTATE75_32X32`
 * 64 x 32 Matrix - `DISPLAY_INTERSTATE75_64X32`
 * 96 x 32 Matrix - `DISPLAY_INTERSTATE75_96X32`
