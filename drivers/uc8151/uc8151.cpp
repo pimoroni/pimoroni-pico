@@ -389,7 +389,7 @@ namespace pimoroni {
   }
 
   void UC8151::power_off() {
-    command(POF);
+    //command(POF);
   }
 
   void UC8151::read(uint8_t reg, size_t len, uint8_t *data) {
@@ -534,7 +534,7 @@ namespace pimoroni {
 
   void UC8151::off() {
     busy_wait();
-    command(POF); // turn off
+    //command(POF); // turn off
   }
 
 }
