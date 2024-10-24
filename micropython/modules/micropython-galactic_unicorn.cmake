@@ -13,6 +13,9 @@ include(pimoroni_bus/micropython)
 
 # Pico Graphics Essential
 include(hershey_fonts/micropython)
+# We need to save ~3k somewhere,
+# and Hershey fonts don't make sense on these boards
+hershey_lite()
 include(bitmap_fonts/micropython)
 include(picographics/micropython)
 
