@@ -44,6 +44,13 @@ typedef struct _ModPicoGraphics_obj_t {
 
 bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type, PicoGraphicsBusType &bus_type) {
     switch(display) {
+        case DISPLAY_EXPLORER:
+            width = 320;
+            height = 240;
+            bus_type = BUS_PARALLEL;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB565;
+            break;
         case DISPLAY_PICO_DISPLAY:
             width = 240;
             height = 135;
@@ -335,6 +342,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             } else if (display == DISPLAY_PICO_W_EXPLORER) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, SPI_DEFAULT_MISO, 9};
             }
+        } else if (bus_type == BUS_PARALLEL) {
+            if (display == DISPLAY_EXPLORER) {
+                parallel_bus = {27, 28, 30, 31, 32, 26};
+            }
         }
     }
 
@@ -349,7 +360,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(Inky73, width, height, (Rotation)rotate, spi_bus);
 
-    } else if (display == DISPLAY_TUFTY_2040) {
+    } else if (display == DISPLAY_TUFTY_2040
+            || display == DISPLAY_EXPLORER) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
 
     } else if (display == DISPLAY_LCD_160X80) {
