@@ -260,4 +260,3 @@ while True:
     move_to_target()   # nudge our current colours closer to the target colours
     display_current()  # display current colours to strip
     gc.collect()
-
