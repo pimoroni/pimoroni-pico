@@ -127,11 +127,6 @@ jobs:
 
     - name: Upload .uf2
       if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2
       with:
-        asset_path: build-${{ matrix.name }}/firmware.uf2
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_name: ${{ env.RELEASE_FILE }}.uf2
-        asset_content_type: application/octet-stream
+        files: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
