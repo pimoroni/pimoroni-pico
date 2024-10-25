@@ -510,6 +510,9 @@ namespace pimoroni {
       int create_pen_hsv(float h, float s, float v) override;
       void set_pixel(const Point &p) override;
       void set_pixel_span(const Point &p, uint l) override;
+
+      void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
+
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
