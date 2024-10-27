@@ -34,7 +34,7 @@ graphics = PicoGraphics(DISPLAY)
 
 WIDTH, HEIGHT = graphics.get_bounds()
 FILENAME = "/sd/placekitten.jpg"
-ENDPOINT = "http://placekitten.com/{0}/{1}"
+ENDPOINT = "http://placecats.com/{0}/{1}"
 
 
 sd_spi = machine.SPI(0, sck=machine.Pin(18, machine.Pin.OUT), mosi=machine.Pin(19, machine.Pin.OUT), miso=machine.Pin(16, machine.Pin.OUT))

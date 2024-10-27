@@ -20,7 +20,7 @@ graphics = i75.display
 WIDTH = i75.width
 HEIGHT = i75.height
 FILENAME = "placekitten.jpg"
-ENDPOINT = "http://placekitten.com/{0}/{1}"
+ENDPOINT = "http://placecats.com/{0}/{1}"
 
 # some colours to draw with
 WHITE = graphics.create_pen(255, 255, 255)
