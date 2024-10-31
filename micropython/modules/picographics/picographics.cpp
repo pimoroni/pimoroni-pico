@@ -39,6 +39,7 @@ typedef struct _ModPicoGraphics_obj_t {
     void *buffer;
     void *fontdata;
     _PimoroniI2C_obj_t *i2c;
+    bool blocking = true;
     //mp_obj_t scanline_callback; // Not really feasible in MicroPython
 } ModPicoGraphics_obj_t;
 
@@ -643,6 +644,17 @@ mp_obj_t ModPicoGraphics_set_scanline_callback(mp_obj_t self_in, mp_obj_t cb_in)
 }
 */
 
+mp_obj_t ModPicoGraphics_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    self->blocking = blocking_in == mp_const_true;
+    return mp_const_none;
+}
+
+mp_obj_t ModPicoGraphics_is_busy(mp_obj_t self_in) {
+    ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+    return self->display->is_busy() ? mp_const_true : mp_const_false;
+}
+
 mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 /*
@@ -666,13 +678,15 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 
     self->display->update(self->graphics);
 
-    while(self->display->is_busy()) {
-    #ifdef mp_event_handle_nowait
-    mp_event_handle_nowait();
-    #endif
-    }
+    if(self->blocking) {
+        while(self->display->is_busy()) {
+        #ifdef mp_event_handle_nowait
+        mp_event_handle_nowait();
+        #endif
+        }
 
-    self->display->power_off();
+        self->display->power_off();
+    }
 
     return mp_const_none;
 }
@@ -695,10 +709,12 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
         mp_obj_get_int(args[ARG_h])
     });
 
-    while(self->display->is_busy()) {
-    #ifdef mp_event_handle_nowait
-    mp_event_handle_nowait();
-    #endif
+    if(self->blocking) {
+        while(self->display->is_busy()) {
+        #ifdef mp_event_handle_nowait
+        mp_event_handle_nowait();
+        #endif
+        }
     }
 
     return mp_const_none;
