@@ -20,7 +20,7 @@ graphics = PicoGraphics(DISPLAY_INKY_PACK)
 
 WIDTH, HEIGHT = graphics.get_bounds()
 FILENAME = "placekitten.jpg"
-ENDPOINT = "http://placekitten.com/{0}/{1}"
+ENDPOINT = "http://placecats.com/{0}/{1}"
 
 
 def status_handler(mode, status, ip):
