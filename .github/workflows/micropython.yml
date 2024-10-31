@@ -7,7 +7,8 @@ on:
     types: [created]
 
 env:
-  MICROPYTHON_VERSION: v1.23.0
+  MICROPYTHON_VERSION: v1.24.0
+  MICROPYTHON_FLAVOUR: micropython
 
 jobs:
   build:
