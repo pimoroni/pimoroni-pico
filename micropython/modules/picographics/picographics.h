@@ -72,6 +72,9 @@ extern mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *ar
 extern mp_obj_t ModPicoGraphics_set_backlight(mp_obj_t self_in, mp_obj_t brightness);
 extern mp_obj_t ModPicoGraphics_set_update_speed(mp_obj_t self_in, mp_obj_t update_speed);
 
+extern mp_obj_t ModPicoGraphics_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in);
+extern mp_obj_t ModPicoGraphics_is_busy(mp_obj_t self_in);
+
 // Palette management
 extern mp_obj_t ModPicoGraphics_update_pen(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_reset_pen(mp_obj_t self_in, mp_obj_t pen);
