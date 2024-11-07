@@ -8,6 +8,9 @@
 #define MICROPY_PY_NETWORK 1
 #define MICROPY_PY_NETWORK_HOSTNAME_DEFAULT     "PicoW"
 
+// Enable dynamic pins so this build can be flashed onto a Pico and used with RM2
+#define CYW43_PIO_CLOCK_DIV_DYNAMIC 1
+
 // CYW43 driver configuration.
 #define CYW43_USE_SPI (1)
 #define CYW43_LWIP (1)
