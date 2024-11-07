@@ -1,8 +1,6 @@
 // Board and hardware specific configuration
-#define MICROPY_HW_BOARD_NAME                   "Raspberry Pi Pico W"
-
-// todo: We need something to check our binary size
-#define MICROPY_HW_FLASH_STORAGE_BYTES          (848 * 1024)
+#define MICROPY_HW_BOARD_NAME                   "Raspberry Pi Pico2W"
+#define MICROPY_HW_FLASH_STORAGE_BYTES          1024 * 1024 * 2
 
 // Enable networking.
 #define MICROPY_PY_NETWORK 1
@@ -20,5 +18,5 @@
 
 #define MICROPY_HW_PIN_EXT_COUNT    CYW43_WL_GPIO_COUNT
 
-int mp_hal_is_pin_reserved(int n);
-#define MICROPY_HW_PIN_RESERVED(i) mp_hal_is_pin_reserved(i)
+#define MICROPY_HW_PIN_RESERVED(i) ((i) == CYW43_PIN_WL_HOST_WAKE || (i) == CYW43_PIN_WL_REG_ON)
+
