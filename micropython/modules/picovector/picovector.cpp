@@ -21,7 +21,6 @@ typedef struct _ModPicoGraphics_obj_t {
 
 typedef struct _VECTOR_obj_t {
     mp_obj_base_t base;
-    void *mem;
     PicoVector *vector;
 } _VECTOR_obj_t;
 
@@ -545,12 +544,7 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
     self->base.type = &VECTOR_type;
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
-    // The PicoVector class calls `pretty_poly::init()` with the memory region
-    // it does not store a pointer to this, so we need to store one ourselves
-    // TODO: C Pretty Poly does not support runtime memory allocation
-    //self->mem = m_new(uint8_t, PicoVector::pretty_poly_buffer_size());
-
-    self->vector = m_new_class(PicoVector, graphics->graphics, self->mem);
+    self->vector = m_new_class(PicoVector, graphics->graphics);
 
     return self;
 }
