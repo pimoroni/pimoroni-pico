@@ -382,12 +382,12 @@ pp_rect_t pp_poly_bounds(pp_poly_t *p) {
 
 // buffer that each tile is rendered into before callback
 // allocate one extra byte to allow a small optimization in the row renderer
-uint8_t tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
+uint8_t pp_tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
 
 // polygon node buffer handles at most 16 line intersections per scanline
 // is this enough for cjk/emoji? (requires a 2kB buffer)
-int32_t nodes[PP_TILE_BUFFER_SIZE * 4][PP_MAX_NODES_PER_SCANLINE * 2];
-uint32_t node_counts[PP_TILE_BUFFER_SIZE * 4];
+int32_t pp_nodes[PP_TILE_BUFFER_SIZE * 4][PP_MAX_NODES_PER_SCANLINE * 2];
+uint32_t pp_node_counts[PP_TILE_BUFFER_SIZE * 4];
 
 uint8_t _pp_alpha_map_none[2] = {0, 255};
 uint8_t _pp_alpha_map_x4[5] = {0, 63, 127, 190, 255};
@@ -474,7 +474,7 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end, pp_
 //     const int nx = interp1->peek[0];
 //     debug("      + adding node at %d, %d\n", x, y);
 //     // add node to node list
-//     nodes[y][node_counts[y]++] = nx;
+//     pp_nodes[y][pp_node_counts[y]++] = nx;
 
 //     // step to next scanline and accumulate error
 //     y++;
@@ -490,7 +490,7 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end, pp_
     int nx = _pp_max(_pp_min(x, (tb->w << _pp_antialias)), 0);
     //debug("      + adding node at %d, %d\n", x, y);
     // add node to node list
-    nodes[y][node_counts[y]++] = nx;
+    pp_nodes[y][pp_node_counts[y]++] = nx;
 
     // step to next scanline and accumulate error
     y++;
@@ -531,17 +531,17 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
 
   for(int y = 0; y < ((int)PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
 
-    // debug("    : row %d node count %d\n", y, node_counts[y]);
+    // debug("    : row %d node count %d\n", y, pp_node_counts[y]);
 
-    if(node_counts[y] == 0) continue; // no nodes on this raster line
+    if(pp_node_counts[y] == 0) continue; // no nodes on this raster line
 
-    qsort(&nodes[y][0], node_counts[y], sizeof(int), compare_nodes);
+    qsort(&pp_nodes[y][0], pp_node_counts[y], sizeof(int), compare_nodes);
 
-    unsigned char* row_data = &tile_buffer[(y >> _pp_antialias) * PP_TILE_BUFFER_SIZE];
+    unsigned char* row_data = &pp_tile_buffer[(y >> _pp_antialias) * PP_TILE_BUFFER_SIZE];
 
-    for(uint32_t i = 0; i < node_counts[y]; i += 2) {
-      int sx = nodes[y][i + 0];
-      int ex = nodes[y][i + 1];
+    for(uint32_t i = 0; i < pp_node_counts[y]; i += 2) {
+      int sx = pp_nodes[y][i + 0];
+      int ex = pp_nodes[y][i + 1];
 
       if(sx == ex) { // empty span, nothing to do
         continue;
@@ -584,7 +584,7 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
   if(_pp_antialias == 2) p_alpha_map = _pp_alpha_map_x16;
   #if PP_SCALE_TO_ALPHA == 1
     for(int y = rb.y; y < rb.y + rb.h; y++) {
-      unsigned char* row_data = &tile_buffer[y * PP_TILE_BUFFER_SIZE + rb.x];
+      unsigned char* row_data = &pp_tile_buffer[y * PP_TILE_BUFFER_SIZE + rb.x];
       for(int x = rb.x; x < rb.x + rb.w; x++) {
         *row_data = p_alpha_map[*row_data];
         row_data++;
@@ -636,8 +636,8 @@ void pp_render(pp_poly_t *polygon) {
       if(pp_rect_empty(&tb)) { debug("    : empty when clipped, skipping\n"); continue; }
 
       // clear existing tile data and nodes
-      memset(node_counts, 0, sizeof(node_counts));
-      memset(tile_buffer, 0, PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE);
+      memset(pp_node_counts, 0, sizeof(pp_node_counts));
+      memset(pp_tile_buffer, 0, PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE);
 
       // build the nodes for each pp_path_t
       pp_path_t *path = polygon->paths;
@@ -659,7 +659,7 @@ void pp_render(pp_poly_t *polygon) {
       pp_tile_t tile = {
         .x = tb.x, .y = tb.y, .w = tb.w, .h = tb.h,
         .stride = PP_TILE_BUFFER_SIZE,
-        .data = tile_buffer + rb.x + (PP_TILE_BUFFER_SIZE * rb.y)
+        .data = pp_tile_buffer + rb.x + (PP_TILE_BUFFER_SIZE * rb.y)
       };
 
       _pp_tile_callback(&tile);
