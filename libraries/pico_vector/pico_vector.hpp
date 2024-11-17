@@ -93,7 +93,7 @@ namespace pimoroni {
 
             pp_rect_t measure_text(std::string_view text, pp_mat3_t *t) {
                 text_metrics.transform = t;
-                return af_measure(text_metrics.face, text.data(), text.size(), &text_metrics);
+                return af_measure(text_metrics.face, text.data(), text.size(), 0, &text_metrics);
             }
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
@@ -124,7 +124,7 @@ namespace pimoroni {
                 return result;
             }
 
-            pp_point_t text(std::string_view text, pp_mat3_t *t=nullptr);
+            pp_point_t text(std::string_view text, int max_width, int max_height, pp_mat3_t *t=nullptr);
 
             void transform(pp_path_t *path, pp_mat3_t *t);
             void transform(pp_poly_t *poly, pp_mat3_t *t);

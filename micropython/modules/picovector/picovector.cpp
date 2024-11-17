@@ -699,13 +699,15 @@ mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa) {
 }
 
 mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_angle };
+    enum { ARG_self, ARG_text, ARG_x, ARG_y, ARG_angle, ARG_max_width, ARG_max_height };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_text, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_angle, MP_ARG_OBJ, {.u_obj = mp_const_none} }
+        { MP_QSTR_angle, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_max_width, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_max_height, MP_ARG_INT, {.u_int = 0} }
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -723,6 +725,8 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
+    int max_width = args[ARG_max_width].u_int;
+    int max_height = args[ARG_max_height].u_int;
 
     pp_mat3_t tt = pp_mat3_identity();
 
@@ -732,7 +736,7 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     pp_mat3_translate(&tt, (float)x, (float)y);
 
-    self->vector->text(t, &tt);
+    self->vector->text(t, max_width, max_height, &tt);
 
     return mp_const_none;
 }
