@@ -41,8 +41,8 @@ int main() {
 
     vector.draw(poly);
 
-    //pp_mat3_t t = pp_mat3_identity();
-    //vector.text("Hello World", {0, 0}, &t);
+    pp_mat3_t t = pp_mat3_identity();
+    vector.text("Hello World", 0, 0, &t);
 
     // update screen
     st7789.update(&graphics);

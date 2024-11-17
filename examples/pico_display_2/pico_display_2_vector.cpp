@@ -51,7 +51,7 @@ int main() {
         pp_mat3_translate(&pos, 50, 50);
         pp_mat3_rotate(&pos, a);
         vector.draw(poly);
-        vector.text("Hello World", &pos);
+        vector.text("Hello World", 0, 0, &pos);
 
         // update screen
         st7789.update(&graphics);
