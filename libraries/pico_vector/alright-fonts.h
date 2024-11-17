@@ -31,6 +31,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <wchar.h>
+#include <float.h>
 
 #ifdef AF_MALLOC
   #ifndef PP_MALLOC
@@ -104,8 +105,8 @@ typedef struct  {
 
 bool af_load_font_file(AF_FILE file, af_face_t *face);
 void af_render_character(af_face_t *face, const char codepoint, af_text_metrics_t *tm);
-void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm);
-pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm);
+void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_width, float max_height, af_text_metrics_t *tm);
+pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_line_width, af_text_metrics_t *tm);
 
 #ifdef AF_USE_PRETTY_POLY
 #endif
@@ -240,20 +241,30 @@ void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {
   af_render_glyph(glyph, tm);
 }
 
-int get_line_width(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
-  int line_width = 0;
-  char *end = (char *)text + tlen;
+float get_line_width(af_face_t *face, const char *text, size_t *tlen, float max_line_width, af_text_metrics_t *tm) {
+  float line_width = 0;
+  const char *start = text;
+  const char *end = text + *tlen;
+  const char *last_space = nullptr;
   for(char c = *text; text < end; text++, c = *text) {
     af_glyph_t *glyph = find_glyph(face, c);
     if(!glyph) {
       continue;
     }
 
+    float char_width;
     if(c == L' ') {
-      line_width += (glyph->advance * tm->word_spacing) / 100.0f;
+      char_width = (glyph->advance * tm->word_spacing) / 100.0f;
+      last_space = text;
     } else {
-      line_width += (glyph->advance * tm->letter_spacing) / 100.0f;
+      char_width = (glyph->advance * tm->letter_spacing) / 100.0f;
     }
+
+    if (max_line_width > 0 && line_width + char_width > max_line_width && last_space) {
+      *tlen = last_space - start;
+      break;
+    }
+    line_width += char_width;
   }
   return line_width;
 }
@@ -270,14 +281,14 @@ size_t line_length(const char *text, const char *end) {
   return line_ending - text;
 }
 
-int get_max_line_width(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
-  int max_width = 0;
+float get_max_line_width(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
+  float max_width = 0;
   char *line = (char *)text;
   char *tend = line + tlen;
 
   size_t line_len = line_length(line, tend);
   while(line_len) {
-    int width = get_line_width(face, line, line_len, tm);
+    float width = get_line_width(face, line, &line_len, 0, tm);
     max_width = max_width < width ? width : max_width;
     line += line_len + 1;
     line_len = line_length(line, tend);
@@ -286,7 +297,7 @@ int get_max_line_width(af_face_t *face, const char *text, size_t tlen, af_text_m
   return max_width;
 }
 
-void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
+void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_width, float max_height, af_text_metrics_t *tm) {
   char *line = (char *)text;
   char *tend = line + tlen;
   size_t line_len = 0;
@@ -304,14 +315,22 @@ void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t
   caret.y = 0;
 
   // find maximum line length
-  int max_line_width = get_max_line_width(face, text, tlen, tm);
+  if (max_line_width == 0.f) {
+    max_line_width = get_max_line_width(face, text, tlen, tm);
+  } else {
+    max_line_width /= scale;
+  }
+  if (max_height == 0.f) {
+    max_height = FLT_MAX;
+  } else {
+    max_height /= scale;
+  }
 
   line_len = line_length(line, tend);
 
-  while(line_len) {
+  while(line_len && caret.y + line_height <= max_height) {
+    int line_width = get_line_width(face, line, &line_len, max_line_width, tm);
     char *end = line + line_len;
-
-    int line_width = get_line_width(face, line, line_len, tm);
 
     for(char c = *line; line < end; line++, c = *line) {
       af_glyph_t *glyph = find_glyph(face, c);
@@ -356,10 +375,10 @@ void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t
 }
 
 void _af_render(af_face_t *face, const char *text, af_text_metrics_t *tm) {
-  af_render(face, text, strlen(text), tm);
+  af_render(face, text, strlen(text), 0, 0, tm);
 }
 
-pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
+pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_line_width, af_text_metrics_t *tm) {
   pp_rect_t result;
   bool first = true;
   char *line = (char *)text;
@@ -377,14 +396,13 @@ pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, af_text_met
   caret.y = 0;
 
   // find maximum line length
-  int max_line_width = get_max_line_width(face, text, tlen, tm);
+  if (max_line_width == 0.f) max_line_width = get_max_line_width(face, text, tlen, tm);
 
   line_len = line_length(line, tend);
 
   while(line_len) {
+    int line_width = get_line_width(face, line, &line_len, max_line_width, tm);
     char *end = line + line_len;
-
-    int line_width = get_line_width(face, line, line_len, tm);
 
     for(char c = *line; line < end; line++, c = *line) {
       af_glyph_t *glyph = find_glyph(face, c);
