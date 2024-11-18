@@ -64,6 +64,19 @@ mp_obj_t scd41_start_periodic_measurement() {
     return mp_const_none;
 }
 
+mp_obj_t scd41_start_low_power_periodic_measurement() {
+    if(!scd41_initialised) {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+        return mp_const_none;
+    }
+    int error = scd4x_start_low_power_periodic_measurement();
+    if(error) {
+        mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
+    }
+
+    return mp_const_none;
+}
+
 mp_obj_t scd41_get_data_ready() {
     if(!scd41_initialised) {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
