@@ -40,6 +40,10 @@
 #define PP_COORD_TYPE float
 #endif
 
+#ifndef PP_TILE_BUFFER_SIZE
+#define PP_TILE_BUFFER_SIZE 64
+#endif
+
 #ifndef PP_SCALE_TO_ALPHA
 #define PP_SCALE_TO_ALPHA 1
 #endif
@@ -118,8 +122,6 @@ void pp_poly_merge(pp_poly_t *p, pp_poly_t *m);
 // user settings
 typedef void (*pp_tile_callback_t)(const pp_tile_t *tile);
 
-extern uint32_t            _pp_tile_buffer_size;
-
 extern pp_rect_t           _pp_clip;
 extern pp_tile_callback_t  _pp_tile_callback;
 extern pp_antialias_t      _pp_antialias;
@@ -131,7 +133,7 @@ void pp_antialias(pp_antialias_t antialias);
 pp_mat3_t *pp_transform(pp_mat3_t *transform);
 void pp_render(pp_poly_t *polygon);
 
-void pp_init(uint32_t tile_buffer_size, uint32_t max_nodes_per_scanline);
+void pp_init(uint32_t max_nodes_per_scanline);
 void pp_deinit();
 
 
@@ -254,7 +256,7 @@ pp_rect_t pp_rect_transform(pp_rect_t *r, pp_mat3_t *m) {
 
 // pp_tile_t implementation
 uint8_t pp_tile_get(const pp_tile_t *tile, const int32_t x, const int32_t y) {
-  return tile->data[(x - tile->x) + (y - tile->y) * _pp_tile_buffer_size];
+  return tile->data[(x - tile->x) + (y - tile->y) * PP_TILE_BUFFER_SIZE];
 }
 
 pp_poly_t *pp_poly_new() {
@@ -377,36 +379,29 @@ pp_rect_t pp_poly_bounds(pp_poly_t *p) {
   return b;
 }
 
-uint32_t _pp_tile_buffer_size = 0;
 uint32_t _pp_max_nodes_per_scanline = 0;
 
 // buffer that each tile is rendered into before callback
-// allocate one extra byte to allow a small optimization in the row renderer
-uint8_t *pp_tile_buffer;
-//uint8_t pp_tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
+// This allocates 4k up-front to ensure it's stored in Pico's RAM
+// Rather than potentially allocating into PSRAM at runtime and trashing perf
+uint8_t pp_tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
 
 // polygon node buffer handles at most 16 line intersections per scanline
 // is this enough for cjk/emoji? (requires a 2kB buffer)
 int32_t *pp_nodes;
 uint32_t *pp_node_counts;
-//int32_t pp_nodes[PP_TILE_BUFFER_SIZE * 4][PP_MAX_NODES_PER_SCANLINE * 2];
-//uint32_t pp_node_counts[PP_TILE_BUFFER_SIZE * 4];
 
 uint8_t _pp_alpha_map_none[2] = {0, 255};
 uint8_t _pp_alpha_map_x4[5] = {0, 63, 127, 190, 255};
 uint8_t _pp_alpha_map_x16[17] = {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255};
 
-void pp_init(uint32_t tile_buffer_size, uint32_t max_nodes_per_scanline) {
-  _pp_tile_buffer_size = tile_buffer_size;
+void pp_init(uint32_t max_nodes_per_scanline) {
   _pp_max_nodes_per_scanline = max_nodes_per_scanline;
-  pp_tile_buffer = (uint8_t *)PP_MALLOC(tile_buffer_size * tile_buffer_size);
-  // tile_buffer_size * 4 | max_nodes_per_scanline * 2
-  pp_nodes = (int32_t *)PP_MALLOC(tile_buffer_size * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
-  pp_node_counts = (uint32_t *)PP_MALLOC(tile_buffer_size * 4 * sizeof(uint32_t));
+  pp_nodes = (int32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
+  pp_node_counts = (uint32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
 }
 
 void pp_deinit() {
-  PP_FREE(pp_tile_buffer);
   PP_FREE(pp_nodes);
   PP_FREE(pp_node_counts);
 }
@@ -546,11 +541,11 @@ int compare_nodes(const void* a, const void* b) {
 }
 
 pp_rect_t render_nodes(pp_rect_t *tb) {
-  pp_rect_t rb = {_pp_tile_buffer_size << _pp_antialias, _pp_tile_buffer_size << _pp_antialias, 0, 0}; // render bounds
-  int maxx = 0, minx = _pp_tile_buffer_size << _pp_antialias;
+  pp_rect_t rb = {PP_TILE_BUFFER_SIZE << _pp_antialias, PP_TILE_BUFFER_SIZE << _pp_antialias, 0, 0}; // render bounds
+  int maxx = 0, minx = PP_TILE_BUFFER_SIZE << _pp_antialias;
   debug("  + render tile %d, %d - %d, %d\n", tb->x, tb->y, tb->w, tb->h);
 
-  for(int y = 0; y < ((int)_pp_tile_buffer_size << _pp_antialias); y++) {
+  for(int y = 0; y < ((int)PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
     int32_t *pp_scanline_nodes = &pp_nodes[y * 4 * _pp_max_nodes_per_scanline * 2];
 
     // debug("    : row %d node count %d\n", y, pp_node_counts[y]);
@@ -559,7 +554,7 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
 
     qsort(pp_scanline_nodes, pp_node_counts[y], sizeof(int), compare_nodes);
 
-    unsigned char* row_data = &pp_tile_buffer[(y >> _pp_antialias) * _pp_tile_buffer_size];
+    unsigned char* row_data = &pp_tile_buffer[(y >> _pp_antialias) * PP_TILE_BUFFER_SIZE];
 
     for(uint32_t i = 0; i < pp_node_counts[y]; i += 2) {
       int sx = *pp_scanline_nodes++;
@@ -606,7 +601,7 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
   if(_pp_antialias == 2) p_alpha_map = _pp_alpha_map_x16;
   #if PP_SCALE_TO_ALPHA == 1
     for(int y = rb.y; y < rb.y + rb.h; y++) {
-      unsigned char* row_data = &pp_tile_buffer[y * _pp_tile_buffer_size + rb.x];
+      unsigned char* row_data = &pp_tile_buffer[y * PP_TILE_BUFFER_SIZE + rb.x];
       for(int x = rb.x; x < rb.x + rb.w; x++) {
         *row_data = p_alpha_map[*row_data];
         row_data++;
@@ -648,9 +643,9 @@ void pp_render(pp_poly_t *polygon) {
 
   // iterate over tiles
   debug("  - processing tiles\n");
-  for(int32_t y = pb.y; y < pb.y + pb.h; y += _pp_tile_buffer_size) {
-    for(int32_t x = pb.x; x < pb.x + pb.w; x += _pp_tile_buffer_size) {
-      pp_rect_t tb = (pp_rect_t){.x = x, .y = y, .w = _pp_tile_buffer_size, .h = _pp_tile_buffer_size};
+  for(int32_t y = pb.y; y < pb.y + pb.h; y += PP_TILE_BUFFER_SIZE) {
+    for(int32_t x = pb.x; x < pb.x + pb.w; x += PP_TILE_BUFFER_SIZE) {
+      pp_rect_t tb = (pp_rect_t){.x = x, .y = y, .w = PP_TILE_BUFFER_SIZE, .h = PP_TILE_BUFFER_SIZE};
       tb = pp_rect_intersection(&tb, &_pp_clip);
       debug("    : %d, %d (%d x %d)\n", tb.x, tb.y, tb.w, tb.h);
 
@@ -658,8 +653,8 @@ void pp_render(pp_poly_t *polygon) {
       if(pp_rect_empty(&tb)) { debug("    : empty when clipped, skipping\n"); continue; }
 
       // clear existing tile data and nodes
-      memset(pp_node_counts, 0, _pp_tile_buffer_size * 4 * sizeof(uint32_t));
-      memset(pp_tile_buffer, 0, _pp_tile_buffer_size * _pp_tile_buffer_size);
+      memset(pp_node_counts, 0, PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
+      memset(pp_tile_buffer, 0, sizeof(pp_tile_buffer));
 
       // build the nodes for each pp_path_t
       pp_path_t *path = polygon->paths;
@@ -680,8 +675,8 @@ void pp_render(pp_poly_t *polygon) {
 
       pp_tile_t tile = {
         .x = tb.x, .y = tb.y, .w = tb.w, .h = tb.h,
-        .stride = _pp_tile_buffer_size,
-        .data = pp_tile_buffer + rb.x + (_pp_tile_buffer_size * rb.y)
+        .stride = PP_TILE_BUFFER_SIZE,
+        .data = pp_tile_buffer + rb.x + (PP_TILE_BUFFER_SIZE * rb.y)
       };
 
       _pp_tile_callback(&tile);
