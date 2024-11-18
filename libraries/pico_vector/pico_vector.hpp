@@ -39,7 +39,7 @@ namespace pimoroni {
 
                 // TODO: Make these configurable?
                 // Tile buffer size, Max nodes per scanline
-                pp_init(16, 16);
+                pp_init(16);
 
                 pp_tile_callback(PicoVector::tile_callback);
 
