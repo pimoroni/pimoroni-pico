@@ -254,14 +254,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             height = 240;
             bus_type = BUS_PIO;
             rotate = (int)Rotation::ROTATE_0;
-            pen_type = PEN_RGB565;
+            if(pen_type == -1) pen_type = PEN_RGB565;
             break;
         case DISPLAY_PRESTO_FULL_RES:
             width = 480;
             height = 480;
             bus_type = BUS_PIO;
             rotate = (int)Rotation::ROTATE_0;
-            pen_type = PEN_RGB565;
+            if(pen_type == -1) pen_type = PEN_RGB565;
             break;
         default:
             return false;
