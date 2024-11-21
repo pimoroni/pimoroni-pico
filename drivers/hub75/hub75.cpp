@@ -278,40 +278,49 @@ void Hub75::update(PicoGraphics *graphics) {
         uint8_t *p = (uint8_t *)graphics->frame_buffer;
         if(graphics->bounds.w == int32_t(width / 2) && graphics->bounds.h == int32_t(height * 2)) {
             for(int y = 0; y <  graphics->bounds.h; y++) {
+                int offsety = 0;
+                int sy = y;
+                int basex = 0;
+
+                // Assuming our canvas is 128x128 and our display is 256x64,
+                // consisting of 2x128x64 panels, remap the bottom half
+                // of the canvas to the right-half of the display,
+                // This gives us an optional square arrangement.
+                if (sy >= int(height)) {
+                    sy -= height;
+                    basex = width / 2;
+                } else {
+                    // Awkward hack to *TEMPORARILY* rotate the top panel
+                    sy = height - 1 - sy;
+                    basex = (width / 2) - 1;
+                }
+
+                // Interlace the top and bottom halves of the panel.
+                // Since these are scanned out simultaneously to two chains
+                // of shift registers we need each pair of rows
+                // (N and N + height / 2) to be adjacent in the buffer.
+                offsety = width * 2;
+                if(sy >= int(height / 2)) {
+                    sy -= height / 2;
+                    offsety *= sy;
+                    offsety += 1;
+                } else {
+                    offsety *= sy;
+                }
+
                 for(int x = 0; x < graphics->bounds.w; x++) {
-                    int offset = 0;
-                    int sy = y;
                     int sx = x;
                     uint8_t b = *p++;
                     uint8_t g = *p++;
                     uint8_t r = *p++;
 
-                    // Assuming our canvas is 128x128 and our display is 256x64,
-                    // consisting of 2x128x64 panels, remap the bottom half
-                    // of the canvas to the right-half of the display,
-                    // This gives us an optional square arrangement.
-                    if (sy >= int(height)) {
-                        sy -= height;
-                        sx += width / 2;
+                    // Assumes width / 2 is even.
+                    if (basex & 1) {
+                        sx = basex - sx;
                     } else {
-                        // Awkward hack to *TEMPORARILY* rotate the top panel
-                        sy = height - 1 - sy;
-                        sx = (width / 2) - 1 - sx;
+                        sx += basex;
                     }
-
-                    // Interlace the top and bottom halves of the panel.
-                    // Since these are scanned out simultaneously to two chains
-                    // of shift registers we need each pair of rows
-                    // (N and N + height / 2) to be adjacent in the buffer.
-                    offset = width * 2;
-                    if(sy >= int(height / 2)) {
-                        sy -= height / 2;
-                        offset *= sy;
-                        offset += 1;
-                    } else {
-                        offset *= sy;
-                    }
-                    offset += sx * 2;
+                    int offset = offsety + sx * 2;
 
                     back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
 
