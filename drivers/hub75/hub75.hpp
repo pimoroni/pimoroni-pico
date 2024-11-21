@@ -65,6 +65,9 @@ class Hub75 {
     };
     uint width;
     uint height;
+    uint r_shift = 0;
+    uint g_shift = 10;
+    uint b_shift = 20;
     Pixel *back_buffer;
     bool managed_buffer = false;
     PanelType panel_type;
