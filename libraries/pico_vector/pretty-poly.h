@@ -127,6 +127,11 @@ extern pp_tile_callback_t  _pp_tile_callback;
 extern pp_antialias_t      _pp_antialias;
 extern pp_mat3_t          *_pp_transform;
 
+// Our parent scope might want to hold a pointer to these
+// ie: MicroPython to avoid garbage collection
+extern int32_t *pp_nodes;
+extern uint32_t *pp_node_counts;
+
 void pp_clip(int32_t x, int32_t y, int32_t w, int32_t h);
 void pp_tile_callback(pp_tile_callback_t callback);
 void pp_antialias(pp_antialias_t antialias);
