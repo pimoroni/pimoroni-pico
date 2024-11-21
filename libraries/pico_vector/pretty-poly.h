@@ -497,7 +497,7 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end, pp_
   // loop over scanlines
 
   while(count--) {
-    int32_t *pp_scanline_nodes = &pp_nodes[y * 4 * _pp_max_nodes_per_scanline * 2];
+    int32_t *pp_scanline_nodes = &pp_nodes[y * _pp_max_nodes_per_scanline * 2];
 
     // consume accumulated error
     while(e > dy) {e -= dy; x += xinc;}
@@ -546,7 +546,7 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
   debug("  + render tile %d, %d - %d, %d\n", tb->x, tb->y, tb->w, tb->h);
 
   for(int y = 0; y < ((int)PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
-    int32_t *pp_scanline_nodes = &pp_nodes[y * 4 * _pp_max_nodes_per_scanline * 2];
+    int32_t *pp_scanline_nodes = &pp_nodes[y * _pp_max_nodes_per_scanline * 2];
 
     // debug("    : row %d node count %d\n", y, pp_node_counts[y]);
 
