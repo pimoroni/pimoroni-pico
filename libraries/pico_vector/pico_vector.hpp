@@ -31,6 +31,10 @@ namespace pimoroni {
     class PicoVector {
         private:
             af_text_metrics_t text_metrics;
+            // Hold copies of pretty-poly's pointers
+            // so MicroPython does not garbage collect them!
+            void *_pp_nodes;
+            void *_pp_node_counts;
 
         public:
             static PicoGraphics *graphics;
@@ -40,6 +44,8 @@ namespace pimoroni {
                 // TODO: Make these configurable?
                 // Tile buffer size, Max nodes per scanline
                 pp_init(16);
+                _pp_nodes = pp_nodes;
+                _pp_node_counts = pp_node_counts;
 
                 pp_tile_callback(PicoVector::tile_callback);
 
