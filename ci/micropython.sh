@@ -29,7 +29,7 @@ function micropython_clone {
 function micropython_build_mpy_cross {
     cd micropython/mpy-cross
     ccache --zero-stats || true
-    CROSS_COMPILE="ccache " make
+    CROSS_COMPILE="ccache " USER_C_MODULES= make
     ccache --show-stats || true
     cd ../../
 }
