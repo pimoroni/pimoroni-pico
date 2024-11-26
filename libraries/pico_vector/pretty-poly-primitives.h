@@ -216,7 +216,8 @@ pp_poly_t* ppp_line(ppp_line_def d) {
   pp_point_t v = {d.y2 - d.y1, d.x2 - d.x1};
   float mag = sqrt(v.x * v.x + v.y * v.y);
   v.x /= mag; v.y /= mag; v.x *= -(d.s / 2.0f); v.y *= (d.s / 2.0f);
-  pp_path_add_points(path, (pp_point_t[]){{d.x1 + v.x, d.y1 + v.y}, {d.x2 + v.x, d.y2 + v.y}, {d.x2 - v.x, d.y2 - v.y}, {d.x1 - v.x, d.y1 - v.y}}, 4);
+  pp_point_t points[] = {{d.x1 + v.x, d.y1 + v.y}, {d.x2 + v.x, d.y2 + v.y}, {d.x2 - v.x, d.y2 - v.y}, {d.x1 - v.x, d.y1 - v.y}};
+  pp_path_add_points(path, points, 4);
   return poly;
 }
 
