@@ -61,10 +61,25 @@ typedef struct {
   PP_COORD_TYPE f, t;            // angle from and to
 } ppp_arc_def;
 
+typedef struct {
+  PP_COORD_TYPE x, y;            // coordinates
+  int c;                         // number of points on star
+  PP_COORD_TYPE ro, ri;          // outer and inner radius for points
+  PP_COORD_TYPE s;               // stroke thickness (0 == filled)
+} ppp_star_def;
+
+typedef struct {
+  PP_COORD_TYPE x1, y1;          // start point
+  PP_COORD_TYPE x2, y2;          // end point
+  PP_COORD_TYPE s;               // thickness
+} ppp_line_def;
+
 pp_poly_t* ppp_rect(ppp_rect_def d);
 pp_poly_t* ppp_regular(ppp_regular_def d);
 pp_poly_t* ppp_circle(ppp_circle_def d);
 pp_poly_t* ppp_arc(ppp_arc_def d);
+pp_poly_t* ppp_star(ppp_star_def d);
+pp_poly_t* ppp_line(ppp_line_def d);
 
 #ifdef __cplusplus
 }
@@ -173,6 +188,35 @@ pp_poly_t* ppp_arc(ppp_arc_def d) {
     free(inner->points); free(inner);
   }
 
+  return poly;
+}
+
+pp_poly_t* ppp_star(ppp_star_def d) {
+  pp_poly_t *poly = pp_poly_new();
+  pp_path_t *path = pp_poly_add_path(poly);
+  pp_path_t *inner = d.s != 0.0f ? pp_poly_add_path(poly) : NULL;
+  for(int i = 0; i < d.c * 2; i++) {
+    float step = ((M_PI * 2) / (float)(d.c * 2)) * (float)i;
+    PP_COORD_TYPE r = i % 2 == 0 ? d.ro : d.ri;
+    pp_path_add_point(path, (pp_point_t){sin(step) * r + d.x, cos(step) * r + d.y});
+    if(inner) { // append the inner path
+      PP_COORD_TYPE ior = d.ro - (d.s * d.ro / d.ri);
+      PP_COORD_TYPE iir = d.ri - d.s;
+      PP_COORD_TYPE ir = i % 2 == 0 ? ior : iir;
+      pp_path_add_point(inner, (pp_point_t){sin(step) * ir + d.x, cos(step) * ir + d.y});
+    }
+  }
+  return poly;
+}
+
+pp_poly_t* ppp_line(ppp_line_def d) {
+  pp_poly_t *poly = pp_poly_new();
+  pp_path_t *path = pp_poly_add_path(poly);
+  // create a normalised perpendicular vector
+  pp_point_t v = {d.y2 - d.y1, d.x2 - d.x1};
+  float mag = sqrt(v.x * v.x + v.y * v.y);
+  v.x /= mag; v.y /= mag; v.x *= -(d.s / 2.0f); v.y *= (d.s / 2.0f);
+  pp_path_add_points(path, (pp_point_t[]){{d.x1 + v.x, d.y1 + v.y}, {d.x2 + v.x, d.y2 + v.y}, {d.x2 - v.x, d.y2 - v.y}, {d.x1 - v.x, d.y1 - v.y}}, 4);
   return poly;
 }
 
