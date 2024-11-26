@@ -19,6 +19,8 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR(POLYGON_path_obj, 4, POLYGON_path);
 static MP_DEFINE_CONST_FUN_OBJ_KW(POLYGON_regular_obj, 5, POLYGON_regular);
 static MP_DEFINE_CONST_FUN_OBJ_KW(POLYGON_circle_obj, 4, POLYGON_circle);
 static MP_DEFINE_CONST_FUN_OBJ_KW(POLYGON_arc_obj, 6, POLYGON_arc);
+static MP_DEFINE_CONST_FUN_OBJ_KW(POLYGON_star_obj, 6, POLYGON_star);
+static MP_DEFINE_CONST_FUN_OBJ_KW(POLYGON_line_obj, 5, POLYGON_line);
 
 
 static const mp_rom_map_elem_t POLYGON_locals_dict_table[] = {
@@ -39,6 +41,8 @@ static const mp_rom_map_elem_t POLYGON_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_path), MP_ROM_PTR(&POLYGON_path_obj) },
     { MP_ROM_QSTR(MP_QSTR_circle), MP_ROM_PTR(&POLYGON_circle_obj) },
     { MP_ROM_QSTR(MP_QSTR_arc), MP_ROM_PTR(&POLYGON_arc_obj) },
+    { MP_ROM_QSTR(MP_QSTR_star), MP_ROM_PTR(&POLYGON_star_obj) },
+    { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&POLYGON_line_obj) },
 };
 
 static MP_DEFINE_CONST_DICT(POLYGON_locals_dict, POLYGON_locals_dict_table);
