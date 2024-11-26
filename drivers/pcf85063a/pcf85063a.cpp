@@ -53,6 +53,8 @@ namespace pimoroni {
     return interrupt;
   }
 
+#if PICO_INCLUDE_RTC_DATETIME
+
   datetime_t PCF85063A::get_datetime() {
     uint8_t result[7] = {0};
 
@@ -84,6 +86,8 @@ namespace pimoroni {
 
     i2c->write_bytes(address, Registers::SECONDS, data, 7);
   }
+
+#endif
 
   void PCF85063A::set_alarm(int second, int minute, int hour, int day) {
     uint8_t alarm[5] = {

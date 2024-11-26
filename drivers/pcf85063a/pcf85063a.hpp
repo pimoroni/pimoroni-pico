@@ -108,10 +108,12 @@ namespace pimoroni {
     int get_scl() const;
     int get_int() const;
 
+#if PICO_INCLUDE_RTC_DATETIME
     // Set and get the date and time
     // Uses datetime_t from pico sdk (hardware/rtc) for compatibility
     datetime_t get_datetime();
     void set_datetime(datetime_t *t);
+#endif
 
     // Alarm manipulation methods
     void set_alarm(int second = PARAM_UNUSED, int minute = PARAM_UNUSED,
