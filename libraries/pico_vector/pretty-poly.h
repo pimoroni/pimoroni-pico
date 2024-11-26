@@ -592,14 +592,14 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
   // either 1 (at x4) or 3 (at x16) we change that to a "ceil" instead ensuring
   // the full tile bounds are returned
   if(_pp_antialias) {
-    rb.w += (_pp_antialias | 0b1);
-    rb.h += (_pp_antialias | 0b1);
-  }
+    int maxx = rb.x + rb.w + (_pp_antialias | 0b1);
+    int maxy = rb.y + rb.h + (_pp_antialias | 0b1);
 
-  rb.x >>= _pp_antialias;
-  rb.y >>= _pp_antialias;
-  rb.w >>= _pp_antialias;
-  rb.h >>= _pp_antialias;
+    rb.x >>= _pp_antialias;
+    rb.y >>= _pp_antialias;
+    rb.w = (maxx >> _pp_antialias) - rb.x;
+    rb.h = (maxy >> _pp_antialias) - rb.y;
+  }
 
   uint8_t *p_alpha_map = _pp_alpha_map_none;
   if(_pp_antialias == 1) p_alpha_map = _pp_alpha_map_x4;
