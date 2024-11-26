@@ -351,6 +351,72 @@ mp_obj_t POLYGON_arc(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     return self;
 }
 
+mp_obj_t POLYGON_star(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_points, ARG_inner_radius, ARG_outer_radius, ARG_stroke };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_points, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_inner_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_outer_radius, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_stroke, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    int p = args[ARG_points].u_int;
+    picovector_point_type r1 = mp_picovector_get_point_type(args[ARG_inner_radius].u_obj);
+    picovector_point_type r2 = mp_picovector_get_point_type(args[ARG_outer_radius].u_obj);
+    picovector_point_type s = args[ARG_stroke].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_stroke].u_obj);
+
+    pp_poly_merge(self->poly, ppp_star({
+        x, y,
+        p,
+        r1,
+        r2,
+        s
+    }));
+
+    return self;
+}
+
+mp_obj_t POLYGON_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_x, ARG_y, ARG_x2, ARG_y2, ARG_thickness };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_x2, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_y2, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_thickness, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
+
+    picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
+    picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
+    picovector_point_type x2 = mp_picovector_get_point_type(args[ARG_x2].u_obj);
+    picovector_point_type y2 = mp_picovector_get_point_type(args[ARG_y2].u_obj);
+    picovector_point_type t = args[ARG_thickness].u_obj == mp_const_none ? 0 : mp_picovector_get_point_type(args[ARG_thickness].u_obj);
+
+    pp_poly_merge(self->poly, ppp_line({
+        x, y,
+        x2, y2,
+        t
+    }));
+
+    return self;
+}
+
 // Utility functions
 
 mp_obj_t POLYGON_centroid(mp_obj_t self_in) {
