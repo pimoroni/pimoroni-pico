@@ -13,6 +13,8 @@ extern mp_obj_t POLYGON_regular(size_t n_args, const mp_obj_t *pos_args, mp_map_
 extern mp_obj_t POLYGON_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t POLYGON_circle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t POLYGON_arc(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t POLYGON_star(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+extern mp_obj_t POLYGON_line(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 
 extern void POLYGON_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t POLYGON_centroid(mp_obj_t self_in);
