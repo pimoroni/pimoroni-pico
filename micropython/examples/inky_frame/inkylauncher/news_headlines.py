@@ -148,7 +148,7 @@ def draw():
 
         graphics.set_pen(3)
         graphics.text(feed[0]["description"], 10, 135 if graphics.measure_text(feed[0]["title"]) < 650 else 90, WIDTH - 150, 2)
-        graphics.text(feed[1]["description"], 130, 320 if graphics.measure_text(feed[1]["title"]) < 650 else 230, WIDTH - 145, 2)
+        graphics.text(feed[1]["description"], 130, 320 if graphics.measure_text(feed[1]["title"]) < 650 else 340, WIDTH - 145, 2)
 
         graphics.line(10, 215, WIDTH - 10, 215)
 
