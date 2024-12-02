@@ -16,7 +16,11 @@ typedef struct _ModPicoGraphics_obj_t {
     mp_obj_base_t base;
     PicoGraphics *graphics;
     DisplayDriver *display;
+    void *spritedata;
     void *buffer;
+    void *fontdata;
+    void *i2c;
+    bool blocking = true;
 } ModPicoGraphics_obj_t;
 
 typedef struct _VECTOR_obj_t {
