@@ -40,21 +40,4 @@ const mp_obj_module_t wakeup_user_cmodule = {
     .globals = (mp_obj_dict_t*)&mp_module_wakeup_globals,
 };
 
-#if MICROPY_VERSION <= 70144
-MP_REGISTER_MODULE(MP_QSTR_wakeup, wakeup_user_cmodule, MODULE_WAKEUP_ENABLED);
-#else
 MP_REGISTER_MODULE(MP_QSTR_wakeup, wakeup_user_cmodule);
-#endif
-
-void runtime_init_latch(void) {
-    runtime_wakeup_gpio_state = gpio_get_all();
-
-    gpio_init_mask(PICO_WAKEUP_PIN_MASK);
-    gpio_set_dir_masked(PICO_WAKEUP_PIN_MASK, PICO_WAKEUP_PIN_DIR);
-    gpio_put_masked(PICO_WAKEUP_PIN_MASK, PICO_WAKEUP_PIN_VALUE);
-};
-
-// After runtime_init_early_resets, PICO_RUNTIME_INIT_EARLY_RESETS ?
-PICO_RUNTIME_INIT_FUNC_HW(runtime_init_latch, "00101");
-// Too early?
-// PICO_RUNTIME_INIT_FUNC_HW(runtime_init_latch, PICO_RUNTIME_INIT_EARLIEST);
