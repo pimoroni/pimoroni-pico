@@ -40,7 +40,7 @@ typedef struct _ModPicoGraphics_obj_t {
     void *fontdata;
     _PimoroniI2C_obj_t *i2c;
     bool blocking = true;
-    //mp_obj_t scanline_callback; // Not really feasible in MicroPython
+    uint8_t layers;
 } ModPicoGraphics_obj_t;
 
 bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type, PicoGraphicsBusType &bus_type) {
@@ -477,6 +477,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     //self->scanline_callback = mp_const_none;
 
+    self->layers = layers;
     self->spritedata = nullptr;
 
     // Clear the buffer
@@ -806,6 +807,10 @@ mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen) {
 
 mp_obj_t ModPicoGraphics_set_layer(mp_obj_t self_in, mp_obj_t layer) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
+
+    if (mp_obj_get_int(layer) >= self->layers) {
+        mp_raise_ValueError("set_layer: layer out of range!");
+    }
 
     self->graphics->set_layer(mp_obj_get_int(layer));
 
