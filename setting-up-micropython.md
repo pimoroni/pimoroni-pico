@@ -26,7 +26,7 @@ On the releases page you'll find a bunch of different .uf2 files for use on diff
 | Tiny 2040 8MB                                                | **tiny2040_8mb-vx.x.x-pimoroni-micropython.uf2**                 | Includes support for the increased flash memory on this board |
 | Enviro Urban, Indoor, Weather & Grow                         | **enviro-vx.x.x-pimoroni-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
 | Galactic Unicorn                                             | **galactic_unicorn-vx.x.x-pimoroni-micropython.uf2**   |                                                              |
-| Inky Frame                                                   | **inky_frame-vx.x.x-pimoroni-micropython.uf2**         |                                                              |
+| Inky Frame                                                   |  | See: [https://github.com/pimoroni/inky-frame/releases/latest](https://github.com/pimoroni/inky-frame/releases/latest) |
 | Badger 2040 W                                                | **badger2040w-vx.x.x-pimoroni-micropython.uf2** or **pimoroni-badger2040w-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Badger 2040                                                  | **badger2040-vx.x.x-pimoroni-micropython.uf2** or  **pimoroni-badger2040-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
 | Cosmic Unicorn                                               | **cosmic_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
