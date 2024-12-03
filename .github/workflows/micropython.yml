@@ -42,8 +42,6 @@ jobs:
           board: RPI_PICO_W
         - name: stellar_unicorn
           board: RPI_PICO_W
-        - name: inky_frame
-          board: PICO_W_INKY
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases

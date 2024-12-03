@@ -23,8 +23,12 @@ jobs:
 
     env:
       PICO_SDK_PATH: $GITHUB_WORKSPACE/pico-sdk
-
+  
     steps:
+    - name: Compiler Cache Fixup
+      run: |
+        mkdir -p /home/runner/.ccache
+
     - name: Compiler Cache
       uses: actions/cache@v4
       with:
