@@ -10,7 +10,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_rgb888.cpp
 )
 pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/galactic_unicorn/galactic_unicorn.pio)
-pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/galactic_unicorn/audio_i2s.pio)
+#pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/galactic_unicorn/audio_i2s.pio)
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}
