@@ -146,7 +146,6 @@ void Hub75::start(irq_handler_t handler) {
 
         dma_channel_set_irq0_enabled(dma_channel, true);
 
-        irq_set_enabled(pio_get_dreq(pio, sm_data, true), true);
         irq_set_enabled(DMA_IRQ_0, true);
 
         row = 0;
