@@ -29,6 +29,7 @@ The version of Intersate75 you're using should be automatically detected. Check 
 You can choose the HUB75 matrix display size that you wish to use by defining `display=` as one of the following:
 
 ```python
+DISPLAY_INTERSTATE75_16X16
 DISPLAY_INTERSTATE75_32X32
 DISPLAY_INTERSTATE75_64X32
 DISPLAY_INTERSTATE75_96X32
