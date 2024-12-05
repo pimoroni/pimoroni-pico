@@ -5,7 +5,7 @@ namespace pimoroni {
     : PicoGraphics(width, height, frame_buffer) {
         this->pen_type = PEN_RGB888;
         if(this->frame_buffer == nullptr) {
-            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+            create_owned_frame_buffer(buffer_size(width, height));
         }
     }
     void PicoGraphics_PenRGB888::set_pen(uint c) {

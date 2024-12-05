@@ -13,6 +13,7 @@ namespace pimoroni {
   void PicoGraphics::set_pixel_dither(const Point &p, const RGB565 &c) {};
   void PicoGraphics::set_pixel_dither(const Point &p, const uint8_t &c) {};
   void PicoGraphics::frame_convert(PenType type, conversion_callback_func callback) {};
+  void PicoGraphics::rect_convert(PenType type, Rect rect, conversion_callback_func callback) {};
   void PicoGraphics::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {};
 
   int PicoGraphics::get_palette_size() {return 0;}
@@ -428,6 +429,29 @@ namespace pimoroni {
     // Callback with zero length to ensure previous buffer is fully written
     callback(row_buf[buf_idx], 0);
   }
+
+	void PicoGraphics::rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline)
+  {
+    // Allocate two temporary buffers, as the callback may transfer by DMA
+    // while we're preparing the next part of the row
+    uint16_t row_buf[2][rect.w];
+    int buf_idx = 0;
+    for(auto i = 0; i < rect.h; i++) {
+			get_next_scanline(row_buf[buf_idx]);
+
+			// Transfer a filled buffer and swap to the next one
+			callback(row_buf[buf_idx], rect.w * sizeof(RGB565));
+			buf_idx ^= 1;
+    }
+
+    // Callback with zero length to ensure previous buffer is fully written
+    callback(row_buf[buf_idx], 0);
+  }
+
+	void PicoGraphics::create_owned_frame_buffer(size_t size_in_bytes) {
+		frame_buffer = (void*)new uint8_t[size_in_bytes];
+		owned_frame_buffer = true;
+	}
 
   // Common function for frame buffer conversion to 565 pixel format
   void PicoGraphics::frame_convert_rgb888(conversion_callback_func callback, next_pixel_func_rgb888 get_next_pixel)

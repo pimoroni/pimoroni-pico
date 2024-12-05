@@ -175,6 +175,7 @@ namespace pimoroni {
     bool contains(const Point &p) const;
     bool contains(const Rect &p) const;
     bool intersects(const Rect &r) const;
+		bool equals(const Rect &r) const;
     Rect intersection(const Rect &r) const;
 
     void inflate(int32_t v);
@@ -228,13 +229,17 @@ namespace pimoroni {
 
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
+    typedef std::function<void(RGB565 *data)> next_scanline_func;
     typedef std::function<RGB888()> next_pixel_func_rgb888;
+
     //typedef std::function<void(int y)> scanline_interrupt_func;
 
     //scanline_interrupt_func scanline_interrupt = nullptr;
 
     const bitmap::font_t *bitmap_font;
     const hershey::font_t *hershey_font;
+
+		bool owned_frame_buffer = false;
 
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return RGB(r, g, b).to_rgb332();
@@ -272,6 +277,12 @@ namespace pimoroni {
       set_font(&font6);
     };
 
+		virtual ~PicoGraphics() 
+		{
+			if(owned_frame_buffer)
+				delete (uint8_t*)frame_buffer;
+		};
+
     virtual void set_pen(uint c) = 0;
     virtual void set_pen(uint8_t r, uint8_t g, uint8_t b) = 0;
     virtual void set_pixel(const Point &p) = 0;
@@ -291,6 +302,7 @@ namespace pimoroni {
     virtual void set_pixel_dither(const Point &p, const uint8_t &c);
     virtual void set_pixel_alpha(const Point &p, const uint8_t a);
     virtual void frame_convert(PenType type, conversion_callback_func callback);
+    virtual void rect_convert(PenType type, Rect rect, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
     virtual bool render_pico_vector_tile(const Rect &bounds, uint8_t* alpha_data, uint32_t stride, uint8_t alpha_type) { return false; }
@@ -323,13 +335,15 @@ namespace pimoroni {
 
   protected:
     void frame_convert_rgb565(conversion_callback_func callback, next_pixel_func get_next_pixel);
+    void rect_convert_rgb565(Rect rect, conversion_callback_func callback, next_scanline_func get_next_scanline);
+		void create_owned_frame_buffer(size_t size_in_bytes);
     void frame_convert_rgb888(conversion_callback_func callback, next_pixel_func_rgb888 get_next_pixel);
   };
 
   class PicoGraphics_Pen1Bit : public PicoGraphics {
     public:
       uint8_t color;
-    
+
       PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -404,6 +418,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return (w * h / 8) * 3;
       }
@@ -437,6 +452,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
       }
@@ -470,6 +486,7 @@ namespace pimoroni {
       void set_pixel_dither(const Point &p, const RGB &c) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
@@ -494,6 +511,7 @@ namespace pimoroni {
       void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) override;
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
+      void rect_convert(PenType type, Rect rect, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
@@ -543,6 +561,11 @@ namespace pimoroni {
 
       DisplayDriver(uint16_t width, uint16_t height, Rotation rotation)
        : width(width), height(height), rotation(rotation) {};
+
+			virtual ~DisplayDriver()
+			{
+				cleanup();
+			}
 
       virtual void update(PicoGraphics *display) {};
       virtual void partial_update(PicoGraphics *display, Rect region) {};
