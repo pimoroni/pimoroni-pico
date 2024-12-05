@@ -304,14 +304,14 @@ PicoGraphics::circle(const Point &p, int32_t radius)
 ### Text
 
 ```c++
-void PicoGraphics::text(const std::string &t, const Point &p, int32_t wrap, uint8_t scale);
+void PicoGraphics::text(const std::string_view &t, const Point &p, int32_t wrap, float s, float a, uint8_t letter_spacing, bool fixed_width);
 ```
 
 `text` allows you to draw a string at `Point p`, with a maximum line-width of `int32_t wrap`.
 
 The 6x6 and 6x8 pixel font characters are encoded in `font6_data.hpp` and `font8_data.hpp` along with their character widths so that text can be drawn variable-width.
 
-You can scale text with `uint8_t scale` for 12x12, 18x18, etc character sizes.
+You can scale text with `float s` for 12x12, 18x18, etc character sizes. You can also rotate text with `float a` (in degrees).
 
 ### Change Font
 
