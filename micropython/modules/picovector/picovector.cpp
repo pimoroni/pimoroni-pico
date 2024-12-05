@@ -259,7 +259,7 @@ mp_obj_t POLYGON_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
 }
 
 mp_obj_t POLYGON_regular(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_sides, ARG_radius, ARG_stroke };
+    enum { ARG_self, ARG_x, ARG_y, ARG_radius, ARG_sides, ARG_stroke };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -273,7 +273,6 @@ mp_obj_t POLYGON_regular(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     _POLY_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _POLY_obj_t);
-
 
     picovector_point_type x = mp_picovector_get_point_type(args[ARG_x].u_obj);
     picovector_point_type y = mp_picovector_get_point_type(args[ARG_y].u_obj);
