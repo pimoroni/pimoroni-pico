@@ -29,6 +29,7 @@ extern mp_obj_t TRANSFORM_make_new(const mp_obj_type_t *type, size_t n_args, siz
 extern mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_in);
 extern mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in);
 extern mp_obj_t TRANSFORM_scale(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in);
+extern mp_obj_t TRANSFORM_custom(mp_obj_t self_in, mp_obj_t custom_in);
 extern mp_obj_t TRANSFORM_reset(mp_obj_t self_in);
 
 /* Vector */
