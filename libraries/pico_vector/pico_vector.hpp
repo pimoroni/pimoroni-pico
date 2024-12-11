@@ -47,6 +47,8 @@ namespace pimoroni {
                 _pp_nodes = pp_nodes;
                 _pp_node_counts = pp_node_counts;
 
+                pp_transform(NULL);
+
                 pp_tile_callback(PicoVector::tile_callback);
 
                 set_antialiasing(graphics->supports_alpha_blend() ? PP_AA_X4 : PP_AA_NONE);
