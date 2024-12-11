@@ -62,12 +62,14 @@ MP_DEFINE_CONST_OBJ_TYPE(
 static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_rotate_obj, TRANSFORM_rotate);
 static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_translate_obj, TRANSFORM_translate);
 static MP_DEFINE_CONST_FUN_OBJ_3(TRANSFORM_scale_obj, TRANSFORM_scale);
+static MP_DEFINE_CONST_FUN_OBJ_2(TRANSFORM_custom_obj, TRANSFORM_custom);
 static MP_DEFINE_CONST_FUN_OBJ_1(TRANSFORM_reset_obj, TRANSFORM_reset);
 
 static const mp_rom_map_elem_t TRANSFORM_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_rotate), MP_ROM_PTR(&TRANSFORM_rotate_obj) },
     { MP_ROM_QSTR(MP_QSTR_translate), MP_ROM_PTR(&TRANSFORM_translate_obj) },
     { MP_ROM_QSTR(MP_QSTR_scale), MP_ROM_PTR(&TRANSFORM_scale_obj) },
+    { MP_ROM_QSTR(MP_QSTR_matrix), MP_ROM_PTR(&TRANSFORM_custom_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&TRANSFORM_reset_obj) },
 };
 
