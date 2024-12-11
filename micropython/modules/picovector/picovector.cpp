@@ -544,6 +544,31 @@ mp_obj_t TRANSFORM_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
     return self;
 }
 
+mp_obj_t TRANSFORM_custom(mp_obj_t self_in, mp_obj_t custom_in) {
+    _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
+
+    if(!mp_obj_is_type(custom_in, &mp_type_list)) mp_raise_ValueError("custom: transform must be a list!");
+    mp_obj_list_t *list = MP_OBJ_TO_PTR2(custom_in, mp_obj_list_t);
+
+    if(list->len != 9)  mp_raise_ValueError("custom: expected 9 items!");
+
+    pp_mat3_t t = pp_mat3_identity();
+
+    t.v00 = mp_obj_get_float(list->items[0]);
+    t.v10 = mp_obj_get_float(list->items[1]);
+    t.v20 = mp_obj_get_float(list->items[2]);
+    t.v01 = mp_obj_get_float(list->items[3]);
+    t.v11 = mp_obj_get_float(list->items[4]);
+    t.v21 = mp_obj_get_float(list->items[5]);
+    t.v02 = mp_obj_get_float(list->items[6]);
+    t.v12 = mp_obj_get_float(list->items[7]);
+    t.v22 = mp_obj_get_float(list->items[8]);
+
+    pp_mat3_mul(&transform->transform, &t);
+
+    return mp_const_none;
+}
+
 mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_in) {
     _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
 
