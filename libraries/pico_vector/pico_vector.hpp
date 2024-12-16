@@ -60,6 +60,8 @@ namespace pimoroni {
                 text_metrics.letter_spacing = 95;
                 text_metrics.word_spacing = 200;
                 text_metrics.size = 48;
+                text_metrics.face = NULL;
+                text_metrics.transform = NULL;
                 // Should be set before rendering chars
                 //text_metrics.transform = (pp_mat3_t *)af_malloc(sizeof(pp_mat3_t));
                 //*text_metrics.transform = pp_mat3_identity();
