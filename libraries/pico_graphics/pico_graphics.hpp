@@ -79,6 +79,7 @@ namespace pimoroni {
       }
   }
 
+    constexpr operator bool() {return r || g || b;};
     constexpr RGB  operator+ (const RGB& c) const {return RGB(r + c.r, g + c.g, b + c.b);}
     constexpr RGB& operator+=(const RGB& c) {r += c.r; g += c.g; b += c.b; return *this;}
     constexpr RGB& operator-=(const RGB& c) {r -= c.r; g -= c.g; b -= c.b; return *this;}
@@ -141,6 +142,12 @@ namespace pimoroni {
 
 
   typedef int Pen;
+
+  struct Tile {
+    int32_t x, y, w, h;
+    uint32_t stride;
+    uint8_t *data;
+  };
 
   struct Rect;
 
@@ -226,6 +233,10 @@ namespace pimoroni {
     Rect clip;
     uint thickness = 1;
 
+    uint layers = 1;
+    uint layer = 0;
+    uint layer_offset = 0;
+
     typedef std::function<void(void *data, size_t length)> conversion_callback_func;
     typedef std::function<RGB565()> next_pixel_func;
     typedef std::function<RGB888()> next_pixel_func_rgb888;
@@ -270,6 +281,12 @@ namespace pimoroni {
     PicoGraphics(uint16_t width, uint16_t height, void *frame_buffer)
     : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height) {
       set_font(&font6);
+      layers = 1;
+    };
+
+    PicoGraphics(uint16_t width, uint16_t height, uint16_t layers, void *frame_buffer)
+    : frame_buffer(frame_buffer), bounds(0, 0, width, height), clip(0, 0, width, height), layers(layers) {
+      set_font(&font6);
     };
 
     virtual void set_pen(uint c) = 0;
@@ -277,6 +294,9 @@ namespace pimoroni {
     virtual void set_pixel(const Point &p) = 0;
     virtual void set_pixel_span(const Point &p, uint l) = 0;
     void set_thickness(uint t);
+
+    void set_layer(uint l);
+    uint get_layer();
 
     virtual int get_palette_size();
     virtual RGB* get_palette();
@@ -293,7 +313,7 @@ namespace pimoroni {
     virtual void frame_convert(PenType type, conversion_callback_func callback);
     virtual void sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent);
 
-    virtual bool render_pico_vector_tile(const Rect &bounds, uint8_t* alpha_data, uint32_t stride, uint8_t alpha_type) { return false; }
+    virtual bool render_tile(const Tile *tile) { return false; }
 
     void set_font(const bitmap::font_t *font);
     void set_font(const hershey::font_t *font);
@@ -330,7 +350,7 @@ namespace pimoroni {
     public:
       uint8_t color;
     
-      PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_Pen1Bit(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
 
@@ -346,7 +366,7 @@ namespace pimoroni {
     public:
       uint8_t color;
     
-      PicoGraphics_Pen1BitY(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_Pen1BitY(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
 
@@ -387,7 +407,7 @@ namespace pimoroni {
       bool cache_built = false;
       std::array<uint8_t, 16> candidates;
 
-      PicoGraphics_Pen3Bit(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_Pen3Bit(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
 
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -420,7 +440,7 @@ namespace pimoroni {
       bool cache_built = false;
       std::array<uint8_t, 16> candidates;
 
-      PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenP4(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
@@ -440,6 +460,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
           return w * h / 2;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenP8 : public PicoGraphics {
@@ -453,7 +475,7 @@ namespace pimoroni {
       bool cache_built = false;
       std::array<uint8_t, 16> candidates;
 
-      PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int update_pen(uint8_t i, uint8_t r, uint8_t g, uint8_t b) override;
@@ -473,12 +495,14 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB332 : public PicoGraphics {
     public:
       RGB332 color;
-      PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -497,13 +521,15 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB565 : public PicoGraphics {
     public:
       RGB src_color;
       RGB565 color;
-      PicoGraphics_PenRGB565(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenRGB565(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -516,13 +542,20 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(RGB565);
       }
+
+      void frame_convert(PenType type, conversion_callback_func callback) override;
+      void set_pixel_alpha(const Point &p, const uint8_t a) override;
+
+      bool supports_alpha_blend() override {return true;}
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_PenRGB888 : public PicoGraphics {
     public:
       RGB src_color;
       RGB888 color;
-      PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer);
+      PicoGraphics_PenRGB888(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
@@ -532,6 +565,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
         return w * h * sizeof(uint32_t);
       }
+
+      bool render_tile(const Tile *tile);
   };
 
 
@@ -600,7 +635,7 @@ namespace pimoroni {
       uint color;
       IDirectDisplayDriver<uint8_t> &driver;
 
-      PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver);
+      PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver, uint16_t layers = 1);
       void set_pen(uint c) override;
       void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
       int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
