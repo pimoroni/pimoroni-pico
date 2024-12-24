@@ -2,7 +2,7 @@
 # If you have a Display Pack 2.0" or 2.8" use DISPLAY_PICO_DISPLAY_2 instead of DISPLAY_PICO_DISPLAY
 
 import time
-from pimoroni import Button
+from machine import Pin
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY, PEN_P4
 from pimoroni import RGBLED
 
@@ -12,10 +12,10 @@ display = PicoGraphics(display=DISPLAY_PICO_DISPLAY, pen_type=PEN_P4, rotate=0)
 display.set_backlight(0.5)
 display.set_font("bitmap8")
 
-button_a = Button(12)
-button_b = Button(13)
-button_x = Button(14)
-button_y = Button(15)
+button_a = Pin(12, Pin.IN, Pin.PULL_UP)
+button_b = Pin(13, Pin.IN, Pin.PULL_UP)
+button_x = Pin(14, Pin.IN, Pin.PULL_UP)
+button_y = Pin(15, Pin.IN, Pin.PULL_UP)
 
 # Set up the RGB LED For Display Pack and Display Pack 2.0":
 led = RGBLED(6, 7, 8)
@@ -43,7 +43,8 @@ def clear():
 clear()
 
 while True:
-    if button_a.read():                                   # if a button press is detected then...
+    # button logic is reversed as we're using pull-ups
+    if button_a.value() == 0:                             # if a button press is detected then...
         clear()                                           # clear to black
         display.set_pen(WHITE)                            # change the pen colour
         led.set_rgb(255, 255, 255)                        # set the LED colour to match
@@ -51,7 +52,7 @@ while True:
         display.update()                                  # update the display
         time.sleep(1)                                     # pause for a sec
         clear()                                           # clear to black again
-    elif button_b.read():
+    elif button_b.value() == 0:
         clear()
         display.set_pen(CYAN)
         led.set_rgb(0, 255, 255)
@@ -59,7 +60,7 @@ while True:
         display.update()
         time.sleep(1)
         clear()
-    elif button_x.read():
+    elif button_x.value() == 0:
         clear()
         display.set_pen(MAGENTA)
         led.set_rgb(255, 0, 255)
@@ -67,7 +68,7 @@ while True:
         display.update()
         time.sleep(1)
         clear()
-    elif button_y.read():
+    elif button_y.value() == 0:
         clear()
         display.set_pen(YELLOW)
         led.set_rgb(255, 255, 0)
