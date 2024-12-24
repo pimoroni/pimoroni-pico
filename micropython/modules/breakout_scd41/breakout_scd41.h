@@ -5,6 +5,7 @@
 // Declare the functions we'll make available in Python
 extern mp_obj_t scd41_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t scd41_start_periodic_measurement();
+extern mp_obj_t scd41_start_low_power_periodic_measurement();
 extern mp_obj_t scd41_stop_periodic_measurement();
 extern mp_obj_t scd41_read_measurement();
 extern mp_obj_t scd41_get_data_ready();

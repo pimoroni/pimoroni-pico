@@ -13,6 +13,7 @@ static MP_DEFINE_CONST_FUN_OBJ_KW(scd41_init_obj, 0, scd41_init);
 
 // Start/Stop measurement, no args (module-level, so no "self")
 static MP_DEFINE_CONST_FUN_OBJ_0(scd41_start_periodic_measurement_obj, scd41_start_periodic_measurement);
+static MP_DEFINE_CONST_FUN_OBJ_0(scd41_start_low_power_periodic_measurement_obj, scd41_start_low_power_periodic_measurement);
 static MP_DEFINE_CONST_FUN_OBJ_0(scd41_stop_periodic_measurement_obj, scd41_stop_periodic_measurement);
 static MP_DEFINE_CONST_FUN_OBJ_0(scd41_get_data_ready_obj, scd41_get_data_ready);
 
@@ -30,6 +31,7 @@ static const mp_map_elem_t scd41_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_breakout_scd41) },
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&scd41_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_start), MP_ROM_PTR(&scd41_start_periodic_measurement_obj) },
+    { MP_ROM_QSTR(MP_QSTR_start_low_power), MP_ROM_PTR(&scd41_start_low_power_periodic_measurement_obj) },
     { MP_ROM_QSTR(MP_QSTR_stop), MP_ROM_PTR(&scd41_stop_periodic_measurement_obj) },
     { MP_ROM_QSTR(MP_QSTR_measure), MP_ROM_PTR(&scd41_read_measurement_obj) },
     { MP_ROM_QSTR(MP_QSTR_ready), MP_ROM_PTR(&scd41_get_data_ready_obj) },
