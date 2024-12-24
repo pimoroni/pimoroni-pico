@@ -1,8 +1,8 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
-  PicoGraphics_PenInky7::PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver)
-  : PicoGraphics(width, height, nullptr),
+  PicoGraphics_PenInky7::PicoGraphics_PenInky7(uint16_t width, uint16_t height, IDirectDisplayDriver<uint8_t> &direct_display_driver, uint16_t layers)
+  : PicoGraphics(width, height, layers, nullptr),
     driver(direct_display_driver) {
       this->pen_type = PEN_INKY7;
   }

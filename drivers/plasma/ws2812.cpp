@@ -4,6 +4,9 @@
 namespace plasma {
 
 WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, COLOR_ORDER color_order, RGB* buffer) : buffer(buffer), num_leds(num_leds), color_order(color_order), pio(pio), sm(sm) {
+    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
+    pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
+
     pio_program_offset = pio_add_program(pio, &ws2812_program);
 
     pio_gpio_init(pio, pin);
