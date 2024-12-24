@@ -181,8 +181,7 @@ namespace pimoroni {
     busy_wait();
 
     command(DRF, {0}); // start display refresh
-    busy_wait();
-
+    
     if(blocking) {
       busy_wait();
 

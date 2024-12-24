@@ -66,11 +66,11 @@ namespace pimoroni {
   }
 
   void InkyFrame::update(bool blocking) {
-    while(is_busy()) {
+    while(blocking && is_busy()) {
       tight_loop_contents();
     }
     uc8159.update((PicoGraphics_PenP4 *)this);
-    while(is_busy()) {
+    while(blocking && is_busy()) {
       tight_loop_contents();
     }
     uc8159.power_off();
