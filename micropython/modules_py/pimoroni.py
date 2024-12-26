@@ -96,7 +96,7 @@ class Button:
         self.invert = invert
         self.repeat_time = repeat_time
         self.hold_time = hold_time
-        self.pin = Pin(button, pull=Pin.PULL_UP if invert else Pin.PULL_DOWN)
+        self.pin = Pin(button, Pin.IN, Pin.PULL_UP if invert else Pin.PULL_DOWN)
         self.last_state = False
         self.pressed = False
         self.pressed_time = 0
