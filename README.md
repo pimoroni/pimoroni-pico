@@ -26,6 +26,8 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
 
 # MicroPython
 
+:warning: This repository contains MicroPython builds for **RP2040** based products only. If you're looking for **RP2350** compatible MicroPython builds see here: https://github.com/pimoroni/pimoroni-pico-rp2350
+
 The easiest way to get started. If you're new to Pico, we recommend you read our [getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico) tutorial.
 
 :warning: All of our MicroPython libraries are baked into a batteries-included, custom version of MicroPython which you can grab from releases: [https://github.com/pimoroni/pimoroni-pico/releases/latest/](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
