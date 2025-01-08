@@ -270,14 +270,26 @@ pp_poly_t *pp_poly_new() {
   return poly;
 }
 
+pp_path_t *pp_path_new() {
+  pp_path_t *path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
+  memset(path, 0, sizeof(pp_path_t));
+  path->storage = 8;
+  path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * path->storage);
+  return path;
+}
+
+void pp_path_free(pp_path_t *path) {
+  PP_FREE(path->points);
+  PP_FREE(path);
+}
+
 void pp_poly_free(pp_poly_t *poly) {
   if(poly->paths) {
     pp_path_t *path = poly->paths;
     while(path) {
-      PP_FREE(path->points);
       pp_path_t *free_path = path;
       path = path->next;
-      PP_FREE(free_path);
+      pp_path_free(free_path);
     }
   }
   PP_FREE(poly);
@@ -302,10 +314,7 @@ int pp_poly_path_count(pp_poly_t *poly) {
 }
 
 pp_path_t* pp_poly_add_path(pp_poly_t *poly) {
-  pp_path_t *path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
-  memset(path, 0, sizeof(pp_path_t));
-  path->storage = 8;
-  path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * path->storage);
+  pp_path_t *path = pp_path_new();
 
   if(!poly->paths) {
     poly->paths = path;
