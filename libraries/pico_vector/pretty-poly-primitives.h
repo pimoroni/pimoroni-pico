@@ -168,7 +168,7 @@ pp_poly_t* ppp_circle(ppp_circle_def d) {
 pp_poly_t* ppp_arc(ppp_arc_def d) {
   pp_poly_t *poly = pp_poly_new();
   pp_path_t *path = pp_poly_add_path(poly);
-  pp_path_t *inner = (pp_path_t *)(d.s == 0.0f ? NULL : calloc(1, sizeof(pp_path_t)));
+  pp_path_t *inner = d.s != 0.0f ? pp_path_new() : NULL;
 
   // no thickness, so add centre point to make pie shape
   if(!inner) pp_path_add_point(path, (pp_point_t){d.x, d.y});
@@ -185,7 +185,7 @@ pp_poly_t* ppp_arc(ppp_arc_def d) {
 
   if(inner) { // append the inner path
     pp_path_add_points(path, inner->points, inner->count);
-    free(inner->points); free(inner);
+    pp_path_free(inner);
   }
 
   return poly;
