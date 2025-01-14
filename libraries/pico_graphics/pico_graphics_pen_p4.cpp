@@ -70,6 +70,10 @@ namespace pimoroni {
     }
 
     void PicoGraphics_PenP4::set_pixel_span(const Point &p, uint l) {
+        // prevent a zero length span causing an overflow in 'l'
+        // and trying to write 2GB of pixels.
+        if (l == 0) {return;}
+
         auto i = (p.x + p.y * bounds.w);
 
         // pointer to byte in framebuffer that contains this pixel
