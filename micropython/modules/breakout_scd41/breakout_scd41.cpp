@@ -64,20 +64,33 @@ mp_obj_t scd41_start_periodic_measurement() {
     return mp_const_none;
 }
 
+mp_obj_t scd41_start_low_power_periodic_measurement() {
+    if(!scd41_initialised) {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+        return mp_const_none;
+    }
+    int error = scd4x_start_low_power_periodic_measurement();
+    if(error) {
+        mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
+    }
+
+    return mp_const_none;
+}
+
 mp_obj_t scd41_get_data_ready() {
     if(!scd41_initialised) {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
         return mp_const_none;
     }
-    uint16_t data_ready = 0;
-    int error = scd4x_get_data_ready_status(&data_ready);
+    bool data_ready = false;
+    int error = scd4x_get_data_ready_flag(&data_ready);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, READ_FAIL_MSG);
         return mp_const_none;
     }
     // The datasheet doesn't really say *which* bit might be 1 if data is ready...
     // so check if the least significant eleven bits are != 0
-    return (data_ready & 0x7ff) ? mp_const_true : mp_const_false;
+    return data_ready ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t scd41_set_temperature_offset(mp_obj_t offset) {
