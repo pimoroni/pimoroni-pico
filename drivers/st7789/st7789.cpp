@@ -23,6 +23,7 @@ namespace pimoroni {
     TEON      = 0x35,
     MADCTL    = 0x36,
     COLMOD    = 0x3A,
+    RAMCTRL   = 0xB0,
     GCTRL     = 0xB7,
     VCOMS     = 0xBB,
     LCMCTRL   = 0xC0,
@@ -78,6 +79,7 @@ namespace pimoroni {
     command(reg::VDVS, 1, "\x20");
     command(reg::PWCTRL1, 2, "\xa4\xa1");
     command(reg::FRCTRL2, 1, "\x0f");
+    command(reg::RAMCTRL, 2, "\x00\xc0");
 
     if(width == 240 && height == 240) {
       command(reg::GCTRL, 1, "\x14");
