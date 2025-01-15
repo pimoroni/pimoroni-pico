@@ -91,8 +91,8 @@ namespace pimoroni {
     if(width == 320 && height == 240) {
       command(reg::GCTRL, 1, "\x35");
       command(reg::VCOMS, 1, "\x1f");
-      command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
-      command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
+      //command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
+      //command(reg::GMCTRN1, 14, "\xD0\x08\x10\x08\x06\x06\x39\x44\x51\x0B\x16\x14\x2F\x31");
     }
 
     if(width == 240 && height == 135) { // Pico Display Pack (1.14" 240x135)
