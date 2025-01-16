@@ -3,7 +3,7 @@ import time
 from pimoroni_i2c import PimoroniI2C
 from breakout_as7262 import BreakoutAS7262
 from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_RGB332
-from picovector import PicoVector, Polygon, RegularPolygon, ANTIALIAS_X4
+from picovector import PicoVector, Polygon, Transform, ANTIALIAS_NONE
 
 PINS_TUFTY_2040 = {"sda": 4, "scl": 5}
 i2c = PimoroniI2C(**PINS_TUFTY_2040)
@@ -22,10 +22,13 @@ display.set_backlight(0.8)
 
 # Set up PicoVector
 vector = PicoVector(display)
-vector.set_antialiasing(ANTIALIAS_X4)
+vector.set_antialiasing(ANTIALIAS_NONE)
+
+t = Transform()
+vector.set_transform(t)
 
 # Load an Alright Font, find this in common/AdvRe.af
-result = vector.set_font("/AdvRe.af", 30)
+vector.set_font("/AdvRe.af", 40)
 
 WIDTH, HEIGHT = display.get_bounds()
 
@@ -67,8 +70,8 @@ def regular_polygon(o_x, o_y, radius, rotation):
     return points
 
 
-lines = RegularPolygon(CENTER_X, CENTER_Y, 6, RADIUS)
-label_points = list(RegularPolygon(CENTER_X, CENTER_Y, 6, RADIUS * 0.7, -(360 / 12)))
+lines = regular_polygon(CENTER_X, CENTER_Y, [RADIUS] * 6, 0)
+label_points = regular_polygon(CENTER_X, CENTER_Y, [RADIUS * 0.7] * 6, -(360 / 12))
 
 
 while True:
@@ -78,7 +81,7 @@ while True:
 
     # Add the title
     display.set_pen(WHITE)
-    vector.text("Spectrograph", 5, -5)
+    vector.text("Spectrograph", 5, 30)
 
     # Get the spectrometer readings
     reading = list(as7262.read())
@@ -110,8 +113,10 @@ while True:
         point_b = points[i]
         label_x, label_y = label_points[i]
         display.set_pen(COLS[i])
-        vector.text(LABELS[i], int(label_x) - 5, int(label_y) - 20)
-        vector.draw(Polygon(point_a, point_b, (CENTER_X, CENTER_Y)))
+        p = Polygon()
+        p.path(point_a, point_b, (CENTER_X, CENTER_Y))
+        vector.draw(p)
+        vector.text(LABELS[i], int(label_x - 5), int(label_y + 5))
         point_a = point_b
 
     display.update()
