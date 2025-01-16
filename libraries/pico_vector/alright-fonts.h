@@ -33,6 +33,8 @@
 #include <wchar.h>
 #include <float.h>
 
+#define FLAG_16BIT_POINT_COUNT 0b00000001
+
 #ifdef AF_MALLOC
   #ifndef PP_MALLOC
     #define PP_MALLOC(size)         AF_MALLOC(size)
@@ -69,7 +71,7 @@ typedef struct {
 pp_point_t af_point_transform(pp_point_t *p, pp_mat3_t *m);
 
 typedef struct {
-  uint8_t point_count;
+  uint16_t point_count;
   af_point_t *points;
 } af_path_t;
 
@@ -130,6 +132,7 @@ uint8_t    ru8(AF_FILE file) {return AF_FGETC(file);}
 int8_t     rs8(AF_FILE file) {return AF_FGETC(file);}
 
 bool af_load_font_file(AF_FILE file, af_face_t *face) {
+  bool font16 = false;
   // check header magic bytes are present
   char marker[4]; AF_FREAD(marker, 1, 4, file);
   if(memcmp(marker, "af!?", 4) != 0) {    
@@ -138,7 +141,9 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
 
   // extract flags and ensure none set
   face->flags = ru16(file);
-  if(face->flags != 0) {    
+  if(face->flags == FLAG_16BIT_POINT_COUNT) {
+    font16 = true;
+  } else if(face->flags != 0) {    
     return false; // unknown flags set
   }
 
@@ -183,7 +188,7 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
     af_glyph_t *glyph = &face->glyphs[i];
     for(int j = 0; j < glyph->path_count; j++) {
       af_path_t *path = &glyph->paths[j];
-      path->point_count = ru8(file);
+      path->point_count = font16 ? ru16(file) : ru8(file);
       path->points = points;
       points += path->point_count;
     }
