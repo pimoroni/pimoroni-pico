@@ -507,12 +507,12 @@ static mp_obj_t POLYGON_it_iternext(mp_obj_t self_in) {
     mp_obj_polygon_it_t *self = MP_OBJ_TO_PTR2(self_in, mp_obj_polygon_it_t);
     //_POLY_obj_t *poly = MP_OBJ_TO_PTR2(self->polygon, _POLY_obj_t);
 
-    //mp_printf(&mp_plat_print, "points: %d, current: %d\n", polygon->contour.count, self->cur);
-
     if(!self->cur) return MP_OBJ_STOP_ITERATION;
 
-    mp_obj_t tuple[self->cur->count];
-    for (auto i = 0; i < self->cur->count; i++) {
+    int count = self->cur->count;
+
+    mp_obj_t tuple[count];
+    for (auto i = 0; i < count; i++) {
         mp_obj_t t_point[2] = {
             mp_picovector_set_point_type((int)(self->cur->points[i].x)),
             mp_picovector_set_point_type((int)(self->cur->points[i].y))
@@ -521,7 +521,7 @@ static mp_obj_t POLYGON_it_iternext(mp_obj_t self_in) {
     }
 
     self->cur = self->cur->next;
-    return mp_obj_new_tuple(self->cur->count, tuple);
+    return mp_obj_new_tuple(count, tuple);
 }
 
 mp_obj_t POLYGON_getiter(mp_obj_t o_in, mp_obj_iter_buf_t *iter_buf) {
