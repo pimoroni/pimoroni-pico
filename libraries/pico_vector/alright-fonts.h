@@ -350,7 +350,7 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
         pp_mat3_translate(&caret_transform, (max_line_width - line_width), 0);
       }
 
-      pp_mat3_t final_transform = *old;
+      pp_mat3_t final_transform = old ? *old : pp_mat3_identity();
       pp_mat3_mul(&final_transform, &caret_transform);
       pp_transform(&final_transform);
 
