@@ -46,13 +46,17 @@ bool WS2812::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+bool WS2812::is_busy() {
+   return dma_channel_is_busy(dma_channel);
+}
+
 void WS2812::update(bool blocking) {
-    if(dma_channel_is_busy(dma_channel) && !blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    if(is_busy() && !blocking) return;
+    while(is_busy()) {}; // Block waiting for DMA finish
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, buffer, true);
     if (!blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    while(is_busy()) {}; // Block waiting for DMA finish
 }
 
 bool WS2812::start(uint fps) {
