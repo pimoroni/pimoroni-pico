@@ -11,6 +11,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaAPA102_get_obj, 2, PlasmaAPA102_get);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaAPA102_clear_obj, PlasmaAPA102_clear);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaAPA102_update_obj, PlasmaAPA102_update);
 MP_DEFINE_CONST_FUN_OBJ_2(PlasmaAPA102_set_blocking_obj, PlasmaAPA102_set_blocking);
+MP_DEFINE_CONST_FUN_OBJ_1(PlasmaAPA102_is_busy_obj, PlasmaAPA102_is_busy);
 
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812___del___obj, PlasmaWS2812___del__);
 MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_set_rgb_obj, 5, PlasmaWS2812_set_rgb);
@@ -20,6 +21,7 @@ MP_DEFINE_CONST_FUN_OBJ_KW(PlasmaWS2812_get_obj, 2, PlasmaWS2812_get);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812_clear_obj, PlasmaWS2812_clear);
 MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812_update_obj, PlasmaWS2812_update);
 MP_DEFINE_CONST_FUN_OBJ_2(PlasmaWS2812_set_blocking_obj, PlasmaWS2812_set_blocking);
+MP_DEFINE_CONST_FUN_OBJ_1(PlasmaWS2812_is_busy_obj, PlasmaWS2812_is_busy);
 
 /***** Binding of Methods *****/
 static const mp_rom_map_elem_t PlasmaAPA102_locals_dict_table[] = {
@@ -32,6 +34,7 @@ static const mp_rom_map_elem_t PlasmaAPA102_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&PlasmaAPA102_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&PlasmaAPA102_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_blocking), MP_ROM_PTR(&PlasmaAPA102_set_blocking_obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_busy), MP_ROM_PTR(&PlasmaAPA102_is_busy_obj) },
 };
 static const mp_rom_map_elem_t PlasmaWS2812_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&PlasmaWS2812___del___obj) },
@@ -42,6 +45,7 @@ static const mp_rom_map_elem_t PlasmaWS2812_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_clear), MP_ROM_PTR(&PlasmaWS2812_clear_obj) },
     { MP_ROM_QSTR(MP_QSTR_update), MP_ROM_PTR(&PlasmaWS2812_update_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_blocking), MP_ROM_PTR(&PlasmaWS2812_set_blocking_obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_busy), MP_ROM_PTR(&PlasmaWS2812_is_busy_obj) },
 };
 
 static MP_DEFINE_CONST_DICT(PlasmaAPA102_locals_dict, PlasmaAPA102_locals_dict_table);
