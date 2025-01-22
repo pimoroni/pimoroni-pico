@@ -293,10 +293,6 @@ void Hub75::update(PicoGraphics *graphics) {
                 if (sy >= int(height)) {
                     sy -= height;
                     basex = width / 2;
-                } else {
-                    // Awkward hack to *TEMPORARILY* rotate the top panel
-                    sy = height - 1 - sy;
-                    basex = (width / 2) - 1;
                 }
 
                 // Interlace the top and bottom halves of the panel.
