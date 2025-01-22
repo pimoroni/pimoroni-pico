@@ -125,6 +125,11 @@ mp_obj_t PlasmaWS2812_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in) {
     return mp_const_none;
 }
 
+mp_obj_t PlasmaWS2812_is_busy(mp_obj_t self_in) {
+    _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
+    return self->ws2812->is_busy() ? mp_const_true : mp_const_false;
+}
+
 mp_obj_t PlasmaWS2812_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
     enum { ARG_self, ARG_fps };
     static const mp_arg_t allowed_args[] = {
@@ -341,6 +346,11 @@ mp_obj_t PlasmaAPA102_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in) {
     _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
     self->blocking = blocking_in == mp_const_true;
     return mp_const_none;
+}
+
+mp_obj_t PlasmaAPA102_is_busy(mp_obj_t self_in) {
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
+    return self->apa102->is_busy() ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t PlasmaAPA102_start(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
