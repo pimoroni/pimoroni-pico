@@ -24,6 +24,7 @@ typedef struct _PlasmaWS2812_obj_t {
     mp_obj_base_t base;
     WS2812* ws2812;
     void *buf;
+    bool blocking;
 } _PlasmaWS2812_obj_t;
 
 
@@ -98,6 +99,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     self = mp_obj_malloc_with_finaliser(_PlasmaWS2812_obj_t, &PlasmaWS2812_type);
     self->buf = buffer;
+    self->blocking = false;
 
     self->ws2812 = m_new_class(WS2812, num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
 
@@ -112,7 +114,13 @@ mp_obj_t PlasmaWS2812_clear(mp_obj_t self_in) {
 
 mp_obj_t PlasmaWS2812_update(mp_obj_t self_in) {
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
-    self->ws2812->update(true);
+    self->ws2812->update(self->blocking);
+    return mp_const_none;
+}
+
+mp_obj_t PlasmaWS2812_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in) {
+    _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
+    self->blocking = blocking_in == mp_const_true;
     return mp_const_none;
 }
 
@@ -230,6 +238,7 @@ typedef struct _PlasmaAPA102_obj_t {
     mp_obj_base_t base;
     APA102* apa102;
     void *buf;
+    bool blocking;
 } _PlasmaAPA102_obj_t;
 
 
@@ -308,6 +317,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     self = mp_obj_malloc_with_finaliser(_PlasmaAPA102_obj_t, &PlasmaAPA102_type);
     self->buf = buffer;
+    self->blocking = false;
 
     self->apa102 = m_new_class(APA102, num_leds, pio, sm, dat, clk, freq, buffer);
 
@@ -322,7 +332,13 @@ mp_obj_t PlasmaAPA102_clear(mp_obj_t self_in) {
 
 mp_obj_t PlasmaAPA102_update(mp_obj_t self_in) {
     _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
-    self->apa102->update(true);
+    self->apa102->update(self->blocking);
+    return mp_const_none;
+}
+
+mp_obj_t PlasmaAPA102_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in) {
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
+    self->blocking = blocking_in == mp_const_true;
     return mp_const_none;
 }
 
