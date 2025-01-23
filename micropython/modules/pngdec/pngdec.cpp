@@ -326,7 +326,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _PNG_obj_t *self = mp_obj_malloc_with_finaliser(_PNG_obj_t, &PNG_type);
+    _PNG_obj_t *self = mp_obj_malloc(_PNG_obj_t, &PNG_type);
     self->png = m_new_class(PNG);
 
     //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
@@ -339,12 +339,6 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
     self->decode_into_buffer = false;
 
     return self;
-}
-
-mp_obj_t _PNG_del(mp_obj_t self_in) {
-    _PNG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PNG_obj_t);
-    self->png->close();
-    return mp_const_none;
 }
 
 // open_FILE
