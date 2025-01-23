@@ -53,7 +53,7 @@ void *pngdec_open_callback(const char *filename, int32_t *size) {
 
     mp_obj_t args[2] = {
         fn,
-        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+        MP_ROM_QSTR(MP_QSTR_r),
     };
 
     // Stat the file to get its size
