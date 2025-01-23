@@ -212,17 +212,11 @@ mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _JPEG_obj_t *self = mp_obj_malloc_with_finaliser(_JPEG_obj_t, &JPEG_type);
+    _JPEG_obj_t *self = mp_obj_malloc(_JPEG_obj_t, &JPEG_type);
     self->jpeg = m_new_class(JPEGDEC);
     self->graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
     return self;
-}
-
-mp_obj_t _JPEG_del(mp_obj_t self_in) {
-    _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    self->jpeg->close();
-    return mp_const_none;
 }
 
 // open_FILE
