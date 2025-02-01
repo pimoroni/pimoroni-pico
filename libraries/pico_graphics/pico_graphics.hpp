@@ -9,7 +9,9 @@
 #include <functional>
 #include <math.h>
 
+#ifdef HERSHEY_FONTS
 #include "libraries/hershey_fonts/hershey_fonts.hpp"
+#endif
 #include "libraries/bitmap_fonts/bitmap_fonts.hpp"
 #include "libraries/bitmap_fonts/font6_data.hpp"
 #include "libraries/bitmap_fonts/font8_data.hpp"
@@ -245,7 +247,10 @@ namespace pimoroni {
     //scanline_interrupt_func scanline_interrupt = nullptr;
 
     const bitmap::font_t *bitmap_font;
+    
+#ifdef HERSHEY_FONTS
     const hershey::font_t *hershey_font;
+#endif
 
     static constexpr RGB332 rgb_to_rgb332(uint8_t r, uint8_t g, uint8_t b) {
       return RGB(r, g, b).to_rgb332();
@@ -316,7 +321,9 @@ namespace pimoroni {
     virtual bool render_tile(const Tile *tile) { return false; }
 
     void set_font(const bitmap::font_t *font);
+#ifdef HERSHEY_FONTS
     void set_font(const hershey::font_t *font);
+#endif
     void set_font(std::string_view name);
 
     void set_dimensions(int width, int height);

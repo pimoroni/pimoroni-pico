@@ -37,13 +37,17 @@ namespace pimoroni {
 
   void PicoGraphics::set_font(const bitmap::font_t *font){
     this->bitmap_font = font;
+#ifdef HERSHEY_FONTS
     this->hershey_font = nullptr;
+#endif
   }
 
+#ifdef HERSHEY_FONTS
   void PicoGraphics::set_font(const hershey::font_t *font){
     this->bitmap_font = nullptr;
     this->hershey_font = font;
   }
+#endif
 
   void PicoGraphics::set_font(std::string_view name){
     if (name == "bitmap6") {
@@ -53,10 +57,12 @@ namespace pimoroni {
     } else if (name == "bitmap14_outline") {
       set_font(&font14_outline);
     } else {
+#ifdef HERSHEY_FONTS
       // check that font exists and assign it
       if(hershey::has_font(name)) {
         set_font(hershey::font(name));
       }
+#endif
     }
   }
 
@@ -146,12 +152,14 @@ namespace pimoroni {
       return;
     }
 
+#ifdef HERSHEY_FONTS
     if (hershey_font) {
       hershey::glyph(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
         line(Point(x1, y1), Point(x2, y2));
       }, c, p.x, p.y, s, a);
       return;
     }
+#endif
   }
 
   void PicoGraphics::text(const std::string_view &t, const Point &p, int32_t wrap, float s, float a, uint8_t letter_spacing, bool fixed_width) {
@@ -162,6 +170,7 @@ namespace pimoroni {
       return;
     }
 
+#ifdef HERSHEY_FONTS
     if (hershey_font) {
       if(thickness == 1) {
         hershey::text(hershey_font, [this](int32_t x1, int32_t y1, int32_t x2, int32_t y2) {
@@ -174,11 +183,14 @@ namespace pimoroni {
       }
       return;
     }
+#endif
   }
 
   int32_t PicoGraphics::measure_text(const std::string_view &t, float s, uint8_t letter_spacing, bool fixed_width) {
     if (bitmap_font) return bitmap::measure_text(bitmap_font, t, std::max(1.0f, s), letter_spacing, fixed_width);
+#ifdef HERSHEY_FONTS
     if (hershey_font) return hershey::measure_text(hershey_font, t, s);
+#endif
     return 0;
   }
 
