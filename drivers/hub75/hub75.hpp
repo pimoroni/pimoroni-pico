@@ -135,6 +135,7 @@ class Hub75 {
     void set_color(uint x, uint y, Pixel c);
 
     void set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b);
+    void copy_to_back_buffer(void *data, size_t len, int start_x, int start_y, int g_width, int g_height);
     void display_update();
     void clear();
     void start(irq_handler_t handler);
