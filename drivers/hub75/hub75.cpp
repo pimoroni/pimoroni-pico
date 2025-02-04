@@ -277,88 +277,115 @@ void Hub75::dma_complete() {
     }
 }
 
-void Hub75::update(PicoGraphics *graphics) {
-    if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
-        uint8_t *p = (uint8_t *)graphics->frame_buffer;
-        if(graphics->bounds.w == int32_t(width / 2) && graphics->bounds.h == int32_t(height * 2)) {
-            for(int y = 0; y <  graphics->bounds.h; y++) {
-                int offsety = 0;
-                int sy = y;
-                int basex = 0;
+void Hub75::copy_to_back_buffer(void *data, size_t len, int start_x, int start_y, int g_width, int g_height) {
+    uint8_t *p = (uint8_t *)data;
 
-                // Assuming our canvas is 128x128 and our display is 256x64,
-                // consisting of 2x128x64 panels, remap the bottom half
-                // of the canvas to the right-half of the display,
-                // This gives us an optional square arrangement.
-                if (sy >= int(height)) {
-                    sy -= height;
-                    basex = width / 2;
+    if(g_width == int32_t(width / 2) && g_height == int32_t(height * 2)) {
+        for(int y = start_y; y < g_height; y++) {
+            int offsety = 0;
+            int sy = y;
+            int basex = 0;
+
+            // Assuming our canvas is 128x128 and our display is 256x64,
+            // consisting of 2x128x64 panels, remap the bottom half
+            // of the canvas to the right-half of the display,
+            // This gives us an optional square arrangement.
+            if (sy >= int(height)) {
+                sy -= height;
+                basex = width / 2;
+            }
+
+            // Interlace the top and bottom halves of the panel.
+            // Since these are scanned out simultaneously to two chains
+            // of shift registers we need each pair of rows
+            // (N and N + height / 2) to be adjacent in the buffer.
+            offsety = width * 2;
+            if(sy >= int(height / 2)) {
+                sy -= height / 2;
+                offsety *= sy;
+                offsety += 1;
+            } else {
+                offsety *= sy;
+            }
+
+            for(int x = start_x; x < g_width; x++) {
+                int sx = x;
+                uint8_t b = *p++;
+                uint8_t g = *p++;
+                uint8_t r = *p++;
+
+                // Assumes width / 2 is even.
+                if (basex & 1) {
+                    sx = basex - sx;
+                } else {
+                    sx += basex;
                 }
+                int offset = offsety + sx * 2;
+
+                back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
+
+                // Skip the empty byte in out 32-bit aligned 24-bit colour.
+                p++;
+
+                len -= 4;
+
+                if(len == 0) {
+                    return;
+                }
+            }
+        }
+    } else {
+        for(uint y = start_y; y < height; y++) {
+            for(uint x = start_x; x < width; x++) {
+                int offset = 0;
+                int sy = y;
+                int sx = x;
+                uint8_t b = *p++;
+                uint8_t g = *p++;
+                uint8_t r = *p++;
 
                 // Interlace the top and bottom halves of the panel.
                 // Since these are scanned out simultaneously to two chains
                 // of shift registers we need each pair of rows
                 // (N and N + height / 2) to be adjacent in the buffer.
-                offsety = width * 2;
+                offset = width * 2;
                 if(sy >= int(height / 2)) {
                     sy -= height / 2;
-                    offsety *= sy;
-                    offsety += 1;
+                    offset *= sy;
+                    offset += 1;
                 } else {
-                    offsety *= sy;
+                    offset *= sy;
                 }
+                offset += sx * 2;
 
-                for(int x = 0; x < graphics->bounds.w; x++) {
-                    int sx = x;
-                    uint8_t b = *p++;
-                    uint8_t g = *p++;
-                    uint8_t r = *p++;
+                back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
 
-                    // Assumes width / 2 is even.
-                    if (basex & 1) {
-                        sx = basex - sx;
-                    } else {
-                        sx += basex;
-                    }
-                    int offset = offsety + sx * 2;
+                // Skip the empty byte in out 32-bit aligned 24-bit colour.
+                p++;
 
-                    back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
+                len -= 4;
 
-                    // Skip the empty byte in out 32-bit aligned 24-bit colour.
-                    p++;
-                }
-            }
-        } else {
-            for(uint y = 0; y < height; y++) {
-                for(uint x = 0; x < width; x++) {
-                    int offset = 0;
-                    int sy = y;
-                    int sx = x;
-                    uint8_t b = *p++;
-                    uint8_t g = *p++;
-                    uint8_t r = *p++;
-
-                    // Interlace the top and bottom halves of the panel.
-                    // Since these are scanned out simultaneously to two chains
-                    // of shift registers we need each pair of rows
-                    // (N and N + height / 2) to be adjacent in the buffer.
-                    offset = width * 2;
-                    if(sy >= int(height / 2)) {
-                        sy -= height / 2;
-                        offset *= sy;
-                        offset += 1;
-                    } else {
-                        offset *= sy;
-                    }
-                    offset += sx * 2;
-
-                    back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
-
-                    // Skip the empty byte in out 32-bit aligned 24-bit colour.
-                    p++;
+                if(len == 0) {
+                    return;
                 }
             }
         }
+    }
+}
+
+void Hub75::update(PicoGraphics *graphics) {
+    if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
+        copy_to_back_buffer(graphics->frame_buffer, width * height * sizeof(RGB888), 0, 0, graphics->bounds.w, graphics->bounds.h);
+    } else {
+        unsigned int offset = 0;
+        graphics->frame_convert(PicoGraphics::PEN_RGB888, [this, &offset, &graphics](void *data, size_t length) {
+            if (length > 0) {
+                int offset_y = offset / graphics->bounds.w;
+                int offset_x = offset - (offset_y * graphics->bounds.w);
+                copy_to_back_buffer(data, length, offset_x, offset_y, graphics->bounds.w, graphics->bounds.h);
+                offset += length / sizeof(RGB888);
+            }
+        });
     }
 }
 }
