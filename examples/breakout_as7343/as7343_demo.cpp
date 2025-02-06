@@ -45,7 +45,7 @@ int main() {
   while(true) {
 
     AS7343::reading reading = as7343.read();
-    printf("FZ: %d FY: %d FXL: %d NIR: %d F2 %d F3: %d F4: %d F5: %d F1: %d F5: %d F7: %d F8: %d \n",
+    printf("FZ: %d FY: %d FXL: %d NIR: %d F2 %d F3: %d F4: %d F6: %d F1: %d F5: %d F7: %d F8: %d \n",
       reading.FZ,
       reading.FY,
       reading.FXL,
