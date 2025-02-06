@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <cmath>
 
+#include "hardware/clocks.h"
+
 #include "hub75.hpp"
 
 namespace pimoroni {
@@ -37,10 +39,48 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
     }
 
     if (brightness == 0) {
+#if PICO_RP2350
+        brightness = 6;
+#else
         if (width >= 64) brightness = 6;
         if (width >= 96) brightness = 3;
         if (width >= 128) brightness = 2;
         if (width >= 160) brightness = 1;
+#endif
+    }
+
+    switch (color_order) {
+        case COLOR_ORDER::RGB:
+            r_shift = 0;
+            g_shift = 10;
+            b_shift = 20;
+            break;
+        case COLOR_ORDER::RBG:
+            r_shift = 0;
+            g_shift = 20;
+            b_shift = 10;
+            break;
+        case COLOR_ORDER::GRB:
+            r_shift = 20;
+            g_shift = 0;
+            b_shift = 10;
+            break;
+        case COLOR_ORDER::GBR:
+            r_shift = 10;
+            g_shift = 20;
+            b_shift = 0;
+            break;
+        case COLOR_ORDER::BRG:
+            r_shift = 10;
+            g_shift = 00;
+            b_shift = 20;
+            break;
+        case COLOR_ORDER::BGR:
+            r_shift = 20;
+            g_shift = 10;
+            b_shift = 0;
+            break;
+
     }
 }
 
@@ -58,26 +98,16 @@ void Hub75::set_color(uint x, uint y, Pixel c) {
 }
 
 void Hub75::set_pixel(uint x, uint y, uint8_t r, uint8_t g, uint8_t b) {
-    switch(color_order) {
-        case COLOR_ORDER::RGB:
-            set_color(x, y, Pixel(r, g, b));
-            break;
-        case COLOR_ORDER::RBG:
-            set_color(x, y, Pixel(r, b, g));
-            break;
-        case COLOR_ORDER::GRB:
-            set_color(x, y, Pixel(g, r, b));
-            break;
-        case COLOR_ORDER::GBR:
-            set_color(x, y, Pixel(g, b, r));
-            break;
-        case COLOR_ORDER::BRG:
-            set_color(x, y, Pixel(b, r, g));
-            break;
-        case COLOR_ORDER::BGR:
-            set_color(x, y, Pixel(b, g, r));
-            break;
+    int offset = 0;
+    if(x >= width || y >= height) return;
+    if(y >= height / 2) {
+        y -= height / 2;
+        offset = (y * width + x) * 2;
+        offset += 1;
+    } else {
+        offset = (y * width + x) * 2;
     }
+    back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
 }
 
 void Hub75::FM6126A_write_register(uint16_t value, uint8_t position) {
@@ -117,6 +147,8 @@ void Hub75::start(irq_handler_t handler) {
             FM6126A_setup();
         }
 
+        uint latch_cycles = clock_get_hz(clk_sys) / 4000000;
+
         // Claim the PIO so we can clean it upon soft restart
         pio_sm_claim(pio, sm_data);
         pio_sm_claim(pio, sm_row);
@@ -128,7 +160,7 @@ void Hub75::start(irq_handler_t handler) {
             row_prog_offs = pio_add_program(pio, &hub75_row_program);
         }
         hub75_data_rgb888_program_init(pio, sm_data, data_prog_offs, DATA_BASE_PIN, pin_clk);
-        hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb);
+        hub75_row_program_init(pio, sm_row, row_prog_offs, ROWSEL_BASE_PIN, ROWSEL_N_PINS, pin_stb, latch_cycles);
 
         // Prevent flicker in Python caused by the smaller dataset just blasting through the PIO too quickly
         pio_sm_set_clkdiv(pio, sm_data, width <= 32 ? 2.0f : 1.0f);
@@ -245,32 +277,115 @@ void Hub75::dma_complete() {
     }
 }
 
-void Hub75::update(PicoGraphics *graphics) {
-    if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
-        uint32_t *p = (uint32_t *)graphics->frame_buffer;
-        for(uint y = 0; y < height; y++) {
-            for(uint x = 0; x < width; x++) {
-                uint32_t col = *p;
-                uint8_t r = (col & 0xff0000) >> 16;
-                uint8_t g = (col & 0x00ff00) >>  8;
-                uint8_t b = (col & 0x0000ff) >>  0;
-                set_pixel(x, y, r, g, b);
+void Hub75::copy_to_back_buffer(void *data, size_t len, int start_x, int start_y, int g_width, int g_height) {
+    uint8_t *p = (uint8_t *)data;
+
+    if(g_width == int32_t(width / 2) && g_height == int32_t(height * 2)) {
+        for(int y = start_y; y < g_height; y++) {
+            int offsety = 0;
+            int sy = y;
+            int basex = 0;
+
+            // Assuming our canvas is 128x128 and our display is 256x64,
+            // consisting of 2x128x64 panels, remap the bottom half
+            // of the canvas to the right-half of the display,
+            // This gives us an optional square arrangement.
+            if (sy >= int(height)) {
+                sy -= height;
+                basex = width / 2;
+            }
+
+            // Interlace the top and bottom halves of the panel.
+            // Since these are scanned out simultaneously to two chains
+            // of shift registers we need each pair of rows
+            // (N and N + height / 2) to be adjacent in the buffer.
+            offsety = width * 2;
+            if(sy >= int(height / 2)) {
+                sy -= height / 2;
+                offsety *= sy;
+                offsety += 1;
+            } else {
+                offsety *= sy;
+            }
+
+            for(int x = start_x; x < g_width; x++) {
+                int sx = x;
+                uint8_t b = *p++;
+                uint8_t g = *p++;
+                uint8_t r = *p++;
+
+                // Assumes width / 2 is even.
+                if (basex & 1) {
+                    sx = basex - sx;
+                } else {
+                    sx += basex;
+                }
+                int offset = offsety + sx * 2;
+
+                back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
+
+                // Skip the empty byte in out 32-bit aligned 24-bit colour.
                 p++;
+
+                len -= 4;
+
+                if(len == 0) {
+                    return;
+                }
+            }
+        }
+    } else {
+        for(uint y = start_y; y < height; y++) {
+            for(uint x = start_x; x < width; x++) {
+                int offset = 0;
+                int sy = y;
+                int sx = x;
+                uint8_t b = *p++;
+                uint8_t g = *p++;
+                uint8_t r = *p++;
+
+                // Interlace the top and bottom halves of the panel.
+                // Since these are scanned out simultaneously to two chains
+                // of shift registers we need each pair of rows
+                // (N and N + height / 2) to be adjacent in the buffer.
+                offset = width * 2;
+                if(sy >= int(height / 2)) {
+                    sy -= height / 2;
+                    offset *= sy;
+                    offset += 1;
+                } else {
+                    offset *= sy;
+                }
+                offset += sx * 2;
+
+                back_buffer[offset] = (GAMMA_10BIT[b] << b_shift) | (GAMMA_10BIT[g] << g_shift) | (GAMMA_10BIT[r] << r_shift);
+
+                // Skip the empty byte in out 32-bit aligned 24-bit colour.
+                p++;
+
+                len -= 4;
+
+                if(len == 0) {
+                    return;
+                }
             }
         }
     }
-    else if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
-        uint16_t *p = (uint16_t *)graphics->frame_buffer;
-        for(uint y = 0; y < height; y++) {
-            for(uint x = 0; x < width; x++) {
-                uint16_t col = __builtin_bswap16(*p);
-                uint8_t r = (col & 0b1111100000000000) >> 8;
-                uint8_t g = (col & 0b0000011111100000) >> 3;
-                uint8_t b = (col & 0b0000000000011111) << 3;
-                set_pixel(x, y, r, g, b);
-                p++;
+}
+
+void Hub75::update(PicoGraphics *graphics) {
+    if(graphics->pen_type == PicoGraphics::PEN_RGB888) {
+        copy_to_back_buffer(graphics->frame_buffer, width * height * sizeof(RGB888), 0, 0, graphics->bounds.w, graphics->bounds.h);
+    } else {
+        unsigned int offset = 0;
+        graphics->frame_convert(PicoGraphics::PEN_RGB888, [this, &offset, &graphics](void *data, size_t length) {
+            if (length > 0) {
+                int offset_y = offset / graphics->bounds.w;
+                int offset_x = offset - (offset_y * graphics->bounds.w);
+                copy_to_back_buffer(data, length, offset_x, offset_y, graphics->bounds.w, graphics->bounds.h);
+                offset += length / sizeof(RGB888);
             }
-        }
+        });
     }
 }
 }
