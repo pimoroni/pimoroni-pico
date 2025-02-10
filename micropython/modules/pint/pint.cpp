@@ -80,7 +80,7 @@ mp_obj_t network_pint_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    nic = m_new_obj_with_finaliser(_pint_obj_t);
+    nic = (_pint_obj_t *)m_malloc_with_finaliser(sizeof(_pint_obj_t));
     nic->base.type = &mod_network_nic_type_pint;
 
     mp_obj_t impl = args[ARG_impl].u_obj;
