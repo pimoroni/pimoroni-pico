@@ -139,7 +139,11 @@ int network_pint_socket_socket(mod_network_socket_obj_t *socket, int *_errno) {
 
     _pint_obj_t *nic = (_pint_obj_t *)MP_OBJ_TO_PTR(socket->nic);
 
-    mp_obj_t result = call_method(nic->socket_socket);
+    mp_obj_t _domain = mp_obj_new_int(socket->domain);
+    mp_obj_t _type = mp_obj_new_int(socket->type);
+    mp_obj_t _proto = mp_obj_new_int(socket->proto);
+
+    mp_obj_t result = call_method(nic->socket_socket, 3, _domain, _type, _proto);
     if (result != mp_const_none) {
         socket->_private = (void *)result;
         *_errno = 0;
