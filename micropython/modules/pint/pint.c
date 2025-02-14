@@ -39,6 +39,13 @@ MP_DEFINE_CONST_OBJ_TYPE(
 static const mp_map_elem_t pint_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_pint) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_PINT), (mp_obj_t)&mod_network_nic_type_pint },
+
+    { MP_ROM_QSTR(MP_QSTR_AF_INET), MP_ROM_INT(MOD_NETWORK_AF_INET) },
+    { MP_ROM_QSTR(MP_QSTR_AF_INET6), MP_ROM_INT(MOD_NETWORK_AF_INET6) },
+
+    { MP_ROM_QSTR(MP_QSTR_SOCK_STREAM), MP_ROM_INT(MOD_NETWORK_SOCK_STREAM) },
+    { MP_ROM_QSTR(MP_QSTR_SOCK_DGRAM), MP_ROM_INT(MOD_NETWORK_SOCK_DGRAM) },
+    { MP_ROM_QSTR(MP_QSTR_SOCK_RAW), MP_ROM_INT(MOD_NETWORK_SOCK_RAW) },
 };
 
 static MP_DEFINE_CONST_DICT(mp_module_pint_globals, pint_globals_table);
