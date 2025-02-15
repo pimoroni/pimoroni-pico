@@ -171,6 +171,16 @@ mp_obj_t ip_to_tuple(byte *ip) {
     return mp_obj_new_tuple(4, _ip_tuple);
 }
 
+void tuple_to_ip(mp_obj_t tuple_in, byte *ip) {
+    if(mp_obj_is_exact_type(tuple_in, &mp_type_tuple)) {
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(tuple_in, mp_obj_tuple_t);
+        ip[0] = mp_obj_get_int(tuple->items[0]);
+        ip[1] = mp_obj_get_int(tuple->items[1]);
+        ip[2] = mp_obj_get_int(tuple->items[2]);
+        ip[3] = mp_obj_get_int(tuple->items[3]);
+    }
+}
+
 int network_pint_socket_bind(mod_network_socket_obj_t *socket, byte *ip, mp_uint_t port, int *_errno) {
     debug_printf("socket_bind(%d, %d)\n", socket->fileno, port);
 
@@ -307,6 +317,14 @@ mp_uint_t network_pint_socket_recvfrom(mod_network_socket_obj_t *socket, byte *b
     mp_obj_t result = call_method(nic->socket_recvfrom, 4, (mp_obj_t)socket->_private, _buf, _ip, _port);
     if (result != mp_const_none) {
         *_errno = 0;
+        if(mp_obj_is_exact_type(result, &mp_type_tuple)) {
+            // Expect length, (0, 0, 0, 0), port
+            mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(result, mp_obj_tuple_t);
+            tuple_to_ip(tuple->items[1], ip);
+            *port = mp_obj_get_int(tuple->items[2]);
+            return mp_obj_get_int(tuple->items[0]);
+        }
+        // Just a length
         return mp_obj_get_int(result);
     }
 
