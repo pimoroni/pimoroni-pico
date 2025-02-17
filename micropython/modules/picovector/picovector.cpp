@@ -514,8 +514,8 @@ static mp_obj_t POLYGON_it_iternext(mp_obj_t self_in) {
     mp_obj_t tuple[count];
     for (auto i = 0; i < count; i++) {
         mp_obj_t t_point[2] = {
-            mp_picovector_set_point_type((int)(self->cur->points[i].x)),
-            mp_picovector_set_point_type((int)(self->cur->points[i].y))
+            mp_picovector_set_point_type(self->cur->points[i].x),
+            mp_picovector_set_point_type(self->cur->points[i].y)
         };
         tuple[i] = mp_obj_new_tuple(2, t_point);
     }
