@@ -25,8 +25,8 @@ constexpr float SERVO_EXTENT = 80.0f;
 const bool USE_COSINE = true;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

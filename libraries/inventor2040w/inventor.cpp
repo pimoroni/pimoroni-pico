@@ -5,7 +5,7 @@
 
 namespace inventor {
 
-Inventor2040W::Inventor2040W(float motor_gear_ratio)
+Inventor::Inventor(float motor_gear_ratio)
 : motors{Motor(MOTOR_A_PINS), Motor(MOTOR_B_PINS)}
 , encoders{Encoder(pio0, 0, ENCODER_A_PINS, PIN_UNUSED, NORMAL_DIR, MMME_CPR * motor_gear_ratio, true),
            Encoder(pio0, 1, ENCODER_B_PINS, PIN_UNUSED, NORMAL_DIR, MMME_CPR * motor_gear_ratio, true)}
@@ -16,13 +16,20 @@ Inventor2040W::Inventor2040W(float motor_gear_ratio)
 , audio_volume(DEFAULT_VOLUME) {
 }
 
-bool Inventor2040W::init(bool init_motors, bool init_servos) {
+bool Inventor::init(bool init_motors, bool init_servos, bool init_encoders) {
   bool success = true;
 
-  // Set up the motors and encoders, if the user wants them
+  // Set up the motors, if the user wants them
   if(init_motors) {
     for(uint i = 0; i < NUM_MOTORS && success; i++) {
-      success = motors[i].init() && encoders[i].init();
+      success = motors[i].init();
+    }
+  }
+
+  // Set up the encoders, if the user wants them
+  if(init_encoders) {
+    for(uint i = 0; i < NUM_MOTORS && success; i++) {
+      success = encoders[i].init();
     }
   }
 
@@ -68,11 +75,11 @@ bool Inventor2040W::init(bool init_motors, bool init_servos) {
   return success;
 }
 
-bool Inventor2040W::switch_pressed() {
+bool Inventor::switch_pressed() {
   return gpio_get(USER_SW_PIN);
 }
 
-bool Inventor2040W::play_tone(float frequency) {
+bool Inventor::play_tone(float frequency) {
   bool success = false;
 
   // Calculate a suitable pwm wrap period for this frequency
@@ -105,7 +112,7 @@ bool Inventor2040W::play_tone(float frequency) {
   return success;
 }
 
-void Inventor2040W::play_silence() {
+void Inventor::play_silence() {
   // Calculate a suitable pwm wrap period for the "silence" frequency
   uint16_t period; uint16_t div16;
   if(pimoroni::calculate_pwm_factors(SILENCE_FREQUENCY, period, div16)) {
@@ -130,24 +137,29 @@ void Inventor2040W::play_silence() {
   }
 }
 
-void Inventor2040W::stop_playing() {
+void Inventor::stop_playing() {
   pwm_set_gpio_level(PWM_AUDIO_PIN, 0);
   mute_audio();
 }
 
-float Inventor2040W::volume() const {
+float Inventor::volume() const {
   return audio_volume;
 }
 
-void Inventor2040W::volume(float volume) {
+void Inventor::volume(float volume) {
   audio_volume = MIN(MAX(volume, 0.0f), 1.0f);
 }
 
-void Inventor2040W::mute_audio() {
+void Inventor::mute_audio() {
   gpio_put(AMP_EN_PIN, false);
 }
 
-void Inventor2040W::unmute_audio() {
+void Inventor::unmute_audio() {
   gpio_put(AMP_EN_PIN, true);
 }
+
+Inventor2040W::Inventor2040W(float motor_gear_ratio)
+: Inventor(motor_gear_ratio) {
+}
+
 }

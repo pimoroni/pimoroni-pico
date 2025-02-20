@@ -60,7 +60,7 @@ namespace inventor {
   const uint NUM_LEDS = 12;
 
 
-  class Inventor2040W {
+  class Inventor {
     //--------------------------------------------------
     // Constants
     //--------------------------------------------------
@@ -108,14 +108,14 @@ namespace inventor {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    Inventor2040W(float motor_gear_ratio = DEFAULT_GEAR_RATIO);
+    Inventor(float motor_gear_ratio = DEFAULT_GEAR_RATIO);
 
 
     //--------------------------------------------------
     // Methods
     //--------------------------------------------------
   public:
-    bool init(bool init_motors = true, bool init_servos = true);
+    bool init(bool init_motors = true, bool init_servos = true, bool init_encoders = true);
 
     bool switch_pressed();
     bool play_tone(float frequency);
@@ -127,6 +127,15 @@ namespace inventor {
 
     void mute_audio();
     void unmute_audio();
+  };
+
+  // Create an alias of the inventor class
+  class Inventor2040W : public Inventor {
+    //--------------------------------------------------
+    // Constructors/Destructor
+    //--------------------------------------------------
+  public:
+    Inventor2040W(float motor_gear_ratio = DEFAULT_GEAR_RATIO);
   };
 
 }

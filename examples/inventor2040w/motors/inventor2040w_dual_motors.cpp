@@ -3,7 +3,7 @@
 #include "inventor.hpp"
 
 /*
-Demonstrates how to control both motors on Inventor 2040 W.
+Demonstrates how to control both motors on Inventor 2040/2350 W.
 */
 
 using namespace inventor;
@@ -21,8 +21,8 @@ const uint STEPS_INTERVAL_MS = 500;
 constexpr float SPEED_EXTENT = 1.0f;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

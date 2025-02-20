@@ -29,8 +29,8 @@ constexpr uint SONG_LENGTH = count_of(SONG);
 const uint NOTE_DURATION_MS = 150;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 // Variables for recording the button state and if it has been toggled

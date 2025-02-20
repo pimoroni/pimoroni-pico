@@ -5,7 +5,7 @@
 #include "analog.hpp"
 
 /*
-Shows how to initialise and read the 3 ADC headers of Inventor 2040 W.
+Shows how to initialise and read the 3 ADC headers of Inventor 2040/2350 W.
 
 Press "User" to exit the program.
 */
@@ -21,8 +21,8 @@ const uint UPDATES = 10;
 const char* ADC_NAMES[] = {"A0", "A1", "A2"};
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 // Create an analog object for each ADC
 Analog analogs[] = {Analog(A0), Analog(A1), Analog(A2)};

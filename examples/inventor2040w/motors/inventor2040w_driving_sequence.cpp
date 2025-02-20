@@ -5,7 +5,7 @@
 #include "pid.hpp"
 
 /*
-A demonstration of driving both of Inventor 2040 W's motor outputs through a
+A demonstration of driving both of Inventor 2040/2350 W's motor outputs through a
 sequence of velocities, with the help of their attached encoders and PID control.
 
 Press "User" to exit the program.
@@ -57,8 +57,8 @@ constexpr float BAR_GRADIENT = 0.125f;
 const uint HALF_LEDS = NUM_LEDS / 2;
 
 
-// Create a new Inventor2040W
-Inventor2040W board(GEAR_RATIO);
+// Create a new Inventor object
+Inventor board(GEAR_RATIO);
 
 // Create an array of PID pointers
 PID vel_pids[NUM_MOTORS];

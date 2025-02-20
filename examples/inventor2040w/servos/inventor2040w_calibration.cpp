@@ -4,14 +4,14 @@
 #include "inventor.hpp"
 
 /*
-Shows how to configure Inventor 2040 W's servos with different
+Shows how to configure Inventor 2040/2350 W's servos with different
 common calibrations, as well as a completely custom one.
 */
 
 using namespace inventor;
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 // Function for printing out the details of a Calibration object
 void print_calibration(const Calibration &calib) {

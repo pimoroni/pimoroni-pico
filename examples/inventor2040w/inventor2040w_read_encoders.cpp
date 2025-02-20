@@ -4,7 +4,7 @@
 #include "inventor.hpp"
 
 /*
-Demonstrates how to read the angles of Inventor 2040 W's two encoders.
+Demonstrates how to read the angles of Inventor 2040/2350 W's two encoders.
 
 Press "User" to exit the program.
 */
@@ -15,8 +15,8 @@ using namespace inventor;
 const char* ENCODER_NAMES[] = {"A", "B"};
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

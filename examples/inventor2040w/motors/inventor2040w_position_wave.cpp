@@ -5,7 +5,7 @@
 #include "pid.hpp"
 
 /*
-A demonstration of driving both of Inventor 2040 W's motor outputs between
+A demonstration of driving both of Inventor 2040/2350 W's motor outputs between
 positions, with the help of their attached encoders and PID control.
 
 Press "User" to exit the program.
@@ -41,8 +41,8 @@ constexpr float POS_KI = 0.0f;    // Position integral (I) gain
 constexpr float POS_KD = 0.002f;  // Position derivative (D) gain
 
 
-// Create a new Inventor2040W
-Inventor2040W board(GEAR_RATIO);
+// Create a new Inventor object
+Inventor board;
 
 // Create an array of PID pointers
 PID pos_pids[NUM_MOTORS];

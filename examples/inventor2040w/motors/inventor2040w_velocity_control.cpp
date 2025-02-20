@@ -48,8 +48,8 @@ constexpr float VEL_KI = 0.0f;    // Velocity integral (I) gain
 constexpr float VEL_KD = 0.4f;    // Velocity derivative (D) gain
 
 
-// Create a new Inventor2040W
-Inventor2040W board(GEAR_RATIO);
+// Create a new Inventor object
+Inventor board;
 
 // Create PID object for velocity control
 PID vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE);

@@ -3,7 +3,7 @@
 #include "inventor.hpp"
 
 /*
-Displays a rotating rainbow pattern on Inventor 2040 W's onboard LED bars.
+Displays a rotating rainbow pattern on Inventor 2040/2350 W's onboard LED bars.
 
 Press "User" to exit the program.
 */
@@ -20,8 +20,8 @@ constexpr float BRIGHTNESS = 0.4f;
 const uint UPDATES = 50;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

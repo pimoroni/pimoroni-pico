@@ -3,7 +3,7 @@
 #include "inventor.hpp"
 
 /*
-An example of applying a wave pattern to Inventor 2040 W's motors and LEDs.
+An example of applying a wave pattern to Inventor 2040/2350 W's motors and LEDs.
 
 Press "User" to exit the program.
 */
@@ -25,8 +25,8 @@ constexpr float SPEED_EXTENT = 1.0f;
 const uint HALF_LEDS = NUM_LEDS / 2;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

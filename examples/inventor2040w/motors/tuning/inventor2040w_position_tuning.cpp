@@ -49,8 +49,8 @@ constexpr float POS_KI = 0.0f;    // Position integral (I) gain
 constexpr float POS_KD = 0.002f;  // Position derivative (D) gain
 
 
-// Create a new Inventor2040W
-Inventor2040W board(GEAR_RATIO);
+// Create a new Inventor object
+Inventor board(GEAR_RATIO);
 
 // Create PID object for position control
 PID pos_pid = PID(POS_KP, POS_KI, POS_KD, UPDATE_RATE);

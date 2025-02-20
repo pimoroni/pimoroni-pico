@@ -23,8 +23,8 @@ const uint UPDATES = 50;
 constexpr float SERVO_EXTENT = 60.0f;
 
 
-// Create a new Inventor2040W
-Inventor2040W board;
+// Create a new Inventor object
+Inventor board;
 
 
 int main() {

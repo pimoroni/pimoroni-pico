@@ -35,8 +35,8 @@ const uint SETTLE_TIME = 100;
 const uint CAPTURE_TIME = 200;
 
 
-// Create a new Inventor2040W
-Inventor2040W board(GEAR_RATIO);
+// Create a new Inventor object
+Inventor board(GEAR_RATIO);
 
 
 // Function that performs a single profiling step
