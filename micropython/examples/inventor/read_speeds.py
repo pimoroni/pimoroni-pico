@@ -25,22 +25,30 @@ board = Inventor(motor_gear_ratio=GEAR_RATIO)
 # encoders[MOTOR_B].direction(REVERSED_DIR)
 
 # Set both motors driving
-for motor in board.motors:
-    motor.speed(SPEED)
+for m in board.motors:
+    m.speed(SPEED)
 
 # Variables for storing encoder captures
 captures = [None] * NUM_MOTORS
 
-# Read the encoders until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Read the encoders until the user button is pressed
+    while not board.switch_pressed():
 
-    # Capture the state of all the encoders since the last capture, SLEEP seconds ago
-    for i in range(NUM_MOTORS):
-        captures[i] = board.encoders[i].capture()
+        # Capture the state of all the encoders since the last capture, SLEEP seconds ago
+        for i in range(NUM_MOTORS):
+            captures[i] = board.encoders[i].capture()
 
-    # Print out the speeds from each encoder
-    for i in range(NUM_MOTORS):
-        print(NAMES[i], "=", captures[i].revolutions_per_second, end=", ")
-    print()
+        # Print out the speeds from each encoder
+        for i in range(NUM_MOTORS):
+            print(NAMES[i], "=", captures[i].revolutions_per_second, end=", ")
+        print()
 
-    time.sleep(SLEEP)
+        time.sleep(SLEEP)
+
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Stop all the motors
+    for m in board.motors:
+        m.disable()

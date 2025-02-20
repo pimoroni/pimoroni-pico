@@ -7,6 +7,7 @@ A program that profiles the speed of a motor across its PWM
 duty cycle range using the attached encoder for feedback.
 """
 
+# Constants
 GEAR_RATIO = 50                         # The gear ratio of the motor
 
 DIRECTION = NORMAL_DIR                  # The direction to spin the motor in. NORMAL_DIR (0), REVERSED_DIR (1)
@@ -61,31 +62,35 @@ def profile_at_duty(duty):
     print("Duty = ", m.duty(), ", Expected = ", m.speed(), ", Measured = ", measured_speed, ", Diff = ", m.speed() - measured_speed, sep="")
 
 
-# Enable the motor to get started
-m.enable()
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable the motor to get started
+    m.enable()
 
-print("Profiler Starting...")
+    print("Profiler Starting...")
 
-# Profile from 0% up to one step below 100%
-for i in range(DUTY_STEPS):
-    profile_at_duty(i / DUTY_STEPS)
+    # Profile from 0% up to one step below 100%
+    for i in range(DUTY_STEPS):
+        profile_at_duty(i / DUTY_STEPS)
 
-# Profile from 100% down to one step above 0%
-for i in range(DUTY_STEPS):
-    profile_at_duty((DUTY_STEPS - i) / DUTY_STEPS)
+    # Profile from 100% down to one step above 0%
+    for i in range(DUTY_STEPS):
+        profile_at_duty((DUTY_STEPS - i) / DUTY_STEPS)
 
-# Profile from 0% down to one step above -100%
-for i in range(DUTY_STEPS):
-    profile_at_duty(-i / DUTY_STEPS)
+    # Profile from 0% down to one step above -100%
+    for i in range(DUTY_STEPS):
+        profile_at_duty(-i / DUTY_STEPS)
 
-# Profile from -100% up to one step below 0%
-for i in range(DUTY_STEPS):
-    profile_at_duty(-(DUTY_STEPS - i) / DUTY_STEPS)
+    # Profile from -100% up to one step below 0%
+    for i in range(DUTY_STEPS):
+        profile_at_duty(-(DUTY_STEPS - i) / DUTY_STEPS)
 
-# Profile 0% again
-profile_at_duty(0)
+    # Profile 0% again
+    profile_at_duty(0)
 
-print("Profiler Finished...")
+    print("Profiler Finished...")
 
-# Disable the motor now the profiler has finished
-m.disable()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Disable the motor
+    m.disable()

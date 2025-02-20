@@ -82,11 +82,6 @@ def stop():
     vel_pids[RIGHT].setpoint = 0
 
 
-# Enable the motor to get started
-for m in board.motors:
-    m.enable()
-
-
 # Variables
 update = 0
 print_count = 0
@@ -94,71 +89,79 @@ sequence = 0
 captures = [None] * NUM_MOTORS
 
 
-# Continually move the motor until the user switch is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable the motor to get started
+    for m in board.motors:
+        m.enable()
 
-    # Capture the state of all the encoders
-    for i in range(NUM_MOTORS):
-        captures[i] = board.encoders[i].capture()
+    # Continually move the motor until the user switch is pressed
+    while not board.switch_pressed():
 
-    for i in range(NUM_MOTORS):
-        # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
-        accel = vel_pids[i].calculate(captures[i].revolutions_per_second)
-
-        # Accelerate or decelerate the motor
-        board.motors[i].speed(board.motors[i].speed() + (accel * UPDATE_RATE))
-
-    # Print out the current motor values, but only on every multiple
-    if print_count == 0:
+        # Capture the state of all the encoders
         for i in range(NUM_MOTORS):
-            print(NAMES[i], "=", captures[i].revolutions_per_second, end=", ")
-        print()
+            captures[i] = board.encoders[i].capture()
 
-    # Increment the print count, and wrap it
-    print_count = (print_count + 1) % PRINT_DIVIDER
+        for i in range(NUM_MOTORS):
+            # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
+            accel = vel_pids[i].calculate(captures[i].revolutions_per_second)
 
-    update += 1     # Move along in time
+            # Accelerate or decelerate the motor
+            board.motors[i].speed(board.motors[i].speed() + (accel * UPDATE_RATE))
 
-    # Have we reached the end of this movement?
-    if update >= UPDATES_PER_MOVE:
-        update = 0  # Reset the counter
+        # Print out the current motor values, but only on every multiple
+        if print_count == 0:
+            for i in range(NUM_MOTORS):
+                print(NAMES[i], "=", captures[i].revolutions_per_second, end=", ")
+            print()
 
-        # Move on to the next part of the sequence
-        sequence += 1
+        # Increment the print count, and wrap it
+        print_count = (print_count + 1) % PRINT_DIVIDER
 
-        # Loop the sequence back around
-        if sequence >= 5:
-            sequence = 0
+        update += 1     # Move along in time
 
-    # Set the motor speeds, based on the sequence
-    if sequence == 0:
-        drive_forward(DRIVING_SPEED)
-    elif sequence == 1:
-        drive_forward(-DRIVING_SPEED)
-    elif sequence == 2:
-        turn_right(DRIVING_SPEED)
-    elif sequence == 3:
-        turn_right(-DRIVING_SPEED)
-    elif sequence == 4:
-        stop()
+        # Have we reached the end of this movement?
+        if update >= UPDATES_PER_MOVE:
+            update = 0  # Reset the counter
 
-    if offset_l < 0.0:
-        offset_l += 1.0
+            # Move on to the next part of the sequence
+            sequence += 1
 
-    if offset_r < 0.0:
-        offset_r += 1.0
+            # Loop the sequence back around
+            if sequence >= 5:
+                sequence = 0
 
-    # Update the LED bars
-    for i in range(HALF_LEDS):
-        hue = (i / HALF_LEDS) * BAR_GRADIENT
-        board.leds.set_hsv(i, hue + offset_l, 1.0, BRIGHTNESS)
-        board.leds.set_hsv(NUM_LEDS - i - 1, hue + offset_r, 1.0, BRIGHTNESS)
+        # Set the motor speeds, based on the sequence
+        if sequence == 0:
+            drive_forward(DRIVING_SPEED)
+        elif sequence == 1:
+            drive_forward(-DRIVING_SPEED)
+        elif sequence == 2:
+            turn_right(DRIVING_SPEED)
+        elif sequence == 3:
+            turn_right(-DRIVING_SPEED)
+        elif sequence == 4:
+            stop()
 
-    time.sleep(UPDATE_RATE)
+        if offset_l < 0.0:
+            offset_l += 1.0
 
-# Stop all the motors
-for m in board.motors:
-    m.disable()
+        if offset_r < 0.0:
+            offset_r += 1.0
 
-# Turn off the LED bars
-board.leds.clear()
+        # Update the LED bars
+        for i in range(HALF_LEDS):
+            hue = (i / HALF_LEDS) * BAR_GRADIENT
+            board.leds.set_hsv(i, hue + offset_l, 1.0, BRIGHTNESS)
+            board.leds.set_hsv(NUM_LEDS - i - 1, hue + offset_r, 1.0, BRIGHTNESS)
+
+        time.sleep(UPDATE_RATE)
+
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Stop all the motors
+    for m in board.motors:
+        m.disable()
+
+    # Turn off the LED bars
+    board.leds.clear()

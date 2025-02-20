@@ -50,10 +50,6 @@ enc.direction(DIRECTION)
 # Create PID object for position control
 pos_pid = PID(POS_KP, POS_KI, POS_KD, UPDATE_RATE)
 
-# Enable the motor to get started
-m.enable()
-
-
 current_detent = 0
 
 
@@ -78,43 +74,49 @@ def detent_change(change):
 # Call the function once to set the setpoint and print the value
 detent_change(0)
 
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable the motor to get started
+    m.enable()
 
-# Continually move the motor until the user button is pressed
-while not board.switch_pressed():
+    # Continually move the motor until the user button is pressed
+    while not board.switch_pressed():
 
-    # Capture the state of the encoder
-    capture = enc.capture()
+        # Capture the state of the encoder
+        capture = enc.capture()
 
-    # Get the current detent's centre angle
-    detent_angle = (current_detent * DETENT_SIZE)
+        # Get the current detent's centre angle
+        detent_angle = (current_detent * DETENT_SIZE)
 
-    # Is the current angle above the region of this detent?
-    if capture.degrees > detent_angle + (DETENT_SIZE / 2):
-        # Is there another detent we can move to?
-        if current_detent < MAX_DETENT:
-            detent_change(1)    # Increment to the next detent
+        # Is the current angle above the region of this detent?
+        if capture.degrees > detent_angle + (DETENT_SIZE / 2):
+            # Is there another detent we can move to?
+            if current_detent < MAX_DETENT:
+                detent_change(1)    # Increment to the next detent
 
-    # Is the current angle below the region of this detent?
-    elif capture.degrees < detent_angle - (DETENT_SIZE / 2):
-        # Is there another detent we can move to?
-        if current_detent > MIN_DETENT:
-            detent_change(-1)    # Decrement to the next detent
+        # Is the current angle below the region of this detent?
+        elif capture.degrees < detent_angle - (DETENT_SIZE / 2):
+            # Is there another detent we can move to?
+            if current_detent > MIN_DETENT:
+                detent_change(-1)    # Decrement to the next detent
 
-    # Calculate the velocity to move the motor closer to the position setpoint
-    vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
+        # Calculate the velocity to move the motor closer to the position setpoint
+        vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
 
-    # If the current angle is within the detent range, limit the max vel
-    # (aka feedback force) that the user will feel when turning the motor between detents
-    if (capture.degrees >= MIN_DETENT * DETENT_SIZE) and (capture.degrees <= MAX_DETENT * DETENT_SIZE):
-        vel = max(min(vel, MAX_DRIVE_PERCENT), -MAX_DRIVE_PERCENT)
+        # If the current angle is within the detent range, limit the max vel
+        # (aka feedback force) that the user will feel when turning the motor between detents
+        if (capture.degrees >= MIN_DETENT * DETENT_SIZE) and (capture.degrees <= MAX_DETENT * DETENT_SIZE):
+            vel = max(min(vel, MAX_DRIVE_PERCENT), -MAX_DRIVE_PERCENT)
 
-    # Set the new motor driving speed
-    m.speed(vel)
+        # Set the new motor driving speed
+        m.speed(vel)
 
-    time.sleep(UPDATE_RATE)
+        time.sleep(UPDATE_RATE)
 
-# Disable the motor
-m.disable()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Disable the motor
+    m.disable()
 
-# Turn off the LEDs
-board.leds.clear()
+    # Turn off the LEDs
+    board.leds.clear()

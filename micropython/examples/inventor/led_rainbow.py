@@ -18,17 +18,21 @@ board = Inventor()
 # Variables
 offset = 0.0
 
-# Make rainbows until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Make rainbows until the user button is pressed
+    while not board.switch_pressed():
 
-    offset += SPEED / 1000.0
+        offset += SPEED / 1000.0
 
-    # Update all the LEDs
-    for i in range(NUM_LEDS):
-        hue = float(i) / NUM_LEDS
-        board.leds.set_hsv(i, hue + offset, 1.0, BRIGHTNESS)
+        # Update all the LEDs
+        for i in range(NUM_LEDS):
+            hue = float(i) / NUM_LEDS
+            board.leds.set_hsv(i, hue + offset, 1.0, BRIGHTNESS)
 
-    time.sleep(1.0 / UPDATES)
+        time.sleep(1.0 / UPDATES)
 
-# Turn off the LED bars
-board.leds.clear()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Turn off the LED bars
+    board.leds.clear()

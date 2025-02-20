@@ -135,22 +135,28 @@ def check_button_toggle():
     return button_toggle
 
 
-while True:
-    # Has the button been toggled?
-    if check_button_toggle():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    while True:
+        # Has the button been toggled?
+        if check_button_toggle():
 
-        # Play the song
-        for i in range(len(SONG)):
-            if check_button_toggle():
-                if SONG[i] == "P":
-                    # This is a "pause" note, so stop the motors
-                    board.play_silence()
-                else:
-                    # Get the frequency of the note and play it
-                    board.play_tone(TONES[SONG[i]])
+            # Play the song
+            for i in range(len(SONG)):
+                if check_button_toggle():
+                    if SONG[i] == "P":
+                        # This is a "pause" note, so stop the motors
+                        board.play_silence()
+                    else:
+                        # Get the frequency of the note and play it
+                        board.play_tone(TONES[SONG[i]])
 
-                time.sleep(NOTE_DURATION)
+                    time.sleep(NOTE_DURATION)
 
-        button_toggle = False
+            button_toggle = False
 
-        board.stop_playing()
+            board.stop_playing()
+
+# Stop the music playing, in the event the program stopped unexpectedly
+finally:
+    board.stop_playing()

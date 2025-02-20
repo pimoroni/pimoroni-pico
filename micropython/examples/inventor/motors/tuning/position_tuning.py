@@ -48,9 +48,6 @@ enc.direction(DIRECTION)
 # Create PID object for position control
 pos_pid = PID(POS_KP, POS_KI, POS_KD, UPDATE_RATE)
 
-# Enable the motor to get started
-m.enable()
-
 # Set the initial setpoint position
 pos_pid.setpoint = POSITION_EXTENT
 
@@ -58,38 +55,45 @@ pos_pid.setpoint = POSITION_EXTENT
 update = 0
 print_count = 0
 
-# Continually move the motor until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable the motor to get started
+    m.enable()
 
-    # Capture the state of the encoder
-    capture = enc.capture()
+    # Continually move the motor until the user button is pressed
+    while not board.switch_pressed():
 
-    # Calculate the velocity to move the motor closer to the position setpoint
-    vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
+        # Capture the state of the encoder
+        capture = enc.capture()
 
-    # Set the new motor driving speed
-    m.speed(vel)
+        # Calculate the velocity to move the motor closer to the position setpoint
+        vel = pos_pid.calculate(capture.degrees, capture.degrees_per_second)
 
-    # Print out the current motor values and their setpoints,
-    # but only for the first few updates and only every multiple
-    if update < (PRINT_WINDOW * UPDATES) and print_count == 0:
-        print("Pos =", capture.degrees, end=", ")
-        print("Pos SP =", pos_pid.setpoint, end=", ")
-        print("Speed = ", m.speed() * SPD_PRINT_SCALE)
+        # Set the new motor driving speed
+        m.speed(vel)
 
-    # Increment the print count, and wrap it
-    print_count = (print_count + 1) % PRINT_DIVIDER
+        # Print out the current motor values and their setpoints,
+        # but only for the first few updates and only every multiple
+        if update < (PRINT_WINDOW * UPDATES) and print_count == 0:
+            print("Pos =", capture.degrees, end=", ")
+            print("Pos SP =", pos_pid.setpoint, end=", ")
+            print("Speed = ", m.speed() * SPD_PRINT_SCALE)
 
-    update += 1     # Move along in time
+        # Increment the print count, and wrap it
+        print_count = (print_count + 1) % PRINT_DIVIDER
 
-    # Have we reached the end of this time window?
-    if update >= (MOVEMENT_WINDOW * UPDATES):
-        update = 0  # Reset the counter
+        update += 1     # Move along in time
 
-        # Set the new position setpoint to be the inverse of the current setpoint
-        pos_pid.setpoint = 0.0 - pos_pid.setpoint
+        # Have we reached the end of this time window?
+        if update >= (MOVEMENT_WINDOW * UPDATES):
+            update = 0  # Reset the counter
 
-    time.sleep(UPDATE_RATE)
+            # Set the new position setpoint to be the inverse of the current setpoint
+            pos_pid.setpoint = 0.0 - pos_pid.setpoint
 
-# Disable the motor
-m.disable()
+        time.sleep(UPDATE_RATE)
+
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Disable the motor
+    m.disable()

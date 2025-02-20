@@ -24,38 +24,41 @@ s = board.servos[SERVO_1]
 start_value = s.mid_value()
 end_value = random.uniform(-SERVO_EXTENT, SERVO_EXTENT)
 
-
 update = 0
 
-# Continually move the servo until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Continually move the servo until the user button is pressed
+    while not board.switch_pressed():
 
-    # Calculate how far along this movement to be
-    percent_along = update / UPDATES_PER_MOVE
+        # Calculate how far along this movement to be
+        percent_along = update / UPDATES_PER_MOVE
 
-    if USE_COSINE:
-        # Move the servo between values using cosine
-        s.to_percent(math.cos(percent_along * math.pi), 1.0, -1.0, start_value, end_value)
-    else:
-        # Move the servo linearly between values
-        s.to_percent(percent_along, 0.0, 1.0, start_value, end_value)
+        if USE_COSINE:
+            # Move the servo between values using cosine
+            s.to_percent(math.cos(percent_along * math.pi), 1.0, -1.0, start_value, end_value)
+        else:
+            # Move the servo linearly between values
+            s.to_percent(percent_along, 0.0, 1.0, start_value, end_value)
 
-    # Print out the value the servo is now at
-    print("Value = ", round(s.value(), 3), sep="")
+        # Print out the value the servo is now at
+        print("Value = ", round(s.value(), 3), sep="")
 
-    # Move along in time
-    update += 1
+        # Move along in time
+        update += 1
 
-    # Have we reached the end of this movement?
-    if update >= UPDATES_PER_MOVE:
-        # Reset the counter
-        update = 0
+        # Have we reached the end of this movement?
+        if update >= UPDATES_PER_MOVE:
+            # Reset the counter
+            update = 0
 
-        # Set the start as the last end and create a new random end value
-        start_value = end_value
-        end_value = random.uniform(-SERVO_EXTENT, SERVO_EXTENT)
+            # Set the start as the last end and create a new random end value
+            start_value = end_value
+            end_value = random.uniform(-SERVO_EXTENT, SERVO_EXTENT)
 
-    time.sleep(1.0 / UPDATES)
+        time.sleep(1.0 / UPDATES)
 
-# Disable the servo
-s.disable()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Disable the servo
+    s.disable()

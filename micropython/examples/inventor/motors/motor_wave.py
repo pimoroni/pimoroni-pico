@@ -20,27 +20,31 @@ board = Inventor()
 
 offset = 0.0
 
-# Make waves until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Make waves until the user button is pressed
+    while not board.switch_pressed():
 
-    offset += SPEED / 1000.0
+        offset += SPEED / 1000.0
 
-    # Update the LED bars
-    for i in range(HALF_LEDS):
-        hue = i / (NUM_LEDS * 4)
-        board.leds.set_hsv(i, hue + offset, 1.0, BRIGHTNESS)
-        board.leds.set_hsv(NUM_LEDS - i - 1, hue + offset, 1.0, BRIGHTNESS)
+        # Update the LED bars
+        for i in range(HALF_LEDS):
+            hue = i / (NUM_LEDS * 4)
+            board.leds.set_hsv(i, hue + offset, 1.0, BRIGHTNESS)
+            board.leds.set_hsv(NUM_LEDS - i - 1, hue + offset, 1.0, BRIGHTNESS)
 
-    # Update both motors
-    for i in range(NUM_MOTORS):
-        angle = (i + offset) * math.pi
-        board.motors[i].speed(math.sin(angle) * SPEED_EXTENT)
+        # Update both motors
+        for i in range(NUM_MOTORS):
+            angle = (i + offset) * math.pi
+            board.motors[i].speed(math.sin(angle) * SPEED_EXTENT)
 
-    time.sleep(1.0 / UPDATES)
+        time.sleep(1.0 / UPDATES)
 
-# Stop both motors
-for m in board.motors:
-    m.disable()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Stop both motors
+    for m in board.motors:
+        m.disable()
 
-# Turn off the LEDs
-board.leds.clear()
+    # Turn off the LEDs
+    board.leds.clear()

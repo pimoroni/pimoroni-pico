@@ -9,6 +9,7 @@ Shows how to initialise and read the 3 ADC headers of Inventor 2040/2350 W.
 Press "User" to exit the program.
 """
 
+# Constants
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 10          # How many times to update LEDs per second
 ADC_NAMES = ("A0", "A1", "A2")
@@ -25,23 +26,27 @@ analogs = [Analog(i) for i in ADCS]
 pulls = [Pin(i, Pin.IN, Pin.PULL_DOWN) for i in ADCS]
 
 
-# Read the ADCs until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Read the ADCs until the user button is pressed
+    while not board.switch_pressed():
 
-    # Read each ADC in turn and print its voltage
-    for i in range(NUM_ADCS):
-        voltage = analogs[i].read_voltage()
-        print(ADC_NAMES[i], " = ", round(voltage, 3), sep="", end=", ")
+        # Read each ADC in turn and print its voltage
+        for i in range(NUM_ADCS):
+            voltage = analogs[i].read_voltage()
+            print(ADC_NAMES[i], " = ", round(voltage, 3), sep="", end=", ")
 
-        # Set the neighbouring LED to a colour based on the
-        # voltage, with Green for high and Blue for low
-        hue = (2.0 - (voltage / 3.3)) * 0.333
-        board.leds.set_hsv(i + LED_A0, hue, 1.0, BRIGHTNESS)
+            # Set the neighbouring LED to a colour based on the
+            # voltage, with Green for high and Blue for low
+            hue = (2.0 - (voltage / 3.3)) * 0.333
+            board.leds.set_hsv(i + LED_A0, hue, 1.0, BRIGHTNESS)
 
-    # Print a new line
-    print()
+        # Print a new line
+        print()
 
-    time.sleep(1.0 / UPDATES)
+        time.sleep(1.0 / UPDATES)
 
-# Turn off the LED bars
-board.leds.clear()
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Turn off the LED bars
+    board.leds.clear()

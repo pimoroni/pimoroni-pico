@@ -137,51 +137,58 @@ def check_button_toggle():
     return button_toggle
 
 
-while True:
-    # Has the button been toggled?
-    if check_button_toggle():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    while True:
+        # Has the button been toggled?
+        if check_button_toggle():
 
-        # Play the song
-        for i in range(len(SONG)):
-            if check_button_toggle():
-                if SONG[i] == "P":
-                    # This is a "pause" note, so stop the motors
-                    motor_a.stop()
-                    motor_b.stop()
-                    time.sleep(NOTE_DURATION)
-                else:
-                    # Get the frequency of the note and set the motors to it
-                    freq = TONES[SONG[i]]
-                    motor_a.frequency(freq)
-                    motor_b.frequency(freq)
+            # Play the song
+            for i in range(len(SONG)):
+                if check_button_toggle():
+                    if SONG[i] == "P":
+                        # This is a "pause" note, so stop the motors
+                        motor_a.stop()
+                        motor_b.stop()
+                        time.sleep(NOTE_DURATION)
+                    else:
+                        # Get the frequency of the note and set the motors to it
+                        freq = TONES[SONG[i]]
+                        motor_a.frequency(freq)
+                        motor_b.frequency(freq)
 
-                    if STATIONARY_PLAYBACK:
-                        # Set the motors to 50% duty cycle to play the note, but alternate
-                        # the direction so that the motor does not actually spin
-                        t = 0
-                        while t < NOTE_DURATION * 1000000:
+                        if STATIONARY_PLAYBACK:
+                            # Set the motors to 50% duty cycle to play the note, but alternate
+                            # the direction so that the motor does not actually spin
+                            t = 0
+                            while t < NOTE_DURATION * 1000000:
+                                motor_a.duty(0.5)
+                                motor_b.duty(0.5)
+                                time.sleep_us(STATIONARY_TOGGLE_US)
+                                t += STATIONARY_TOGGLE_US
+
+                                motor_a.duty(-0.5)
+                                motor_b.duty(-0.5)
+                                time.sleep_us(STATIONARY_TOGGLE_US)
+                                t += STATIONARY_TOGGLE_US
+                        else:
+                            # Set the motors to 50% duty cycle to play the note whilst spinning
                             motor_a.duty(0.5)
                             motor_b.duty(0.5)
-                            time.sleep_us(STATIONARY_TOGGLE_US)
-                            t += STATIONARY_TOGGLE_US
+                            time.sleep(NOTE_DURATION)
+                else:
+                    # The button was toggled again, so stop playing the song
+                    break
 
-                            motor_a.duty(-0.5)
-                            motor_b.duty(-0.5)
-                            time.sleep_us(STATIONARY_TOGGLE_US)
-                            t += STATIONARY_TOGGLE_US
-                    else:
-                        # Set the motors to 50% duty cycle to play the note whilst spinning
-                        motor_a.duty(0.5)
-                        motor_b.duty(0.5)
-                        time.sleep(NOTE_DURATION)
-            else:
-                # The button was toggled again, so stop playing the song
-                break
+            button_toggle = False
 
-        button_toggle = False
+            # The song has finished, so disable the motors
+            motor_a.disable()
+            motor_b.disable()
 
-        # The song has finished, so disable the motors
-        motor_a.disable()
-        motor_b.disable()
+        time.sleep(0.01)
 
-    time.sleep(0.01)
+finally:
+    # Disable the motors
+    motor_a.disable()
+    motor_b.disable()

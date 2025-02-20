@@ -45,11 +45,6 @@ board.encoders[MOTOR_A].direction(REVERSED_DIR)
 # Create PID objects for position control
 pos_pids = [PID(POS_KP, POS_KI, POS_KD, UPDATE_RATE) for i in range(NUM_MOTORS)]
 
-# Enable all motors
-for m in board.motors:
-    m.enable()
-
-
 update = 0
 print_count = 0
 
@@ -59,55 +54,63 @@ end_value = 270.0
 
 captures = [None] * NUM_MOTORS
 
-# Continually move the motor until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable all motors
+    for m in board.motors:
+        m.enable()
 
-    # Capture the state of all the encoders
-    for i in range(NUM_MOTORS):
-        captures[i] = board.encoders[i].capture()
+    # Continually move the motor until the user button is pressed
+    while not board.switch_pressed():
 
-    # Calculate how far along this movement to be
-    percent_along = min(update / UPDATES_PER_MOVE, 1.0)
-
-    for i in range(NUM_MOTORS):
-        # Move the motor between values using cosine
-        pos_pids[i].setpoint = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
-
-        # Calculate the velocity to move the motor closer to the position setpoint
-        vel = pos_pids[i].calculate(captures[i].degrees, captures[i].degrees_per_second)
-
-        # Set the new motor driving speed
-        board.motors[i].speed(vel)
-
-    # Update the LEDs
-    board.leds.set_hsv(LED_GP0, percent_along, 1.0, BRIGHTNESS)
-    board.leds.set_hsv(LED_SERVO_6, percent_along, 1.0, BRIGHTNESS)
-
-    # Print out the current motor values and their setpoints, but only on every multiple
-    if print_count == 0:
+        # Capture the state of all the encoders
         for i in range(NUM_MOTORS):
-            print(ENCODER_NAMES[i], "=", captures[i].degrees, end=", ")
-        print()
+            captures[i] = board.encoders[i].capture()
 
-    # Increment the print count, and wrap it
-    print_count = (print_count + 1) % PRINT_DIVIDER
+        # Calculate how far along this movement to be
+        percent_along = min(update / UPDATES_PER_MOVE, 1.0)
 
-    update += 1     # Move along in time
+        for i in range(NUM_MOTORS):
+            # Move the motor between values using cosine
+            pos_pids[i].setpoint = (((-math.cos(percent_along * math.pi) + 1.0) / 2.0) * (end_value - start_value)) + start_value
 
-    # Have we reached the end of this movement?
-    if update >= UPDATES_PER_MOVE:
-        update = 0  # Reset the counter
+            # Calculate the velocity to move the motor closer to the position setpoint
+            vel = pos_pids[i].calculate(captures[i].degrees, captures[i].degrees_per_second)
 
-        # Swap the start and end values
-        temp = start_value
-        start_value = end_value
-        end_value = temp
+            # Set the new motor driving speed
+            board.motors[i].speed(vel)
 
-    time.sleep(UPDATE_RATE)
+        # Update the LEDs
+        board.leds.set_hsv(LED_GP0, percent_along, 1.0, BRIGHTNESS)
+        board.leds.set_hsv(LED_SERVO_6, percent_along, 1.0, BRIGHTNESS)
 
-# Stop all the motors
-for m in board.motors:
-    m.disable()
+        # Print out the current motor values and their setpoints, but only on every multiple
+        if print_count == 0:
+            for i in range(NUM_MOTORS):
+                print(ENCODER_NAMES[i], "=", captures[i].degrees, end=", ")
+            print()
 
-# Turn off the LEDs
-board.leds.clear()
+        # Increment the print count, and wrap it
+        print_count = (print_count + 1) % PRINT_DIVIDER
+
+        update += 1     # Move along in time
+
+        # Have we reached the end of this movement?
+        if update >= UPDATES_PER_MOVE:
+            update = 0  # Reset the counter
+
+            # Swap the start and end values
+            temp = start_value
+            start_value = end_value
+            end_value = temp
+
+        time.sleep(UPDATE_RATE)
+
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Stop all the motors
+    for m in board.motors:
+        m.disable()
+
+    # Turn off the LEDs
+    board.leds.clear()

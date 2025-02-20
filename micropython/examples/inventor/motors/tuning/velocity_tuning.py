@@ -48,49 +48,52 @@ enc.direction(DIRECTION)
 # Create PID object for velocity control
 vel_pid = PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE)
 
-# Enable the motor to get started
-m.enable()
-
 # Set the initial setpoint velocity
 vel_pid.setpoint = VELOCITY_EXTENT
-
 
 update = 0
 print_count = 0
 
-# Continually move the motor until the user button is pressed
-while not board.switch_pressed():
+# Wrap the code in a try block, to catch any exceptions (including KeyboardInterrupt)
+try:
+    # Enable the motor to get started
+    m.enable()
 
-    # Capture the state of the encoder
-    capture = enc.capture()
+    # Continually move the motor until the user button is pressed
+    while not board.switch_pressed():
 
-    # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
-    accel = vel_pid.calculate(capture.revolutions_per_second)
+        # Capture the state of the encoder
+        capture = enc.capture()
 
-    # Accelerate or decelerate the motor
-    m.speed(m.speed() + (accel * UPDATE_RATE))
+        # Calculate the acceleration to apply to the motor to move it closer to the velocity setpoint
+        accel = vel_pid.calculate(capture.revolutions_per_second)
 
-    # Print out the current motor values and their setpoints,
-    # but only for the first few updates and only every multiple
-    if update < (PRINT_WINDOW * UPDATES) and print_count == 0:
-        print("Vel =", capture.revolutions_per_second, end=", ")
-        print("Vel SP =", vel_pid.setpoint, end=", ")
-        print("Accel =", accel * ACC_PRINT_SCALE, end=", ")
-        print("Speed =", m.speed())
+        # Accelerate or decelerate the motor
+        m.speed(m.speed() + (accel * UPDATE_RATE))
 
-    # Increment the print count, and wrap it
-    print_count = (print_count + 1) % PRINT_DIVIDER
+        # Print out the current motor values and their setpoints,
+        # but only for the first few updates and only every multiple
+        if update < (PRINT_WINDOW * UPDATES) and print_count == 0:
+            print("Vel =", capture.revolutions_per_second, end=", ")
+            print("Vel SP =", vel_pid.setpoint, end=", ")
+            print("Accel =", accel * ACC_PRINT_SCALE, end=", ")
+            print("Speed =", m.speed())
 
-    update += 1     # Move along in time
+        # Increment the print count, and wrap it
+        print_count = (print_count + 1) % PRINT_DIVIDER
 
-    # Have we reached the end of this time window?
-    if update >= (MOVEMENT_WINDOW * UPDATES):
-        update = 0  # Reset the counter
+        update += 1     # Move along in time
 
-        # Set the new velocity setpoint to be the inverse of the current setpoint
-        vel_pid.setpoint = 0.0 - vel_pid.setpoint
+        # Have we reached the end of this time window?
+        if update >= (MOVEMENT_WINDOW * UPDATES):
+            update = 0  # Reset the counter
 
-    time.sleep(UPDATE_RATE)
+            # Set the new velocity setpoint to be the inverse of the current setpoint
+            vel_pid.setpoint = 0.0 - vel_pid.setpoint
 
-# Disable the motor
-m.disable()
+        time.sleep(UPDATE_RATE)
+
+# Put the board back into a safe state, regardless of how the program may have ended
+finally:
+    # Disable the motor
+    m.disable()
