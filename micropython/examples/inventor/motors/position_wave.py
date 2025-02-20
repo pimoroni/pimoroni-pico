@@ -4,7 +4,7 @@ from pimoroni import PID, REVERSED_DIR
 from inventor import Inventor, NUM_MOTORS, MOTOR_A, MOTOR_B, LED_GP0, LED_SERVO_6
 
 """
-A demonstration of driving both of Inventor 2040 W's motor outputs between
+A demonstration of driving both of Inventor 2040/2350 W's motor outputs between
 positions, with the help of their attached encoders and PID control.
 
 Press "User" to exit the program.
