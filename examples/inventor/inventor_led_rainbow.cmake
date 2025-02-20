@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_led_rainbow)
-add_executable(${OUTPUT_NAME} inventor2040w_led_rainbow.cpp)
+set(OUTPUT_NAME inventor_led_rainbow)
+add_executable(${OUTPUT_NAME} inventor_led_rainbow.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

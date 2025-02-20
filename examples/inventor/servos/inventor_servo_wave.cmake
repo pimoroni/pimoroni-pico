@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_servo_wave)
-add_executable(${OUTPUT_NAME} inventor2040w_servo_wave.cpp)
+set(OUTPUT_NAME inventor_servo_wave)
+add_executable(${OUTPUT_NAME} inventor_servo_wave.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_single_servo)
-add_executable(${OUTPUT_NAME} inventor2040w_single_servo.cpp)
+set(OUTPUT_NAME inventor_single_servo)
+add_executable(${OUTPUT_NAME} inventor_single_servo.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

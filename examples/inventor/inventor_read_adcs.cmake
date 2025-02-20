@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_read_adcs)
-add_executable(${OUTPUT_NAME} inventor2040w_read_adcs.cpp)
+set(OUTPUT_NAME inventor_read_adcs)
+add_executable(${OUTPUT_NAME} inventor_read_adcs.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

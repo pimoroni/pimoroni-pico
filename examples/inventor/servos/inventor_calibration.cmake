@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_calibration)
-add_executable(${OUTPUT_NAME} inventor2040w_calibration.cpp)
+set(OUTPUT_NAME inventor_calibration)
+add_executable(${OUTPUT_NAME} inventor_calibration.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

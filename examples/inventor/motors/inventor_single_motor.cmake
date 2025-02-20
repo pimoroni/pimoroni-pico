@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_single_motor)
-add_executable(${OUTPUT_NAME} inventor2040w_single_motor.cpp)
+set(OUTPUT_NAME inventor_single_motor)
+add_executable(${OUTPUT_NAME} inventor_single_motor.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

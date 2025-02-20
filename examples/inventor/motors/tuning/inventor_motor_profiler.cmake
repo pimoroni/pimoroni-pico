@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_motor_profiler)
-add_executable(${OUTPUT_NAME} inventor2040w_motor_profiler.cpp)
+set(OUTPUT_NAME inventor_motor_profiler)
+add_executable(${OUTPUT_NAME} inventor_motor_profiler.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

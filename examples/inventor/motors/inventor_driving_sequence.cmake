@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_driving_sequence)
-add_executable(${OUTPUT_NAME} inventor2040w_driving_sequence.cpp)
+set(OUTPUT_NAME inventor_driving_sequence)
+add_executable(${OUTPUT_NAME} inventor_driving_sequence.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

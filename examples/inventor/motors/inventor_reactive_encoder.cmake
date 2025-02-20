@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_reactive_encoder)
-add_executable(${OUTPUT_NAME} inventor2040w_reactive_encoder.cpp)
+set(OUTPUT_NAME inventor_reactive_encoder)
+add_executable(${OUTPUT_NAME} inventor_reactive_encoder.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

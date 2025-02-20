@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_position_wave)
-add_executable(${OUTPUT_NAME} inventor2040w_position_wave.cpp)
+set(OUTPUT_NAME inventor_position_wave)
+add_executable(${OUTPUT_NAME} inventor_position_wave.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME}

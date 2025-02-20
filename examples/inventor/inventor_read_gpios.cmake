@@ -1,5 +1,5 @@
-set(OUTPUT_NAME inventor2040w_read_gpios)
-add_executable(${OUTPUT_NAME} inventor2040w_read_gpios.cpp)
+set(OUTPUT_NAME inventor_read_gpios)
+add_executable(${OUTPUT_NAME} inventor_read_gpios.cpp)
 
 # Pull in pico libraries that we need
 target_link_libraries(${OUTPUT_NAME} pico_stdlib inventor)
