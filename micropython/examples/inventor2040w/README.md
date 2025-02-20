@@ -1,4 +1,4 @@
-# Inventor 2040 W Micropython Examples <!-- omit in toc -->
+# Inventor 2040/2350 W Micropython Examples <!-- omit in toc -->
 
 - [Function Examples](#function-examples)
   - [Read ADCs](#read-adcs)
@@ -37,37 +37,37 @@
 ### Read ADCs
 [read_adcs.py](read_adcs.py)
 
-Shows how to initialise and read the 3 ADC headers of Inventor 2040 W.
+Shows how to initialise and read the 3 ADC headers of Inventor 2040/2350 W.
 
 
 ### Read GPIOs
 [read_gpios.py](read_gpios.py)
 
-Shows how to initialise and read the 6 GPIO headers of Inventor 2040 W.
+Shows how to initialise and read the 6 GPIO headers of Inventor 2040/2350 W.
 
 
 ### Read Encoders
 [read_encoders.py](read_encoders.py)
 
-Demonstrates how to read the angles of Inventor 2040 W's two encoders.
+Demonstrates how to read the angles of Inventor 2040/2350 W's two encoders.
 
 
 ### Read Speeds
 [read_speeds.py](read_speeds.py)
 
-Demonstrates how to read the speeds of Inventor 2040 W's two encoders.
+Demonstrates how to read the speeds of Inventor 2040/2350 W's two encoders.
 
 
 ### LED Rainbow
 [led_rainbow.py](led_rainbow.py)
 
-Displays a rotating rainbow pattern on Inventor 2040 W's onboard LED bars.
+Displays a rotating rainbow pattern on Inventor 2040/2350 W's onboard LED bars.
 
 
 ### Reset Inventor
 [reset_inventor.py](reset_inventor.py)
 
-A simple program that resets Inventor 2040 W, turning off its LEDs, Motors, Servos, and Audio.
+A simple program that resets Inventor 2040/2350 W, turning off its LEDs, Motors, Servos, and Audio.
 
 
 ## Motor Examples
@@ -75,19 +75,19 @@ A simple program that resets Inventor 2040 W, turning off its LEDs, Motors, Serv
 ### Single Motor
 [motors/single_motor.py](motors/single_motor.py)
 
-Demonstrates how to control a motor on Inventor 2040 W.
+Demonstrates how to control a motor on Inventor 2040/2350 W.
 
 
 ### Dual Motors
 [motors/dual_motors.py](motors/dual_motors.py)
 
-Demonstrates how to control both motors on Inventor 2040 W.
+Demonstrates how to control both motors on Inventor 2040/2350 W.
 
 
 ### Motor Wave
 [motors/motor_wave.py](motors/motor_wave.py)
 
-An example of applying a wave pattern to Inventor 2040 W's motors and LEDs.
+An example of applying a wave pattern to Inventor 2040/2350 W's motors and LEDs.
 
 
 ### Position Control
@@ -117,13 +117,13 @@ A demonstration of how a motor with an encoder can be used as a programmable rot
 ### Position Wave
 [motors/position_wave.py](motors/position_wave.py)
 
-A demonstration of driving both of Inventor 2040 W's motor outputs between positions, with the help of their attached encoders and PID control.
+A demonstration of driving both of Inventor 2040/2350 W's motor outputs between positions, with the help of their attached encoders and PID control.
 
 
 ### Driving Sequence
 [motors/driving_sequence.py](motors/driving_sequence.py)
 
-A demonstration of driving both of Inventor 2040 W's motor outputs through a sequence of velocities, with the help of their attached encoders and PID control.
+A demonstration of driving both of Inventor 2040/2350 W's motor outputs through a sequence of velocities, with the help of their attached encoders and PID control.
 
 
 ## Motor Tuning
@@ -157,13 +157,13 @@ A program to aid in the discovery and tuning of motor PID values for position on
 ### Single Servo
 [servos/single_servo.py](servos/single_servo.py)
 
-Demonstrates how to control a single servo on Inventor 2040 W.
+Demonstrates how to control a single servo on Inventor 2040/2350 W.
 
 
 ### Multiple Servos
 [servos/multiple_servos.py](servos/multiple_servos.py)
 
-Demonstrates how to control all of the servos on Inventor 2040 W.
+Demonstrates how to control all of the servos on Inventor 2040/2350 W.
 
 
 ### Simple Easing
@@ -181,7 +181,7 @@ An example of applying a wave pattern to a group of servos and the LEDs.
 ### Calibration
 [servos/calibration.py](servos/calibration.py)
 
-Shows how to configure Inventor 2040 W's servos with different common calibrations, as well as a completely custom one.
+Shows how to configure Inventor 2040/2350 W's servos with different common calibrations, as well as a completely custom one.
 
 
 ## Audio Examples
@@ -189,7 +189,7 @@ Shows how to configure Inventor 2040 W's servos with different common calibratio
 ### Tone Song
 [audio/tone_song.py](audio/tone_song.py)
 
-This example shows you how you can use Inventor 2040 W's audio output with a speaker to play different notes and string them together into a bleepy tune.
+This example shows you how you can use Inventor 2040/2350 W's audio output with a speaker to play different notes and string them together into a bleepy tune.
 
 ### Motor Song
 [audio/motor_song.py](audio/motor_song.py)

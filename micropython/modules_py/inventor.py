@@ -52,7 +52,7 @@ NUM_SERVOS = 6
 NUM_LEDS = 12
 
 
-class Inventor2040W():
+class Inventor():
     AMP_EN_PIN = 3
     I2C_SDA_PIN = 4
     I2C_SCL_PIN = 5
@@ -75,15 +75,19 @@ class Inventor2040W():
     AMP_CORRECTION = 4
     DEFAULT_VOLUME = 0.2
 
-    def __init__(self, motor_gear_ratio=50, init_motors=True, init_servos=True):
+    def __init__(self, motor_gear_ratio=50, init_motors=True, init_servos=True, init_encoders=True, init_i2c=True):
         # Free up hardware resources
         gc.collect()
 
-        # Set up the motors and encoders, if the user wants them
+        # Set up the motors, if the user wants them
         self.motors = None
         if init_motors:
-            cpr = MMME_CPR * motor_gear_ratio
             self.motors = [Motor(self.MOTOR_A_PINS), Motor(self.MOTOR_B_PINS)]
+
+        # Set up the encoders, if the user wants them
+        self.encoders = None
+        if init_encoders:
+            cpr = MMME_CPR * motor_gear_ratio
             # Set the encoders to use PIO 0 and State Machines 0 and 1
             self.encoders = [Encoder(0, 0, self.ENCODER_A_PINS, counts_per_rev=cpr, count_microsteps=True),
                              Encoder(0, 1, self.ENCODER_B_PINS, counts_per_rev=cpr, count_microsteps=True)]
@@ -93,8 +97,10 @@ class Inventor2040W():
         if init_servos:
             self.servos = [Servo(i) for i in range(self.SERVO_1_PIN, self.SERVO_6_PIN + 1)]
 
-        # Set up the i2c for Qw/st and Breakout Garden
-        self.i2c = PimoroniI2C(self.I2C_SDA_PIN, self.I2C_SCL_PIN, 100000)
+        # Set up the i2c for Qw/st and Breakout Garden, if the user wants
+        self.i2c = None
+        if init_i2c:
+            self.i2c = PimoroniI2C(self.I2C_SDA_PIN, self.I2C_SCL_PIN, 100000)
 
         # Set up the amp enable
         self.__amp_en = Pin(self.AMP_EN_PIN, Pin.OUT)
@@ -149,3 +155,7 @@ class Inventor2040W():
 
     def unmute_audio(self):
         self.__amp_en.on()
+
+
+# Create an alias of the inventor class
+Inventor2040W = Inventor

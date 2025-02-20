@@ -1,13 +1,13 @@
 import time
 import math
-from inventor import Inventor2040W, MOTOR_A
+from inventor import Inventor, MOTOR_A
 
 """
-Demonstrates how to control a motor on Inventor 2040 W.
+Demonstrates how to control a motor on Inventor 2040/2350 W.
 """
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 # Access the motor from Inventor and enable it
 m = board.motors[MOTOR_A]

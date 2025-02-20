@@ -1,6 +1,6 @@
 import time
 from pimoroni import NORMAL_DIR  # , REVERSED_DIR
-from inventor import Inventor2040W, MOTOR_A
+from inventor import Inventor, MOTOR_A
 
 """
 A program that profiles the speed of a motor across its PWM
@@ -18,8 +18,8 @@ DUTY_STEPS = 100                        # How many duty cycle steps to sample th
 SETTLE_TIME = 0.1                       # How long to wait after changing motor duty cycle
 CAPTURE_TIME = 0.2                      # How long to capture the motor's speed at each step
 
-# Create a new Inventor2040W and get a motor and encoder from it
-board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
+# Create a new Inventor object and get a motor and encoder from it
+board = Inventor(motor_gear_ratio=GEAR_RATIO)
 m = board.motors[MOTOR_A]
 enc = board.encoders[MOTOR_A]
 

@@ -1,9 +1,9 @@
 import time
 import math
-from inventor import Inventor2040W, NUM_LEDS, NUM_MOTORS
+from inventor import Inventor, NUM_LEDS, NUM_MOTORS
 
 """
-An example of applying a wave pattern to Inventor 2040 W's motors and LEDs.
+An example of applying a wave pattern to Inventor 2040/2350 W's motors and LEDs.
 
 Press "User" to exit the program.
 """
@@ -15,8 +15,8 @@ UPDATES = 50          # How many times to update LEDs and motors per second
 SPEED_EXTENT = 1.0    # How far from zero to drive the motors
 HALF_LEDS = NUM_LEDS / 2
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 offset = 0.0
 

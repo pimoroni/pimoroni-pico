@@ -1,9 +1,9 @@
 import time
-from inventor import Inventor2040W, NUM_MOTORS  # , MOTOR_A, MOTOR_B
+from inventor import Inventor, NUM_MOTORS  # , MOTOR_A, MOTOR_B
 # from pimoroni import REVERSED_DIR
 
 """
-Demonstrates how to read the speeds of Inventor 2040 W's two encoders.
+Demonstrates how to read the speeds of Inventor 2040/2350 W's two encoders.
 
 Press "User" to exit the program.
 """
@@ -16,8 +16,8 @@ GEAR_RATIO = 50                         # The gear ratio of the motor
 SPEED = 1.0                             # The speed to drive the motors at
 SLEEP = 0.1                             # The time to sleep between each capture
 
-# Create a new Inventor2040W
-board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
+# Create a new Inventor object
+board = Inventor(motor_gear_ratio=GEAR_RATIO)
 
 # Uncomment the below lines (and the top imports) to
 # reverse the counting direction of an encoder

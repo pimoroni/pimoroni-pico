@@ -1,13 +1,13 @@
 import time
 import math
-from inventor import Inventor2040W, SERVO_1
+from inventor import Inventor, SERVO_1
 
 """
 Demonstrates how to control a single servo on Inventor 2040 W.
 """
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 # Access the servo from Inventor and enable it (this puts it at the middle)
 s = board.servos[SERVO_1]

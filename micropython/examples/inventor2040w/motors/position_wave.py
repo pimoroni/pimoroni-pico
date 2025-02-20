@@ -1,7 +1,7 @@
 import time
 import math
 from pimoroni import PID, REVERSED_DIR
-from inventor import Inventor2040W, NUM_MOTORS, MOTOR_A, MOTOR_B, LED_GP0, LED_SERVO_6
+from inventor import Inventor, NUM_MOTORS, MOTOR_A, MOTOR_B, LED_GP0, LED_SERVO_6
 
 """
 A demonstration of driving both of Inventor 2040 W's motor outputs between
@@ -31,8 +31,8 @@ POS_KI = 0.0                            # Position integral (I) gain
 POS_KD = 0.0022                         # Position derivative (D) gain
 
 
-# Create a new Inventor2040W
-board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
+# Create a new Inventor object
+board = Inventor(motor_gear_ratio=GEAR_RATIO)
 
 # Set the speed scale of the motors
 board.motors[MOTOR_A].speed_scale(SPEED_SCALE)

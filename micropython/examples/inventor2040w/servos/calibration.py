@@ -1,13 +1,13 @@
-from inventor import Inventor2040W, SERVO_1, SERVO_2, SERVO_3, SERVO_4
+from inventor import Inventor, SERVO_1, SERVO_2, SERVO_3, SERVO_4
 from servo import Calibration, ANGULAR, LINEAR, CONTINUOUS
 
 """
-Shows how to configure Inventor 2040 W's servos with different
+Shows how to configure Inventor 2040/2350 W's servos with different
 common calibrations, as well as a completely custom one.
 """
 
-# Create a new Inventor2040W and access four of its servos
-board = Inventor2040W()
+# Create a new Inventor object and access four of its servos
+board = Inventor()
 angular_servo = board.servos[SERVO_1]
 linear_servo = board.servos[SERVO_2]
 continuous_servo = board.servos[SERVO_3]

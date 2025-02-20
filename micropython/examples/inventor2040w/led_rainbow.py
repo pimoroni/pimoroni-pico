@@ -1,8 +1,8 @@
 import time
-from inventor import Inventor2040W, NUM_LEDS
+from inventor import Inventor, NUM_LEDS
 
 """
-Displays a rotating rainbow pattern on Inventor 2040 W's onboard LED bars.
+Displays a rotating rainbow pattern on Inventor 2040/2350 W's onboard LED bars.
 
 Press "User" to exit the program.
 """
@@ -12,8 +12,8 @@ SPEED = 5           # The speed that the LEDs will cycle at
 BRIGHTNESS = 0.4    # The brightness of the LEDs
 UPDATES = 50        # How many times the LEDs will be updated per second
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 # Variables
 offset = 0.0

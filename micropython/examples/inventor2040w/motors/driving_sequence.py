@@ -1,6 +1,6 @@
 import time
 from pimoroni import PID, REVERSED_DIR
-from inventor import Inventor2040W, MOTOR_A, MOTOR_B, NUM_MOTORS, NUM_LEDS
+from inventor import Inventor, MOTOR_A, MOTOR_B, NUM_MOTORS, NUM_LEDS
 
 """
 A demonstration of driving both of Inventor 2040 W's motor outputs through a
@@ -38,8 +38,8 @@ BAR_GRADIENT = 0.125                    # The percentage of the colour spectrum 
 HALF_LEDS = NUM_LEDS / 2
 
 
-# Create a new Inventor2040W
-board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
+# Create a new Inventor object
+board = Inventor(motor_gear_ratio=GEAR_RATIO)
 
 # Set the speed scale of the motors
 board.motors[LEFT].speed_scale(SPEED_SCALE)

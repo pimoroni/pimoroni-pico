@@ -1,6 +1,6 @@
 import time
 import math
-from inventor import Inventor2040W, NUM_SERVOS, LED_SERVO_1
+from inventor import Inventor, NUM_SERVOS, LED_SERVO_1
 
 """
 An example of applying a wave pattern to a group of servos and the LEDs.
@@ -13,8 +13,8 @@ BRIGHTNESS = 0.4      # The brightness of the LEDs
 UPDATES = 50          # How many times to update LEDs and Servos per second
 SERVO_EXTENT = 80.0   # How far from zero to move the servos
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 offset = 0.0
 

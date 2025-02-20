@@ -1,5 +1,5 @@
 import time
-from inventor import Inventor2040W, MOTOR_A, MOTOR_B
+from inventor import Inventor, MOTOR_A, MOTOR_B
 from motor import SLOW_DECAY  # , FAST_DECAY
 
 """
@@ -113,8 +113,8 @@ STATIONARY_PLAYBACK = False     # Whether to play the song with or without the m
 DECAY_MODE = SLOW_DECAY         # The motor decay mode to use, either FAST_DECAY (0) or SLOW_DECAY (1). Affects the song's quality
 
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 motor_a = board.motors[MOTOR_A]
 motor_b = board.motors[MOTOR_B]
 

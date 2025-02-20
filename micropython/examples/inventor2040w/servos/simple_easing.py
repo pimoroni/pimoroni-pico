@@ -1,7 +1,7 @@
 import time
 import math
 import random
-from inventor import Inventor2040W, SERVO_1
+from inventor import Inventor, SERVO_1
 
 """
 An example of how to move a servo smoothly between random positions.
@@ -16,8 +16,8 @@ UPDATES_PER_MOVE = TIME_FOR_EACH_MOVE * UPDATES
 SERVO_EXTENT = 80       # How far from zero to move the servo
 USE_COSINE = True       # Whether or not to use a cosine path between values
 
-# Create a new Inventor2040W and get a servo from it
-board = Inventor2040W()
+# Create a new Inventor object and get a servo from it
+board = Inventor()
 s = board.servos[SERVO_1]
 
 # Get the initial value and create a random end value between the extents

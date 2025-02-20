@@ -1,6 +1,6 @@
 import time
 from pimoroni import PID, NORMAL_DIR  # , REVERSED_DIR
-from inventor import Inventor2040W, MOTOR_A
+from inventor import Inventor, MOTOR_A
 
 """
 A program to aid in the discovery and tuning of motor PID
@@ -39,8 +39,8 @@ VEL_KI = 0.0                            # Velocity integral (I) gain
 VEL_KD = 0.4                            # Velocity derivative (D) gain
 
 
-# Create a new Inventor2040W and get a motor and encoder from it
-board = Inventor2040W(motor_gear_ratio=GEAR_RATIO)
+# Create a new Inventor object and get a motor and encoder from it
+board = Inventor(motor_gear_ratio=GEAR_RATIO)
 m = board.motors[MOTOR_A]
 enc = board.encoders[MOTOR_A]
 

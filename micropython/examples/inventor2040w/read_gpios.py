@@ -1,9 +1,9 @@
 import time
 from machine import Pin
-from inventor import Inventor2040W, GPIOS, NUM_GPIOS
+from inventor import Inventor, GPIOS, NUM_GPIOS
 
 """
-Shows how to initialise and read the 6 GPIO headers of Inventor 2040 W.
+Shows how to initialise and read the 6 GPIO headers of Inventor 2040/2350 W.
 
 Press "User" to exit the program.
 """
@@ -11,8 +11,8 @@ Press "User" to exit the program.
 BRIGHTNESS = 0.4      # The brightness of the LEDs
 GPIO_NAMES = ("GP0", "GP1", "GP2", "A0", "A1", "A2")
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 # Create an input pin object for each GPIO
 inputs = [Pin(i, Pin.IN, Pin.PULL_DOWN) for i in GPIOS]

@@ -1,8 +1,8 @@
 import time
-from inventor import Inventor2040W
+from inventor import Inventor
 
 """
-This example shows you how you can use Inventor 2040 W's audio output
+This example shows you how you can use Inventor 2040/2350 W's audio output
 with a speaker to play different notes and string them together into a bleepy tune.
 
 It uses code written by Avram Piltch - check out his Tom's Hardware article!
@@ -111,8 +111,8 @@ SONG = ("F6", "F6", "E6", "F6", "F5", "P", "F5", "P", "C6", "AS5", "A5", "C6", "
 NOTE_DURATION = 0.150           # The time (in seconds) to play each note for. Change this to make the song play faster or slower
 
 
-# Create a new Inventor2040W
-board = Inventor2040W()
+# Create a new Inventor object
+board = Inventor()
 
 # Set the volume of the speaker output
 board.volume(0.25)
