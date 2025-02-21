@@ -97,6 +97,14 @@ namespace pimoroni {
                 text_metrics.line_height = font_line_height;
             }
 
+            void set_font_max_line_width(float max_line_width) {
+                text_metrics.max_line_width = max_line_width;
+            }
+
+            void set_font_max_height(float max_height) {
+                text_metrics.max_height = max_height;
+            }
+
             void set_font_align(unsigned int font_align) {
                 text_metrics.align = font_align;
             }

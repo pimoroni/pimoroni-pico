@@ -101,12 +101,15 @@ typedef struct  {
   float line_height;                // spacing between lines (%)
   float letter_spacing;             // spacing between characters (%)   
   float word_spacing;               // spacing between words (%)
+  float max_line_width;             // maximum width of a line in pixels
+  float max_height;                 // maximum height of a line in pixels
   unsigned int align;               // horizontal and vertical alignment
   pp_mat3_t *transform;             // arbitrary transformation
 } af_text_metrics_t;
 
 bool af_load_font_file(AF_FILE file, af_face_t *face);
 void af_render_character(af_face_t *face, const char codepoint, af_text_metrics_t *tm);
+void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm);
 void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_width, float max_height, af_text_metrics_t *tm);
 pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_line_width, af_text_metrics_t *tm);
 
@@ -302,7 +305,18 @@ float get_max_line_width(af_face_t *face, const char *text, size_t tlen, af_text
   return max_width;
 }
 
+// Wrapper function to support the line_width form of af_render, we should consider this deprecated
 void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_width, float max_height, af_text_metrics_t *tm) {
+  float old_max_line_width = tm->max_line_width;
+  float old_max_height = tm->max_height;
+  tm->max_line_width = max_line_width;
+  tm->max_height = max_height;
+  af_render(face, tlen, tm);
+  tm->max_line_width = old_max_line_width;
+  tm->max_height = old_max_height;
+}
+
+void af_render(af_face_t *face, const char *text, size_t tlen, af_text_metrics_t *tm) {
   char *line = (char *)text;
   char *tend = line + tlen;
   size_t line_len = 0;
@@ -318,6 +332,9 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
 
   caret.x = 0;
   caret.y = 0;
+
+  float max_line_width = tm->max_line_width;
+  float max_height = tm->max_height;
 
   // find maximum line length
   if (max_line_width == 0.f) {
@@ -348,10 +365,14 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
       pp_mat3_translate(&caret_transform, caret.x, caret.y);
       
       if(tm->align & AF_H_ALIGN_CENTER) {
+        // Center text horizontally within a bounding box starting at 0,0
+        // that is max_line_width wide
         pp_mat3_translate(&caret_transform, (max_line_width - line_width) / 2, 0);
       }
 
       if(tm->align & AF_H_ALIGN_RIGHT) {
+        // Right-justify text within a bounding box starting at 0,0
+        // and ending at max_line_width
         pp_mat3_translate(&caret_transform, (max_line_width - line_width), 0);
       }
 

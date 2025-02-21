@@ -64,8 +64,20 @@ namespace pimoroni {
     pp_point_t caret = {0, 0};
 
     text_metrics.transform = t;
+    text_metrics.max_line_width = max_width;
+    text_metrics.max_height = max_height;
 
-    af_render(text_metrics.face, text.data(), text.size(), max_width, max_height, &text_metrics);
+    af_render(text_metrics.face, text.data(), text.size(), &text_metrics);
+
+    return caret;
+  }
+
+  pp_point_t PicoVector::text(std::string_view text, pp_mat3_t *t) {
+    pp_point_t caret = {0, 0};
+
+    text_metrics.transform = t;
+
+    af_render(text_metrics.face, text.data(), text.size(), &text_metrics);
 
     return caret;
   }
