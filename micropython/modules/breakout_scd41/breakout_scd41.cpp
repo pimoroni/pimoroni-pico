@@ -88,9 +88,64 @@ mp_obj_t scd41_get_data_ready() {
         mp_raise_msg(&mp_type_RuntimeError, READ_FAIL_MSG);
         return mp_const_none;
     }
-    // The datasheet doesn't really say *which* bit might be 1 if data is ready...
-    // so check if the least significant eleven bits are != 0
     return data_ready ? mp_const_true : mp_const_false;
+}
+
+/*
+    To successfully conduct an accurate forced recalibration, the following
+    steps need to be carried out:
+    1. Operate the SCD4x in a periodic measurement mode for > 3 minutes in an
+    environment with homogenous and constant CO₂ concentration.
+    2. Stop periodic measurement. Wait 500 ms.
+    3. Subsequently issue the perform_forced_recalibration command and
+    optionally read out the baseline correction. A return value of 0xffff
+    indicates that the forced recalibration failed.
+ */
+mp_obj_t scd41_perform_forced_recalibration(mp_obj_t target_co2_concentration_in) {
+    if(!scd41_initialised) {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+        return mp_const_none;
+    };
+    uint16_t frc_correction;
+    uint16_t target_co2_concentration = mp_obj_get_int(target_co2_concentration_in);
+    int error = scd4x_perform_forced_recalibration(target_co2_concentration, &frc_correction);
+    if(error) {
+        mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
+    }
+    // FRC correction value in CO₂ ppm or 0xFFFF if the
+    // command failed. Convert value to CO₂ ppm with: value - 0x8000
+    // The mp_const_none return and guardrails here are hopefully unecessary
+    // since it'll throw an error
+    return frc_correction == 0xffff ? mp_const_none : mp_obj_new_int(frc_correction - 0x8000);
+}
+
+mp_obj_t scd41_set_automatic_self_calibration(mp_obj_t asc_enabled) {
+    if(!scd41_initialised) {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+        return mp_const_none;
+    };
+    int error = scd4x_set_automatic_self_calibration(asc_enabled == mp_const_true ? 1u : 0u);
+    if(error) {
+        mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
+    }
+
+    return mp_const_none;
+}
+
+mp_obj_t scd41_get_automatic_self_calibration() {
+    if(!scd41_initialised) {
+        mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
+        return mp_const_none;
+    }
+
+    uint16_t asc_enabled;
+    int error = scd4x_get_automatic_self_calibration(&asc_enabled);
+    if(error) {
+        mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
+        return mp_const_none;
+    }
+
+    return asc_enabled ? mp_const_true : mp_const_false;
 }
 
 mp_obj_t scd41_set_temperature_offset(mp_obj_t offset) {

@@ -20,6 +20,10 @@ static MP_DEFINE_CONST_FUN_OBJ_0(scd41_get_data_ready_obj, scd41_get_data_ready)
 static MP_DEFINE_CONST_FUN_OBJ_1(scd41_set_temperature_offset_obj, scd41_set_temperature_offset);
 static MP_DEFINE_CONST_FUN_OBJ_0(scd41_get_temperature_offset_obj, scd41_get_temperature_offset);
 
+static MP_DEFINE_CONST_FUN_OBJ_1(scd41_perform_forced_recalibration_obj, scd41_perform_forced_recalibration);
+static MP_DEFINE_CONST_FUN_OBJ_1(scd41_set_automatic_self_calibration_obj, scd41_set_automatic_self_calibration);
+static MP_DEFINE_CONST_FUN_OBJ_0(scd41_get_automatic_self_calibration_obj, scd41_get_automatic_self_calibration);
+
 static MP_DEFINE_CONST_FUN_OBJ_1(scd41_set_sensor_altitude_obj, scd41_set_sensor_altitude);
 static MP_DEFINE_CONST_FUN_OBJ_1(scd41_set_ambient_pressure_obj, scd41_set_ambient_pressure);
 
@@ -38,6 +42,10 @@ static const mp_map_elem_t scd41_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_set_temperature_offset), MP_ROM_PTR(&scd41_set_temperature_offset_obj) },
     { MP_ROM_QSTR(MP_QSTR_get_temperature_offset), MP_ROM_PTR(&scd41_get_temperature_offset_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_perform_forced_recalibration), MP_ROM_PTR(&scd41_perform_forced_recalibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_set_automatic_self_calibration), MP_ROM_PTR(&scd41_set_automatic_self_calibration_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_automatic_self_calibration), MP_ROM_PTR(&scd41_get_automatic_self_calibration_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_set_sensor_altitude), MP_ROM_PTR(&scd41_set_sensor_altitude_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_ambient_pressure), MP_ROM_PTR(&scd41_set_ambient_pressure_obj) },

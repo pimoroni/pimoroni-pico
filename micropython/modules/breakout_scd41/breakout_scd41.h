@@ -14,3 +14,7 @@ extern mp_obj_t scd41_set_temperature_offset(mp_obj_t offset);
 extern mp_obj_t scd41_get_temperature_offset();
 extern mp_obj_t scd41_set_sensor_altitude(mp_obj_t altitude);
 extern mp_obj_t scd41_set_ambient_pressure(mp_obj_t pressure);
+
+extern mp_obj_t scd41_perform_forced_recalibration(mp_obj_t target_co2_concentration_in);
+extern mp_obj_t scd41_set_automatic_self_calibration(mp_obj_t asc_enabled);
+extern mp_obj_t scd41_get_automatic_self_calibration();
