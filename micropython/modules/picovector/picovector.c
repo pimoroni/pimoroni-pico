@@ -96,6 +96,7 @@ static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_font_align_obj, VECTOR_set_font_alig
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_antialiasing_obj, VECTOR_set_antialiasing);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_transform_obj, VECTOR_set_transform);
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_set_clip_obj, VECTOR_set_clip);
+static MP_DEFINE_CONST_FUN_OBJ_1(VECTOR_get_transform_obj, VECTOR_get_transform);
 
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_draw_obj, VECTOR_draw);
 
@@ -112,6 +113,7 @@ static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_set_antialiasing), MP_ROM_PTR(&VECTOR_set_antialiasing_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_transform), MP_ROM_PTR(&VECTOR_set_transform_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_clip), MP_ROM_PTR(&VECTOR_set_clip_obj) },
+    { MP_ROM_QSTR(MP_QSTR_get_transform), MP_ROM_PTR(&VECTOR_get_transform_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_draw), MP_ROM_PTR(&VECTOR_draw_obj) },
 };
