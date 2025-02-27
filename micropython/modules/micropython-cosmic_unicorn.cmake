@@ -7,12 +7,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+# Disable hershey fonts to claw back some binary size
+# PicoVector's Alright Fonts replace these
+target_compile_definitions(usermod INTERFACE
+HERSHEY_FONTS=0
+)
+
 # Essential
 include(pimoroni_i2c/micropython)
 include(pimoroni_bus/micropython)
 
 # Pico Graphics Essential
-include(hershey_fonts/micropython)
 include(bitmap_fonts/micropython)
 include(picographics/micropython)
 
