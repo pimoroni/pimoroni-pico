@@ -208,7 +208,7 @@ mp_obj_t POLYGON_path(size_t n_args, const mp_obj_t *all_args) {
         });
     }
 
-    return mp_const_none;
+    return self;
 }
 
 mp_obj_t POLYGON_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
