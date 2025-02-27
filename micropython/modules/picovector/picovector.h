@@ -47,6 +47,7 @@ extern mp_obj_t VECTOR_set_font_align(mp_obj_t self_in, mp_obj_t align);
 extern mp_obj_t VECTOR_set_antialiasing(mp_obj_t self_in, mp_obj_t aa);
 extern mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in);
 extern mp_obj_t VECTOR_set_clip(mp_obj_t self_in, mp_obj_t clip_in);
+extern mp_obj_t VECTOR_get_transform(mp_obj_t self_in);
 
 extern mp_obj_t VECTOR_draw(mp_obj_t self_in, mp_obj_t poly_in);
 extern mp_obj_t VECTOR_rotate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);

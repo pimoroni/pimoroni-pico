@@ -23,15 +23,16 @@ typedef struct _ModPicoGraphics_obj_t {
     bool blocking = true;
 } ModPicoGraphics_obj_t;
 
-typedef struct _VECTOR_obj_t {
-    mp_obj_base_t base;
-    PicoVector *vector;
-} _VECTOR_obj_t;
-
 typedef struct _TRANSFORM_obj_t {
     mp_obj_base_t base;
     pp_mat3_t transform;
 } _TRANSFORM_obj_t;
+
+typedef struct _VECTOR_obj_t {
+    mp_obj_base_t base;
+    PicoVector *vector;
+    _TRANSFORM_obj_t *transform;
+} _VECTOR_obj_t;
 
 typedef struct _POLY_obj_t {
     mp_obj_base_t base;
@@ -566,7 +567,7 @@ mp_obj_t TRANSFORM_custom(mp_obj_t self_in, mp_obj_t custom_in) {
 
     pp_mat3_mul(&transform->transform, &t);
 
-    return mp_const_none;
+    return transform;
 }
 
 mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_in) {
@@ -589,7 +590,7 @@ mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_i
         pp_mat3_rotate(&transform->transform, angle);
     }
 
-    return mp_const_none;
+    return transform;
 }
 
 mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
@@ -600,7 +601,7 @@ mp_obj_t TRANSFORM_translate(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
 
     pp_mat3_translate(&transform->transform, o_x, o_y);
 
-    return mp_const_none;
+    return transform;
 }
 
 mp_obj_t TRANSFORM_scale(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
@@ -611,7 +612,7 @@ mp_obj_t TRANSFORM_scale(mp_obj_t self_in, mp_obj_t x_in, mp_obj_t y_in) {
 
     pp_mat3_scale(&transform->transform, o_x, o_y);
 
-    return mp_const_none;
+    return transform;
 }
 
 mp_obj_t TRANSFORM_reset(mp_obj_t self_in) {
@@ -645,20 +646,28 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
 mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
-    (void)self;
 
     if(transform_in == mp_const_none) {
-        pp_mat3_t* old = pp_transform(NULL);
-        (void)old; // TODO: Return old transform?
+        pp_transform(NULL);
+        self->transform = NULL;
     } else if MP_OBJ_IS_TYPE(transform_in, &TRANSFORM_type) {
         _TRANSFORM_obj_t *transform = (_TRANSFORM_obj_t *)MP_OBJ_TO_PTR(transform_in);
-        pp_mat3_t* old = pp_transform(&transform->transform);
-        (void)old;
+        pp_transform(&transform->transform);
+
+        // Store a reference to the transform so `set_transform(Transform())`
+        // doesn't break when GC runs.
+        self->transform = transform;
     } else {
-        // TODO: ValueError?
+        mp_raise_ValueError("Must set a valid transform or None.");
     }
 
     return mp_const_none;
+}
+
+mp_obj_t VECTOR_get_transform(mp_obj_t self_in) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+
+    return self->transform ? self->transform : mp_const_none;
 }
 
 mp_obj_t VECTOR_set_font(mp_obj_t self_in, mp_obj_t font, mp_obj_t size) {
