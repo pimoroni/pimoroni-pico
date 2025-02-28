@@ -36,12 +36,6 @@ jobs:
           board: PIMORONI_TUFTY2040
         - name: enviro
           board: PICO_W_ENVIRO
-        - name: galactic_unicorn
-          board: RPI_PICO_W
-        - name: cosmic_unicorn
-          board: RPI_PICO_W
-        - name: stellar_unicorn
-          board: RPI_PICO_W
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
