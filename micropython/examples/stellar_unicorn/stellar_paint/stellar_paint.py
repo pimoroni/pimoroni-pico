@@ -1,6 +1,5 @@
 import os
-from microdot_asyncio import Microdot, send_file
-from microdot_asyncio_websocket import with_websocket
+from microdot import Microdot, send_file, websocket
 from phew import connect_to_wifi
 from stellar import StellarUnicorn
 from picographics import PicoGraphics, DISPLAY_STELLAR_UNICORN as DISPLAY
@@ -75,7 +74,7 @@ def flood_fill(x, y, r, g, b):
 
 
 @server.route('/paint')
-@with_websocket
+@websocket.with_websocket
 async def echo(request, ws):
     while True:
         data = await ws.receive()
