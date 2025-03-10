@@ -60,14 +60,18 @@ bool APA102::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+bool APA102::is_busy() {
+   return dma_channel_is_busy(dma_channel);
+}
+
 void APA102::update(bool blocking) {
-    if(dma_channel_is_busy(dma_channel) && !blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    if(is_busy() && !blocking) return;
+    while(is_busy()) {}; // Block waiting for DMA finish
     pio->txf[sm] = 0x00000000; // Output the APA102 start-of-frame bytes
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, buffer, true);
     if (!blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    while(is_busy()) {}; // Block waiting for DMA finish
     // This is necessary to prevent a single LED remaining lit when clearing and updating.
     // This code will only run in *blocking* mode since it's assumed non-blocking will be continuously updating anyway.
     // Yes this will slow down LED updates... don't use blocking mode unless you're clearing LEDs before shutdown,

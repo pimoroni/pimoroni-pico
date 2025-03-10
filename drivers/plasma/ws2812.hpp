@@ -85,6 +85,7 @@ namespace plasma {
             bool start(uint fps=60);
             bool stop();
             void update(bool blocking=false);
+            bool is_busy();
             void clear();
             void set_hsv(uint32_t index, float h, float s, float v, uint8_t w=0);
             void set_rgb(uint32_t index, uint8_t r, uint8_t g, uint8_t b, uint8_t w=0, bool gamma=true);
