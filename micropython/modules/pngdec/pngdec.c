@@ -1,6 +1,5 @@
 #include "pngdec.h"
 
-static MP_DEFINE_CONST_FUN_OBJ_1(PNG_del_obj, _PNG_del);
 static MP_DEFINE_CONST_FUN_OBJ_2(PNG_openRAM_obj, _PNG_openRAM);
 static MP_DEFINE_CONST_FUN_OBJ_2(PNG_openFILE_obj, _PNG_openFILE);
 static MP_DEFINE_CONST_FUN_OBJ_KW(PNG_decode_obj, 1, _PNG_decode);
@@ -10,7 +9,6 @@ static MP_DEFINE_CONST_FUN_OBJ_1(PNG_getPalette_obj, _PNG_getPalette);
 
 // class
 static const mp_rom_map_elem_t PNG_locals_dict_table[] = {
-    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&PNG_del_obj) },
     { MP_ROM_QSTR(MP_QSTR_open_RAM), MP_ROM_PTR(&PNG_openRAM_obj) },
     { MP_ROM_QSTR(MP_QSTR_open_file), MP_ROM_PTR(&PNG_openFILE_obj) },
     { MP_ROM_QSTR(MP_QSTR_decode), MP_ROM_PTR(&PNG_decode_obj) },

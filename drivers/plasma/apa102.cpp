@@ -4,10 +4,26 @@
 namespace plasma {
 
 APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq, RGB* buffer) : buffer(buffer), num_leds(num_leds), pio(pio), sm(sm) {
+    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
+    uint range_max = std::max(pin_dat, pin_clk);
+    uint range_min = std::min(pin_dat, pin_clk);
+
+    // Both pins in 16-48 range
+    if(range_max >= 32 && range_min >= 16) {
+        pio_set_gpio_base(pio, 16);
+    // Both pins in 0-31 range
+    } else if(range_max <= 31) {
+        pio_set_gpio_base(pio, 0);
+    // Pins in different ranges: invalid combo!
+    } else {
+        // TODO: Need some means to notify the caller
+        pio_set_gpio_base(pio, 0);
+    }
+
     pio_program_offset = pio_add_program(pio, &apa102_program);
 
-    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << pin_clk) | (1u << pin_dat));
-    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << pin_clk) | (1u << pin_dat));
+    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
+    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
     pio_gpio_init(pio, pin_clk);
     pio_gpio_init(pio, pin_dat);
 
