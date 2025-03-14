@@ -400,6 +400,8 @@ uint32_t _pp_max_nodes_per_scanline = 0;
 // Rather than potentially allocating into PSRAM at runtime and trashing perf
 uint8_t pp_tile_buffer[PP_TILE_BUFFER_SIZE * PP_TILE_BUFFER_SIZE];
 
+pp_point_t* pp_point_buffer;
+
 // polygon node buffer handles at most 16 line intersections per scanline
 // is this enough for cjk/emoji? (requires a 2kB buffer)
 int32_t *pp_nodes;
@@ -413,6 +415,7 @@ void pp_init(uint32_t max_nodes_per_scanline) {
   _pp_max_nodes_per_scanline = max_nodes_per_scanline;
   pp_nodes = (int32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
   pp_node_counts = (uint32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
+  pp_point_buffer = (pp_point_t *)PP_MALLOC(max_nodes_per_scanline * max_nodes_per_scanline * sizeof(pp_point_t));
 }
 
 void pp_deinit() {
@@ -488,45 +491,44 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end, pp_
     x += xinc * xjump;
   }
 
-// #ifdef USE_RP2040_INTERP
-//   interp1->base[1] = full_tile_width;
-//   interp1->accum[0] = x;
+  int32_t *pp_scanline_nodes = &pp_nodes[y * _pp_max_nodes_per_scanline * 2];
+  const int32_t nodes_step = _pp_max_nodes_per_scanline * 2;
 
-//   // loop over scanlines
-//   while(count--) {
-//     // consume accumulated error
-//     while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
+  const int full_tile_width = (tb->w << _pp_antialias);
+  if (false && _pp_min(x, ex) >= 0 && _pp_max(x, ex) <= full_tile_width) {
+    // loop over scanlines
+    while(count--) {
+      // consume accumulated error
+      while(e > dy) {e -= dy; x += xinc;}
 
-//     // clamp node x value to tile bounds
-//     const int nx = interp1->peek[0];
-//     debug("      + adding node at %d, %d\n", x, y);
-//     // add node to node list
-//     pp_nodes[y][pp_node_counts[y]++] = nx;
+      //debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      pp_scanline_nodes[pp_node_counts[y]++] = x;
 
-//     // step to next scanline and accumulate error
-//     y++;
-//     e += einc;
-//   }
-// #else
-  // loop over scanlines
-
-  while(count--) {
-    int32_t *pp_scanline_nodes = &pp_nodes[y * _pp_max_nodes_per_scanline * 2];
-
-    // consume accumulated error
-    while(e > dy) {e -= dy; x += xinc;}
-
-    // clamp node x value to tile bounds
-    int nx = _pp_max(_pp_min(x, (tb->w << _pp_antialias)), 0);
-    //debug("      + adding node at %d, %d\n", x, y);
-    // add node to node list
-    pp_scanline_nodes[pp_node_counts[y]++] = nx;
-
-    // step to next scanline and accumulate error
-    y++;
-    e += einc;
+      // step to next scanline and accumulate error
+      y++;
+      e += einc;
+      pp_scanline_nodes += nodes_step;
+    }
   }
-//#endif
+  else {
+    // loop over scanlines
+    while(count--) {
+      // consume accumulated error
+      while(e > dy) {e -= dy; x += xinc;}
+
+      // clamp node x value to tile bounds
+      int nx = _pp_max(_pp_min(x, full_tile_width), 0);
+      //debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      pp_scanline_nodes[pp_node_counts[y]++] = nx;
+
+      // step to next scanline and accumulate error
+      y++;
+      e += einc;
+      pp_scanline_nodes += nodes_step;
+    }
+  }
 }
 
 void build_nodes(pp_path_t *path, pp_rect_t *tb) {
@@ -550,13 +552,62 @@ void build_nodes(pp_path_t *path, pp_rect_t *tb) {
   }
 }
 
+int compare_points(const void* a, const void* b) {
+  PP_COORD_TYPE pa = ((pp_point_t*)a)->x;
+  PP_COORD_TYPE pb = ((pp_point_t*)b)->x;
+  if (pa > pb) return 1;
+  if (pa < pb) return -1;
+  pa = (((pp_point_t*)a) + 1)->x;
+  pb = (((pp_point_t*)b) + 1)->x;
+  if (pa > pb) return 1;
+  return -1;
+}
+
+void build_all_nodes(pp_path_t *path, pp_rect_t *tb) {
+  PP_COORD_TYPE aa_scale = (PP_COORD_TYPE)(1 << _pp_antialias);
+
+  pp_point_t tile_origin = (pp_point_t){tb->x * aa_scale, tb->y * aa_scale};
+  pp_point_t* points = pp_point_buffer;
+  int num_segments = 0;
+
+  while (path) {
+    // start with the last point to close the loop, transform it, scale for antialiasing, and offset to tile origin
+    pp_point_t last = path->points[path->count - 1];
+    if(_pp_transform) last = pp_point_transform(&last, _pp_transform);
+    last.x *= aa_scale; last.y *= aa_scale;
+    last = pp_point_sub(&last, &tile_origin);
+
+    for(int i = 0; i < path->count; i++) {
+      pp_point_t next = path->points[i];
+      if(_pp_transform) next = pp_point_transform(&next, _pp_transform);
+      next.x *= aa_scale; next.y *= aa_scale;
+      next = pp_point_sub(&next, &tile_origin);
+      *points++ = last;
+      *points++ = next;
+      ++num_segments;
+    }
+
+    path = path->next;
+  }
+
+  qsort(pp_point_buffer, num_segments, sizeof(pp_point_buffer) * 2, compare_points);
+
+  points = pp_point_buffer;
+  for (int i = 0; i < num_segments; ++i) {
+    const pp_point_t last = *points++;
+    const pp_point_t next = *points++;
+    add_line_segment_to_nodes(last, next, tb);
+  }
+}
+
 int compare_nodes(const void* a, const void* b) {
   return *((int*)a) - *((int*)b);
 }
 
 pp_rect_t render_nodes(pp_rect_t *tb) {
-  pp_rect_t rb = {PP_TILE_BUFFER_SIZE << _pp_antialias, PP_TILE_BUFFER_SIZE << _pp_antialias, 0, 0}; // render bounds
-  int maxx = 0, minx = PP_TILE_BUFFER_SIZE << _pp_antialias;
+  pp_rect_t rb = {PP_TILE_BUFFER_SIZE << _pp_antialias, 0, 0, 0}; // render bounds
+  int maxx = 0, maxy = -1;
+  const int antialias_mask = (1 << _pp_antialias) - 1;
   debug("  + render tile %d, %d - %d, %d\n", tb->x, tb->y, tb->w, tb->h);
 
   for(int y = 0; y < ((int)PP_TILE_BUFFER_SIZE << _pp_antialias); y++) {
@@ -566,10 +617,13 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
 
     if(pp_node_counts[y] == 0) continue; // no nodes on this raster line
 
-    qsort(pp_scanline_nodes, pp_node_counts[y], sizeof(int), compare_nodes);
+    //qsort(pp_scanline_nodes, pp_node_counts[y], sizeof(int), compare_nodes);
 
     unsigned char* row_data = &pp_tile_buffer[(y >> _pp_antialias) * PP_TILE_BUFFER_SIZE];
 
+    bool rendered_any = false;
+
+    rb.x = _pp_min(rb.x, *pp_scanline_nodes);
     for(uint32_t i = 0; i < pp_node_counts[y]; i += 2) {
       int sx = *pp_scanline_nodes++;
       int ex = *pp_scanline_nodes++;
@@ -579,22 +633,44 @@ pp_rect_t render_nodes(pp_rect_t *tb) {
       }
 
       // update render bounds
-      rb.x = _pp_min(rb.x, sx);
-      rb.y = _pp_min(rb.y, y);
-      minx = _pp_min(_pp_min(sx, ex), minx);
-      maxx = _pp_max(_pp_max(sx, ex), maxx);
-      rb.h = y - rb.y + 1;
+      rendered_any = true;
 
-      //debug(" - render span at %d from %d to %d\n", y, sx, ex);
+      if (_pp_antialias) {
+        int ax = sx >> _pp_antialias;
+        const int aex = ex >> _pp_antialias;
 
-      // rasterise the span into the tile buffer
-      do {
-        row_data[sx >> _pp_antialias]++;
-      } while(++sx < ex);
+        if (ax == aex) {
+          row_data[ax] += ex - sx;
+          continue;
+        }
+
+        row_data[ax] += (1 << _pp_antialias) - (sx & antialias_mask);
+        for(ax++; ax < aex; ax++) {
+          row_data[ax] += (1 << _pp_antialias);
+        }
+
+        // This might add 0 to the byte after the end of the row,
+        // TODO check that's OK
+        row_data[ax] += ex & antialias_mask;
+      }
+      else {
+        for(int x = sx; x < ex; x++) {
+          row_data[x]++;
+        }
+      }
+    }
+
+    maxx = _pp_max(*(pp_scanline_nodes-1) - 1, maxx);
+    if (rendered_any) {
+      maxy = y;
+    }
+    else if (y == rb.y) {
+      ++rb.y;
     }
   }
 
-  rb.w = maxx - minx;
+  rb.w = (maxx >= rb.x) ? maxx + 1 - rb.x : 0;
+  rb.h = (maxy >= rb.y) ? maxy + 1 - rb.y : 0;
 
   // shifting the width and height effectively "floors" the result which can
   // mean we lose a pixel off the right or bottom edge of the tile. by adding
@@ -673,11 +749,15 @@ void pp_render(pp_poly_t *polygon) {
       // build the nodes for each pp_path_t
       pp_path_t *path = polygon->paths;
       if(!path) return;
+#if 1
+      build_all_nodes(path, &tb);
+#else
       do {
         debug("    : build nodes for path (%d points)\n", path->count);
         build_nodes(path, &tb);
         path = path->next;
       } while(path);
+#endif
 
       debug("    : render the tile\n");
       // render the tile
