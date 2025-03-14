@@ -49,8 +49,8 @@
 #endif
 
 #if defined(PICO_ON_DEVICE) && PICO_ON_DEVICE
-#define USE_RP2040_INTERP
-#include "hardware/interp.h"
+//#define USE_RP2040_INTERP
+//#include "hardware/interp.h"
 #endif
 
 #ifdef __cplusplus
@@ -488,47 +488,44 @@ void add_line_segment_to_nodes(const pp_point_t start, const pp_point_t end, pp_
     x += xinc * xjump;
   }
 
-// #ifdef USE_RP2040_INTERP
-//   interp1->base[1] = full_tile_width;
-//   interp1->accum[0] = x;
-
-//   // loop over scanlines
-//   while(count--) {
-//     // consume accumulated error
-//     while(e > dy) {e -= dy; interp1->add_raw[0] = xinc;}
-
-//     // clamp node x value to tile bounds
-//     const int nx = interp1->peek[0];
-//     debug("      + adding node at %d, %d\n", x, y);
-//     // add node to node list
-//     pp_nodes[y][pp_node_counts[y]++] = nx;
-
-//     // step to next scanline and accumulate error
-//     y++;
-//     e += einc;
-//   }
-// #else
-  // loop over scanlines
-
   int32_t *pp_scanline_nodes = &pp_nodes[y * _pp_max_nodes_per_scanline * 2];
   const int32_t nodes_step = _pp_max_nodes_per_scanline * 2;
 
-  while(count--) {
-    // consume accumulated error
-    while(e > dy) {e -= dy; x += xinc;}
+  const int full_tile_width = (tb->w << _pp_antialias);
+  if (false && _pp_min(x, ex) >= 0 && _pp_max(x, ex) <= full_tile_width) {
+    // loop over scanlines
+    while(count--) {
+      // consume accumulated error
+      while(e > dy) {e -= dy; x += xinc;}
 
-    // clamp node x value to tile bounds
-    int nx = _pp_max(_pp_min(x, (tb->w << _pp_antialias)), 0);
-    //debug("      + adding node at %d, %d\n", x, y);
-    // add node to node list
-    pp_scanline_nodes[pp_node_counts[y]++] = nx;
+      //debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      pp_scanline_nodes[pp_node_counts[y]++] = x;
 
-    // step to next scanline and accumulate error
-    y++;
-    e += einc;
-    pp_scanline_nodes += nodes_step;
+      // step to next scanline and accumulate error
+      y++;
+      e += einc;
+      pp_scanline_nodes += nodes_step;
+    }
   }
-//#endif
+  else {
+    // loop over scanlines
+    while(count--) {
+      // consume accumulated error
+      while(e > dy) {e -= dy; x += xinc;}
+
+      // clamp node x value to tile bounds
+      int nx = _pp_max(_pp_min(x, full_tile_width), 0);
+      //debug("      + adding node at %d, %d\n", x, y);
+      // add node to node list
+      pp_scanline_nodes[pp_node_counts[y]++] = nx;
+
+      // step to next scanline and accumulate error
+      y++;
+      e += einc;
+      pp_scanline_nodes += nodes_step;
+    }
+  }
 }
 
 void build_nodes(pp_path_t *path, pp_rect_t *tb) {
