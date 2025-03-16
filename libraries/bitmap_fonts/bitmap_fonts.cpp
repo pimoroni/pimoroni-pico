@@ -39,6 +39,12 @@ namespace bitmap {
       text_width += letter_spacing * scale;
       codepage = unicode_sorta::PAGE_195; // Reset back to default
     }
+
+    // Do not include the spacing on the final character
+    if (text_width>0) {
+      text_width -= letter_spacing * scale;
+    }
+
     return text_width;
   }
 
