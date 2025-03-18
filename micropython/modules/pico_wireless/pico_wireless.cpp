@@ -13,7 +13,7 @@ PicoWireless *wireless = nullptr;
 extern "C" {
 #include "pico_wireless.h"
 
-#define NOT_INITIALISED_MSG     "Cannot call this function, as picowireless is not initialised. Call picowireless.init() first."
+#define NOT_INITIALISED_MSG     MP_ERROR_TEXT("Cannot call this function, as picowireless is not initialised. Call picowireless.init() first.")
 
 static void mp_obj_to_string(const mp_obj_t &obj, std::string &string_out) {
     if(mp_obj_is_str_or_bytes(obj)) {

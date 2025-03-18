@@ -34,7 +34,7 @@ void Channel_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t ki
 
 /***** Constructor *****/
 mp_obj_t Channel_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
-    mp_raise_msg(&mp_type_RuntimeError, "Cannot create Channel objects. They can only be accessed from StellarUnicorn.synth_channel()");
+    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Cannot create Channel objects. They can only be accessed from StellarUnicorn.synth_channel()"));
     return mp_const_none;
 }
 

@@ -785,7 +785,7 @@ mp_obj_t Calibration_value_to_pulse(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert value to pulse. Calibration needs at least 2 pairs");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Unable to convert value to pulse. Calibration needs at least 2 pairs"));
     }
     return mp_const_none;
 }
@@ -813,7 +813,7 @@ mp_obj_t Calibration_pulse_to_value(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert pulse to value. Calibration needs at least 2 pairs");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Unable to convert pulse to value. Calibration needs at least 2 pairs"));
     }
     return mp_const_none;
 }
@@ -1348,7 +1348,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     if(!cluster->init()) {
         m_del_class(ServoCluster, cluster);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 
     self = mp_obj_malloc_with_finaliser(_ServoCluster_obj_t, &ServoCluster_type);
