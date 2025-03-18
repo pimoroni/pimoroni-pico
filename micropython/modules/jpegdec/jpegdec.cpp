@@ -197,7 +197,7 @@ void jpegdec_open_helper(_JPEG_obj_t *self) {
         result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
     }
 
-    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, "JPEG: could not read file/buffer.");
+    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("JPEG: could not read file/buffer."));
 }
 
 mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {

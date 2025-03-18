@@ -737,7 +737,7 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     if(!cluster->init()) {
         m_del_class(MotorCluster, cluster);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this MotorCluster. Try running `import gc` followed by `gc.collect()` before creating it");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this MotorCluster. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 
     self = mp_obj_malloc_with_finaliser(_MotorCluster_obj_t, &MotorCluster_type);
