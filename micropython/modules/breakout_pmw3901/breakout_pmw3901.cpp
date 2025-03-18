@@ -80,14 +80,14 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
                 BreakoutPMW3901 *breakout = m_new_class(BreakoutPMW3901, (BG_SPI_SLOT)slot);
                 if (!breakout->init()) {
                     m_del_class(BreakoutPMW3901, breakout);
-                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+                    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPMW3901: Init failed"));
                 }
                 self->breakout = breakout;
             } else {
                 BreakoutPAA5100 *breakout = m_new_class(BreakoutPAA5100, (BG_SPI_SLOT)slot);
                 if (!breakout->init()) {
                     m_del_class(BreakoutPAA5100, breakout);
-                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+                    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPAA5100: Init failed"));
                 }
                 self->breakout = breakout;
             }
@@ -143,14 +143,14 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
             BreakoutPMW3901 *breakout = m_new_class(BreakoutPMW3901, spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
             if (!breakout->init()) {
                 m_del_class(BreakoutPMW3901, breakout);
-                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+                mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPMW3901: Init failed"));
             }
             self->breakout = breakout;
         } else {
             BreakoutPAA5100 *breakout = m_new_class(BreakoutPAA5100, spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
             if (!breakout->init()) {
                 m_del_class(BreakoutPAA5100, breakout);
-                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+                mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPAA5100: Init failed"));
             }
             self->breakout = breakout;
         }
