@@ -89,7 +89,7 @@ int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     int error;
     mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(MP_ERROR_TEXT(error));
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("PNG: seek failed with %d"), error);
     }
 
     return seek_s.offset;
