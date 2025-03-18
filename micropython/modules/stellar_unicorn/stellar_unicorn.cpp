@@ -50,7 +50,7 @@ void set_channel_waveforms(AudioChannel& channel, mp_obj_t in) {
     int waveforms = mp_obj_get_int(in);
     const int mask = (NOISE | SQUARE | SAW | TRIANGLE | SINE | WAVE);
     if(waveforms < 0 || (waveforms & mask) == 0) {
-        mp_raise_ValueError("waveforms invalid. Expected a combination of NOISE, SQUARE, SAW, TRIANGLE, SINE, or WAVE");
+        mp_raise_ValueError(MP_ERROR_TEXT("waveforms invalid. Expected a combination of NOISE, SQUARE, SAW, TRIANGLE, SINE, or WAVE"));
     }
     channel.waveforms = (uint8_t)waveforms;
 }
@@ -58,7 +58,7 @@ void set_channel_waveforms(AudioChannel& channel, mp_obj_t in) {
 void set_channel_frequency(AudioChannel& channel, mp_obj_t in) {
     int freq = mp_obj_get_int(in);
     if(freq <= 0 || freq > UINT16_MAX) {
-        mp_raise_ValueError("frequency out of range. Expected greater than 0Hz to 65535Hz");
+        mp_raise_ValueError(MP_ERROR_TEXT("frequency out of range. Expected greater than 0Hz to 65535Hz"));
     }
     channel.frequency = (uint16_t)freq;
 }
@@ -66,7 +66,7 @@ void set_channel_frequency(AudioChannel& channel, mp_obj_t in) {
 void set_channel_volume(AudioChannel& channel, mp_obj_t in) {
     float volume = mp_obj_get_float(in);
     if(volume < 0.0f || volume > 1.0f) {
-        mp_raise_ValueError("volume out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("volume out of range. Expected 0.0 to 1.0"));
     }
     channel.volume = (uint16_t)(volume * UINT16_MAX);
 }
@@ -74,7 +74,7 @@ void set_channel_volume(AudioChannel& channel, mp_obj_t in) {
 void set_channel_attack(AudioChannel& channel, mp_obj_t in) {
     int attack_ms = (int)(mp_obj_get_float(in) * 1000.0f);
     if(attack_ms < 0 || attack_ms > UINT16_MAX) {
-        mp_raise_ValueError("attack out of range. Expected 0.0s to 65.5s");
+        mp_raise_ValueError(MP_ERROR_TEXT("attack out of range. Expected 0.0s to 65.5s"));
     }
     channel.attack_ms = MAX(attack_ms, 1);
 }
@@ -82,7 +82,7 @@ void set_channel_attack(AudioChannel& channel, mp_obj_t in) {
 void set_channel_decay(AudioChannel& channel, mp_obj_t in) {
     int decay_ms = (int)(mp_obj_get_float(in) * 1000.0f);
     if(decay_ms < 0 || decay_ms > UINT16_MAX) {
-        mp_raise_ValueError("decay out of range. Expected 0.0s to 65.5s");
+        mp_raise_ValueError(MP_ERROR_TEXT("decay out of range. Expected 0.0s to 65.5s"));
     }
     channel.decay_ms = MAX(decay_ms, 1);
 }
@@ -90,7 +90,7 @@ void set_channel_decay(AudioChannel& channel, mp_obj_t in) {
 void set_channel_sustain(AudioChannel& channel, mp_obj_t in) {
     float sustain = mp_obj_get_float(in);
     if(sustain < 0.0f || sustain > 1.0f) {
-        mp_raise_ValueError("sustain out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("sustain out of range. Expected 0.0 to 1.0"));
     }
     channel.sustain = (uint16_t)(sustain * UINT16_MAX);
 }
@@ -98,7 +98,7 @@ void set_channel_sustain(AudioChannel& channel, mp_obj_t in) {
 void set_channel_release(AudioChannel& channel, mp_obj_t in) {
     int release_ms = (int)(mp_obj_get_float(in) * 1000.0f);
     if(release_ms < 0 || release_ms > UINT16_MAX) {
-        mp_raise_ValueError("release out of range. Expected 0.0s to 65.5s");
+        mp_raise_ValueError(MP_ERROR_TEXT("release out of range. Expected 0.0s to 65.5s"));
     }
     channel.release_ms = MAX(release_ms, 1);
 }
@@ -106,7 +106,7 @@ void set_channel_release(AudioChannel& channel, mp_obj_t in) {
 void set_channel_pulse_width(AudioChannel& channel, mp_obj_t in) {
     float pulse_width = mp_obj_get_float(in);
     if(pulse_width < 0.0f || pulse_width > 1.0f) {
-        mp_raise_ValueError("pulse_width out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("pulse_width out of range. Expected 0.0 to 1.0"));
     }
     channel.pulse_width = (uint16_t)(pulse_width * UINT16_MAX);
 }
@@ -378,13 +378,13 @@ mp_obj_t StellarUnicorn_make_new(const mp_obj_type_t *type, size_t n_args, size_
 
     int pio_int = args[ARG_pio].u_int;
     if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
-        mp_raise_ValueError("pio out of range. Expected 0 to 1");
+        mp_raise_ValueError(MP_ERROR_TEXT("pio out of range. Expected 0 to 1"));
     }
     //PIO pio = pio_int == 0 ? pio0 : pio1;
 
     int sm = args[ARG_sm].u_int;
     if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
-        mp_raise_ValueError("sm out of range. Expected 0 to 3");
+        mp_raise_ValueError(MP_ERROR_TEXT("sm out of range. Expected 0 to 3"));
     }
 
 
@@ -473,7 +473,7 @@ extern mp_obj_t StellarUnicorn_play_sample(mp_obj_t self_in, mp_obj_t data) {
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(data, &bufinfo, MP_BUFFER_RW);
     if(bufinfo.len < 1) {
-        mp_raise_ValueError("Supplied buffer is too small!");
+        mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is too small!"));
     }
 
     self->stellar->play_sample((uint8_t *)bufinfo.buf, bufinfo.len);

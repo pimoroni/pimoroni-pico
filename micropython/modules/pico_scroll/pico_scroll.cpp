@@ -80,9 +80,9 @@ mp_obj_t picoscroll_set_pixel(mp_uint_t n_args, const mp_obj_t *args) {
     int val = mp_obj_get_int(args[3]);
 
     if (x < 0 || x >= PicoScroll::WIDTH || y < 0 || y >= PicoScroll::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     if (val < 0 || val > 255)
-        mp_raise_ValueError("val out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("val out of range. Expected 0 to 255"));
 
     self->scroll->set_pixel(x, y, val);
 
@@ -213,7 +213,7 @@ mp_obj_t picoscroll_is_pressed(mp_obj_t self_in, mp_obj_t button_obj) {
         break;
 
     default:
-        mp_raise_ValueError("button not valid. Expected 0 to 3");
+        mp_raise_ValueError(MP_ERROR_TEXT("button not valid. Expected 0 to 3"));
         break;
     }
 

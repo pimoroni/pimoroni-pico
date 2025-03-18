@@ -66,12 +66,12 @@ mp_obj_t picounicorn_set_pixel(mp_uint_t n_args, const mp_obj_t *args) {
     int b = mp_obj_get_int(args[ARG_b]);
 
     if(x < 0 || x >= PicoUnicorn::WIDTH || y < 0 || y >= PicoUnicorn::HEIGHT) {
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     }
 
-    if(r < 0 || r > 255) mp_raise_ValueError("r out of range. Expected 0 to 255");
-    if(g < 0 || g > 255) mp_raise_ValueError("g out of range. Expected 0 to 255");
-    if(b < 0 || b > 255) mp_raise_ValueError("b out of range. Expected 0 to 255");
+    if(r < 0 || r > 255) mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
+    if(g < 0 || g > 255) mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
+    if(b < 0 || b > 255) mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
     self->unicorn->set_pixel(x, y, r, g, b);
 
     return mp_const_none;
@@ -87,10 +87,10 @@ mp_obj_t picounicorn_set_pixel_value(size_t n_args, const mp_obj_t *args) {
     int val = mp_obj_get_int(args[ARG_v]);
 
     if(x < 0 || x >= PicoUnicorn::WIDTH || y < 0 || y >= PicoUnicorn::HEIGHT) {
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     }
 
-    if(val < 0 || val > 255) mp_raise_ValueError("val out of range. Expected 0 to 255");
+    if(val < 0 || val > 255) mp_raise_ValueError(MP_ERROR_TEXT("val out of range. Expected 0 to 255"));
 
     self->unicorn->set_pixel(x, y, val);
 
@@ -127,7 +127,7 @@ mp_obj_t picounicorn_is_pressed(mp_obj_t self_in, mp_obj_t button_obj) {
         break;
 
     default:
-        mp_raise_ValueError("button not valid. Expected 0 to 3");
+        mp_raise_ValueError(MP_ERROR_TEXT("button not valid. Expected 0 to 3"));
         break;
     }
 

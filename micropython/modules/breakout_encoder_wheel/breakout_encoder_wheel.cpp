@@ -83,7 +83,7 @@ extern mp_obj_t BreakoutEncoderWheel_pressed(mp_obj_t self_in, mp_obj_t button_i
     int button = mp_obj_get_int(button_in);
 
     if(button < 0 || button >= 5) {
-        mp_raise_ValueError("button out of range. Expected 0 to 4");
+        mp_raise_ValueError(MP_ERROR_TEXT("button out of range. Expected 0 to 4"));
     }
 
     return mp_obj_new_bool(self->breakout->pressed(button));
@@ -150,7 +150,7 @@ extern mp_obj_t BreakoutEncoderWheel_direction(size_t n_args, const mp_obj_t *po
     else {
         int direction = mp_obj_get_int(args[ARG_direction].u_obj);
         if(direction < 0 || direction > 1) {
-            mp_raise_ValueError("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)");
+            mp_raise_ValueError(MP_ERROR_TEXT("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)"));
         }
         self->breakout->direction((Direction)direction);
         return mp_const_none;
@@ -179,13 +179,13 @@ extern mp_obj_t BreakoutEncoderWheel_set_rgb(size_t n_args, const mp_obj_t *pos_
     int b = args[ARG_b].u_int;
 
     if(index < 0 || index >= 24)
-        mp_raise_ValueError("index out of range. Expected 0 to 23");
+        mp_raise_ValueError(MP_ERROR_TEXT("index out of range. Expected 0 to 23"));
     else if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     else if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     else if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
     else
         self->breakout->set_rgb(index, r, g, b);
 
@@ -222,7 +222,7 @@ extern mp_obj_t BreakoutEncoderWheel_set_hsv(size_t n_args, const mp_obj_t *pos_
     }
 
     if(index < 0 || index >= 24)
-        mp_raise_ValueError("index out of range. Expected 0 to 23");
+        mp_raise_ValueError(MP_ERROR_TEXT("index out of range. Expected 0 to 23"));
     else
         self->breakout->set_hsv(index, h, s, v);
 
@@ -258,7 +258,7 @@ enum { ARG_self, ARG_gpio, ARG_mode };
     breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
     int gpio = args[ARG_gpio].u_int;
     if(gpio < 7 || gpio > 9) {
-        mp_raise_ValueError("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)");
+        mp_raise_ValueError(MP_ERROR_TEXT("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)"));
     }
 
     if(args[ARG_mode].u_obj == mp_const_none) {
@@ -289,7 +289,7 @@ extern mp_obj_t BreakoutEncoderWheel_gpio_pin_value(size_t n_args, const mp_obj_
     breakout_encoder_wheel_BreakoutEncoderWheel_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
     int gpio = args[ARG_gpio].u_int;
     if(gpio < 7 || gpio > 9) {
-        mp_raise_ValueError("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)");
+        mp_raise_ValueError(MP_ERROR_TEXT("gpio out of range. Expected GP7 (7), GP8 (8), or GP9 (9)"));
     }
 
     if(args[ARG_value].u_obj == mp_const_none) {
@@ -346,10 +346,10 @@ extern mp_obj_t BreakoutEncoderWheel_gpio_pwm_frequency(size_t n_args, const mp_
     float frequency = mp_obj_get_float(args[ARG_frequency].u_obj);
     uint32_t period = (uint32_t)(IOExpander::CLOCK_FREQ / frequency);
     if (period / 128 > IOExpander::MAX_PERIOD) {
-      mp_raise_ValueError("The provided frequency is too low");
+      mp_raise_ValueError(MP_ERROR_TEXT("The provided frequency is too low"));
     }
     if (period < 2) {
-      mp_raise_ValueError("The provided frequency is too high");
+      mp_raise_ValueError(MP_ERROR_TEXT("The provided frequency is too high"));
     }
 
     bool load = args[ARG_load].u_bool;

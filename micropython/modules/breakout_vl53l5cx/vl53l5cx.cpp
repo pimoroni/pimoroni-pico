@@ -88,7 +88,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     }
 
     if(bufinfo.len != (size_t)(firmware_size)) {  // firmware blob is always 84K
-        mp_raise_ValueError("Firmware must be 84k bytes!");
+        mp_raise_ValueError(MP_ERROR_TEXT("Firmware must be 84k bytes!"));
     }
 
     self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr, self->configuration, self->motion_configuration);

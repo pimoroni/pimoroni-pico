@@ -89,7 +89,7 @@ int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     int error;
     mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_OSError(MP_ERROR_TEXT(error));
     }
 
     return seek_s.offset;
@@ -395,7 +395,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     if(mp_obj_is_type(args[ARG_source].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_source].u_obj, mp_obj_tuple_t);
 
-        if(tuple->len != 4) mp_raise_ValueError("decode(): source tuple must contain (x, y, w, h)");
+        if(tuple->len != 4) mp_raise_ValueError(MP_ERROR_TEXT("decode(): source tuple must contain (x, y, w, h)"));
 
         self->decode_target->source = {
             mp_obj_get_int(tuple->items[0]),
@@ -415,7 +415,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         case 270:
             break;
         default:
-            mp_raise_ValueError("decode(): rotation must be one of 0, 90, 180 or 270");
+            mp_raise_ValueError(MP_ERROR_TEXT("decode(): rotation must be one of 0, 90, 180 or 270"));
             break;
     }
 
@@ -429,7 +429,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     } else if(mp_obj_is_type(args[ARG_scale].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_scale].u_obj, mp_obj_tuple_t);
 
-        if(tuple->len != 2) mp_raise_ValueError("decode(): scale tuple must contain (scale_x, scale_y)");
+        if(tuple->len != 2) mp_raise_ValueError(MP_ERROR_TEXT("decode(): scale tuple must contain (scale_x, scale_y)"));
 
         self->decode_target->scale = {
             mp_obj_get_int(tuple->items[0]),

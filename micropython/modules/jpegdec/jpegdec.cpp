@@ -79,7 +79,7 @@ int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
     int error;
     mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_OSError(MP_ERROR_TEXT(error));
     }
 
     return seek_s.offset;
