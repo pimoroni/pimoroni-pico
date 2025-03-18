@@ -69,14 +69,14 @@ mp_obj_t BreakoutRGBMatrix5x5_set_pixel(size_t n_args, const mp_obj_t *pos_args,
     int b = args[ARG_b].u_int;
 
     if(x < 0 || x >= BreakoutRGBMatrix5x5::WIDTH || y < 0 || y >= BreakoutRGBMatrix5x5::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     else {
         if(r < 0 || r > 255)
-            mp_raise_ValueError("r out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
         else if(g < 0 || g > 255)
-            mp_raise_ValueError("g out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
         else if(b < 0 || b > 255)
-            mp_raise_ValueError("b out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
         else
             self->breakout->set_pixel(x, y, r, g, b);
     }

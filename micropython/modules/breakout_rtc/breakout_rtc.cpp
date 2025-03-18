@@ -87,13 +87,13 @@ mp_obj_t BreakoutRTC_set_time(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
     int month = args[ARG_month].u_int;
     int year = args[ARG_year].u_int;
 
-    if(sec < 0 || sec > 59) mp_raise_ValueError("sec out of range. Expected 0 to 59");
-    if(min < 0 || min > 59) mp_raise_ValueError("min out of range. Expected 0 to 59");
-    if(hour < 0 || hour > 23) mp_raise_ValueError("hour out of range. Expected 0 to 23");
-    if(weekday < 0 || weekday > 6) mp_raise_ValueError("weekday out of range. Expected 0 to 6");
-    if(date < 1 || date > 31) mp_raise_ValueError("date out of range. Expected 1 to 31");
-    if(month < 1 || month > 12) mp_raise_ValueError("month out of range. Expected 1 to 12");
-    if(year < 2000 || year > 2099) mp_raise_ValueError("year out of range. Expected 2000 to 2099");
+    if(sec < 0 || sec > 59) mp_raise_ValueError(MP_ERROR_TEXT("sec out of range. Expected 0 to 59"));
+    if(min < 0 || min > 59) mp_raise_ValueError(MP_ERROR_TEXT("min out of range. Expected 0 to 59"));
+    if(hour < 0 || hour > 23) mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
+    if(weekday < 0 || weekday > 6) mp_raise_ValueError(MP_ERROR_TEXT("weekday out of range. Expected 0 to 6"));
+    if(date < 1 || date > 31) mp_raise_ValueError(MP_ERROR_TEXT("date out of range. Expected 1 to 31"));
+    if(month < 1 || month > 12) mp_raise_ValueError(MP_ERROR_TEXT("month out of range. Expected 1 to 12"));
+    if(year < 2000 || year > 2099) mp_raise_ValueError(MP_ERROR_TEXT("year out of range. Expected 2000 to 2099"));
 
     return mp_obj_new_bool(self->breakout->set_time(sec, min, hour, weekday, date, month, year));
 }
@@ -103,7 +103,7 @@ mp_obj_t BreakoutRTC_set_seconds(mp_obj_t self_in, mp_obj_t sec_in) {
 
     int sec = mp_obj_get_int(sec_in);
 
-    if(sec < 0 || sec > 59) mp_raise_ValueError("sec out of range. Expected 0 to 59");
+    if(sec < 0 || sec > 59) mp_raise_ValueError(MP_ERROR_TEXT("sec out of range. Expected 0 to 59"));
 
     return mp_obj_new_bool(self->breakout->set_seconds(sec));
 }
@@ -113,7 +113,7 @@ mp_obj_t BreakoutRTC_set_minutes(mp_obj_t self_in, mp_obj_t min_in) {
 
     int min = mp_obj_get_int(min_in);
 
-    if(min < 0 || min > 59) mp_raise_ValueError("min out of range. Expected 0 to 59");
+    if(min < 0 || min > 59) mp_raise_ValueError(MP_ERROR_TEXT("min out of range. Expected 0 to 59"));
 
     return mp_obj_new_bool(self->breakout->set_minutes(min));
 }
@@ -123,7 +123,7 @@ mp_obj_t BreakoutRTC_set_hours(mp_obj_t self_in, mp_obj_t hour_in) {
 
     int hour = mp_obj_get_int(hour_in);
 
-    if(hour < 0 || hour > 23) mp_raise_ValueError("hour out of range. Expected 0 to 23");
+    if(hour < 0 || hour > 23) mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
 
     return mp_obj_new_bool(self->breakout->set_hours(hour));
 }
@@ -133,7 +133,7 @@ mp_obj_t BreakoutRTC_set_weekday(mp_obj_t self_in, mp_obj_t weekday_in) {
 
     int weekday = mp_obj_get_int(weekday_in);
 
-    if(weekday < 0 || weekday > 6) mp_raise_ValueError("weekday out of range. Expected 0 to 6");
+    if(weekday < 0 || weekday > 6) mp_raise_ValueError(MP_ERROR_TEXT("weekday out of range. Expected 0 to 6"));
 
     return mp_obj_new_bool(self->breakout->set_weekday(weekday));
 }
@@ -143,7 +143,7 @@ mp_obj_t BreakoutRTC_set_date(mp_obj_t self_in, mp_obj_t date_in) {
 
     int date = mp_obj_get_int(date_in);
 
-    if(date < 1 || date > 31) mp_raise_ValueError("date out of range. Expected 1 to 31");
+    if(date < 1 || date > 31) mp_raise_ValueError(MP_ERROR_TEXT("date out of range. Expected 1 to 31"));
     
     return mp_obj_new_bool(self->breakout->set_date(date));
 }
@@ -153,7 +153,7 @@ mp_obj_t BreakoutRTC_set_month(mp_obj_t self_in, mp_obj_t month_in) {
 
     int month = mp_obj_get_int(month_in);
 
-    if(month < 1 || month > 12) mp_raise_ValueError("month out of range. Expected 1 to 12");
+    if(month < 1 || month > 12) mp_raise_ValueError(MP_ERROR_TEXT("month out of range. Expected 1 to 12"));
 
     return mp_obj_new_bool(self->breakout->set_month(month));
 }
@@ -163,7 +163,7 @@ mp_obj_t BreakoutRTC_set_year(mp_obj_t self_in, mp_obj_t year_in) {
 
     int year = mp_obj_get_int(year_in);
 
-    if(year < 0 || year > 99) mp_raise_ValueError("year out of range. Expected 0 to 99");
+    if(year < 0 || year > 99) mp_raise_ValueError(MP_ERROR_TEXT("year out of range. Expected 0 to 99"));
 
     return mp_obj_new_bool(self->breakout->set_year(year));
 }
@@ -321,17 +321,17 @@ mp_obj_t BreakoutRTC_enable_alarm_interrupt(size_t n_args, const mp_obj_t *pos_a
         bool enable_clock_output = args[ARG_enable_clock_output].u_bool;
 
         if(min < 0 || min > 59)
-            mp_raise_ValueError("min out of range. Expected 0 to 59");
+            mp_raise_ValueError(MP_ERROR_TEXT("min out of range. Expected 0 to 59"));
         else if(hour < 0 || hour > 23)
-            mp_raise_ValueError("hour out of range. Expected 0 to 23");
+            mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
         else {
             if(set_weekday_alarm_not_date) {
                 if(date_or_weekday < 0 || date_or_weekday > 6)
-                    mp_raise_ValueError("date_or_weekday out of range. Expected 0 to 6");
+                    mp_raise_ValueError(MP_ERROR_TEXT("date_or_weekday out of range. Expected 0 to 6"));
             }
             else {
                 if(date_or_weekday < 1 || date_or_weekday > 31)
-                    mp_raise_ValueError("date_or_weekday out of range. Expected 1 to 31");
+                    mp_raise_ValueError(MP_ERROR_TEXT("date_or_weekday out of range. Expected 1 to 31"));
             }
             self->breakout->enable_alarm_interrupt(min, hour, date_or_weekday, set_weekday_alarm_not_date, mode, enable_clock_output);
         }
@@ -384,7 +384,7 @@ mp_obj_t BreakoutRTC_set_timer(size_t n_args, const mp_obj_t *pos_args, mp_map_t
     bool enable_clock_output = args[ARG_enable_clock_output].u_bool;
 
     if(timer_value < 0 || timer_value > 4065) {
-        mp_raise_ValueError("timer_value out of range. Expected 0 to 4095");
+        mp_raise_ValueError(MP_ERROR_TEXT("timer_value out of range. Expected 0 to 4095"));
     }
     else {
         switch(timer_frequency) {
@@ -396,7 +396,7 @@ mp_obj_t BreakoutRTC_set_timer(size_t n_args, const mp_obj_t *pos_args, mp_map_t
                 break;
 
             default:
-                mp_raise_ValueError("timer_frequency not valid. Expected, 4096, 64, 1, or 60000");
+                mp_raise_ValueError(MP_ERROR_TEXT("timer_frequency not valid. Expected, 4096, 64, 1, or 60000"));
                 break;
         }
     }
@@ -502,7 +502,7 @@ mp_obj_t BreakoutRTC_enable_trickle_charge(size_t n_args, const mp_obj_t *pos_ar
 
     int tcr = args[ARG_tcr].u_int;
 
-    if(tcr < 0 || tcr > 3) mp_raise_ValueError("tcr out of range. Expected 0 to 3 (TCR_3K, TCR_5K, TCR_9K, TCR_15K)");
+    if(tcr < 0 || tcr > 3) mp_raise_ValueError(MP_ERROR_TEXT("tcr out of range. Expected 0 to 3 (TCR_3K, TCR_5K, TCR_9K, TCR_15K)"));
 
     self->breakout->enable_trickle_charge(tcr);
 
@@ -521,7 +521,7 @@ mp_obj_t BreakoutRTC_set_backup_switchover_mode(mp_obj_t self_in, mp_obj_t val_i
 
     int val = mp_obj_get_int(val_in);
 
-    if(val < 0 || val > 3) mp_raise_ValueError("tcr out of range. Expected 0 to 3");
+    if(val < 0 || val > 3) mp_raise_ValueError(MP_ERROR_TEXT("tcr out of range. Expected 0 to 3"));
 
     self->breakout->set_backup_switchover_mode(val);
 
@@ -533,7 +533,7 @@ mp_obj_t BreakoutRTC_enable_clock_out(mp_obj_t self_in, mp_obj_t freq_in) {
 
     int freq = mp_obj_get_int(freq_in);
 
-    if(freq < 0 || freq > 7) mp_raise_ValueError("freq out of range. Expected 0 to 7");
+    if(freq < 0 || freq > 7) mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 0 to 7"));
 
     self->breakout->enable_clock_out(freq);
 
@@ -545,7 +545,7 @@ mp_obj_t BreakoutRTC_enable_interrupt_controlled_clockout(mp_obj_t self_in, mp_o
 
     int freq = mp_obj_get_int(freq_in);
 
-    if(freq < 0 || freq > 7) mp_raise_ValueError("freq out of range. Expected 0 to 7");
+    if(freq < 0 || freq > 7) mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 0 to 7"));
 
     self->breakout->enable_interrupt_controlled_clockout(freq);
 

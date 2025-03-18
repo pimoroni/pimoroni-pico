@@ -114,7 +114,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
         buffer = (Pixel *)bufinfo.buf;
         if(bufinfo.len < (size_t)(width * height * sizeof(Pixel))) {
-            mp_raise_ValueError("Supplied buffer is too small!");
+            mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is too small!"));
         }
     } else {
         buffer = m_new(Pixel, width * height);

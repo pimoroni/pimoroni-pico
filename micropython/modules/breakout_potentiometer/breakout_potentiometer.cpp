@@ -123,7 +123,7 @@ mp_obj_t BreakoutPotentiometer_set_brightness(size_t n_args, const mp_obj_t *pos
 
     float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
     if(brightness < 0 || brightness > 1.0f)
-        mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("brightness out of range. Expected 0.0 to 1.0"));
     else
         self->breakout->set_brightness(brightness);
 
@@ -149,11 +149,11 @@ mp_obj_t BreakoutPotentiometer_set_led(size_t n_args, const mp_obj_t *pos_args, 
     int b = args[ARG_b].u_int;
 
     if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     else if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     else if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
     else
         self->breakout->set_led(r, g, b);
 

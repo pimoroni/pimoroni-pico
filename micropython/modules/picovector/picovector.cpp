@@ -136,7 +136,7 @@ size_t fileio_tell(void* fhandle) {
     int error;
     mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_OSError(MP_ERROR_TEXT(error));
     }
 
     return seek_s.offset;
@@ -153,7 +153,7 @@ size_t fileio_seek(void* fhandle, size_t pos) {
     int error;
     mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_OSError(MP_ERROR_TEXT(error));
     }
 
     return seek_s.offset;
@@ -165,7 +165,7 @@ static const std::string_view mp_obj_to_string_r(const mp_obj_t &obj) {
         GET_STR_DATA_LEN(obj, str, str_len);
         return std::string_view((const char*)str, str_len);
     }
-    mp_raise_TypeError("can't convert object to str implicitly");
+    mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to str implicitly"));
 }
 */
 
@@ -191,16 +191,16 @@ mp_obj_t POLYGON_path(size_t n_args, const mp_obj_t *all_args) {
 
     pp_path_t *path = pp_poly_add_path(self->poly);
 
-    if(num_points < 3) mp_raise_ValueError("Polygon: At least 3 points required.");
+    if(num_points < 3) mp_raise_ValueError(MP_ERROR_TEXT("Polygon: At least 3 points required."));
 
     for(auto i = 0u; i < num_points; i++) {
         mp_obj_t c_obj = points[i];
 
-        if(!mp_obj_is_exact_type(c_obj, &mp_type_tuple)) mp_raise_ValueError("Not a tuple");
+        if(!mp_obj_is_exact_type(c_obj, &mp_type_tuple)) mp_raise_ValueError(MP_ERROR_TEXT("Not a tuple"));
 
         mp_obj_tuple_t *t_point = MP_OBJ_TO_PTR2(c_obj, mp_obj_tuple_t);
 
-        if(t_point->len != 2) mp_raise_ValueError("Tuple must have X, Y");
+        if(t_point->len != 2) mp_raise_ValueError(MP_ERROR_TEXT("Tuple must have X, Y"));
 
         pp_path_add_point(path, {
             (picovector_point_type)mp_picovector_get_point_type(t_point->items[0]),
@@ -242,7 +242,7 @@ mp_obj_t POLYGON_rectangle(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
     if(mp_obj_is_exact_type(args[ARG_corners].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *t_corners = MP_OBJ_TO_PTR2(args[ARG_corners].u_obj, mp_obj_tuple_t);
 
-        if(t_corners->len != 4) mp_raise_ValueError("Corners must have r1, r2, r3, r4");
+        if(t_corners->len != 4) mp_raise_ValueError(MP_ERROR_TEXT("Corners must have r1, r2, r3, r4"));
 
         r1 = mp_picovector_get_point_type(t_corners->items[0]);
         r2 = mp_picovector_get_point_type(t_corners->items[1]);
@@ -480,7 +480,7 @@ void _pp_poly_transform(pp_poly_t *poly, pp_mat3_t *transform) {
 mp_obj_t POLYGON_transform(mp_obj_t self_in, mp_obj_t transform_in) {
     _POLY_obj_t *self = MP_OBJ_TO_PTR2(self_in, _POLY_obj_t);
 
-    if (!MP_OBJ_IS_TYPE(transform_in, &TRANSFORM_type)) mp_raise_ValueError("Transform required");
+    if (!MP_OBJ_IS_TYPE(transform_in, &TRANSFORM_type)) mp_raise_ValueError(MP_ERROR_TEXT("Transform required"));
     _TRANSFORM_obj_t *transform = (_TRANSFORM_obj_t *)MP_OBJ_TO_PTR(transform_in);
 
     _pp_poly_transform(self->poly, &transform->transform);
@@ -548,10 +548,10 @@ mp_obj_t TRANSFORM_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_k
 mp_obj_t TRANSFORM_custom(mp_obj_t self_in, mp_obj_t custom_in) {
     _TRANSFORM_obj_t *transform = MP_OBJ_TO_PTR2(self_in, _TRANSFORM_obj_t);
 
-    if(!mp_obj_is_type(custom_in, &mp_type_list)) mp_raise_ValueError("custom: transform must be a list!");
+    if(!mp_obj_is_type(custom_in, &mp_type_list)) mp_raise_ValueError(MP_ERROR_TEXT("custom: transform must be a list!"));
     mp_obj_list_t *list = MP_OBJ_TO_PTR2(custom_in, mp_obj_list_t);
 
-    if(list->len != 9)  mp_raise_ValueError("custom: expected 9 items!");
+    if(list->len != 9)  mp_raise_ValueError(MP_ERROR_TEXT("custom: expected 9 items!"));
 
     pp_mat3_t t = pp_mat3_identity();
 
@@ -578,7 +578,7 @@ mp_obj_t TRANSFORM_rotate(mp_obj_t self_in, mp_obj_t angle_in, mp_obj_t origin_i
     if(mp_obj_is_exact_type(origin_in, &mp_type_tuple)) {
         mp_obj_tuple_t *t_origin = MP_OBJ_TO_PTR2(origin_in, mp_obj_tuple_t);
 
-        if(t_origin->len != 2) mp_raise_ValueError("Origin Tuple must have X, Y");
+        if(t_origin->len != 2) mp_raise_ValueError(MP_ERROR_TEXT("Origin Tuple must have X, Y"));
     
         picovector_point_type x = mp_picovector_get_point_type(t_origin->items[0]);
         picovector_point_type y = mp_picovector_get_point_type(t_origin->items[1]);
@@ -658,7 +658,7 @@ mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in) {
         // doesn't break when GC runs.
         self->transform = transform;
     } else {
-        mp_raise_ValueError("Must set a valid transform or None.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Must set a valid transform or None."));
     }
 
     return mp_const_none;
@@ -741,7 +741,7 @@ mp_obj_t VECTOR_measure_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
 
-    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError("text: string required");
+    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError(MP_ERROR_TEXT("text: string required"));
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
@@ -781,7 +781,7 @@ mp_obj_t VECTOR_set_clip(mp_obj_t self_in, mp_obj_t clip_in) {
     if(mp_obj_is_exact_type(clip_in, &mp_type_tuple)){
         mp_obj_tuple_t *t_clip = MP_OBJ_TO_PTR2(clip_in, mp_obj_tuple_t);
 
-        if(t_clip->len != 4) mp_raise_ValueError("Clip must have x, y, w, h");
+        if(t_clip->len != 4) mp_raise_ValueError(MP_ERROR_TEXT("Clip must have x, y, w, h"));
 
         x = mp_picovector_get_point_type(t_clip->items[0]);
         y = mp_picovector_get_point_type(t_clip->items[1]);
@@ -820,7 +820,7 @@ mp_obj_t VECTOR_text(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
 
     mp_obj_t text_obj = args[ARG_text].u_obj;
 
-    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError("text: string required");
+    if(!mp_obj_is_str_or_bytes(text_obj)) mp_raise_TypeError(MP_ERROR_TEXT("text: string required"));
 
     GET_STR_DATA_LEN(text_obj, str, str_len);
 
@@ -848,7 +848,7 @@ mp_obj_t VECTOR_draw(mp_obj_t self_in, mp_obj_t poly_in) {
     _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
     (void)self;
 
-    if(!MP_OBJ_IS_TYPE(poly_in, &POLYGON_type)) mp_raise_TypeError("draw: Polygon required.");
+    if(!MP_OBJ_IS_TYPE(poly_in, &POLYGON_type)) mp_raise_TypeError(MP_ERROR_TEXT("draw: Polygon required."));
 
     _POLY_obj_t *poly = MP_OBJ_TO_PTR2(poly_in, _POLY_obj_t);
 

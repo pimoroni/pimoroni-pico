@@ -87,8 +87,8 @@ mp_obj_t PCF85063A_datetime(size_t n_args, const mp_obj_t *args) {
             items = tuple->items;
         }
 
-        if(items == nullptr)           mp_raise_TypeError("cannot convert object to a list or tuple of integers");
-        if(length < 7 || length > 8)   mp_raise_TypeError("list or tuple must contain integers in the form (year, month, mday, hour, minute, second, weekday)");
+        if(items == nullptr)           mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers"));
+        if(length < 7 || length > 8)   mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain integers in the form (year, month, mday, hour, minute, second, weekday)"));
 
         int year    = mp_obj_get_int(items[0]);
         int month   = mp_obj_get_int(items[1]);
@@ -98,13 +98,13 @@ mp_obj_t PCF85063A_datetime(size_t n_args, const mp_obj_t *args) {
         int second  = mp_obj_get_int(items[5]);
         int dotw    = mp_obj_get_int(items[6]);
 
-        if(year < 2000 || year > 2099)  mp_raise_ValueError("year out of range. Expected 2000 to 2099");
-        if(month < 1   || month > 12)   mp_raise_ValueError("month out of range. Expected 1 to 12");
-        if(day < 1     || day > 31)     mp_raise_ValueError("day out of range. Expected 1 to 31");
-        if(hour < 0    || hour > 23)    mp_raise_ValueError("hour out of range. Expected 0 to 23");
-        if(minute < 0  || minute > 59)  mp_raise_ValueError("minute out of range. Expected 0 to 59");
-        if(second < 0  || second > 59)  mp_raise_ValueError("second out of range. Expected 0 to 59");
-        if(dotw < 0    || dotw > 6)     mp_raise_ValueError("dotw out of range. Expected 0 to 6");
+        if(year < 2000 || year > 2099)  mp_raise_ValueError(MP_ERROR_TEXT("year out of range. Expected 2000 to 2099"));
+        if(month < 1   || month > 12)   mp_raise_ValueError(MP_ERROR_TEXT("month out of range. Expected 1 to 12"));
+        if(day < 1     || day > 31)     mp_raise_ValueError(MP_ERROR_TEXT("day out of range. Expected 1 to 31"));
+        if(hour < 0    || hour > 23)    mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
+        if(minute < 0  || minute > 59)  mp_raise_ValueError(MP_ERROR_TEXT("minute out of range. Expected 0 to 59"));
+        if(second < 0  || second > 59)  mp_raise_ValueError(MP_ERROR_TEXT("second out of range. Expected 0 to 59"));
+        if(dotw < 0    || dotw > 6)     mp_raise_ValueError(MP_ERROR_TEXT("dotw out of range. Expected 0 to 6"));
 
         datetime_t t;
         t.year = year;
@@ -140,13 +140,13 @@ mp_obj_t PCF85063A_set_alarm(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     int day = args[ARG_day].u_int;
 
     if(second != PCF85063A::PARAM_UNUSED && (second < 0 || second > 59))
-        mp_raise_ValueError("second out of range. Expected 0 to 59");
+        mp_raise_ValueError(MP_ERROR_TEXT("second out of range. Expected 0 to 59"));
     if(minute != PCF85063A::PARAM_UNUSED && (minute < 0 || minute > 59))
-        mp_raise_ValueError("minute out of range. Expected 0 to 59");
+        mp_raise_ValueError(MP_ERROR_TEXT("minute out of range. Expected 0 to 59"));
     if(hour != PCF85063A::PARAM_UNUSED && (hour < 0 || hour > 23))
-        mp_raise_ValueError("hour out of range. Expected 0 to 23");
+        mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
     if(day != PCF85063A::PARAM_UNUSED && (day < 1 || day > 31))
-        mp_raise_ValueError("date out of range. Expected 1 to 31");
+        mp_raise_ValueError(MP_ERROR_TEXT("date out of range. Expected 1 to 31"));
     
     self->breakout->set_alarm(second, minute, hour, day);
 
@@ -174,13 +174,13 @@ mp_obj_t PCF85063A_set_weekday_alarm(size_t n_args, const mp_obj_t *pos_args, mp
     int dotw = args[ARG_dotw].u_int;
 
     if(second != PCF85063A::PARAM_UNUSED && (second < 0 || second > 59))
-        mp_raise_ValueError("second out of range. Expected 0 to 59");
+        mp_raise_ValueError(MP_ERROR_TEXT("second out of range. Expected 0 to 59"));
     if(minute != PCF85063A::PARAM_UNUSED && (minute < 0 || minute > 59))
-        mp_raise_ValueError("minute out of range. Expected 0 to 59");
+        mp_raise_ValueError(MP_ERROR_TEXT("minute out of range. Expected 0 to 59"));
     if(hour != PCF85063A::PARAM_UNUSED && (hour < 0 || hour > 23))
-        mp_raise_ValueError("hour out of range. Expected 0 to 23");
+        mp_raise_ValueError(MP_ERROR_TEXT("hour out of range. Expected 0 to 23"));
     if(dotw != PCF85063A::PARAM_UNUSED && (dotw < 0 || dotw > 6))
-        mp_raise_ValueError("dotw out of range. Expected 0 to 6");
+        mp_raise_ValueError(MP_ERROR_TEXT("dotw out of range. Expected 0 to 6"));
 
     self->breakout->set_weekday_alarm(second, minute, hour, (PCF85063A::DayOfWeek)dotw);
 
@@ -230,8 +230,8 @@ mp_obj_t PCF85063A_set_timer(size_t n_args, const mp_obj_t *pos_args, mp_map_t *
     int ticks = args[ARG_ticks].u_int;
     int ttp = args[ARG_ttp].u_int;
 
-    if(ticks < 0 || ticks > 255) mp_raise_ValueError("ticks out of range. Expected 0 to 255");
-    if(ttp < 0   || ttp > 3)     mp_raise_ValueError("ttp out of range. Expected 0 to 3");
+    if(ticks < 0 || ticks > 255) mp_raise_ValueError(MP_ERROR_TEXT("ticks out of range. Expected 0 to 255"));
+    if(ttp < 0   || ttp > 3)     mp_raise_ValueError(MP_ERROR_TEXT("ttp out of range. Expected 0 to 3"));
 
     self->breakout->set_timer(ticks, (PCF85063A::TimerTickPeriod)ttp);
 
@@ -291,7 +291,7 @@ mp_obj_t PCF85063A_set_byte(mp_obj_t self_in, mp_obj_t v) {
     pcf85063a_PCF85063A_obj_t *self = MP_OBJ_TO_PTR2(self_in, pcf85063a_PCF85063A_obj_t);
 
     int val = mp_obj_get_int(v);
-    if(val < 0 || val > 255) mp_raise_ValueError("out of range. Expected 0 to 255");
+    if(val < 0 || val > 255) mp_raise_ValueError(MP_ERROR_TEXT("out of range. Expected 0 to 255"));
 
     self->breakout->set_byte((uint8_t)val);
 
