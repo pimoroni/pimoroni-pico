@@ -38,7 +38,7 @@ mp_obj_t BreakoutBME280_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self->breakout = m_new_class(BME280, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int, args[ARG_int].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutBME280: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutBME280: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -56,7 +56,7 @@ mp_obj_t BreakoutBME280_read(mp_obj_t self_in) {
         return mp_obj_new_tuple(3, tuple);
     }
 
-    mp_raise_msg(&mp_type_RuntimeError, "BME280: read failed.");
+    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BME280: read failed."));
 }
 
 mp_obj_t BreakoutBME280_configure(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {

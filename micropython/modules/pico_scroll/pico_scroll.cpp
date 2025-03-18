@@ -18,9 +18,6 @@ extern "C" {
 #include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
 #include "py/builtin.h"
 
-#define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
-#define INCORRECT_SIZE_MSG "Scroll height wrong: > 8 pixels."
-
 typedef struct _PicoScroll_obj_t {
     mp_obj_base_t base;
     PicoScroll* scroll;
@@ -152,7 +149,7 @@ mp_obj_t picoscroll_set_pixels(mp_obj_t self_in, mp_obj_t image_obj) {
     mp_get_buffer_raise(image_obj, &bufinfo, MP_BUFFER_RW);
 
     if (bufinfo.len < (PicoScroll::WIDTH * PicoScroll::HEIGHT)) {
-        mp_raise_msg(&mp_type_IndexError, BUFFER_TOO_SMALL_MSG);
+        mp_raise_msg(&mp_type_IndexError, MP_ERROR_TEXT("bytearray too small: len(image) < width * height."));
     }
 
     self->scroll->set_pixels((const char*)bufinfo.buf);

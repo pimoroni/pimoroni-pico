@@ -37,7 +37,7 @@ mp_obj_t BreakoutICP10125_make_new(const mp_obj_type_t *type, size_t n_args, siz
     self->breakout = m_new_class(ICP10125, (pimoroni::I2C *)(self->i2c->i2c));
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutICP10125: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutICP10125: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);

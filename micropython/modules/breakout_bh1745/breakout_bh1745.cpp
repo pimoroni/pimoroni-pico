@@ -38,7 +38,7 @@ mp_obj_t BreakoutBH1745_make_new(const mp_obj_type_t *type, size_t n_args, size_
     self->breakout = m_new_class(BreakoutBH1745, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutBH1745: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutBH1745: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);

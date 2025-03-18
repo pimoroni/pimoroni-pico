@@ -116,7 +116,7 @@ void pngdec_open_helper(_PNG_obj_t *self) {
         result = self->png->openRAM((uint8_t *)self->buf.buf, self->buf.len, self->decode_callback);
     }
 
-    if(result != 0) mp_raise_msg(&mp_type_RuntimeError, "PNG: could not read file/buffer.");
+    if(result != 0) mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("PNG: could not read file/buffer."));
 }
 
 void PNGDraw(PNGDRAW *pDraw) {

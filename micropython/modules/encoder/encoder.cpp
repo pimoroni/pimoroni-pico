@@ -141,7 +141,7 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     Encoder *encoder = m_new_class(Encoder, pio, sm, pins, args[ARG_common_pin].u_int, (Direction)direction, counts_per_rev, count_microsteps, freq_divider);
     if(!encoder->init()) {
         m_del_class(Encoder, encoder);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this Encoder. Try running `import gc` followed by `gc.collect()` before creating it");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this Encoder. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 
     self = mp_obj_malloc_with_finaliser(_Encoder_obj_t, &Encoder_type);
