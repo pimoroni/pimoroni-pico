@@ -136,7 +136,7 @@ size_t fileio_tell(void* fhandle) {
     int error;
     mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(MP_ERROR_TEXT(error));
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("PicoVector: fileio_tell failed with %d"), error);
     }
 
     return seek_s.offset;
@@ -153,7 +153,7 @@ size_t fileio_seek(void* fhandle, size_t pos) {
     int error;
     mp_uint_t res = stream_p->ioctl((mp_obj_t)fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(MP_ERROR_TEXT(error));
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("PicoVector: fileio_seek failed with %d"), error);
     }
 
     return seek_s.offset;
