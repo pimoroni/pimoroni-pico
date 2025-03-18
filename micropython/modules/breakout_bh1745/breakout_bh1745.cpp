@@ -113,9 +113,9 @@ mp_obj_t BreakoutBH1745_threshold(size_t n_args, const mp_obj_t *pos_args, mp_ma
     int upper = args[ARG_upper].u_int;
 
     if(lower < 0 || lower > 65535) {
-        mp_raise_ValueError("lower out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("lower out of range. Expected 0 to 65535"));
     } else if(upper < 0 || upper > 65535) {
-        mp_raise_ValueError("upper out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("upper out of range. Expected 0 to 65535"));
     } else {
         self->breakout->set_threshold_low(lower);
         self->breakout->set_threshold_high(upper);
@@ -139,7 +139,7 @@ mp_obj_t BreakoutBH1745_measurement_time_ms(size_t n_args, const mp_obj_t *pos_a
     int measurement_time = args[ARG_time].u_int;
 
     if(measurement_time < 0 || measurement_time > 65535) {
-        mp_raise_ValueError("Time out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("Time out of range. Expected 0 to 65535"));
     } else {
         self->breakout->set_measurement_time_ms(measurement_time);
     }

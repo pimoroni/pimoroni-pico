@@ -90,7 +90,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
         buffer = bufinfo.buf;
         if(bufinfo.len < (size_t)(num_leds * sizeof(WS2812::RGB))) {
-            mp_raise_ValueError("Supplied buffer is too small for LED count!");
+            mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is too small for LED count!"));
         }
     } else {
         buffer = m_new(WS2812::RGB, num_leds);
@@ -293,7 +293,7 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
         buffer = (APA102::RGB *)bufinfo.buf;
         if(bufinfo.len < (size_t)(num_leds * 4)) {
-            mp_raise_ValueError("Supplied buffer is too small for LED count!");
+            mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is too small for LED count!"));
         }
     } else {
         buffer = m_new(APA102::RGB, num_leds);
