@@ -108,13 +108,13 @@ mp_obj_t BreakoutTrackball_set_rgbw(size_t n_args, const mp_obj_t *pos_args, mp_
     int w = args[ARG_w].u_int;
 
     if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     else if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     else if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
     else if(w < 0 || w > 255)
-        mp_raise_ValueError("w out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("w out of range. Expected 0 to 255"));
     else
         self->breakout->set_rgbw(r, g, b, w);
 
@@ -136,7 +136,7 @@ mp_obj_t BreakoutTrackball_set_red(size_t n_args, const mp_obj_t *pos_args, mp_m
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_red(value);
 
@@ -158,7 +158,7 @@ mp_obj_t BreakoutTrackball_set_green(size_t n_args, const mp_obj_t *pos_args, mp
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_green(value);
 
@@ -180,7 +180,7 @@ mp_obj_t BreakoutTrackball_set_blue(size_t n_args, const mp_obj_t *pos_args, mp_
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_blue(value);
 
@@ -202,7 +202,7 @@ mp_obj_t BreakoutTrackball_set_white(size_t n_args, const mp_obj_t *pos_args, mp
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_white(value);
 

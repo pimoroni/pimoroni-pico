@@ -93,7 +93,7 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
             }
         }
         else {
-            mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
+            mp_raise_ValueError(MP_ERROR_TEXT("slot not a valid value. Expected 0 to 1"));
         }
     }
     else {
@@ -193,7 +193,7 @@ mp_obj_t BreakoutPMW3901_set_rotation(size_t n_args, const mp_obj_t *pos_args, m
 
     int degrees = args[ARG_degrees].u_int;
     if(degrees < 0 || degrees > 3)
-        mp_raise_ValueError("degrees out of range. Expected 0 (0), 1 (90), 2 (180) or 3 (270)");
+        mp_raise_ValueError(MP_ERROR_TEXT("degrees out of range. Expected 0 (0), 1 (90), 2 (180) or 3 (270)"));
     else
         self->breakout->set_rotation((BreakoutPMW3901::Degrees)degrees);
 
@@ -299,7 +299,7 @@ mp_obj_t BreakoutPMW3901_frame_capture(size_t n_args, const mp_obj_t *pos_args, 
     mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
     uint8_t *buffer = (uint8_t *)bufinfo.buf;
     if(bufinfo.len != (size_t)(BreakoutPMW3901::FRAME_BYTES)) {
-        mp_raise_ValueError("Supplied buffer is the wrong size for frame capture. Needs to be 1225.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is the wrong size for frame capture. Needs to be 1225."));
     }
 
     float timeout = (float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000.0f;

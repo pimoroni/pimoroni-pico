@@ -73,13 +73,13 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
     int pio_int = args[ARG_pio].u_int;
     if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
-        mp_raise_ValueError("pio out of range. Expected 0 to 1");
+        mp_raise_ValueError(MP_ERROR_TEXT("pio out of range. Expected 0 to 1"));
     }
     PIO pio = pio_int == 0 ? pio0 : pio1;
 
     int sm = args[ARG_sm].u_int;
     if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
-        mp_raise_ValueError("sm out of range. Expected 0 to 3");
+        mp_raise_ValueError(MP_ERROR_TEXT("sm out of range. Expected 0 to 3"));
     }
 
     size_t pin_count = 0;
@@ -100,18 +100,18 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     }
 
     if(items == nullptr)
-        mp_raise_TypeError("cannot convert object to a list or tuple of pins");
+        mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of pins"));
     else if(pin_count != 2)
-        mp_raise_TypeError("list or tuple must only contain two integers");
+        mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must only contain two integers"));
     else {
         int a = mp_obj_get_int(items[0]);
         int b = mp_obj_get_int(items[1]);
         if((a < 0 || a >= (int)NUM_BANK0_GPIOS) ||
            (b < 0 || b >= (int)NUM_BANK0_GPIOS)) {
-            mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
+            mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
         }
         else if(a == b) {
-            mp_raise_ValueError("cannot use the same pin for encoder A and B");
+            mp_raise_ValueError(MP_ERROR_TEXT("cannot use the same pin for encoder A and B"));
         }
 
         pins.a = (uint8_t)a;
@@ -120,14 +120,14 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 
     int direction = args[ARG_direction].u_int;
     if(direction < 0 || direction > 1) {
-        mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)");
+        mp_raise_ValueError(MP_ERROR_TEXT("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)"));
     }
 
     float counts_per_rev = Encoder::DEFAULT_COUNTS_PER_REV;
     if(args[ARG_counts_per_rev].u_obj != mp_const_none) {
         counts_per_rev = mp_obj_get_float(args[ARG_counts_per_rev].u_obj);
         if(counts_per_rev < FLT_EPSILON) {
-            mp_raise_ValueError("counts_per_rev out of range. Expected greater than 0.0");
+            mp_raise_ValueError(MP_ERROR_TEXT("counts_per_rev out of range. Expected greater than 0.0"));
         }
     }
 
@@ -245,7 +245,7 @@ extern mp_obj_t Encoder_direction(size_t n_args, const mp_obj_t *pos_args, mp_ma
     else {
         int direction = mp_obj_get_int(args[ARG_direction].u_obj);
         if(direction < 0 || direction > 1) {
-            mp_raise_ValueError("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)");
+            mp_raise_ValueError(MP_ERROR_TEXT("direction out of range. Expected NORMAL (0) or REVERSED_DIR (1)"));
         }
         self->encoder->direction((Direction)direction);
         return mp_const_none;
@@ -271,7 +271,7 @@ extern mp_obj_t Encoder_counts_per_rev(size_t n_args, const mp_obj_t *pos_args, 
     else {
         float counts_per_rev = mp_obj_get_float(args[ARG_counts_per_rev].u_obj);
         if(counts_per_rev < FLT_EPSILON) {
-            mp_raise_ValueError("counts_per_rev out of range. Expected greater than 0.0");
+            mp_raise_ValueError(MP_ERROR_TEXT("counts_per_rev out of range. Expected greater than 0.0"));
         }
         self->encoder->counts_per_rev(counts_per_rev);
         return mp_const_none;

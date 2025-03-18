@@ -145,7 +145,7 @@ mp_obj_t BreakoutIOExpander_set_pin_interrupt(size_t n_args, const mp_obj_t *pos
     int pin = args[ARG_pin].u_int;
     bool enabled = args[ARG_enabled].u_bool;
     if(!self->breakout->set_pin_interrupt(pin, enabled)) {
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
     }
 
     return mp_const_none;
@@ -211,7 +211,7 @@ mp_obj_t BreakoutIOExpander_set_pwm_control(size_t n_args, const mp_obj_t *pos_a
 
     int divider = args[ARG_divider].u_int;
     if(!self->breakout->set_pwm_control(divider)) {
-        mp_raise_ValueError("divider not valid. Available options are: 1, 2, 4, 8, 16, 32, 64, 128");
+        mp_raise_ValueError(MP_ERROR_TEXT("divider not valid. Available options are: 1, 2, 4, 8, 16, 32, 64, 128"));
     }
 
     return mp_const_none;
@@ -233,7 +233,7 @@ mp_obj_t BreakoutIOExpander_set_pwm_period(size_t n_args, const mp_obj_t *pos_ar
     int value = args[ARG_value].u_int;
     bool load = args[ARG_load].u_bool;
     if(value < 0 || value > 65535)
-        mp_raise_ValueError("value out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 65535"));
     else
         self->breakout->set_pwm_period(value, load);
 
@@ -255,7 +255,7 @@ mp_obj_t BreakoutIOExpander_get_mode(size_t n_args, const mp_obj_t *pos_args, mp
     int pin = args[ARG_pin].u_int;
     uint8_t mode = self->breakout->get_mode(pin);
     if(mode == UINT8_MAX)
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
 
     return mp_obj_new_int(mode);
 }
@@ -281,7 +281,7 @@ mp_obj_t BreakoutIOExpander_set_mode(size_t n_args, const mp_obj_t *pos_args, mp
     bool invert = args[ARG_invert].u_bool;
 
     if(pin < 1 || pin > IOExpander::NUM_PINS)
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
     else
         self->breakout->set_mode(pin, mode, schmitt_trigger, invert);
 
@@ -303,7 +303,7 @@ mp_obj_t BreakoutIOExpander_input(size_t n_args, const mp_obj_t *pos_args, mp_ma
     int pin = args[ARG_pin].u_int;
 
     if(pin < 1 || pin > IOExpander::NUM_PINS)
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
     else
         return mp_obj_new_int(self->breakout->input(pin));
 
@@ -325,7 +325,7 @@ mp_obj_t BreakoutIOExpander_input_as_voltage(size_t n_args, const mp_obj_t *pos_
     int pin = args[ARG_pin].u_int;
 
     if(pin < 1 || pin > IOExpander::NUM_PINS)
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
     else
         return mp_obj_new_float(self->breakout->input_as_voltage(pin));
 
@@ -351,9 +351,9 @@ mp_obj_t BreakoutIOExpander_output(size_t n_args, const mp_obj_t *pos_args, mp_m
     bool load = args[ARG_load].u_bool;
 
     if(pin < 1 || pin > IOExpander::NUM_PINS)
-        mp_raise_ValueError("pin out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin out of range. Expected 1 to 14"));
     else if(value < 0 || value > 65535)
-        mp_raise_ValueError("value out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 65535"));
     else
         self->breakout->output(pin, value, load);
 
@@ -383,13 +383,13 @@ mp_obj_t BreakoutIOExpander_setup_rotary_encoder(size_t n_args, const mp_obj_t *
     bool count_microsteps = args[ARG_count_microsteps].u_bool;
 
     if(channel < 1 || channel > 4)
-        mp_raise_ValueError("channel out of range. Expected 1 to 4");
+        mp_raise_ValueError(MP_ERROR_TEXT("channel out of range. Expected 1 to 4"));
     else if(pin_a < 1 || pin_a > 14)
-        mp_raise_ValueError("pin_a out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin_a out of range. Expected 1 to 14"));
     else if(pin_b < 1 || pin_b > 14)
-        mp_raise_ValueError("pin_b out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin_b out of range. Expected 1 to 14"));
     else if(pin_c < 1 || pin_c > 14)
-        mp_raise_ValueError("pin_c out of range. Expected 1 to 14");
+        mp_raise_ValueError(MP_ERROR_TEXT("pin_c out of range. Expected 1 to 14"));
     else
         self->breakout->setup_rotary_encoder(channel, pin_a, pin_b, pin_c, count_microsteps);
 
@@ -410,7 +410,7 @@ mp_obj_t BreakoutIOExpander_read_rotary_encoder(size_t n_args, const mp_obj_t *p
 
     int channel = args[ARG_channel].u_int;
     if(channel < 1 || channel > 4)
-        mp_raise_ValueError("channel out of range. Expected 1 to 4");
+        mp_raise_ValueError(MP_ERROR_TEXT("channel out of range. Expected 1 to 4"));
     else
         return mp_obj_new_int(self->breakout->read_rotary_encoder(channel));
 

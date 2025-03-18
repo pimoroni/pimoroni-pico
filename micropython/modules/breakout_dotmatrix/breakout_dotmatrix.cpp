@@ -61,7 +61,7 @@ mp_obj_t BreakoutDotMatrix_set_brightness(size_t n_args, const mp_obj_t *pos_arg
 
     float brightness = mp_obj_get_float(args[ARG_brightness].u_obj);
     if(brightness < 0 || brightness > 1.0f)
-        mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("brightness out of range. Expected 0.0 to 1.0"));
     else
         self->breakout->set_brightness((uint8_t)(brightness * BreakoutDotMatrix::MAX_BRIGHTNESS), args[ARG_update].u_bool);
 
@@ -103,7 +103,7 @@ mp_obj_t BreakoutDotMatrix_set_pixel(size_t n_args, const mp_obj_t *pos_args, mp
     int y = args[ARG_y].u_int;
 
     if(x < 0 || x >= BreakoutDotMatrix::WIDTH || y < 0 || y >= BreakoutDotMatrix::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     else
         self->breakout->set_pixel(x, y, args[ARG_on].u_bool);
 
@@ -167,13 +167,13 @@ mp_obj_t BreakoutDotMatrix_set_image(size_t n_args, const mp_obj_t *pos_args, mp
     int padding = args[ARG_padding].u_int;
 
     if(width <= 0 || height <= 0)
-        mp_raise_ValueError("width or height less than or equal to zero.");
+        mp_raise_ValueError(MP_ERROR_TEXT("width or height less than or equal to zero."));
     else if(offset_x < 0 || offset_y < 0)
-        mp_raise_ValueError("offset_x or offset_y less than zero.");
+        mp_raise_ValueError(MP_ERROR_TEXT("offset_x or offset_y less than zero."));
     else if(on_level < 0 || offset_y > 255)
-        mp_raise_ValueError("on_level out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("on_level out of range. Expected 0 to 255"));
     else if(padding < 0 || padding > 255)
-        mp_raise_ValueError("padding out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("padding out of range. Expected 0 to 255"));
     else {
         mp_buffer_info_t bufinfo;
         mp_get_buffer_raise(args[ARG_image].u_obj, &bufinfo, MP_BUFFER_READ);

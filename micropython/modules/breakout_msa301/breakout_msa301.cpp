@@ -64,7 +64,7 @@ mp_obj_t BreakoutMSA301_get_axis(size_t n_args, const mp_obj_t *pos_args, mp_map
 
     int sample_count = args[ARG_sample_count].u_int;
     if(sample_count < 0 || sample_count > 255)
-        mp_raise_ValueError("sample_count out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("sample_count out of range. Expected 0 to 255"));
     else {
         float value = 0.0f;
         switch(args[ARG_axis].u_int) {
@@ -78,7 +78,7 @@ mp_obj_t BreakoutMSA301_get_axis(size_t n_args, const mp_obj_t *pos_args, mp_map
             value = self->breakout->get_axis(BreakoutMSA301::Z, sample_count);
             break;
         default:
-            mp_raise_ValueError("axis out of range. Expected 0 to 2 (X, Y, Z)");
+            mp_raise_ValueError(MP_ERROR_TEXT("axis out of range. Expected 0 to 2 (X, Y, Z)"));
             break;
         }
 
@@ -102,7 +102,7 @@ mp_obj_t BreakoutMSA301_get_x_axis(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     int sample_count = args[ARG_sample_count].u_int;
     if(sample_count < 0 || sample_count > 255)
-        mp_raise_ValueError("sample_count out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("sample_count out of range. Expected 0 to 255"));
     else
         return mp_obj_new_float(self->breakout->get_x_axis(sample_count));
 
@@ -123,7 +123,7 @@ mp_obj_t BreakoutMSA301_get_y_axis(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     int sample_count = args[ARG_sample_count].u_int;
     if(sample_count < 0 || sample_count > 255)
-        mp_raise_ValueError("sample_count out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("sample_count out of range. Expected 0 to 255"));
     else
         return mp_obj_new_float(self->breakout->get_y_axis(sample_count));
 
@@ -144,7 +144,7 @@ mp_obj_t BreakoutMSA301_get_z_axis(size_t n_args, const mp_obj_t *pos_args, mp_m
 
     int sample_count = args[ARG_sample_count].u_int;
     if(sample_count < 0 || sample_count > 255)
-        mp_raise_ValueError("sample_count out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("sample_count out of range. Expected 0 to 255"));
     else
         return mp_obj_new_float(self->breakout->get_z_axis(sample_count));
 
@@ -170,7 +170,7 @@ mp_obj_t BreakoutMSA301_set_power_mode(size_t n_args, const mp_obj_t *pos_args, 
 
     int power_mode = args[ARG_power_mode].u_int;
     if(power_mode < 0 || power_mode > 255)
-        mp_raise_ValueError("power_mode out of range. Expected 0 to 2 (NORMAL, LOW, SUSPEND)");
+        mp_raise_ValueError(MP_ERROR_TEXT("power_mode out of range. Expected 0 to 2 (NORMAL, LOW, SUSPEND)"));
     else
         self->breakout->set_power_mode((BreakoutMSA301::PowerMode)power_mode);
 
@@ -193,9 +193,9 @@ mp_obj_t BreakoutMSA301_set_range_and_resolution(size_t n_args, const mp_obj_t *
     int range = args[ARG_range].u_int;
     int resolution = args[ARG_resolution].u_int;
     if(range < 0 || range > 3)
-        mp_raise_ValueError("range out of range. Expected 0 to 3 (G_2, G_4, G_8, G_16)");
+        mp_raise_ValueError(MP_ERROR_TEXT("range out of range. Expected 0 to 3 (G_2, G_4, G_8, G_16)"));
     if(resolution < 0 || resolution > 3)
-        mp_raise_ValueError("resolution out of range. Expected 0 to 3 (BITS_14, BITS_12, BITS_10, BITS_8)");
+        mp_raise_ValueError(MP_ERROR_TEXT("resolution out of range. Expected 0 to 3 (BITS_14, BITS_12, BITS_10, BITS_8)"));
     else
         self->breakout->set_range_and_resolution((BreakoutMSA301::Range)range, (BreakoutMSA301::Resolution)(resolution << 2));
 
@@ -216,7 +216,7 @@ mp_obj_t BreakoutMSA301_set_axis_polarity(size_t n_args, const mp_obj_t *pos_arg
 
     int polarity = args[ARG_polarity].u_int;
     if(polarity < 0 || polarity > 15)
-        mp_raise_ValueError("polarity out of range. Expected 0 or the bitwise combination of 1 (INVERT_X), 2 (INVERT_Y), 4 (INVERT_Z), or 8 (XY_SWAP)");
+        mp_raise_ValueError(MP_ERROR_TEXT("polarity out of range. Expected 0 or the bitwise combination of 1 (INVERT_X), 2 (INVERT_Y), 4 (INVERT_Z), or 8 (XY_SWAP)"));
     else
         self->breakout->set_axis_polarity(polarity);
 
@@ -251,7 +251,7 @@ mp_obj_t BreakoutMSA301_enable_interrupts(size_t n_args, const mp_obj_t *pos_arg
                     BreakoutMSA301::SINGLE_TAP |
                     BreakoutMSA301::DOUBLE_TAP;
     if(interrupts < 0 || (interrupts & mask) == 0)
-        mp_raise_ValueError("interrupts out of range. Expected 0 or the bitwise combination of 1 (X_ACTIVE), 2 (Y_ACTIVE), 4 (Z_ACTIVE), 16 (DOUBLE_TAP), 32 (SINGLE_TAP), 64 (ORIENTATION), 2048 (FREEFALL), 4096 (NEW_DATA)");
+        mp_raise_ValueError(MP_ERROR_TEXT("interrupts out of range. Expected 0 or the bitwise combination of 1 (X_ACTIVE), 2 (Y_ACTIVE), 4 (Z_ACTIVE), 16 (DOUBLE_TAP), 32 (SINGLE_TAP), 64 (ORIENTATION), 2048 (FREEFALL), 4096 (NEW_DATA)"));
     else
         self->breakout->enable_interrupts(interrupts);
 
@@ -287,7 +287,7 @@ mp_obj_t BreakoutMSA301_set_interrupt_latch(size_t n_args, const mp_obj_t *pos_a
         case MSA_LATCH_4S:      period = BreakoutMSA301::LATCH_4S;      break;
         case MSA_LATCH_8S:      period = BreakoutMSA301::LATCH_8S;      break;
         default:
-            mp_raise_ValueError("latch_period out of range. Expected 0 to 10 (LATCH_1MS, LATCH_2MS, LATCH_25MS, LATCH_50MS, LATCH_100MS, LATCH_250MS, LATCH_500MS, LATCH_1S, LATCH_2S, LATCH_4S, or LATCH_8S)");
+            mp_raise_ValueError(MP_ERROR_TEXT("latch_period out of range. Expected 0 to 10 (LATCH_1MS, LATCH_2MS, LATCH_25MS, LATCH_50MS, LATCH_100MS, LATCH_250MS, LATCH_500MS, LATCH_1S, LATCH_2S, LATCH_4S, or LATCH_8S)"));
             break;
     }
     self->breakout->set_interrupt_latch(period, reset_latched);
@@ -317,7 +317,7 @@ mp_obj_t BreakoutMSA301_read_interrupt(size_t n_args, const mp_obj_t *pos_args, 
         case BreakoutMSA301::ORIENTATION:
             return mp_obj_new_bool(self->breakout->read_interrupt((BreakoutMSA301::Interrupt)interrupt));
         default:
-            mp_raise_ValueError("interrupt not valid. Expected 7 (ACTIVE), 16 (DOUBLE_TAP), 32 (SINGLE_TAP), 64 (ORIENTATION), 2048 (FREEFALL), 4096 (NEW_DATA)");
+            mp_raise_ValueError(MP_ERROR_TEXT("interrupt not valid. Expected 7 (ACTIVE), 16 (DOUBLE_TAP), 32 (SINGLE_TAP), 64 (ORIENTATION), 2048 (FREEFALL), 4096 (NEW_DATA)"));
             break;
     }
 
