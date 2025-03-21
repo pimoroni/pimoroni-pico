@@ -37,7 +37,7 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     self->breakout = m_new_class(BreakoutSGP30, (pimoroni::I2C *)(self->i2c->i2c));
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutSGP30: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutSGP30: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);

@@ -13,7 +13,7 @@ PicoWireless *wireless = nullptr;
 extern "C" {
 #include "pico_wireless.h"
 
-#define NOT_INITIALISED_MSG     "Cannot call this function, as picowireless is not initialised. Call picowireless.init() first."
+#define NOT_INITIALISED_MSG     MP_ERROR_TEXT("Cannot call this function, as picowireless is not initialised. Call picowireless.init() first.")
 
 static void mp_obj_to_string(const mp_obj_t &obj, std::string &string_out) {
     if(mp_obj_is_str_or_bytes(obj)) {
@@ -21,13 +21,13 @@ static void mp_obj_to_string(const mp_obj_t &obj, std::string &string_out) {
         string_out = std::string((const char*)str);
     }
     else if(mp_obj_is_float(obj))
-        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'float' object to str implicitly"));
     else if(mp_obj_is_int(obj))
-        mp_raise_TypeError("can't convert 'int' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'int' object to str implicitly"));
     else if(mp_obj_is_bool(obj))
-        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'bool' object to str implicitly"));
     else
-        mp_raise_TypeError("can't convert object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to str implicitly"));
 }
 
 uint32_t mp_obj_to_ip(mp_obj_t obj) {
@@ -1174,11 +1174,11 @@ mp_obj_t picowireless_set_led(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         int b = args[ARG_b].u_int;
 
         if(r < 0 || r > 255)
-            mp_raise_ValueError("r out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
         else if(g < 0 || g > 255)
-            mp_raise_ValueError("g out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
         else if(b < 0 || b > 255)
-            mp_raise_ValueError("b out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
         else
             wireless->set_led(r, g, b);
     }

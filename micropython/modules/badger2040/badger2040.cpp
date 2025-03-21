@@ -34,13 +34,13 @@ std::string mp_obj_to_string_r(const mp_obj_t &obj) {
         return (const char*)str;
     }
     else if(mp_obj_is_float(obj))
-        mp_raise_TypeError("can't convert 'float' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'float' object to str implicitly"));
     else if(mp_obj_is_int(obj))
-        mp_raise_TypeError("can't convert 'int' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'int' object to str implicitly"));
     else if(mp_obj_is_bool(obj))
-        mp_raise_TypeError("can't convert 'bool' object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert 'bool' object to str implicitly"));
     else
-        mp_raise_TypeError("can't convert object to str implicitly");
+        mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to str implicitly"));
 }
 
 typedef struct _mp_obj_float_t {
@@ -92,7 +92,7 @@ mp_obj_t Badger2040_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_
         mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
         buffer = (uint8_t *)bufinfo.buf;
         if(bufinfo.len < (size_t)(width * height / 8)) {
-            mp_raise_ValueError("Supplied buffer is too small!");
+            mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is too small!"));
         }
     } else {
         buffer = m_new(uint8_t, width * height / 8);
@@ -354,7 +354,7 @@ mp_obj_t Badger2040_image(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_RW);
     if(bufinfo.len < (size_t)(dw * dh / 8)) {
-        mp_raise_ValueError("image: Supplied buffer is too small!");
+        mp_raise_ValueError(MP_ERROR_TEXT("image: Supplied buffer is too small!"));
     }
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
@@ -389,7 +389,7 @@ mp_obj_t Badger2040_icon(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_a
     mp_buffer_info_t bufinfo;
     mp_get_buffer_raise(args[ARG_data].u_obj, &bufinfo, MP_BUFFER_RW);
         if(bufinfo.len < (size_t)(ssize * isize / 8)) {
-        mp_raise_ValueError("icon: Supplied buffer is too small!");
+        mp_raise_ValueError(MP_ERROR_TEXT("icon: Supplied buffer is too small!"));
     }
 
     _Badger2040_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Badger2040_obj_t);
@@ -471,7 +471,7 @@ mp_obj_t Badger2040_glyph(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         std::string message = mp_obj_to_string_r(args[ARG_char].u_obj);
         self->badger2040->text(message, x, y, scale, rotation);
     } else {
-        mp_raise_TypeError("glyph: expected char or string.");
+        mp_raise_TypeError(MP_ERROR_TEXT("glyph: expected char or string."));
     }
 
     return mp_const_none;

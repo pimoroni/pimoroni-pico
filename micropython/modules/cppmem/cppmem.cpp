@@ -21,7 +21,6 @@ static allocator_mode mode = FIXED_HEAP;
 static constexpr size_t cpp_heap_size = CPP_FIXED_HEAP_SIZE / 4;
 static uint32_t cpp_heap[cpp_heap_size];
 static uint32_t ptr = 0;
-static char cpp_err_buf[128] = {0};
 
 extern "C" {
 #include "cppmem.h"
@@ -69,8 +68,7 @@ void* stat_new(std::size_t n) {
     }
     std::size_t s = alloc_size(n);
     if(ptr + s > cpp_heap_size) {
-        snprintf(cpp_err_buf, sizeof(cpp_err_buf), "Failed to allocate %d bytes.", s * 4);
-        mp_raise_msg(&mp_type_RuntimeError, cpp_err_buf);
+        mp_raise_msg_varg(&mp_type_RuntimeError, MP_ERROR_TEXT("Failed to allocate %d bytes."), s * 4);
         return nullptr;
     }
     alloc_bytes += s * 4;

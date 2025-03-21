@@ -38,7 +38,7 @@ mp_obj_t BreakoutMatrix11x7_make_new(const mp_obj_type_t *type, size_t n_args, s
     self->breakout = m_new_class(BreakoutMatrix11x7, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutMatrix11x7: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutMatrix11x7: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -64,10 +64,10 @@ mp_obj_t BreakoutMatrix11x7_set_pixel(size_t n_args, const mp_obj_t *pos_args, m
     int val = args[ARG_val].u_int;
 
     if(x < 0 || x >= BreakoutMatrix11x7::WIDTH || y < 0 || y >= BreakoutMatrix11x7::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     else {
         if(val < 0 || val > 255)
-            mp_raise_ValueError("val out of range. Expected 0 to 255");
+            mp_raise_ValueError(MP_ERROR_TEXT("val out of range. Expected 0 to 255"));
         else
             self->breakout->set_pixel(x, y, val);
     }

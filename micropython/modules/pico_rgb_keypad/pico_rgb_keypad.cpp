@@ -59,7 +59,7 @@ mp_obj_t picokeypad_set_brightness(mp_obj_t self_in, mp_obj_t brightness_obj) {
     float brightness = mp_obj_get_float(brightness_obj);
 
     if(brightness < 0 || brightness > 1.0f)
-        mp_raise_ValueError("brightness out of range. Expected 0.0 to 1.0");
+        mp_raise_ValueError(MP_ERROR_TEXT("brightness out of range. Expected 0.0 to 1.0"));
 
     self->keypad->set_brightness(brightness);
 
@@ -78,13 +78,13 @@ mp_obj_t picokeypad_illuminate_xy(mp_uint_t n_args, const mp_obj_t *args) {
     int b = mp_obj_get_int(args[5]);
 
     if(x < 0 || x >= PicoRGBKeypad::WIDTH || y < 0 || y >= PicoRGBKeypad::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
 
     self->keypad->illuminate(x, y, r, g, b);
     
@@ -102,13 +102,13 @@ mp_obj_t picokeypad_illuminate(mp_uint_t n_args, const mp_obj_t *args) {
     int b = mp_obj_get_int(args[4]);
 
     if(i < 0 || i >= PicoRGBKeypad::NUM_PADS)
-        mp_raise_ValueError("x or y out of range.");   
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));   
     if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
 
     self->keypad->illuminate(i, r, g, b);
 
