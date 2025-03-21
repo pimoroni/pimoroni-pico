@@ -89,49 +89,10 @@ typedef struct _mp_obj_float_t {
 mp_obj_float_t shunt_resistor = {{&mp_type_float}, 0.015f};
 
 /***** Globals Table *****/
-static const mp_map_elem_t plasma2040_globals_table[] = {
-    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_plasma2040) },
-    { MP_ROM_QSTR(MP_QSTR_LED_R), MP_ROM_INT(16) },
-    { MP_ROM_QSTR(MP_QSTR_LED_G), MP_ROM_INT(17) },
-    { MP_ROM_QSTR(MP_QSTR_LED_B), MP_ROM_INT(18) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_A), MP_ROM_INT(12) },
-    { MP_ROM_QSTR(MP_QSTR_BUTTON_B), MP_ROM_INT(13) },
-    { MP_ROM_QSTR(MP_QSTR_USER_SW), MP_ROM_INT(23) },
-    { MP_ROM_QSTR(MP_QSTR_CLK), MP_ROM_INT(14) },
-    { MP_ROM_QSTR(MP_QSTR_DAT), MP_ROM_INT(15) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_SENSE), MP_ROM_INT(29) },
-    { MP_ROM_QSTR(MP_QSTR_SDA), MP_ROM_INT(20) },
-    { MP_ROM_QSTR(MP_QSTR_SCL), MP_ROM_INT(21) },
-
-    { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&shunt_resistor) },
-    { MP_ROM_QSTR(MP_QSTR_ADC_GAIN), MP_ROM_INT(50) },
-};
-static MP_DEFINE_CONST_DICT(mp_module_plasma2040_globals, plasma2040_globals_table);
-
-static const mp_map_elem_t plasma_stick_globals_table[] = {
-    { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_plasma_stick) },
-    { MP_ROM_QSTR(MP_QSTR_DAT), MP_ROM_INT(15) },
-    { MP_ROM_QSTR(MP_QSTR_SDA), MP_ROM_INT(4) },
-    { MP_ROM_QSTR(MP_QSTR_SCL), MP_ROM_INT(5) },
-};
-static MP_DEFINE_CONST_DICT(mp_module_plasma_stick_globals, plasma_stick_globals_table);
-
-const mp_obj_module_t plasma2040_user_cmodule = {
-    .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t*)&mp_module_plasma2040_globals,
-};
-
-const mp_obj_module_t plasma_stick_user_cmodule = {
-    .base = { &mp_type_module },
-    .globals = (mp_obj_dict_t*)&mp_module_plasma_stick_globals,
-};
-
 static const mp_map_elem_t plasma_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_plasma) },
     { MP_OBJ_NEW_QSTR(MP_QSTR_APA102), (mp_obj_t)&PlasmaAPA102_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_WS2812), (mp_obj_t)&PlasmaWS2812_type },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_plasma2040), (mp_obj_t)&plasma2040_user_cmodule },
-    { MP_OBJ_NEW_QSTR(MP_QSTR_plasma_stick), (mp_obj_t)&plasma_stick_user_cmodule },
 
     { MP_ROM_QSTR(MP_QSTR_COLOR_ORDER_RGB), MP_ROM_INT(0x00) },
     { MP_ROM_QSTR(MP_QSTR_COLOR_ORDER_RBG), MP_ROM_INT(0x01) },
