@@ -48,6 +48,7 @@ LED_SERVO_6 = 11
 NUM_GPIOS = 6
 NUM_ADCS = 3
 NUM_MOTORS = 2
+NUM_ENCODERS = 2
 NUM_SERVOS = 6
 NUM_LEDS = 12
 
@@ -118,6 +119,66 @@ class Inventor():
 
     def switch_pressed(self):
         return self.__switch.value()
+
+    @property
+    def motor_a(self):
+        if self.__init_motors:
+            return self.motors[0]
+        raise RuntimeError("motor_a is only accessible if init_motors was True during initialisation")
+
+    @property
+    def motor_b(self):
+        if self.__init_motors:
+            return self.motors[1]
+        raise RuntimeError("motor_b is only accessible if init_motors was True during initialisation")
+
+    @property
+    def encoder_a(self):
+        if self.__init_encoders:
+            return self.encoders[0]
+        raise RuntimeError("encoder_a is only accessible if init_motors was True during initialisation")
+
+    @property
+    def encoder_b(self):
+        if self.__init_encoders:
+            return self.encoders[1]
+        raise RuntimeError("encoder_b is only accessible if init_motors was True during initialisation")
+
+    @property
+    def servo1(self):
+        if self.__init_servos:
+            return self.servos[0]
+        raise RuntimeError("servo1 is only accessible if init_servos was True during initialisation")
+
+    @property
+    def servo2(self):
+        if self.__init_servos:
+            return self.servos[1]
+        raise RuntimeError("servo2 is only accessible if init_servos was True during initialisation")
+
+    @property
+    def servo3(self):
+        if self.__init_servos:
+            return self.servos[2]
+        raise RuntimeError("servo3 is only accessible if init_servos was True during initialisation")
+
+    @property
+    def servo4(self):
+        if self.__init_servos:
+            return self.servos[3]
+        raise RuntimeError("servo4 is only accessible if init_servos was True during initialisation")
+
+    @property
+    def servo5(self):
+        if self.__init_servos:
+            return self.servos[3]
+        raise RuntimeError("servo5 is only accessible if init_servos was True during initialisation")
+
+    @property
+    def servo6(self):
+        if self.__init_servos:
+            return self.servos[3]
+        raise RuntimeError("servo6 is only accessible if init_servos was True during initialisation")
 
     def play_tone(self, frequency):
         try:
