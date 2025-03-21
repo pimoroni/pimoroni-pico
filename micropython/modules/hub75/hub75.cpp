@@ -40,11 +40,12 @@ typedef struct _Hub75_obj_t {
     void *buf;
 } _Hub75_obj_t;
 
-_Hub75_obj_t *hub75_obj;
+_Hub75_obj_t *hub75_obj[2];
 
 
 void __isr dma_complete() {
-    if(hub75_obj) hub75_obj->hub75->dma_complete();
+    if(hub75_obj[0]) hub75_obj[0]->hub75->dma_complete();
+    if(hub75_obj[1]) hub75_obj[1]->hub75->dma_complete();
 }
 
 /***** Print *****/
@@ -86,7 +87,8 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         ARG_buffer,
         ARG_panel_type,
         ARG_stb_invert,
-        ARG_color_order
+        ARG_color_order,
+        ARG_duo
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT },
@@ -95,6 +97,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         { MP_QSTR_panel_type, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_stb_invert, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_color_order, MP_ARG_INT, {.u_int = (uint8_t)Hub75::COLOR_ORDER::RGB} },
+        { MP_QSTR_duo, MP_ARG_INT, {.u_int = 0} },
     };
 
     // Parse args.
@@ -106,6 +109,7 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     PanelType paneltype = (PanelType)args[ARG_panel_type].u_int;
     bool stb_invert = args[ARG_stb_invert].u_int;
     Hub75::COLOR_ORDER color_order = (Hub75::COLOR_ORDER)args[ARG_color_order].u_int;
+    bool duo_mode = args[ARG_duo].u_int;
 
     Pixel *buffer = nullptr;
 
@@ -120,11 +124,11 @@ mp_obj_t Hub75_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         buffer = m_new(Pixel, width * height);
     }
 
-    hub75_obj = mp_obj_malloc_with_finaliser(_Hub75_obj_t, &Hub75_type);
-    hub75_obj->buf = buffer;
-    hub75_obj->hub75 = m_new_class(Hub75, width, height, buffer, paneltype, stb_invert, color_order);
+    hub75_obj[duo_mode] = mp_obj_malloc_with_finaliser(_Hub75_obj_t, &Hub75_type);
+    hub75_obj[duo_mode]->buf = buffer;
+    hub75_obj[duo_mode]->hub75 = m_new_class(Hub75, width, height, buffer, paneltype, stb_invert, color_order, duo_mode);
 
-    return MP_OBJ_FROM_PTR(hub75_obj);
+    return MP_OBJ_FROM_PTR(hub75_obj[duo_mode]);
 }
 
 mp_obj_t Hub75_clear(mp_obj_t self_in) {

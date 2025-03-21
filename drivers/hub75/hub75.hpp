@@ -17,6 +17,9 @@ const uint ROWSEL_BASE_PIN = 6;
 const uint ROWSEL_N_PINS = 5;
 const uint BIT_DEPTH = 10;
 
+const uint DUO_DATA_BASE_PIN = DATA_BASE_PIN + 32;
+const uint DUO_ROWSEL_BASE_PIN = ROWSEL_BASE_PIN + 32;
+
 /*
 10-bit gamma table, allowing us to gamma correct our 8-bit colour values up
 to 10-bit without losing dynamic range.
@@ -86,6 +89,7 @@ class Hub75 {
     PanelType panel_type;
     bool inverted_stb = false;
     COLOR_ORDER color_order;
+    bool duo_mode = false;
     Pixel background = 0;
 
     // DMA & PIO
@@ -140,7 +144,7 @@ class Hub75 {
     Hub75(uint width, uint height) : Hub75(width, height, nullptr) {};
     Hub75(uint width, uint height, Pixel *buffer) : Hub75(width, height, buffer, PANEL_GENERIC) {};
     Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Hub75(width, height, buffer, panel_type, false) {};
-    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB);
+    Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB, bool duo=false);
     ~Hub75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);
