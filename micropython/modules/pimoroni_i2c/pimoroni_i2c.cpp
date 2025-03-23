@@ -74,8 +74,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
     }
 
-    self = m_new_obj(_PimoroniI2C_obj_t);
-    self->base.type = &PimoroniI2C_type;
+    self = mp_obj_malloc(_PimoroniI2C_obj_t, &PimoroniI2C_type);
 
     self->i2c = m_new_class(I2C, sda, scl, baud);
 
