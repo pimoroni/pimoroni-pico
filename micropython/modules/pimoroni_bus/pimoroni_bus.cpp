@@ -13,36 +13,23 @@ void PimoroniBus_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
     _PimoroniBus_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PimoroniBus_obj_t);
     if(self->base.type == &SPIPins_type) {
         SPIPins *pins = (SPIPins *)self->pins;
-        mp_print_str(print, "SPIBus(");
-        mp_obj_print_helper(print, mp_obj_new_int((pins->spi == spi0) ? 0 : 1), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->cs), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->sck), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->mosi), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->miso == PIN_UNUSED ? -1 : pins->miso), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->dc == PIN_UNUSED ? -1 : pins->dc), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->bl == PIN_UNUSED ? -1 : pins->bl), PRINT_REPR);
-        mp_print_str(print, ")");
+        mp_printf(print, "SPIBus(%d, %d, %d, %d, %d, %d, %d)",
+            pins->spi == spi0 ? 0 : 1,
+            pins->cs,
+            pins->sck,
+            pins->mosi,
+            pins->miso == PIN_UNUSED ? -1 : pins->miso,
+            pins->dc   == PIN_UNUSED ? -1 : pins->dc,
+            pins->bl   == PIN_UNUSED ? -1 : pins->bl);
     } else {
         ParallelPins *pins = (ParallelPins *)self->pins;
-        mp_print_str(print, "ParallelBus(");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->cs), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->dc), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->wr_sck), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->rd_sck), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->d0), PRINT_REPR);
-        mp_print_str(print, ", ");
-        mp_obj_print_helper(print, mp_obj_new_int(pins->bl == PIN_UNUSED ? -1 : pins->bl), PRINT_REPR);
-        mp_print_str(print, ")");
+        mp_printf(print, "ParallelBus(%d, %d, %d, %d, %d, %d)",
+            pins->cs,
+            pins->dc,
+            pins->wr_sck,
+            pins->rd_sck,
+            pins->d0,
+            pins->bl == PIN_UNUSED ? -1 : pins->bl);
     }
     (void)kind;
 }
