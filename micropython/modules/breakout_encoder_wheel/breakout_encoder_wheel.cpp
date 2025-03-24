@@ -34,8 +34,7 @@ mp_obj_t BreakoutEncoderWheel_make_new(const mp_obj_type_t *type, size_t n_args,
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(breakout_encoder_wheel_BreakoutEncoderWheel_obj_t);
-    self->base.type = &breakout_encoder_wheel_BreakoutEncoderWheel_type;
+    self = mp_obj_malloc(breakout_encoder_wheel_BreakoutEncoderWheel_obj_t, &breakout_encoder_wheel_BreakoutEncoderWheel_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
