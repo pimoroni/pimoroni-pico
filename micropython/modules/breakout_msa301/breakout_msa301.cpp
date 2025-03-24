@@ -29,8 +29,7 @@ mp_obj_t BreakoutMSA301_make_new(const mp_obj_type_t *type, size_t n_args, size_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(breakout_msa301_BreakoutMSA301_obj_t);
-    self->base.type = &breakout_msa301_BreakoutMSA301_type;
+    self = mp_obj_malloc(breakout_msa301_BreakoutMSA301_obj_t, &breakout_msa301_BreakoutMSA301_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
