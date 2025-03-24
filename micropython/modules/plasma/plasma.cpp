@@ -64,9 +64,13 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_pio, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pio, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_sm, MP_ARG_INT, {.u_int = 0} },
+#ifdef PLASMA_DATA_PIN
+        { MP_QSTR_dat, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PLASMA_DATA_PIN)} },
+#else
         { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_OBJ },
+#endif
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = WS2812::DEFAULT_SERIAL_FREQ} },
         { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_rgbw, MP_ARG_BOOL, {.u_bool = false} },
@@ -282,10 +286,18 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_pio, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_sm, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pio, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_sm, MP_ARG_INT, {.u_int = 0} },
+#ifdef PLASMA_DATA_PIN
+        { MP_QSTR_dat, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PLASMA_DATA_PIN)} },
+#else
         { MP_QSTR_dat, MP_ARG_REQUIRED | MP_ARG_OBJ },
+#endif
+#ifdef PLASMA_CLOCK_PIN
+        { MP_QSTR_clk, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PLASMA_CLOCK_PIN)} },
+#else
         { MP_QSTR_clk, MP_ARG_REQUIRED | MP_ARG_OBJ },
+#endif
         { MP_QSTR_freq, MP_ARG_INT, {.u_int = APA102::DEFAULT_SERIAL_FREQ} },
         { MP_QSTR_buffer, MP_ARG_OBJ, {.u_obj = nullptr} },
     };
