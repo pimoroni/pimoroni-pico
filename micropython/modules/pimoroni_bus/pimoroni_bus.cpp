@@ -49,8 +49,7 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _PimoroniBus_obj_t *self = m_new_obj(_PimoroniBus_obj_t);
-    self->base.type = &SPIPins_type;
+    _PimoroniBus_obj_t *self = mp_obj_malloc(_PimoroniBus_obj_t, &SPIPins_type);
     self->pins = new(m_new(SPIPins, 1)) SPIPins{
         ((args[ARG_sck].u_int >> 3) & 0b1) == 0 ? spi0 : spi1,
         (uint)args[ARG_cs].u_int,
@@ -69,8 +68,7 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
 mp_obj_t SPISlot(mp_obj_t slot_in) {
     int slot = mp_obj_get_int(slot_in);
 
-    _PimoroniBus_obj_t *obj = m_new_obj(_PimoroniBus_obj_t);
-    obj->base.type = &SPIPins_type;
+    _PimoroniBus_obj_t *obj = mp_obj_malloc(_PimoroniBus_obj_t, &SPIPins_type);
 
     SPIPins slot_pins = get_spi_pins((BG_SPI_SLOT)slot);
     
@@ -94,8 +92,7 @@ mp_obj_t ParallelPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    _PimoroniBus_obj_t *self = m_new_obj(_PimoroniBus_obj_t);
-    self->base.type = &ParallelPins_type;
+    _PimoroniBus_obj_t *self = mp_obj_malloc(_PimoroniBus_obj_t, &ParallelPins_type);
     self->pins = new(m_new(ParallelPins, 1)) ParallelPins{
         (uint)args[ARG_cs].u_int,
         (uint)args[ARG_dc].u_int,
