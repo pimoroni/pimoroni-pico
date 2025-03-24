@@ -23,5 +23,5 @@ target_link_libraries(usermod INTERFACE usermod_picovector)
 set_source_files_properties(
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_vector/pico_vector.cpp
     PROPERTIES COMPILE_FLAGS
-    "-Wno-narrowing"
+    "-Wno-narrowing -O2 -fgcse-after-reload -floop-interchange -fpeel-loops -fpredictive-commoning -fsplit-paths -ftree-loop-distribute-patterns -ftree-loop-distribution -ftree-vectorize -ftree-partial-pre -funswitch-loops"
 )
