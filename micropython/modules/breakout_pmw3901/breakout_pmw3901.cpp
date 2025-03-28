@@ -80,20 +80,20 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
                 BreakoutPMW3901 *breakout = m_new_class(BreakoutPMW3901, (BG_SPI_SLOT)slot);
                 if (!breakout->init()) {
                     m_del_class(BreakoutPMW3901, breakout);
-                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+                    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPMW3901: Init failed"));
                 }
                 self->breakout = breakout;
             } else {
                 BreakoutPAA5100 *breakout = m_new_class(BreakoutPAA5100, (BG_SPI_SLOT)slot);
                 if (!breakout->init()) {
                     m_del_class(BreakoutPAA5100, breakout);
-                    mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+                    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPAA5100: Init failed"));
                 }
                 self->breakout = breakout;
             }
         }
         else {
-            mp_raise_ValueError("slot not a valid value. Expected 0 to 1");
+            mp_raise_ValueError(MP_ERROR_TEXT("slot not a valid value. Expected 0 to 1"));
         }
     }
     else {
@@ -143,14 +143,14 @@ mp_obj_t make_new(enum ChipType chip, const mp_obj_type_t *type, size_t n_args, 
             BreakoutPMW3901 *breakout = m_new_class(BreakoutPMW3901, spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
             if (!breakout->init()) {
                 m_del_class(BreakoutPMW3901, breakout);
-                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPMW3901: Init failed");
+                mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPMW3901: Init failed"));
             }
             self->breakout = breakout;
         } else {
             BreakoutPAA5100 *breakout = m_new_class(BreakoutPAA5100, spi, args[ARG_cs].u_int, sck, mosi, miso, args[ARG_interrupt].u_int);
             if (!breakout->init()) {
                 m_del_class(BreakoutPAA5100, breakout);
-                mp_raise_msg(&mp_type_RuntimeError, "BreakoutPAA5100: Init failed");
+                mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutPAA5100: Init failed"));
             }
             self->breakout = breakout;
         }
@@ -193,7 +193,7 @@ mp_obj_t BreakoutPMW3901_set_rotation(size_t n_args, const mp_obj_t *pos_args, m
 
     int degrees = args[ARG_degrees].u_int;
     if(degrees < 0 || degrees > 3)
-        mp_raise_ValueError("degrees out of range. Expected 0 (0), 1 (90), 2 (180) or 3 (270)");
+        mp_raise_ValueError(MP_ERROR_TEXT("degrees out of range. Expected 0 (0), 1 (90), 2 (180) or 3 (270)"));
     else
         self->breakout->set_rotation((BreakoutPMW3901::Degrees)degrees);
 
@@ -299,7 +299,7 @@ mp_obj_t BreakoutPMW3901_frame_capture(size_t n_args, const mp_obj_t *pos_args, 
     mp_get_buffer_raise(args[ARG_buffer].u_obj, &bufinfo, MP_BUFFER_RW);
     uint8_t *buffer = (uint8_t *)bufinfo.buf;
     if(bufinfo.len != (size_t)(BreakoutPMW3901::FRAME_BYTES)) {
-        mp_raise_ValueError("Supplied buffer is the wrong size for frame capture. Needs to be 1225.");
+        mp_raise_ValueError(MP_ERROR_TEXT("Supplied buffer is the wrong size for frame capture. Needs to be 1225."));
     }
 
     float timeout = (float)BreakoutPMW3901::DEFAULT_MOTION_TIMEOUT_MS / 1000.0f;

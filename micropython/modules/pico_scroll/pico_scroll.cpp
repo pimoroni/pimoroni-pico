@@ -18,9 +18,6 @@ extern "C" {
 #include "micropython/modules/pimoroni_i2c/pimoroni_i2c.h"
 #include "py/builtin.h"
 
-#define BUFFER_TOO_SMALL_MSG "bytearray too small: len(image) < width * height."
-#define INCORRECT_SIZE_MSG "Scroll height wrong: > 8 pixels."
-
 typedef struct _PicoScroll_obj_t {
     mp_obj_base_t base;
     PicoScroll* scroll;
@@ -80,9 +77,9 @@ mp_obj_t picoscroll_set_pixel(mp_uint_t n_args, const mp_obj_t *args) {
     int val = mp_obj_get_int(args[3]);
 
     if (x < 0 || x >= PicoScroll::WIDTH || y < 0 || y >= PicoScroll::HEIGHT)
-        mp_raise_ValueError("x or y out of range.");
+        mp_raise_ValueError(MP_ERROR_TEXT("x or y out of range."));
     if (val < 0 || val > 255)
-        mp_raise_ValueError("val out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("val out of range. Expected 0 to 255"));
 
     self->scroll->set_pixel(x, y, val);
 
@@ -152,7 +149,7 @@ mp_obj_t picoscroll_set_pixels(mp_obj_t self_in, mp_obj_t image_obj) {
     mp_get_buffer_raise(image_obj, &bufinfo, MP_BUFFER_RW);
 
     if (bufinfo.len < (PicoScroll::WIDTH * PicoScroll::HEIGHT)) {
-        mp_raise_msg(&mp_type_IndexError, BUFFER_TOO_SMALL_MSG);
+        mp_raise_msg(&mp_type_IndexError, MP_ERROR_TEXT("bytearray too small: len(image) < width * height."));
     }
 
     self->scroll->set_pixels((const char*)bufinfo.buf);
@@ -213,7 +210,7 @@ mp_obj_t picoscroll_is_pressed(mp_obj_t self_in, mp_obj_t button_obj) {
         break;
 
     default:
-        mp_raise_ValueError("button not valid. Expected 0 to 3");
+        mp_raise_ValueError(MP_ERROR_TEXT("button not valid. Expected 0 to 3"));
         break;
     }
 

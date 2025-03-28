@@ -2,8 +2,8 @@
 
 namespace pimoroni {
 
-    PicoGraphics_Pen3Bit::PicoGraphics_Pen3Bit(uint16_t width, uint16_t height, void *frame_buffer)
-    : PicoGraphics(width, height, frame_buffer) {
+    PicoGraphics_Pen3Bit::PicoGraphics_Pen3Bit(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers)
+    : PicoGraphics(width, height, layers, frame_buffer) {
         this->pen_type = PEN_3BIT;
         if(this->frame_buffer == nullptr) {
             this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);

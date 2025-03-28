@@ -25,13 +25,16 @@ enum PicoGraphicsDisplay {
     DISPLAY_INTERSTATE75_128X64,
     DISPLAY_INTERSTATE75_192X64,
     DISPLAY_INTERSTATE75_256X64,
+    DISPLAY_INTERSTATE75_128X128,
     DISPLAY_INKY_FRAME_7,
     DISPLAY_COSMIC_UNICORN,
     DISPLAY_STELLAR_UNICORN,
     DISPLAY_UNICORN_PACK,
     DISPLAY_SCROLL_PACK,
     DISPLAY_PICO_W_EXPLORER,
-    DISPLAY_EXPLORER
+    DISPLAY_EXPLORER,
+    DISPLAY_PRESTO,
+    DISPLAY_PRESTO_FULL_RES
 };
 
 enum PicoGraphicsPenType {
@@ -71,11 +74,17 @@ extern mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *ar
 extern mp_obj_t ModPicoGraphics_set_backlight(mp_obj_t self_in, mp_obj_t brightness);
 extern mp_obj_t ModPicoGraphics_set_update_speed(mp_obj_t self_in, mp_obj_t update_speed);
 
+extern mp_obj_t ModPicoGraphics_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in);
+extern mp_obj_t ModPicoGraphics_is_busy(mp_obj_t self_in);
+
 // Palette management
 extern mp_obj_t ModPicoGraphics_update_pen(size_t n_args, const mp_obj_t *args);
 extern mp_obj_t ModPicoGraphics_reset_pen(mp_obj_t self_in, mp_obj_t pen);
 extern mp_obj_t ModPicoGraphics_set_palette(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t ModPicoGraphics_hsv_to_rgb(size_t n_args, const mp_obj_t *args);
+
+// Layers
+extern mp_obj_t ModPicoGraphics_set_layer(mp_obj_t self_in, mp_obj_t layer);
 
 // Pen
 extern mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen);
@@ -85,6 +94,7 @@ extern mp_obj_t ModPicoGraphics_set_thickness(mp_obj_t self_in, mp_obj_t thickne
 
 // Primitives
 extern mp_obj_t ModPicoGraphics_set_clip(size_t n_args, const mp_obj_t *args);
+extern mp_obj_t ModPicoGraphics_get_clip(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_remove_clip(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_clear(mp_obj_t self_in);
 extern mp_obj_t ModPicoGraphics_pixel(mp_obj_t self_in, mp_obj_t x, mp_obj_t y);
