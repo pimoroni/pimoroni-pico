@@ -390,11 +390,11 @@ void Duo75::dma_complete() {
 void Duo75::copy_to_back_buffer(void *data, size_t len, int start_x, int start_y) {
     uint8_t *p = (uint8_t *)data;
 
-    // x and y are swapped from convention to achieve a 90degree rotation
-    for(uint x = start_x; x < width; x++) {
-        for(uint y = start_y; y < height; y++) {
-            uint sy = y;
-            uint sx = width - 1 - x;
+    for(uint y = start_y; y < height; y++) {
+        for(uint x = start_x; x < width; x++) {
+            // x and y are swapped to achieve a 90degree rotation
+            uint sy = x;
+            uint sx = width - 1 - y;
             uint offset = sx * 2; // * 2 because we have pairs of pixels
 
             uint8_t b = *p++;
