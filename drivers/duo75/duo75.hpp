@@ -76,8 +76,8 @@ class Duo75 {
         BRG,
         BGR
     };
-    uint width;
-    uint height;
+    const uint width = 128;
+    const uint height = 128;
     uint r_shift = 0;
     uint g_shift = 10;
     uint b_shift = 20;
@@ -148,10 +148,10 @@ class Duo75 {
     unsigned int pin_led_g = 17;
     unsigned int pin_led_b = 18;
 
-    Duo75(uint width, uint height) : Duo75(width, height, nullptr) {};
-    Duo75(uint width, uint height, Pixel *buffer) : Duo75(width, height, buffer, PANEL_GENERIC) {};
-    Duo75(uint width, uint height, Pixel *buffer, PanelType panel_type) : Duo75(width, height, buffer, panel_type, false) {};
-    Duo75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB);
+    Duo75(void) : Duo75(nullptr) {};
+    Duo75(Pixel *buffer) : Duo75(buffer, PANEL_GENERIC) {};
+    Duo75(Pixel *buffer, PanelType panel_type) : Duo75(buffer, panel_type, false) {};
+    Duo75(Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order=COLOR_ORDER::RGB);
     ~Duo75();
 
     void FM6126A_write_register(uint16_t value, uint8_t position);

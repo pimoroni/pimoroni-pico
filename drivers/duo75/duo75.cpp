@@ -11,8 +11,8 @@ namespace pimoroni {
 #define GPIO_INIT_BOTH(pin, initial) gpio_init(pin); gpio_set_function(pin, GPIO_FUNC_SIO); gpio_set_dir(pin, true); gpio_put(pin, initial); \
                                      gpio_init(pin + 32); gpio_set_function(pin + 32, GPIO_FUNC_SIO); gpio_set_dir(pin + 32, true); gpio_put(pin + 32, initial)
 
-Duo75::Duo75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order)
- : width(width), height(height), panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order)
+Duo75::Duo75(Pixel *buffer, PanelType panel_type, bool inverted_stb, COLOR_ORDER color_order)
+ : panel_type(panel_type), inverted_stb(inverted_stb), color_order(color_order)
  {
     // Set up allllll the GPIO
     GPIO_INIT_BOTH(pin_r0, 0);
