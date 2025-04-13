@@ -76,7 +76,7 @@ typedef struct {
 } af_path_t;
 
 typedef struct {
-  char codepoint;
+  uint16_t codepoint;
   int8_t x, y, w, h;
   int8_t advance;
   uint8_t path_count;
@@ -106,7 +106,7 @@ typedef struct  {
 } af_text_metrics_t;
 
 bool af_load_font_file(AF_FILE file, af_face_t *face);
-void af_render_character(af_face_t *face, const char codepoint, af_text_metrics_t *tm);
+void af_render_character(af_face_t *face, uint16_t codepoint, af_text_metrics_t *tm);
 void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_width, float max_height, af_text_metrics_t *tm);
 pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_line_width, af_text_metrics_t *tm);
 
@@ -210,6 +210,33 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   return true;
 }
 
+uint16_t get_utf8_char(const char *text, const char *end) {
+  uint16_t codepoint;
+  if((*text & 0x80) == 0x00) {
+    codepoint = *text; // ASCII, codepoints U+0000...U007F
+  }
+  else if( ((*text & 0xE0) == 0xC0) && (text+1 <= end) && ((*(text+1) & 0xC0) == 0x80) ) {
+    codepoint = ((uint16_t)(*text & 0x1F) << 6) + (*(text+1) & 0x3F); //codepoints U+0080...U+07FF
+  }
+  else if( ((*text & 0xF0) == 0xE0) && (text+2 <= end) && ((*(text+1) & 0xC0) == 0x80) && ((*(text+2) & 0xC0) == 0x80) ) {
+    codepoint = ((uint16_t)(*text & 0x0F) << 12) + ((uint16_t)(*(text+1) & 0x3F) << 6) + (*(text+2) & 0x3F); // codepoints U+0800...U+FFFF
+  }
+  else {
+    codepoint = 0xFFFF; // malformed UTF-8 sequences or unsupported codepoints starting at U+10000
+  }
+  return codepoint;
+}
+
+uint8_t num_of_utf8_continuation_bytes(const char *text, const char *end) {
+  uint8_t cont = 0;
+  for(char c = *text; text < end; text++, c = *text) {
+    if((c & 0xC0) == 0x80) {
+      cont++;
+    }
+  }
+  return cont;
+}
+
 af_glyph_t *find_glyph(af_face_t *face, char c) {
   for(int i = 0; i < face->glyph_count; i++) {
     if(face->glyphs[i].codepoint == c) {
@@ -238,7 +265,7 @@ void af_render_glyph(af_glyph_t* glyph, af_text_metrics_t *tm) {
   pp_poly_free(poly);
 }
 
-void af_render_character(af_face_t *face, const char c, af_text_metrics_t *tm) {
+void af_render_character(af_face_t *face, uint16_t c, af_text_metrics_t *tm) {
   af_glyph_t *glyph = find_glyph(face, c);
   if(!glyph) {
     return;
@@ -251,14 +278,23 @@ float get_line_width(af_face_t *face, const char *text, size_t *tlen, float max_
   const char *start = text;
   const char *end = text + *tlen;
   const char *last_space = nullptr;
-  for(char c = *text; text < end; text++, c = *text) {
-    af_glyph_t *glyph = find_glyph(face, c);
+  uint16_t utf8_char;
+  while(text < end) {
+    utf8_char = get_utf8_char(text, end);
+    text++;
+    if(utf8_char > 0x7F) {
+      text++;
+    }
+    if(utf8_char > 0x7FF) {
+      text++;
+    }
+    af_glyph_t *glyph = find_glyph(face, utf8_char);
     if(!glyph) {
       continue;
     }
 
     float char_width;
-    if(c == L' ') {
+    if(utf8_char == L' ') {
       char_width = (glyph->advance * tm->word_spacing) / 100.0f;
       last_space = text;
     } else {
@@ -311,6 +347,7 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
   
   float line_height = (tm->line_height * 128.0f) / 100.0f;
   float scale = tm->size / 128.0f;
+  uint16_t utf8_char;
 
   struct {
     float x, y;
@@ -337,8 +374,16 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
     int line_width = get_line_width(face, line, &line_len, max_line_width, tm);
     char *end = line + line_len;
 
-    for(char c = *line; line < end; line++, c = *line) {
-      af_glyph_t *glyph = find_glyph(face, c);
+    while(line < end) {
+      utf8_char = get_utf8_char(line, end);
+      line++;
+      if(utf8_char > 0x7F) {
+        line++;
+      }
+      if(utf8_char > 0x7FF) {
+        line++;
+      }
+      af_glyph_t *glyph = find_glyph(face, utf8_char);
       if(!glyph) {
         continue;
       }
@@ -361,7 +406,7 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
 
       af_render_glyph(glyph, tm);
       
-      if(c == L' ') {
+      if(utf8_char == L' ') {
         caret.x += (glyph->advance * tm->word_spacing) / 100.0f;
       } else {
         caret.x += (glyph->advance * tm->letter_spacing) / 100.0f;
