@@ -76,7 +76,7 @@ typedef struct {
 } af_path_t;
 
 typedef struct {
-  int16_t codepoint;
+  uint16_t codepoint;
   int8_t x, y, w, h;
   int8_t advance;
   uint8_t path_count;
@@ -210,36 +210,27 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   return true;
 }
 
-uint16_t get_utf8_char(const char *text, const char *end)
-{
+uint16_t get_utf8_char(const char *text, const char *end) {
   uint16_t codepoint;
-  if((*text & 0x80) == 0x00)
-  {
+  if((*text & 0x80) == 0x00) {
     codepoint = *text; // ASCII, codepoints U+0000...U007F
   }
-  else if( ((*text & 0xE0) == 0xC0) && (text+1 <= end) && ((*(text+1) & 0xC0) == 0x80) )
-  {
+  else if( ((*text & 0xE0) == 0xC0) && (text+1 <= end) && ((*(text+1) & 0xC0) == 0x80) ) {
     codepoint = ((uint16_t)(*text & 0x1F) << 6) + (*(text+1) & 0x3F); //codepoints U+0080...U+07FF
   }
-  else if( ((*text & 0xF0) == 0xE0) && (text+2 <= end) && ((*(text+1) & 0xC0) == 0x80) && ((*(text+2) & 0xC0) == 0x80) )
-  {
+  else if( ((*text & 0xF0) == 0xE0) && (text+2 <= end) && ((*(text+1) & 0xC0) == 0x80) && ((*(text+2) & 0xC0) == 0x80) ) {
     codepoint = ((uint16_t)(*text & 0x0F) << 12) + ((uint16_t)(*(text+1) & 0x3F) << 6) + (*(text+2) & 0x3F); // codepoints U+0800...U+FFFF
   }
-  else
-  {
+  else {
     codepoint = 0xFFFF; // malformed UTF-8 sequences or unsupported codepoints starting at U+10000
   }
   return codepoint;
-
 }
 
-uint8_t num_of_utf8_continuation_bytes(const char *text, const char *end)
-{
+uint8_t num_of_utf8_continuation_bytes(const char *text, const char *end) {
   uint8_t cont = 0;
-  for(char c = *text; text < end; text++, c = *text)
-  {
-    if((c & 0xC0) == 0x80)
-    {
+  for(char c = *text; text < end; text++, c = *text) {
+    if((c & 0xC0) == 0x80) {
       cont++;
     }
   }
