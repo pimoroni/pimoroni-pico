@@ -1,15 +1,15 @@
-"""BME688 / BME680 demo
+"""BME69X demo
 
-This demo will work for both the BME680 and BME688.
+Demo of how to read the BME690 sensor.
 """
 
 import machine
 import time
-from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE
+from breakout_bme69x import BreakoutBME69X, STATUS_HEATER_STABLE
 
-bme = BreakoutBME68X(machine.I2C(), 0x76)
+bme = BreakoutBME69X(machine.I2C(), 0x76)
 # If this gives an error, try the alternative address
-# bme = BreakoutBME68X(machine.I2C(), 0x77)
+# bme = BreakoutBME69X(machine.I2C(), 0x77)
 
 while True:
     temperature, pressure, humidity, gas, status, _, _ = bme.read()

@@ -1,4 +1,4 @@
-# BME68X <!-- omit in toc -->
+# BME69X <!-- omit in toc -->
 
 - [Getting Started](#getting-started)
 - [Reading Data From The Sensor](#reading-data-from-the-sensor)
@@ -11,22 +11,22 @@
 
 ## Getting Started
 
-Construct new `I2C` and `BreakoutBME68X` instances:
+Construct new `I2C` and `BreakoutBME69X` instances:
 
 ```python
-from breakout_bme68x import BreakoutBME68X
+from breakout_bme69x import BreakoutBME69X
 
 i2c = machine.I2C()
-bme = BreakoutBME68X(i2c)
+bme = BreakoutBME69X(i2c)
 ```
 
 The default I2C address is `0x76`. If you've cut the trace to change the I2C address of the sensor, you can specify the alternate I2C address like this:
 
 ``` python
-bme = BreakoutBME68X(i2c, 0x77)
+bme = BreakoutBME69X(i2c, 0x77)
 ```
 
-The `breakout_bme68x` module also includes constants for the possible I2C addresses:
+The `breakout_bme69x` module also includes constants for the possible I2C addresses:
 
 * `I2C_ADDRESS_DEFAULT`
 * `I2C_ADDRESS_ALT`
@@ -55,7 +55,7 @@ The `configure` method allows you to set up the oversampling, filtering and oper
 bme.configure(filter, standby_time, os_pressure, os_temp, os_humidity)
 ```
 
-The `breakout_bme68x` module includes constants for these:
+The `breakout_bme69x` module includes constants for these:
 
 ### Filter Settings
 
