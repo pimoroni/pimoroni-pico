@@ -25,6 +25,7 @@ namespace pimoroni {
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
     uint RESET  = 27; //25;
+    uint BUSY   = 6;
 
     uint SR_CLOCK = 8;
     uint SR_LATCH = 9;
@@ -32,7 +33,7 @@ namespace pimoroni {
 
     bool blocking = false;
 
-    ShiftRegister<uint8_t> sr = ShiftRegister<uint8_t>(SR_CLOCK, SR_LATCH, SR_DATA);
+    //ShiftRegister<uint8_t> sr = ShiftRegister<uint8_t>(SR_CLOCK, SR_LATCH, SR_DATA);
 
   public:
     enum Button : uint8_t {

@@ -44,7 +44,7 @@ namespace pimoroni {
   };
 
   bool Inky73::is_busy() {
-    return !(sr.read() & 128);
+    return !gpio_get(BUSY);
   }
   
   void Inky73::busy_wait(uint timeout_ms) {
@@ -74,6 +74,10 @@ namespace pimoroni {
     gpio_set_function(RESET, GPIO_FUNC_SIO);
     gpio_set_dir(RESET, GPIO_OUT);
     gpio_put(RESET, 1);
+
+    gpio_set_function(BUSY, GPIO_FUNC_SIO);
+    gpio_set_dir(BUSY, GPIO_IN);
+    gpio_set_pulls(BUSY, true, false);
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
@@ -164,6 +168,12 @@ namespace pimoroni {
       gpio_put(CS, 0);
       spi_write_blocking(spi, (const uint8_t*)graphics->frame_buffer, graphics->bounds.w * graphics->bounds.h / 2);
       gpio_put(CS, 1);
+    } else if (graphics->pen_type == PicoGraphics::PEN_3BIT) {
+      graphics->frame_convert(PicoGraphics::PEN_P4, [this](void *buf, size_t length) {
+        if (length > 0) {
+          spi_write_blocking(spi, (const uint8_t*)buf, length);
+        }
+      });
     } else {
       graphics->frame_convert(PicoGraphics::PEN_INKY7, [this, &totalLength](void *buf, size_t length) {
         if (length > 0) {
@@ -175,7 +185,7 @@ namespace pimoroni {
       });
     }
 
-    gpio_put(DC, 0); // data mode
+    gpio_put(DC, 0); // command mode
 
     gpio_put(CS, 1);
 
@@ -194,7 +204,8 @@ namespace pimoroni {
   }
 
   bool Inky73::is_pressed(Button button) {
-    return sr.read() & button;
+    //return sr.read() & button;
+    return false;
   }
 
 }
