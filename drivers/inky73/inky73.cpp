@@ -144,8 +144,6 @@ namespace pimoroni {
   }
 
   void Inky73::update(PicoGraphics *graphics) {
-    if(graphics->pen_type != PicoGraphics::PEN_INKY7) return; // Incompatible buffer
-
     if(blocking) {
       busy_wait();
     }
