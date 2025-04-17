@@ -381,7 +381,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         self->display = m_new_class(UC8159, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_INKY_FRAME_7) {
-        pen_type = PEN_INKY7;
+        //pen_type = PEN_INKY7;
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(Inky73, width, height, (Rotation)rotate, spi_bus);
 
