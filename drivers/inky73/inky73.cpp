@@ -160,14 +160,20 @@ namespace pimoroni {
 
     uint totalLength = 0;
     gpio_put(CS, 1);
-    graphics->frame_convert(PicoGraphics::PEN_INKY7, [this, &totalLength](void *buf, size_t length) {
-      if (length > 0) {
-        gpio_put(CS, 0);
-        spi_write_blocking(spi, (const uint8_t*)buf, length);
-        totalLength += length;
-        gpio_put(CS, 1);
-      }
-    });
+    if(graphics->pen_type == PicoGraphics::PEN_P4) {
+      gpio_put(CS, 0);
+      spi_write_blocking(spi, (const uint8_t*)graphics->frame_buffer, graphics->bounds.w * graphics->bounds.h / 2);
+      gpio_put(CS, 1);
+    } else {
+      graphics->frame_convert(PicoGraphics::PEN_INKY7, [this, &totalLength](void *buf, size_t length) {
+        if (length > 0) {
+          gpio_put(CS, 0);
+          spi_write_blocking(spi, (const uint8_t*)buf, length);
+          totalLength += length;
+          gpio_put(CS, 1);
+        }
+      });
+    }
 
     gpio_put(DC, 0); // data mode
 
