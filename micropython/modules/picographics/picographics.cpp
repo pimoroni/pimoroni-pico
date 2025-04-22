@@ -138,6 +138,14 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_1BIT;
             break;
+        case DISPLAY_INTERSTATE75_16X16:
+            width = 16;
+            height = 16;
+            bus_type = BUS_PIO;
+            // Portrait to match labelling
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         case DISPLAY_INTERSTATE75_32X32:
             width = 32;
             height = 32;
