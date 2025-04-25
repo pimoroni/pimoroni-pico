@@ -1,4 +1,4 @@
-name: Python
+name: Python Linting
 
 on:
   push:
@@ -7,24 +7,26 @@ on:
 jobs:
   build:
     name: Python Linting
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Python
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+      with:
+        python-version: '3.13'
+
     - name: Install Python Deps
-      run: python3 -m pip install flake8
+      run: source ci/python.sh && qa_prepare_all
 
-    - name: Lint micropython/modules_py
+    - name: Lint MicroPython Examples
       shell: bash
-      run: |
-        python3 -m flake8 --show-source --ignore E501 micropython/modules_py
+      run: source ci/python.sh && qa_examples_check
 
-    - name: Lint micropython/examples
+    - name: Lint MicroPython Modules
       shell: bash
-      run: |
-        python3 -m flake8 --show-source --ignore E501 micropython/examples
+      run: source ci/python.sh && qa_modules_check
 
-    - name: Lint .py tools in C++ examples
+    - name: Lint Python Tools
       shell: bash
-      run: |
-        python3 -m flake8 --show-source --ignore E501 examples
+      run: source ci/python.sh && qa_tools_check
