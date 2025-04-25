@@ -72,7 +72,7 @@ def convert_font(data):
         while data.find("\n", char_data_len) != -1:
             data = data.replace("\n", "", 1)
 
-        for i in range(0, vertex_count):
+        for i in range(vertex_count):
             offset = 10 + (i * 2)
             if data[offset:offset + 2] == " R":
                 # pen up for one
@@ -106,7 +106,7 @@ def convert_font(data):
     #   int8_t  *vertices;     // vertex data (indices: even = x, odd = y)
     # };
     chars = []
-    for i in range(0, 95):
+    for i in range(95):
         if i in char_data:
             chars.append(
                 "      {{.width={width}, .vertex_count={vertex_count}, .vertices=&{font_name}_vertices[{offset}]}}".format(
