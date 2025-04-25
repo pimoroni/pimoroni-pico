@@ -54,8 +54,7 @@ class LTE():
     def ipconfig(self, *args, **kwargs):
         if len(args):
             return self._ppp.ipconfig(*args)
-        else:
-            return self._ppp.ipconfig(**kwargs)
+        return self._ppp.ipconfig(**kwargs)
 
     def iccid(self):
         try:
@@ -73,8 +72,7 @@ class LTE():
             response = self._send_at_command("AT+CSQ", 1)
             quality = int(response.split(":")[1].split(",")[0])
             # Conversion as per AT command set datasheet
-            db = -113 + (2 * quality)
-            return db
+            return -113 + (2 * quality)
         except CellularError:
             pass
         return None
@@ -125,7 +123,7 @@ class LTE():
         self._wait_ready()
 
         self._send_at_command("ATE0")                                  # Disable local echo
-        self._send_at_command(f"AT+CGDCONT=1,\"IP\",\"{self._apn}\"")  # Set apn and activate pdp context
+        self._send_at_command(f'AT+CGDCONT=1,"IP","{self._apn}"')  # Set apn and activate pdp context
 
         # Wait for roaming lte connection to be established
         giveup = time.time() + timeout
@@ -137,8 +135,8 @@ class LTE():
                 raise CellularError("timed out getting network registration")
 
         # Disable server and client certification validation
-        self._send_at_command("AT+CSSLCFG=\"authmode\",0,0")
-        self._send_at_command("AT+CSSLCFG=\"enableSNI\",0,1")
+        self._send_at_command('AT+CSSLCFG="authmode",0,0')
+        self._send_at_command('AT+CSSLCFG="enableSNI",0,1')
 
         print(f"  - SIM ICCID is {self.iccid()}")
 

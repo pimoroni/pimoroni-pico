@@ -145,6 +145,7 @@ class Automation2040W():
             return self.__relays[relay].value()
 
         self.__relays[relay].value(actuate)
+        return None
 
     def actuate_relay(self, relay):
         if relay < 0 or relay >= self.NUM_RELAYS:
@@ -172,7 +173,7 @@ class Automation2040W():
         try:
             if value >= 0.0 and value <= 100.0:
                 self.__outputs[output].duty_u16(int((value / 100.0) * 65535))
-                return
+                return None
         except TypeError:
             pass
 
@@ -338,6 +339,7 @@ class Automation2040WMini():
             return self.__relay.value()
 
         self.__relay.value(actuate)
+        return None
 
     def actuate_relay(self):
         self.__relay.on()
@@ -361,7 +363,7 @@ class Automation2040WMini():
         try:
             if value >= 0.0 and value <= 100.0:
                 self.__outputs[output].duty_u16(int((value / 100.0) * 65535))
-                return
+                return None
         except TypeError:
             pass
 

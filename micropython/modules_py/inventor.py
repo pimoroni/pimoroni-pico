@@ -116,9 +116,9 @@ class Inventor2040W():
     def play_tone(self, frequency):
         try:
             self.audio_pwm.freq(frequency)
-        except ValueError:
+        except ValueError as e:
             self.play_silence()
-            raise ValueError("frequency of range. Expected greater than 0")
+            raise ValueError("frequency of range. Expected greater than 0") from e
 
         corrected_volume = (self.__volume ** 4)  # Correct for RC Filter curve
         self.audio_pwm.duty_u16(int(32768 * corrected_volume))
@@ -143,6 +143,7 @@ class Inventor2040W():
             raise ValueError("volume out of range. Expected 0.0 to 1.0")
 
         self.__volume = volume
+        return None
 
     def mute_audio(self):
         self.__amp_en.off()
