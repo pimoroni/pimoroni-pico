@@ -42,8 +42,8 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         { MP_QSTR_dc, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(SPI_DEFAULT_MISO)} },
         { MP_QSTR_sck, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(SPI_DEFAULT_SCK)} },
         { MP_QSTR_mosi, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(SPI_DEFAULT_MOSI)} },
-        { MP_QSTR_miso, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PIN_UNUSED)} },
-        { MP_QSTR_bl, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PIN_UNUSED)} },
+        { MP_QSTR_miso, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+        { MP_QSTR_bl, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     // Parse args.
@@ -56,9 +56,9 @@ mp_obj_t SPIPins_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
         mp_hal_get_pin_obj(args[ARG_cs].u_obj),
         mp_hal_get_pin_obj(args[ARG_sck].u_obj),
         mp_hal_get_pin_obj(args[ARG_mosi].u_obj),
-        mp_hal_get_pin_obj(args[ARG_miso].u_obj),
-        mp_hal_get_pin_obj(args[ARG_dc].u_obj),
-        mp_hal_get_pin_obj(args[ARG_bl].u_obj)
+        args[ARG_miso].u_obj == mp_const_none ? PIN_UNUSED : mp_hal_get_pin_obj(args[ARG_miso].u_obj),
+        args[ARG_dc].u_obj == mp_const_none ? PIN_UNUSED : mp_hal_get_pin_obj(args[ARG_dc].u_obj),
+        args[ARG_bl].u_obj == mp_const_none ? PIN_UNUSED : mp_hal_get_pin_obj(args[ARG_bl].u_obj)
     };
 
     return MP_OBJ_FROM_PTR(self);
