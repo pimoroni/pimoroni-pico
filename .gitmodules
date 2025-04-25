@@ -25,3 +25,6 @@
 [submodule "drivers/mlx90640/src"]
 	path = drivers/mlx90640/src
 	url = https://github.com/melexis/mlx90640-library
+[submodule "drivers/bme69x/src"]
+	path = drivers/bme69x/src
+	url = https://github.com/boschsensortec/BME690_SensorAPI

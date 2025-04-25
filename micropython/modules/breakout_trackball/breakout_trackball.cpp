@@ -32,15 +32,14 @@ mp_obj_t BreakoutTrackball_make_new(const mp_obj_type_t *type, size_t n_args, si
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(breakout_trackball_BreakoutTrackball_obj_t);
-    self->base.type = &breakout_trackball_BreakoutTrackball_type;
+    self = mp_obj_malloc(breakout_trackball_BreakoutTrackball_obj_t, &breakout_trackball_BreakoutTrackball_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
     self->breakout = m_new_class(BreakoutTrackball, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_address].u_int, args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "Trackball breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Trackball breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -108,13 +107,13 @@ mp_obj_t BreakoutTrackball_set_rgbw(size_t n_args, const mp_obj_t *pos_args, mp_
     int w = args[ARG_w].u_int;
 
     if(r < 0 || r > 255)
-        mp_raise_ValueError("r out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("r out of range. Expected 0 to 255"));
     else if(g < 0 || g > 255)
-        mp_raise_ValueError("g out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("g out of range. Expected 0 to 255"));
     else if(b < 0 || b > 255)
-        mp_raise_ValueError("b out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("b out of range. Expected 0 to 255"));
     else if(w < 0 || w > 255)
-        mp_raise_ValueError("w out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("w out of range. Expected 0 to 255"));
     else
         self->breakout->set_rgbw(r, g, b, w);
 
@@ -136,7 +135,7 @@ mp_obj_t BreakoutTrackball_set_red(size_t n_args, const mp_obj_t *pos_args, mp_m
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_red(value);
 
@@ -158,7 +157,7 @@ mp_obj_t BreakoutTrackball_set_green(size_t n_args, const mp_obj_t *pos_args, mp
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_green(value);
 
@@ -180,7 +179,7 @@ mp_obj_t BreakoutTrackball_set_blue(size_t n_args, const mp_obj_t *pos_args, mp_
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_blue(value);
 
@@ -202,7 +201,7 @@ mp_obj_t BreakoutTrackball_set_white(size_t n_args, const mp_obj_t *pos_args, mp
     int value = args[ARG_value].u_int;
 
     if(value < 0 || value > 255)
-        mp_raise_ValueError("value out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("value out of range. Expected 0 to 255"));
     else
         self->breakout->set_white(value);
 

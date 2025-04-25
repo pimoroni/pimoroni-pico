@@ -31,15 +31,14 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(breakout_ltr559_BreakoutLTR559_obj_t);
-    self->base.type = &breakout_ltr559_BreakoutLTR559_type;
+    self = mp_obj_malloc(breakout_ltr559_BreakoutLTR559_obj_t, &breakout_ltr559_BreakoutLTR559_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
     self->breakout = m_new_class(BreakoutLTR559, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutLTR559: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutLTR559: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);
@@ -118,13 +117,13 @@ mp_obj_t BreakoutLTR559_proximity_led(size_t n_args, const mp_obj_t *pos_args, m
     int num_pulses = args[ARG_num_pulses].u_int;
 
     if(current < 0 || current > 255)
-        mp_raise_ValueError("current out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("current out of range. Expected 0 to 255"));
     else if(duty_cycle < 0 || duty_cycle > 255)
-        mp_raise_ValueError("duty_cycle out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("duty_cycle out of range. Expected 0 to 255"));
     else if(pulse_freq < 0 || pulse_freq > 255)
-        mp_raise_ValueError("pulse_freq out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("pulse_freq out of range. Expected 0 to 255"));
     else if(num_pulses < 0 || num_pulses > 255)
-        mp_raise_ValueError("num_pulses out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("num_pulses out of range. Expected 0 to 255"));
     else
         self->breakout->proximity_led(current, duty_cycle, pulse_freq, num_pulses);
 
@@ -147,7 +146,7 @@ mp_obj_t BreakoutLTR559_light_control(size_t n_args, const mp_obj_t *pos_args, m
     int gain = args[ARG_gain].u_int;
 
     if(gain < 0 || gain > 255)
-        mp_raise_ValueError("gain out of range. Expected 0 to 255");
+        mp_raise_ValueError(MP_ERROR_TEXT("gain out of range. Expected 0 to 255"));
     else
         self->breakout->light_control(args[ARG_active].u_bool, gain);
 
@@ -188,9 +187,9 @@ mp_obj_t BreakoutLTR559_light_threshold(size_t n_args, const mp_obj_t *pos_args,
     int upper = args[ARG_upper].u_int;
 
     if(lower < 0 || lower > 65535)
-        mp_raise_ValueError("lower out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("lower out of range. Expected 0 to 65535"));
     else if(upper < 0 || upper > 65535)
-        mp_raise_ValueError("upper out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("upper out of range. Expected 0 to 65535"));
     else
         self->breakout->light_threshold(lower, upper);
 
@@ -214,9 +213,9 @@ mp_obj_t BreakoutLTR559_proximity_threshold(size_t n_args, const mp_obj_t *pos_a
     int upper = args[ARG_upper].u_int;
 
     if(lower < 0 || lower > 65535)
-        mp_raise_ValueError("lower out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("lower out of range. Expected 0 to 65535"));
     else if(upper < 0 || upper > 65535)
-        mp_raise_ValueError("upper out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("upper out of range. Expected 0 to 65535"));
     else
         self->breakout->proximity_threshold(lower, upper);
 
@@ -240,9 +239,9 @@ mp_obj_t BreakoutLTR559_light_measurement_rate(size_t n_args, const mp_obj_t *po
     int rate = args[ARG_rate].u_int;
 
     if(integration_time < 0 || integration_time > 65535)
-        mp_raise_ValueError("integration_time out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("integration_time out of range. Expected 0 to 65535"));
     else if(rate < 0 || rate > 65535)
-        mp_raise_ValueError("rate out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("rate out of range. Expected 0 to 65535"));
     else
         self->breakout->light_measurement_rate(integration_time, rate);
 
@@ -264,7 +263,7 @@ mp_obj_t BreakoutLTR559_proximity_measurement_rate(size_t n_args, const mp_obj_t
     int rate = args[ARG_rate].u_int;
 
     if(rate < 0 || rate > 65535)
-        mp_raise_ValueError("rate out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("rate out of range. Expected 0 to 65535"));
     else
         self->breakout->proximity_measurement_rate(rate);
 
@@ -286,7 +285,7 @@ mp_obj_t BreakoutLTR559_proximity_offset(size_t n_args, const mp_obj_t *pos_args
     int offset = args[ARG_offset].u_int;
 
     if(offset < 0 || offset > 65535)
-        mp_raise_ValueError("offset out of range. Expected 0 to 65535");
+        mp_raise_ValueError(MP_ERROR_TEXT("offset out of range. Expected 0 to 65535"));
     else
         self->breakout->proximity_offset(offset);
 

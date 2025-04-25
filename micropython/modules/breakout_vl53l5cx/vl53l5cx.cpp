@@ -88,13 +88,13 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     }
 
     if(bufinfo.len != (size_t)(firmware_size)) {  // firmware blob is always 84K
-        mp_raise_ValueError("Firmware must be 84k bytes!");
+        mp_raise_ValueError(MP_ERROR_TEXT("Firmware must be 84k bytes!"));
     }
 
     self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr, self->configuration, self->motion_configuration);
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: init error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: init error"));
     }
 
     if(args[ARG_firmware].u_obj == nullptr) {
@@ -108,7 +108,7 @@ mp_obj_t VL53L5CX_start_ranging(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->start_ranging();
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: start_ranging error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: start_ranging error"));
     }
     return mp_const_none;
 }
@@ -117,7 +117,7 @@ mp_obj_t VL53L5CX_stop_ranging(mp_obj_t self_in) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->stop_ranging();
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: stop_ranging error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: stop_ranging error"));
     }
     return mp_const_none;
 }
@@ -126,7 +126,7 @@ mp_obj_t VL53L5CX_enable_motion_indicator(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->enable_motion_indicator((pimoroni::VL53L5CX::Resolution)mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: enable_motion_indicator error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: enable_motion_indicator error"));
     }
     return mp_const_none;
 }
@@ -135,7 +135,7 @@ mp_obj_t VL53L5CX_set_motion_distance(mp_obj_t self_in, mp_obj_t distance_min, m
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_motion_distance(mp_obj_get_int(distance_min), mp_obj_get_int(distance_max));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_motion_distance error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_motion_distance error"));
     }
     return mp_const_none;
 }
@@ -144,7 +144,7 @@ mp_obj_t VL53L5CX_set_i2c_address(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_i2c_address(mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_i2c_address error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_i2c_address error"));
     }
     return mp_const_none;
 }
@@ -153,7 +153,7 @@ mp_obj_t VL53L5CX_set_ranging_mode(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_ranging_mode((pimoroni::VL53L5CX::RangingMode)mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_ranging_mode error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_ranging_mode error"));
     }
     return mp_const_none;
 }
@@ -162,7 +162,7 @@ mp_obj_t VL53L5CX_set_ranging_frequency_hz(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_ranging_frequency_hz(mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_ranging_frequency_hz error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_ranging_frequency_hz error"));
     }
     return mp_const_none;
 }
@@ -171,7 +171,7 @@ mp_obj_t VL53L5CX_set_resolution(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_resolution((pimoroni::VL53L5CX::Resolution)mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_resolution error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_resolution error"));
     }
     return mp_const_none;
 }
@@ -180,7 +180,7 @@ mp_obj_t VL53L5CX_set_integration_time_ms(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_integration_time_ms(mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_integration_time_ms error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_integration_time_ms error"));
     }
     return mp_const_none;
 }
@@ -189,7 +189,7 @@ mp_obj_t VL53L5CX_set_sharpener_percent(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_sharpener_percent(mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_sharpener_percent error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_sharpener_percent error"));
     }
     return mp_const_none;
 }
@@ -198,7 +198,7 @@ mp_obj_t VL53L5CX_set_target_order(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_target_order((pimoroni::VL53L5CX::TargetOrder)mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_target_order error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_target_order error"));
     }
     return mp_const_none;
 }
@@ -207,7 +207,7 @@ mp_obj_t VL53L5CX_set_power_mode(mp_obj_t self_in, mp_obj_t value) {
     _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
     bool status = self->breakout->set_power_mode((pimoroni::VL53L5CX::PowerMode)mp_obj_get_int(value));
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: set_power_mode error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_power_mode error"));
     }
     return mp_const_none;
 }
@@ -222,7 +222,7 @@ mp_obj_t VL53L5CX_get_data(mp_obj_t self_in) {
     pimoroni::VL53L5CX::ResultsData *results = (pimoroni::VL53L5CX::ResultsData *)self->results;
     bool status = self->breakout->get_data(results);
     if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, "VL53L5CX: get_data error");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: get_data error"));
     }
 
     // Get the current resolution so we only look at valid results.
