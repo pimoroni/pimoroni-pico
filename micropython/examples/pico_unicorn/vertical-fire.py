@@ -3,9 +3,9 @@ import random
 from picounicorn import PicoUnicorn
 from picographics import PicoGraphics, DISPLAY_UNICORN_PACK
 
-'''
+"""
 A pretty, procedural fire effect. Based on fire_effect.py from bigger Unicorns!
-'''
+"""
 
 picounicorn = PicoUnicorn()
 graphics = PicoGraphics(display=DISPLAY_UNICORN_PACK)
@@ -28,7 +28,7 @@ def update():
         _heat[x][height - 1] = 0.0
         _heat[x][height - 2] = 0.0
 
-    for c in range(fire_spawns):
+    for _ in range(fire_spawns):
         x = random.randint(0, width - 4) + 2
         _heat[x + 0][height - 1] = 1.0
         _heat[x + 1][height - 1] = 1.0
@@ -38,7 +38,7 @@ def update():
         _heat[x - 1][height - 2] = 1.0
 
     factor = damping_factor / 5.0
-    for y in range(0, height - 2):
+    for y in range(height - 2):
         for x in range(1, width - 1):
             _heat[x][y] += _heat[x][y + 1] + _heat[x][y + 2] + _heat[x - 1][y + 1] + _heat[x + 1][y + 1]
             _heat[x][y] *= factor

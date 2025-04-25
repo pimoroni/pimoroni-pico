@@ -23,7 +23,7 @@ FILENAME = "placekitten.jpg"
 ENDPOINT = "http://placecats.com/{0}/{1}"
 
 
-def status_handler(mode, status, ip):
+def status_handler(mode, status, ip):  # noqa: ARG001
     graphics.set_update_speed(3)
     graphics.set_pen(15)
     graphics.clear()

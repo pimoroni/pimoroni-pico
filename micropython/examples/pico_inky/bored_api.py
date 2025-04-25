@@ -24,7 +24,7 @@ WIDTH, HEIGHT = graphics.get_bounds()
 ENDPOINT = "https://www.boredapi.com/api/activity"
 
 
-def status_handler(mode, status, ip):
+def status_handler(mode, status, ip):  # noqa: ARG001
     graphics.set_update_speed(2)
     graphics.set_pen(15)
     graphics.clear()

@@ -24,7 +24,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 
@@ -46,7 +46,7 @@ while 1:
         x_scroll = 0
 
     # for each character we'll calculate a position and colour, then draw it
-    for i in range(0, len(message)):
+    for i in range(len(message)):
         cx = int(x_scroll + (i * text_size * 5.5))
         cy = int(80 + math.sin(t * 10 + i) * 20)
 

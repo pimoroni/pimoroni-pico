@@ -42,12 +42,14 @@ class Matrix:
         if bank is None:
             return self.i2c.readfrom_mem(self.address, _BANK_ADDRESS, 1)[0]
         self.i2c.writeto_mem(self.address, _BANK_ADDRESS, bytearray([bank]))
+        return None
 
     def _register(self, bank, register, value=None):
         self._bank(bank)
         if value is None:
             return self.i2c.readfrom_mem(self.address, register, 1)[0]
         self.i2c.writeto_mem(self.address, register, bytearray([value]))
+        return None
 
     def _mode(self, mode=None):
         return self._register(_CONFIG_BANK, _MODE_REGISTER, mode)
@@ -111,6 +113,7 @@ class Matrix:
         self._frame = frame
         if show:
             self._register(_CONFIG_BANK, _FRAME_REGISTER, frame)
+        return None
 
     def audio_sync(self, value=None):
         return self._register(_CONFIG_BANK, _AUDIOSYNC_REGISTER, value)
@@ -134,11 +137,12 @@ class Matrix:
     def blink(self, rate=None):
         if rate is None:
             return (self._register(_CONFIG_BANK, _BLINK_REGISTER) & 0x07) * 270
-        elif rate == 0:
+        if rate == 0:
             self._register(_CONFIG_BANK, _BLINK_REGISTER, 0x00)
-            return
+            return None
         rate //= 270
         self._register(_CONFIG_BANK, _BLINK_REGISTER, rate & 0x07 | 0x08)
+        return None
 
     def fill(self, color=None, blink=None, frame=None):
         if frame is None:
@@ -169,9 +173,9 @@ class Matrix:
 
     def pixel(self, x, y, color=None, blink=None, frame=None):
         if not 0 <= x <= self.width:
-            return
+            return None
         if not 0 <= y <= self.height:
-            return
+            return None
         pixel = self._pixel_addr(x, y)
         if color is None and blink is None:
             return self._register(self._frame, pixel)
@@ -189,6 +193,7 @@ class Matrix:
             else:
                 bits &= ~(1 << bit)
             self._register(frame, _BLINK_OFFSET + addr, bits)
+        return None
 
 
 class Matrix_Keybow2040(Matrix):

@@ -1,11 +1,12 @@
-'''
+"""
 calc.py
 Graphical demo for the GFX Pack with Raspberry Pi Pico
 This example draws a nice sine wave on the display,
 reminiscent of the graphical calculators from the 90s.
-'''
+"""
 
 from math import radians, sin
+
 from gfx_pack import GfxPack
 
 gp = GfxPack()

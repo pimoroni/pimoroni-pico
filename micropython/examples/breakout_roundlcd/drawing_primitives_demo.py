@@ -63,7 +63,7 @@ while True:
     # text
     display.set_pen(BLUE)
     display.text(
-        'test text',  # text
+        "test text",  # text
         int(width // 5),  # box starting point x
         int(height * 3 / 5),  # box starting point y
         True,  # word wrap

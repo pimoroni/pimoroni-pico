@@ -30,7 +30,7 @@ def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 
@@ -106,8 +106,8 @@ def menu() -> str:
         scroll_position += (target_scroll_position - scroll_position) / 5
 
         grid_size = 40
-        for y in range(0, 240 // grid_size):
-            for x in range(0, 320 // grid_size):
+        for y in range(240 // grid_size):
+            for x in range(320 // grid_size):
                 h = x + y + int(t * 5)
                 h = h / 50.0
                 r, g, b = hsv_to_rgb(h, 0.5, 1)

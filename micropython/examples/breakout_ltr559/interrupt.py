@@ -15,7 +15,7 @@ ltr.light_threshold(0, 10)  # COUNTS, NOT LUX!!!
 ltr.proximity_threshold(0, 10)
 
 
-def read(pin):
+def read(pin):  # noqa: ARG001
     reading = ltr.get_reading()
     if reading is not None:
         print("T: ", time.ticks_ms(), " Lux: ", reading[BreakoutLTR559.LUX], " Prox: ", reading[BreakoutLTR559.PROXIMITY])
@@ -24,7 +24,7 @@ def read(pin):
 interrupt.irq(trigger=Pin.IRQ_RISING, handler=read)
 
 part_id = ltr.part_id()
-print("Found LTR559. Part ID: 0x", '{:02x}'.format(part_id), sep="")
+print("Found LTR559. Part ID: 0x", "{:02x}".format(part_id), sep="")
 
 while True:
     pass

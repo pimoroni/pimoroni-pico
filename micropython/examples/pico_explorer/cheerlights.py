@@ -18,7 +18,7 @@ URL = "http://api.thingspeak.com/channels/1417/field/2/last.json"
 UPDATE_INTERVAL = 120  # refresh interval in secs. Be nice to free APIs!
 
 
-def status_handler(mode, status, ip):
+def status_handler(mode, status, ip):  # noqa: ARG001
     # connect to the internets
     display.set_pen(BLACK)
     display.clear()
@@ -38,7 +38,7 @@ def status_handler(mode, status, ip):
 
 def hex_to_rgb(hex):
     # converts a hex colour code into RGB
-    h = hex.lstrip('#')
+    h = hex.lstrip("#")
     r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
     return r, g, b
 
@@ -72,7 +72,7 @@ while True:
     print("Data obtained!")
 
     # extract hex colour from the data
-    hex = data['field2']
+    hex = data["field2"]
 
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)

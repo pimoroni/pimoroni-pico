@@ -17,7 +17,7 @@ display.show()
 while True:
     second = str((time.time() - start_time) % 60)
     if len(second) == 1:
-        left = '0'
+        left = "0"
         right = second[0]
     else:
         left = second[0]

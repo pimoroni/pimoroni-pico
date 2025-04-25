@@ -2,6 +2,7 @@
 # If you're into rainbows, HSV (Hue, Saturation, Value) is very useful!
 
 import time
+
 from gfx_pack import GfxPack
 
 gp = GfxPack()
@@ -33,7 +34,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 

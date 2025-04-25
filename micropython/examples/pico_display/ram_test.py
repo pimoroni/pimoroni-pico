@@ -26,11 +26,10 @@ def free(full=False):
     F = gc.mem_free()
     A = gc.mem_alloc()
     T = F + A
-    P = '{0:.2f}%'.format(F / T * 100)
+    P = "{0:.2f}%".format(F / T * 100)
     if not full:
         return P
-    else:
-        return (f"Total RAM \n{T} bytes \nUnused RAM \n{F} bytes \n({P} free)")
+    return (f"Total RAM \n{T} bytes \nUnused RAM \n{F} bytes \n({P} free)")
 
 
 while True:

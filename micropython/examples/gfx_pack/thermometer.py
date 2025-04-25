@@ -1,7 +1,8 @@
 import time
+
 import machine
+from breakout_bme68x import STATUS_HEATER_STABLE, BreakoutBME68X
 from gfx_pack import GfxPack
-from breakout_bme68x import BreakoutBME68X, STATUS_HEATER_STABLE
 
 """
 GFX temp DEMO

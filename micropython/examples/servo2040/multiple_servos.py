@@ -37,7 +37,7 @@ STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
 SWEEP_EXTENT = 90.0     # How far from zero to move the servo when sweeping
 
 # Do a sine sweep
-for j in range(SWEEPS):
+for _j in range(SWEEPS):
     for i in range(360):
         value = math.sin(math.radians(i)) * SWEEP_EXTENT
         for s in servos:
@@ -45,12 +45,12 @@ for j in range(SWEEPS):
         time.sleep(0.02)
 
 # Do a stepped sweep
-for j in range(SWEEPS):
-    for i in range(0, STEPS):
+for _j in range(SWEEPS):
+    for i in range(STEPS):
         for s in servos:
             s.to_percent(i, 0, STEPS, 0.0 - SWEEP_EXTENT, SWEEP_EXTENT)
         time.sleep(STEPS_INTERVAL)
-    for i in range(0, STEPS):
+    for i in range(STEPS):
         for s in servos:
             s.to_percent(i, STEPS, 0, 0.0 - SWEEP_EXTENT, SWEEP_EXTENT)
         time.sleep(STEPS_INTERVAL)

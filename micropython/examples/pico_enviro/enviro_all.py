@@ -57,8 +57,7 @@ def adjust_to_sea_pressure(pressure_hpa, temperature, altitude):
     """
 
     # Adjusted-to-the-sea barometric pressure
-    adjusted_hpa = pressure_hpa + ((pressure_hpa * 9.80665 * altitude) / (287 * (273 + temperature + (altitude / 400))))
-    return adjusted_hpa
+    return pressure_hpa + ((pressure_hpa * 9.80665 * altitude) / (287 * (273 + temperature + (altitude / 400))))
 
 
 def describe_pressure(pressure_hpa):

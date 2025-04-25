@@ -123,18 +123,18 @@ while True:
     display.set_pen(WHITE)
     display.text("temperature:", 10, 10, 240, 3)
     display.set_pen(TEMPCOLOUR)
-    display.text('{:.1f}'.format(temperature) + 'C', 10, 30, 240, 5)
+    display.text("{:.1f}".format(temperature) + "C", 10, 30, 240, 5)
     display.set_pen(WHITE)
     display.text(describe_temperature(temperature), 10, 60, 240, 3)
 
     # and the pressure text
     display.text("pressure:", 10, 90, 240, 3)
-    display.text('{:.0f}'.format(pressurehpa) + 'hPa', 10, 110, 240, 5)
+    display.text("{:.0f}".format(pressurehpa) + "hPa", 10, 110, 240, 5)
     display.text(describe_pressure(pressurehpa), 10, 140, 240, 3)
 
     # and the humidity text
     display.text("humidity:", 10, 170, 240, 3)
-    display.text('{:.0f}'.format(humidity) + '%', 10, 190, 240, 5)
+    display.text("{:.0f}".format(humidity) + "%", 10, 190, 240, 5)
     display.text(describe_humidity(humidity), 10, 220, 240, 3)
 
     # time to update the display

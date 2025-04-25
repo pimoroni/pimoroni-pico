@@ -42,7 +42,7 @@ STEPS_INTERVAL = 0.5    # The time in seconds between each step of the sequence
 SPEED_EXTENT = 1.0      # How far from zero to drive the motors when sweeping
 
 # Do a sine speed sweep
-for j in range(SWEEPS):
+for _j in range(SWEEPS):
     for i in range(360):
         speed = math.sin(math.radians(i)) * SPEED_EXTENT
         for m in motors:
@@ -50,12 +50,12 @@ for j in range(SWEEPS):
         time.sleep(0.02)
 
 # Do a stepped speed sweep
-for j in range(SWEEPS):
-    for i in range(0, STEPS):
+for _j in range(SWEEPS):
+    for i in range(STEPS):
         for m in motors:
             m.to_percent(i, 0, STEPS, 0.0 - SPEED_EXTENT, SPEED_EXTENT)
         time.sleep(STEPS_INTERVAL)
-    for i in range(0, STEPS):
+    for i in range(STEPS):
         for m in motors:
             m.to_percent(i, STEPS, 0, 0.0 - SPEED_EXTENT, SPEED_EXTENT)
         time.sleep(STEPS_INTERVAL)

@@ -95,7 +95,6 @@ class Block():
 class Game():
     def __init__(self):
         self.player = Player()
-        self.block = []
         self.last_new_block = 0
 
         self.treasure = Treasure()
@@ -103,8 +102,7 @@ class Game():
 
         self.SKY = display.create_pen(72, 180, 224)
 
-        for i in range(5):
-            self.block.append(Block())
+        self.block = [Block() for _ in range(5)]
 
     def reset(self):
         for block in self.block:

@@ -28,7 +28,7 @@ class Keybow2040(KeyboardInterface):
 
 
 def main():
-    for pin, keycode in KEYS.items():
+    for pin, _keycode in KEYS.items():
         BUTTONS[pin] = Button(pin)
 
     k = Keybow2040()

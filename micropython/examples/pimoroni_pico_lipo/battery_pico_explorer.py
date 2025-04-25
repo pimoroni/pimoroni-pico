@@ -53,8 +53,8 @@ while True:
     if charging.value() == 1:         # if it's plugged into USB power...
         display.text("Charging!", 15, 90, 240, 4)
 
-    display.text('{:.2f}'.format(voltage) + "v", 15, 10, 240, 5)
-    display.text('{:.0f}%'.format(percentage), 15, 50, 240, 5)
+    display.text("{:.2f}".format(voltage) + "v", 15, 10, 240, 5)
+    display.text("{:.0f}%".format(percentage), 15, 50, 240, 5)
 
     # Low battery alarm! (you'll need to have GP0 and AUDIO connected with a jumper wire)
     if percentage < 5:              # if the battery is less than 5%

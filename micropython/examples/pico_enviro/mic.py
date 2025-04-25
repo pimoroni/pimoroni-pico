@@ -1,7 +1,7 @@
-'''
+"""
 Audio Sensor Example
 
-'''
+"""
 from picographics import PicoGraphics, DISPLAY_ENVIRO_PLUS
 from pimoroni import RGBLED
 from machine import Pin, ADC
@@ -64,7 +64,7 @@ def read_mic():
 
 def take_sample(frequency, length=240):
     buffer = []
-    for index in range(length):
+    for _ in range(length):
         buffer.append(read_mic())
         time.sleep(1 / frequency)
     return buffer

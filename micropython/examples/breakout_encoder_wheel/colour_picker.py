@@ -54,7 +54,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 
@@ -115,7 +115,7 @@ while True:
     if changed:
         # Print the colour at the current hue, saturation, and brightness
         r, g, b = [int(c * 255) for c in hsv_to_rgb(position / NUM_LEDS, saturation, brightness)]
-        print("Colour Code = #", '{:02x}'.format(r), '{:02x}'.format(g), '{:02x}'.format(b), sep="")
+        print("Colour Code = #", "{:02x}".format(r), "{:02x}".format(g), "{:02x}".format(b), sep="")
 
         # Set the LED at the current position to either the actual colour,
         # or an inverted version to show a "selection marker"
@@ -125,7 +125,7 @@ while True:
             wheel.set_rgb(position, 255 - r, 255 - g, 255 - b)
 
         # Set the LEDs below the current position
-        for i in range(0, position):
+        for i in range(position):
             wheel.set_hsv(i, i / NUM_LEDS, saturation, brightness)
 
         # Set the LEDs after the current position

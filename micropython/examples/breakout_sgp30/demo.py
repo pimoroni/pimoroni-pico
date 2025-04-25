@@ -12,7 +12,7 @@ print("SGP30 initialised - about to start measuring without waiting")
 
 sgp30.start_measurement(False)
 id = sgp30.get_unique_id()
-print("Started measuring for id 0x", '{:04x}'.format(id[0]), '{:04x}'.format(id[1]), '{:04x}'.format(id[2]), sep="")
+print("Started measuring for id 0x", "{:04x}".format(id[0]), "{:04x}".format(id[1]), "{:04x}".format(id[2]), sep="")
 
 j = 0
 while True:

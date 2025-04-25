@@ -1,7 +1,8 @@
 # This example shows you a simple, non-interrupt way of reading GFX Pack's buttons with a loop that checks to see if buttons are pressed.
 
 import time
-from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E
+
+from gfx_pack import SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E, GfxPack
 
 gp = GfxPack()
 display = gp.display

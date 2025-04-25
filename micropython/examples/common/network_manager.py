@@ -25,10 +25,10 @@ class NetworkManager:
     def config(self, var):
         if self._sta_if.active():
             return self._sta_if.config(var)
-        else:
-            if var == "password":
-                return self.UID
-            return self._ap_if.config(var)
+
+        if var == "password":
+            return self.UID
+        return self._ap_if.config(var)
 
     def mode(self):
         if self._sta_if.isconnected():
@@ -42,7 +42,7 @@ class NetworkManager:
             return self._sta_if.ifconfig()[0]
         if self._ap_if.isconnected():
             return self._ap_if.ifconfig()[0]
-        return '0.0.0.0'
+        return "0.0.0.0"
 
     def disconnect(self):
         if self._sta_if.isconnected():

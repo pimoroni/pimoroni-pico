@@ -9,7 +9,7 @@ i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 msa = BreakoutMSA301(i2c)
 
 part_id = msa.part_id()
-print("Found MSA301. Part ID: 0x", '{:02x}'.format(part_id), sep="")
+print("Found MSA301. Part ID: 0x", "{:02x}".format(part_id), sep="")
 
 msa.enable_interrupts(BreakoutMSA301.FREEFALL | BreakoutMSA301.ORIENTATION)
 

@@ -33,7 +33,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 
@@ -49,7 +49,7 @@ class Ball:
 
 # initialise shapes
 balls = []
-for i in range(0, 100):
+for _ in range(100):
     r = random.randint(0, 10) + 3
     balls.append(
         Ball(
