@@ -7,24 +7,29 @@ on:
 jobs:
   build:
     name: Python Linting
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install Python
+      uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55
+      with:
+        python-version: '3.13'
+
     - name: Install Python Deps
-      run: python3 -m pip install flake8
+      run: pip install flake8
 
     - name: Lint micropython/modules_py
       shell: bash
       run: |
-        python3 -m flake8 --show-source --ignore E501 micropython/modules_py
+        flake8 --show-source --ignore E501 micropython/modules_py
 
     - name: Lint micropython/examples
       shell: bash
       run: |
-        python3 -m flake8 --show-source --ignore E501 micropython/examples
+        flake8 --show-source --ignore E501 micropython/examples
 
     - name: Lint .py tools in C++ examples
       shell: bash
       run: |
-        python3 -m flake8 --show-source --ignore E501 examples
+        flake8 --show-source --ignore E501 examples
