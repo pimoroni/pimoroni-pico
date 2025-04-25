@@ -41,7 +41,7 @@ class ByteWriter(object):
 
     def __init__(self, stream, varname):
         self.stream = stream
-        self.stream.write('{} =\\\n'.format(varname))
+        self.stream.write("{} =\\\n".format(varname))
         self.bytecount = 0  # For line breaks
 
     def _eol(self):
@@ -57,7 +57,7 @@ class ByteWriter(object):
     def obyte(self, data):
         if not self.bytecount:
             self._bol()
-        self.stream.write('\\x{:02x}'.format(data))
+        self.stream.write("\\x{:02x}".format(data))
         self.bytecount += 1
         self.bytecount %= self.bytes_per_line
         if not self.bytecount:
@@ -72,7 +72,7 @@ class ByteWriter(object):
     def eot(self):  # User force EOL if one hasn't occurred
         if self.bytecount:
             self._eot()
-        self.stream.write('\n')
+        self.stream.write("\n")
 
 
 # PYTHON FILE WRITING
@@ -90,17 +90,17 @@ def data():
 
 
 def write_func(stream, name, arg):
-    stream.write('def {}():\n    return {}\n\n'.format(name, arg))
+    stream.write("def {}():\n    return {}\n\n".format(name, arg))
 
 
 def write_data(op_path, ip_path):
     try:
-        with open(ip_path, 'rb') as ip_stream:
+        with open(ip_path, "rb") as ip_stream:
             try:
-                with open(op_path, 'w') as op_stream:
+                with open(op_path, "w") as op_stream:
                     write_stream(ip_stream, op_stream)
             except OSError:
-                print("Can't open", op_path, 'for writing')
+                print("Can't open", op_path, "for writing")
                 return False
     except OSError:
         print("Can't open", ip_path)
@@ -110,9 +110,9 @@ def write_data(op_path, ip_path):
 
 def write_stream(ip_stream, op_stream):
     op_stream.write(STR01)
-    op_stream.write('\n')
+    op_stream.write("\n")
     data = ip_stream.read()
-    bw_data = ByteWriter(op_stream, '_data')
+    bw_data = ByteWriter(op_stream, "_data")
     bw_data.odata(data)
     bw_data.eot()
     op_stream.write(STR02)
@@ -135,20 +135,20 @@ data_to_py.py image.jpg image.py
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(__file__, description=DESC,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('infile', type=str, help='Input file path')
-    parser.add_argument('outfile', type=str,
-                        help='Path and name of output file. Must have .py extension.')
+    parser.add_argument("infile", type=str, help="Input file path")
+    parser.add_argument("outfile", type=str,
+                        help="Path and name of output file. Must have .py extension.")
 
     args = parser.parse_args()
 
     if not os.path.isfile(args.infile):
         quit("Data filename does not exist")
 
-    if not os.path.splitext(args.outfile)[1].upper() == '.PY':
-        quit('Output filename must have a .py extension.')
+    if not os.path.splitext(args.outfile)[1].upper() == ".PY":
+        quit("Output filename must have a .py extension.")
 
-    print('Writing Python file.')
+    print("Writing Python file.")
     if not write_data(args.outfile, args.infile):
         sys.exit(1)
 
-    print(args.outfile, 'written successfully.')
+    print(args.outfile, "written successfully.")

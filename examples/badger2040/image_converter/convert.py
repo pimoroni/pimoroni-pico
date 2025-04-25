@@ -28,12 +28,12 @@ def data():
 """
 
 
-parser = argparse.ArgumentParser(description='Converts images into the format used by Badger2040.')
-parser.add_argument('file', nargs="+", help='input files to convert')
-parser.add_argument('--out_dir', type=Path, default=None, help='output directory')
-parser.add_argument('--binary', action="store_true", help='output binary file for MicroPython')
-parser.add_argument('--py', action="store_true", help='output .py file for MicroPython embedding')
-parser.add_argument('--resize', action="store_true", help='force images to 296x128 pixels')
+parser = argparse.ArgumentParser(description="Converts images into the format used by Badger2040.")
+parser.add_argument("file", nargs="+", help="input files to convert")
+parser.add_argument("--out_dir", type=Path, default=None, help="output directory")
+parser.add_argument("--binary", action="store_true", help="output binary file for MicroPython")
+parser.add_argument("--py", action="store_true", help="output .py file for MicroPython embedding")
+parser.add_argument("--resize", action="store_true", help="force images to 296x128 pixels")
 
 options = parser.parse_args()
 
@@ -43,7 +43,7 @@ class ByteWriter(object):
 
     def __init__(self, stream, varname):
         self.stream = stream
-        self.stream.write('{} =\\\n'.format(varname))
+        self.stream.write("{} =\\\n".format(varname))
         self.bytecount = 0  # For line breaks
 
     def _eol(self):
@@ -59,7 +59,7 @@ class ByteWriter(object):
     def obyte(self, data):
         if not self.bytecount:
             self._bol()
-        self.stream.write('\\x{:02x}'.format(data))
+        self.stream.write("\\x{:02x}".format(data))
         self.bytecount += 1
         self.bytecount %= self.bytes_per_line
         if not self.bytecount:
@@ -74,7 +74,7 @@ class ByteWriter(object):
     def eot(self):  # User force EOL if one hasn't occurred
         if self.bytecount:
             self._eot()
-        self.stream.write('\n')
+        self.stream.write("\n")
 
 
 def convert_image(img):
@@ -85,15 +85,14 @@ def convert_image(img):
         img = enhancer.enhance(2.0)
     except ValueError:
         pass
-    img = img.convert("1")  # convert to black and white
-    return img
+    return img.convert("1")  # convert to black and white
 
 
 def write_stream(header, footer, ip_stream, op_stream):
     op_stream.write(header)
-    op_stream.write('\n')
+    op_stream.write("\n")
     data = ip_stream.read()
-    bw_data = ByteWriter(op_stream, '_data')
+    bw_data = ByteWriter(op_stream, "_data")
     bw_data.odata(data)
     bw_data.eot()
     op_stream.write(footer)
@@ -127,10 +126,10 @@ for input_filename in options.file:
             with open(output_filename, "w") as out:
                 write_stream(PY_HEADER, PY_FOOTER, io.BytesIO(bytes(output_data)), out)
         else:
-            image_code = '''\
+            image_code = """\
 static const uint8_t {image_name}[{count}] = {{
     {byte_data}
 }};
-    '''.format(image_name=image_name, count=len(output_data), byte_data=", ".join(str(b) for b in output_data))
+    """.format(image_name=image_name, count=len(output_data), byte_data=", ".join(str(b) for b in output_data))
 
             print(image_code)

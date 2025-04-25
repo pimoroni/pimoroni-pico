@@ -51,8 +51,8 @@ while True:
     if charging.value() == 1:         # if it's plugged into USB power...
         display.text("Charging!", 15, 90, 240, 4)
 
-    display.text('{:.2f}'.format(voltage) + "v", 15, 10, 240, 5)
-    display.text('{:.0f}%'.format(percentage), 15, 50, 240, 5)
+    display.text("{:.2f}".format(voltage) + "v", 15, 10, 240, 5)
+    display.text("{:.0f}%".format(percentage), 15, 50, 240, 5)
 
     display.update()
     time.sleep(0.5)

@@ -7,12 +7,12 @@ import plasma
 from plasma import plasma_stick
 from machine import Pin
 
-'''
+"""
 This Plasma Stick example sets your LED strip to the current #cheerlights colour.
 Find out more about the Cheerlights API at https://cheerlights.com/
-'''
+"""
 
-URL = 'http://api.thingspeak.com/channels/1417/field/2/last.json'
+URL = "http://api.thingspeak.com/channels/1417/field/2/last.json"
 UPDATE_INTERVAL = 120  # refresh interval in secs. Be nice to free APIs!
 
 # Set how many LEDs you have
@@ -25,7 +25,7 @@ BRIGHTNESS = 0.5
 def status_handler(mode, status, ip):
     # reports wifi connection status
     print(mode, status, ip)
-    print('Connecting to wifi...')
+    print("Connecting to wifi...")
     # flash while connecting
     for i in range(NUM_LEDS):
         led_strip.set_hsv(i, 0, 0, BRIGHTNESS)
@@ -34,15 +34,15 @@ def status_handler(mode, status, ip):
         led_strip.set_hsv(i, 0, 0, 0)
     if status is not None:
         if status:
-            print('Wifi connection successful!')
+            print("Wifi connection successful!")
         else:
-            print('Wifi connection failed!')
+            print("Wifi connection failed!")
             # if no wifi connection, you get spooky rainbows. Bwahahaha!
             spooky_rainbows()
 
 
 def spooky_rainbows():
-    print('SPOOKY RAINBOWS!')
+    print("SPOOKY RAINBOWS!")
     HUE_START = 30  # orange
     HUE_END = 140  # green
     SPEED = 0.3  # bigger = faster (harder, stronger)
@@ -69,13 +69,13 @@ def spooky_rainbows():
 
 def hex_to_rgb(hex):
     # converts a hex colour code into RGB
-    h = hex.lstrip('#')
+    h = hex.lstrip("#")
     r, g, b = (int(h[i:i + 2], 16) for i in (0, 2, 4))
     return r, g, b
 
 
 # set up the Pico W's onboard LED
-pico_led = Pin('LED', Pin.OUT)
+pico_led = Pin("LED", Pin.OUT)
 
 # set up the WS2812 / NeoPixel™ LEDs
 led_strip = plasma.WS2812(NUM_LEDS, 0, 0, plasma_stick.DAT, color_order=plasma.COLOR_ORDER_RGB)
@@ -87,18 +87,18 @@ led_strip.start()
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-except Exception as e:
-    print(f'Wifi connection failed! {e}')
+except Exception as e:  # noqa: BLE001
+    print(f"Wifi connection failed! {e}")
     # if no wifi, then you get...
     spooky_rainbows()
 
 while True:
     # open the json file
-    print(f'Requesting URL: {URL}')
+    print(f"Requesting URL: {URL}")
     r = urequests.get(URL)
     # open the json data
     j = r.json()
-    print('Data obtained!')
+    print("Data obtained!")
     r.close()
 
     # flash the onboard LED after getting data
@@ -107,7 +107,7 @@ while True:
     pico_led.value(False)
 
     # extract hex colour from the data
-    hex = j['field2']
+    hex = j["field2"]
 
     # and convert it to RGB
     r, g, b = hex_to_rgb(hex)
@@ -118,8 +118,8 @@ while True:
     # light up the LEDs
     for i in range(NUM_LEDS):
         led_strip.set_rgb(i, r, g, b)
-    print(f'LEDs set to {hex}')
+    print(f"LEDs set to {hex}")
 
     # sleep
-    print(f'Sleeping for {UPDATE_INTERVAL} seconds.')
+    print(f"Sleeping for {UPDATE_INTERVAL} seconds.")
     time.sleep(UPDATE_INTERVAL)

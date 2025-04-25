@@ -1,6 +1,7 @@
-import time
 import random
-from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E
+import time
+
+from gfx_pack import SWITCH_A, SWITCH_B, SWITCH_C, SWITCH_D, SWITCH_E, GfxPack
 
 """
 Basic Snake demo for GFX Pack
@@ -46,12 +47,11 @@ def game_over():
     segments = [head_position]
     ate_apple = False
     set_new_apple()
-    pass
 
 
 # Poll all the butttons to see if anything has been pressed and change next direction accoringly
 def check_button():
-    global next_move, ate_apple
+    global next_move
     if gp.switch_pressed(SWITCH_A):
         if next_move != MOVE_DOWN:
             next_move = MOVE_UP
@@ -70,7 +70,7 @@ def check_button():
 
 # If the snake head and apple are on the same pixel the apple has been eaten
 def check_eaten():
-    global ate_apple, head_position, apple_position, score
+    global ate_apple, score
     if head_position == apple_position:
         ate_apple = True
         score += 1
@@ -95,7 +95,7 @@ def check_collision():
 
 
 def move():
-    global head_position, segments, ate_apple
+    global head_position, ate_apple
 
     head_x, head_y = head_position
 

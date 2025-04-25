@@ -25,7 +25,7 @@ class Ball:
 
 # initialise shapes
 balls = []
-for i in range(0, 100):
+for _i in range(100):
     r = random.randint(0, 10) + 3
     balls.append(
         Ball(

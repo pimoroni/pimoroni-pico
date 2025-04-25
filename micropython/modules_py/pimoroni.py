@@ -29,8 +29,7 @@ class Analog:
     def read_current(self):
         if self.resistor > 0:
             return self.read_voltage() / self.resistor
-        else:
-            return self.read_voltage()
+        return self.read_voltage()
 
 
 class AnalogMux:
@@ -50,45 +49,45 @@ class AnalogMux:
     def select(self, address):
         if address < 0:
             raise ValueError("address is less than zero")
-        elif address > self.max_address:
+        if address > self.max_address:
             raise ValueError("address is greater than number of available addresses")
-        else:
-            if self.muxed_pin and self.pulls[address] is None:
-                self.muxed_pin.init(Pin.IN, None)
 
-            self.addr0_pin.value(address & 0b001)
+        if self.muxed_pin and self.pulls[address] is None:
+            self.muxed_pin.init(Pin.IN, None)
 
-            if self.addr1_pin is not None:
-                self.addr1_pin.value(address & 0b010)
+        self.addr0_pin.value(address & 0b001)
 
-            if self.addr2_pin is not None:
-                self.addr2_pin.value(address & 0b100)
+        if self.addr1_pin is not None:
+            self.addr1_pin.value(address & 0b010)
 
-            if self.en_pin is not None:
-                self.en_pin.value(1)
+        if self.addr2_pin is not None:
+            self.addr2_pin.value(address & 0b100)
 
-            if self.muxed_pin and self.pulls[address] is not None:
-                self.muxed_pin.init(Pin.IN, self.pulls[address])
+        if self.en_pin is not None:
+            self.en_pin.value(1)
+
+        if self.muxed_pin and self.pulls[address] is not None:
+            self.muxed_pin.init(Pin.IN, self.pulls[address])
 
     def disable(self):
-        if self.en_pin is not None:
-            self.en_pin.value(0)
-        else:
+        if self.en_pin is None:
             raise RuntimeError("there is no enable pin assigned to this mux")
+
+        self.en_pin.value(0)
 
     def configure_pull(self, address, pull=None):
         if address < 0:
             raise ValueError("address is less than zero")
-        elif address > self.max_address:
+        if address > self.max_address:
             raise ValueError("address is greater than number of available addresses")
-        else:
-            self.pulls[address] = pull
+
+        self.pulls[address] = pull
 
     def read(self):
-        if self.muxed_pin is not None:
-            return self.muxed_pin.value()
-        else:
+        if self.muxed_pin is None:
             raise RuntimeError("there is no muxed pin assigned to this mux")
+
+        return self.muxed_pin.value()
 
 
 class Button:
@@ -113,10 +112,9 @@ class Button:
                 self.pressed = True
                 self.last_time = current_time
                 return True
-            else:
-                self.pressed_time = 0
-                self.pressed = False
-                self.last_time = 0
+            self.pressed_time = 0
+            self.pressed = False
+            self.last_time = 0
 
         if self.repeat_time == 0:
             return False
@@ -132,10 +130,7 @@ class Button:
         return False
 
     def raw(self):
-        if self.invert:
-            return not self.pin.value()
-        else:
-            return self.pin.value()
+        return self.pin.value() ^ self.invert
 
     @property
     def is_pressed(self):

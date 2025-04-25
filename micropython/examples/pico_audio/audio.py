@@ -185,9 +185,9 @@ class WavPlayer:
         if self.__audio_out is not None:
             self.__audio_out.deinit()   # Deinit any active I2S comms
 
-        self.__state == WavPlayer.NONE  # Return to the none state
+        self.__state = WavPlayer.NONE  # Return to the none state
 
-    def __i2s_callback(self, arg):
+    def __i2s_callback(self, arg):  # noqa: ARG002
         # PLAY
         if self.__state == WavPlayer.PLAY:
             if self.__mode == WavPlayer.MODE_WAV:

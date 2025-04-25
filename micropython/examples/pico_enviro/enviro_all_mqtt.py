@@ -28,7 +28,7 @@ MQTT_PASSWORD = "broker_password_goes_here"
 UPDATE_INTERVAL = 60  # how often to post MQTT data, in seconds
 
 
-def status_handler(mode, status, ip):
+def status_handler(mode, status, ip):  # noqa: ARG001
     display.set_pen(BLACK)
     display.clear()
     display.set_pen(WHITE)
@@ -142,7 +142,7 @@ while True:
                 mqtt_success = True
                 mqtt_time = time.ticks_ms()
                 led.set_rgb(0, 50, 0)
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001
                 print(e)
                 mqtt_success = False
                 led.set_rgb(255, 0, 0)

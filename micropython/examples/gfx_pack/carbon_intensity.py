@@ -1,4 +1,4 @@
-'''
+"""
 carbon_intensity.py
 This example is for the Pico W with GFX Pack.
 Displays near realtime information about the different types of electricity
@@ -7,15 +7,15 @@ to show the current mix of generation sources, and updates itself periodically
 or when button E is pressed.
 Find out more about the Carbon Intensity API here:
 https://carbon-intensity.github.io/api-definitions/#carbon-intensity-api-v2-0-0
-'''
+"""
 
 import time
+
 import uasyncio
 import urequests
 import WIFI_CONFIG
-from gfx_pack import GfxPack, SWITCH_E
+from gfx_pack import SWITCH_E, GfxPack
 from network_manager import NetworkManager
-
 
 gp = GfxPack()
 display = gp.display
@@ -154,15 +154,15 @@ def display_status():
 def status_handler(mode, status, ip):
     global sys_status
     print(mode, status, ip)
-    sys_status = 'Mode: {0} Connected: {1} IP: {2}'.format(mode, status, ip)
+    sys_status = "Mode: {0} Connected: {1} IP: {2}".format(mode, status, ip)
     display_status()
     display.update()
-    print('Connecting to wifi...')
+    print("Connecting to wifi...")
     if status is not None:
         if status:
-            print('Wifi connection successful!')
+            print("Wifi connection successful!")
         else:
-            print('Wifi connection failed!')
+            print("Wifi connection failed!")
 
 
 try:
@@ -208,6 +208,6 @@ try:
         display.line(0, 61, bar_width, 61, 2)
         display.update()
 
-except Exception as e:
+except Exception as e:  # noqa: BLE001
     # Failed to connect to wifi - check credentials in WIFI_CONFIG.py
-    print(f'Wifi connection failed! {e}')
+    print(f"Wifi connection failed! {e}")

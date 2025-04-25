@@ -59,7 +59,7 @@ while not user_sw.raw():
 
     # Read the current sense several times and average the result
     current = 0
-    for i in range(SAMPLES):
+    for _ in range(SAMPLES):
         current += cur_adc.read_current()
         time.sleep(TIME_BETWEEN)
     current /= SAMPLES

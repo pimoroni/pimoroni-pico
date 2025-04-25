@@ -55,7 +55,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 
@@ -65,7 +65,7 @@ class Keybow2040(KeyboardInterface):
 
 
 def main():
-    for pin, keycode in KEYS.items():
+    for pin, _keycode in KEYS.items():
         BUTTONS[pin] = Button(pin, repeat_time=0)
         VALUES[pin] = 0
 
@@ -102,7 +102,7 @@ def main():
             if changed:
                 k.send_keys(keys)
 
-        for pin, code in KEYS.items():
+        for pin, _code in KEYS.items():
             x, y = PIXELS[pin]
             v = VALUES[pin] / MAX_ON_TIME
             r, g, b = [int(c * 255) for c in hsv_to_rgb(x / 4.0, 0.7, 1.0 - v)]

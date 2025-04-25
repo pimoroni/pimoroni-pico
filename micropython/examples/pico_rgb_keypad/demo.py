@@ -22,7 +22,7 @@ while True:
                     colour_index = 0
             else:
                 button = 0
-                for find in range(0, NUM_PADS):
+                for _ in range(NUM_PADS):
                     # check if this button is pressed and no other buttons are pressed
                     if button_states & 0x01 > 0:
                         if not (button_states & (~0x01)) > 0:
@@ -31,7 +31,7 @@ while True:
                     button_states >>= 1
                     button += 1
 
-    for i in range(0, NUM_PADS):
+    for i in range(NUM_PADS):
         if (lit >> i) & 0x01:
             if colour_index == 0:
                 keypad.illuminate(i, 0x00, 0x20, 0x00)

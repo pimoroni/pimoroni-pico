@@ -33,9 +33,9 @@ led = RGBLED(26, 27, 28)
 
 class Menu(object):
     def __init__(self):
-        self.items = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                      'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-                      'y', 'z']
+        self.items = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l",
+                      "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
+                      "y", "z"]
         self.selected = 0
         self.shadow_offset = 2
         self.cursor = "<-"

@@ -1,5 +1,5 @@
 from pimoroni import RGBLED, Button
-from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32, DISPLAY_INTERSTATE75_64X32, DISPLAY_INTERSTATE75_96X32, DISPLAY_INTERSTATE75_96X48, DISPLAY_INTERSTATE75_128X32, DISPLAY_INTERSTATE75_64X64, DISPLAY_INTERSTATE75_128X64, DISPLAY_INTERSTATE75_192X64, DISPLAY_INTERSTATE75_256X64
+from picographics import PicoGraphics, DISPLAY_INTERSTATE75_32X32, DISPLAY_INTERSTATE75_64X32, DISPLAY_INTERSTATE75_96X32, DISPLAY_INTERSTATE75_96X48, DISPLAY_INTERSTATE75_128X32, DISPLAY_INTERSTATE75_64X64, DISPLAY_INTERSTATE75_128X64, DISPLAY_INTERSTATE75_192X64, DISPLAY_INTERSTATE75_256X64, DISPLAY_INTERSTATE75_128X128
 from pimoroni_i2c import PimoroniI2C
 import hub75
 import sys
@@ -29,6 +29,7 @@ class Interstate75:
     DISPLAY_INTERSTATE75_128X64 = DISPLAY_INTERSTATE75_128X64
     DISPLAY_INTERSTATE75_192X64 = DISPLAY_INTERSTATE75_192X64
     DISPLAY_INTERSTATE75_256X64 = DISPLAY_INTERSTATE75_256X64
+    DISPLAY_INTERSTATE75_128X128 = DISPLAY_INTERSTATE75_128X128
 
     PANEL_GENERIC = hub75.PANEL_GENERIC
     PANEL_FM6126A = hub75.PANEL_FM6126A
@@ -43,10 +44,18 @@ class Interstate75:
     NUM_SWITCHES = 2
 
     def __init__(self, display, panel_type=hub75.PANEL_GENERIC, stb_invert=False, color_order=hub75.COLOR_ORDER_RGB):
-        self.interstate75w = "Pico W" in sys.implementation._machine
+        self.interstate75w = "Pico W" in sys.implementation._machine  # noqa: SLF001
         self.display = PicoGraphics(display=display)
         self.width, self.height = self.display.get_bounds()
-        self.hub75 = hub75.Hub75(self.width, self.height, panel_type=panel_type, stb_invert=stb_invert, color_order=color_order)
+
+        out_width = self.width
+        out_height = self.height
+
+        if display == DISPLAY_INTERSTATE75_128X128:
+            out_width = 256
+            out_height = 64
+
+        self.hub75 = hub75.Hub75(out_width, out_height, panel_type=panel_type, stb_invert=stb_invert, color_order=color_order)
         self.hub75.start()
         if self.interstate75w:
             self._switch_pins = self.SWITCH_PINS_W

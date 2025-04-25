@@ -17,25 +17,21 @@ WIDTH, HEIGHT = graphics.get_bounds()
 BLACK = graphics.create_pen(0, 0, 0)
 WHITE = graphics.create_pen(255, 255, 255)
 
-stars = []
-
 
 def new_star():
     # Create a new star, with initial x, y, and size
     # Initial x will fall between -WIDTH / 2 and +WIDTH / 2 and y between -HEIGHT/2 and +HEIGHT/2
     # These are relative values for now, treating (0, 0) as the centre of the screen.
-    star = [random.randint(0, WIDTH) - WIDTH // 2, random.randint(0, HEIGHT) - HEIGHT // 2, 0.5]
-    return star
+    return [random.randint(0, WIDTH) - WIDTH // 2, random.randint(0, HEIGHT) - HEIGHT // 2, 0.5]
 
 
-for i in range(0, NUMBER_OF_STARS):
-    stars.append(new_star())
+stars = [new_star() for _ in range(NUMBER_OF_STARS)]
 
 while True:
     graphics.set_pen(BLACK)
     graphics.clear()
     graphics.set_pen(WHITE)
-    for i in range(0, NUMBER_OF_STARS):
+    for i in range(NUMBER_OF_STARS):
         # Load a star from the stars list
         s = stars[i]
 

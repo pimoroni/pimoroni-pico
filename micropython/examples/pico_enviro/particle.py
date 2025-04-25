@@ -1,11 +1,11 @@
-'''
+"""
 Particle Sensor Example
 
 This example requires seperate MicroPython drivers for the PMS5003 particulate sensor.
 (You can find it at https://github.com/pimoroni/pms5003-micropython )
 or install from PyPi by searching for 'pms5003-micropython' in Thonny's 'Tools > Manage Packages'
 
-'''
+"""
 from picographics import PicoGraphics, DISPLAY_ENVIRO_PLUS
 from pimoroni import RGBLED
 from pms5003 import PMS5003

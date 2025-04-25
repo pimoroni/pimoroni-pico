@@ -1,4 +1,4 @@
-'''
+"""
 zoo_facts.py
 This example is for the Pico W with GFX Pack.
 It uses the Zoo Animal API to download a list of 5 animals,
@@ -9,15 +9,16 @@ D = Show stats
 E = Fetch a different 5 animals
 Find out more about Zoo Animal API here:
 https://zoo-animal-api.herokuapp.com/
-'''
-import WIFI_CONFIG
+"""
 import time
-from gfx_pack import GfxPack, SWITCH_A, SWITCH_B, SWITCH_D, SWITCH_E
-from network_manager import NetworkManager
-import urequests
-import uasyncio
 
-URL = 'https://zoo-animal-api.herokuapp.com/animals/rand/5'
+import uasyncio
+import urequests
+import WIFI_CONFIG
+from gfx_pack import SWITCH_A, SWITCH_B, SWITCH_D, SWITCH_E, GfxPack
+from network_manager import NetworkManager
+
+URL = "https://zoo-animal-api.herokuapp.com/animals/rand/5"
 
 gp = GfxPack()
 display = gp.display
@@ -43,24 +44,24 @@ class Animal:
         self.lifespan = ""
 
     def process_json(self, json):
-        print(json['name'])
-        self.name = json['name']
-        self.latin_name = json['latin_name']
-        self.animal_type = json['animal_type']
-        self.habitat = json['habitat']
-        self.diet = json['diet']
-        self.length_max = json['length_max']
-        self.weight_max = json['weight_max']
-        self.lifespan = json['lifespan']
+        print(json["name"])
+        self.name = json["name"]
+        self.latin_name = json["latin_name"]
+        self.animal_type = json["animal_type"]
+        self.habitat = json["habitat"]
+        self.diet = json["diet"]
+        self.length_max = json["length_max"]
+        self.weight_max = json["weight_max"]
+        self.lifespan = json["lifespan"]
 
 
 def get_data():
     # open the json file
-    print(f'Requesting URL: {URL}')
+    print(f"Requesting URL: {URL}")
     r = urequests.get(URL)
     # open the json data
     j = r.json()
-    print('Data obtained!')
+    print("Data obtained!")
     r.close()
     return j
 
@@ -68,7 +69,7 @@ def get_data():
 def get_animals():
     global sys_status
     animals = []
-    sys_status = 'Getting Animals'
+    sys_status = "Getting Animals"
     display_status()
     display.update()
     json_data = get_data()
@@ -92,15 +93,15 @@ def status_handler(mode, status, ip):
     # reports wifi connection status
     global sys_status
     print(mode, status, ip)
-    sys_status = 'Mode: {0} Connected: {1} IP: {2}'.format(mode, status, ip)
+    sys_status = "Mode: {0} Connected: {1} IP: {2}".format(mode, status, ip)
     display_status()
     display.update()
-    print('Connecting to wifi...')
+    print("Connecting to wifi...")
     if status is not None:
         if status:
-            print('Wifi connection successful!')
+            print("Wifi connection successful!")
         else:
-            print('Wifi connection failed!')
+            print("Wifi connection failed!")
 
 
 def display_animal(animal, stat_page):
@@ -108,26 +109,26 @@ def display_animal(animal, stat_page):
     display.clear()
     display.set_pen(15)
     if stat_page is False:
-        display.text('Animal Info {0}'.format(animal_number), 0, 0, WIDTH, 1)
-        display.text('Name: {0}'.format(animal.name[:19]), 0, 10, WIDTH, 1)
-        display.text('Latin: {0}'.format(animal.latin_name[:19]), 0, 20, WIDTH, 1)
-        display.text('Type: {0}'.format(animal.animal_type[:19]), 0, 30, WIDTH, 1)
-        display.text('Habitat: {0}'.format(animal.habitat[:19]), 0, 40, WIDTH, 1)
-        display.text('Diet: {0}'.format(animal.diet[:19]), 0, 50, WIDTH, 1)
+        display.text("Animal Info {0}".format(animal_number), 0, 0, WIDTH, 1)
+        display.text("Name: {0}".format(animal.name[:19]), 0, 10, WIDTH, 1)
+        display.text("Latin: {0}".format(animal.latin_name[:19]), 0, 20, WIDTH, 1)
+        display.text("Type: {0}".format(animal.animal_type[:19]), 0, 30, WIDTH, 1)
+        display.text("Habitat: {0}".format(animal.habitat[:19]), 0, 40, WIDTH, 1)
+        display.text("Diet: {0}".format(animal.diet[:19]), 0, 50, WIDTH, 1)
 
     else:
-        display.text('Animal Stats {0}'.format(animal_number), 0, 0, WIDTH, 1)
-        display.text('Max Length: {0}'.format(animal.length_max), 0, 10, WIDTH, 1)
-        display.text('Max Weight: {0}'.format(animal.weight_max), 0, 20, WIDTH, 1)
-        display.text('Lifespan: {0}'.format(animal.lifespan), 0, 30, WIDTH, 1)
+        display.text("Animal Stats {0}".format(animal_number), 0, 0, WIDTH, 1)
+        display.text("Max Length: {0}".format(animal.length_max), 0, 10, WIDTH, 1)
+        display.text("Max Weight: {0}".format(animal.weight_max), 0, 20, WIDTH, 1)
+        display.text("Lifespan: {0}".format(animal.lifespan), 0, 30, WIDTH, 1)
     display.update()
 
 
 try:
     network_manager = NetworkManager(WIFI_CONFIG.COUNTRY, status_handler=status_handler)
     uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
-except Exception as e:
-    print(f'Wifi connection failed! {e}')
+except Exception as e:  # noqa: BLE001
+    print(f"Wifi connection failed! {e}")
 
 
 # From CPython Lib/colorsys.py
@@ -150,7 +151,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:
+    if i == 5:  # noqa: RET503
         return v, p, q
 
 

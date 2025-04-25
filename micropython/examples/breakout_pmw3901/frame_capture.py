@@ -37,11 +37,11 @@ while True:
     # A shorter timeout (in seconds) can be set with the 'timeout' keyword e.g. frame_capture(data, timeout=6.0)
     data_size = flo.frame_capture(data)
     if data_size == BYTES:
-        for y in range(0, SIZE):
+        for y in range(SIZE):
             if rotation == FlowSensor.DEGREES_180 or rotation == FlowSensor.DEGREES_270:
                 y = SIZE - y - 1
 
-            for x in range(0, SIZE):
+            for x in range(SIZE):
                 if rotation == FlowSensor.DEGREES_180 or rotation == FlowSensor.DEGREES_90:
                     x = SIZE - x - 1
 

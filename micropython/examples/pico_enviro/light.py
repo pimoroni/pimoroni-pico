@@ -44,7 +44,7 @@ i2c = PimoroniI2C(**PINS_BREAKOUT_GARDEN)
 ltr = BreakoutLTR559(i2c)
 
 part_id = ltr.part_id()
-print("Found LTR559. Part ID: 0x", '{:02x}'.format(part_id), sep="")
+print("Found LTR559. Part ID: 0x", "{:02x}".format(part_id), sep="")
 
 # Draw blank graph
 draw_graph(0, 0)

@@ -32,7 +32,7 @@ def handler(head, body):
         if HTTP_REQUEST_PATH.endswith(".json"):
             # Parse as JSON
             data = json.loads(body)
-            color = data['field2'][1:]
+            color = data["field2"][1:]
 
         elif HTTP_REQUEST_PATH.endswith(".xml") and xmltok is not None:
             # Parse as XML

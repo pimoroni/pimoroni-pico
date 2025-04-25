@@ -25,12 +25,12 @@ last_date = ""
 def parse_qotd(text):
     text = text.split("\n")
     return (
-        text[6][2:].replace("[[", "").replace("]]", "").replace("<br>", '\n').replace("<br />", '\n'),  # Quote
+        text[6][2:].replace("[[", "").replace("]]", "").replace("<br>", "\n").replace("<br />", "\n"),  # Quote
         text[8].split("|")[2][5:-4]                                                                     # Author
     )
 
 
-def status_handler(mode, status, ip):
+def status_handler(mode, status, ip):  # noqa: ARG001
     graphics.set_update_speed(2)
     graphics.set_pen(15)
     graphics.clear()
@@ -67,7 +67,7 @@ while True:
     print("Requesting URL: {}".format(url))
     j = ujson.load(urequest.urlopen(url))
 
-    text = j['expandtemplates']['wikitext']
+    text = j["expandtemplates"]["wikitext"]
 
     text, author = parse_qotd(text)
 
