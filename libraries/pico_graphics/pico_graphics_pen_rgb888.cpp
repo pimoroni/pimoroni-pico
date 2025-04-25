@@ -37,11 +37,16 @@ namespace pimoroni {
         }
     }
     bool PicoGraphics_PenRGB888::render_tile(const Tile *tile) {
+        // Unpack our pen colour
+        uint32_t sr = (color >> 16) & 0xff;
+        uint32_t sg = (color >> 8) & 0xff;
+        uint32_t sb = (color >> 0) & 0xff;
+
         for(int y = 0; y < tile->h; y++) {
             uint8_t *p_alpha = &tile->data[(y * tile->stride)];
             uint32_t *p_dest = &((uint32_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
             for(int x = 0; x < tile->w; x++) {
-                uint16_t dest = *p_dest;
+                uint32_t dest = *p_dest;
                 uint8_t alpha = *p_alpha;
 
                 // TODO: Alpha blending
@@ -49,11 +54,7 @@ namespace pimoroni {
                   *p_dest = color;
                 }else if(alpha == 0) {
                 } else {
-                    // blend tha pixel
-                    uint32_t sr = (color >> 16) & 0xff;
-                    uint32_t sg = (color >> 8) & 0xff;
-                    uint32_t sb = (color >> 0) & 0xff;
-
+                    // blend the pixel
                     uint32_t dr = (dest >> 16) & 0xff;
                     uint32_t dg = (dest >> 8) & 0xff;
                     uint32_t db = (dest >> 0) & 0xff;
