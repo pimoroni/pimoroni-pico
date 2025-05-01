@@ -14,16 +14,16 @@ namespace pimoroni {
         uint offset = (bounds.w * bounds.h) / 8;
         uint8_t *buf = (uint8_t *)frame_buffer;
 
-        uint bo = 7 - (p.x & 0b111);
+        uint bo = 7 - (p.x & 0b11);
 
         uint8_t *bufA = &buf[(p.x / 8) + (p.y * bounds.w / 8)];
         uint8_t *bufB = bufA + offset;
 
-        uint8_t cA = (col & 0b100) >> 2;
+        uint8_t cA = (col & 0b10) >> 1;
         *bufA &= ~(1U << bo);
         *bufA |= (cA << bo);
 
-        uint8_t cB = (col & 0b010) >> 1;
+        uint8_t cB = (col & 0b01);
         *bufB &= ~(1U << bo);
         *bufB |= (cB << bo);
 
