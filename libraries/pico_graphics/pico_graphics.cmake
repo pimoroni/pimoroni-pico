@@ -11,6 +11,7 @@ add_library(pico_graphics
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_1bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_1bitY.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_2bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_3bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_p4.cpp
     ${CMAKE_CURRENT_LIST_DIR}/pico_graphics_pen_p8.cpp
