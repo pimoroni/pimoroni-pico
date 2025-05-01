@@ -216,6 +216,7 @@ namespace pimoroni {
     enum PenType {
       PEN_1BIT,
       PEN_3BIT,
+      PEN_2BIT,
       PEN_P2,
       PEN_P4,
       PEN_P8,
@@ -382,6 +383,53 @@ namespace pimoroni {
 
       static size_t buffer_size(uint w, uint h) {
           return w * h / 8;
+      }
+  };
+
+  class PicoGraphics_Pen2Bit : public PicoGraphics {
+    public:
+      static const uint16_t palette_size = 4;
+      uint color;
+      RGB palette[4] = {
+        /*
+        {0x2b, 0x2a, 0x37},
+        {0xdc, 0xcb, 0xba},
+        {0x35, 0x56, 0x33},
+        {0x33, 0x31, 0x47},
+        {0x9c, 0x3b, 0x2e},
+        {0xd3, 0xa9, 0x34},
+        {0xab, 0x58, 0x37},
+        {0xb2, 0x8e, 0x67}
+        */
+        {255, 255, 255}, // black
+        {192, 192, 192}, // gray
+        {64, 64, 64}, // gray
+        {0, 0, 0} // white
+      };
+
+      std::array<std::array<uint8_t, 16>, 512> candidate_cache;
+      bool cache_built = false;
+      std::array<uint8_t, 16> candidates;
+
+      PicoGraphics_Pen2Bit(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers = 1);
+
+      void set_pen(uint c) override;
+      void set_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen(uint8_t r, uint8_t g, uint8_t b) override;
+      int create_pen_hsv(float h, float s, float v) override;
+
+      int get_palette_size() override {return palette_size;};
+      RGB* get_palette() override {return palette;};
+
+      void _set_pixel(const Point &p, uint col);
+      void set_pixel(const Point &p) override;
+      void set_pixel_span(const Point &p, uint l) override;
+      void get_dither_candidates(const RGB &col, const RGB *palette, size_t len, std::array<uint8_t, 16> &candidates);
+      void set_pixel_dither(const Point &p, const RGB &c) override;
+
+      void frame_convert(PenType type, conversion_callback_func callback) override;
+      static size_t buffer_size(uint w, uint h) {
+          return (w * h / 8) * 2;
       }
   };
 
