@@ -32,7 +32,7 @@ namespace pimoroni {
 
   bool SSD1680::is_busy() {
     if(BUSY == PIN_UNUSED) return false;
-    return !gpio_get(BUSY);
+    return gpio_get(BUSY);
   }
 
   void SSD1680::busy_wait() {
@@ -96,7 +96,7 @@ namespace pimoroni {
 
     gpio_set_function(BUSY, GPIO_FUNC_SIO);
     gpio_set_dir(BUSY, GPIO_IN);
-    gpio_set_pulls(BUSY, true, false);
+    gpio_set_pulls(BUSY, false, true);
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
@@ -108,6 +108,8 @@ namespace pimoroni {
     reset();
 
     command(SWR);
+    busy_wait();
+
     command(DOC, {Y_START_L, Y_START_H, 0x00});
     command(SRX, {X_START, X_END});
     command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
@@ -232,6 +234,7 @@ namespace pimoroni {
     if(blocking) {
       busy_wait();
     }
+
 
     command(SRXC, {X_START});
     command(SRYC, {Y_START_L, Y_START_H});
