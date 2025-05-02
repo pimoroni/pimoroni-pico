@@ -11,6 +11,7 @@ namespace pimoroni {
     SDVC     = 0x04,  // source driving voltage control
     BTST     = 0x0C,  // booster soft start
     DSM      = 0x10,  // deep sleep mode
+    DEM      = 0x11,   // data entry mode
     SWR      = 0x12,  // SW RESET
     ADUS     = 0x20,  // activate display update
     DUC1     = 0x21,  // display update control 1
@@ -111,6 +112,7 @@ namespace pimoroni {
     busy_wait();
 
     command(DOC, {Y_START_L, Y_START_H, 0x00});
+    command(DEM, {0x01});
     command(SRX, {X_START, X_END});
     command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
     command(BWCTRL, {0x00});
