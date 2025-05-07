@@ -65,8 +65,6 @@ namespace pimoroni {
     // SSD1680 Specific
     void default_luts();
 
-    uint32_t update_time();
-
   private:
     void init();
     void setup();
