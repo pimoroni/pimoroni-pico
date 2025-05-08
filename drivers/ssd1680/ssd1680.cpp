@@ -30,7 +30,6 @@ namespace pimoroni {
     SRYC     = 0x4F,  // set RAM y counter
   };
 
-
   bool SSD1680::is_busy() {
     if(BUSY == PIN_UNUSED) return false;
     return gpio_get(BUSY);
@@ -50,6 +49,7 @@ namespace pimoroni {
   }
 
   void SSD1680::default_luts() {
+
     command(WLR, {											
       0x40,	0x68,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	//VS L0				
       0xA0,	0x65,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	//VS L1				
@@ -68,7 +68,7 @@ namespace pimoroni {
       0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,						//TP, SR, RP of Group9				
       0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,						//TP, SR, RP of Group10				
       0x00,	0x00,	0x00,	0x00,	0x00,	0x00,	0x00,						//TP, SR, RP of Group11				
-      0x44,	0x42,	0x22,	0x22,	0x23,	0x32,	0x00,	0x00,	0x00,				//FR, XON									
+      0x44,	0x42,	0x22,	0x22,	0x23,	0x32,	0x00,	0x00,	0x00				//FR, XON									
       });
 
     command(EOPT, {0x22});
@@ -97,12 +97,14 @@ namespace pimoroni {
 
     gpio_set_function(BUSY, GPIO_FUNC_SIO);
     gpio_set_dir(BUSY, GPIO_IN);
-    gpio_set_pulls(BUSY, false, true);
 
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
 
     setup();
+
+    default_luts();
+
   };
 
   void SSD1680::setup() {
@@ -111,11 +113,23 @@ namespace pimoroni {
     command(SWR);
     busy_wait();
 
-    command(DOC, {Y_START_L, Y_START_H, 0x00});
-    command(DEM, {0x01});
-    command(SRX, {X_START, X_END});
-    command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
-    command(BWCTRL, {0x00});
+    command(DOC, {Y_START_L, Y_START_H, 0});
+    //command(0x3A, {27}); // Dummy line period?
+    //command(0x3B, {55}); // Gateline?
+
+    // 0b100 == Swap X / Y
+    // 0b010 == Y invert (ie: counts up)
+    // 0b001 == X invert (ie counts up)
+    command(DEM, {0b001}); // Setting third bit stops update?
+    command(SRX, {X_START, X_END}); // X_START to X_END if X is inverted
+
+    uint16_t ram_start_end_y[2];
+    ram_start_end_y[1] = __builtin_bswap16(0);
+    ram_start_end_y[0] = __builtin_bswap16(height - 1);
+    command(SRY, 4, (uint8_t *)ram_start_end_y);
+
+    //command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
+    //command(BWCTRL, {0x00});
 
     busy_wait();
     
@@ -162,9 +176,11 @@ namespace pimoroni {
     if(len > 0) {
       gpio_put(DC, 1); // data mode
       spi_write_blocking(spi, (const uint8_t*)data, len);
+      
     }
 
     gpio_put(CS, 1);
+
   }
 
   void SSD1680::data(size_t len, const uint8_t *data) {
@@ -237,28 +253,33 @@ namespace pimoroni {
       busy_wait();
     }
 
+    uint16_t ram_start_y = height - 1; //__builtin_bswap16(width - 1);
 
-    command(SRXC, {X_START});
-    command(SRYC, {Y_START_L, Y_START_H});
+    command(SRXC, {X_START}); // X_START if X is inverted
+    command(SRYC, 2, (uint8_t *)&ram_start_y);
+    //command(SRYC, {Y_START_H, Y_START_L});
     command(WRAM_R, (width * height) / 8, bufA);
 
-    command(SRXC, {X_START});
-    command(SRYC, {Y_START_L, Y_START_H});
+    command(SRXC, {X_START}); // X_START if X is inverted
+    command(SRYC, 2, (uint8_t *)&ram_start_y);
+    //command(SRYC, {Y_START_H, Y_START_L});
     command(WRAM_BW, (width * height) / 8, bufB);
 
     command(BTST);
     command(DUC2, {0xC7});
+
+    busy_wait();
 
     command(ADUS);
 
     if(blocking) {
       off();
     }
+
   }
 
   void SSD1680::off() {
     busy_wait();
     //command(POF); // turn off
   }
-
 }

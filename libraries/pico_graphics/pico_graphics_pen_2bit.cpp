@@ -10,13 +10,15 @@ namespace pimoroni {
         }
         cache_built = false;
     }
-    void PicoGraphics_Pen2Bit::_set_pixel(const Point &p, uint col) {
+    void PicoGraphics_Pen2Bit::_set_pixel(const Point &pa, uint col) {
+        Point p = Point(pa.y, pa.x);
+    
         uint offset = (bounds.w * bounds.h) / 8;
         uint8_t *buf = (uint8_t *)frame_buffer;
 
-        uint bo = 7 - (p.x & 0b11);
+        uint bo = 7 - (p.x & 0b111);
 
-        uint8_t *bufA = &buf[(p.x / 8) + (p.y * bounds.w / 8)];
+        uint8_t *bufA = &buf[(p.x / 8) + (p.y * bounds.h / 8)];
         uint8_t *bufB = bufA + offset;
 
         uint8_t cA = (col & 0b10) >> 1;
@@ -114,7 +116,6 @@ namespace pimoroni {
 
                     uint8_t *bufA = &buf[(x / 8) + (y * bounds.w / 8)];
                     uint8_t *bufB = bufA + offset;
-
 
                     uint8_t nibble = (*bufA >> bo) & 1U;
                     nibble <<= 1;
