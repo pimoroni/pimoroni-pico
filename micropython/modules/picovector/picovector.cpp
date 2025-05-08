@@ -62,26 +62,81 @@ void af_debug(const char *fmt, ...) {
 #define mp_picovector_get_point_type mp_obj_get_float
 #define mp_picovector_set_point_type mp_obj_new_float
 
+uint32_t _af_malloc_count = 0;
+uint32_t _af_malloc_bytes = 0;
+uint32_t _af_realloc_count = 0;
+
+uint32_t _af_tracked_malloc_count = 0;
+uint32_t _af_tracked_malloc_bytes = 0;
+uint32_t _af_tracked_realloc_count = 0;
+
 
 void *af_malloc(size_t size) {
-    //mp_printf(&mp_plat_print, "af_malloc %lu\n", size);
-    //__printf_debug_flush();
-    //void *addr = m_tracked_calloc(sizeof(uint8_t), size);
+    _af_malloc_count++;
+    _af_malloc_bytes += size;
     void *addr = m_malloc(size);
-    //mp_printf(&mp_plat_print, "addr %lu\n", addr);
-    //__printf_debug_flush();
     return addr;
 }
 
+
 void *af_realloc(void *p, size_t size) {
-    return m_realloc(p, size);
+    _af_realloc_count++;
+    void *addr = m_realloc(p, size);
+    return addr;
 }
 
 void af_free(void *p) {
-    //mp_printf(&mp_plat_print, "af_free\n");
-    //__printf_debug_flush();
-    //m_tracked_free(p);
     m_free(p);
+}
+
+void *af_tracked_malloc(size_t size) {
+    _af_tracked_malloc_count++;
+    _af_tracked_malloc_bytes += size;
+
+    // Allocate an extra sizeof(size_t) bytes
+    size_t *addr = (size_t *)m_tracked_calloc(sizeof(uint8_t), size + sizeof(size_t));
+    // Tag our memory with its allocated size
+    *addr = size;
+    // Skip past the size_t size
+    addr++;
+
+#if DEBUG
+    mp_printf(&mp_plat_print, "af_tracked_malloc %lu %p : %p\n", size, addr, (uint8_t *)addr + size);
+    __printf_debug_flush();
+#endif
+
+    return (void *)addr;
+}
+
+void *af_tracked_realloc(void *p, size_t size) {
+    _af_tracked_realloc_count++;
+
+    void *addr = af_tracked_malloc(size);
+    size_t old_size = *((size_t *)p - 1);
+    memcpy(addr, p, std::min(old_size, size));
+
+#if DEBUG
+    mp_printf(&mp_plat_print, "af_tracked_realloc %lu -> %lu, %p -> %p : %p\n", old_size, size, p, addr, (uint8_t *)addr + size);
+    __printf_debug_flush();
+#endif
+
+    af_tracked_free(p);
+
+    return addr;
+}
+
+void af_tracked_free(void *p) {
+    size_t *pp = (size_t *)p;   // Convert our void pointer to size_t* so we can read the size marker
+    pp--;                       // Skip back to get our real start
+
+#if DEBUG
+    size_t size = *pp;          // First "size_t" should be the allocated size
+    mp_printf(&mp_plat_print, "af_tracked_free %p (size %d)\n", p, size);
+    __printf_debug_flush();
+#endif
+
+    m_tracked_free((void *)pp);
+    //m_free(p);
 }
 
 void* fileio_open(const char *filename) {
@@ -855,6 +910,29 @@ mp_obj_t VECTOR_draw(mp_obj_t self_in, mp_obj_t poly_in) {
     pp_render(poly->poly);
 
     return mp_const_none;
+}
+
+mp_obj_t MALLOC_get_stats(mp_obj_t self_in) {
+    (void)self_in;
+
+    mp_obj_t tuple[6];
+    tuple[0] = mp_obj_new_int(_af_malloc_count);
+    tuple[1] = mp_obj_new_int(_af_realloc_count);
+    tuple[2] = mp_obj_new_int(_af_malloc_bytes);
+
+    tuple[3] = mp_obj_new_int(_af_tracked_malloc_count);
+    tuple[4] = mp_obj_new_int(_af_tracked_realloc_count);
+    tuple[5] = mp_obj_new_int(_af_tracked_malloc_bytes);
+
+    _af_malloc_count = 0;
+    _af_realloc_count = 0;
+    _af_malloc_bytes = 0;
+
+    _af_tracked_malloc_count = 0;
+    _af_tracked_realloc_count = 0;
+    _af_tracked_malloc_bytes = 0;
+    
+    return mp_obj_new_tuple(6, tuple);
 }
 
 }

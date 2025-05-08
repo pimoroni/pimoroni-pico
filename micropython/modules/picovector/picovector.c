@@ -100,6 +100,10 @@ static MP_DEFINE_CONST_FUN_OBJ_1(VECTOR_get_transform_obj, VECTOR_get_transform)
 
 static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_draw_obj, VECTOR_draw);
 
+/* Stats */
+
+static MP_DEFINE_CONST_FUN_OBJ_1(MALLOC_get_stats_obj, MALLOC_get_stats);
+
 static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&VECTOR_text_obj) },
     { MP_ROM_QSTR(MP_QSTR_measure_text), MP_ROM_PTR(&VECTOR_measure_text_obj) },
@@ -116,6 +120,8 @@ static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_get_transform), MP_ROM_PTR(&VECTOR_get_transform_obj) },
 
     { MP_ROM_QSTR(MP_QSTR_draw), MP_ROM_PTR(&VECTOR_draw_obj) },
+
+    { MP_ROM_QSTR(MP_QSTR_malloc_get_stats), MP_ROM_PTR(&MALLOC_get_stats_obj) },
 };
 
 static MP_DEFINE_CONST_DICT(VECTOR_locals_dict, VECTOR_locals_dict_table);

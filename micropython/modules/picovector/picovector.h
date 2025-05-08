@@ -52,3 +52,7 @@ extern mp_obj_t VECTOR_get_transform(mp_obj_t self_in);
 extern mp_obj_t VECTOR_draw(mp_obj_t self_in, mp_obj_t poly_in);
 extern mp_obj_t VECTOR_rotate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
 extern mp_obj_t VECTOR_translate(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args);
+
+/* Stats */
+
+extern mp_obj_t MALLOC_get_stats(mp_obj_t self_in);

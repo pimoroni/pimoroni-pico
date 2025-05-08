@@ -114,7 +114,7 @@ typedef struct {
 pp_poly_t *pp_poly_new();
 void pp_poly_free(pp_poly_t *poly);
 pp_path_t* pp_poly_tail_path(pp_poly_t *p);
-pp_path_t* pp_poly_add_path(pp_poly_t *p);
+pp_path_t* pp_poly_add_path(pp_poly_t *p, int32_t points = -1);
 pp_rect_t pp_poly_bounds(pp_poly_t *p);
 int pp_poly_path_count(pp_poly_t *p);
 void pp_poly_merge(pp_poly_t *p, pp_poly_t *m);
@@ -152,6 +152,12 @@ void pp_deinit();
 #define PP_MALLOC(size)         malloc(size)
 #define PP_REALLOC(p, size)     realloc(p, size)
 #define PP_FREE(p)              free(p)
+#endif
+
+#ifndef PP_TRACKED_MALLOC
+#define PP_TRACKED_MALLOC(size)         malloc(size)
+#define PP_TRACKED_REALLOC(p, size)     realloc(p, size)
+#define PP_TRACKED_FREE(p)              free(p)
 #endif
 
 #ifdef PP_DEBUG
@@ -270,10 +276,10 @@ pp_poly_t *pp_poly_new() {
   return poly;
 }
 
-pp_path_t *pp_path_new() {
+pp_path_t *pp_path_new(int32_t points = -1) {
   pp_path_t *path = (pp_path_t *)PP_MALLOC(sizeof(pp_path_t));
   memset(path, 0, sizeof(pp_path_t));
-  path->storage = 8;
+  path->storage = points > -1 ? points : 8;
   path->points = (pp_point_t *)PP_MALLOC(sizeof(pp_point_t) * path->storage);
   return path;
 }
@@ -313,8 +319,8 @@ int pp_poly_path_count(pp_poly_t *poly) {
   return i;
 }
 
-pp_path_t* pp_poly_add_path(pp_poly_t *poly) {
-  pp_path_t *path = pp_path_new();
+pp_path_t* pp_poly_add_path(pp_poly_t *poly, int32_t points) {
+  pp_path_t *path = pp_path_new(points);
 
   if(!poly->paths) {
     poly->paths = path;
@@ -411,13 +417,13 @@ uint8_t _pp_alpha_map_x16[17] = {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 
 
 void pp_init(uint32_t max_nodes_per_scanline) {
   _pp_max_nodes_per_scanline = max_nodes_per_scanline;
-  pp_nodes = (int32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
-  pp_node_counts = (uint32_t *)PP_MALLOC(PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
+  pp_nodes = (int32_t *)PP_TRACKED_MALLOC(PP_TILE_BUFFER_SIZE * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
+  pp_node_counts = (uint32_t *)PP_TRACKED_MALLOC(PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
 }
 
 void pp_deinit() {
-  PP_FREE(pp_nodes);
-  PP_FREE(pp_node_counts);
+  PP_TRACKED_FREE(pp_nodes);
+  PP_TRACKED_FREE(pp_node_counts);
 }
 
 void pp_clip(int32_t x, int32_t y, int32_t w, int32_t h) {
