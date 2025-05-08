@@ -3,6 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void *af_tracked_malloc(size_t size) {
+    return malloc(size);
+}
+
+void *af_tracked_realloc(void *p, size_t size) {
+    return realloc(p, size);
+}
+
+void af_tracked_free(void *p) {
+    free(p);
+}
+
 void *af_malloc(size_t size) {
     return malloc(size);
 }

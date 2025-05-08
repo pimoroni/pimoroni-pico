@@ -10,9 +10,17 @@
 #define AF_REALLOC(p, size)     af_realloc(p, size)
 #define AF_FREE(p)              af_free(p)
 
+#define AF_TRACKED_MALLOC(size)         af_tracked_malloc(size)
+#define AF_TRACKED_REALLOC(p, size)     af_tracked_realloc(p, size)
+#define AF_TRACKED_FREE(p)              af_tracked_free(p)
+
 #define PP_MALLOC(size)         af_malloc(size)
 #define PP_REALLOC(p, size)     af_realloc(p, size)
 #define PP_FREE(p)              af_free(p)
+
+#define PP_TRACKED_MALLOC(size)         af_tracked_malloc(size)
+#define PP_TRACKED_REALLOC(p, size)     af_tracked_realloc(p, size)
+#define PP_TRACKED_FREE(p)              af_tracked_free(p)
 
 #define AF_DEBUG(...)          af_debug(__VA_ARGS__)
 
@@ -108,10 +116,10 @@ namespace pimoroni {
 
             bool set_font(std::string_view font_path, unsigned int font_size) {
                 if(text_metrics.face) {
-                    af_free(text_metrics.face->glyphs);
-                    af_free(text_metrics.face);
+                    af_tracked_free(text_metrics.face->glyphs);
+                    af_tracked_free(text_metrics.face);
                 }
-                text_metrics.face = (af_face_t *)af_malloc(sizeof(af_face_t));
+                text_metrics.face = (af_face_t *)af_tracked_malloc(sizeof(af_face_t));
                 //bool result = text_metrics.face.load(font_path);
                 void* font = fileio_open(font_path.data());
                 bool result = af_load_font_file(font, text_metrics.face);
@@ -123,10 +131,10 @@ namespace pimoroni {
 
             bool set_font(void* font,  unsigned int font_size) {
                 if(text_metrics.face) {
-                    af_free(text_metrics.face->glyphs);
-                    af_free(text_metrics.face);
+                    af_tracked_free(text_metrics.face->glyphs);
+                    af_tracked_free(text_metrics.face);
                 }
-                text_metrics.face = (af_face_t *)af_malloc(sizeof(af_face_t));
+                text_metrics.face = (af_face_t *)af_tracked_malloc(sizeof(af_face_t));
                 bool result = af_load_font_file(font, text_metrics.face);
 
                 set_font_size(font_size);

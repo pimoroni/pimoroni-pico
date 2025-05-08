@@ -40,6 +40,10 @@
     #define PP_MALLOC(size)         AF_MALLOC(size)
     #define PP_REALLOC(p, size)     AF_REALLOC(p, size)
     #define PP_FREE(p)              AF_FREE(p)
+
+    #define PP_TRACKED_MALLOC(size)     AF_TRACKED_MALLOC(size)
+    #define PP_TRACKED_REALLOC(p, size) AF_TRACKED_REALLOC(p, size)
+    #define PP_TRACKED_FREE(p)          AF_TRACKED_FREE(p)
   #endif // PP_MALLOC
 #endif // AF_MALLOC
 
@@ -157,7 +161,7 @@ bool af_load_font_file(AF_FILE file, af_face_t *face) {
   size_t point_buffer_size = sizeof(af_point_t) * point_count;
 
   // allocate buffer to store font glyph, path, and point data
-  uint8_t *buffer = (uint8_t *)AF_MALLOC(glyph_buffer_size + path_buffer_size + point_buffer_size);
+  uint8_t *buffer = (uint8_t *)AF_TRACKED_MALLOC(glyph_buffer_size + path_buffer_size + point_buffer_size);
 
   if(!buffer) {
     return false; // failed memory allocation
@@ -251,7 +255,7 @@ void af_render_glyph(af_glyph_t* glyph, af_text_metrics_t *tm) {
 
   pp_poly_t *poly = pp_poly_new();
   for(uint32_t i = 0; i < glyph->path_count; i++) {
-    pp_path_t *path = pp_poly_add_path(poly);
+    pp_path_t *path = pp_poly_add_path(poly, glyph->paths[i].point_count);
     for(uint32_t j = 0; j < glyph->paths[i].point_count; j++) {
       pp_path_add_point(path, {
         glyph->paths[i].points[j].x,
