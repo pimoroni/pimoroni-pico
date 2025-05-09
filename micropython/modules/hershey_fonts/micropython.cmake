@@ -12,4 +12,10 @@ target_include_directories(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/hershey_fonts
 )
 
+# Hershey has all but been replaced by PicoVector's "alright fonts."
+# This definition ensures that PicoGraphics compiles in Hershey support.
+target_compile_definitions(usermod_${MOD_NAME} INTERFACE
+HERSHEY_FONTS=1
+)
+
 target_link_libraries(usermod INTERFACE usermod_${MOD_NAME})

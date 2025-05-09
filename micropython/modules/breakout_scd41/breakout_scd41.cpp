@@ -16,10 +16,10 @@ extern "C" {
 #include "breakout_scd41.h"
 #include "pimoroni_i2c.h"
 
-#define NOT_INITIALISED_MSG     "SCD41: Not initialised. Call scd41.init(<i2c instance>) first."
-#define READ_FAIL_MSG           "SCD41: Reading failed."
-#define FAIL_MSG                "SCD41: Error."
-#define SAMPLE_FAIL_MSG         "SCD41: Read invalid sample."
+#define NOT_INITIALISED_MSG     MP_ERROR_TEXT("SCD41: Not initialised. Call scd41.init(<i2c instance>) first.")
+#define READ_FAIL_MSG           MP_ERROR_TEXT("SCD41: Reading failed.")
+#define FAIL_MSG                MP_ERROR_TEXT("SCD41: Error.")
+#define SAMPLE_FAIL_MSG         MP_ERROR_TEXT("SCD41: Read invalid sample.")
 
 mp_obj_t scd41_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 

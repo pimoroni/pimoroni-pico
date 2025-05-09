@@ -53,7 +53,7 @@ void *pngdec_open_callback(const char *filename, int32_t *size) {
 
     mp_obj_t args[2] = {
         fn,
-        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+        MP_ROM_QSTR(MP_QSTR_r),
     };
 
     // Stat the file to get its size
@@ -89,7 +89,7 @@ int32_t pngdec_seek_callback(PNGFILE *png, int32_t p) {
     int error;
     mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("PNG: seek failed with %d"), error);
     }
 
     return seek_s.offset;
@@ -116,7 +116,7 @@ void pngdec_open_helper(_PNG_obj_t *self) {
         result = self->png->openRAM((uint8_t *)self->buf.buf, self->buf.len, self->decode_callback);
     }
 
-    if(result != 0) mp_raise_msg(&mp_type_RuntimeError, "PNG: could not read file/buffer.");
+    if(result != 0) mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("PNG: could not read file/buffer."));
 }
 
 void PNGDraw(PNGDRAW *pDraw) {
@@ -326,7 +326,7 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _PNG_obj_t *self = mp_obj_malloc_with_finaliser(_PNG_obj_t, &PNG_type);
+    _PNG_obj_t *self = mp_obj_malloc(_PNG_obj_t, &PNG_type);
     self->png = m_new_class(PNG);
 
     //mp_printf(&mp_plat_print, "PNG RAM %fK\n", sizeof(PNG) / 1024.0f);
@@ -339,12 +339,6 @@ mp_obj_t _PNG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, co
     self->decode_into_buffer = false;
 
     return self;
-}
-
-mp_obj_t _PNG_del(mp_obj_t self_in) {
-    _PNG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PNG_obj_t);
-    self->png->close();
-    return mp_const_none;
 }
 
 // open_FILE
@@ -401,7 +395,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     if(mp_obj_is_type(args[ARG_source].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_source].u_obj, mp_obj_tuple_t);
 
-        if(tuple->len != 4) mp_raise_ValueError("decode(): source tuple must contain (x, y, w, h)");
+        if(tuple->len != 4) mp_raise_ValueError(MP_ERROR_TEXT("decode(): source tuple must contain (x, y, w, h)"));
 
         self->decode_target->source = {
             mp_obj_get_int(tuple->items[0]),
@@ -421,7 +415,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         case 270:
             break;
         default:
-            mp_raise_ValueError("decode(): rotation must be one of 0, 90, 180 or 270");
+            mp_raise_ValueError(MP_ERROR_TEXT("decode(): rotation must be one of 0, 90, 180 or 270"));
             break;
     }
 
@@ -435,7 +429,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     } else if(mp_obj_is_type(args[ARG_scale].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_scale].u_obj, mp_obj_tuple_t);
 
-        if(tuple->len != 2) mp_raise_ValueError("decode(): scale tuple must contain (scale_x, scale_y)");
+        if(tuple->len != 2) mp_raise_ValueError(MP_ERROR_TEXT("decode(): scale tuple must contain (scale_x, scale_y)"));
 
         self->decode_target->scale = {
             mp_obj_get_int(tuple->items[0]),

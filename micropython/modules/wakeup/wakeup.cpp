@@ -80,7 +80,7 @@ mp_obj_t Wakeup_reset_gpio_state() {
 }
 
 void err_no_sr() {
-    mp_raise_msg(&mp_type_RuntimeError, "Wakeup_get_shift_state: board does not have a shift register.");
+    mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Wakeup_get_shift_state: board does not have a shift register."));
 }
 
 mp_obj_t Wakeup_reset_shift_state() {
