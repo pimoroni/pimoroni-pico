@@ -39,7 +39,7 @@ typedef struct _ModPicoGraphics_obj_t {
     void *buffer;
     void *fontdata;
     _PimoroniI2C_obj_t *i2c;
-    bool blocking = true;
+    bool blocking;
     uint8_t layers;
 } ModPicoGraphics_obj_t;
 
@@ -477,6 +477,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     //self->scanline_callback = mp_const_none;
 
+    self->blocking = true;
     self->layers = layers;
     self->spritedata = nullptr;
 
