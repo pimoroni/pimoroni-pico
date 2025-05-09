@@ -689,8 +689,8 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 */
 
     while(self->display->is_busy()) {
-    #ifdef mp_event_handle_nowait
-    mp_event_handle_nowait();
+    #ifdef MICROPY_BUILD_TYPE
+    mp_handle_pending(true);
     #endif
     }
 
@@ -698,8 +698,8 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 
     if(self->blocking) {
         while(self->display->is_busy()) {
-        #ifdef mp_event_handle_nowait
-        mp_event_handle_nowait();
+        #ifdef MICROPY_BUILD_TYPE
+        mp_handle_pending(true);
         #endif
         }
 
@@ -715,8 +715,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self], ModPicoGraphics_obj_t);
 
     while(self->display->is_busy()) {
-    #ifdef mp_event_handle_nowait
-    mp_event_handle_nowait();
+    #ifdef MICROPY_BUILD_TYPE
+    mp_handle_pending(true);
     #endif
     }
 
@@ -729,8 +729,8 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
 
     if(self->blocking) {
         while(self->display->is_busy()) {
-        #ifdef mp_event_handle_nowait
-        mp_event_handle_nowait();
+        #ifdef MICROPY_BUILD_TYPE
+        mp_handle_pending(true);
         #endif
         }
     }
