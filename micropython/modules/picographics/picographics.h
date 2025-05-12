@@ -34,11 +34,13 @@ enum PicoGraphicsDisplay {
     DISPLAY_PICO_W_EXPLORER,
     DISPLAY_EXPLORER,
     DISPLAY_PRESTO,
-    DISPLAY_PRESTO_FULL_RES
+    DISPLAY_PRESTO_FULL_RES,
+    DISPLAY_BADGER_2350
 };
 
 enum PicoGraphicsPenType {
     PEN_1BIT = 0,
+    PEN_2BIT,
     PEN_3BIT,
     PEN_P2,
     PEN_P4,
