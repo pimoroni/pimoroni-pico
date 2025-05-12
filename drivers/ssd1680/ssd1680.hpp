@@ -15,9 +15,9 @@ namespace pimoroni {
   class SSD1680 : public DisplayDriver {
     enum RAM_FLAGS {
       X_START    = 0x00,
-      X_END      = 0x15,
-      Y_START_H  = 0x01,
-      Y_START_L  = 0x07,
+      X_END      = 0x15, // 0x15 = (176 / 8) - 1
+      Y_START_H  = 0x01, // 0x01 = (264 >> 8)
+      Y_START_L  = 0x07, // 0x07 = (264 & 0xff) - 1
       Y_END_H    = 0x00,
       Y_END_L    = 0x00 
     };

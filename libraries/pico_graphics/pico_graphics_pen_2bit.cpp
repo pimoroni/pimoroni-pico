@@ -12,7 +12,7 @@ namespace pimoroni {
     }
     void PicoGraphics_Pen2Bit::_set_pixel(const Point &pa, uint col) {
         Point p = Point(pa.y, pa.x);
-    
+
         uint offset = (bounds.w * bounds.h) / 8;
         uint8_t *buf = (uint8_t *)frame_buffer;
 
