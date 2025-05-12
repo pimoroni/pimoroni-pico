@@ -152,6 +152,7 @@ mp_event_handle_nowait();
                 || current_graphics->pen_type == PicoGraphics::PEN_P4
                 || current_graphics->pen_type == PicoGraphics::PEN_DV_P5
                 || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                || current_graphics->pen_type == PicoGraphics::PEN_2BIT
                 || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
                     if (current_flags & FLAG_NO_DITHER) {
                         int closest = RGB((RGB565)pDraw->pPixels[i]).closest(current_graphics->get_palette(), current_graphics->get_palette_size());
