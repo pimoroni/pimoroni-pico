@@ -2,6 +2,7 @@
 
 #include <cstdlib>
 #include <math.h>
+#include <string.h>
 
 namespace pimoroni {
 
@@ -101,6 +102,10 @@ namespace pimoroni {
     gpio_set_function(SCK,  GPIO_FUNC_SPI);
     gpio_set_function(MOSI, GPIO_FUNC_SPI);
 
+    if(rotation == ROTATE_90 || rotation == ROTATE_270) {
+      std::swap(width, height);
+    }
+
     setup();
 
     default_luts();
@@ -120,9 +125,23 @@ namespace pimoroni {
     // 0b100 == Swap X / Y
     // 0b010 == Y invert (ie: counts up)
     // 0b001 == X invert (ie counts up)
-    command(DEM, {0b001}); // x+ y-
-    command(SRX, {X_START, X_END}); // X_START to X_END if X is inverted (x-)
-    command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
+    if(rotation == ROTATE_0) {
+      command(DEM, {0b001}); // x+ y-
+      command(SRX, {X_START, X_END});
+      command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
+    } else if(rotation == ROTATE_90) {
+      command(DEM, {0b011}); // x+ y-
+      command(SRX, {X_START, X_END});
+      command(SRY, {Y_END_L, Y_END_H, Y_START_L, Y_START_H});
+    } else if(rotation == ROTATE_180) {
+      command(DEM, {0b010}); // x+ y-
+      command(SRX, {X_END, X_START});
+      command(SRY, {Y_END_L, Y_END_H, Y_START_L, Y_START_H});
+    } else if(rotation == ROTATE_270) {
+      command(DEM, {0b000}); // x+ y-
+      command(SRX, {X_END, X_START});
+      command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
+    }
     //command(BWCTRL, {0x00});
 
     busy_wait();
@@ -238,22 +257,79 @@ namespace pimoroni {
   
 
   void SSD1680::update(PicoGraphics *graphics) {
-    uint8_t *fb = (uint8_t *)graphics->frame_buffer;
-
-    uint8_t *bufA = (uint8_t *)fb;
+    uint8_t *bufA = (uint8_t *)graphics->frame_buffer;
     uint8_t *bufB = bufA + (width * height / 8);
+    uint8_t *newBuf = bufB + (width * height / 8);
 
     if(blocking) {
       busy_wait();
     }
 
-    command(SRXC, {X_START});
-    command(SRYC, {Y_START_L, Y_START_H});
-    command(WRAM_R, (width * height) / 8, bufA);
+    if(rotation == ROTATE_0) {
+      command(SRXC, {X_START});
+      command(SRYC, {Y_START_L, Y_START_H});
+    } else if(rotation == ROTATE_90) {
+      command(SRXC, {X_START});
+      command(SRYC, {Y_END_L, Y_END_H});
+    } else if (rotation == ROTATE_180) {
+      command(SRXC, {X_END});
+      command(SRYC, {Y_END_L, Y_END_H});
+    } else if (rotation == ROTATE_270) {
+      command(SRXC, {X_END});
+      command(SRYC, {Y_START_L, Y_START_H});
+    }
 
-    command(SRXC, {X_START});
-    command(SRYC, {Y_START_L, Y_START_H});
-    command(WRAM_BW, (width * height) / 8, bufB);
+    command(WRAM_R);
+    if(rotation == ROTATE_90 || rotation == ROTATE_270) {
+      // Because pen_2bit rotates the pixel data to fit the portrait screen
+      // we need to rotate it back for portrait rotations.
+      memset(newBuf, 0, (width * height) / 8);
+      for(auto y = 0; y < height; y++) {
+        for(auto x = 0; x < width; x++) {
+          uint bo_s = 7 - (y & 0b111);
+          uint bo_d = 7 - (x & 0b111);
+          uint8_t src = (bufA[(y / 8) + (x * height / 8)] >> bo_s) & 0b1;
+          //newBuf[(x / 8) + (y * height / 8)] &= ~(1 << bo_d);
+          newBuf[(x / 8) + (y * width / 8)] |= (src << bo_d);
+        }
+      }
+      data((width * height) / 8, newBuf);
+    } else {
+      data((width * height) / 8, bufA);
+    }
+
+    if(rotation == ROTATE_0) {
+      command(SRXC, {X_START});
+      command(SRYC, {Y_START_L, Y_START_H});
+    } else if(rotation == ROTATE_90) {
+      command(SRXC, {X_START});
+      command(SRYC, {Y_END_L, Y_END_H});
+    } else if (rotation == ROTATE_180) {
+      command(SRXC, {X_END});
+      command(SRYC, {Y_END_L, Y_END_H});
+    } else if (rotation == ROTATE_270) {
+      command(SRXC, {X_END});
+      command(SRYC, {Y_START_L, Y_START_H});
+    }
+
+    command(WRAM_BW);
+    if(rotation == ROTATE_90 || rotation == ROTATE_270) {
+      // Because pen_2bit rotates the pixel data to fit the portrait screen
+      // we need to rotate it back for portrait rotations.
+      memset(newBuf, 0, (width * height) / 8);
+      for(auto y = 0; y < height; y++) {
+        for(auto x = 0; x < width; x++) {
+          uint bo_s = 7 - (y & 0b111);
+          uint bo_d = 7 - (x & 0b111);
+          uint8_t src = (bufB[(y / 8) + (x * height / 8)] >> bo_s) & 0b1;
+          //newBuf[(x / 8) + (y * height / 8)] &= ~(1 << bo_d);
+          newBuf[(x / 8) + (y * width / 8)] |= (src << bo_d);
+        }
+      }
+      data((width * height) / 8, newBuf);
+    } else {
+      data((width * height) / 8, bufB);
+    }
 
     command(BTST);
     command(DUC2, {0xC7});
