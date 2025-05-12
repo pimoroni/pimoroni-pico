@@ -120,15 +120,9 @@ namespace pimoroni {
     // 0b100 == Swap X / Y
     // 0b010 == Y invert (ie: counts up)
     // 0b001 == X invert (ie counts up)
-    command(DEM, {0b001}); // Setting third bit stops update?
-    command(SRX, {X_START, X_END}); // X_START to X_END if X is inverted
-
-    uint16_t ram_start_end_y[2];
-    ram_start_end_y[1] = __builtin_bswap16(0);
-    ram_start_end_y[0] = __builtin_bswap16(height - 1);
-    command(SRY, 4, (uint8_t *)ram_start_end_y);
-
-    //command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
+    command(DEM, {0b001}); // x+ y-
+    command(SRX, {X_START, X_END}); // X_START to X_END if X is inverted (x-)
+    command(SRY, {Y_START_L, Y_START_H, Y_END_L, Y_END_H});
     //command(BWCTRL, {0x00});
 
     busy_wait();
@@ -253,16 +247,12 @@ namespace pimoroni {
       busy_wait();
     }
 
-    uint16_t ram_start_y = height - 1; //__builtin_bswap16(width - 1);
-
-    command(SRXC, {X_START}); // X_START if X is inverted
-    command(SRYC, 2, (uint8_t *)&ram_start_y);
-    //command(SRYC, {Y_START_H, Y_START_L});
+    command(SRXC, {X_START});
+    command(SRYC, {Y_START_L, Y_START_H});
     command(WRAM_R, (width * height) / 8, bufA);
 
-    command(SRXC, {X_START}); // X_START if X is inverted
-    command(SRYC, 2, (uint8_t *)&ram_start_y);
-    //command(SRYC, {Y_START_H, Y_START_L});
+    command(SRXC, {X_START});
+    command(SRYC, {Y_START_L, Y_START_H});
     command(WRAM_BW, (width * height) / 8, bufB);
 
     command(BTST);

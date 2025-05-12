@@ -429,7 +429,7 @@ namespace pimoroni {
 
       void frame_convert(PenType type, conversion_callback_func callback) override;
       static size_t buffer_size(uint w, uint h) {
-          return (w * h / 4);
+          return (w * h / 8) * 2;
       }
   };
 

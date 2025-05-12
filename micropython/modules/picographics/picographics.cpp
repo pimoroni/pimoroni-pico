@@ -40,7 +40,7 @@ typedef struct _ModPicoGraphics_obj_t {
     void *buffer;
     void *fontdata;
     _PimoroniI2C_obj_t *i2c;
-    bool blocking;
+    bool blocking = true;
     uint8_t layers;
     PicoGraphicsDisplay display_type;
 } ModPicoGraphics_obj_t;
@@ -429,7 +429,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     } else if (display == DISPLAY_BADGER_2350) {
         pen_type = PEN_2BIT; // FORCE to 2BIT
-        self->display = m_new_class(SSD1680, width, height, (Rotation)rotate, spi_bus);
+        self->display = m_new_class(SSD1680, height, width, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_INTERSTATE75_32X32
             || display == DISPLAY_INTERSTATE75_64X64
@@ -479,7 +479,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             }
             break;
         case PEN_2BIT:
-            self->graphics = m_new_class(PicoGraphics_Pen2Bit, self->display->width, self->display->height, self->buffer, layers);
+            self->graphics = m_new_class(PicoGraphics_Pen2Bit, width, height, self->buffer, layers);
             break;
         case PEN_3BIT:
             self->graphics = m_new_class(PicoGraphics_Pen3Bit, self->display->width, self->display->height, self->buffer, layers);
@@ -508,7 +508,6 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     //self->scanline_callback = mp_const_none;
 
-    self->blocking = true;
     self->layers = layers;
     self->spritedata = nullptr;
 
