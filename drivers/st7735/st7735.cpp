@@ -165,7 +165,7 @@ namespace pimoroni {
 
   // Native 16-bit framebuffer update
   void ST7735::update(PicoGraphics *graphics) {
-    if(graphics->pen_type == PicoGraphics::PEN_RGB565) {
+    if(graphics->pen_type == PicoGraphics::PEN_RGB565 && graphics->layers == 1) {
       command(reg::RAMWR, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
     } else {
       command(reg::RAMWR);

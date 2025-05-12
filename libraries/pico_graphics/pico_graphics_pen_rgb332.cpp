@@ -2,11 +2,11 @@
 #include <string.h>
 
 namespace pimoroni {
-    PicoGraphics_PenRGB332::PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer)
-    : PicoGraphics(width, height, frame_buffer) {
+    PicoGraphics_PenRGB332::PicoGraphics_PenRGB332(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers)
+    : PicoGraphics(width, height, layers, frame_buffer) {
         this->pen_type = PEN_RGB332;
         if(this->frame_buffer == nullptr) {
-            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
+            this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height) * layers]);
         }
     }
     void PicoGraphics_PenRGB332::set_pen(uint c) {
@@ -23,12 +23,14 @@ namespace pimoroni {
     }
     void PicoGraphics_PenRGB332::set_pixel(const Point &p) {
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset;
         buf[p.y * bounds.w + p.x] = color;
     }
     void PicoGraphics_PenRGB332::set_pixel_span(const Point &p, uint l) {
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
-        buf = &buf[p.y * bounds.w + p.x];
+        buf += this->layer_offset;
+        buf += p.y * bounds.w + p.x;
 
         while(l--) {
             *buf++ = color;
@@ -38,6 +40,7 @@ namespace pimoroni {
         if(!bounds.contains(p)) return;
 
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset;
 
         RGB332 blended = RGB(buf[p.y * bounds.w + p.x]).blend(RGB(color), a).to_rgb332();
 
@@ -96,9 +99,29 @@ namespace pimoroni {
             // Treat our void* frame_buffer as uint8_t
             uint8_t *src = (uint8_t *)frame_buffer;
 
-            frame_convert_rgb565(callback, [&]() {
-                return rgb332_to_rgb565_lut[*src++];
-            });
+            if(this->layers > 1) {
+                // The size of a single layer
+                uint offset = this->bounds.w * this->bounds.h;
+
+                frame_convert_rgb565(callback, [&]() {
+                    uint8_t c = 0;
+
+                    // Iterate through layers in reverse order
+                    // Return the first nonzero (not transparent) pixel
+                    for(auto layer = this->layers; layer > 0; layer--) {
+                        c = *(src + offset * (layer - 1));
+                        if (c) break;
+                    }
+
+                    src++;
+
+                    return rgb332_to_rgb565_lut[c];
+                });
+            } else {
+                frame_convert_rgb565(callback, [&]() {
+                    return rgb332_to_rgb565_lut[*src++];
+                });
+            }
         }
     }
     void PicoGraphics_PenRGB332::sprite(void* data, const Point &sprite, const Point &dest, const int scale, const int transparent) {
@@ -121,5 +144,51 @@ namespace pimoroni {
                 if(color != transparent) pixel(dest + o);
             }
         }
+    }
+    bool PicoGraphics_PenRGB332::render_tile(const Tile *tile) {
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+
+            uint8_t *p_dest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            p_dest += this->layer_offset;
+
+            uint8_t *p_layer0 = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+
+
+            for(int x = 0; x < tile->w; x++) {
+                uint8_t alpha = *palpha;
+                uint8_t dest = *p_dest;
+                if(dest == 0) {
+                    dest = *p_layer0;
+                }
+
+                // TODO: Try to alpha blend RGB332... somewhat?
+                if(alpha == 255) {
+                  *p_dest = color;
+                }else if(alpha == 0) {
+                }else{
+                  // blend tha pixel
+                  uint16_t sr = (color & 0b11100000) >> 5;
+                  uint16_t sg = (color & 0b00011100) >> 2;
+                  uint16_t sb = (color & 0b00000011);
+
+                  uint16_t dr = (dest & 0b11100000) >> 5;
+                  uint16_t dg = (dest & 0b00011100) >> 2;
+                  uint16_t db = (dest & 0b00000011);
+
+                  uint8_t r = ((sr * alpha) + (dr * (255 - alpha))) >> 8;
+                  uint8_t g = ((sg * alpha) + (dg * (255 - alpha))) >> 8;
+                  uint8_t b = ((sb * alpha) + (db * (255 - alpha))) >> 8;
+
+                  // recombine the channels
+                  *p_dest  = (r << 5) | (g << 2) | (b);
+                }
+
+                p_dest++;
+                palpha++;
+            }
+        }
+
+        return true;
     }
 }

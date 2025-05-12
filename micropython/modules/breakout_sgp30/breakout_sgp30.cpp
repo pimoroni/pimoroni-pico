@@ -29,15 +29,14 @@ mp_obj_t BreakoutSGP30_make_new(const mp_obj_type_t *type, size_t n_args, size_t
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    self = m_new_obj(breakout_sgp30_BreakoutSGP30_obj_t);
-    self->base.type = &breakout_sgp30_BreakoutSGP30_type;
+    self = mp_obj_malloc(breakout_sgp30_BreakoutSGP30_obj_t, &breakout_sgp30_BreakoutSGP30_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
     self->breakout = m_new_class(BreakoutSGP30, (pimoroni::I2C *)(self->i2c->i2c));
 
     if(!self->breakout->init()) {
-        mp_raise_msg(&mp_type_RuntimeError, "BreakoutSGP30: breakout not found when initialising");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutSGP30: breakout not found when initialising"));
     }
 
     return MP_OBJ_FROM_PTR(self);

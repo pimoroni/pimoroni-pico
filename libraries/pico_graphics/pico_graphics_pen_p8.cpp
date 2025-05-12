@@ -1,8 +1,8 @@
 #include "pico_graphics.hpp"
 
 namespace pimoroni {
-    PicoGraphics_PenP8::PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer)
-    : PicoGraphics(width, height, frame_buffer) {
+    PicoGraphics_PenP8::PicoGraphics_PenP8(uint16_t width, uint16_t height, void *frame_buffer, uint16_t layers)
+    : PicoGraphics(width, height, layers, frame_buffer) {
         this->pen_type = PEN_P8;
         if(this->frame_buffer == nullptr) {
             this->frame_buffer = (void *)(new uint8_t[buffer_size(width, height)]);
@@ -51,12 +51,14 @@ namespace pimoroni {
     }
     void PicoGraphics_PenP8::set_pixel(const Point &p) {
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset;
         buf[p.y * bounds.w + p.x] = color;
     }
     
     void PicoGraphics_PenP8::set_pixel_span(const Point &p, uint l) {
         // pointer to byte in framebuffer that contains this pixel
         uint8_t *buf = (uint8_t *)frame_buffer;
+        buf += this->layer_offset;
         buf = &buf[p.y * bounds.w + p.x];
 
         while(l--) {
@@ -103,26 +105,90 @@ namespace pimoroni {
     }
 
     void PicoGraphics_PenP8::frame_convert(PenType type, conversion_callback_func callback) {
-        if(type == PEN_RGB565) {
-            // Cache the RGB888 palette as RGB565
-            RGB565 cache[palette_size];
-            for(auto i = 0u; i < palette_size; i++) {
-                cache[i] = palette[i].to_rgb565();
+        // Treat our void* frame_buffer as uint8_t
+        uint8_t *src = (uint8_t *)frame_buffer;
+
+        if(layers > 1) {
+            // The size of a single layer
+            uint offset = this->bounds.w * this->bounds.h;
+
+            if(type == PEN_RGB565) {
+                // Cache the RGB888 palette as RGB565
+                RGB565 cache[palette_size];
+                for(auto i = 0u; i < palette_size; i++) {
+                    cache[i] = palette[i].to_rgb565();
+                }
+
+                frame_convert_rgb565(callback, [&]() {
+                    // Check the *palette* index, rather than the colour
+                    // Thus palette entry 0 is *always* transparent
+                    uint8_t c = 0;
+
+                    // Iterate through layers in reverse order
+                    // Return the first nonzero (not transparent) pixel
+                    for(auto layer = this->layers; layer > 0; layer--) {
+                        c = *(src + offset * (layer - 1));
+                        if (c) break;
+                    }
+
+                    src++;
+
+                    return cache[c];
+                });
+            } else if (type == PEN_RGB888) {
+                frame_convert_rgb888(callback, [&]() {
+                    // Check the *palette* index, rather than the colour
+                    // Thus palette entry 0 is *always* transparent
+                    uint8_t c = 0;
+
+                    // Iterate through layers in reverse order
+                    // Return the first nonzero (not transparent) pixel
+                    for(auto layer = this->layers; layer > 0; layer--) {
+                        c = *(src + offset * (layer - 1));
+                        if (c) break;
+                    }
+
+                    src++;
+
+                    return palette[c].to_rgb888();
+                });
             }
+        } else {
+            if(type == PEN_RGB565) {
+                // Cache the RGB888 palette as RGB565
+                RGB565 cache[palette_size];
+                for(auto i = 0u; i < palette_size; i++) {
+                    cache[i] = palette[i].to_rgb565();
+                }
 
-            // Treat our void* frame_buffer as uint8_t
-            uint8_t *src = (uint8_t *)frame_buffer;
-
-            frame_convert_rgb565(callback, [&]() {
-                return cache[*src++];
-            });
-        } else if (type == PEN_RGB888) {
-            // Treat our void* frame_buffer as uint8_t
-            uint8_t *src = (uint8_t *)frame_buffer;
-
-            frame_convert_rgb888(callback, [&]() {
-                return palette[*src++].to_rgb888();
-            });
+                frame_convert_rgb565(callback, [&]() {
+                    return cache[*src++];
+                });
+            } else if (type == PEN_RGB888) {
+                frame_convert_rgb888(callback, [&]() {
+                    return palette[*src++].to_rgb888();
+                });
+            }
         }
+    }
+
+    bool PicoGraphics_PenP8::render_tile(const Tile *tile) {
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+            uint8_t *pdest = &((uint8_t *)frame_buffer)[tile->x + ((tile->y + y) * bounds.w)];
+            for(int x = 0; x < tile->w; x++) {
+                uint8_t alpha = *palpha;
+
+                if(alpha == 0) {
+                } else {
+                  *pdest = color;
+                }
+
+                pdest++;
+                palpha++;
+            }
+        }
+
+        return true;
     }
 }

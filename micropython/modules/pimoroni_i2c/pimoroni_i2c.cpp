@@ -51,8 +51,8 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
     enum { ARG_sda, ARG_scl, ARG_baudrate };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_sda, MP_ARG_INT, {.u_int = I2C_DEFAULT_SDA} },
-        { MP_QSTR_scl, MP_ARG_INT, {.u_int = I2C_DEFAULT_SCL} },
+        { MP_QSTR_sda, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(I2C_DEFAULT_SDA)} },
+        { MP_QSTR_scl, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(I2C_DEFAULT_SCL)} },
         { MP_QSTR_baudrate, MP_ARG_INT, {.u_int = I2C_DEFAULT_BAUDRATE} },
     };
 
@@ -61,8 +61,8 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     // Get I2C bus.
-    int sda = args[ARG_sda].u_int;
-    int scl = args[ARG_scl].u_int;
+    int sda = mp_hal_get_pin_obj(args[ARG_sda].u_obj);
+    int scl = mp_hal_get_pin_obj(args[ARG_scl].u_obj);
     int baud = args[ARG_baudrate].u_int;
     int i2c_id = (sda >> 1) & 0b1;  // i2c bus for given SDA pin
 
@@ -74,8 +74,7 @@ mp_obj_t PimoroniI2C_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         mp_raise_ValueError(MP_ERROR_TEXT("bad SCL pin"));
     }
 
-    self = m_new_obj(_PimoroniI2C_obj_t);
-    self->base.type = &PimoroniI2C_type;
+    self = mp_obj_malloc(_PimoroniI2C_obj_t, &PimoroniI2C_type);
 
     self->i2c = m_new_class(I2C, sda, scl, baud);
 

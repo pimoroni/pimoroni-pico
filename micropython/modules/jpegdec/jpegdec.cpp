@@ -43,7 +43,7 @@ void *jpegdec_open_callback(const char *filename, int32_t *size) {
 
     mp_obj_t args[2] = {
         fn,
-        MP_OBJ_NEW_QSTR(MP_QSTR_r),
+        MP_ROM_QSTR(MP_QSTR_r),
     };
 
     // Stat the file to get its size
@@ -79,7 +79,7 @@ int32_t jpegdec_seek_callback(JPEGFILE *jpeg, int32_t p) {
     int error;
     mp_uint_t res = stream_p->ioctl(fhandle, MP_STREAM_SEEK, (mp_uint_t)(uintptr_t)&seek_s, &error);
     if (res == MP_STREAM_ERROR) {
-        mp_raise_OSError(error);
+        mp_raise_msg_varg(&mp_type_OSError, MP_ERROR_TEXT("JPEG: seek failed with %d"), error);
     }
 
     return seek_s.offset;
@@ -197,7 +197,7 @@ void jpegdec_open_helper(_JPEG_obj_t *self) {
         result = self->jpeg->openRAM((uint8_t *)self->buf.buf, self->buf.len, JPEGDraw);
     }
 
-    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, "JPEG: could not read file/buffer.");
+    if(result != 1) mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("JPEG: could not read file/buffer."));
 }
 
 mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
@@ -212,17 +212,11 @@ mp_obj_t _JPEG_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _JPEG_obj_t *self = mp_obj_malloc_with_finaliser(_JPEG_obj_t, &JPEG_type);
+    _JPEG_obj_t *self = mp_obj_malloc(_JPEG_obj_t, &JPEG_type);
     self->jpeg = m_new_class(JPEGDEC);
     self->graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
     return self;
-}
-
-mp_obj_t _JPEG_del(mp_obj_t self_in) {
-    _JPEG_obj_t *self = MP_OBJ_TO_PTR2(self_in, _JPEG_obj_t);
-    self->jpeg->close();
-    return mp_const_none;
 }
 
 // open_FILE

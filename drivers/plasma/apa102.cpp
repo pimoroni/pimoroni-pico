@@ -4,10 +4,26 @@
 namespace plasma {
 
 APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint freq, RGB* buffer) : buffer(buffer), num_leds(num_leds), pio(pio), sm(sm) {
+    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
+    uint range_max = std::max(pin_dat, pin_clk);
+    uint range_min = std::min(pin_dat, pin_clk);
+
+    // Both pins in 16-48 range
+    if(range_max >= 32 && range_min >= 16) {
+        pio_set_gpio_base(pio, 16);
+    // Both pins in 0-31 range
+    } else if(range_max <= 31) {
+        pio_set_gpio_base(pio, 0);
+    // Pins in different ranges: invalid combo!
+    } else {
+        // TODO: Need some means to notify the caller
+        pio_set_gpio_base(pio, 0);
+    }
+
     pio_program_offset = pio_add_program(pio, &apa102_program);
 
-    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << pin_clk) | (1u << pin_dat));
-    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << pin_clk) | (1u << pin_dat));
+    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
+    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
     pio_gpio_init(pio, pin_clk);
     pio_gpio_init(pio, pin_dat);
 
@@ -44,14 +60,18 @@ bool APA102::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+bool APA102::is_busy() {
+   return dma_channel_is_busy(dma_channel);
+}
+
 void APA102::update(bool blocking) {
-    if(dma_channel_is_busy(dma_channel) && !blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    if(is_busy() && !blocking) return;
+    while(is_busy()) {}; // Block waiting for DMA finish
     pio->txf[sm] = 0x00000000; // Output the APA102 start-of-frame bytes
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, buffer, true);
     if (!blocking) return;
-    while(dma_channel_is_busy(dma_channel)) {}; // Block waiting for DMA finish
+    while(is_busy()) {}; // Block waiting for DMA finish
     // This is necessary to prevent a single LED remaining lit when clearing and updating.
     // This code will only run in *blocking* mode since it's assumed non-blocking will be continuously updating anyway.
     // Yes this will slow down LED updates... don't use blocking mode unless you're clearing LEDs before shutdown,

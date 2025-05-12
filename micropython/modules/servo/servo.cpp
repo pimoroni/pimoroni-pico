@@ -69,7 +69,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
         if(mp_obj_is_int(object)) {
             int type = mp_obj_get_int(object);
             if(type < 0 || type >= 3) {
-                mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
+                mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
             }
             servo::CalibrationType calibration_type = (servo::CalibrationType)type;
 
@@ -77,7 +77,7 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
             self->calibration = m_new_class(Calibration, calibration_type);
         }
         else {
-            mp_raise_TypeError("cannot convert object to an integer");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to an integer"));
         }
     }
     else {
@@ -113,7 +113,7 @@ mp_obj_t Calibration_apply_blank_pairs(size_t n_args, const mp_obj_t *pos_args, 
 
     int size = args[ARG_size].u_int;
     if(size < 0)
-        mp_raise_ValueError("size out of range. Expected 0 or greater");
+        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
     else
         self->calibration->apply_blank_pairs((uint)size);
 
@@ -193,7 +193,7 @@ mp_obj_t Calibration_apply_uniform_pairs(size_t n_args, const mp_obj_t *pos_args
 
     int size = args[ARG_size].u_int;
     if(size < 0)
-        mp_raise_ValueError("size out of range. Expected 0 or greater");
+        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
     else {
         float min_pulse = mp_obj_get_float(args[ARG_min_pulse].u_obj);
         float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
@@ -220,7 +220,7 @@ mp_obj_t Calibration_apply_default_pairs(size_t n_args, const mp_obj_t *pos_args
 
     int type = args[ARG_type].u_int;
     if(type < 0 || type >= 3) {
-        mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
+        mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
     }
     servo::CalibrationType calibration_type = (servo::CalibrationType)type;
     self->calibration->apply_default_pairs(calibration_type);
@@ -250,7 +250,7 @@ mp_obj_t Calibration_pair(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -279,7 +279,7 @@ mp_obj_t Calibration_pair(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -293,7 +293,7 @@ mp_obj_t Calibration_pair(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
                     pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("list must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("list must contain two numbers"));
                 }
             }
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
@@ -303,11 +303,11 @@ mp_obj_t Calibration_pair(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
                     pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("tuple must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("tuple must contain two numbers"));
                 }
             }
             else {
-                mp_raise_TypeError("can't convert object to list or tuple");
+                mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to list or tuple"));
             }
         }
     }
@@ -332,7 +332,7 @@ mp_obj_t Calibration_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -356,7 +356,7 @@ mp_obj_t Calibration_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -384,7 +384,7 @@ mp_obj_t Calibration_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -408,7 +408,7 @@ mp_obj_t Calibration_value(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         int index = args[ARG_index].u_int;
         int calibration_size = (int)self->calibration->size();
         if(calibration_size == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         if(index < 0 || index >= calibration_size)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("index out of range. Expected 0 to %d"), calibration_size - 1);
         else {
@@ -433,7 +433,7 @@ mp_obj_t Calibration_first(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             const Calibration::Pair &pair = self->calibration->first();
 
@@ -457,7 +457,7 @@ mp_obj_t Calibration_first(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             Calibration::Pair &pair = self->calibration->first();
 
@@ -469,7 +469,7 @@ mp_obj_t Calibration_first(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
                     pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("list must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("list must contain two numbers"));
                 }
             }
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
@@ -479,11 +479,11 @@ mp_obj_t Calibration_first(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw
                     pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("tuple must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("tuple must contain two numbers"));
                 }
             }
             else {
-                mp_raise_TypeError("can't convert object to list or tuple");
+                mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to list or tuple"));
             }
         }
     }
@@ -505,7 +505,7 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             return mp_obj_new_float(self->calibration->first_pulse());
         }
@@ -524,7 +524,7 @@ mp_obj_t Calibration_first_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             self->calibration->first_pulse(mp_obj_get_float(args[ARG_pulse].u_obj));
         }
@@ -547,7 +547,7 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             return mp_obj_new_float(self->calibration->first_value());
         }
@@ -566,7 +566,7 @@ mp_obj_t Calibration_first_value(size_t n_args, const mp_obj_t *pos_args, mp_map
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             self->calibration->first_value(mp_obj_get_float(args[ARG_value].u_obj));
         }
@@ -589,7 +589,7 @@ mp_obj_t Calibration_last(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             const Calibration::Pair &pair = self->calibration->last();
 
@@ -613,7 +613,7 @@ mp_obj_t Calibration_last(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             Calibration::Pair &pair = self->calibration->last();
 
@@ -625,7 +625,7 @@ mp_obj_t Calibration_last(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
                     pair.value = mp_obj_get_float(list->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("list must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("list must contain two numbers"));
                 }
             }
             else if(mp_obj_is_type(object, &mp_type_tuple)) {
@@ -635,11 +635,11 @@ mp_obj_t Calibration_last(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
                     pair.value = mp_obj_get_float(tuple->items[1]);
                 }
                 else {
-                    mp_raise_ValueError("tuple must contain two numbers");
+                    mp_raise_ValueError(MP_ERROR_TEXT("tuple must contain two numbers"));
                 }
             }
             else {
-                mp_raise_TypeError("can't convert object to list or tuple");
+                mp_raise_TypeError(MP_ERROR_TEXT("can't convert object to list or tuple"));
             }
         }
     }
@@ -661,7 +661,7 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             return mp_obj_new_float(self->calibration->last_pulse());
         }
@@ -680,7 +680,7 @@ mp_obj_t Calibration_last_pulse(size_t n_args, const mp_obj_t *pos_args, mp_map_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             self->calibration->last_pulse(mp_obj_get_float(args[ARG_pulse].u_obj));
         }
@@ -703,7 +703,7 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             return mp_obj_new_float(self->calibration->last_value());
         }
@@ -722,7 +722,7 @@ mp_obj_t Calibration_last_value(size_t n_args, const mp_obj_t *pos_args, mp_map_
         _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
         if(self->calibration->size() == 0)
-            mp_raise_ValueError("this calibration does not have any pairs");
+            mp_raise_ValueError(MP_ERROR_TEXT("this calibration does not have any pairs"));
         else {
             self->calibration->last_value(mp_obj_get_float(args[ARG_value].u_obj));
         }
@@ -785,7 +785,7 @@ mp_obj_t Calibration_value_to_pulse(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert value to pulse. Calibration needs at least 2 pairs");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Unable to convert value to pulse. Calibration needs at least 2 pairs"));
     }
     return mp_const_none;
 }
@@ -813,7 +813,7 @@ mp_obj_t Calibration_pulse_to_value(size_t n_args, const mp_obj_t *pos_args, mp_
         return mp_obj_new_tuple(2, tuple);
     }
     else {
-        mp_raise_msg(&mp_type_RuntimeError, "Unable to convert pulse to value. Calibration needs at least 2 pairs");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("Unable to convert pulse to value. Calibration needs at least 2 pairs"));
     }
     return mp_const_none;
 }
@@ -873,7 +873,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
         if(mp_obj_is_int(calib_object)) {
             int type = mp_obj_get_int(calib_object);
             if(type < 0 || type >= 3) {
-                mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
+                mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
             }
             calibration_type = (servo::CalibrationType)type;
         }
@@ -881,7 +881,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
             calib = (MP_OBJ_TO_PTR2(calib_object, _Calibration_obj_t)->calibration);
         }
         else {
-            mp_raise_TypeError("cannot convert object to an integer or a Calibration class instance");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to an integer or a Calibration class instance"));
         }
     }
 
@@ -1037,7 +1037,7 @@ extern mp_obj_t Servo_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
         if(!self->servo->frequency(freq)) {
-            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz");
+            mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 10Hz to 350Hz"));
         }
         return mp_const_none;
     }
@@ -1182,7 +1182,7 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
             self->servo->calibration() = *(calib->calibration);
         }
         else {
-            mp_raise_TypeError("cannot convert object to a Calibration class instance");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a Calibration class instance"));
         }
     }
 
@@ -1280,9 +1280,9 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         }
 
         if(items == nullptr)
-            mp_raise_TypeError("cannot convert object to a list or tuple of pins, or a pin mask integer");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of pins, or a pin mask integer"));
         else if(pin_count == 0)
-            mp_raise_TypeError("list or tuple must contain at least one integer");
+            mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
         else {
             // Create and populate a local array of pins
             pins = m_new(uint8_t, pin_count);
@@ -1290,7 +1290,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
                 int pin = mp_obj_get_int(items[i]);
                 if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
                     m_free(pins);
-                    mp_raise_ValueError("a pin in the list or tuple is out of range. Expected 0 to 29");
+                    mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
                 }
                 else {
                     pins[i] = (uint8_t)pin;
@@ -1307,7 +1307,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         if(mp_obj_is_int(calib_object)) {
             int type = mp_obj_get_int(calib_object);
             if(type < 0 || type >= 3) {
-                mp_raise_ValueError("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)");
+                mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
             }
             calibration_type = (servo::CalibrationType)mp_obj_get_int(calib_object);
         }
@@ -1315,7 +1315,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
             calib = (MP_OBJ_TO_PTR2(calib_object, _Calibration_obj_t)->calibration);
         }
         else {
-            mp_raise_TypeError("cannot convert object to an integer or a Calibration class instance");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to an integer or a Calibration class instance"));
         }
     }
 
@@ -1348,7 +1348,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 
     if(!cluster->init()) {
         m_del_class(ServoCluster, cluster);
-        mp_raise_msg(&mp_type_RuntimeError, "unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it");
+        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 
     self = mp_obj_malloc_with_finaliser(_ServoCluster_obj_t, &ServoCluster_type);
@@ -1388,7 +1388,7 @@ extern mp_obj_t ServoCluster_pin(size_t n_args, const mp_obj_t *pos_args, mp_map
     int servo = args[ARG_servo].u_int;
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
     else
@@ -1413,7 +1413,7 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         // Determine what servo(s) to enable
         const mp_obj_t object = args[ARG_servos].u_obj;
@@ -1439,9 +1439,9 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
             }
 
             if(items == nullptr)
-                mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
             else if(length == 0)
-                mp_raise_TypeError("list or tuple must contain at least one integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
             else {
                 // Create and populate a local array of servo indices
                 uint8_t *servos = m_new(uint8_t, length);
@@ -1497,7 +1497,7 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         // Determine what servo(s) to disable
         const mp_obj_t object = args[ARG_servos].u_obj;
@@ -1523,9 +1523,9 @@ extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp
             }
 
             if(items == nullptr)
-                mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
             else if(length == 0)
-                mp_raise_TypeError("list or tuple must contain at least one integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
             else {
                 // Create and populate a local array of servo indices
                 uint8_t *servos = m_new(uint8_t, length);
@@ -1581,7 +1581,7 @@ extern mp_obj_t ServoCluster_is_enabled(size_t n_args, const mp_obj_t *pos_args,
     int servo = args[ARG_servo].u_int;
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
     else
@@ -1607,7 +1607,7 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
         int servo = args[ARG_servo].u_int;
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else if(servo < 0 || servo >= servo_count)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
         else
@@ -1630,7 +1630,7 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -1658,9 +1658,9 @@ extern mp_obj_t ServoCluster_pulse(size_t n_args, const mp_obj_t *pos_args, mp_m
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -1700,7 +1700,7 @@ extern mp_obj_t ServoCluster_all_to_pulse(size_t n_args, const mp_obj_t *pos_arg
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         float pulse = mp_obj_get_float(args[ARG_pulse].u_obj);
         self->cluster->all_to_pulse(pulse, args[ARG_load].u_bool);
@@ -1725,7 +1725,7 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
         int servo = args[ARG_servo].u_int;
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else if(servo < 0 || servo >= servo_count)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
         else
@@ -1748,7 +1748,7 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -1776,9 +1776,9 @@ extern mp_obj_t ServoCluster_value(size_t n_args, const mp_obj_t *pos_args, mp_m
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -1818,7 +1818,7 @@ extern mp_obj_t ServoCluster_all_to_value(size_t n_args, const mp_obj_t *pos_arg
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         float value = mp_obj_get_float(args[ARG_value].u_obj);
         self->cluster->all_to_value(value, args[ARG_load].u_bool);
@@ -1843,7 +1843,7 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
         int servo = args[ARG_servo].u_int;
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else if(servo < 0 || servo >= servo_count)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
         else
@@ -1866,7 +1866,7 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -1894,9 +1894,9 @@ extern mp_obj_t ServoCluster_phase(size_t n_args, const mp_obj_t *pos_args, mp_m
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -1936,7 +1936,7 @@ extern mp_obj_t ServoCluster_all_to_phase(size_t n_args, const mp_obj_t *pos_arg
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         float phase = mp_obj_get_float(args[ARG_phase].u_obj);
         self->cluster->all_to_phase(phase, args[ARG_load].u_bool);
@@ -1975,7 +1975,7 @@ extern mp_obj_t ServoCluster_frequency(size_t n_args, const mp_obj_t *pos_args, 
         float freq = mp_obj_get_float(args[ARG_freq].u_obj);
 
         if(!self->cluster->frequency(freq))
-            mp_raise_ValueError("freq out of range. Expected 10Hz to 350Hz");
+            mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 10Hz to 350Hz"));
         else
             return mp_const_none;
     }
@@ -1997,7 +1997,7 @@ extern mp_obj_t ServoCluster_min_value(size_t n_args, const mp_obj_t *pos_args, 
     int servo = args[ARG_servo].u_int;
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
     else
@@ -2022,7 +2022,7 @@ extern mp_obj_t ServoCluster_mid_value(size_t n_args, const mp_obj_t *pos_args, 
     int servo = args[ARG_servo].u_int;
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
     else
@@ -2047,7 +2047,7 @@ extern mp_obj_t ServoCluster_max_value(size_t n_args, const mp_obj_t *pos_args, 
     int servo = args[ARG_servo].u_int;
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else if(servo < 0 || servo >= servo_count)
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
     else
@@ -2072,7 +2072,7 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         // Determine what servo(s) to enable
         const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2098,9 +2098,9 @@ extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_
             }
 
             if(items == nullptr)
-                mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
             else if(length == 0)
-                mp_raise_TypeError("list or tuple must contain at least one integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
             else {
                 // Create and populate a local array of servo indices
                 uint8_t *servos = m_new(uint8_t, length);
@@ -2137,7 +2137,7 @@ extern mp_obj_t ServoCluster_all_to_min(size_t n_args, const mp_obj_t *pos_args,
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         self->cluster->all_to_min(args[ARG_load].u_bool);
     }
@@ -2160,7 +2160,7 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         // Determine what servo(s) to enable
         const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2186,9 +2186,9 @@ extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_
             }
 
             if(items == nullptr)
-                mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
             else if(length == 0)
-                mp_raise_TypeError("list or tuple must contain at least one integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
             else {
                 // Create and populate a local array of servo indices
                 uint8_t *servos = m_new(uint8_t, length);
@@ -2225,7 +2225,7 @@ extern mp_obj_t ServoCluster_all_to_mid(size_t n_args, const mp_obj_t *pos_args,
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         self->cluster->all_to_mid(args[ARG_load].u_bool);
     }
@@ -2248,7 +2248,7 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         // Determine what servo(s) to enable
         const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2274,9 +2274,9 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
             }
 
             if(items == nullptr)
-                mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
             else if(length == 0)
-                mp_raise_TypeError("list or tuple must contain at least one integer");
+                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
             else {
                 // Create and populate a local array of servo indices
                 uint8_t *servos = m_new(uint8_t, length);
@@ -2313,7 +2313,7 @@ extern mp_obj_t ServoCluster_all_to_max(size_t n_args, const mp_obj_t *pos_args,
 
     int servo_count = (int)self->cluster->count();
     if(servo_count == 0)
-        mp_raise_ValueError("this cluster does not have any servos");
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
         self->cluster->all_to_max(args[ARG_load].u_bool);
     }
@@ -2338,7 +2338,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2366,9 +2366,9 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -2408,7 +2408,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2438,9 +2438,9 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -2484,7 +2484,7 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             // Determine what servo(s) to enable
             const mp_obj_t object = args[ARG_servos].u_obj;
@@ -2516,9 +2516,9 @@ extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args,
                 }
 
                 if(items == nullptr)
-                    mp_raise_TypeError("cannot convert object to a list or tuple of integers, or a single integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
                 else if(length == 0)
-                    mp_raise_TypeError("list or tuple must contain at least one integer");
+                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
                 else {
                     // Create and populate a local array of servo indices
                     uint8_t *servos = m_new(uint8_t, length);
@@ -2563,7 +2563,7 @@ extern mp_obj_t ServoCluster_all_to_percent(size_t n_args, const mp_obj_t *pos_a
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             self->cluster->all_to_percent(in, args[ARG_load].u_bool);
@@ -2587,7 +2587,7 @@ extern mp_obj_t ServoCluster_all_to_percent(size_t n_args, const mp_obj_t *pos_a
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
@@ -2615,7 +2615,7 @@ extern mp_obj_t ServoCluster_all_to_percent(size_t n_args, const mp_obj_t *pos_a
 
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else {
             float in = mp_obj_get_float(args[ARG_in].u_obj);
             float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
@@ -2645,7 +2645,7 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
         int servo = args[ARG_servo].u_int;
         int servo_count = (int)self->cluster->count();
         if(servo_count == 0)
-            mp_raise_ValueError("this cluster does not have any servos");
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
         else if(servo < 0 || servo >= servo_count)
             mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
         else {
@@ -2677,7 +2677,7 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
             self->cluster->calibration((uint)servo) = *(calib->calibration);
         }
         else {
-            mp_raise_TypeError("cannot convert object to a Calibration class instance");
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a Calibration class instance"));
         }
     }
 
