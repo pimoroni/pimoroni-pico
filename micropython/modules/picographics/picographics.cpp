@@ -5,6 +5,7 @@
 #include "drivers/uc8159/uc8159.hpp"
 #include "drivers/st7567/st7567.hpp"
 #include "drivers/inky73/inky73.hpp"
+#include "drivers/ssd1680/ssd1680.hpp"
 #include "drivers/psram_display/psram_display.hpp"
 #include "libraries/pico_graphics/pico_graphics.hpp"
 #include "common/pimoroni_common.hpp"
@@ -280,6 +281,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB565;
             break;
+        case DISPLAY_BADGER_2350:
+            width = 264;
+            height = 176;
+            bus_type = BUS_SPI;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_2BIT;
+            break;
         default:
             return false;
     }
@@ -290,6 +298,8 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
     switch(pen_type) {
         case PEN_1BIT:
             return PicoGraphics_Pen1Bit::buffer_size(width, height) * layers;
+        case PEN_2BIT:
+            return PicoGraphics_Pen2Bit::buffer_size(width, height) * layers;
         case PEN_3BIT:
             return PicoGraphics_Pen3Bit::buffer_size(width, height) * layers;
         case PEN_P4:
@@ -377,6 +387,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, 9};
             } else if (display == DISPLAY_PICO_W_EXPLORER) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, SPI_DEFAULT_MISO, 9};
+            } else if (display == DISPLAY_BADGER_2350) {
+                spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
             }
         } else if (bus_type == BUS_PARALLEL) {
             if (display == DISPLAY_EXPLORER) {
@@ -414,6 +426,10 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     
     } else if (display == DISPLAY_GFX_PACK) {
         self->display = m_new_class(ST7567, width, height, spi_bus);
+
+    } else if (display == DISPLAY_BADGER_2350) {
+        pen_type = PEN_2BIT; // FORCE to 2BIT
+        self->display = m_new_class(SSD1680, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_INTERSTATE75_32X32
             || display == DISPLAY_INTERSTATE75_64X64
@@ -461,6 +477,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             } else {
                 self->graphics = m_new_class(PicoGraphics_Pen1Bit, self->display->width, self->display->height, self->buffer, layers);
             }
+            break;
+        case PEN_2BIT:
+            self->graphics = m_new_class(PicoGraphics_Pen2Bit, self->display->width, self->display->height, self->buffer, layers);
             break;
         case PEN_3BIT:
             self->graphics = m_new_class(PicoGraphics_Pen3Bit, self->display->width, self->display->height, self->buffer, layers);
@@ -518,7 +537,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     }
 
     // Update the LCD from the graphics library
-    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7 && display != DISPLAY_INKY_FRAME_SPECTRA_7) {
+    if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7 && display != DISPLAY_INKY_FRAME_SPECTRA_7 && display != DISPLAY_BADGER_2350) {
         self->display->update(self->graphics);
     }
 

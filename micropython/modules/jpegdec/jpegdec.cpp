@@ -282,6 +282,7 @@ mp_obj_t _JPEG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args
         case PicoGraphics::PEN_RGB888:
         case PicoGraphics::PEN_P8:
         case PicoGraphics::PEN_P4:
+        case PicoGraphics::PEN_2BIT:
         case PicoGraphics::PEN_3BIT:
         case PicoGraphics::PEN_INKY7:
         case PicoGraphics::PEN_DV_RGB555:

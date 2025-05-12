@@ -37,10 +37,12 @@ enum PicoGraphicsDisplay {
     DISPLAY_PRESTO_FULL_RES,
     DISPLAY_GENERIC,
     DISPLAY_INKY_FRAME_SPECTRA_7,
+    DISPLAY_BADGER_2350
 };
 
 enum PicoGraphicsPenType {
     PEN_1BIT = 0,
+    PEN_2BIT,
     PEN_3BIT,
     PEN_P2,
     PEN_P4,
