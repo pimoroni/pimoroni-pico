@@ -12,11 +12,13 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/uc8159/uc8159.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/st7567/st7567.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/inky73/inky73.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/ssd1680/ssd1680.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/shiftregister/shiftregister.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/psram_display/psram_display.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_1bitY.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_2bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_3bit.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_p4.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/pico_graphics/pico_graphics_pen_p8.cpp
