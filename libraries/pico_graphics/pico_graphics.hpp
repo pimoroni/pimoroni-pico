@@ -401,10 +401,10 @@ namespace pimoroni {
         {0xab, 0x58, 0x37},
         {0xb2, 0x8e, 0x67}
         */
-        {255, 255, 255}, // black
-        {192, 192, 192}, // gray
+        {0, 0, 0}, // white
         {64, 64, 64}, // gray
-        {0, 0, 0} // white
+        {192, 192, 192}, // gray
+        {255, 255, 255}, // black
       };
 
       std::array<std::array<uint8_t, 16>, 512> candidate_cache;
