@@ -12,6 +12,7 @@ namespace pimoroni {
     }
     void PicoGraphics_Pen2Bit::_set_pixel(const Point &p, uint col) {
         uint8_t *buf = (uint8_t *)frame_buffer;
+        col = ~col;
 
         uint bo = 7 - (p.x & 0b111);
 
@@ -134,6 +135,8 @@ namespace pimoroni {
 
         uint8_t *buf = &fb[tile->y * bounds.w / 8];
 
+        uint8_t col = ~color & 0b11;
+
         for(int y = 0; y < tile->h; y++) {
             uint8_t *palpha = &tile->data[(y * tile->stride)];
 
@@ -142,15 +145,26 @@ namespace pimoroni {
 
                 uint8_t alpha = *palpha >> 6;
 
-                if(alpha == 0) {
+                if(alpha == 0b00) {
+                } else if (alpha == 0b11) {
+                    uint8_t *dst = buf + (tile->x + x) / 8;
+                    *dst &= ~(1u << bo);
+                    *dst |= (col >> 1) << bo;
+                    *(dst + offset) &= ~(1u << bo);
+                    *(dst + offset) |= (col & 0b1) << bo;
                 } else {
                     uint8_t *dst = buf + (tile->x + x) / 8;
-                    uint16_t pdst = (((*dst >> bo) & 0b1) << 1) | (((*dst + offset) >> bo) & 0b1);
-                    uint8_t blend = ((pdst << ~alpha) >> 3) | ((color << alpha) >> 3);
-                    *dst &= ~(1u << bo);
-                    *dst |= (blend >> 1) << bo;
-                    *(dst + offset) &= ~(1u << bo);
-                    *(dst + offset) |= (blend & 0b1) << bo;
+                    uint8_t pdst = (*dst >> bo) & 0b1;
+                    pdst <<= 1;
+                    pdst |= ((*(dst + offset)) >> bo) & 0b1;
+                    if (pdst != col) {
+                        uint8_t blend = ((pdst * (3 - alpha)) + (col * alpha)) / 3;
+                        blend &= 0b11;
+                        *dst &= ~(1u << bo);
+                        *dst |= (blend >> 1) << bo;
+                        *(dst + offset) &= ~(1u << bo);
+                        *(dst + offset) |= (blend & 0b1) << bo;
+                    }
                 }
 
                 palpha++;
