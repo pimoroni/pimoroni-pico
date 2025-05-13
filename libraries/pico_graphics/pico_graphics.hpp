@@ -431,6 +431,8 @@ namespace pimoroni {
       static size_t buffer_size(uint w, uint h) {
           return (w * h / 8) * 3;
       }
+
+      bool render_tile(const Tile *tile);
   };
 
   class PicoGraphics_Pen3Bit : public PicoGraphics {

@@ -10,16 +10,13 @@ namespace pimoroni {
         }
         cache_built = false;
     }
-    void PicoGraphics_Pen2Bit::_set_pixel(const Point &pa, uint col) {
-        Point p = Point(pa.y, pa.x);
-
-        uint offset = (bounds.w * bounds.h) / 8;
+    void PicoGraphics_Pen2Bit::_set_pixel(const Point &p, uint col) {
         uint8_t *buf = (uint8_t *)frame_buffer;
 
         uint bo = 7 - (p.x & 0b111);
 
-        uint8_t *bufA = &buf[(p.x / 8) + (p.y * bounds.h / 8)];
-        uint8_t *bufB = bufA + offset;
+        uint8_t *bufA = &buf[(p.x + p.y * bounds.w) / 8];
+        uint8_t *bufB = bufA + (bounds.w * bounds.h) / 8;
 
         uint8_t cA = (col & 0b10) >> 1;
         *bufA &= ~(1U << bo);
@@ -129,5 +126,39 @@ namespace pimoroni {
                 callback(row_buf, bounds.w / 2);
             }
         }
+    }
+
+    bool PicoGraphics_Pen2Bit::render_tile(const Tile *tile) {
+        uint offset = (bounds.w * bounds.h) / 8;
+        uint8_t *fb = (uint8_t *)frame_buffer;
+
+        uint8_t *buf = &fb[tile->y * bounds.w / 8];
+
+        for(int y = 0; y < tile->h; y++) {
+            uint8_t *palpha = &tile->data[(y * tile->stride)];
+
+            for(int x = 0; x < tile->w; x++) {
+                const uint bo = 7 - ((tile->x + x) & 0b111);
+
+                uint8_t alpha = *palpha >> 6;
+
+                if(alpha == 0) {
+                } else {
+                    uint8_t *dst = buf + (tile->x + x) / 8;
+                    uint16_t pdst = (((*dst >> bo) & 0b1) << 1) | (((*dst + offset) >> bo) & 0b1);
+                    uint8_t blend = ((pdst << ~alpha) >> 3) | ((color << alpha) >> 3);
+                    *dst &= ~(1u << bo);
+                    *dst |= (blend >> 1) << bo;
+                    *(dst + offset) &= ~(1u << bo);
+                    *(dst + offset) |= (blend & 0b1) << bo;
+                }
+
+                palpha++;
+            }
+
+            buf += bounds.w / 8;
+        }
+
+        return true;
     }
 }

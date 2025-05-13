@@ -280,17 +280,14 @@ namespace pimoroni {
     }
 
     command(WRAM_R);
-    if(rotation == ROTATE_90 || rotation == ROTATE_270) {
-      // Because pen_2bit rotates the pixel data to fit the portrait screen
-      // we need to rotate it back for portrait rotations.
+    if(rotation == ROTATE_0 || rotation == ROTATE_180) {
       memset(newBuf, 0, (width * height) / 8);
       for(auto y = 0; y < height; y++) {
         for(auto x = 0; x < width; x++) {
-          uint bo_s = 7 - (y & 0b111);
-          uint bo_d = 7 - (x & 0b111);
-          uint8_t src = (bufA[(y / 8) + (x * height / 8)] >> bo_s) & 0b1;
-          //newBuf[(x / 8) + (y * height / 8)] &= ~(1 << bo_d);
-          newBuf[(x / 8) + (y * width / 8)] |= (src << bo_d);
+          uint bo_s = 7 - (x & 0b111);
+          uint bo_d = 7 - (y & 0b111);
+          uint8_t src = (bufA[(x + y * width) / 8] >> bo_s) & 0b1;
+          newBuf[(y + x * height) / 8] |= (src << bo_d);
         }
       }
       data((width * height) / 8, newBuf);
@@ -313,17 +310,14 @@ namespace pimoroni {
     }
 
     command(WRAM_BW);
-    if(rotation == ROTATE_90 || rotation == ROTATE_270) {
-      // Because pen_2bit rotates the pixel data to fit the portrait screen
-      // we need to rotate it back for portrait rotations.
+    if(rotation == ROTATE_0 || rotation == ROTATE_180) {
       memset(newBuf, 0, (width * height) / 8);
       for(auto y = 0; y < height; y++) {
         for(auto x = 0; x < width; x++) {
-          uint bo_s = 7 - (y & 0b111);
-          uint bo_d = 7 - (x & 0b111);
-          uint8_t src = (bufB[(y / 8) + (x * height / 8)] >> bo_s) & 0b1;
-          //newBuf[(x / 8) + (y * height / 8)] &= ~(1 << bo_d);
-          newBuf[(x / 8) + (y * width / 8)] |= (src << bo_d);
+          uint bo_s = 7 - (x & 0b111);
+          uint bo_d = 7 - (y & 0b111);
+          uint8_t src = (bufB[(x + y * width) / 8] >> bo_s) & 0b1;
+          newBuf[(y + x * height) / 8] |= (src << bo_d);
         }
       }
       data((width * height) / 8, newBuf);
