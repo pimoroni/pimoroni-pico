@@ -36,6 +36,7 @@ namespace pimoroni {
     uint BUSY   = 9;
     uint RESET  = 21;
 
+    uint8_t lut_repeat_count = 1; // Default to 1 for a ghost-free but slightly slower refresh
     bool inverted = true; // Makes 0 black and 1 white, as is foretold.
     bool blocking = true;
 
@@ -61,9 +62,10 @@ namespace pimoroni {
     void power_off() override;
     void update(PicoGraphics *graphics) override;
     void partial_update(PicoGraphics *graphics, Rect region) override;
+    bool set_update_speed(int update_speed) override;
   
     // SSD1680 Specific
-    void default_luts();
+    void write_luts();
 
   private:
     void init();
@@ -74,6 +76,7 @@ namespace pimoroni {
     void command(uint8_t reg, std::initializer_list<uint8_t> values);
     void command(uint8_t reg) {command(reg, 0, nullptr);};
     void data(size_t len, const uint8_t *data);
+    void data(std::initializer_list<uint8_t> values);
 
     void update(bool blocking = true);
     void partial_update(int x, int y, int w, int h, bool blocking = true);
