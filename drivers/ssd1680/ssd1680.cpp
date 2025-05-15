@@ -229,50 +229,8 @@ namespace pimoroni {
 
   
   void SSD1680::partial_update(PicoGraphics *graphics, Rect region) {
-    // region.y is given in columns ("banks"), which are groups of 8 horiontal pixels
-    // region.x is given in pixels
-
-    /*
-    uint8_t *fb = (uint8_t *)graphics->frame_buffer;
-
-    if(blocking) {
-      busy_wait();
-    }
-
-    int cols = region.h / 8;
-    int y1 = region.y / 8;
-
-    int rows = region.w;
-    int x1 = region.x;
-
-    uint8_t partial_window[7] = {
-      (uint8_t)(region.y),
-      (uint8_t)(region.y + region.h - 1),
-      (uint8_t)(region.x >> 8),
-      (uint8_t)(region.x & 0xff),
-      (uint8_t)((region.x + region.w - 1) >> 8),
-      (uint8_t)((region.x + region.w - 1) & 0xff),
-      0b00000001  // PT_SCAN
-    };
-    command(PON); // turn on
-
-    command(PTIN); // enable partial mode
-    command(PTL, sizeof(partial_window), partial_window);
-
-    command(DTM2);
-    for (auto dx = 0; dx < rows; dx++) {
-      int sx = dx + x1;
-      int sy = y1;
-      data(cols, &fb[sy + (sx * (height / 8))]);
-    }
-    command(DSP); // data stop
-
-    command(DRF); // start display refresh
-
-    if(blocking) {
-      off();
-    }
-      */
+    // SSD1680 supports sending partial RAM contents, but not partial updates
+    update(graphics);
   }
   
 
