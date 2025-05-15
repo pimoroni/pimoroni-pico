@@ -271,6 +271,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB565;
             break;
+        case DISPLAY_TEST:
+            width = 39;
+            height = 26;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB888;
+            break;
         default:
             return false;
     }
@@ -413,7 +420,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             || display == DISPLAY_UNICORN_PACK
             || display == DISPLAY_SCROLL_PACK
             || display == DISPLAY_PRESTO
-            || display == DISPLAY_PRESTO_FULL_RES) {
+            || display == DISPLAY_PRESTO_FULL_RES
+            || display == DISPLAY_TEST) {
         // Create a dummy display driver
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
