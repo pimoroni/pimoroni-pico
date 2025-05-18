@@ -123,3 +123,39 @@ pico_enable_stdio_usb(feature_test 1)
 
 # create map/bin/hex file etc.
 pico_add_extra_outputs(feature_test)
+
+# WiFi / Bluetooth examples, only built when the board type is set to PicoW
+if (${PICO_BOARD} STREQUAL "pico_w")
+
+  add_executable(
+    scrolling_quote
+    scrolling_quote.cpp
+  )
+
+  # Pull in the pico libraries that we need
+  target_link_libraries(
+    scrolling_quote
+    pico_stdlib pico_graphics galactic_unicorn
+    pico_cyw43_arch_lwip_threadsafe_background pico_lwip_http
+  )
+
+  # Need to include lwipopts.h from the local dir
+  target_include_directories(
+    scrolling_quote PRIVATE ${CMAKE_CURRENT_LIST_DIR}
+  )
+
+  # WiFi connection details; provide these to your CMake command!
+  target_compile_definitions(
+    scrolling_quote PRIVATE
+    WIFI_SSID=\"${WIFI_SSID}\"
+    WIFI_PASSWORD=\"${WIFI_PASSWORD}\"
+    CYW43_HOST_NAME=\"GalacticUnicorn\"
+    PICO_CYW43_ARCH_DEBUG_ENABLED
+  )
+
+  pico_enable_stdio_usb(scrolling_quote 1)
+
+  # create map/bin/hex file etc.
+  pico_add_extra_outputs(scrolling_quote)
+
+endif ()
