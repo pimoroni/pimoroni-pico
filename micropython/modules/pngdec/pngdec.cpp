@@ -221,6 +221,7 @@ mp_event_handle_nowait();
                     && (current_graphics->pen_type == PicoGraphics::PEN_P8
                     || current_graphics->pen_type == PicoGraphics::PEN_P4
                     || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                    || current_graphics->pen_type == PicoGraphics::PEN_2BIT
                     || current_graphics->pen_type == PicoGraphics::PEN_INKY7)) {
                     if(current_palette_offset > 0) {
                         i = ((int16_t)(i) + current_palette_offset) & 0xff;
@@ -280,6 +281,7 @@ mp_event_handle_nowait();
                 } else if(current_graphics->pen_type == PicoGraphics::PEN_P8
                     || current_graphics->pen_type == PicoGraphics::PEN_P4
                     || current_graphics->pen_type == PicoGraphics::PEN_3BIT
+                    || current_graphics->pen_type == PicoGraphics::PEN_2BIT
                     || current_graphics->pen_type == PicoGraphics::PEN_INKY7) {
 
                         // Copy raw palette indexes over
