@@ -20,6 +20,10 @@ jobs:
             board: pico
           - name: Pico W
             board: pico_w
+          - name: Pico 2
+            board: pico2
+          - name: Pico 2 W
+            board: pico2_w
 
     env:
       PICO_SDK_PATH: $GITHUB_WORKSPACE/pico-sdk
