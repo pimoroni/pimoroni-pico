@@ -6,7 +6,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(${OUTPUT_NAME} pico_stdlib inky_frame hardware_pwm hardware_spi hardware_i2c hardware_rtc fatfs sdcard pico_graphics)
+target_link_libraries(${OUTPUT_NAME} pico_stdlib inky_frame hardware_pwm hardware_spi hardware_i2c fatfs sdcard pico_graphics)
 
 pico_enable_stdio_usb(${OUTPUT_NAME} 1)
 
