@@ -241,7 +241,7 @@ uint8_t num_of_utf8_continuation_bytes(const char *text, const char *end) {
   return cont;
 }
 
-af_glyph_t *find_glyph(af_face_t *face, char c) {
+af_glyph_t *find_glyph(af_face_t *face, uint16_t c) {
   for(int i = 0; i < face->glyph_count; i++) {
     if(face->glyphs[i].codepoint == c) {
       return &face->glyphs[i];
