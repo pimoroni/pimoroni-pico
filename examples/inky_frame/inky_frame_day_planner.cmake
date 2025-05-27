@@ -5,7 +5,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(inky_frame_day_planner pico_stdlib inky_frame hardware_pwm hardware_spi hardware_i2c hardware_rtc fatfs sdcard pico_graphics)
+target_link_libraries(inky_frame_day_planner pico_stdlib inky_frame hardware_pwm hardware_spi hardware_i2c fatfs sdcard pico_graphics)
 
 pico_enable_stdio_usb(inky_frame_day_planner 1)
 
@@ -19,7 +19,7 @@ add_executable(
 )
 
 # Pull in pico libraries that we need
-target_link_libraries(inky_frame_7_day_planner pico_stdlib inky_frame_7 hardware_pwm hardware_spi hardware_i2c hardware_rtc fatfs sdcard pico_graphics)
+target_link_libraries(inky_frame_7_day_planner pico_stdlib inky_frame_7 hardware_pwm hardware_spi hardware_i2c fatfs sdcard pico_graphics)
 
 pico_enable_stdio_usb(inky_frame_7_day_planner 1)
 
