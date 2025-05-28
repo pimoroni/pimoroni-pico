@@ -5,4 +5,5 @@ target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:
     -fno-unwind-tables
     -fno-rtti
     -fno-use-cxa-atexit
+    -Wl,--no-ld-generated-unwind-info
 >)
