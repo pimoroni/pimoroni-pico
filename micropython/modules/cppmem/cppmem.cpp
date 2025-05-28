@@ -4,6 +4,17 @@
 #include <cstring>
 #include <cstdio>
 
+#ifdef PIMORONI_VERBOSE_TERMINATE_HANDLER
+namespace __gnu_cxx
+{
+    void __verbose_terminate_handler()
+    {
+    for (;;)
+        ;
+    }
+}
+#endif
+
 enum allocator_mode {
     FIXED_HEAP = 0,
     MICROPYTHON

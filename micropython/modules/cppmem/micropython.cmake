@@ -11,6 +11,7 @@ target_include_directories(usermod_cppmem INTERFACE
 
 target_compile_definitions(usermod_cppmem INTERFACE
     MODULE_CPPMEM_ENABLED=1
+    PIMORONI_VERBOSE_TERMINATE_HANDLER=1
 )
 
 target_link_libraries(usermod INTERFACE usermod_cppmem)
