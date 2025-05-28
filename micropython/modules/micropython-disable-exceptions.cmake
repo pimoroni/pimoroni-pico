@@ -5,5 +5,7 @@ target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:
     -fno-unwind-tables
     -fno-rtti
     -fno-use-cxa-atexit
+    -ffunction-sections
+    -Wl,--gc-sections
     -Wl,--no-ld-generated-unwind-info
 >)
