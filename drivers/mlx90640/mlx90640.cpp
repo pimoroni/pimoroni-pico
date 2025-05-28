@@ -1,13 +1,6 @@
 #include <stdint.h>
-#include <iostream>
-#include <cstring>
-#include <fstream>
-#include <chrono>
-#include <thread>
-#include <math.h>
 #include "src/headers/MLX90640_API.h"
 #include "mlx90640.hpp"
-
 
 
 namespace pimoroni {
