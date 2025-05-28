@@ -306,7 +306,7 @@ float get_line_width(af_face_t *face, const char *text, size_t *tlen, float max_
     }
 
     if (max_line_width > 0 && line_width + char_width > max_line_width && last_space) {
-      *tlen = last_space - start;
+      *tlen = last_space - start - 1;
       break;
     }
     line_width += char_width;
@@ -374,7 +374,7 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
 
   line_len = line_length(line, tend);
 
-  while(line_len && caret.y + line_height <= max_height) {
+  while(line < tend && caret.y + line_height <= max_height) {
     int line_width = get_line_width(face, line, &line_len, max_line_width, tm);
     char *end = line + line_len;
 
