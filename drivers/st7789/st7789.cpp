@@ -36,6 +36,7 @@ namespace pimoroni {
     GMCTRP1   = 0xE0,
     GMCTRN1   = 0xE1,
     INVOFF    = 0x20,
+    SLPIN     = 0x10,
     SLPOUT    = 0x11,
     DISPON    = 0x29,
     GAMSET    = 0x26,
@@ -321,5 +322,12 @@ namespace pimoroni {
     float gamma = 2.8;
     uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
+    if(brightness == 0) {
+      command(reg::SLPOUT);  // leave sleep mode
+      sleep_ms(5);
+    } else {
+      command(reg::SLPOUT);  // leave sleep mode
+      sleep_ms(120);
+    }
   }
 }
