@@ -6,6 +6,7 @@ target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:
     -fno-rtti
     -fno-use-cxa-atexit
     -ffunction-sections
+    -fdata-sections
     -Wl,--gc-sections
     -Wl,--no-ld-generated-unwind-info
 >)
