@@ -162,27 +162,31 @@ namespace pimoroni {
   // Write an 8-bit register
   void VL53L1X::writeReg(uint16_t reg, uint8_t value)
   {
-    alignas(2) struct u16_u32_buffer {
+#pragma pack(push, 1)
+    struct u16_u8_buffer {
       uint16_t reg;
       uint8_t value;
-    } buffer{reg, value};
+    } buffer{__builtin_bswap16(reg), value};
+#pragma pack(pop)
     i2c->write_blocking(address, (uint8_t *)&buffer, 3, false);
   }
 
   // Write a 16-bit register
   void VL53L1X::writeReg16Bit(uint16_t reg, uint16_t value)
   {
-    uint16_t buffer[2] = {reg, value};
+    uint16_t buffer[2] = {__builtin_bswap16(reg), __builtin_bswap16(value)};
     i2c->write_blocking(address, (uint8_t *)buffer, 4, false);
   }
 
   // Write a 32-bit register
   void VL53L1X::writeReg32Bit(uint16_t reg, uint32_t value)
   {
-    alignas(2) struct u16_u32_buffer {
+#pragma pack(push, 1)
+    struct u16_u32_buffer {
       uint16_t reg;
       uint32_t value;
-    } buffer{reg, value};
+    } buffer{__builtin_bswap16(reg), __builtin_bswap32(value)};
+#pragma pack(pop)
     i2c->write_blocking(address, (uint8_t *)&buffer, 6, false);
   }
 
@@ -190,8 +194,8 @@ namespace pimoroni {
   uint8_t VL53L1X::readReg(regAddr reg)
   {
     uint8_t value;
-    // TODO do we need to bswap reg?
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    uint16_t _reg = __builtin_bswap16(reg);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, &value, 1, false);
     return value;
   }
@@ -200,11 +204,9 @@ namespace pimoroni {
   uint16_t VL53L1X::readReg16Bit(uint16_t reg)
   {
     uint16_t value;
-    // TODO do we need to bswap reg?
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    uint16_t _reg = __builtin_bswap16(reg);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, (uint8_t *)&value, 2, false);
-
-    // TODO do we need to bswap this return value?
     return __builtin_bswap16(value);
   }
 
@@ -212,11 +214,9 @@ namespace pimoroni {
   uint32_t VL53L1X::readReg32Bit(uint16_t reg)
   {
     uint32_t value;
-    reg= (reg << 8) + (reg >> 8);
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    uint16_t _reg = __builtin_bswap16(reg);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, (uint8_t *)&value, 4, false);
-
-    // TODO do we need to bswap this return value?
     return __builtin_bswap32(value);
   }
 
@@ -572,8 +572,7 @@ namespace pimoroni {
   // read measurement results into buffer
   void VL53L1X::readResults()
   {
-    uint16_t reg = RESULT__RANGE_STATUS;
-    // TODO do we need to bswap reg?
+    uint16_t reg = __builtin_bswap16(RESULT__RANGE_STATUS);
     uint8_t buffer[17];
     i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
     i2c->read_blocking(address, buffer, 17, false);
