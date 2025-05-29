@@ -3,6 +3,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <exception>
+
+typedef unsigned _Unwind_Word __attribute__((__mode__(__word__)));
 
 #ifdef PIMORONI_VERBOSE_TERMINATE_HANDLER
 namespace __gnu_cxx
@@ -12,6 +15,32 @@ namespace __gnu_cxx
     for (;;)
         ;
     }
+}
+
+[[noreturn]] void terminate() noexcept
+{
+    for (;;)
+        ;
+}
+
+namespace __cxxabiv1
+{
+std::terminate_handler __terminate_handler = terminate;
+}
+
+extern "C" {
+void __wrap__ZSt25__throw_bad_function_callv(void) {};
+void __wrap__ZSt19__throw_logic_errorPKc(const char *) {};
+void __wrap__ZSt20__throw_length_errorPKc(const char *) {};
+
+void __wrap___aeabi_unwind_cpp_pr0(void) {};
+void __wrap___aeabi_unwind_cpp_pr1(void) {};
+void __wrap___aeabi_unwind_cpp_pr2(void) {};
+
+void * __wrap__malloc_r (struct _reent *, size_t) {return NULL;};
+void * __wrap__malloc_av (struct _reent *, size_t) {return NULL;};
+void __wrap_qsort(void *base, __SIZE_TYPE__ nmemb, __SIZE_TYPE__ size,
+              int (*compar)(const void *, const void *)) {};
 }
 #endif
 

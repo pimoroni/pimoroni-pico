@@ -10,3 +10,4 @@ target_compile_options(usermod INTERFACE $<$<COMPILE_LANGUAGE:CXX>:
     -Wl,--gc-sections
     -Wl,--no-ld-generated-unwind-info
 >)
+#target_link_options(usermod INTERFACE -specs=nano.specs)
