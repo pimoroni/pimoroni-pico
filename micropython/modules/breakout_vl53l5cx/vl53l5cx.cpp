@@ -47,11 +47,13 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
         ARG_i2c,
         ARG_addr,
         ARG_firmware,
+        ARG_change_addr,
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_i2c, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_addr, MP_ARG_INT, {.u_int = pimoroni::VL53L5CX::DEFAULT_ADDRESS} },
-        { MP_QSTR_firmware, MP_ARG_OBJ, {.u_obj = nullptr} }
+        { MP_QSTR_firmware, MP_ARG_OBJ, {.u_obj = nullptr} },
+        { MP_QSTR_change_addr, MP_ARG_INT, {.u_int = 0} }
     };
 
     // Parse args.
@@ -59,6 +61,7 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int addr = args[ARG_addr].u_int;
+    int change_addr = args[ARG_change_addr].u_int;
 
     self = mp_obj_malloc_with_finaliser(_VL53L5CX_obj_t, &VL53L5CX_type);
 
@@ -92,6 +95,12 @@ mp_obj_t VL53L5CX_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw
     }
 
     self->breakout = m_new_class(pimoroni::VL53L5CX, (pimoroni::I2C*)self->i2c->i2c, (uint8_t *)bufinfo.buf, addr, self->configuration, self->motion_configuration);
+
+    if(change_addr != 0) {
+        if(!self->breakout->set_i2c_address(change_addr)) {
+            mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_i2c_address error"));
+        }
+    }
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: init error"));
@@ -141,12 +150,9 @@ mp_obj_t VL53L5CX_set_motion_distance(mp_obj_t self_in, mp_obj_t distance_min, m
 }
 
 mp_obj_t VL53L5CX_set_i2c_address(mp_obj_t self_in, mp_obj_t value) {
-    _VL53L5CX_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VL53L5CX_obj_t);
-    bool status = self->breakout->set_i2c_address(mp_obj_get_int(value));
-    if(!status) {
-        mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("VL53L5CX: set_i2c_address error"));
-    }
-    return mp_const_none;
+    (void)self_in;
+    (void)value;
+    mp_raise_NotImplementedError(MP_ERROR_TEXT("set_i2c_address: use VL53L5CX(..., \"change_addr=N\", ...) instead."));
 }
 
 mp_obj_t VL53L5CX_set_ranging_mode(mp_obj_t self_in, mp_obj_t value) {
