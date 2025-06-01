@@ -20,6 +20,12 @@ def clear():
 
 # set up
 display.set_font("bitmap8")
+if machine.mem32[0x40064008] & (1<<16): # Has the reset button been pressed
+    gp.set_backlight(0, 128, 128, 0)
+    clear()
+    display.text("Reset button pressed", 0, 0, WIDTH, 2)
+    display.update()
+    time.sleep(1)
 
 while True:
     if gp.switch_pressed(SWITCH_A):                       # if a button press is detected...                                          # clear to black
