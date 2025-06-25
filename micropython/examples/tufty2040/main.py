@@ -7,7 +7,7 @@ from picographics import PicoGraphics, DISPLAY_TUFTY_2040, PEN_RGB332
 from pimoroni import Button
 
 
-def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
+def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:  # noqa: RET503
     if s == 0.0:
         return v, v, v
     i = int(h * 6.0)
@@ -30,7 +30,7 @@ def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:  # noqa: RET503
+    if i == 5:
         return v, p, q
 
 
