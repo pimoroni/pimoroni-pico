@@ -418,7 +418,7 @@ void af_render(af_face_t *face, const char *text, size_t tlen, float max_line_wi
       
     }
 
-    line += 1; // Skip over \n
+    if (*line == '\n') line += 1; // Skip over \n
     line_len = line_length(line, tend);
 
     caret.x = 0;
