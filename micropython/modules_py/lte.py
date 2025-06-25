@@ -34,6 +34,7 @@ class LTE():
 
         # Set PPP timeouts and rxbuf
         self._uart.init(
+            baudrate=DEFAULT_UART_STARTUP_BAUD,
             timeout=DEFAULT_UART_TIMEOUT,
             timeout_char=DEFAULT_UART_TIMEOUT_CHAR,
             rxbuf=DEFAULT_UART_RXBUF)
@@ -81,6 +82,11 @@ class LTE():
         self._ppp.disconnect()
         self._send_at_command(f"AT+IPR={DEFAULT_UART_STARTUP_BAUD}")
         self._flush_uart()
+        self._uart.init(
+            baudrate=DEFAULT_UART_STARTUP_BAUD,
+            timeout=DEFAULT_UART_TIMEOUT,
+            timeout_char=DEFAULT_UART_TIMEOUT_CHAR,
+            rxbuf=DEFAULT_UART_RXBUF)
 
     def start_ppp(self, baudrate=DEFAULT_UART_BAUD, connect=True):
         self._wait_ready(poll_time=1.0, timeout=30)
