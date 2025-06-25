@@ -24,7 +24,7 @@ QA_IGNORE="E501,E402,COM812,ICN001"
 QA_EXCLUDE="micropython/examples/common/lib/tinyweb/server.py,micropython/examples/pico_wireless/*"
 
 function qa_prepare_all {
-    pip install ruff
+    pip install ruff==0.12.0
 }
 
 function qa_check {
