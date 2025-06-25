@@ -6,7 +6,7 @@ display = PicoGraphics(display=DISPLAY_TUFTY_2040, pen_type=PEN_RGB332, rotate=1
 
 
 # convert a hue, saturation, and value into rgb values
-def hsv_to_rgb(h, s, v):
+def hsv_to_rgb(h, s, v):  # noqa: RET503
     if s == 0.0:
         return v, v, v
     i = int(h * 6.0)
@@ -24,7 +24,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:  # noqa: RET503
+    if i == 5:
         return v, p, q
 
 

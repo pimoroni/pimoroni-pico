@@ -20,7 +20,7 @@ enc.set_brightness(1.0)
 # enc.set_direction(BreakoutEncoder.DIRECTION_CCW)     # Uncomment this to flip the direction
 
 
-def hsv_to_rgb(h, s, v):
+def hsv_to_rgb(h, s, v):  # noqa: RET503
     # From CPython Lib/colorsys.py
     if s == 0.0:
         return v, v, v
@@ -40,7 +40,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:  # noqa: RET503
+    if i == 5:
         return v, p, q
 
 

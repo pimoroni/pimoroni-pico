@@ -12,7 +12,7 @@ BLACK = display.create_pen(0, 0, 0)
 
 
 # From CPython Lib/colorsys.py
-def hsv_to_rgb(h, s, v):
+def hsv_to_rgb(h, s, v):  # noqa: RET503
     if s == 0.0:
         return v, v, v
     i = int(h * 6.0)
@@ -31,7 +31,7 @@ def hsv_to_rgb(h, s, v):
         return p, q, v
     if i == 4:
         return t, p, v
-    if i == 5:  # noqa: RET503
+    if i == 5:
         return v, p, q
 
 
