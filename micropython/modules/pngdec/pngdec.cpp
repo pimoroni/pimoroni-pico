@@ -24,7 +24,9 @@ typedef struct _PNG_decode_target {
     Point position = {0, 0};
     Rect source = {0, 0, 0, 0};
     Point scale = {1, 1};
-    int rotation = 0;
+    bool swap_xy = false;
+    bool reflect_x = false;
+    bool reflect_y = false;
     uint8_t palette_offset = 0;
 } _PNG_decode_target;
 
@@ -129,7 +131,6 @@ mp_event_handle_nowait();
     uint8_t current_mode = target->mode;
     uint8_t current_palette_offset = target->palette_offset;
     Point scale = target->scale;
-    int rotation = target->rotation;
     Point step = {0, 0};
 
     // "pixel" is slow and clipped,
@@ -138,27 +139,30 @@ mp_event_handle_nowait();
 
     if(pDraw->y < target->source.y || pDraw->y >= target->source.y + target->source.h) return;
 
-    switch (rotation) {
-        case 0:
-            current_position.y += (pDraw->y - target->source.y) * scale.y;
-            step = {scale.x, 0};
-            break;
-        case 90:
-            current_position.y += target->source.w * scale.y;
+    if(target->swap_xy) {
+        step = {0, scale.y};
+        if (target->reflect_x) {
             current_position.x += target->source.h * scale.x;
-            current_position.x += (pDraw->y - target->source.y) * -scale.x;
-            step = {0, -scale.y};
-            break;
-        case 180:
-            current_position.x += target->source.w * scale.x;
-            current_position.y += target->source.h * scale.y;
-            current_position.y += (pDraw->y - target->source.y) * -scale.y;
-            step = {-scale.x, 0};
-            break;
-        case 270:
+            current_position.x -= (pDraw->y - target->source.y) * scale.x;
+        } else {
             current_position.x += (pDraw->y - target->source.y) * scale.x;
-            step = {0, scale.y};
-            break;
+        }
+        if (target->reflect_y) {
+            current_position.y += target->source.w * scale.y;
+            step = {0, -scale.y};
+        }
+    } else {
+        step = {scale.x, 0};
+        if (target->reflect_x) {
+            current_position.x += target->source.w * scale.x;
+            step = {-scale.x, 0};
+        }
+        if (target->reflect_y) {
+            current_position.y += target->source.h * scale.y;
+            current_position.y -= (pDraw->y - target->source.y) * scale.y;
+        } else {
+            current_position.y += (pDraw->y - target->source.y) * scale.y;
+        }
     }
 
     //mp_printf(&mp_plat_print, "Drawing scanline at %d, %dbpp, type: %d, width: %d pitch: %d alpha: %d\n", pDraw->y , pDraw->iBpp, pDraw->iPixelType, pDraw->iWidth, pDraw->iPitch, pDraw->iHasAlpha);
@@ -377,7 +381,7 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_palette_offset };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_reflect_x, ARG_reflect_y, ARG_palette_offset };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
@@ -386,6 +390,8 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         { MP_QSTR_mode, MP_ARG_INT, {.u_int = 0} },
         { MP_QSTR_source, MP_ARG_OBJ, {.u_obj = nullptr} },
         { MP_QSTR_rotate, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_reflect_x, MP_ARG_OBJ, {.u_obj = mp_const_false} },
+        { MP_QSTR_reflect_y, MP_ARG_OBJ, {.u_obj = mp_const_false} },
         { MP_QSTR_palette_offset, MP_ARG_INT, {.u_int = 0} },
     };
 
@@ -393,6 +399,10 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     _PNG_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _PNG_obj_t);
+
+    self->decode_target->swap_xy = false;
+    self->decode_target->reflect_x = false;
+    self->decode_target->reflect_y = false;
 
     if(mp_obj_is_type(args[ARG_source].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_source].u_obj, mp_obj_tuple_t);
@@ -409,16 +419,32 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         self->decode_target->source = {0, 0, self->width, self->height};
     }
 
-    self->decode_target->rotation = args[ARG_rotate].u_int;
-    switch(self->decode_target->rotation) {
+    switch(args[ARG_rotate].u_int) {
         case 0:
+            break;
         case 90:
+            self->decode_target->swap_xy = true;
+            self->decode_target->reflect_x = true;
+            break;
         case 180:
+            self->decode_target->reflect_x = true;
+            self->decode_target->reflect_y = true;
+            break;
         case 270:
+            self->decode_target->swap_xy = true;
+            self->decode_target->reflect_y = true;
             break;
         default:
             mp_raise_ValueError(MP_ERROR_TEXT("decode(): rotation must be one of 0, 90, 180 or 270"));
             break;
+    }
+
+    if (mp_obj_is_true(args[ARG_reflect_x].u_obj)) {
+        self->decode_target->reflect_x = !self->decode_target->reflect_x;
+    }
+
+    if (mp_obj_is_true(args[ARG_reflect_y].u_obj)) {
+        self->decode_target->reflect_y = !self->decode_target->reflect_y;
     }
 
     // Scale is a single int, corresponds to both width/height
