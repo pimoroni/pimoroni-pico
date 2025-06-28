@@ -165,14 +165,14 @@ namespace pimoroni {
     alignas(2) struct u16_u32_buffer {
       uint16_t reg;
       uint8_t value;
-    } buffer{reg, value};
+    } buffer{__builtin_bswap16(reg), value};
     i2c->write_blocking(address, (uint8_t *)&buffer, 3, false);
   }
 
   // Write a 16-bit register
   void VL53L1X::writeReg16Bit(uint16_t reg, uint16_t value)
   {
-    uint16_t buffer[2] = {reg, value};
+    uint16_t buffer[2] = {__builtin_bswap16(reg), __builtin_bswap16(value)};
     i2c->write_blocking(address, (uint8_t *)buffer, 4, false);
   }
 
@@ -182,7 +182,7 @@ namespace pimoroni {
     alignas(2) struct u16_u32_buffer {
       uint16_t reg;
       uint32_t value;
-    } buffer{reg, value};
+    } buffer{__builtin_bswap16(reg), __builtin_bswap32(value)};
     i2c->write_blocking(address, (uint8_t *)&buffer, 6, false);
   }
 
@@ -190,8 +190,9 @@ namespace pimoroni {
   uint8_t VL53L1X::readReg(regAddr reg)
   {
     uint8_t value;
+    uint16_t _reg = __builtin_bswap16(reg);
     // TODO do we need to bswap reg?
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, &value, 1, false);
     return value;
   }
@@ -200,8 +201,9 @@ namespace pimoroni {
   uint16_t VL53L1X::readReg16Bit(uint16_t reg)
   {
     uint16_t value;
+    uint16_t _reg = __builtin_bswap16(reg);
     // TODO do we need to bswap reg?
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, (uint8_t *)&value, 2, false);
 
     // TODO do we need to bswap this return value?
@@ -212,8 +214,8 @@ namespace pimoroni {
   uint32_t VL53L1X::readReg32Bit(uint16_t reg)
   {
     uint32_t value;
-    reg= (reg << 8) + (reg >> 8);
-    i2c->write_blocking(address, (uint8_t *)&reg, 2, true);
+    uint16_t _reg = __builtin_bswap16(reg);
+    i2c->write_blocking(address, (uint8_t *)&_reg, 2, true);
     i2c->read_blocking(address, (uint8_t *)&value, 4, false);
 
     // TODO do we need to bswap this return value?
