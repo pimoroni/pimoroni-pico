@@ -28,6 +28,7 @@ typedef struct _PNG_decode_target {
     bool reflect_x = false;
     bool reflect_y = false;
     uint8_t palette_offset = 0;
+    int transparent = -1;
 } _PNG_decode_target;
 
 typedef struct _PNG_obj_t {
@@ -267,7 +268,7 @@ mp_event_handle_nowait();
             uint8_t r = pDraw->pPalette[(i * 3) + 0];
             uint8_t g = pDraw->pPalette[(i * 3) + 1];
             uint8_t b = pDraw->pPalette[(i * 3) + 2];
-            uint8_t a = pDraw->iHasAlpha ? pDraw->pPalette[768 + i] : 1;
+            uint8_t a = pDraw->iHasAlpha ? pDraw->pPalette[768 + i] : (target->transparent == (int)i ? 0 : 1);
             if (a) {
                 if (current_graphics->pen_type == PicoGraphics::PEN_RGB332) {
                     if (current_mode == MODE_POSTERIZE || current_mode == MODE_COPY) {
@@ -381,7 +382,7 @@ mp_obj_t _PNG_openRAM(mp_obj_t self_in, mp_obj_t buffer) {
 
 // decode
 mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_reflect_x, ARG_reflect_y, ARG_palette_offset };
+    enum { ARG_self, ARG_x, ARG_y, ARG_scale, ARG_mode, ARG_source, ARG_rotate, ARG_reflect_x, ARG_reflect_y, ARG_palette_offset, ARG_transparent };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_INT, {.u_int = 0}  },
@@ -393,6 +394,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
         { MP_QSTR_reflect_x, MP_ARG_OBJ, {.u_obj = mp_const_false} },
         { MP_QSTR_reflect_y, MP_ARG_OBJ, {.u_obj = mp_const_false} },
         { MP_QSTR_palette_offset, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_transparent, MP_ARG_INT, {.u_int = -1} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -403,6 +405,7 @@ mp_obj_t _PNG_decode(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args)
     self->decode_target->swap_xy = false;
     self->decode_target->reflect_x = false;
     self->decode_target->reflect_y = false;
+    self->decode_target->transparent = args[ARG_transparent].u_int;
 
     if(mp_obj_is_type(args[ARG_source].u_obj, &mp_type_tuple)){
         mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(args[ARG_source].u_obj, mp_obj_tuple_t);
