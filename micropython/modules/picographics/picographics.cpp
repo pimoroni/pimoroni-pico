@@ -271,6 +271,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_RGB565;
             break;
+        case DISPLAY_GENERIC:
+            if(width == 0) width = 320;
+            if(height == 0) height = 240;
+            bus_type = BUS_PIO;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
+            if(pen_type == -1) pen_type = PEN_RGB565;
+            break;
         default:
             return false;
     }
@@ -303,9 +310,9 @@ size_t get_required_buffer_size(PicoGraphicsPenType pen_type, uint width, uint h
 mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     ModPicoGraphics_obj_t *self = nullptr;
 
-    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address, ARG_layers };
+    enum { ARG_display, ARG_rotate, ARG_bus, ARG_buffer, ARG_pen_type, ARG_extra_pins, ARG_i2c_address, ARG_layers, ARG_width, ARG_height };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_display, MP_ARG_INT | MP_ARG_REQUIRED },
+        { MP_QSTR_display, MP_ARG_INT, { .u_int = DISPLAY_GENERIC } },
         { MP_QSTR_rotate, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_bus, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_buffer, MP_ARG_OBJ, { .u_obj = mp_const_none } },
@@ -313,6 +320,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         { MP_QSTR_extra_pins, MP_ARG_OBJ, { .u_obj = mp_const_none } },
         { MP_QSTR_i2c_address, MP_ARG_INT, { .u_int = -1 } },
         { MP_QSTR_layers, MP_ARG_INT, { .u_int = 1 } },
+        { MP_QSTR_width, MP_ARG_INT, { .u_int = 0 } },
+        { MP_QSTR_height, MP_ARG_INT, { .u_int = 0 } },
     };
 
     // Parse args.
@@ -324,8 +333,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     PicoGraphicsDisplay display = (PicoGraphicsDisplay)args[ARG_display].u_int;
 
     bool round = display == DISPLAY_ROUND_LCD_240X240;
-    int width = 0;
-    int height = 0;
+    int width = args[ARG_width].u_int;
+    int height = args[ARG_height].u_int;;
     int pen_type = args[ARG_pen_type].u_int;
     int rotate = args[ARG_rotate].u_int;
     int layers = args[ARG_layers].u_int;
@@ -413,7 +422,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             || display == DISPLAY_UNICORN_PACK
             || display == DISPLAY_SCROLL_PACK
             || display == DISPLAY_PRESTO
-            || display == DISPLAY_PRESTO_FULL_RES) {
+            || display == DISPLAY_PRESTO_FULL_RES
+            || display == DISPLAY_GENERIC) {
         // Create a dummy display driver
         self->display = m_new_class(DisplayDriver, width, height, (Rotation)rotate);
 
