@@ -20,13 +20,11 @@
 .side_set 2
 
 .wrap_target
-    out pins, 5 [1]    side 0x2 ; Deassert OEn, output row select
-    mov x, y    [3]    side 0x3 ; Pulse LATCH
-wait_loop:
-    jmp x-- wait_loop  side 0x2 ; Wait for row to latch
-    out x, 27          side 0x2 ; Get OEn pulse width
+    out pins, 5 [7]    side 0x2 ; Deassert OEn, output row select
+    out x, 27   [7]    side 0x3 ; Pulse LATCH, get OEn pulse width
 pulse_loop:
     jmp x-- pulse_loop side 0x0 ; Assert OEn for x+1 cycles
+    in x, 32           side 0x0 ; Output data sent to DMA channel after OEn has finished
 .wrap
 
 .program hub75_row_inverted
@@ -45,17 +43,15 @@ pulse_loop:
 .side_set 2
 
 .wrap_target
-    out pins, 5 [1]    side 0x3 ; Deassert OEn, output row select
-    mov x, y    [3]    side 0x2 ; Pulse LATCH
-wait_loop:
-    jmp x-- wait_loop  side 0x3 ; Wait for row to latch
-    out x, 27          side 0x3 ; Get OEn pulse width
+    out pins, 5 [7]    side 0x3 ; Deassert OEn, output row select
+    mov x, y    [7]    side 0x2 ; Pulse LATCH
 pulse_loop:
     jmp x-- pulse_loop side 0x1 ; Assert OEn for x+1 cycles
+    in x, 32           side 0x0 ; Output data sent to DMA channel after OEn has finished
 .wrap
 
 % c-sdk {
-static inline void hub75_row_program_init(PIO pio, uint sm, uint offset, uint row_base_pin, uint n_row_pins, uint latch_base_pin, uint latch_cycles) {
+static inline void hub75_row_program_init(PIO pio, uint sm, uint offset, uint row_base_pin, uint n_row_pins, uint latch_base_pin) {
     pio_sm_set_consecutive_pindirs(pio, sm, row_base_pin, n_row_pins, true);
     pio_sm_set_consecutive_pindirs(pio, sm, latch_base_pin, 2, true);
     for (uint i = row_base_pin; i < row_base_pin + n_row_pins; ++i)
@@ -66,22 +62,15 @@ static inline void hub75_row_program_init(PIO pio, uint sm, uint offset, uint ro
     pio_sm_config c = hub75_row_program_get_default_config(offset);
     sm_config_set_out_pins(&c, row_base_pin, n_row_pins);
     sm_config_set_sideset_pins(&c, latch_base_pin);
+    sm_config_set_in_shift(&c, true, true, 32);
     sm_config_set_out_shift(&c, true, true, 32);
     pio_sm_init(pio, sm, offset, &c);
-    pio_sm_exec(pio, sm, pio_encode_out(pio_y, 32));
-    pio_sm_put(pio, sm, latch_cycles);
     pio_sm_set_enabled(pio, sm, true);
-}
-
-static inline void hub75_wait_tx_stall(PIO pio, uint sm) {
-    uint32_t txstall_mask = 1u << (PIO_FDEBUG_TXSTALL_LSB + sm);
-    pio->fdebug = txstall_mask;
-    while (!(pio->fdebug & txstall_mask))
-        tight_loop_contents();
 }
 %}
 
 .program hub75_data_rgb888
+.define BIT_PLANES 10
 .side_set 1
 
 ; Each FIFO record consists of a RGB888 pixel. (This is ok for e.g. an RGB565
@@ -102,30 +91,30 @@ static inline void hub75_wait_tx_stall(PIO pio, uint sm) {
 public entry_point:
 .wrap_target
 
-public shift0:              ; R0 G0 B0 (Top half of 64x64 displays)
-    pull             side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
-    in osr, 1        side 0 ; Red0 N
-    out null, 10     side 0 ; Red0 discard
+public shift0:                     ; R0 G0 B0 (Top half of 64x64 displays)
+    pull                    side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
+    in osr, 1               side 0 ; Red0 N
+    out null, BIT_PLANES    side 0 ; Red0 discard
 
-    in osr, 1        side 0 ; Green0 N
-    out null, 10     side 0 ; Green0 discard
+    in osr, 1               side 0 ; Green0 N
+    out null, BIT_PLANES    side 0 ; Green0 discard
 
-    in osr, 1        side 0 ; Blue0 N
-    out null, 32     side 0 ; Remainder discard
+    in osr, 1               side 0 ; Blue0 N
+    out null, 32            side 0 ; Remainder discard
 
-public shift1:              ; R1 G1 B1 (Bottom half of 64x64 displays)
-    pull             side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
-    in osr, 1        side 1 ; Red1 N
-    out null, 10     side 1 ; Red1 discard
+public shift1:                     ; R1 G1 B1 (Bottom half of 64x64 displays)
+    pull                    side 0 ; gets patched to `out null, n` if n nonzero (otherwise the PULL is required for fencing)
+    in osr, 1               side 1 ; Red1 N
+    out null, BIT_PLANES    side 1 ; Red1 discard
 
-    in osr, 1        side 1 ; Green1 N
-    out null, 10     side 1 ; Green1 discard
+    in osr, 1               side 1 ; Green1 N
+    out null, BIT_PLANES    side 1 ; Green1 discard
 
-    in osr, 1        side 1 ; Blue1 N
-    out null, 32     side 1 ; Remainder discard
+    in osr, 1               side 1 ; Blue1 N
+    out null, 32            side 1 ; Remainder discard
 
-    in null, 26      side 1 ; Note we are just doing this little manoeuvre here to get GPIOs in the order
-    mov pins, ::isr  side 1 ; R0, G0, B0, R1, G1, B1. Can go 1 cycle faster if reversed
+    in null, 26             side 1 ; Note we are just doing this little manoeuvre here to get GPIOs in the order
+    mov pins, ::isr         side 1 ; R0, G0, B0, R1, G1, B1. Can go 1 cycle faster if reversed
 
 .wrap
 ; Note that because the clock edge for pixel n is in the middle of pixel n +
