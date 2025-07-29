@@ -14,8 +14,8 @@ function log_warning {
 
 function micropython_clone {
     log_inform "Using MicroPython $MICROPYTHON_FLAVOUR/$MICROPYTHON_VERSION"
-    git clone https://github.com/$MICROPYTHON_FLAVOUR/micropython -b $MICROPYTHON_VERSION --depth=1 $PIMORONI_PICO_DIR/micropython
-    cd $PIMORONI_PICO_DIR/micropython
+    git clone https://github.com/$MICROPYTHON_FLAVOUR/micropython -b $MICROPYTHON_VERSION --depth=1 $GITHUB_WORKSPACE/micropython
+    cd $GITHUB_WORKSPACE/micropython
     git submodule update --init lib/pico-sdk
     git submodule update --init lib/cyw43-driver
     git submodule update --init lib/lwip
@@ -27,7 +27,7 @@ function micropython_clone {
 }
 
 function micropython_build_mpy_cross {
-    cd $PIMORONI_PICO_DIR/micropython/mpy-cross
+    cd $GITHUB_WORKSPACE/micropython/mpy-cross
     ccache --zero-stats || true
     CROSS_COMPILE="ccache " USER_C_MODULES= make
     ccache --show-stats || true
@@ -45,13 +45,13 @@ function micropython_version {
 
 function hack_patch_pico_sdk {
     # pico-sdk-patch.sh will apply the patch if it exists
-    cd $PIMORONI_PICO_DIR/micropython
-    $PIMORONI_PICO_DIR/micropython/board/pico-sdk-patch.sh $MICROPY_BOARD
+    cd $GITHUB_WORKSPACE/micropython
+    $GITHUB_WORKSPACE/micropython/board/pico-sdk-patch.sh $MICROPY_BOARD
     cd ../
 }
 
 function cmake_configure {
-    cmake -S $PIMORONI_PICO_DIR/micropython/ports/rp2 -B build-$BOARD_NAME \
+    cmake -S $GITHUB_WORKSPACE/micropython/ports/rp2 -B build-$BOARD_NAME \
     -DPICO_BUILD_DOCS=0 \
     -DUSER_C_MODULES=$USER_C_MODULES \
     -DMICROPY_BOARD_DIR=$MICROPY_BOARD_DIR \
