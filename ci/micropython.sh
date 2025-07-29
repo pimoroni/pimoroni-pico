@@ -45,8 +45,8 @@ function micropython_version {
 
 function hack_patch_pico_sdk {
     # pico-sdk-patch.sh will apply the patch if it exists
-    cd $GITHUB_WORKSPACE/micropython
-    $GITHUB_WORKSPACE/micropython/board/pico-sdk-patch.sh $MICROPY_BOARD
+    cd $PIMORONI_PICO_DIR/micropython
+    $PIMORONI_PICO_DIR/micropython/board/pico-sdk-patch.sh $MICROPY_BOARD
     cd ../
 }
 
