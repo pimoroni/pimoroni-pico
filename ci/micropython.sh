@@ -57,7 +57,8 @@ function cmake_configure {
     -DMICROPY_BOARD_DIR=$MICROPY_BOARD_DIR \
     -DMICROPY_BOARD=$MICROPY_BOARD \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+    "$@"
 }
 
 function cmake_build {
