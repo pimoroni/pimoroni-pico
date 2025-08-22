@@ -92,12 +92,12 @@ Button(button, invert=True, repeat_time=200, hold_time=1000)
 To set up the user button, first import the `Button` class from the `pimoroni` module and the pin constant for the button from `motor`:
 ```python
 from pimoroni import Button
-from motor import picomotorshim
+from motor import pico_motor_shim
 ```
 
 Then create an instance of `Button` for the user button:
 ```python
-button_a = Button(picomotorshim.BUTTON_A)
+button_a = Button(pico_motor_shim.BUTTON_A)
 ```
 
 To get the button state, call `.read()`. If the button is held down, then this will return `True` at the interval specified by `repeat_time` until `hold_time` is reached, at which point it will return `True` every `repeat_time / 3` milliseconds. This is useful for rapidly increasing/decreasing values:
@@ -114,7 +114,7 @@ state = button_a.raw()
 
 ### Pin Constants
 
-The `motor` module contains a `picomotorshim` sub module with constants for the motor and button pins.
+The `motor` module contains a `pico_motor_shim` sub module with constants for the motor and button pins.
 
 
 #### Motor Pins
@@ -136,7 +136,7 @@ The `motor` module contains a `picomotorshim` sub module with constants for the 
 
 ### Other Constants
 
-The `picomotorshim` sub module also contains a constant for the number of motors on Pico Motor Shim:
+The `pico_motor_shim` sub module also contains a constant for the number of motors on Pico Motor Shim:
 
 * `NUM_MOTORS` = `2`
 
