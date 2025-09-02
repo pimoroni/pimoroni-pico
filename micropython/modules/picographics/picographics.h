@@ -35,7 +35,8 @@ enum PicoGraphicsDisplay {
     DISPLAY_EXPLORER,
     DISPLAY_PRESTO,
     DISPLAY_PRESTO_FULL_RES,
-    DISPLAY_GENERIC
+    DISPLAY_GENERIC,
+    DISPLAY_INKY_FRAME_SPECTRA_7,
 };
 
 enum PicoGraphicsPenType {

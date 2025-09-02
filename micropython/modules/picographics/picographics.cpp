@@ -220,6 +220,7 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(pen_type == -1) pen_type = PEN_RGB888;
             break;
         case DISPLAY_INKY_FRAME_7:
+        case DISPLAY_INKY_FRAME_SPECTRA_7:
             width = 800;
             height = 480;
             bus_type = BUS_SPI;
@@ -367,7 +368,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
             self->i2c = (_PimoroniI2C_obj_t *)MP_OBJ_TO_PTR(PimoroniI2C_make_new(&PimoroniI2C_type, 0, 0, nullptr));
             i2c_bus = (pimoroni::I2C *)(self->i2c->i2c);
         } else if (bus_type == BUS_SPI) {
-            if(display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4 || display == DISPLAY_INKY_FRAME_7) {
+            if(display == DISPLAY_INKY_FRAME || display == DISPLAY_INKY_FRAME_4 || display == DISPLAY_INKY_FRAME_7 || display == DISPLAY_INKY_FRAME_SPECTRA_7) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 28, PIN_UNUSED};
             } else if (display == DISPLAY_INKY_PACK) {
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
@@ -389,7 +390,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(UC8159, width, height, (Rotation)rotate, spi_bus);
 
-    } else if (display == DISPLAY_INKY_FRAME_7) {
+    } else if (display == DISPLAY_INKY_FRAME_7 || display == DISPLAY_INKY_FRAME_SPECTRA_7) {
         pen_type = PEN_INKY7;
         // TODO grab BUSY and RESET from ARG_extra_pins
         self->display = m_new_class(Inky73, width, height, (Rotation)rotate, spi_bus);
@@ -500,6 +501,19 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         self->graphics->set_pen(0);
         self->graphics->clear();
         self->graphics->set_layer(0);
+    }
+
+    // Replace the palette for Spectra 7
+    // We use white for colour 4 since the first pure white should always get
+    // considered for dithering before it.
+    if (display == DISPLAY_INKY_FRAME_SPECTRA_7) {
+        self->graphics->update_pen(0, 0, 0, 0);
+        self->graphics->update_pen(1, 255, 255, 255);
+        self->graphics->update_pen(2, 255, 255, 0);
+        self->graphics->update_pen(3, 255, 0, 0);
+        self->graphics->update_pen(4, 255, 255, 255); // This colour is missing/non-functional on the display
+        self->graphics->update_pen(5, 0, 0, 255);
+        self->graphics->update_pen(6, 0, 255, 0);
     }
 
     // Update the LCD from the graphics library
