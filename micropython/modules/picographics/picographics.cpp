@@ -838,10 +838,10 @@ mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen_in) {
             case 1: // White
                 break;
             case 2: // Green
-                pen = 5;
+                pen = 6;
                 break;
             case 3: // Blue
-                pen = 6;
+                pen = 5;
                 break;
             case 4: // Red
                 pen = 3;
