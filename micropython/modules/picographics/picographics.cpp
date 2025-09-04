@@ -41,6 +41,7 @@ typedef struct _ModPicoGraphics_obj_t {
     _PimoroniI2C_obj_t *i2c;
     bool blocking;
     uint8_t layers;
+    PicoGraphicsDisplay display_type;
 } ModPicoGraphics_obj_t;
 
 bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, int &rotate, int &pen_type, PicoGraphicsBusType &bus_type) {
@@ -520,6 +521,9 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
     if (display != DISPLAY_INKY_FRAME && display != DISPLAY_INKY_FRAME_4 && display != DISPLAY_INKY_PACK && display != DISPLAY_INKY_FRAME_7) {
         self->display->update(self->graphics);
     }
+
+    self->display_type = display;
+
     return MP_OBJ_FROM_PTR(self);
 }
 
@@ -822,10 +826,39 @@ mp_obj_t ModPicoGraphics_module_RGB_to_RGB565(mp_obj_t r, mp_obj_t g, mp_obj_t b
     ).to_rgb565());
 }
 
-mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen) {
+mp_obj_t ModPicoGraphics_set_pen(mp_obj_t self_in, mp_obj_t pen_in) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
-    self->graphics->set_pen(mp_obj_get_int(pen));
+    int pen = mp_obj_get_int(pen_in);
+
+    // Remap the standard Inky 7 colours to the 6 on Spectra displays (missing colour 4)
+    if(self->display_type == DISPLAY_INKY_FRAME_SPECTRA_7 && (PicoGraphicsPenType)self->graphics->pen_type == PEN_INKY7) {
+        switch(pen) {
+            case 0: // Black
+            case 1: // White
+                break;
+            case 2: // Green
+                pen = 5;
+                break;
+            case 3: // Blue
+                pen = 6;
+                break;
+            case 4: // Red
+                pen = 3;
+                break;
+            case 5: // Yellow
+                pen = 2;
+                break;
+            case 6: // Orange (remap to Yellow)
+            case 7: // Taupe / Clear (remap to yellow)
+                pen = 2;
+                break;
+            default: // Unknown or full colour for dithering, don't try to remap
+                break;
+        }
+    }
+
+    self->graphics->set_pen(pen);
 
     return mp_const_none;
 }
