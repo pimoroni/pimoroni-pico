@@ -7,7 +7,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  PICO_SDK_VERSION: 2.1.1
+  PICO_SDK_VERSION: 2.2.0
 
 jobs:
   build:
