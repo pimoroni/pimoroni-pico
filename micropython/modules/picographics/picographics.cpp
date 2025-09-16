@@ -429,7 +429,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     } else if (display == DISPLAY_BADGER_2350) {
         pen_type = PEN_2BIT; // FORCE to 2BIT
-        self->display = m_new_class(SSD1680, width, height, (Rotation)rotate, spi_bus);
+        self->display = m_new_class(SSD1680, width, height, (Rotation)rotate, spi_bus, 16, 21);
 
     } else if (display == DISPLAY_INTERSTATE75_32X32
             || display == DISPLAY_INTERSTATE75_64X64
