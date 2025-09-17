@@ -112,9 +112,6 @@ namespace pimoroni {
 
     command(reg::INVON);   // set inversion mode
     command(reg::SLPOUT);  // leave sleep mode
-    command(reg::DISPON);  // turn display on
-
-    sleep_ms(100);
 
     configure_display(rotation);
 
@@ -313,6 +310,12 @@ namespace pimoroni {
       });
 
       gpio_put(cs, 1);
+    }
+
+    if(!display_on) {
+      command(reg::DISPON);  // turn display on
+      sleep_ms(100);
+      display_on = true;
     }
   }
 
