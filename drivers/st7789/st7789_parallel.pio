@@ -5,3 +5,22 @@
     out pins, 8  side 0
     nop          side 1
 .wrap
+
+.program st7789_parallel_pd
+.side_set 1
+
+.wrap_target
+    pull         side 0
+    mov x osr    side 0 ; Store the OSR in scratch X
+
+    out pins, 8  side 0
+    nop          side 1
+    out pins, 8  side 0
+    nop          side 1
+
+    mov osr x    side 0 ; Retrieve the OSR from scratch X
+    out pins, 8  side 0
+    nop          side 1
+    out pins, 8  side 0
+    nop          side 1
+.wrap

@@ -288,6 +288,13 @@ bool get_display_settings(PicoGraphicsDisplay display, int &width, int &height, 
             if(rotate == -1) rotate = (int)Rotation::ROTATE_0;
             if(pen_type == -1) pen_type = PEN_2BIT;
             break;
+        case DISPLAY_TUFTY_2350:
+            width = 160;
+            height = 120;
+            bus_type = BUS_PARALLEL;
+            if(rotate == -1) rotate = (int)Rotation::ROTATE_180;
+            if(pen_type == -1) pen_type = PEN_RGB565;
+            break;
         default:
             return false;
     }
@@ -391,7 +398,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
                 spi_bus = {PIMORONI_SPI_DEFAULT_INSTANCE, 17, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED};
             }
         } else if (bus_type == BUS_PARALLEL) {
-            if (display == DISPLAY_EXPLORER) {
+            if (display == DISPLAY_EXPLORER || display == DISPLAY_TUFTY_2350) {
                 parallel_bus = {27, 28, 30, 31, 32, 26};
             }
         }
@@ -409,7 +416,8 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
         self->display = m_new_class(Inky73, width, height, (Rotation)rotate, spi_bus);
 
     } else if (display == DISPLAY_TUFTY_2040
-            || display == DISPLAY_EXPLORER) {
+            || display == DISPLAY_EXPLORER
+            || display == DISPLAY_TUFTY_2350) {
         self->display = m_new_class(ST7789, width, height, (Rotation)rotate, parallel_bus);
 
     } else if (display == DISPLAY_LCD_160X80) {

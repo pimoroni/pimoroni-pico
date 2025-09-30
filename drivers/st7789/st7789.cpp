@@ -94,7 +94,7 @@ namespace pimoroni {
       command(reg::GMCTRN1, 14, "\xD0\x04\x0C\x11\x13\x2C\x3F\x44\x51\x2F\x1F\x1F\x20\x23");
     }
 
-    if(width == 320 && height == 240) {
+    if((width == 320 && height == 240) || (width == 160 && height == 120)) {
       command(reg::GCTRL, 1, "\x35");
       command(reg::VCOMS, 1, "\x1f");
       command(reg::GMCTRP1, 14, "\xD0\x08\x11\x08\x0C\x15\x39\x33\x50\x36\x13\x14\x29\x2D");
@@ -128,12 +128,23 @@ namespace pimoroni {
       dma_channel_abort(st_dma);
       dma_channel_unclaim(st_dma);
     }
+    if(dma_channel_is_claimed(pd_st_dma)) {
+      dma_channel_abort(pd_st_dma);
+      dma_channel_unclaim(pd_st_dma);
+    }
     if(spi) return; // SPI mode needs no further tear down
 
     if(pio_sm_is_claimed(parallel_pio, parallel_sm)) {
       pio_sm_set_enabled(parallel_pio, parallel_sm, false);
       pio_sm_drain_tx_fifo(parallel_pio, parallel_sm);
-      pio_sm_unclaim(parallel_pio, parallel_sm);
+      //pio_sm_unclaim(parallel_pio, parallel_sm);
+      pio_remove_program_and_unclaim_sm(&st7789_parallel_program, parallel_pio, parallel_sm, parallel_offset);
+    }
+    if(pio_sm_is_claimed(parallel_pio, parallel_pd_sm)) {
+      pio_sm_set_enabled(parallel_pio, parallel_pd_sm, false);
+      pio_sm_drain_tx_fifo(parallel_pio, parallel_pd_sm);
+      //pio_sm_unclaim(parallel_pio, parallel_pd_sm);
+      pio_remove_program_and_unclaim_sm(&st7789_parallel_pd_program, parallel_pio, parallel_pd_sm, parallel_pd_offset);
     }
   }
 
@@ -147,7 +158,7 @@ namespace pimoroni {
     if(width == 240 && height == 240) {
       int row_offset = round ? 40 : 80;
       int col_offset = 0;
-    
+
       switch(rotate) {
         case ROTATE_90:
           if (!round) row_offset = 0;
@@ -216,7 +227,7 @@ namespace pimoroni {
     }
 
     // Pico Display 2.0
-    if(width == 320 && height == 240) {
+    if((width == 320 && height == 240) || (width == 160 && height == 120)) {
       caset[0] = 0;
       caset[1] = 319;
       raset[0] = 0;
@@ -262,11 +273,24 @@ namespace pimoroni {
       ;
   }
 
+  void ST7789::write_blocking_parallel_pixel_doubled(const uint8_t *src, size_t len) {
+    while (dma_channel_is_busy(pd_st_dma))
+      ;
+    dma_channel_set_trans_count(pd_st_dma, len, false);
+    dma_channel_set_read_addr(pd_st_dma, src, true);
+    dma_channel_wait_for_finish_blocking(pd_st_dma);
+
+    // This may cause a race between PIO and the
+    // subsequent chipselect deassert for the last pixel
+    while(!pio_sm_is_tx_fifo_empty(parallel_pio, parallel_pd_sm))
+      ;
+  }
+
   void ST7789::command(uint8_t command, size_t len, const char *data) {
     gpio_put(dc, 0); // command mode
 
     gpio_put(cs, 0);
-    
+
     if(spi) {
       spi_write_blocking(spi, &command, 1);
     } else {
@@ -284,12 +308,24 @@ namespace pimoroni {
 
     gpio_put(cs, 1);
   }
-  
+
   void ST7789::update(PicoGraphics *graphics) {
     uint8_t cmd = reg::RAMWR;
 
     if(graphics->pen_type == PicoGraphics::PEN_RGB565 && graphics->layers == 1) { // Display buffer is screen native
-      command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
+      if(width == 160 && height == 120) {
+        gpio_put(dc, 0); // command mode
+        gpio_put(cs, 0);
+        write_blocking_parallel(&cmd, 1);
+        gpio_put(dc, 1); // data mode
+        for(int y = 0; y < height; y++) {
+          write_blocking_parallel_pixel_doubled((const uint8_t*)(graphics->frame_buffer) + width * 2 * y, width); // Len is given in pixels not bytes
+          write_blocking_parallel_pixel_doubled((const uint8_t*)(graphics->frame_buffer) + width * 2 * y, width);
+        }
+        gpio_put(cs, 1);
+      } else {
+        command(cmd, width * height * sizeof(uint16_t), (const char*)graphics->frame_buffer);
+      }
     } else {
       gpio_put(dc, 0); // command mode
       gpio_put(cs, 0);
