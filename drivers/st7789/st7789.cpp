@@ -112,6 +112,7 @@ namespace pimoroni {
 
     command(reg::INVON);   // set inversion mode
     command(reg::SLPOUT);  // leave sleep mode
+    display_sleep = false;
 
     configure_display(rotation);
 
@@ -325,12 +326,14 @@ namespace pimoroni {
     float gamma = 2.8;
     uint16_t value = (uint16_t)(pow((float)(brightness) / 255.0f, gamma) * 65535.0f + 0.5f);
     pwm_set_gpio_level(bl, value);
-    if(brightness == 0) {
+    if(brightness == 0 && !display_sleep) {
       command(reg::SLPOUT);  // leave sleep mode
       sleep_ms(5);
-    } else {
+      display_sleep = true;
+    } else if (display_sleep) {
       command(reg::SLPOUT);  // leave sleep mode
       sleep_ms(120);
+      display_sleep = false;
     }
   }
 }

@@ -44,6 +44,7 @@ namespace pimoroni {
     uint parallel_offset;
     uint st_dma;
     bool display_on = false;
+    bool display_sleep = false;
 
 
     // The ST7789 requires 16 ns between SPI rising edges.
