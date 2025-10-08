@@ -100,6 +100,10 @@ e = "Wait a minute"
 # connect to wifi
 uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
 
+# Helper to check wifi connection
+def wifi_connected():
+    return network_manager.isconnected()
+
 while True:
 
     # read BME688
@@ -121,6 +125,24 @@ while True:
 
     # read particle sensor
     particulate_reading = pms5003.read()
+    
+    # --- WiFi reconnection section ---
+    if not wifi_connected():
+        display.set_pen(RED)
+        display.clear()
+        display.text("WiFi down! Atmpting reconnect...", 10, 10, WIDTH, scale=2)
+        display.update()
+        led.set_rgb(255, 128, 0)
+        try:
+            uasyncio.get_event_loop().run_until_complete(network_manager.client(WIFI_CONFIG.SSID, WIFI_CONFIG.PSK))
+            time.sleep(2)
+            error_message = ""
+        except Exception as wifi_error:
+            print("WiFi reconnect failed:", wifi_error)
+            error_message = f"WiFi reconnect failed: {wifi_error}"
+            led.set_rgb(255, 0, 0)
+            time.sleep(5)
+            continue  # Skip this loop cycle if WiFi fails
 
     if heater == "Stable" and ltr_reading is not None:
         led.set_rgb(0, 0, 0)
