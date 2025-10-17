@@ -336,7 +336,7 @@ mp_obj_t ModPicoGraphics_make_new(const mp_obj_type_t *type, size_t n_args, size
 
     bool round = display == DISPLAY_ROUND_LCD_240X240;
     int width = args[ARG_width].u_int;
-    int height = args[ARG_height].u_int;;
+    int height = args[ARG_height].u_int;
     int pen_type = args[ARG_pen_type].u_int;
     int rotate = args[ARG_rotate].u_int;
     int layers = args[ARG_layers].u_int;
