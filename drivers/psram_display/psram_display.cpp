@@ -68,6 +68,11 @@ namespace pimoroni {
     write(pointToAddress(p), l, colour);
   }
 
+  void PSRamDisplay::write_span(uint32_t offset, uint l, const uint8_t *colours)
+  {
+    write(start_address + offset, l, colours);
+  }
+
   void PSRamDisplay::read_pixel_span(const Point &p, uint l, uint8_t *data)
   {
     read(pointToAddress(p), l, data);
