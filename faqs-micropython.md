@@ -24,10 +24,9 @@ This is fine and expected - once your board restarts running MicroPython it will
 
 ### OK, then how do I transfer files/edit code?
 
-To program it and to transfer files to and from it you'll need to use an interpreter, such as Thonny or Mu.
+To program it and to transfer files to and from it you'll need to use an interpreter, such as Thonny.
 
 - [Download Thonny](https://thonny.org/)
-- [Download Mu](https://codewith.mu/)
 
 If you're hardcore, you can also transfer files to boards running MicroPython using command line tools, like `mpremote`.
 
