@@ -55,10 +55,9 @@ Here's what the 'RPI-RP2' drive looks like in Windows:
 
 **Copy the downloaded firmware image across to the 'RPI-RP2' drive**. Once it has finished uploading (which takes a few seconds) the board will restart itself.
 
-⚠ Note that once your board restarts running MicroPython it will no longer show up as a drive. To program it and to transfer files to and from it you'll need to use an interpreter, such as Thonny or Mu.
+⚠ Note that once your board restarts running MicroPython it will no longer show up as a drive. To program it and to transfer files to and from it you'll need to use an interpreter, such as Thonny.
 
 - [Download Thonny](https://thonny.org/)
-- [Download Mu](https://codewith.mu/)
 
 You can also transfer files to boards running MicroPython using command line tools, like `mpremote`.
 
@@ -75,3 +74,4 @@ Note that most of our MicroPython images don't include examples, so you'll need 
 Having trouble getting started? Check out the link below:
 
 - [MicroPython FAQs](faqs-micropython.md)
+
