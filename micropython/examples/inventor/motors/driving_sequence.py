@@ -49,7 +49,7 @@ board.motors[RIGHT].speed_scale(SPEED_SCALE)
 board.motors[LEFT].direction(REVERSED_DIR)
 board.encoders[LEFT].direction(REVERSED_DIR)
 
-# Create PID objects for position control
+# Create PID objects for velocity control
 vel_pids = [PID(VEL_KP, VEL_KI, VEL_KD, UPDATE_RATE) for i in range(NUM_MOTORS)]
 
 
