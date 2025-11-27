@@ -6,8 +6,17 @@ from aye_arr.nec.remotes import PimoroniRemote
 
 
 """
-A demonstration of driving both of Inventor 2040 W's motor outputs through a
-sequence of velocities, with the help of their attached encoders and PID control.
+A 2-wheeled remote-controlled robot with gripper, powered by Inventor 2040/2350 W.
+
+Remote control is achieved by an IR receiver is connected to GPIO0.
+Signals detected by the receiver are processed by the AyeArr library
+and passed to callback functions for various robot actions. These are
+* Drive forward / backward
+* Turn left / right
+* Gripper open / close
+* Set onboard LED colours
+
+The gripper is driven by a servo connected to the SERVO_1 header.
 
 Press "User" to exit the program.
 """
@@ -15,12 +24,10 @@ Press "User" to exit the program.
 # Wheel friendly names
 LEFT = MOTOR_A
 RIGHT = MOTOR_B
-NAMES = ["LEFT", "RIGHT"]
 
 # Constants
 UPDATES = 100                           # How many times to update the motor per second
 UPDATE_RATE = 1 / UPDATES
-PRINT_DIVIDER = 4                       # How many of the updates should be printed (i.e. 2 would be every other update)
 
 # Motor Constnats
 GEAR_RATIO = 50                         # The gear ratio of the motors

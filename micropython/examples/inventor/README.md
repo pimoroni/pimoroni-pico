@@ -31,6 +31,8 @@
 - [Audio Examples](#audio-examples)
   - [Tone Song](#tone-song)
   - [Motor Song](#motor-song)
+- [Showcase Examples](#showcase-examples)
+  - [Inventor Bot](#inventor-bot)
 
 ## Function Examples
 
@@ -195,3 +197,11 @@ This example shows you how you can use Inventor 2040/2350 W's audio output with 
 [audio/motor_song.py](audio/motor_song.py)
 
 A fun example of how to change a motor's frequency to have it play a song.
+
+
+## Showcase Examples
+
+### Inventor Bot
+[showcase/inventor_bot.py]([showcase/inventor_bot.py)
+
+A 2-wheeled remote-controlled robot with gripper, powered by Inventor 2040/2350 W.
