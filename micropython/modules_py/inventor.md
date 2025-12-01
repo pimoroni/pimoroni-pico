@@ -9,13 +9,19 @@ This is the library reference for the [Pimoroni Inventor 2040/2350 W](https://sh
 - [Reading Encoders](#reading-encoders)
 - [Controlling Servos](#controlling-servos)
 - [Controlling RGB LEDs](#controlling-rgb-leds)
+  - [RGB](#rgb)
+  - [HSV](#hsv)
 - [Connecting Qw/ST Devices](#connecting-qwst-devices)
-- [Audio](#audio)
-- [Wireless](#wireless)
+- [Playing Audio](#playing-audio)
+  - [Play Tone](#play-tone)
+  - [Play Silence](#play-silence)
+  - [Stop Playing](#stop-playing)
+  - [Volume Control](#volume-control)
+  - [Muting/Unmuting](#mutingunmuting)
 - [Program Lifecycle](#program-lifecycle)
-  - [Notes](#notes)
-  - [What Gets Initialised](#what-gets-initialised)
-  - [A note about gear ratios](#a-note-about-gear-ratios)
+- [Notes](#notes)
+  - [Initialisation](#initialisation)
+  - [Gear Ratios](#gear-ratios)
 - [`inventor` Module Reference](#inventor-module-reference)
   - [Constants](#constants)
     - [IO Pin](#io-pin)
@@ -37,7 +43,7 @@ from inventor import Inventor
 board = Inventor()
 ```
 
-This will create an `Inventor` class called `board` that initialises all the features of Inventor. This will be used in the rest of the examples going forward.
+This will create an `Inventor` object called `board` that initialises all the features of Inventor. This will be used in the rest of the examples going forward.
 
 
 ## Reading the User Button
@@ -60,7 +66,7 @@ while not board.switch_pressed():
 
 ## Controlling Motors
 
-Inventor features a DRV8833 dual-channel motor driver that is suitable for driving small motors. These motor channels are set up as `Motor` objects during `Inventor` class creation (unless `init_motors=False` was supplied).
+Inventor features a DRV8833 dual-channel motor driver that is suitable for driving small motors, either via the two 6-pin connectors or the 0.1" header. These motor channels are set up as `Motor` objects during `Inventor` creation (unless `init_motors=False` was supplied).
 
 :information_source: **For details of what `Motor` objects can do, refer to the [Motor Library](/micropython/modules/motor/README.md#motor)**
 
@@ -111,9 +117,61 @@ for i, motor in enumerate(board.motors):
 
 ## Reading Encoders
 
+Inventor features two 6-pin connectors for attaching Micro-Metal Motors with Encoders ([MMME]((https://shop.pimoroni.com/search?q=MMME))), allowing for precise position and velocity control. The encoders are set up as `Encoder` objects during `Inventor` creation (unless `init_encoders=False` was supplied).
+
+:information_source: **For details of what `Encoder` objects can do, refer to the [Encoder Library](/micropython/modules/encoder/README.md#encoder)**
+
+The created `Encoder` objects can be accessed in two ways, either through the `encoder_a` and `encoders_b` properties, or by the `encoders` list.
+
+```python
+# Access the first encoder by property
+encoder = board.encoder_a
+```
+
+```python
+# Access the first encoder by list
+encoder = board.encoders[0]
+```
+
+```python
+# Access the first encoder by list and constant
+from inventor import MOTOR_A
+encoder = board.encoders[MOTOR_A]
+```
+
+Accessing by property is convenient when you know the specific encoder you wish to read, whereas accessing by list can be useful if you need to perform operations on motor and encoder pairs.
+
+Here are examples of how the list may be looped through:
+
+**For**
+```python
+# Loop through all encoders
+for encoder in board.encoders:
+    # Do something with each encoder here
+```
+
+**Range**
+```python
+# Loop through all motors and encoders via an index
+from inventor import NUM_MOTORS
+for i in range(NUM_MOTORS):
+    motor = board.motors[i]
+    encoder = board.encoders[i]
+    # Do something with each motor using its related encoder
+```
+
+**Enumerate**
+```python
+# Loop through all encoders using enumerate
+for i, encoder in enumerate(board.encoders):
+    motor = board.motors[i]
+    # Do something with each motor using its related encoder
+```
+
+
 ## Controlling Servos
 
-There are six headers on Inventor 2040/2350 W for connecting 3-pin servos. These headers are set up as `Servo` objects during `Inventor` class creation (unless `init_servos=False` was supplied).
+There are six headers on Inventor 2040/2350 W for connecting 3-pin servos. These headers are set up as `Servo` objects during `Inventor` creation (unless `init_servos=False` was supplied).
 
 :information_source: **For details of what `Servo` objects can do, refer to the [Servo Library](/micropython/modules/servo/README.md#servo)**
 
@@ -165,18 +223,18 @@ for i, servo in enumerate(board.servos):
 
 ## Controlling RGB LEDs
 
-Inventor 2040/2350 W has twelve addressable RGB LEDs, positioned alongside its servo and GPIO/ADC pins. These make use of the `WS2812` class from our [`Plasma` Library](/micropython/modules/plasma/README.md#ws2812), which is set up automatically during `Inventor` class creation.
+Inventor 2040/2350 W has twelve addressable RGB LEDs, positioned alongside its servo and GPIO/ADC pins. These make use of the `WS2812` class from our [`Plasma` Library](/micropython/modules/plasma/README.md#ws2812), which is set up automatically during `Inventor` creation.
 
 The `WS2812` object can be accessed via `board.leds`. From this, you can set the colour of each LED in either the RGB colourspace, or HSV (Hue, Saturation, Value). 
 
-**RGB**
+### RGB
 ```python
 # Set LED zero to full white
 board.leds.set_rgb(0, 255, 255, 255)
 ```
 The first parameter is the index of the LED (from `0` to `11`), and the rest are the R, G, and B components (from `0` to `255`).
 
-**HSV**
+### HSV
 ```python
 # Set LED four to full green
 board.leds.set_hsv(4, 0.333, 1.0, 1.0)
@@ -194,7 +252,7 @@ for i in range(NUM_LEDS):
 
 ## Connecting Qw/ST Devices
 
-Inventor 2040/2350 W features two Qw/ST connectors for attaching I2C-based sensors and devices. These connectors are automatically initialised during class creation (unless `init_i2c=False` was supplied), removing the worry of specifying the wrong pins. The I2C bus can then be accessed by calling `board.i2c`.
+Inventor 2040/2350 W features two Qw/ST connectors for attaching I2C-based sensors and devices. These connectors are automatically initialised during class creation (unless `init_i2c=False` was supplied). The I2C bus can then be accessed by calling `board.i2c`.
 
 Here is an example of setting up our [BME280 breakout](https://shop.pimoroni.com/products/bme280-breakout) on Inventor.
 
@@ -211,9 +269,46 @@ bme = BreakoutBME280(board.i2c, ADDRESS)
 ```
 
 
-## Audio
+## Playing Audio
 
-## Wireless
+Inventor 2040/2350 W features an audio amplifier and speaker output for adding chirps and tones to your project.
+
+### Play Tone
+```python
+# Play a 2kHz tone
+board.play_tone(2000)
+```
+
+### Play Silence
+```python
+# Silence the speaker by playing an inaudible tone (avoids popping sounds)
+board.play_silence()
+```
+
+### Stop Playing
+```python
+# Stop playing the last tone (can cause a popping sound)
+board.stop_playing()
+```
+
+### Volume Control
+```python
+# Get the last volume level (between 0.0 and 1.0)
+value = board.volume()
+
+# Set the new volume level (between 0.0 and 1.0)
+board.volume(0.7)
+```
+
+### Muting/Unmuting
+```python
+# Mute the speaker
+board.mute_audio()
+```
+```python
+# Unmute the speaker
+board.unmute_audio()
+```
 
 ## Program Lifecycle
 
@@ -241,7 +336,7 @@ board = Inventor()    # Create a new Inventor object. These optional keyword par
 
 # Pull out any variables for easy access. E.g
 motor = board.motor_a       # or board.motors[MOTOR_A]
-encoder = board.encoder_a   # or board.encoders[ENCODER_A]
+encoder = board.encoder_a   # or board.encoders[MOTOR_A]
 servo = board.servo1        # or board.servos[SERVO_1]
 
 
@@ -261,27 +356,26 @@ finally:
 ```
 
 
+## Notes
 
-### Notes
+### Initialisation
 
-### What Gets Initialised
-
-To make the starting experience of Inventor easier, the class initialises all of the board features. For some advanced uses though this may not be wanted. To give this flexibility, several steps of the initialisation can be turned off during class creation:
+To make the starting experience of Inventor easier, all the board's features are set up when creating an `Inventor` object. For some advanced uses this may not be wanted, so optional parameters can be provided to skip steps of the set up.
 
 ```python
 board = Inventor(init_motors=True, init_servos=True, init_encoders=True, init_i2c=True)
 ```
 
-Example uses:
+**Example uses:**
 * `init_motors=False` - Lets you drive different kinds of magnetic loads, such as solenoids or stepper motors (with the appropriate code), via the new 1x4 header of Inventor 2350 W.
 * `init_servos=False` - Lets you use the 6 servo headers as additional digital GPIO. Note these pins are not 5V tolerant so be careful when using the neighbouring 5V pins for powering devices.
 * `init_encoders=False` - Lets you use the 4 encoder pins as additional digital GPIO. These are handily broken out to pads on the new Inventor 2350 W.
 * `init_i2c=False` - Lets you use the 2 Qw/ST pins as additional digital GPIO for UART or similar.
 
 
-### A note about gear ratios
+### Gear Ratios
 
-By default the Inventor class sets things up for motors with encoders attached that have a 50:1 gear ratio, matching the pre-assembled [Micro Metal Motor Encoders](https://shop.pimoroni.com/products/micro-metal-gearmotor-with-micro-metal-motor-encoder) that we sell.
+By default the `Inventor` class sets itself up for motors with encoders that have a 50:1 gear ratio, matching the pre-assembled [Micro Metal Motor Encoders](https://shop.pimoroni.com/products/micro-metal-gearmotor-with-micro-metal-motor-encoder) that we sell.
 
 If you are soldering up your own motors with encoders that have a different gear ratio, then add the `motor_gear_ratio` parameter during class creation, like so:
 
