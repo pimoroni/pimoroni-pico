@@ -7,7 +7,7 @@
 
 using namespace pimoroni;
 
-PicoUnicorn pico_unicorn;
+PicoUnicorn<14,1,0, uint16_t, pimoroni::GAMMA_14BIT> pico_unicorn;
 
 int main() {
   bool a_pressed = false;
