@@ -3,9 +3,9 @@ from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY_2, PEN_RGB565
 from pimoroni import RGBLED
 from machine import Pin
 
-button_a = Pin(12, Pin.IN)
-button_x = Pin(14, Pin.IN)
-button_y = Pin(15, Pin.IN)
+button_a = Pin(12, Pin.IN, Pin.PULL_UP)
+button_x = Pin(14, Pin.IN, Pin.PULL_UP)
+button_y = Pin(15, Pin.IN, Pin.PULL_UP)
 
 display = PicoGraphics(display=DISPLAY_PICO_DISPLAY_2, pen_type=PEN_RGB565, rotate=0)
 display.set_backlight(0.8)
