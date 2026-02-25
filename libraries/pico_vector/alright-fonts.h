@@ -460,7 +460,12 @@ pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_l
     int line_width = get_line_width(face, line, &line_len, max_line_width, tm);
     char *end = line + line_len;
 
-    for(char c = *line; line < end; line++, c = *line) {
+    while(line < end) {
+      uint16_t c = get_utf8_char(line, end);
+      line++;
+      if(c > 0x7F) line++;
+      if(c > 0x7FF) line++;
+
       af_glyph_t *glyph = find_glyph(face, c);
       if(!glyph) {
         continue;
@@ -489,7 +494,7 @@ pp_rect_t af_measure(af_face_t *face, const char *text, size_t tlen, float max_l
         result = pp_rect_merge(&result, &r);
       }
 
-      if(c == L' ') {
+      if(c == ' ') {
         caret.x += (glyph->advance * tm->word_spacing) / 100.0f;
       } else {
         caret.x += (glyph->advance * tm->letter_spacing) / 100.0f;
