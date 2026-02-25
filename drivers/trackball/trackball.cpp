@@ -105,7 +105,7 @@ namespace pimoroni {
       value = i2c->reg_read_uint8(address, reg::INT);
       value &= MSK_INT_TRIGGERED;
     }
-    return false;
+    return value;
   }
 
   void Trackball::set_rgbw(uint8_t r, uint8_t g, uint8_t b, uint8_t w) {
