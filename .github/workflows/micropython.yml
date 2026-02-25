@@ -4,7 +4,7 @@ on:
   push:
   pull_request:
   release:
-    types: [created]
+    types: [published]
 
 env:
   MICROPYTHON_VERSION: v1.27.0
