@@ -88,6 +88,7 @@ namespace pimoroni {
       
       void write_pixel(const Point &p, uint8_t colour) override;
       void write_pixel_span(const Point &p, uint l, uint8_t colour) override;
+      void write_span(uint32_t offset, uint l, const uint8_t * colours) override;
       void read_pixel_span(const Point &p, uint l, uint8_t *data) override;
 
       int __not_in_flash_func(SpiSetBlocking)(const uint16_t uSrc, size_t uLen) 
