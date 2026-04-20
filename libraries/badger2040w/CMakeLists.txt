@@ -1,0 +1,1 @@
+include(badger2040w.cmake)
