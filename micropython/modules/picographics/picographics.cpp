@@ -718,7 +718,7 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
 
     while(self->display->is_busy()) {
     #ifdef MICROPY_BUILD_TYPE
-    mp_handle_pending(true);
+    mp_handle_pending(MP_HANDLE_PENDING_CALLBACKS_AND_EXCEPTIONS);
     #endif
     }
 
@@ -727,7 +727,7 @@ mp_obj_t ModPicoGraphics_update(mp_obj_t self_in) {
     if(self->blocking) {
         while(self->display->is_busy()) {
         #ifdef MICROPY_BUILD_TYPE
-        mp_handle_pending(true);
+        mp_handle_pending(MP_HANDLE_PENDING_CALLBACKS_AND_EXCEPTIONS);
         #endif
         }
 
@@ -744,7 +744,7 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
 
     while(self->display->is_busy()) {
     #ifdef MICROPY_BUILD_TYPE
-    mp_handle_pending(true);
+    mp_handle_pending(MP_HANDLE_PENDING_CALLBACKS_AND_EXCEPTIONS);
     #endif
     }
 
@@ -758,7 +758,7 @@ mp_obj_t ModPicoGraphics_partial_update(size_t n_args, const mp_obj_t *args) {
     if(self->blocking) {
         while(self->display->is_busy()) {
         #ifdef MICROPY_BUILD_TYPE
-        mp_handle_pending(true);
+        mp_handle_pending(MP_HANDLE_PENDING_CALLBACKS_AND_EXCEPTIONS);
         #endif
         }
     }
