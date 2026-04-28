@@ -184,9 +184,12 @@ namespace pimoroni {
     
     if(blocking) {
       busy_wait();
-
       command(POF); // turn off
+
+      busy_wait();
+      command(PSR, {0x4F, 0x6E});
     }
+
   }
 
   bool Inky73::is_pressed(Button button) {
