@@ -1,6 +1,7 @@
 # Installing MicroPython  <!-- omit in toc -->
 
-- [Which file to download?](#which-file-to-download)
+- [What firmware files are in this repo?](#what-firmware-files-are-in-this-repo)
+- [What firmware files are **not** in this repo?](#what-firmware-files-are-not-in-this-repo)
 - [Entering DFU/bootloader mode](#entering-dfubootloader-mode)
   - [If you have a board with a reset button:](#if-you-have-a-board-with-a-reset-button)
   - [If you have a board without a reset button:](#if-you-have-a-board-without-a-reset-button)
@@ -10,28 +11,34 @@
 
 We provide pre-built MicroPython images which include all the drivers that include all the libraries and drivers you'll need to use our [supported products](https://github.com/pimoroni/pimoroni-pico#supported-products) To install MicroPython, you'll need to **copy the appropriate .uf2 file from the releases page to your device while it's in DFU/bootloader mode.**
 
-## Which file to download?
+## What firmware files are in this repo?
 
-On the releases page you'll find a bunch of different .uf2 files for use on different RP2040 boards (if you can't see them, click on the arrow next to 'assets' to expand the list). For Badger 2040 and Badger 2040 W you should refer to the [Badger 2040 repository](https://github.com/pimoroni/badger2040/).
+On the releases page of this Github repository you'll find a bunch of different .uf2 files for use on **Pico, Pico W and other RP2040 boards** (if you can't see them, click on the arrow next to 'assets' to expand the list).
 
 - [Releases page](https://github.com/pimoroni/pimoroni-pico/releases)
-- [Badger 2040 firmware](https://github.com/pimoroni/badger2040/releases)
 
 | Board                                                        | What uf2 file to use                                         | Notes                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| Raspberry Pi Pico and most other RP2040 boards without wireless (Plasma 2040, Interstate 75, Servo 2040, Motor 2040, Tiny 2040 2MB) | **pico-vx.x.x-pimoroni-micropython.uf2**                     |                                                              |
-| Raspberry Pi Pico W and most Pico W Aboard products (Automation 2040 W, Inventor 2040 W, Plasma Stick, Interstate 75 W) | **picow-vx.x.x-pimoroni-micropython.uf2**                    |                                                              |
+| Raspberry Pi Pico and other RP2040 boards without wireless (Servo 2040, Motor 2040, Tiny 2040 2MB) | **pico-vx.x.x-pimoroni-micropython.uf2**                     |                                                              |
+| Raspberry Pi Pico W and Pico W Aboard products (Automation 2040 W) | **picow-vx.x.x-pimoroni-micropython.uf2**                    |                                                              |
 | Tufty 2040                                                   | **tufty2040-vx.x.x-pimoroni-micropython.uf2**                |                                                              |
-| Pimoroni Pico LiPo                                           | **picolipo_4mb-vx.x.x-pimoroni-micropython.uf2** or **pimoroni-picolipo_16mb-vx.x.x-pimoroni-micropython.uf2** | Includes support for the increased flash memory on these boards |
 | Tiny 2040 8MB                                                | **tiny2040_8mb-vx.x.x-pimoroni-micropython.uf2**                 | Includes support for the increased flash memory on this board |
 | Enviro Urban, Indoor, Weather & Grow                         | **enviro-vx.x.x-pimoroni-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
-| Galactic Unicorn                                             | **galactic_unicorn-vx.x.x-pimoroni-micropython.uf2**   |                                                              |
-| Inky Frame                                                   |  | See: [https://github.com/pimoroni/inky-frame/releases/latest](https://github.com/pimoroni/inky-frame/releases/latest) |
-| Badger 2040 W                                                | **badger2040w-vx.x.x-pimoroni-micropython.uf2** or **pimoroni-badger2040w-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
-| Badger 2040                                                  | **badger2040-vx.x.x-pimoroni-micropython.uf2** or  **pimoroni-badger2040-v0.0.1-micropython-with-badger-os.uf2** | :warning: Badger OS will overwrite your files!
-| Cosmic Unicorn                                               | **cosmic_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
-| Stellar Unicorn                                               | **stellar_unicorn-vx.x.x-pimoroni-micropython.uf2**     |                                                              |
 | Pico + USB | **pico_usb-vx.x.x-pimoroni-micropython.uf2** | :warning: Will erase your files when switching to/from a regular Pico build
+
+## What firmware files are **not** in this repo?
+
+ If you have a **Pico 2, Pico 2 W or other RP2350 board** you'll find MicroPython builds from the releases page of our [pimoroni-pico-rp2350 repo](https://github.com/pimoroni/pimoroni-pico-rp2350/releases).
+
+Many of our own RP2040 and RP2350 boards now have their own repos where you can find the firmware and examples:
+
+- [Badger 2040 / W](https://github.com/pimoroni/badger2040/)
+- [Inky Frame](https://github.com/pimoroni/inky-frame)
+- [Interstate 75 / W](https://github.com/pimoroni/interstate75)
+- [Inventor 2040 W / 2350 W](https://github.com/pimoroni/inventor/)
+- [Pico / Pico 2 W Unicorn (Stellar, Galactic, Cosmic)](https://github.com/pimoroni/unicorn)
+- [Pimoroni Pico LiPo / 2 / XL W](https://github.com/pimoroni/pico-lipo)
+- [Plasma 2040 / Plasma Stick / Plasma 2350 / W](https://github.com/pimoroni/plasma)
 
 ## Entering DFU/bootloader mode
 
