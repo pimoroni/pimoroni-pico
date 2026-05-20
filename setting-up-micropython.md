@@ -31,7 +31,7 @@ On the releases page of this Github repository you'll find a bunch of different 
 
 ### What firmware files are **not** in this repo?
 
-If you have a **Pico 2, Pico 2 W or other RP2350 board** you'll can download MicroPython builds from the [releases page of our RP2350 repo](https://github.com/pimoroni/pimoroni-pico-rp2350/releases).
+If you have a **Pico 2, Pico 2 W or other RP2350 board** you can download MicroPython builds from the [releases page of our RP2350 repo](https://github.com/pimoroni/pimoroni-pico-rp2350/releases).
 
 Many of our own RP2040 and RP2350 products now have their own repos where you can find the firmware and examples:
 
