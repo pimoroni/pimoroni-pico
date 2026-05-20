@@ -1,7 +1,8 @@
 # Installing MicroPython  <!-- omit in toc -->
 
-- [What firmware files are in this repo?](#what-firmware-files-are-in-this-repo)
-- [What firmware files are **not** in this repo?](#what-firmware-files-are-not-in-this-repo)
+- [Where to find the firmware](#where-to-find-the-firmware)
+  - [What firmware files are in this repo?](#what-firmware-files-are-in-this-repo)
+  - [What firmware files are **not** in this repo?](#what-firmware-files-are-not-in-this-repo)
 - [Entering DFU/bootloader mode](#entering-dfubootloader-mode)
   - [If you have a board with a reset button:](#if-you-have-a-board-with-a-reset-button)
   - [If you have a board without a reset button:](#if-you-have-a-board-without-a-reset-button)
@@ -11,7 +12,9 @@
 
 We provide pre-built MicroPython images which include all the drivers that include all the libraries and drivers you'll need to use our [supported products](https://github.com/pimoroni/pimoroni-pico#supported-products) To install MicroPython, you'll need to **copy the appropriate .uf2 file from the releases page to your device while it's in DFU/bootloader mode.**
 
-## What firmware files are in this repo?
+## Where to find the firmware
+
+### What firmware files are in this repo?
 
 On the releases page of this Github repository you'll find a bunch of different .uf2 files for use on **Pico, Pico W and other RP2040 boards** (if you can't see them, click on the arrow next to 'assets' to expand the list).
 
@@ -26,11 +29,11 @@ On the releases page of this Github repository you'll find a bunch of different 
 | Enviro Urban, Indoor, Weather & Grow                         | **enviro-vx.x.x-pimoroni-micropython.uf2**             | For a .uf2 with examples built in, go to the [Enviro releases page](https://github.com/pimoroni/enviro/releases)! |
 | Pico + USB | **pico_usb-vx.x.x-pimoroni-micropython.uf2** | :warning: Will erase your files when switching to/from a regular Pico build
 
-## What firmware files are **not** in this repo?
+### What firmware files are **not** in this repo?
 
- If you have a **Pico 2, Pico 2 W or other RP2350 board** you'll find MicroPython builds from the releases page of our [pimoroni-pico-rp2350 repo](https://github.com/pimoroni/pimoroni-pico-rp2350/releases).
+If you have a **Pico 2, Pico 2 W or other RP2350 board** you'll can download MicroPython builds from the [releases page of our RP2350 repo](https://github.com/pimoroni/pimoroni-pico-rp2350/releases).
 
-Many of our own RP2040 and RP2350 boards now have their own repos where you can find the firmware and examples:
+Many of our own RP2040 and RP2350 products now have their own repos where you can find the firmware and examples:
 
 - [Badger 2040 / W](https://github.com/pimoroni/badger2040/)
 - [Inky Frame](https://github.com/pimoroni/inky-frame)
