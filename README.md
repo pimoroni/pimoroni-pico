@@ -21,16 +21,15 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
   - [RP2040 Boards](#rp2040-boards)
   - [Pico W Aboard](#pico-w-aboard)
   - [Breakouts](#breakouts)
-  - [Kits](#kits)
 - [Tutorials and Guides](#tutorials-and-guides)
 
 # MicroPython
 
-:warning: This repository contains MicroPython builds for **RP2040** based products only. If you're looking for **RP2350** compatible MicroPython builds see here: https://github.com/pimoroni/pimoroni-pico-rp2350
+:warning: This repository contains MicroPython builds for **RP2040** based products only. If you're looking for **RP2350** compatible MicroPython builds see here: https://github.com/pimoroni/pimoroni-pico-rp2350 . Many of our own RP2040 and RP2350 products now have their own repos with MicroPython firmware and examples - these will be linked on the relevant shop pages.
 
-The easiest way to get started. If you're new to Pico, we recommend you read our [getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico) tutorial.
+We think MicroPython is the easiest way to get started! If you're new to Pico, we recommend you read our [getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico) tutorial.
 
-:warning: All of our MicroPython libraries are baked into a batteries-included, custom version of MicroPython which you can grab from releases: [https://github.com/pimoroni/pimoroni-pico/releases/latest/](https://github.com/pimoroni/pimoroni-pico/releases/latest/)
+We supply a batteries-included, custom version of MicroPython which you can grab from releases: [https://github.com/pimoroni/pimoroni-pico/releases/latest/](https://github.com/pimoroni/pimoroni-pico/releases/latest/). This contains built-in drivers for working with our displays, breakouts and other hardware.
 
 New releases are issued regularly with new libraries, bug fixes to our existing libraries and new features inherited from MicroPython upstream. Be sure to check back!
 
@@ -70,7 +69,6 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 * [Pimoroni Pico SDK Boilerplate](https://github.com/pimoroni/pico-boilerplate)
 
-
 # Supported Products
 
 ## Packs and Bases
@@ -95,9 +93,6 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 ## RP2040 Boards
 
-* Plasma 2040 (LED strip driver) - https://shop.pimoroni.com/products/plasma-2040
-* Interstate 75 (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75
-* Badger 2040 (E Ink badge) - https://shop.pimoroni.com/products/badger-2040
 * Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
 * Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
 * Tufty 2040 (LCD badge) - https://shop.pimoroni.com/products/tufty-2040
@@ -105,16 +100,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 ## Pico W Aboard
 
 * Automation 2040 W (inputs, outputs and relays, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w
-* Inventor 2040 W (motors, servos, noise) - https://shop.pimoroni.com/products/inventor-2040-w
-* Inky Frame 5.7" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-5-7
 * Automation 2040 W Mini (inputs, outputs and a relay, 6-40V compatible) - https://shop.pimoroni.com/products/automation-2040-w-mini
-* Plasma Stick 2040 W (bijou LED strip controller) - https://shop.pimoroni.com/products/plasma-stick-2040-w
-* Galactic Unicorn (53 x 11 LED matrix) - https://shop.pimoroni.com/products/galactic-unicorn
-* Interstate 75 W (HUB75 matrix driver) - https://shop.pimoroni.com/products/interstate-75-w
-* Inky Frame 4.0" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-4
-* Badger 2040 W (E Ink badge) - https://shop.pimoroni.com/products/badger-2040-w
-* Cosmic Unicorn (32 x 32 LED matrix) - https://shop.pimoroni.com/products/cosmic-unicorn
-* Inky Frame 7.3" (7-colour E Ink) - https://shop.pimoroni.com/products/inky-frame-7-3
 
 ## Breakouts
 
@@ -149,10 +135,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 * VL53L5CX 8x8 Time of Flight Array Sensor - https://shop.pimoroni.com/products/vl53l5cx-time-of-flight-tof-sensor-breakout
 * RGB Encoder Wheel - https://shop.pimoroni.com/products/rgb-encoder-wheel-breakout
 * AS7343 14-Channel Multi-Spectral Sensor Breakout - https://shop.pimoroni.com/products/as7343-breakout
-
-## Kits
-
-* Wireless Plasma Kit (Plasma Stick + LED wire + bottle!) - https://shop.pimoroni.com/products/wireless-plasma-kit
+* BME690 - Temperature, Pressure, Humidity & Gas Sensor - https://shop.pimoroni.com/products/bme690-breakout
 
 # Tutorials and Guides
 
