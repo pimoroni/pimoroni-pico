@@ -61,8 +61,8 @@ namespace pimoroni {
 
   void UC8151::reset() {
     if(RESET == PIN_UNUSED) return;
-    gpio_put(RESET, 0); sleep_ms(10);
-    gpio_put(RESET, 1); sleep_ms(10);
+    gpio_put(RESET, 0); busy_wait_ms(10);
+    gpio_put(RESET, 1); busy_wait_ms(10);
     busy_wait();
   }
 
