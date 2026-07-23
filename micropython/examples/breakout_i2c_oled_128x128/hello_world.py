@@ -13,21 +13,21 @@ while True:
     # clear to black
     display.set_pen(0)  # Black
     display.clear()
-    
-    # write some text    
-    display.set_pen(15)    
+
+    # write some text
+    display.set_pen(15)
     display.text("Hello World!", 0, 0, scale=2)
-    
+
     # draw some boxes showing all the 'pens' - AKA dither patterns - available for this mono screen
     for pen in range(16):
         display.set_pen(pen)
         display.rectangle(pen * 8, HEIGHT - 16, 8, 16)
-    
+
     # add some labels
     display.set_pen(15)
     display.text("0", 0, HEIGHT - 28, scale=1)
     display.text("15", 116, HEIGHT - 28, scale=1)
-    
+
     # update the screen
     display.update()
 
