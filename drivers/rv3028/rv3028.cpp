@@ -69,7 +69,9 @@ namespace pimoroni {
 
     uint8_t chip_id = 0;
     i2c->read_bytes(address, RV3028_ID, &chip_id, 1);
-    if(chip_id != (RV3028_CHIP_ID | RV3028_VERSION)) {
+    // Accept both known RV3028 chip/version pairs.
+    if(chip_id != (RV3028_CHIP_ID | RV3028_VERSION) &&
+       chip_id != (RV3028_NEW_CHIP_ID | RV3028_NEW_VERSION)) {
       return false;
     }
 
