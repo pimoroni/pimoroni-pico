@@ -19,6 +19,8 @@ namespace pimoroni {
     // Variables
     //--------------------------------------------------
   private:
+    static constexpr uint32_t MAX_CHUNK_BYTES = 32;
+
     spi_inst_t *spi = PIMORONI_SPI_DEFAULT_INSTANCE;
 
     // interface pins with our standard defaults where appropriate
@@ -27,14 +29,28 @@ namespace pimoroni {
     uint SCK    = SPI_DEFAULT_SCK;
     uint MOSI   = SPI_DEFAULT_MOSI;
     uint MISO   = SPI_DEFAULT_MISO;
-    
+
     uint32_t start_address = 0;
     uint16_t width = 0;
     uint16_t height = 0;
-    
+
     absolute_time_t timeout;
 
     bool blocking = false;
+
+    struct BusConfig {
+      uint32_t cpsr;
+      uint32_t cr0;
+    };
+
+    uint32_t bus_cpsr = 0;
+    uint32_t bus_cr0 = 0;
+
+    uint32_t chunk_size = 8;
+
+    uint8_t pending_data[MAX_CHUNK_BYTES];
+    uint32_t pending_address = 0;
+    uint32_t pending_len = 0;
 
   public:
     enum colour : uint8_t {
@@ -85,12 +101,14 @@ namespace pimoroni {
           printf("[%u] %s == %s ? %s\n", k, writeBuffer, readBuffer, bSame ? "Success" : "Failure");
         }
       }
-      
+
       void write_pixel(const Point &p, uint8_t colour) override;
       void write_pixel_span(const Point &p, uint l, uint8_t colour) override;
       void read_pixel_span(const Point &p, uint l, uint8_t *data) override;
 
-      int __not_in_flash_func(SpiSetBlocking)(const uint16_t uSrc, size_t uLen) 
+      void flush();
+
+      int __not_in_flash_func(SpiSetBlocking)(const uint16_t uSrc, size_t uLen)
       {
         // Deliberately overflow FIFO, then clean up afterward, to minimise amount
         // of APB polling required per halfword
@@ -115,6 +133,18 @@ namespace pimoroni {
 
     private:
       void init();
+
+      BusConfig claim_bus();
+      void release_bus(const BusConfig &previous);
+
+      void command(uint8_t value);
+      void reset();
+      bool is_wrapped();
+
+      void write_burst(uint32_t address, size_t len, const uint8_t *data);
+      void fill_burst(uint32_t address, size_t len, const uint8_t byte);
+      void read_burst(uint32_t address, size_t len, uint8_t *data);
+
       void write(uint32_t address, size_t len, const uint8_t *data);
       void write(uint32_t address, size_t len, const uint8_t byte);
       void read(uint32_t address, size_t len, uint8_t *data);
