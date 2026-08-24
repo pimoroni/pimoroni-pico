@@ -56,26 +56,28 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 
 ### Supported Displays
 
-* Pico Display - 240x135 SPI LCD - `DISPLAY_PICO_DISPLAY`
-* Pico Display 2.0" / 2.8" - 320x240 SPI LCD - `DISPLAY_PICO_DISPLAY_2`
-* Tufty 2040 - 320x240 Parallel LCD - `DISPLAY_TUFTY_2040`
-* Pico Explorer - 240x240 SPI LCD - `DISPLAY_PICO_EXPLORER`
-* Enviro Plus - 240x240 SPI LCD - `DISPLAY_ENVIRO_PLUS`
-* 240x240 Round SPI LCD Breakout - `DISPLAY_ROUND_LCD_240X240`
-* 240x240 Square SPI LCD Breakout - `DISPLAY_LCD_240X240`
-* 160x80 SPI LCD Breakout - `DISPLAY_LCD_160X80`
-* 128x128 I2C OLED - `DISPLAY_I2C_OLED_128X128`
-* Pico Inky Pack / Badger 2040 / Badger 2040 W - 296x128 mono E ink - `DISPLAY_INKY_PACK`
-* Inky Frame 5.7" - 600x448 7-colour E ink - `DISPLAY_INKY_FRAME`
-* Inky Frame 4.0" - 640x400 7-colour E ink - `DISPLAY_INKY_FRAME_4`
-* Inky Frame 7.3" - 800x480 7-colour E ink - `DISPLAY_INKY_FRAME_7`
-* Pico GFX Pack - 128x64 mono LCD Matrix - `DISPLAY_GFX_PACK`
-* Galactic Unicorn - 53x11 LED Matrix - `DISPLAY_GALACTIC_UNICORN`
-* Interstate75 and 75W - HUB75 Matrix driver - `DISPLAY_INTERSTATE75_SIZEOFMATRIX` please read below!
-* Cosmic Unicorn - 32x32 LED Matrix - `DISPLAY_COSMIC_UNICORN`
-* Stellar Unicorn - 16x16 LED Matrix - `DISPLAY_STELLAR_UNICORN`
-* Pico Unicorn Pack - 16x7 LED Matrix - `DISPLAY_UNICORN_PACK`
-* Pico Scroll Pack - 17x7 LED Matrix - `DISPLAY_SCROLL_PACK`
+| Display Name                                 | Description            | Constructor Constant                                                            |
+| -------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------- |
+| 128x128 I2C OLED                             |                        | `DISPLAY_I2C_OLED_128X128`                                                      |
+| 160x80 SPI LCD Breakout                      |                        | `DISPLAY_LCD_160X80`                                                            |
+| 240x240 Round SPI LCD Breakout               |                        | `DISPLAY_ROUND_LCD_240X240`                                                     |
+| 240x240 Square SPI LCD Breakout              |                        | `DISPLAY_LCD_240X240`                                                           |
+| Cosmic Unicorn                               | 32x32 LED Matrix       | `DISPLAY_COSMIC_UNICORN`                                                        |
+| Enviro Plus                                  | 240x240 SPI LCD        | `DISPLAY_ENVIRO_PLUS`                                                           |
+| Galactic Unicorn                             | 53x11 LED Matrix       | `DISPLAY_GALACTIC_UNICORN`                                                      |
+| Inky Frame 4.0"                              | 640x400 7-colour E ink | `DISPLAY_INKY_FRAME_4`                                                          |
+| Inky Frame 5.7"                              | 600x448 7-colour E ink | `DISPLAY_INKY_FRAME`                                                            |
+| Inky Frame 7.3"                              | 800x480 7-colour E ink | `DISPLAY_INKY_FRAME_7`                                                          |
+| Interstate75 and 75W                         | HUB75 Matrix driver    | See [Interstate75 section](#interstate75-and-interstate75w-display-modes) below |
+| Pico Display                                 | 240x135 SPI LCD        | `DISPLAY_PICO_DISPLAY`                                                          |
+| Pico Display 2.0" / 2.8"                     | 320x240 SPI LCD        | `DISPLAY_PICO_DISPLAY_2`                                                        |
+| Pico Explorer                                | 240x240 SPI LCD        | `DISPLAY_PICO_EXPLORER`                                                         |
+| Pico GFX Pack                                | 128x64 mono LCD Matrix | `DISPLAY_GFX_PACK`                                                              |
+| Pico Inky Pack / Badger 2040 / Badger 2040 W | 296x128 mono E ink     | `DISPLAY_INKY_PACK`                                                             |
+| Pico Scroll Pack                             | 17x7 LED Matrix        | `DISPLAY_SCROLL_PACK`                                                           |
+| Pico Unicorn Pack                            | 16x7 LED Matrix        | `DISPLAY_UNICORN_PACK`                                                          |
+| Stellar Unicorn                              | 16x16 LED Matrix       | `DISPLAY_STELLAR_UNICORN`                                                       |
+| Tufty 2040                                   | 320x240 Parallel LCD   | `DISPLAY_TUFTY_2040`                                                            |
 
 #### Interstate75 and Interstate75W Display modes
 
@@ -83,25 +85,29 @@ Both the Interstate75 and Interstate75W support lots of different sizes of HUB75
 
 The available display settings are listed here:
 
-* 32 x 32 Matrix - `DISPLAY_INTERSTATE75_32X32`
-* 64 x 32 Matrix - `DISPLAY_INTERSTATE75_64X32`
-* 96 x 32 Matrix - `DISPLAY_INTERSTATE75_96X32`
-* 96 x 48 Matrix - `DISPLAY_INTERSTATE75_96X48`
-* 128 x 32 Matrix - `DISPLAY_INTERSTATE75_128X32`
-* 64 x 64 Matrix - `DISPLAY_INTERSTATE75_64X64`
-* 128 x 64 Matrix - `DISPLAY_INTERSTATE75_128X64`
-* 192 x 64 Matrix - `DISPLAY_INTERSTATE75_192X64`
-* 256 x 64 Matrix - `DISPLAY_INTERSTATE75_256X64`
+| Matrix Dimensions | Constructor Constant          |
+| ----------------- | ----------------------------- |
+| 32 x 32           | `DISPLAY_INTERSTATE75_32X32`  |
+| 64 x 32           | `DISPLAY_INTERSTATE75_64X32`  |
+| 96 x 32           | `DISPLAY_INTERSTATE75_96X32`  |
+| 96 x 48           | `DISPLAY_INTERSTATE75_96X48`  |
+| 128 x 32          | `DISPLAY_INTERSTATE75_128X32` |
+| 64 x 64           | `DISPLAY_INTERSTATE75_64X64`  |
+| 128 x 64          | `DISPLAY_INTERSTATE75_128X64` |
+| 192 x 64          | `DISPLAY_INTERSTATE75_192X64` |
+| 256 x 64          | `DISPLAY_INTERSTATE75_256X64` |
 
 ### Supported Graphics Modes (Pen Type)
 
-* 1-bit - `PEN_1BIT` - mono, used for Pico Inky Pack and i2c OLED
-* 3-bit - `PEN_3BIT` - 8-colour, used for Inky Frame
-* 4-bit - `PEN_P4` - 16-colour palette of your choice
-* 8-bit - `PEN_P8` - 256-colour palette of your choice
-* 8-bit RGB332 - `PEN_RGB332` - 256 fixed colours (3 bits red, 3 bits green, 2 bits blue)
-* 16-bit RGB565 - `PEN_RGB565` - 64K colours at the cost of RAM. (5 bits red, 6 bits green, 5 bits blue)
-* 24-bit RGB888 - `PEN_RGB888` - 16M colours at the cost of lots of RAM. (8 bits red, 8 bits green, 8 bits blue)
+| Pen Type      | Description                                                                     | Constructor Constant |
+| ------------- | ------------------------------------------------------------------------------- | -------------------- |
+| 1-bit         | mono, used for Pico Inky Pack and i2c OLED                                      | `PEN_1BIT`           |
+| 3-bit         | 8-colour, used for Inky Frame                                                   | `PEN_3BIT`           |
+| 4-bit         | 16-colour palette of your choice                                                | `PEN_P4`             |
+| 8-bit         | 256-colour palette of your choice                                               | `PEN_P8`             |
+| 8-bit RGB332  | 256 fixed colours (3 bits red, 3 bits green, 2 bits blue)                       | `PEN_RGB332`         |
+| 16-bit RGB565 | 64K colours at the cost of RAM. (5 bits red, 6 bits green, 5 bits blue)         | `PEN_RGB565`         |
+| 24-bit RGB888 | 16M colours at the cost of lots of RAM. (8 bits red, 8 bits green, 8 bits blue) | `PEN_RGB888`         |
 
 These offer a tradeoff between RAM usage and available colours. In most cases you would probably use `RGB332` since it offers the easiest tradeoff. It's also the default for colour LCDs.
 
