@@ -75,6 +75,7 @@ Bear in mind that MicroPython has only 192K of RAM available- a 320x240 pixel di
 * Cosmic Unicorn - 32x32 LED Matrix - `DISPLAY_COSMIC_UNICORN`
 * Stellar Unicorn - 16x16 LED Matrix - `DISPLAY_STELLAR_UNICORN`
 * Pico Unicorn Pack - 16x7 LED Matrix - `DISPLAY_UNICORN_PACK`
+* Pico Scroll Pack - 17x7 LED Matrix - `DISPLAY_SCROLL_PACK`
 
 #### Interstate75 and Interstate75W Display modes
 
@@ -607,7 +608,7 @@ The arguments for `decode` are as follows:
 2. Decode Y
 3. Source - The region, in pixels, that you want to show from the PNG. The argument is given as a tuple of four values which give the offset from the left and top of the images, plus the width and height of the selected region. The whole PNG is loaded and decoded no matter what you put here, but this it makes it easier to manage multiple images for things like icons.
 4. Scale - Lets you scale images up by a fixed multiplier along the X and Y axis. If you want to make an image 4x wider and 2x taller you'd use `scale=(4,2)'.
-5. Rotate - Lets you rotate your PNG graphic in 90 degree intervals. 
+5. Rotate - Lets you rotate your PNG graphic in 90 degree intervals.
 6. Mode - For indexed PNGs, you can supply a mode argument with one of `PNG COPY`, `PNG DITHER`, and `PNG_POSTERISE`. `PNG_COPY` will copy the palette indexes into a P4 or P8 graphics buffer rather than dithering or posterising (snapping to the nearest available colour).
    `PNG_DITHER` will use a simple ordered dither matrix to dither the image colours to the available display colours.
    `PNG_POSTERISE` will snap the colours in the PNG to their nearest display counterpart. Posterise is the default in all cases.
