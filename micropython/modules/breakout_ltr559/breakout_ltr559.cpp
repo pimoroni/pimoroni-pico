@@ -31,11 +31,16 @@ mp_obj_t BreakoutLTR559_make_new(const mp_obj_type_t *type, size_t n_args, size_
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
+    int interrupt = args[ARG_interrupt].u_int;
+    if(interrupt != (int)PIN_UNUSED && (interrupt < 0 || interrupt >= (int)NUM_BANK0_GPIOS)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("interrupt out of range. Expected a GPIO pin number or PIN_UNUSED"));
+    }
+
     self = mp_obj_malloc(breakout_ltr559_BreakoutLTR559_obj_t, &breakout_ltr559_BreakoutLTR559_type);
 
     self->i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
-    self->breakout = m_new_class(BreakoutLTR559, (pimoroni::I2C *)(self->i2c->i2c), args[ARG_interrupt].u_int);
+    self->breakout = m_new_class(BreakoutLTR559, (pimoroni::I2C *)(self->i2c->i2c), interrupt);
 
     if(!self->breakout->init()) {
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("BreakoutLTR559: breakout not found when initialising"));
