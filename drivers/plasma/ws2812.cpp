@@ -19,7 +19,7 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
     int cycles_per_bit = ws2812_T1 + ws2812_T2 + ws2812_T3;
-    float div = clock_get_hz(clk_sys) / (freq * cycles_per_bit);
+    float div = (float)clock_get_hz(clk_sys) / (freq * cycles_per_bit);
     sm_config_set_clkdiv(&c, div);
 
     pio_sm_init(pio, sm, pio_program_offset, &c);
