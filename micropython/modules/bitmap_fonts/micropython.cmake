@@ -4,6 +4,9 @@ add_library(usermod_${MOD_NAME} INTERFACE)
 
 target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/bitmap_fonts/bitmap_fonts.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/bitmap_fonts/font6_data.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/bitmap_fonts/font8_data.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../libraries/bitmap_fonts/font14_outline_data.cpp
 )
 
 target_include_directories(usermod_${MOD_NAME} INTERFACE
