@@ -35,6 +35,7 @@ mp_obj_t scd41_init(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) 
     _PimoroniI2C_obj_t *i2c = PimoroniI2C_from_machine_i2c_or_native(args[ARG_i2c].u_obj);
 
     sensirion_i2c_hal_init((pimoroni::I2C*)i2c->i2c);
+    scd4x_init(SCD41_I2C_ADDR_62);
     scd4x_stop_periodic_measurement();
     scd4x_reinit();
     scd41_initialised = true;
@@ -83,7 +84,7 @@ mp_obj_t scd41_get_data_ready() {
         return mp_const_none;
     }
     bool data_ready = false;
-    int error = scd4x_get_data_ready_flag(&data_ready);
+    int error = scd4x_get_data_ready_status(&data_ready);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, READ_FAIL_MSG);
         return mp_const_none;
@@ -124,7 +125,7 @@ mp_obj_t scd41_set_automatic_self_calibration(mp_obj_t asc_enabled) {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
         return mp_const_none;
     };
-    int error = scd4x_set_automatic_self_calibration(asc_enabled == mp_const_true ? 1u : 0u);
+    int error = scd4x_set_automatic_self_calibration_enabled(asc_enabled == mp_const_true ? 1u : 0u);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
     }
@@ -139,7 +140,7 @@ mp_obj_t scd41_get_automatic_self_calibration() {
     }
 
     uint16_t asc_enabled;
-    int error = scd4x_get_automatic_self_calibration(&asc_enabled);
+    int error = scd4x_get_automatic_self_calibration_enabled(&asc_enabled);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
         return mp_const_none;
@@ -153,8 +154,8 @@ mp_obj_t scd41_set_temperature_offset(mp_obj_t offset) {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
         return mp_const_none;
     }
-    float o = mp_obj_get_float(offset);
-    int error = scd4x_set_temperature_offset(o);
+    int32_t o = (int32_t)mp_obj_get_float(offset);
+    int error = scd4x_set_temperature_offset_raw((uint16_t)((o * 12271) >> 15));
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
     }
@@ -168,14 +169,14 @@ mp_obj_t scd41_get_temperature_offset() {
         return mp_const_none;
     }
 
-    int32_t t_offset;
-    int error = scd4x_get_temperature_offset(&t_offset);
+    uint16_t t_offset_raw;
+    int error = scd4x_get_temperature_offset_raw(&t_offset_raw);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
         return mp_const_none;
     }
 
-    return mp_obj_new_int(t_offset);
+    return mp_obj_new_int((21875 * (int32_t)t_offset_raw) >> 13);
 }
 
 mp_obj_t scd41_set_sensor_altitude(mp_obj_t altitude) {
@@ -198,7 +199,7 @@ mp_obj_t scd41_set_ambient_pressure(mp_obj_t pressure) {
         return mp_const_none;
     }
     int p = mp_obj_get_int(pressure);
-    int error = scd4x_set_ambient_pressure(p);
+    int error = scd4x_set_ambient_pressure_raw(p);
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
     }
