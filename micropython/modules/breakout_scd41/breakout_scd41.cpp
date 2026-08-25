@@ -154,8 +154,11 @@ mp_obj_t scd41_set_temperature_offset(mp_obj_t offset) {
         mp_raise_msg(&mp_type_RuntimeError, NOT_INITIALISED_MSG);
         return mp_const_none;
     }
-    int32_t o = (int32_t)mp_obj_get_float(offset);
-    int error = scd4x_set_temperature_offset_raw((uint16_t)((o * 12271) >> 15));
+    float o = mp_obj_get_float(offset);
+    if(o < 0.0f || o > 175.0f) {
+        mp_raise_ValueError(MP_ERROR_TEXT("offset out of range. Expected 0.0 to 175.0 degrees C"));
+    }
+    int error = scd4x_set_temperature_offset_raw((uint16_t)(((o * 65535.0f) / 175.0f) + 0.5f));
     if(error) {
         mp_raise_msg(&mp_type_RuntimeError, FAIL_MSG);
     }
@@ -176,7 +179,7 @@ mp_obj_t scd41_get_temperature_offset() {
         return mp_const_none;
     }
 
-    return mp_obj_new_int((21875 * (int32_t)t_offset_raw) >> 13);
+    return mp_obj_new_float(((float)t_offset_raw * 175.0f) / 65535.0f);
 }
 
 mp_obj_t scd41_set_sensor_altitude(mp_obj_t altitude) {

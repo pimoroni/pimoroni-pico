@@ -37,6 +37,27 @@ while True:
 
 The `measure()` method will return a Tuple containing the CO₂ reading, temperature in degrees C and humidity.
 
+## Compensating For Ambient Conditions
+
+The SCD41 self-heats, so its temperature reading runs high. Set an offset in degrees C to
+compensate, and read it back:
+
+```python
+breakout_scd41.set_temperature_offset(4.0)
+print(breakout_scd41.get_temperature_offset())
+```
+
+The offset applies to the temperature and humidity readings, not to CO2. Valid range is
+0.0 to 175.0.
+
+For a more accurate CO2 reading you can also supply the altitude in metres, or the ambient
+pressure in hPa. Set one or the other, not both - pressure takes precedence:
+
+```python
+breakout_scd41.set_sensor_altitude(150)
+breakout_scd41.set_ambient_pressure(1013)
+```
+
 ## Changing Calibration
 
 By default the SCD41 will perform automatic self calibration, which could lead to drift in readings over time.
