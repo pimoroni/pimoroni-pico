@@ -1079,7 +1079,7 @@ mp_obj_t ModPicoGraphics_character(size_t n_args, const mp_obj_t *pos_args, mp_m
         { MP_QSTR_char, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_x, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_y, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_scale, MP_ARG_INT, {.u_int = 2} },
+        { MP_QSTR_scale, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -1090,7 +1090,7 @@ mp_obj_t ModPicoGraphics_character(size_t n_args, const mp_obj_t *pos_args, mp_m
     int c = mp_obj_get_int(args[ARG_char].u_obj);
     int x = args[ARG_x].u_int;
     int y = args[ARG_y].u_int;
-    int scale = args[ARG_scale].u_int;
+    float scale = args[ARG_scale].u_obj == mp_const_none ? 2.0f : mp_obj_get_float(args[ARG_scale].u_obj);
 
     self->graphics->character((char)c, Point(x, y), scale);
 

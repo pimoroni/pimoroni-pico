@@ -372,6 +372,8 @@ display.character(char, x, y, scale)
 
 Specify `char` using a [decimal ASCII code](https://www.ascii-code.com/). Note not all characters are supported.
 
+As with `text`, `scale` can be a whole number (integer) for Bitmap fonts, or a decimal (float) for Vector (Hershey) fonts.
+
 For example:
 ```python
 display.set_font("bitmap8")
