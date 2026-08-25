@@ -308,26 +308,12 @@ These are aligned from their top-left corner.
 * `bitmap8`
 * `bitmap14_outline`
 
-Vector (Hershey) fonts.
-These are aligned horizontally (x) to their left edge, but vertically (y) to their midline excluding descenders [i.e., aligned at top edge of lower case letter m]. At `scale=1`, the top edge of upper case letters is 10 pixels above the specified `y`, text baseline is 10 pixels below the specified `y`, and descenders go down to 20 pixels below the specified `y`.
+The Vector (Hershey) fonts - `sans`, `gothic`, `cursive`, `serif_italic` and `serif` - are no longer built into MicroPython firmware, and `set_font` will raise a `ValueError` if you ask for one. Use PicoVector with an Alright Fonts `.af` file instead, which gives you anti-aliased vector text and a much wider choice of typeface:
 
-* `sans`
-* `gothic`
-* `cursive`
-* `serif_italic`
-* `serif`
+* Fonts: https://github.com/pimoroni/picovector-fonts/releases
+* PicoVector: [../picovector/README.md](../picovector/README.md)
 
-#### Changing The Thickness
-
-Vector (Hershey) fonts are drawn with individual lines. By default these are 1px thick, making for very thin and typically illegible text.
-
-To change the thickness of lines used for Vector fonts, use the `set_thickness` method:
-
-```python
-display.set_thickness(n)
-```
-
-Drawing thick text involves setting a lot more pixels and may slow your drawing down considerably. Be careful how and where you use this.
+`set_thickness` only ever affected Vector font text, so it now has no effect. It is still accepted so existing code keeps running.
 
 #### Drawing Text
 
@@ -346,7 +332,7 @@ display.text(text, x, y, wordwrap, scale, angle, spacing)
 * `spacing` - letter spacing
 * `fixed_width` - space all characters equal distance apart (monospace)
 
-Text scale can be a whole number (integer) for Bitmap fonts, or a decimal (float) for Vector (Hershey) fonts.
+Text scale can be a whole number (integer) or a decimal (float).
 
 For example:
 
@@ -372,7 +358,7 @@ display.character(char, x, y, scale)
 
 Specify `char` using a [decimal ASCII code](https://www.ascii-code.com/). Note not all characters are supported.
 
-As with `text`, `scale` can be a whole number (integer) for Bitmap fonts, or a decimal (float) for Vector (Hershey) fonts.
+As with `text`, `scale` can be a whole number (integer) or a decimal (float).
 
 For example:
 ```python

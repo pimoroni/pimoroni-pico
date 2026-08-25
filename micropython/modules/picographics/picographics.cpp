@@ -607,7 +607,9 @@ mp_obj_t ModPicoGraphics_set_font(mp_obj_t self_in, mp_obj_t font) {
     ModPicoGraphics_obj_t *self = MP_OBJ_TO_PTR2(self_in, ModPicoGraphics_obj_t);
 
     if (mp_obj_is_str(font)) {
-        self->graphics->set_font(mp_obj_to_string_r(font));
+        if(!self->graphics->set_font(mp_obj_to_string_r(font))) {
+            mp_raise_ValueError(MP_ERROR_TEXT("unknown font. Expected bitmap6, bitmap8 or bitmap14_outline"));
+        }
     }
     else {
         mp_buffer_info_t bufinfo;

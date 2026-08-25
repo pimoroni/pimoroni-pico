@@ -324,7 +324,7 @@ namespace pimoroni {
 #ifdef HERSHEY_FONTS
     void set_font(const hershey::font_t *font);
 #endif
-    void set_font(std::string_view name);
+    bool set_font(std::string_view name);
 
     void set_dimensions(int width, int height);
     void set_framebuffer(void *frame_buffer);

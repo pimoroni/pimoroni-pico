@@ -49,7 +49,7 @@ namespace pimoroni {
   }
 #endif
 
-  void PicoGraphics::set_font(std::string_view name){
+  bool PicoGraphics::set_font(std::string_view name){
     if (name == "bitmap6") {
       set_font(&font6);
     } else if (name == "bitmap8") {
@@ -58,12 +58,14 @@ namespace pimoroni {
       set_font(&font14_outline);
     } else {
 #ifdef HERSHEY_FONTS
-      // check that font exists and assign it
       if(hershey::has_font(name)) {
         set_font(hershey::font(name));
+        return true;
       }
 #endif
+      return false;
     }
+    return true;
   }
 
   void PicoGraphics::set_thickness(uint t) {
