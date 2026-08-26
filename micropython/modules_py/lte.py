@@ -88,7 +88,7 @@ class LTE():
             timeout_char=DEFAULT_UART_TIMEOUT_CHAR,
             rxbuf=DEFAULT_UART_RXBUF)
 
-    def start_ppp(self, baudrate=DEFAULT_UART_BAUD, connect=True):
+    def start_ppp(self, baudrate=DEFAULT_UART_BAUD, connect=True, timeout=60):
         self._wait_ready(poll_time=1.0, timeout=30)
 
         # Switch to a faster baudrate
@@ -112,8 +112,11 @@ class LTE():
 
         self._ppp = PPP(self._uart)
         self._ppp.connect()
+        giveup = time.time() + timeout
         while self._ppp.status() != 4:
             time.sleep(1.0)
+            if time.time() > giveup:
+                raise CellularError("timed out starting ppp")
 
         return self._ppp.ifconfig()
 

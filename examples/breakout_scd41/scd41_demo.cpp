@@ -54,18 +54,17 @@ int main(void) {
     sensirion_i2c_hal_init(&i2c);
 
     // Clean up potential SCD40 states
+    scd4x_init(SCD41_I2C_ADDR_62);
     scd4x_wake_up();
     scd4x_stop_periodic_measurement();
     scd4x_reinit();
 
-    uint16_t serial_0;
-    uint16_t serial_1;
-    uint16_t serial_2;
-    error = scd4x_get_serial_number(&serial_0, &serial_1, &serial_2);
+    uint16_t serial[3];
+    error = scd4x_get_serial_number(serial, 3);
     if (error) {
         printf("Error executing scd4x_get_serial_number(): %i\n", error);
     } else {
-        printf("serial: 0x%04x%04x%04x\n", serial_0, serial_1, serial_2);
+        printf("serial: 0x%04x%04x%04x\n", serial[0], serial[1], serial[2]);
     }
 
     // Start Measurement

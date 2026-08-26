@@ -43,7 +43,7 @@ namespace pimoroni {
         conf.os_pres = os_pressure;
         conf.os_temp = os_temp;
 
-        bme68x_set_conf(&conf, &device);
+        result = bme68x_set_conf(&conf, &device);
         bme68x_check_rslt("bme68x_set_conf", result);
         if(result != BME68X_OK) return false;
 

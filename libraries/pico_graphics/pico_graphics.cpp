@@ -49,7 +49,7 @@ namespace pimoroni {
   }
 #endif
 
-  void PicoGraphics::set_font(std::string_view name){
+  bool PicoGraphics::set_font(std::string_view name){
     if (name == "bitmap6") {
       set_font(&font6);
     } else if (name == "bitmap8") {
@@ -58,12 +58,14 @@ namespace pimoroni {
       set_font(&font14_outline);
     } else {
 #ifdef HERSHEY_FONTS
-      // check that font exists and assign it
       if(hershey::has_font(name)) {
         set_font(hershey::font(name));
+        return true;
       }
 #endif
+      return false;
     }
+    return true;
   }
 
   void PicoGraphics::set_thickness(uint t) {
@@ -118,7 +120,7 @@ namespace pimoroni {
 
   void PicoGraphics::circle(const Point &p, int32_t radius) {
     // circle in screen bounds?
-    Rect bounds = Rect(p.x - radius, p.y - radius, radius * 2, radius * 2);
+    Rect bounds = Rect(p.x - radius, p.y - radius, radius * 2 + 1, radius * 2 + 1);
     if(!bounds.intersects(clip)) return;
 
     int ox = radius, oy = 0, err = -radius;
@@ -283,7 +285,7 @@ namespace pimoroni {
         int32_t sy = points[i].y;
         int32_t ey = points[j].y;
         int32_t fy = p.y;
-        if ((sy < fy && ey >= fy) || (ey < fy && sy >= fy)) {
+        if ((sy <= fy && ey > fy) || (ey <= fy && sy > fy)) {
           int32_t sx = points[i].x;
           int32_t ex = points[j].x;
           int32_t px = int32_t(sx + float(fy - sy) / float(ey - sy) * float(ex - sx));
@@ -317,14 +319,14 @@ namespace pimoroni {
     if(p1.y == p2.y) {
       int32_t start = std::min(p1.x, p2.x);
       int32_t end   = std::max(p1.x, p2.x);
-      rectangle(Rect(start, p1.y - ht, end - start, t));
+      rectangle(Rect(start, p1.y - ht, end - start + 1, t));
       return;
     }
 
     // fast vertical line
     if(p1.x == p2.x) {
       int32_t start  = std::min(p1.y, p2.y);
-      int32_t length = std::max(p1.y, p2.y) - start;
+      int32_t length = std::max(p1.y, p2.y) - start + 1;
       rectangle(Rect(p1.x - ht, start, t, length));
       return;
     }
@@ -347,6 +349,7 @@ namespace pimoroni {
         y += sy;
         x += sx;
       }
+      rectangle({p2.x - ht, p2.y - ht, t, t});
     }else{
       // steep version
       int32_t s = std::abs(dy);       // number of steps
@@ -359,6 +362,7 @@ namespace pimoroni {
         y += sy;
         x += sx;
       }
+      rectangle({p2.x - ht, p2.y - ht, t, t});
     }
   }
 
@@ -367,14 +371,14 @@ namespace pimoroni {
     if(p1.y == p2.y) {
       int32_t start = std::min(p1.x, p2.x);
       int32_t end   = std::max(p1.x, p2.x);
-      pixel_span(Point(start, p1.y), end - start);
+      pixel_span(Point(start, p1.y), end - start + 1);
       return;
     }
 
     // fast vertical line
     if(p1.x == p2.x) {
       int32_t start  = std::min(p1.y, p2.y);
-      int32_t length = std::max(p1.y, p2.y) - start;
+      int32_t length = std::max(p1.y, p2.y) - start + 1;
       Point dest(p1.x, start);
       while(length--) {
         pixel(dest);
@@ -403,6 +407,7 @@ namespace pimoroni {
         y += sy;
         x += sx;
       }
+      pixel(p2);
     }else{
       // steep version
       int32_t s = std::abs(dy);       // number of steps
@@ -416,6 +421,7 @@ namespace pimoroni {
         y += sy;
         x += sx;
       }
+      pixel(p2);
     }
   }
 

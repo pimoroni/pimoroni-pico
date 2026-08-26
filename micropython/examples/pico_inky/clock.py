@@ -12,7 +12,7 @@ button_c = machine.Pin(14, machine.Pin.IN, pull=machine.Pin.PULL_UP)
 graphics = PicoGraphics(DISPLAY_INKY_PACK)
 WIDTH, HEIGHT = graphics.get_bounds()
 graphics.set_update_speed(3)
-graphics.set_font("gothic")
+graphics.set_font("bitmap8")
 
 # RTC
 rtc = machine.RTC()

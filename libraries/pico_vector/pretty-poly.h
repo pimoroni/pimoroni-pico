@@ -416,14 +416,20 @@ uint8_t _pp_alpha_map_x4[5] = {0, 63, 127, 190, 255};
 uint8_t _pp_alpha_map_x16[17] = {0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255};
 
 void pp_init(uint32_t max_nodes_per_scanline) {
+  if(pp_nodes && _pp_max_nodes_per_scanline == max_nodes_per_scanline) return;
+
+  pp_deinit();
+
   _pp_max_nodes_per_scanline = max_nodes_per_scanline;
   pp_nodes = (int32_t *)PP_TRACKED_MALLOC(PP_TILE_BUFFER_SIZE * 4 * max_nodes_per_scanline * 2 * sizeof(int32_t));
   pp_node_counts = (uint32_t *)PP_TRACKED_MALLOC(PP_TILE_BUFFER_SIZE * 4 * sizeof(uint32_t));
 }
 
 void pp_deinit() {
-  PP_TRACKED_FREE(pp_nodes);
-  PP_TRACKED_FREE(pp_node_counts);
+  if(pp_nodes) PP_TRACKED_FREE(pp_nodes);
+  if(pp_node_counts) PP_TRACKED_FREE(pp_node_counts);
+  pp_nodes = NULL;
+  pp_node_counts = NULL;
 }
 
 void pp_clip(int32_t x, int32_t y, int32_t w, int32_t h) {

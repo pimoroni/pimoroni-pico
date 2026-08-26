@@ -368,7 +368,7 @@ namespace pimoroni {
 
     int32_t  network_rssi = 0;
     uint16_t data_len = 0; 
-    driver.send_command(GET_IDX_CHANNEL, params, 1, (uint8_t*)&network_rssi, &data_len);
+    driver.send_command(GET_IDX_RSSI, params, 1, (uint8_t*)&network_rssi, &data_len);
 
     return network_rssi;
   }

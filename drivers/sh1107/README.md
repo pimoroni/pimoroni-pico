@@ -1,58 +1,40 @@
-# ST7789 Display Driver for Pimoroni LCDs <!-- omit in toc -->
+# SH1107 Display Driver for Pimoroni Mono OLEDs <!-- omit in toc -->
 
-The ST7789 driver supports both Parallel and Serial (SPI) ST7789 displays and is intended for use with:
+The SH1107 driver supports I2C mono OLED displays and is intended for use with:
 
-* Pico Display
-* Pico Display 2.0
-* Tufty 2040
-* Pico Explorer
-* 240x240 Round & Square SPI LCD Breakouts
+* 1.12" Mono OLED Breakout (128x128)
 
 ## Setup
 
-Construct an instance of the ST7789 driver with either Parallel or SPI pins.
-
-Parallel:
+Construct an instance of the SH1107 driver with a width, height and I2C bus:
 
 ```c++
-ST7789 st7789(WIDTH, HEIGHT, ROTATE_0, {
-    Tufty2040::LCD_CS,   // Chip-Select
-    Tufty2040::LCD_DC,   // Data-Command
-    Tufty2040::LCD_WR,   // Write
-    Tufty2040::LCD_RD,   // Read
-    Tufty2040::LCD_D0,   // Data 0 (start of a bank of 8 pins)
-    Tufty2040::BACKLIGHT // Backlight
-});
+I2C i2c(4, 5);
+
+SH1107 sh1107(128, 128, i2c);
 ```
 
-SPI:
+The default I2C address is `0x3c`. Boards strapped to the alternate address take it as a fourth argument:
 
 ```c++
-ST7789 st7789(WIDTH, HEIGHT, ROTATE_0, false, {
-    PIMORONI_SPI_DEFAULT_INSTANCE, // SPI instance
-    SPI_BG_FRONT_CS,               // Chip-select
-    SPI_DEFAULT_SCK,               // SPI Clock
-    SPI_DEFAULT_MOSI,              // SPI Out
-    PIN_UNUSED,                    // SPI In
-    SPI_DEFAULT_DC,                // SPI Data/Command
-    PIN_UNUSED                     // Backlight
-});
+SH1107 sh1107(128, 128, i2c, SH1107::ALTERNATE_I2C_ADDRESS);
 ```
 
 ## Reference
 
 ### Update
 
-ST7789's `update` accepts an instance of `PicoGraphics` in any colour mode:
+SH1107's `update` accepts an instance of `PicoGraphics`. The display is 1 bit per pixel, so use `PicoGraphics_Pen1Bit`:
 
 ```c++
-st7789.update(&graphics);
+PicoGraphics_Pen1Bit graphics(sh1107.width, sh1107.height, nullptr);
+
+sh1107.update(&graphics);
 ```
 
-### Set Backlight
+### I2C Addresses
 
-If a backlight pin has been configured, you can set the backlight from 0 to 255:
-
-```c++
-st7789.set_backlight(128)
-```
+| Constant                        | Address |
+| ------------------------------- | ------- |
+| `SH1107::DEFAULT_I2C_ADDRESS`   | `0x3c`  |
+| `SH1107::ALTERNATE_I2C_ADDRESS` | `0x3d`  |

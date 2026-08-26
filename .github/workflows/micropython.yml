@@ -6,10 +6,6 @@ on:
   release:
     types: [published]
 
-env:
-  MICROPYTHON_VERSION: v1.28.0
-  MICROPYTHON_FLAVOUR: micropython
-
 jobs:
   build:
     name: ${{ matrix.name }} (${{ matrix.board }})
@@ -39,10 +35,10 @@ jobs:
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
-      RELEASE_FILE: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-pimoroni-micropython
-      PIMORONI_PICO_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}"
-      MICROPY_BOARD_DIR: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/board/${{ matrix.BOARD }}"
-      USER_C_MODULES: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}/micropython/modules/micropython-${{ matrix.name }}.cmake"
+      CI_RELEASE_FILENAME: ${{ matrix.name }}-${{ github.event.release.tag_name || github.sha }}-pimoroni-micropython
+      CI_PROJECT_ROOT: "${{ github.workspace }}/pimoroni-pico-${{ github.sha }}"
+      CI_BUILD_ROOT: "${{ github.workspace }}"
+      CI_USE_ENV: 1
       TAG_OR_SHA: ${{ github.event.release.tag_name || github.sha }}
       MICROPY_BOARD: ${{ matrix.board }}
       BOARD_NAME: ${{ matrix.name }}
@@ -71,57 +67,55 @@ jobs:
     - name: Install CCache
       run: |
         source $BUILD_TOOLS
-        apt_install_build_deps
+        ci_apt_install_build_deps
       
     - name: Checkout MicroPython & Submodules
       run: |
         source $BUILD_TOOLS
-        micropython_clone
+        ci_micropython_clone
 
     - name: "Py_Decl: Checkout py_decl"
-      uses: actions/checkout@v4
-      with:
-        repository: gadgetoid/py_decl
-        ref: v0.0.4
-        path: py_decl
+      run: |
+        source $BUILD_TOOLS
+        ci_tools_clone
 
     - name: Build MPY Cross
       run: |
         source $BUILD_TOOLS
-        micropython_build_mpy_cross
+        ci_micropython_build_mpy_cross
 
     - name: "HACK: Pico SDK Patch"
       shell: bash
       run: |
         source $BUILD_TOOLS
-        hack_patch_pico_sdk
+        ci_hack_patch_pico_sdk
 
     - name: Configure MicroPython
       shell: bash
       run: |
         source $BUILD_TOOLS
-        micropython_version
-        cmake_configure
+        ci_cmake_configure
 
     - name: Build MicroPython
       shell: bash
       run: |
         source $BUILD_TOOLS
-        cmake_build
+        ci_cmake_build
 
     - name: "Py_Decl: Verify UF2"
       shell: bash
       run: |
-        python3 py_decl/py_decl.py --to-json --verify build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
+        source $BUILD_TOOLS
+        ci_py_decl_verify
 
     - name: Store .uf2 as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.RELEASE_FILE }}.uf2
-        path: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
+        name: ${{ env.CI_RELEASE_FILENAME }}.uf2
+        path: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.uf2
 
     - name: Upload .uf2
       if: github.event_name == 'release'
       uses: softprops/action-gh-release@v2
       with:
-        files: build-${{ matrix.name }}/${{ env.RELEASE_FILE }}.uf2
+        files: ${{ env.CI_BUILD_ROOT }}/${{ env.CI_RELEASE_FILENAME }}.uf2

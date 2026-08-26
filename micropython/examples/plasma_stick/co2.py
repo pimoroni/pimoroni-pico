@@ -1,6 +1,6 @@
 import plasma
 from plasma import plasma_stick
-import breakout_scd41 as scd
+from breakout_scd41 import BreakoutSCD41
 from pimoroni_i2c import PimoroniI2C
 
 """
@@ -34,7 +34,7 @@ led_strip.start()
 i2c = PimoroniI2C(plasma_stick.SDA, plasma_stick.SCL)
 
 # set up SCD41 breakout
-scd.init(i2c)
+scd = BreakoutSCD41(i2c)
 scd.start()
 
 print("Waiting for SCD41 to be ready")

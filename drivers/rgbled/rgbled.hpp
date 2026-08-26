@@ -30,6 +30,10 @@ namespace pimoroni {
       gpio_set_function(pin_g, GPIO_FUNC_NULL);
       gpio_set_function(pin_b, GPIO_FUNC_NULL);
     }
+
+    RGBLED(const RGBLED&) = delete;
+    RGBLED& operator=(const RGBLED&) = delete;
+
     void set_rgb(uint8_t r, uint8_t g, uint8_t b);
     void set_hsv(float h, float s, float v);
     void set_brightness(uint8_t brightness);
