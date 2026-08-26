@@ -377,7 +377,7 @@ To draw a straight line at any angle between two specified points:
 display.line(x1, y1, x2, y2)
 ```
 
-The X1/Y1 and X2/Y2 coordinates describe the start and end of the line respectively.
+The X1/Y1 and X2/Y2 coordinates describe the start and end of the line respectively. Both endpoints are drawn, so a line and a polygon sharing a corner will meet at it.
 
 If you need a thicker line, for an outline or UI elements you can supply a fifth parameter - thickness - like so:
 
@@ -392,6 +392,8 @@ To draw a circle:
 ```python
 display.circle(x, y, r)
 ```
+
+The circle is centred on a pixel, so it spans `2 * r + 1` pixels rather than `2 * r`.
 
 * `x` - the destination X coordinate
 * `y` - the destination Y coordinate
