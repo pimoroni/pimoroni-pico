@@ -2,7 +2,7 @@
 # https://shop.pimoroni.com/products/scd41-co2-sensor-breakout
 # Press A to reset the high/low values.
 
-import breakout_scd41
+from breakout_scd41 import BreakoutSCD41
 from gfx_pack import SWITCH_A, GfxPack
 
 gp = GfxPack()
@@ -64,8 +64,8 @@ lowest = 4000.0
 readings = []
 
 # set up
-breakout_scd41.init(gp.i2c)
-breakout_scd41.start()
+scd41 = BreakoutSCD41(gp.i2c)
+scd41.start()
 
 gp.set_backlight(0, 0, 0, 127)
 display.set_font("bitmap8")
@@ -79,9 +79,9 @@ while True:
         highest = 0.0
         lowest = 4000.0
 
-    if breakout_scd41.ready():
+    if scd41.ready():
         # read the sensor
-        co2, temperature, humidity = breakout_scd41.measure()
+        co2, temperature, humidity = scd41.measure()
 
         # update highest / lowest values
         if co2 < lowest:

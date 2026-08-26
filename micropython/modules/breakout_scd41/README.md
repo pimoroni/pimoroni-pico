@@ -4,20 +4,21 @@
 
 Construct a new PimoroniI2C instance for your specific board. Breakout Garden uses pins 4 & 5 and Pico Explorer uses pins 20 & 21.
 
-Since SCD41 has a fixed I2C address and the Sensirion SCD4x library is used under the hood, it's wrapped up as a module for Python.
-
-Import the `breakout_scd41` and call `init` to set up I2C:
+Import `BreakoutSCD41` and construct one with your I2C instance:
 
 ```python
 import time
 
 import pimoroni_i2c
-import breakout_scd41
+from breakout_scd41 import BreakoutSCD41
 
 i2c = pimoroni_i2c.PimoroniI2C(4, 5)
 
-breakout_scd41.init(i2c)
+scd41 = BreakoutSCD41(i2c)
 ```
+
+Keep a reference to the object for as long as you're using the sensor. The Sensirion
+library keeps the I2C bus in a global, and the object is what keeps it alive.
 
 ## Taking Measurements
 
@@ -26,11 +27,11 @@ Before taking a measurement you must start periodic measurement by calling `star
 Poll on `ready()` and use `measure()` to read the result when it's `True`:
 
 ```python
-breakout_scd41.start()
+scd41.start()
 
 while True:
-    if breakout_scd41.ready():
-        co2, temperature, humidity = breakout_scd41.measure()
+    if scd41.ready():
+        co2, temperature, humidity = scd41.measure()
         print(co2, temperature, humidity)
         time.sleep(1.0)
 ```
@@ -43,8 +44,8 @@ The SCD41 self-heats, so its temperature reading runs high. Set an offset in deg
 compensate, and read it back:
 
 ```python
-breakout_scd41.set_temperature_offset(4.0)
-print(breakout_scd41.get_temperature_offset())
+scd41.set_temperature_offset(4.0)
+print(scd41.get_temperature_offset())
 ```
 
 The offset applies to the temperature and humidity readings, not to CO2. Valid range is
@@ -54,20 +55,20 @@ For a more accurate CO2 reading you can also supply the altitude in metres, or t
 pressure in hPa. Set one or the other, not both - pressure takes precedence:
 
 ```python
-breakout_scd41.set_sensor_altitude(150)
-breakout_scd41.set_ambient_pressure(1013)
+scd41.set_sensor_altitude(150)
+scd41.set_ambient_pressure(1013)
 ```
 
 ## Changing Calibration
 
 By default the SCD41 will perform automatic self calibration, which could lead to drift in readings over time.
 
-You can stop this with `breakout_scd41.set_automatic_self_calibration(False)`.
+You can stop this with `scd41.set_automatic_self_calibration(False)`.
 
 You can then use force recalibration with a known good CO₂ PPM baseline to calibrate your sensor:
 
 ```python
-correction_amount = breakout_scd41.scd41_perform_forced_recalibration(target_co2_concentration);
+correction_amount = scd41.perform_forced_recalibration(target_co2_concentration)
 ```
 
 `correction_amount` is the resulting correction in CO₂ PPM.
