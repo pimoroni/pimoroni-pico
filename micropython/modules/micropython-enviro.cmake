@@ -51,5 +51,5 @@ include(modules_py/modules_py)
 # C++ Magic Memory
 include(cppmem/micropython)
 
-# Disable build-busting C++ exceptions
-include(micropython-disable-exceptions)
+# Drop the C++ demangler, which nothing can reach
+include(cxx_terminate/micropython)
