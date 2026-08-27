@@ -32,6 +32,8 @@ namespace plasma {
             static const uint SERIAL_FREQ_400KHZ = 400000;
             static const uint SERIAL_FREQ_800KHZ = 800000;
             static const uint DEFAULT_SERIAL_FREQ = SERIAL_FREQ_800KHZ;
+            // Pass as "sm" to claim whichever state machine on "pio" is free
+            static const uint SM_AUTO = ~0u;
             enum class COLOR_ORDER {
                 RGB,
                 RBG,
@@ -68,18 +70,29 @@ namespace plasma {
             WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq=DEFAULT_SERIAL_FREQ, bool rgbw=false, COLOR_ORDER color_order=COLOR_ORDER::GRB, RGB* buffer=nullptr);
             ~WS2812() {
                 stop();
-                clear();
-                update(true);
-                dma_channel_unclaim(dma_channel);
-                pio_sm_set_enabled(pio, sm, false);
-                pio_remove_program(pio, &ws2812_program, pio_program_offset);
-#ifndef MICROPY_BUILD_TYPE
-                // pio_sm_unclaim seems to hardfault in MicroPython
-                pio_sm_unclaim(pio, sm);
-#endif
+                if(sm_claimed && dma_channel != -1) {
+                    clear();
+                    update(true);
+                }
+                if(dma_channel != -1) {
+                    dma_channel_abort(dma_channel);
+                    dma_channel_unclaim(dma_channel);
+                    dma_channel = -1;
+                }
+                if(sm_claimed) {
+                    pio_sm_set_enabled(pio, sm, false);
+                    pio_sm_unclaim(pio, sm);
+                    sm_claimed = false;
+                }
+                if(pio_program_offset != -1) {
+                    pio_remove_program(pio, &ws2812_program, pio_program_offset);
+                    pio_program_offset = -1;
+                }
                 if(managed_buffer) {
                     // Only delete buffers we have allocated ourselves.
                     delete[] buffer;
+                    buffer = nullptr;
+                    managed_buffer = false;
                 }
             }
             bool start(uint fps=60);
@@ -98,9 +111,11 @@ namespace plasma {
             uint32_t fps;
             PIO pio;
             uint sm;
-            uint pio_program_offset;
-            int dma_channel;
-            struct repeating_timer timer;
+            int pio_program_offset = -1;
+            int dma_channel = -1;
+            bool sm_claimed = false;
+            bool timer_running = false;
+            struct repeating_timer timer = {};
             bool managed_buffer = false;
     };
 }

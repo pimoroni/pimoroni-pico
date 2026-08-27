@@ -41,10 +41,48 @@ void PlasmaWS2812_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
     mp_print_str(print, ")");
 }
 
+// Resolve the "pio" and "sm" arguments. -1 means "pick one", which is the
+// default so that a second strip does not land on a state machine already
+// driving the first. Reported as exceptions rather than the SDK's panic.
+static PIO plasma_get_pio(int pio_idx) {
+    if(pio_idx == -1) {
+        return pio0;
+    }
+    if(pio_idx < 0 || pio_idx >= (int)NUM_PIOS) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid pio"));
+    }
+    return pio_get_instance((uint)pio_idx);
+}
+
+static_assert(APA102::SM_AUTO == WS2812::SM_AUTO, "plasma SM_AUTO sentinels must match");
+
+static uint plasma_get_sm(PIO pio, int sm) {
+    if(sm == -1) {
+        for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
+            if(!pio_sm_is_claimed(pio, i)) {
+                return WS2812::SM_AUTO;
+            }
+        }
+        mp_raise_ValueError(MP_ERROR_TEXT("no free state machine"));
+    }
+    if(sm < 0 || sm >= (int)NUM_PIO_STATE_MACHINES) {
+        mp_raise_ValueError(MP_ERROR_TEXT("invalid state machine"));
+    }
+    if(pio_sm_is_claimed(pio, (uint)sm)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("state machine already in use"));
+    }
+    return (uint)sm;
+}
+
 /***** Destructor ******/
 mp_obj_t PlasmaWS2812___del__(mp_obj_t self_in) {
     _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
-    m_del_class(WS2812, self->ws2812);
+    if(self->ws2812 != nullptr) {
+        // Release the PIO and DMA resources only. The block itself is the GC's
+        // to reclaim, and m_del() is a no-op from inside a finaliser regardless.
+        self->ws2812->~WS2812();
+        self->ws2812 = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -64,8 +102,8 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_pio, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_sm, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_pio, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_sm, MP_ARG_INT, {.u_int = -1} },
 #ifdef PLASMA_DATA_PIN
         { MP_QSTR_dat, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PLASMA_DATA_PIN)} },
 #else
@@ -82,8 +120,8 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int num_leds = args[ARG_num_leds].u_int;
-    PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
-    int sm = args[ARG_sm].u_int;
+    PIO pio = plasma_get_pio(args[ARG_pio].u_int);
+    uint sm = plasma_get_sm(pio, args[ARG_sm].u_int);
     int dat = mp_hal_get_pin_obj(args[ARG_dat].u_obj);
     int freq = args[ARG_freq].u_int;
     bool rgbw = args[ARG_rgbw].u_bool;
@@ -267,7 +305,12 @@ void PlasmaAPA102_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind
 /***** Destructor ******/
 mp_obj_t PlasmaAPA102___del__(mp_obj_t self_in) {
     _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
-    m_del_class(APA102, self->apa102);
+    if(self->apa102 != nullptr) {
+        // Release the PIO and DMA resources only. The block itself is the GC's
+        // to reclaim, and m_del() is a no-op from inside a finaliser regardless.
+        self->apa102->~APA102();
+        self->apa102 = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -286,8 +329,8 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_num_leds, MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_pio, MP_ARG_INT, {.u_int = 0} },
-        { MP_QSTR_sm, MP_ARG_INT, {.u_int = 0} },
+        { MP_QSTR_pio, MP_ARG_INT, {.u_int = -1} },
+        { MP_QSTR_sm, MP_ARG_INT, {.u_int = -1} },
 #ifdef PLASMA_DATA_PIN
         { MP_QSTR_dat, MP_ARG_OBJ, {.u_obj = MP_ROM_INT(PLASMA_DATA_PIN)} },
 #else
@@ -307,8 +350,8 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int num_leds = args[ARG_num_leds].u_int;
-    PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
-    int sm = args[ARG_sm].u_int;
+    PIO pio = plasma_get_pio(args[ARG_pio].u_int);
+    uint sm = plasma_get_sm(pio, args[ARG_sm].u_int);
     int dat = mp_hal_get_pin_obj(args[ARG_dat].u_obj);
     int clk = mp_hal_get_pin_obj(args[ARG_clk].u_obj);
     int freq = args[ARG_freq].u_int;
