@@ -1,0 +1,19 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "docs": "",
+    "features": [
+        "Dual-core",
+        "External Flash",
+        "USB"
+    ],
+    "images": [
+        "rp2-picos.jpg"
+    ],
+    "mcu": "rp2350",
+    "product": "Pico2",
+    "thumbnail": "",
+    "url": "https://shop.pimoroni.com/products/raspberry-pi-pico-plus2/",
+    "vendor": "Raspberry Pi"
+}
