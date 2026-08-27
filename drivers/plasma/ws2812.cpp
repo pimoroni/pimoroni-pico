@@ -3,7 +3,17 @@
 
 namespace plasma {
 
-WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, COLOR_ORDER color_order, RGB* buffer) : buffer(buffer), num_leds(num_leds), color_order(color_order), pio(pio), sm(sm) {
+WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, COLOR_ORDER color_order, RGB* buffer) : buffer(buffer), num_leds(num_leds), color_order(color_order), pio(pio) {
+    // Claim before touching the state machine, so that a second strip - or an
+    // rp2.StateMachine - cannot be handed the one we are about to drive.
+    if(sm == SM_AUTO) {
+        sm = (uint)pio_claim_unused_sm(pio, true);
+    } else {
+        pio_sm_claim(pio, sm);
+    }
+    this->sm = sm;
+    sm_claimed = true;
+
     // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
     pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
 
@@ -60,11 +70,14 @@ void WS2812::update(bool blocking) {
 }
 
 bool WS2812::start(uint fps) {
-    add_repeating_timer_ms(-(1000 / fps), dma_timer_callback, (void*)this, &timer);
-    return true;
+    stop();
+    timer_running = add_repeating_timer_ms(-(1000 / fps), dma_timer_callback, (void*)this, &timer);
+    return timer_running;
 }
 
 bool WS2812::stop() {
+    if(!timer_running) return false;
+    timer_running = false;
     return cancel_repeating_timer(&timer);
 }
 
