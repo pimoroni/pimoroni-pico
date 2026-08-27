@@ -2,8 +2,10 @@ export TERM=${TERM:="xterm-256color"}
 
 # Pinned here rather than in the workflow so a local build matches CI without
 # having to read the YAML first. Override in the environment to try another.
-MICROPYTHON_FLAVOUR="${MICROPYTHON_FLAVOUR:-micropython}"
-MICROPYTHON_VERSION="${MICROPYTHON_VERSION:-v1.29.0}"
+# RP2350 boards need the cyw43 dynamic pin support, which is v1.29.0 plus five
+# commits on our fork and not yet upstream.
+MICROPYTHON_FLAVOUR="${MICROPYTHON_FLAVOUR:-pimoroni}"
+MICROPYTHON_VERSION="${MICROPYTHON_VERSION:-cyw43-dynamic-pins}"
 
 PY_DECL_VERSION="${PY_DECL_VERSION:-v0.0.4}"
 

@@ -26,6 +26,16 @@ jobs:
           board: PIMORONI_TINY2040
         - name: tufty2040
           board: PIMORONI_TUFTY2040
+        - name: pico2
+          board: RPI_PICO2
+        - name: pico2_w
+          board: RPI_PICO2_W
+        - name: pico2b
+          board: RPI_PICO2B
+        - name: pico_plus2
+          board: PIMORONI_PICO_PLUS2
+        - name: tiny2350
+          board: PIMORONI_TINY2350
 
     env:
       # MicroPython version will be contained in github.event.release.tag_name for releases
