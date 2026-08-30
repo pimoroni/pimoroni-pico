@@ -139,7 +139,7 @@ namespace pimoroni {
 
     uint8_t update_speed = 0;
     bool inverted = true; // Makes 0 black and 1 white, as is foretold.
-    bool blocking = true;
+    bool blocking = false;
 
   public:
     UC8151(uint16_t width, uint16_t height, Rotation rotate) : UC8151(width, height, rotate, {PIMORONI_SPI_DEFAULT_INSTANCE, SPI_BG_FRONT_CS, SPI_DEFAULT_SCK, SPI_DEFAULT_MOSI, PIN_UNUSED, 20, PIN_UNUSED}) {};
