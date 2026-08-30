@@ -22,7 +22,7 @@ BSD License
 
 using namespace pimoroni;
 
-PicoUnicorn pico_unicorn;
+PicoUnicorn<14,1,0, uint16_t, pimoroni::GAMMA_14BIT> pico_unicorn;
 
 // Sine table to speed up execution
 static const int8_t sinetab[256] = {
@@ -95,7 +95,7 @@ void from_hsv(float h, float s, float v, uint8_t &r, uint8_t &g, uint8_t &b) {
 
 int main() {
   stdio_init_all();
-  pico_unicorn.init();
+  // pico_unicorn.init();
   pico_unicorn.clear();
 
 
