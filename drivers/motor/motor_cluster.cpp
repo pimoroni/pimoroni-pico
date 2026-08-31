@@ -261,7 +261,7 @@ namespace motor {
   bool MotorCluster::frequency(float freq) {
     bool success = false;
 
-    if((freq >= MotorState::MIN_FREQUENCY) && (freq <= MotorState::MAX_FREQUENCY)) {
+    if((freq >= MotorState::MIN_FREQUENCY) && (freq <= MAX_FREQUENCY)) {
       // Calculate a suitable pwm wrap period for this frequency
       uint32_t period; uint32_t div256;
       if(pimoroni::PWMCluster::calculate_pwm_factors(freq, period, div256)) {
