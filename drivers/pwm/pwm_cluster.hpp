@@ -22,9 +22,17 @@ namespace pimoroni {
                                                               // but risks stalling the PIO if the interrupt takes longer due to other processes
     static const bool DEFAULT_USE_LOADING_ZONE = true;        // Whether or not the default behaviour of PWMCluster is to use the loading zone
   public:
-    static const uint BUFFER_SIZE = 64;     // Set to 64, the maximum number of single rises and falls for 32 channels within a looping time period
     static const uint NUM_BUFFERS = 3;
-    static const uint MAX_PWM_CHANNELS = 32;
+    static const uint MAX_PWM_CHANNELS = 32;                  // The most channels a single state machine can drive, from its "out pins, 32"
+  private:
+    static const uint CHANNEL_LIMIT = (MAX_PWM_CHANNELS < NUM_BANK0_GPIOS) ? MAX_PWM_CHANNELS : NUM_BANK0_GPIOS;
+
+    // A load inserts up to three transitions per channel into the one-shot data (a fall for a
+    // previous overrun, a rise, and a fall), two per channel into the looping data, plus the
+    // loading zone. A sequence holds one entry more than its source array, for the leading
+    // delay emitted when no transition sits at level zero.
+    static const uint TRANSITION_LIMIT = (CHANNEL_LIMIT * 3) + LOADING_ZONE_SIZE;
+    static const uint LOOP_TRANSITION_LIMIT = (CHANNEL_LIMIT * 2) + LOADING_ZONE_SIZE;
 
 
     //--------------------------------------------------
@@ -45,12 +53,13 @@ namespace pimoroni {
       Transition() : mask(0), delay(0) {};
     };
 
+    template<uint buffer_size>
     struct Sequence {
       //--------------------------------------------------
       // Variables
       //--------------------------------------------------
       uint32_t size;
-      Transition data[BUFFER_SIZE];
+      Transition data[buffer_size];
 
 
       //--------------------------------------------------
@@ -105,15 +114,12 @@ namespace pimoroni {
     int dma_channel;
     uint64_t pin_mask;
     uint8_t channel_count;
-    ChannelState channels[NUM_BANK0_GPIOS];
-    uint8_t channel_to_pin_map[NUM_BANK0_GPIOS];
+    ChannelState channels[CHANNEL_LIMIT];
+    uint8_t channel_to_pin_map[CHANNEL_LIMIT];
     uint wrap_level;
 
-    Sequence sequences[NUM_BUFFERS];
-    Sequence loop_sequences[NUM_BUFFERS];
-
-    TransitionData transitions[BUFFER_SIZE];
-    TransitionData looping_transitions[BUFFER_SIZE];
+    Sequence<TRANSITION_LIMIT + 1> sequences[NUM_BUFFERS];
+    Sequence<LOOP_TRANSITION_LIMIT + 1> loop_sequences[NUM_BUFFERS];
 
     volatile uint read_index = 0;
     volatile uint last_written_index = 0;
@@ -127,7 +133,12 @@ namespace pimoroni {
     //--------------------------------------------------
     static PWMCluster* clusters[NUM_DMA_CHANNELS];
     static uint8_t claimed_sms[NUM_PIOS];
-    static uint pio_program_offset;
+    static uint pio_program_offsets[NUM_PIOS];
+
+    // Scratch used by load_pwm, shared by every cluster under a mutex
+    static TransitionData transitions[TRANSITION_LIMIT];
+    static TransitionData looping_transitions[LOOP_TRANSITION_LIMIT];
+
     static void dma_interrupt_handler();
 
 
@@ -182,8 +193,8 @@ namespace pimoroni {
     static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& div256_out);
   private:
     static bool bit_in_mask(uint bit, uint mask);
-    static void sorted_insert(TransitionData array[], uint &size, const TransitionData &data);
-    void populate_sequence(const TransitionData transitions[], const uint &data_size, Sequence &seq_out, uint &pin_states_in_out) const;
+    static void sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data);
+    void populate_sequence(const TransitionData transitions[], uint data_size, Transition sequence_data[], uint sequence_capacity, uint32_t &sequence_size, uint &pin_states_in_out) const;
 
     void next_dma_sequence();
   };
