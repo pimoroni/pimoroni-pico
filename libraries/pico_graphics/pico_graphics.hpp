@@ -599,6 +599,7 @@ namespace pimoroni {
      public:
        virtual void write_pixel(const Point &p, T colour) = 0;
        virtual void write_pixel_span(const Point &p, uint l, T colour) = 0;
+       virtual void write_span(uint32_t offset, uint l, const T *colours) = 0;
 
        virtual void read_pixel(const Point &p, T &data) {};
        virtual void read_pixel_span(const Point &p, uint l, T *data) {};
