@@ -26,6 +26,7 @@ namespace pimoroni {
 PWMCluster* PWMCluster::clusters[NUM_DMA_CHANNELS];
 uint32_t PWMCluster::claimed_channel_mask = 0;
 uint8_t PWMCluster::claimed_sms[NUM_PIOS];
+uint64_t PWMCluster::claimed_spans[NUM_PIOS];
 uint PWMCluster::pio_program_offsets[NUM_PIOS];
 PWMCluster::TransitionData PWMCluster::transitions[TRANSITION_LIMIT];
 PWMCluster::TransitionData PWMCluster::looping_transitions[LOOP_TRANSITION_LIMIT];
@@ -204,6 +205,7 @@ PWMCluster::~PWMCluster() {
 
     uint pio_idx = pio_get_index(pio);
     claimed_sms[pio_idx] &= ~(1u << sm);
+    claimed_spans[pio_idx] &= ~claimed_span;
 
     //If there are no more SMs using the encoder program, then we can remove it from the PIO
     if(claimed_sms[pio_idx] == 0) {
@@ -283,6 +285,7 @@ bool PWMCluster::init() {
     // Every pin must fit the PIO instance's 32-pin window, 0-31 or 16-47 on chips with
     // more than 32 GPIOs. The base applies to the whole PIO, so while the instance has
     // claimed state machines the window has to be taken as found.
+    uint pio_idx = pio_get_index(pio);
     if(channel_count > 0) {
       uint pin_min = NUM_BANK0_GPIOS;
       uint pin_max = 0;
@@ -308,6 +311,17 @@ bool PWMCluster::init() {
         }
         gpio_base = (pin_max > 31) ? 16 : 0;
         pio_set_gpio_base(pio, gpio_base);
+      }
+
+      // The state machine's out instruction writes every pin from pin_min to pin_max each
+      // tick, wired or not, so the whole span is claimed and overlapping spans on the same
+      // PIO instance must be refused. Spans on separate instances are independent.
+      out_base = pin_min;
+      out_count = (pin_max - pin_min) + 1;
+      claimed_span = ((1llu << out_count) - 1) << out_base;
+      if((claimed_spans[pio_idx] & claimed_span) != 0) {
+        claimed_span = 0;
+        return false;
       }
     }
 
@@ -341,7 +355,6 @@ bool PWMCluster::init() {
     dma_channel = dma_claim_unused_channel(false);
     if(dma_channel >= 0) {
       pio_sm_claim(pio, sm);
-      uint pio_idx = pio_get_index(pio);
 
       // If this is the first time using a cluster on this PIO, add the program to the PIO memory
       if(claimed_sms[pio_idx] == 0) {
@@ -378,7 +391,9 @@ bool PWMCluster::init() {
       sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
     #else
       pio_sm_config c = pwm_cluster_program_get_default_config(pio_program_offsets[pio_idx]);
-      sm_config_set_out_pins(&c, gpio_base, 32);
+      // Only the cluster's own span is written; the out instruction still consumes 32 bits
+      // per tick, so the sequence masks are unchanged in width, just based at out_base
+      sm_config_set_out_pins(&c, out_base, out_count);
     #endif
       sm_config_set_out_shift(&c, false, true, 32);
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE); // We actively do not want a joined FIFO even though we are not needing the RX
@@ -419,6 +434,7 @@ bool PWMCluster::init() {
       clusters[dma_channel] = this;
       claimed_channel_mask |= 1u << dma_channel;
       claimed_sms[pio_idx] |= 1u << sm;
+      claimed_spans[pio_idx] |= claimed_span;
 
       // Manually set the next dma sequence to trigger the first transfer
       next_dma_sequence();
@@ -556,7 +572,7 @@ void PWMCluster::load_pwm() {
 
     // Invert this channel's initial state if it's polarity invert is set
     if(state.polarity) {
-      pin_states |= (1u << (channel_to_pin_map[channel] - gpio_base)); // Set the pin
+      pin_states |= (1u << (channel_to_pin_map[channel] - out_base)); // Set the pin
     }
 
     const uint channel_start = state.offset;
@@ -574,7 +590,7 @@ void PWMCluster::load_pwm() {
     // Did the previous sequence overrun the wrap level?
     if(state.overrun > 0) {
       // Flip the initial state so the pin starts "high" (or "low" if polarity inverted)
-      pin_states ^= (1u << (channel_to_pin_map[channel] - gpio_base));
+      pin_states ^= (1u << (channel_to_pin_map[channel] - out_base));
 
       // Is our end level before our start level?
       if(channel_wrapped_end < channel_start) {
@@ -747,9 +763,9 @@ void PWMCluster::populate_sequence(const TransitionData transitions[], uint data
           // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
           if(!transition.dummy) {
             if(transition.state)
-              pin_states_in_out |= (1u << (channel_to_pin_map[transition.channel] - gpio_base));
+              pin_states_in_out |= (1u << (channel_to_pin_map[transition.channel] - out_base));
             else
-              pin_states_in_out &= ~(1u << (channel_to_pin_map[transition.channel] - gpio_base));
+              pin_states_in_out &= ~(1u << (channel_to_pin_map[transition.channel] - out_base));
           }
 
           data_index++; // Move on to the next transition
