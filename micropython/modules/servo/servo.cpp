@@ -1397,7 +1397,13 @@ extern mp_obj_t ServoCluster_pin(size_t n_args, const mp_obj_t *pos_args, mp_map
     return mp_const_none;
 }
 
-extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+// These actions differ only in which cluster method they call. Passing the same
+// method twice is deliberate: one index and an array resolve to different overloads.
+typedef void (ServoCluster::*ServoClusterAction)(uint8_t servo, bool load);
+typedef void (ServoCluster::*ServoClusterActionAll)(const uint8_t *servos, uint8_t length, bool load);
+
+static mp_obj_t ServoCluster_action(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args,
+                                    ServoClusterAction action, ServoClusterActionAll action_all) {
     enum { ARG_self, ARG_servos, ARG_load };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
@@ -1415,18 +1421,18 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
     if(servo_count == 0)
         mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
-        // Determine what servo(s) to enable
+        // Determine what servo(s) to act on
         const mp_obj_t object = args[ARG_servos].u_obj;
         if(mp_obj_is_int(object)) {
             int servo = mp_obj_get_int(object);
             if(servo < 0 || servo >= servo_count)
                 mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
             else
-                self->cluster->enable((uint)servo, args[ARG_load].u_bool);
+                (self->cluster->*action)((uint8_t)servo, args[ARG_load].u_bool);
         }
         else {
             size_t length = 0;
-             mp_obj_t *items = nullptr;
+            mp_obj_t *items = nullptr;
             if(mp_obj_is_type(object, &mp_type_list)) {
                 mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
                 length = list->len;
@@ -1455,13 +1461,16 @@ extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_
                         servos[i] = (uint8_t)servo;
                     }
                 }
-                self->cluster->enable(servos, length, args[ARG_load].u_bool);
+                (self->cluster->*action_all)(servos, (uint8_t)length, args[ARG_load].u_bool);
                 m_free(servos);
             }
         }
     }
-
     return mp_const_none;
+}
+
+extern mp_obj_t ServoCluster_enable(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    return ServoCluster_action(n_args, pos_args, kw_args, &ServoCluster::enable, &ServoCluster::enable);
 }
 
 extern mp_obj_t ServoCluster_enable_all(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -1482,70 +1491,7 @@ extern mp_obj_t ServoCluster_enable_all(size_t n_args, const mp_obj_t *pos_args,
 }
 
 extern mp_obj_t ServoCluster_disable(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_servos, ARG_load };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-    int servo_count = (int)self->cluster->count();
-    if(servo_count == 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-    else {
-        // Determine what servo(s) to disable
-        const mp_obj_t object = args[ARG_servos].u_obj;
-        if(mp_obj_is_int(object)) {
-            int servo = mp_obj_get_int(object);
-            if(servo < 0 || servo >= servo_count)
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-            else
-                self->cluster->disable((uint)servo, args[ARG_load].u_bool);
-        }
-        else {
-            size_t length = 0;
-             mp_obj_t *items = nullptr;
-            if(mp_obj_is_type(object, &mp_type_list)) {
-                mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                length = list->len;
-                items = list->items;
-            }
-            else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                length = tuple->len;
-                items = tuple->items;
-            }
-
-            if(items == nullptr)
-                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-            else if(length == 0)
-                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-            else {
-                // Create and populate a local array of servo indices
-                uint8_t *servos = m_new(uint8_t, length);
-                for(size_t i = 0; i < length; i++) {
-                    int servo = mp_obj_get_int(items[i]);
-                    if(servo < 0 || servo >= servo_count) {
-                        m_free(servos);
-                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                    }
-                    else {
-                        servos[i] = (uint8_t)servo;
-                    }
-                }
-                self->cluster->disable(servos, length, args[ARG_load].u_bool);
-                m_free(servos);
-            }
-        }
-    }
-
-    return mp_const_none;
+    return ServoCluster_action(n_args, pos_args, kw_args, &ServoCluster::disable, &ServoCluster::disable);
 }
 
 extern mp_obj_t ServoCluster_disable_all(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -2057,69 +2003,7 @@ extern mp_obj_t ServoCluster_max_value(size_t n_args, const mp_obj_t *pos_args, 
 }
 
 extern mp_obj_t ServoCluster_to_min(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_servos, ARG_load };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-    int servo_count = (int)self->cluster->count();
-    if(servo_count == 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-    else {
-        // Determine what servo(s) to enable
-        const mp_obj_t object = args[ARG_servos].u_obj;
-        if(mp_obj_is_int(object)) {
-            int servo = mp_obj_get_int(object);
-            if(servo < 0 || servo >= servo_count)
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-            else
-                self->cluster->to_min((uint)servo, args[ARG_load].u_bool);
-        }
-        else {
-            size_t length = 0;
-            mp_obj_t *items = nullptr;
-            if(mp_obj_is_type(object, &mp_type_list)) {
-                mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                length = list->len;
-                items = list->items;
-            }
-            else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                length = tuple->len;
-                items = tuple->items;
-            }
-
-            if(items == nullptr)
-                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-            else if(length == 0)
-                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-            else {
-                // Create and populate a local array of servo indices
-                uint8_t *servos = m_new(uint8_t, length);
-                for(size_t i = 0; i < length; i++) {
-                    int servo = mp_obj_get_int(items[i]);
-                    if(servo < 0 || servo >= servo_count) {
-                        m_free(servos);
-                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                    }
-                    else {
-                        servos[i] = (uint8_t)servo;
-                    }
-                }
-                self->cluster->to_min(servos, length, args[ARG_load].u_bool);
-                m_free(servos);
-            }
-        }
-    }
-    return mp_const_none;
+    return ServoCluster_action(n_args, pos_args, kw_args, &ServoCluster::to_min, &ServoCluster::to_min);
 }
 
 extern mp_obj_t ServoCluster_all_to_min(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -2145,69 +2029,7 @@ extern mp_obj_t ServoCluster_all_to_min(size_t n_args, const mp_obj_t *pos_args,
 }
 
 extern mp_obj_t ServoCluster_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_servos, ARG_load };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-    int servo_count = (int)self->cluster->count();
-    if(servo_count == 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-    else {
-        // Determine what servo(s) to enable
-        const mp_obj_t object = args[ARG_servos].u_obj;
-        if(mp_obj_is_int(object)) {
-            int servo = mp_obj_get_int(object);
-            if(servo < 0 || servo >= servo_count)
-                mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-            else
-                self->cluster->to_mid((uint)servo, args[ARG_load].u_bool);
-        }
-        else {
-            size_t length = 0;
-            mp_obj_t *items = nullptr;
-            if(mp_obj_is_type(object, &mp_type_list)) {
-                mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                length = list->len;
-                items = list->items;
-            }
-            else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                length = tuple->len;
-                items = tuple->items;
-            }
-
-            if(items == nullptr)
-                mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-            else if(length == 0)
-                mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-            else {
-                // Create and populate a local array of servo indices
-                uint8_t *servos = m_new(uint8_t, length);
-                for(size_t i = 0; i < length; i++) {
-                    int servo = mp_obj_get_int(items[i]);
-                    if(servo < 0 || servo >= servo_count) {
-                        m_free(servos);
-                        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                    }
-                    else {
-                        servos[i] = (uint8_t)servo;
-                    }
-                }
-                self->cluster->to_mid(servos, length, args[ARG_load].u_bool);
-                m_free(servos);
-            }
-        }
-    }
-    return mp_const_none;
+    return ServoCluster_action(n_args, pos_args, kw_args, &ServoCluster::to_mid, &ServoCluster::to_mid);
 }
 
 extern mp_obj_t ServoCluster_all_to_mid(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
@@ -2233,10 +2055,13 @@ extern mp_obj_t ServoCluster_all_to_mid(size_t n_args, const mp_obj_t *pos_args,
 }
 
 extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_servos, ARG_load };
+    return ServoCluster_action(n_args, pos_args, kw_args, &ServoCluster::to_max, &ServoCluster::to_max);
+}
+
+extern mp_obj_t ServoCluster_all_to_max(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_load };
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
     };
 
@@ -2250,14 +2075,124 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
     if(servo_count == 0)
         mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
     else {
-        // Determine what servo(s) to enable
-        const mp_obj_t object = args[ARG_servos].u_obj;
+        self->cluster->all_to_max(args[ARG_load].u_bool);
+    }
+    return mp_const_none;
+}
+
+// The call forms differ only in how many range values they take, so each arm
+// parses its own arguments and the work after that is shared.
+enum PercentForm { PERCENT_IN, PERCENT_RANGE, PERCENT_FULL };
+
+extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    mp_obj_t self_obj;
+    mp_obj_t servos_obj;
+    mp_obj_t in_obj;
+    mp_obj_t in_min_obj = mp_const_none;
+    mp_obj_t in_max_obj = mp_const_none;
+    mp_obj_t value_min_obj = mp_const_none;
+    mp_obj_t value_max_obj = mp_const_none;
+    bool load;
+    PercentForm form;
+
+    if(n_args <= 4) {
+        enum { ARG_self, ARG_servos, ARG_in, ARG_load };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        self_obj = args[ARG_self].u_obj;
+        servos_obj = args[ARG_servos].u_obj;
+        in_obj = args[ARG_in].u_obj;
+        load = args[ARG_load].u_bool;
+        form = PERCENT_IN;
+    }
+    else if(n_args <= 6) {
+        enum { ARG_self, ARG_servos, ARG_in, ARG_in_min, ARG_in_max, ARG_load };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        self_obj = args[ARG_self].u_obj;
+        servos_obj = args[ARG_servos].u_obj;
+        in_obj = args[ARG_in].u_obj;
+        in_min_obj = args[ARG_in_min].u_obj;
+        in_max_obj = args[ARG_in_max].u_obj;
+        load = args[ARG_load].u_bool;
+        form = PERCENT_RANGE;
+    }
+    else {
+        enum { ARG_self, ARG_servos, ARG_in, ARG_in_min, ARG_in_max, ARG_value_min, ARG_value_max, ARG_load };
+        static const mp_arg_t allowed_args[] = {
+            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_in_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_value_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_value_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
+            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
+        };
+
+        // Parse args.
+        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+        self_obj = args[ARG_self].u_obj;
+        servos_obj = args[ARG_servos].u_obj;
+        in_obj = args[ARG_in].u_obj;
+        in_min_obj = args[ARG_in_min].u_obj;
+        in_max_obj = args[ARG_in_max].u_obj;
+        value_min_obj = args[ARG_value_min].u_obj;
+        value_max_obj = args[ARG_value_max].u_obj;
+        load = args[ARG_load].u_bool;
+        form = PERCENT_FULL;
+    }
+
+    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_obj, _ServoCluster_obj_t);
+
+    int servo_count = (int)self->cluster->count();
+    if(servo_count == 0)
+        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
+    else {
+        // Determine what servo(s) to move
+        const mp_obj_t object = servos_obj;
         if(mp_obj_is_int(object)) {
             int servo = mp_obj_get_int(object);
             if(servo < 0 || servo >= servo_count)
                 mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-            else
-                self->cluster->to_max((uint)servo, args[ARG_load].u_bool);
+            else {
+                float in = mp_obj_get_float(in_obj);
+                if(form == PERCENT_IN)
+                    self->cluster->to_percent((uint)servo, in, load);
+                else {
+                    float in_min = mp_obj_get_float(in_min_obj);
+                    float in_max = mp_obj_get_float(in_max_obj);
+                    if(form == PERCENT_RANGE)
+                        self->cluster->to_percent((uint)servo, in, in_min, in_max, load);
+                    else {
+                        float value_min = mp_obj_get_float(value_min_obj);
+                        float value_max = mp_obj_get_float(value_max_obj);
+                        self->cluster->to_percent((uint)servo, in, in_min, in_max, value_min, value_max, load);
+                    }
+                }
+            }
         }
         else {
             size_t length = 0;
@@ -2290,256 +2225,22 @@ extern mp_obj_t ServoCluster_to_max(size_t n_args, const mp_obj_t *pos_args, mp_
                         servos[i] = (uint8_t)servo;
                     }
                 }
-                self->cluster->to_max(servos, length, args[ARG_load].u_bool);
+
+                float in = mp_obj_get_float(in_obj);
+                if(form == PERCENT_IN)
+                    self->cluster->to_percent(servos, length, in, load);
+                else {
+                    float in_min = mp_obj_get_float(in_min_obj);
+                    float in_max = mp_obj_get_float(in_max_obj);
+                    if(form == PERCENT_RANGE)
+                        self->cluster->to_percent(servos, length, in, in_min, in_max, load);
+                    else {
+                        float value_min = mp_obj_get_float(value_min_obj);
+                        float value_max = mp_obj_get_float(value_max_obj);
+                        self->cluster->to_percent(servos, length, in, in_min, in_max, value_min, value_max, load);
+                    }
+                }
                 m_free(servos);
-            }
-        }
-    }
-    return mp_const_none;
-}
-
-extern mp_obj_t ServoCluster_all_to_max(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    enum { ARG_self, ARG_load };
-    static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-    };
-
-    // Parse args.
-    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-    _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-    int servo_count = (int)self->cluster->count();
-    if(servo_count == 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-    else {
-        self->cluster->all_to_max(args[ARG_load].u_bool);
-    }
-    return mp_const_none;
-}
-
-extern mp_obj_t ServoCluster_to_percent(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
-    if(n_args <= 4) {
-        enum { ARG_self, ARG_servos, ARG_in, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->count();
-        if(servo_count == 0)
-            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-        else {
-            // Determine what servo(s) to enable
-            const mp_obj_t object = args[ARG_servos].u_obj;
-            if(mp_obj_is_int(object)) {
-                int servo = mp_obj_get_int(object);
-                if(servo < 0 || servo >= servo_count)
-                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-                else {
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    self->cluster->to_percent((uint)servo, in, args[ARG_load].u_bool);
-                }
-            }
-            else {
-                size_t length = 0;
-                mp_obj_t *items = nullptr;
-                if(mp_obj_is_type(object, &mp_type_list)) {
-                    mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                    length = list->len;
-                    items = list->items;
-                }
-                else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                    length = tuple->len;
-                    items = tuple->items;
-                }
-
-                if(items == nullptr)
-                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-                else if(length == 0)
-                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-                else {
-                    // Create and populate a local array of servo indices
-                    uint8_t *servos = m_new(uint8_t, length);
-                    for(size_t i = 0; i < length; i++) {
-                        int servo = mp_obj_get_int(items[i]);
-                        if(servo < 0 || servo >= servo_count) {
-                            m_free(servos);
-                            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                        }
-                        else {
-                            servos[i] = (uint8_t)servo;
-                        }
-                    }
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    self->cluster->to_percent(servos, length, in, args[ARG_load].u_bool);
-                    m_free(servos);
-                }
-            }
-        }
-    }
-    else if(n_args <= 6) {
-        enum { ARG_self, ARG_servos, ARG_in, ARG_in_min, ARG_in_max, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->count();
-        if(servo_count == 0)
-            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-        else {
-            // Determine what servo(s) to enable
-            const mp_obj_t object = args[ARG_servos].u_obj;
-            if(mp_obj_is_int(object)) {
-                int servo = mp_obj_get_int(object);
-                if(servo < 0 || servo >= servo_count)
-                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-                else {
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
-                    float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
-                    self->cluster->to_percent((uint)servo, in, in_min, in_max, args[ARG_load].u_bool);
-                }
-            }
-            else {
-                size_t length = 0;
-                mp_obj_t *items = nullptr;
-                if(mp_obj_is_type(object, &mp_type_list)) {
-                    mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                    length = list->len;
-                    items = list->items;
-                }
-                else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                    length = tuple->len;
-                    items = tuple->items;
-                }
-
-                if(items == nullptr)
-                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-                else if(length == 0)
-                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-                else {
-                    // Create and populate a local array of servo indices
-                    uint8_t *servos = m_new(uint8_t, length);
-                    for(size_t i = 0; i < length; i++) {
-                        int servo = mp_obj_get_int(items[i]);
-                        if(servo < 0 || servo >= servo_count) {
-                            m_free(servos);
-                            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                        }
-                        else {
-                            servos[i] = (uint8_t)servo;
-                        }
-                    }
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
-                    float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
-                    self->cluster->to_percent(servos, length, in, in_min, in_max, args[ARG_load].u_bool);
-                    m_free(servos);
-                }
-            }
-        }
-    }
-    else {
-        enum { ARG_self, ARG_servos, ARG_in, ARG_in_min, ARG_in_max, ARG_value_min, ARG_value_max, ARG_load };
-        static const mp_arg_t allowed_args[] = {
-            { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_servos, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_in_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_value_min, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_value_max, MP_ARG_REQUIRED | MP_ARG_OBJ },
-            { MP_QSTR_load, MP_ARG_BOOL, { .u_bool = true }},
-        };
-
-        // Parse args.
-        mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
-        mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-
-        _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
-
-        int servo_count = (int)self->cluster->count();
-        if(servo_count == 0)
-            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
-        else {
-            // Determine what servo(s) to enable
-            const mp_obj_t object = args[ARG_servos].u_obj;
-            if(mp_obj_is_int(object)) {
-                int servo = mp_obj_get_int(object);
-                if(servo < 0 || servo >= servo_count)
-                    mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
-                else {
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
-                    float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
-                    float value_min = mp_obj_get_float(args[ARG_value_min].u_obj);
-                    float value_max = mp_obj_get_float(args[ARG_value_max].u_obj);
-                    self->cluster->to_percent((uint)servo, in, in_min, in_max, value_min, value_max, args[ARG_load].u_bool);
-                }
-            }
-            else {
-                size_t length = 0;
-                mp_obj_t *items = nullptr;
-                if(mp_obj_is_type(object, &mp_type_list)) {
-                    mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
-                    length = list->len;
-                    items = list->items;
-                }
-                else if(mp_obj_is_type(object, &mp_type_tuple)) {
-                    mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
-                    length = tuple->len;
-                    items = tuple->items;
-                }
-
-                if(items == nullptr)
-                    mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of integers, or a single integer"));
-                else if(length == 0)
-                    mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
-                else {
-                    // Create and populate a local array of servo indices
-                    uint8_t *servos = m_new(uint8_t, length);
-                    for(size_t i = 0; i < length; i++) {
-                        int servo = mp_obj_get_int(items[i]);
-                        if(servo < 0 || servo >= servo_count) {
-                            m_free(servos);
-                            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a servo in the list or tuple is out of range. Expected 0 to %d"), servo_count - 1);
-                        }
-                        else {
-                            servos[i] = (uint8_t)servo;
-                        }
-                    }
-                    float in = mp_obj_get_float(args[ARG_in].u_obj);
-                    float in_min = mp_obj_get_float(args[ARG_in_min].u_obj);
-                    float in_max = mp_obj_get_float(args[ARG_in_max].u_obj);
-                    float value_min = mp_obj_get_float(args[ARG_value_min].u_obj);
-                    float value_max = mp_obj_get_float(args[ARG_value_max].u_obj);
-                    self->cluster->to_percent(servos, length, in, in_min, in_max, value_min, value_max, args[ARG_load].u_bool);
-                    m_free(servos);
-                }
             }
         }
     }
