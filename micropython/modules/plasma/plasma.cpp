@@ -145,6 +145,11 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->blocking = false;
 
     self->ws2812 = m_new_class(WS2812, num_leds, pio, sm, dat, freq, rgbw, color_order, (WS2812::RGB *)buffer);
+    if(!self->ws2812->pins_reachable()) {
+        self->ws2812->~WS2812();
+        self->ws2812 = nullptr;
+        mp_raise_ValueError(MP_ERROR_TEXT("the pins do not fit the 32 pin range this PIO can currently reach"));
+    }
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -381,6 +386,11 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     self->blocking = false;
 
     self->apa102 = m_new_class(APA102, num_leds, pio, sm, dat, clk, freq, buffer);
+    if(!self->apa102->pins_reachable()) {
+        self->apa102->~APA102();
+        self->apa102 = nullptr;
+        mp_raise_ValueError(MP_ERROR_TEXT("the pins do not fit the 32 pin range this PIO can currently reach"));
+    }
 
     return MP_OBJ_FROM_PTR(self);
 }
