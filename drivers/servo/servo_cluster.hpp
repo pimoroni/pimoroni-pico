@@ -18,8 +18,11 @@ namespace servo {
     PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    ServoState states[MAX_SERVO_CHANNELS];
-    float servo_phases[MAX_SERVO_CHANNELS];
+
+    // Both arrays live in one block sized to the channel count, claimed by the constructors
+    // through pwm_cluster_allocate; init() fails if the claim did
+    ServoState* states = nullptr;
+    float* servo_phases = nullptr;
 
 
     //--------------------------------------------------
@@ -118,6 +121,7 @@ namespace servo {
     //--------------------------------------------------
   private:
     void apply_pulse(uint8_t servo, float pulse, bool load);
+    bool allocate_servo_states(uint8_t servo_count);
     void create_servo_states(CalibrationType default_type, bool auto_phase);
     void create_servo_states(const Calibration& calibration, bool auto_phase);
   };

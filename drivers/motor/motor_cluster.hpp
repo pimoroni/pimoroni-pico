@@ -32,8 +32,11 @@ namespace motor {
     PWMCluster pwms;
     uint32_t pwm_period;
     float pwm_frequency;
-    MotorState states[MAX_MOTOR_CHANNELS];
-    motor_config configs[MAX_MOTOR_CHANNELS];
+
+    // Both arrays live in one block sized to the motor count, claimed by the constructors
+    // through pwm_cluster_allocate; init() fails if the claim did
+    MotorState* states = nullptr;
+    motor_config* configs = nullptr;
 
 
     //--------------------------------------------------

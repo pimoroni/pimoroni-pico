@@ -8,11 +8,11 @@
 #include <initializer_list>
 #include <cstddef>
 
-// PWMCluster's buffer block is claimed and released through these, so a port can supply
-// memory from its own heap. The block is a DMA source, so it must be somewhere the DMA
-// reads coherently with the CPU's writes, in practice SRAM. The defaults, defined weak in
-// pwm_cluster.cpp, take the C heap, which the RP2 ports place in SRAM. Returns nullptr on
-// failure; init() reports that to its caller.
+// The cluster classes claim and release their blocks through these, so a port can supply
+// memory from its own heap. PWMCluster's block is a DMA source, so the memory must be
+// somewhere the DMA reads coherently with the CPU's writes, in practice SRAM. The defaults,
+// defined weak in pwm_cluster.cpp, take the C heap, which the RP2 ports place in SRAM.
+// Returns nullptr on failure; init() reports that to its caller.
 extern "C" void* pwm_cluster_allocate(size_t size);
 extern "C" void pwm_cluster_deallocate(void* mem);
 
