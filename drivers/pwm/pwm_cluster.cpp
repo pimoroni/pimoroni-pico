@@ -2,6 +2,8 @@
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "pico/mutex.h"
+#include <cstdlib>
+#include <cstring>
 
 #ifndef NO_QSTR
 #include "pwm_cluster.pio.h"
@@ -29,6 +31,21 @@ PWMCluster::TransitionData PWMCluster::looping_transitions[LOOP_TRANSITION_LIMIT
 
 auto_init_mutex(pwm_cluster_load_mutex);
 
+// Default buffer block source, taking the C heap. The SDK wraps malloc and panics on
+// failure where init() reports it, so these call the unwrapped functions; those skip the
+// wrapper's cross-core mutex, so cluster init and destruction must not run concurrently
+// with another core's allocations.
+extern "C" void *__real_malloc(size_t size);
+extern "C" void __real_free(void *mem);
+
+extern "C" __attribute__((weak)) void* pwm_cluster_allocate(size_t size) {
+  return __real_malloc(size);
+}
+
+extern "C" __attribute__((weak)) void pwm_cluster_deallocate(void* mem) {
+  __real_free(mem);
+}
+
 
 PWMCluster::PWMCluster(PIO pio, uint sm, uint64_t pin_mask, bool loading_zone)
 : pio(pio)
@@ -46,7 +63,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint64_t pin_mask, bool loading_zone)
     }
   }
 
-  constructor_common();
 }
 
 
@@ -66,7 +82,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, bool loa
     channel_count++;
   }
 
-  constructor_common();
 }
 
 PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, bool loading_zone)
@@ -87,7 +102,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, b
     }
   }
 
-  constructor_common();
 }
 
 PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bool loading_zone)
@@ -110,7 +124,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bo
     }
   }
 
-  constructor_common();
 }
 
 PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, bool loading_zone)
@@ -135,7 +148,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t len
     }
   }
 
-  constructor_common();
 }
 
 PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, bool loading_zone)
@@ -162,21 +174,6 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pai
     }
   }
 
-  constructor_common();
-}
-
-void PWMCluster::constructor_common() {
-  // Initialise all the channels this PWM will control
-  for(uint i = 0; i < channel_count; i++) {
-    channels[i] = ChannelState();
-  }
-
-  // Set up the transition buffers
-  for(uint i = 0; i < NUM_BUFFERS; i++) {
-    // Need to set a delay otherwise a lockup occurs when first changing frequency
-    sequences[i].data[0].delay = 10;
-    loop_sequences[i].data[0].delay = 10;
-  }
 }
 
 PWMCluster::~PWMCluster() {
@@ -227,6 +224,8 @@ PWMCluster::~PWMCluster() {
     for(uint channel = 0; channel < channel_count; channel++) {
       gpio_set_function(channel_to_pin_map[channel], GPIO_FUNC_NULL);
     }
+
+    pwm_cluster_deallocate(allocation);
   }
 }
 
@@ -273,6 +272,33 @@ void PWMCluster::next_dma_sequence() {
 
 bool PWMCluster::init() {
   if(!initialised && !pio_sm_is_claimed(pio, sm)) {
+    // One block holds both sequence sets and the channel states, sized for this cluster's
+    // channel count. Zeroed content is every member's default.
+    const uint sequence_entries = transition_capacity() + 1;
+    const uint loop_sequence_entries = loop_transition_capacity() + 1;
+    const size_t sequence_bytes = (size_t)NUM_BUFFERS * (sequence_entries + loop_sequence_entries) * sizeof(Transition);
+    const size_t allocation_bytes = sequence_bytes + ((size_t)channel_count * sizeof(ChannelState));
+    allocation = (uint8_t*)pwm_cluster_allocate(allocation_bytes);
+    if(allocation == nullptr) {
+      return false;
+    }
+    memset(allocation, 0, allocation_bytes);
+
+    uint8_t* block = allocation;
+    for(uint i = 0; i < NUM_BUFFERS; i++) {
+      sequences[i].data = (Transition*)block;
+      block += sequence_entries * sizeof(Transition);
+      loop_sequences[i].data = (Transition*)block;
+      block += loop_sequence_entries * sizeof(Transition);
+
+      // Need to set a delay otherwise a lockup occurs when first changing frequency
+      sequences[i].size = 1;
+      sequences[i].data[0].delay = 10;
+      loop_sequences[i].size = 1;
+      loop_sequences[i].data[0].delay = 10;
+    }
+    channels = (ChannelState*)block;
+
     dma_channel = dma_claim_unused_channel(false);
     if(dma_channel >= 0) {
       pio_sm_claim(pio, sm);
@@ -360,6 +386,16 @@ bool PWMCluster::init() {
     }
   }
 
+  if(!initialised && allocation != nullptr) {
+    pwm_cluster_deallocate(allocation);
+    allocation = nullptr;
+    channels = nullptr;
+    for(uint i = 0; i < NUM_BUFFERS; i++) {
+      sequences[i].data = nullptr;
+      loop_sequences[i].data = nullptr;
+    }
+  }
+
   return initialised;
 }
 
@@ -391,12 +427,12 @@ uint8_t PWMCluster::channel_from_pair(uint8_t channel_pair) {
 
 uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
   assert(channel < channel_count);
-  return (channel < channel_count) ? channels[channel].level : 0;
+  return (initialised && channel < channel_count) ? channels[channel].level : 0;
 }
 
 void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
   assert(channel < channel_count);
-  if(channel < channel_count) {
+  if(initialised && channel < channel_count) {
     channels[channel].level = level;
     if(load)
       load_pwm();
@@ -405,12 +441,12 @@ void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
 
 uint32_t PWMCluster::get_chan_offset(uint8_t channel) const {
   assert(channel < channel_count);
-  return (channel < channel_count) ? channels[channel].offset : 0;
+  return (initialised && channel < channel_count) ? channels[channel].offset : 0;
 }
 
 void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
   assert(channel < channel_count);
-  if(channel < channel_count) {
+  if(initialised && channel < channel_count) {
     channels[channel].offset = offset;
     if(load)
       load_pwm();
@@ -419,12 +455,12 @@ void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
 
 bool PWMCluster::get_chan_polarity(uint8_t channel) const {
   assert(channel < channel_count);
-  return (channel < channel_count) ? channels[channel].polarity : false;
+  return (initialised && channel < channel_count) ? channels[channel].polarity : false;
 }
 
 void PWMCluster::set_chan_polarity(uint8_t channel, bool polarity, bool load) {
   assert(channel < channel_count);
-  if(channel < channel_count) {
+  if(initialised && channel < channel_count) {
     channels[channel].polarity = polarity;
     if(load)
       load_pwm();
@@ -452,6 +488,10 @@ void PWMCluster::set_clkdiv_int_frac(uint16_t integer, uint8_t fract) {
 }
 
 void PWMCluster::load_pwm() {
+  if(!initialised) {
+    return;
+  }
+
   #ifdef DEBUG_MULTI_PWM
     gpio_put(WRITE_GPIO, true);
   #endif
@@ -567,8 +607,8 @@ void PWMCluster::load_pwm() {
     write_index = (write_index + 1) % NUM_BUFFERS;
   }
 
-  populate_sequence(transitions, data_size, sequences[write_index].data, TRANSITION_LIMIT + 1, sequences[write_index].size, pin_states);
-  populate_sequence(looping_transitions, looping_data_size, loop_sequences[write_index].data, LOOP_TRANSITION_LIMIT + 1, loop_sequences[write_index].size, pin_states);
+  populate_sequence(transitions, data_size, sequences[write_index].data, transition_capacity() + 1, sequences[write_index].size, pin_states);
+  populate_sequence(looping_transitions, looping_data_size, loop_sequences[write_index].data, loop_transition_capacity() + 1, loop_sequences[write_index].size, pin_states);
 
   // Update the last written index so that the next DMA interrupt picks up the new sequence
   last_written_index = write_index;
