@@ -433,7 +433,8 @@ uint32_t PWMCluster::get_chan_level(uint8_t channel) const {
 void PWMCluster::set_chan_level(uint8_t channel, uint32_t level, bool load) {
   assert(channel < channel_count);
   if(initialised && channel < channel_count) {
-    channels[channel].level = level;
+    // Clamped so it fits the uint16_t field; any level at or above the wrap is constant high
+    channels[channel].level = MIN(level, MAX_PWM_CLUSTER_WRAP);
     if(load)
       load_pwm();
   }
@@ -447,7 +448,7 @@ uint32_t PWMCluster::get_chan_offset(uint8_t channel) const {
 void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
   assert(channel < channel_count);
   if(initialised && channel < channel_count) {
-    channels[channel].offset = offset;
+    channels[channel].offset = MIN(offset, MAX_PWM_CLUSTER_WRAP);
     if(load)
       load_pwm();
   }
@@ -472,7 +473,7 @@ uint32_t PWMCluster::get_wrap() const {
 }
 
 void PWMCluster::set_wrap(uint32_t wrap, bool load) {
-  wrap_level = MAX(wrap, 1);  // Cannot have a wrap of zero!
+  wrap_level = MIN(MAX(wrap, 1u), MAX_PWM_CLUSTER_WRAP);  // Cannot have a wrap of zero!
   if(load)
     load_pwm();
 }

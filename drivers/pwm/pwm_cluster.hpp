@@ -24,7 +24,9 @@ namespace pimoroni {
     // Constants
     //--------------------------------------------------
   private:
-    static const uint64_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX;  // UINT32_MAX works too, but seems to produce less accurate counters
+    static const uint32_t MAX_PWM_CLUSTER_WRAP = UINT16_MAX;  // UINT32_MAX works too, but seems to produce less accurate counters.
+                                                              // Wraps, levels and offsets are clamped to this, which is what lets
+                                                              // ChannelState and TransitionData store them as uint16_t
     static const uint32_t LOADING_ZONE_SIZE = 3;              // The number of dummy transitions to insert into the data to delay the DMA interrupt (if zero then no zone is used)
     static const uint32_t LOADING_ZONE_POSITION = 55;         // The number of levels before the wrap level to insert the load zone
                                                               // Smaller values will make the DMA interrupt trigger closer to the time the data is needed,
@@ -80,18 +82,18 @@ namespace pimoroni {
       //--------------------------------------------------
       // Variables
       //--------------------------------------------------
+      uint16_t level;
       uint8_t channel;
-      uint32_t level;
-      bool state;
-      bool dummy;
+      bool state : 1;
+      bool dummy : 1;
 
 
       //--------------------------------------------------
       // Constructors/Destructor
       //--------------------------------------------------
-      TransitionData() : channel(0), level(0), state(false), dummy(false) {};
-      TransitionData(uint8_t channel, uint32_t level, bool new_state) : channel(channel), level(level), state(new_state), dummy(false) {};
-      TransitionData(uint32_t level) : channel(0), level(level), state(false), dummy(true) {};
+      TransitionData() : level(0), channel(0), state(false), dummy(false) {};
+      TransitionData(uint8_t channel, uint32_t level, bool new_state) : level(level), channel(channel), state(new_state), dummy(false) {};
+      TransitionData(uint32_t level) : level(level), channel(0), state(false), dummy(true) {};
     };
 
   private:
@@ -99,17 +101,17 @@ namespace pimoroni {
       //--------------------------------------------------
       // Variables
       //--------------------------------------------------
-      uint level;
-      uint offset;
+      uint16_t level;
+      uint16_t offset;
+      uint16_t overrun;
+      uint16_t next_overrun;
       bool polarity;
-      uint overrun;
-      uint next_overrun;
 
 
       //--------------------------------------------------
       // Constructors/Destructor
       //--------------------------------------------------
-      ChannelState() : level(0), offset(0), polarity(false), overrun(0), next_overrun(0) {}
+      ChannelState() : level(0), offset(0), overrun(0), next_overrun(0), polarity(false) {}
     };
 
 
