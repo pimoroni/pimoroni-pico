@@ -32,8 +32,10 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
 
     pio_program_offset = pio_add_program(pio, &apa102_program);
 
-    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
-    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
+    // These take absolute GPIO masks and shift by the window base themselves
+    uint64_t used_pins = (1llu << pin_clk) | (1llu << pin_dat);
+    pio_sm_set_pins_with_mask64(pio, sm, 0, used_pins);
+    pio_sm_set_pindirs_with_mask64(pio, sm, ~0llu, used_pins);
     pio_gpio_init(pio, pin_clk);
     pio_gpio_init(pio, pin_dat);
 
