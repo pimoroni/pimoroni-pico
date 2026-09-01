@@ -1,3 +1,10 @@
+# The C heap ends at __StackLimit, which is not page aligned, while newlib's malloc grows
+# its arena in page-aligned steps. With an unlucky __bss_end__ the first C++ static
+# allocations overshoot the limit, are refused whole, and panic before main runs, so
+# whether a build boots depends on its RAM layout. Clamping sbrk to the limit instead of
+# refusing removes that dependence.
+add_compile_definitions(PICO_USE_OPTIMISTIC_SBRK=1)
+
 # Essential
 include(pimoroni_i2c/micropython)
 include(pimoroni_bus/micropython)
