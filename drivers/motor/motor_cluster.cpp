@@ -1,6 +1,7 @@
 #include "motor_cluster.hpp"
 #include "pwm.hpp"
 #include <cstdio>
+#include <new>
 #include "math.h"
 
 #define POS_MOTOR(motor)  (PWMCluster::channel_from_pair(motor))
@@ -29,10 +30,16 @@ namespace motor {
   }
 
   MotorCluster::~MotorCluster() {
+    // MotorState and motor_config are trivially destructible, so no destructor calls
+    pwm_cluster_deallocate(states);
   }
 
   bool MotorCluster::init() {
     bool success = false;
+
+    if(states == nullptr && pwms.get_chan_pair_count() > 0) {
+      return false;
+    }
 
     if(pwms.init()) {
       // Calculate a suitable pwm wrap period for this frequency
@@ -261,7 +268,7 @@ namespace motor {
   bool MotorCluster::frequency(float freq) {
     bool success = false;
 
-    if((freq >= MotorState::MIN_FREQUENCY) && (freq <= MotorState::MAX_FREQUENCY)) {
+    if((freq >= MotorState::MIN_FREQUENCY) && (freq <= MAX_FREQUENCY)) {
       // Calculate a suitable pwm wrap period for this frequency
       uint32_t period; uint32_t div256;
       if(pimoroni::PWMCluster::calculate_pwm_factors(freq, period, div256)) {
@@ -711,9 +718,14 @@ namespace motor {
                                          float deadzone, DecayMode mode, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     if(motor_count > 0) {
+      states = (MotorState*)pwm_cluster_allocate(((size_t)sizeof(MotorState) + sizeof(motor_config)) * motor_count);
+      if(states == nullptr) {
+        return;  // init() reports the failure
+      }
+      configs = (motor_config*)(states + motor_count);
       for(uint motor = 0; motor < motor_count; motor++) {
-        configs[motor] = motor_config();
-        states[motor] = MotorState(direction, speed_scale, zeropoint, deadzone);
+        new(&states[motor]) MotorState(direction, speed_scale, zeropoint, deadzone);
+        new(&configs[motor]) motor_config();
         configs[motor].phase = (auto_phase) ? (float)motor / (float)motor_count : 0.0f;
         configs[motor].mode = mode;
       }
