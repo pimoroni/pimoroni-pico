@@ -14,8 +14,20 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     this->sm = sm;
     sm_claimed = true;
 
-    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
-    pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
+    // The gpio_base applies to the entire PIO, so a busy PIO's window is taken as found.
+    // A pin outside the window stops construction here, reported by pins_reachable()
+    bool pio_in_use = false;
+    for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
+        pio_in_use |= (i != sm) && pio_sm_is_claimed(pio, i);
+    }
+    if(!pio_in_use) {
+        pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
+    }
+    uint window_base = pio_get_gpio_base(pio);
+    pins_ok = (pin >= window_base) && (pin < window_base + 32);
+    if(!pins_ok) {
+        return;
+    }
 
     pio_program_offset = pio_add_program(pio, &ws2812_program);
 

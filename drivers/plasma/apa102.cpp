@@ -14,20 +14,21 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
     this->sm = sm;
     sm_claimed = true;
 
-    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
+    // The gpio_base applies to the entire PIO, so a busy PIO's window is taken as found.
+    // Pins outside the window stop construction here, reported by pins_reachable()
     uint range_max = std::max(pin_dat, pin_clk);
     uint range_min = std::min(pin_dat, pin_clk);
-
-    // Both pins in 16-48 range
-    if(range_max >= 32 && range_min >= 16) {
-        pio_set_gpio_base(pio, 16);
-    // Both pins in 0-31 range
-    } else if(range_max <= 31) {
-        pio_set_gpio_base(pio, 0);
-    // Pins in different ranges: invalid combo!
-    } else {
-        // TODO: Need some means to notify the caller
-        pio_set_gpio_base(pio, 0);
+    bool pio_in_use = false;
+    for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
+        pio_in_use |= (i != sm) && pio_sm_is_claimed(pio, i);
+    }
+    if(!pio_in_use) {
+        pio_set_gpio_base(pio, (range_max >= 32 && range_min >= 16) ? 16 : 0);
+    }
+    uint window_base = pio_get_gpio_base(pio);
+    pins_ok = (range_min >= window_base) && (range_max < window_base + 32);
+    if(!pins_ok) {
+        return;
     }
 
     pio_program_offset = pio_add_program(pio, &apa102_program);
