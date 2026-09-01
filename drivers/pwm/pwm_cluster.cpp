@@ -24,6 +24,7 @@ namespace pimoroni {
 // STATICS
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 PWMCluster* PWMCluster::clusters[NUM_DMA_CHANNELS];
+uint32_t PWMCluster::claimed_channel_mask = 0;
 uint8_t PWMCluster::claimed_sms[NUM_PIOS];
 uint PWMCluster::pio_program_offsets[NUM_PIOS];
 PWMCluster::TransitionData PWMCluster::transitions[TRANSITION_LIMIT];
@@ -196,6 +197,7 @@ PWMCluster::~PWMCluster() {
     hw_set_bits(&dma_hw->inte0, irq0_save);
 
     dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
+    claimed_channel_mask &= ~(1u << dma_channel);
     clusters[dma_channel] = nullptr;
 
     pio_sm_unclaim(pio, sm);
@@ -230,11 +232,15 @@ PWMCluster::~PWMCluster() {
 }
 
 void PWMCluster::dma_interrupt_handler() {
-  // Go through each dma channel to see which triggered this interrupt,
-  // and if there's an associated cluster, have it advance to the next sequence
-  for(uint8_t channel = 0; channel < NUM_DMA_CHANNELS; channel++) {
-    if(dma_channel_get_irq0_status(channel) && clusters[channel] != nullptr) {
-      clusters[channel]->next_dma_sequence();
+  // One register read covers every channel; only those claimed by clusters are visited.
+  // A channel asserting after the read stays pending, so the handler runs again for it.
+  uint32_t triggered = dma_hw->ints0 & claimed_channel_mask;
+  while(triggered != 0) {
+    uint8_t channel = (uint8_t)__builtin_ctz(triggered);
+    triggered &= ~(1u << channel);
+    PWMCluster* cluster = clusters[channel];
+    if(cluster != nullptr) {
+      cluster->next_dma_sequence();
     }
   }
 }
@@ -377,6 +383,7 @@ bool PWMCluster::init() {
 
       //Keep a record of this cluster for the interrupt callback
       clusters[dma_channel] = this;
+      claimed_channel_mask |= 1u << dma_channel;
       claimed_sms[pio_idx] |= 1u << sm;
 
       // Manually set the next dma sequence to trigger the first transfer
@@ -667,10 +674,6 @@ bool PWMCluster::calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& 
     }
   }
   return success;
-}
-
-bool PWMCluster::bit_in_mask(uint bit, uint mask) {
-  return ((1u << bit) & mask) != 0;
 }
 
 void PWMCluster::sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data) {

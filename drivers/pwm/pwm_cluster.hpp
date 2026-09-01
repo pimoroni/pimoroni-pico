@@ -145,6 +145,7 @@ namespace pimoroni {
     // Statics
     //--------------------------------------------------
     static PWMCluster* clusters[NUM_DMA_CHANNELS];
+    static uint32_t claimed_channel_mask;  // A bit per DMA channel with a cluster attached
     static uint8_t claimed_sms[NUM_PIOS];
     static uint pio_program_offsets[NUM_PIOS];
 
@@ -202,7 +203,9 @@ namespace pimoroni {
   public:
     static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& div256_out);
   private:
-    static bool bit_in_mask(uint bit, uint mask);
+    static constexpr bool bit_in_mask(uint bit, uint mask) {
+      return ((1u << bit) & mask) != 0;
+    }
     static void sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data);
 
     // Worst case inserts per load for this cluster's channel count, as for the class limits above
