@@ -231,7 +231,9 @@ PWMCluster::~PWMCluster() {
   }
 }
 
-void PWMCluster::dma_interrupt_handler() {
+// In RAM: an XIP miss stretches the handler's worst case from 0.9us to over 9us, past the
+// loading zone cushion at motor frequencies in the tens of kHz
+void __not_in_flash_func(PWMCluster::dma_interrupt_handler)() {
   // One register read covers every channel; only those claimed by clusters are visited.
   // A channel asserting after the read stays pending, so the handler runs again for it.
   uint32_t triggered = dma_hw->ints0 & claimed_channel_mask;
@@ -245,7 +247,7 @@ void PWMCluster::dma_interrupt_handler() {
   }
 }
 
-void PWMCluster::next_dma_sequence() {
+void __not_in_flash_func(PWMCluster::next_dma_sequence)() {
   #ifdef DEBUG_MULTI_PWM
     gpio_put(IRQ_GPIO, true);
   #endif

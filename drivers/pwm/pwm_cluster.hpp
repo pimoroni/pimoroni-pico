@@ -28,9 +28,12 @@ namespace pimoroni {
                                                               // Wraps, levels and offsets are clamped to this, which is what lets
                                                               // ChannelState and TransitionData store them as uint16_t
     static const uint32_t LOADING_ZONE_SIZE = 3;              // The number of dummy transitions to insert into the data to delay the DMA interrupt (if zero then no zone is used)
-    static const uint32_t LOADING_ZONE_POSITION = 55;         // The number of levels before the wrap level to insert the load zone
-                                                              // Smaller values will make the DMA interrupt trigger closer to the time the data is needed,
-                                                              // but risks stalling the PIO if the interrupt takes longer due to other processes
+    static const uint32_t LOADING_ZONE_POSITION = 55;         // The number of levels before the wrap level to insert the load zone.
+                                                              // A level lasts at least PWM_CLUSTER_CYCLES clocks, so this position gives the
+                                                              // interrupt a cushion of at least 2.2us on RP2040 (at a clock divider of 1;
+                                                              // larger dividers only widen it), against a measured worst case of about 1.1us
+                                                              // for entry plus the RAM-resident handler. A too-large position costs little,
+                                                              // as the interrupt just fires earlier in the period
     static const bool DEFAULT_USE_LOADING_ZONE = true;        // Whether or not the default behaviour of PWMCluster is to use the loading zone
   public:
     static const uint NUM_BUFFERS = 3;
