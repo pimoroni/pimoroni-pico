@@ -78,7 +78,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, uint pin_base, uint pin_count, bool loa
   // Create the pin mask and channel mapping
   uint pin_end = MIN(pin_count + pin_base, NUM_BANK0_GPIOS);
   for(uint pin = pin_base; (pin < pin_end) && (channel_count < CHANNEL_LIMIT); pin++) {
-    pin_mask |= (1u << pin);
+    pin_mask |= (1llu << pin);
     channel_to_pin_map[channel_count] = pin;
     channel_count++;
   }
@@ -97,7 +97,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, b
   for(uint i = 0; (i < length) && (channel_count < CHANNEL_LIMIT); i++) {
     uint8_t pin = pins[i];
     if(pin < NUM_BANK0_GPIOS) {
-      pin_mask |= (1u << pin);
+      pin_mask |= (1llu << pin);
       channel_to_pin_map[channel_count] = pin;
       channel_count++;
     }
@@ -119,7 +119,7 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, bo
       break;
     }
     if(pin < NUM_BANK0_GPIOS) {
-      pin_mask |= (1u << pin);
+      pin_mask |= (1llu << pin);
       channel_to_pin_map[channel_count] = pin;
       channel_count++;
     }
@@ -139,11 +139,11 @@ PWMCluster::PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t len
   for(uint i = 0; (i < length) && (channel_count + 2u <= CHANNEL_LIMIT); i++) {
     pin_pair pair = pin_pairs[i];
     if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
-      pin_mask |= (1u << pair.first);
+      pin_mask |= (1llu << pair.first);
       channel_to_pin_map[channel_count] = pair.first;
       channel_count++;
 
-      pin_mask |= (1u << pair.second);
+      pin_mask |= (1llu << pair.second);
       channel_to_pin_map[channel_count] = pair.second;
       channel_count++;
     }
@@ -165,11 +165,11 @@ PWMCluster::PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pai
       break;
     }
     if((pair.first < NUM_BANK0_GPIOS) && (pair.second < NUM_BANK0_GPIOS)) {
-      pin_mask |= (1u << pair.first);
+      pin_mask |= (1llu << pair.first);
       channel_to_pin_map[channel_count] = pair.first;
       channel_count++;
 
-      pin_mask |= (1u << pair.second);
+      pin_mask |= (1llu << pair.second);
       channel_to_pin_map[channel_count] = pair.second;
       channel_count++;
     }
@@ -280,6 +280,37 @@ void __not_in_flash_func(PWMCluster::next_dma_sequence)() {
 
 bool PWMCluster::init() {
   if(!initialised && !pio_sm_is_claimed(pio, sm)) {
+    // Every pin must fit the PIO instance's 32-pin window, 0-31 or 16-47 on chips with
+    // more than 32 GPIOs. The base applies to the whole PIO, so while the instance has
+    // claimed state machines the window has to be taken as found.
+    if(channel_count > 0) {
+      uint pin_min = NUM_BANK0_GPIOS;
+      uint pin_max = 0;
+      for(uint channel = 0; channel < channel_count; channel++) {
+        pin_min = MIN(pin_min, (uint)channel_to_pin_map[channel]);
+        pin_max = MAX(pin_max, (uint)channel_to_pin_map[channel]);
+      }
+
+      bool pio_in_use = false;
+      for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
+        pio_in_use |= pio_sm_is_claimed(pio, i);
+      }
+      if(pio_in_use) {
+        uint current_base = pio_get_gpio_base(pio);
+        if(pin_min < current_base || pin_max >= current_base + 32) {
+          return false;
+        }
+        gpio_base = current_base;
+      }
+      else {
+        if(pin_max > 31 && pin_min < 16) {
+          return false;
+        }
+        gpio_base = (pin_max > 31) ? 16 : 0;
+        pio_set_gpio_base(pio, gpio_base);
+      }
+    }
+
     // One block holds both sequence sets and the channel states, sized for this cluster's
     // channel count. Zeroed content is every member's default.
     const uint sequence_entries = transition_capacity() + 1;
@@ -333,9 +364,10 @@ bool PWMCluster::init() {
         pio_gpio_init(pio, channel_to_pin_map[channel]);
       }
 
-      // Set their default state and direction
-      pio_sm_set_pins_with_mask(pio, sm, 0x00, pin_mask);
-      pio_sm_set_pindirs_with_mask(pio, sm, pin_mask, pin_mask);
+      // Set their default state and direction. These take absolute GPIO masks and
+      // shift by the window base themselves
+      pio_sm_set_pins_with_mask64(pio, sm, 0x00, pin_mask);
+      pio_sm_set_pindirs_with_mask64(pio, sm, pin_mask, pin_mask);
 
     #ifdef DEBUG_MULTI_PWM
       pio_gpio_init(pio, DEBUG_SIDESET);
@@ -346,7 +378,7 @@ bool PWMCluster::init() {
       sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
     #else
       pio_sm_config c = pwm_cluster_program_get_default_config(pio_program_offsets[pio_idx]);
-      sm_config_set_out_pins(&c, 0, 32);
+      sm_config_set_out_pins(&c, gpio_base, 32);
     #endif
       sm_config_set_out_shift(&c, false, true, 32);
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE); // We actively do not want a joined FIFO even though we are not needing the RX
@@ -524,7 +556,7 @@ void PWMCluster::load_pwm() {
 
     // Invert this channel's initial state if it's polarity invert is set
     if(state.polarity) {
-      pin_states |= (1u << channel_to_pin_map[channel]); // Set the pin
+      pin_states |= (1u << (channel_to_pin_map[channel] - gpio_base)); // Set the pin
     }
 
     const uint channel_start = state.offset;
@@ -542,7 +574,7 @@ void PWMCluster::load_pwm() {
     // Did the previous sequence overrun the wrap level?
     if(state.overrun > 0) {
       // Flip the initial state so the pin starts "high" (or "low" if polarity inverted)
-      pin_states ^= (1u << channel_to_pin_map[channel]);
+      pin_states ^= (1u << (channel_to_pin_map[channel] - gpio_base));
 
       // Is our end level before our start level?
       if(channel_wrapped_end < channel_start) {
@@ -715,9 +747,9 @@ void PWMCluster::populate_sequence(const TransitionData transitions[], uint data
           // Yes, so add the transition state to the pin states mask, if it's not a dummy transition
           if(!transition.dummy) {
             if(transition.state)
-              pin_states_in_out |= (1u << channel_to_pin_map[transition.channel]);
+              pin_states_in_out |= (1u << (channel_to_pin_map[transition.channel] - gpio_base));
             else
-              pin_states_in_out &= ~(1u << channel_to_pin_map[transition.channel]);
+              pin_states_in_out &= ~(1u << (channel_to_pin_map[transition.channel] - gpio_base));
           }
 
           data_index++; // Move on to the next transition

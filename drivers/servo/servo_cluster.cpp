@@ -4,7 +4,7 @@
 #include <new>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase)
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint64_t pin_mask, CalibrationType default_type, float freq, bool auto_phase)
     : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
@@ -24,7 +24,7 @@ namespace servo {
     create_servo_states(default_type, auto_phase);
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq, bool auto_phase)
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint64_t pin_mask, const Calibration& calibration, float freq, bool auto_phase)
     : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
     create_servo_states(calibration, auto_phase);
   }
