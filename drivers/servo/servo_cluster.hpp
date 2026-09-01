@@ -29,12 +29,12 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
-    ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, uint64_t pin_mask, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, CalibrationType default_type = ANGULAR, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
 
-    ServoCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
+    ServoCluster(PIO pio, uint sm, uint64_t pin_mask, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, uint pin_base, uint pin_count, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, const uint8_t *pins, uint32_t length, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);
     ServoCluster(PIO pio, uint sm, std::initializer_list<uint8_t> pins, const Calibration& calibration, float freq = ServoState::DEFAULT_FREQUENCY, bool auto_phase = true);

@@ -128,6 +128,11 @@ namespace pimoroni {
     uint64_t pin_mask;
     uint8_t channel_count;
     uint8_t channel_to_pin_map[CHANNEL_LIMIT];
+
+    // First GPIO the PIO instance's 32-pin window can reach, set by init() from the pin set.
+    // The map above stays absolute; the transition masks subtract this
+    uint gpio_base = 0;
+
     uint wrap_level;
 
     // The channel states and both sequence sets live in one block, sized for channel_count
@@ -206,8 +211,8 @@ namespace pimoroni {
   public:
     static bool calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& div256_out);
   private:
-    static constexpr bool bit_in_mask(uint bit, uint mask) {
-      return ((1u << bit) & mask) != 0;
+    static constexpr bool bit_in_mask(uint bit, uint64_t mask) {
+      return ((1llu << bit) & mask) != 0;
     }
     static void sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data);
 
