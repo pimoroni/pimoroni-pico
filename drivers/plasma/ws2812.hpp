@@ -95,6 +95,10 @@ namespace plasma {
                     managed_buffer = false;
                 }
             }
+            // False when the pin did not fit the PIO's window; construction stopped
+            // before any hardware setup and only the destructor may follow
+            bool pins_reachable() const { return pins_ok; }
+
             bool start(uint fps=60);
             bool stop();
             void update(bool blocking=false);
@@ -114,6 +118,7 @@ namespace plasma {
             int pio_program_offset = -1;
             int dma_channel = -1;
             bool sm_claimed = false;
+            bool pins_ok = false;
             bool timer_running = false;
             struct repeating_timer timer = {};
             bool managed_buffer = false;
