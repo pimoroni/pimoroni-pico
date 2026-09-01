@@ -6,6 +6,15 @@
 #include "hardware/irq.h"
 #include "common/pimoroni_common.hpp"
 #include <initializer_list>
+#include <cstddef>
+
+// PWMCluster's buffer block is claimed and released through these, so a port can supply
+// memory from its own heap. The block is a DMA source, so it must be somewhere the DMA
+// reads coherently with the CPU's writes, in practice SRAM. The defaults, defined weak in
+// pwm_cluster.cpp, take the C heap, which the RP2 ports place in SRAM. Returns nullptr on
+// failure; init() reports that to its caller.
+extern "C" void* pwm_cluster_allocate(size_t size);
+extern "C" void pwm_cluster_deallocate(void* mem);
 
 namespace pimoroni {
 
@@ -53,19 +62,18 @@ namespace pimoroni {
       Transition() : mask(0), delay(0) {};
     };
 
-    template<uint buffer_size>
     struct Sequence {
       //--------------------------------------------------
       // Variables
       //--------------------------------------------------
       uint32_t size;
-      Transition data[buffer_size];
+      Transition* data;
 
 
       //--------------------------------------------------
       // Constructors/Destructor
       //--------------------------------------------------
-      Sequence() : size(1), data{Transition()} {};
+      Sequence() : size(1), data(nullptr) {};
     };
 
     struct TransitionData {
@@ -114,12 +122,15 @@ namespace pimoroni {
     int dma_channel;
     uint64_t pin_mask;
     uint8_t channel_count;
-    ChannelState channels[CHANNEL_LIMIT];
     uint8_t channel_to_pin_map[CHANNEL_LIMIT];
     uint wrap_level;
 
-    Sequence<TRANSITION_LIMIT + 1> sequences[NUM_BUFFERS];
-    Sequence<LOOP_TRANSITION_LIMIT + 1> loop_sequences[NUM_BUFFERS];
+    // The channel states and both sequence sets live in one block, sized for channel_count
+    // and claimed by init() through pwm_cluster_allocate
+    uint8_t* allocation = nullptr;
+    ChannelState* channels = nullptr;
+    Sequence sequences[NUM_BUFFERS];
+    Sequence loop_sequences[NUM_BUFFERS];
 
     volatile uint read_index = 0;
     volatile uint last_written_index = 0;
@@ -154,9 +165,6 @@ namespace pimoroni {
     PWMCluster(PIO pio, uint sm, const pin_pair *pin_pairs, uint32_t length, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
     PWMCluster(PIO pio, uint sm, std::initializer_list<pin_pair> pin_pairs, bool loading_zone = DEFAULT_USE_LOADING_ZONE);
     ~PWMCluster();
-
-  private:
-    void constructor_common();
 
 
     //--------------------------------------------------
@@ -194,6 +202,10 @@ namespace pimoroni {
   private:
     static bool bit_in_mask(uint bit, uint mask);
     static void sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data);
+
+    // Worst case inserts per load for this cluster's channel count, as for the class limits above
+    uint transition_capacity() const { return (channel_count * 3u) + LOADING_ZONE_SIZE; }
+    uint loop_transition_capacity() const { return (channel_count * 2u) + LOADING_ZONE_SIZE; }
     void populate_sequence(const TransitionData transitions[], uint data_size, Transition sequence_data[], uint sequence_capacity, uint32_t &sequence_size, uint &pin_states_in_out) const;
 
     void next_dma_sequence();
