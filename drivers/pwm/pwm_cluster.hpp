@@ -153,6 +153,8 @@ namespace pimoroni {
 
     bool initialised = false;
     bool loading_zone = true;
+    bool pins_ok = true;
+    bool span_ok = true;
 
 
     //--------------------------------------------------
@@ -190,6 +192,11 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     bool init();
+
+    // Why the last init() returned false, distinguishing pin problems, which no retry can
+    // fix, from resource exhaustion
+    bool pins_reachable() const { return pins_ok; }
+    bool pins_available() const { return span_ok; }
 
     uint8_t get_chan_count() const;
     uint8_t get_chan_pair_count() const;

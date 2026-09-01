@@ -286,6 +286,8 @@ bool PWMCluster::init() {
     // more than 32 GPIOs. The base applies to the whole PIO, so while the instance has
     // claimed state machines the window has to be taken as found.
     uint pio_idx = pio_get_index(pio);
+    pins_ok = true;
+    span_ok = true;
     if(channel_count > 0) {
       uint pin_min = NUM_BANK0_GPIOS;
       uint pin_max = 0;
@@ -301,12 +303,14 @@ bool PWMCluster::init() {
       if(pio_in_use) {
         uint current_base = pio_get_gpio_base(pio);
         if(pin_min < current_base || pin_max >= current_base + 32) {
+          pins_ok = false;
           return false;
         }
         gpio_base = current_base;
       }
       else {
         if(pin_max > 31 && pin_min < 16) {
+          pins_ok = false;
           return false;
         }
         gpio_base = (pin_max > 31) ? 16 : 0;
@@ -321,6 +325,7 @@ bool PWMCluster::init() {
       claimed_span = ((1llu << out_count) - 1) << out_base;
       if((claimed_spans[pio_idx] & claimed_span) != 0) {
         claimed_span = 0;
+        span_ok = false;
         return false;
       }
     }
