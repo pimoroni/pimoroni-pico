@@ -2,7 +2,7 @@
 
 Welcome to the brave new world of Pico!
 
-This repository contains the C/C++ and MicroPython libraries for our range of RP2040-based boards, Raspberry Pi Pico addons & [supported Breakout Garden sensors](#breakouts).
+This repository contains the C/C++ and MicroPython libraries for our range of RP2040 and RP2350-based boards, Raspberry Pi Pico addons & [supported Breakout Garden sensors](#breakouts).
 
 [![CMake Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/cmake.yml?branch=main&label=CMake)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/cmake.yml)
 [![MicroPython Build Status](https://img.shields.io/github/actions/workflow/status/pimoroni/pimoroni-pico/micropython.yml?branch=main&label=MicroPython)](https://github.com/pimoroni/pimoroni-pico/actions/workflows/micropython.yml)
@@ -19,13 +19,14 @@ This repository contains the C/C++ and MicroPython libraries for our range of RP
   - [Packs and Bases](#packs-and-bases)
   - [SHIMs](#shims)
   - [RP2040 Boards](#rp2040-boards)
+  - [RP2350 Boards](#rp2350-boards)
   - [Pico W Aboard](#pico-w-aboard)
   - [Breakouts](#breakouts)
 - [Tutorials and Guides](#tutorials-and-guides)
 
 # MicroPython
 
-:warning: This repository contains MicroPython builds for **RP2040** based products only. If you're looking for **RP2350** compatible MicroPython builds see here: https://github.com/pimoroni/pimoroni-pico-rp2350 . Many of our own RP2040 and RP2350 products now have their own repos with MicroPython firmware and examples - these will be linked on the relevant shop pages.
+:warning: This repository now contains MicroPython builds for both **RP2040 and RP2350** based products. Many of our own RP2040 and RP2350 products have their own repos with MicroPython firmware and examples - these will be linked on the relevant shop pages.
 
 We think MicroPython is the easiest way to get started! If you're new to Pico, we recommend you read our [getting started with Pico](https://learn.pimoroni.com/article/getting-started-with-pico) tutorial.
 
@@ -93,9 +94,22 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 ## RP2040 Boards
 
+* Raspberry Pi Pico - https://shop.pimoroni.com/products/raspberry-pi-pico
+* Raspberry Pi Pico W - https://shop.pimoroni.com/products/raspberry-pi-pico-w
+* Tiny 2040 - https://shop.pimoroni.com/products/tiny-2040
+* PGA2040 - https://shop.pimoroni.com/products/pga2040
 * Servo 2040 (18 Channel Servo Controller) - https://shop.pimoroni.com/products/servo-2040
 * Motor 2040 (Quad Motor+Encoder Controller) - https://shop.pimoroni.com/products/motor-2040
 * Tufty 2040 (LCD badge) - https://shop.pimoroni.com/products/tufty-2040
+
+## RP2350 Boards
+
+* Raspberry Pi Pico 2 - https://shop.pimoroni.com/products/raspberry-pi-pico-2
+* Raspberry Pi Pico 2 W - https://shop.pimoroni.com/products/raspberry-pi-pico-2-w
+* Tiny 2350 - https://shop.pimoroni.com/products/tiny-2350
+* PGA2350 - https://shop.pimoroni.com/products/pga2350
+* Pimoroni Pico Plus 2 - https://shop.pimoroni.com/products/pimoroni-pico-plus-2
+* Pimoroni Pico Plus 2 W - https://shop.pimoroni.com/products/pimoroni-pico-plus-2-w
 
 ## Pico W Aboard
 
@@ -141,13 +155,7 @@ We also maintain a C++/CMake boilerplate with GitHub workflows configured for te
 
 - :link: [Getting Started with (MicroPython on) Pico](https://learn.pimoroni.com/article/getting-started-with-pico)
 - :link: [Pico C/C++ Development on Windows / WSL](https://learn.pimoroni.com/article/pico-development-using-wsl)
-- :link: [Getting Started with Interstate 75 (and W)](https://learn.pimoroni.com/article/getting-started-with-interstate-75)
-- :link: [Getting Started with Plasma 2040](https://learn.pimoroni.com/article/plasma-2040)
 - :link: [Assembling Keybow 2040](https://learn.pimoroni.com/article/assembling-keybow-2040)
-- :link: [Getting Started with Badger 2040](https://learn.pimoroni.com/article/getting-started-with-badger-2040)
 - :link: [MicroPython and VL53L5CX](https://learn.pimoroni.com/article/micropython-and-vl53l5cx)
 - :link: [Getting Started with Tufty 2040](https://learn.pimoroni.com/article/getting-started-with-tufty-2040)
-- :link: [Getting Started with Inky Frame](https://learn.pimoroni.com/article/getting-started-with-inky-frame)
 - :link: [Getting Started with Automation 2040 W (and Mini)](https://learn.pimoroni.com/article/getting-started-with-automation-2040-w)
-- :link: [Assembling Wireless Plasma Kit](https://learn.pimoroni.com/article/assembling-wireless-plasma-kit)
-- :link: [Getting Started with Badger 2040 W](https://learn.pimoroni.com/article/getting-started-with-badger-2040-w)
