@@ -56,6 +56,14 @@ static PIO plasma_get_pio(int pio_idx) {
 
 static_assert(APA102::SM_AUTO == WS2812::SM_AUTO, "plasma SM_AUTO sentinels must match");
 
+static int plasma_get_gpio(mp_obj_t object) {
+    int gpio = pimoroni_gpio_from_obj(object);
+    if(gpio < 0 || gpio >= (int)NUM_BANK0_GPIOS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pin out of range. Expected 0 to %d"), NUM_BANK0_GPIOS - 1);
+    }
+    return gpio;
+}
+
 static uint plasma_get_sm(PIO pio, int sm) {
     if(sm == -1) {
         for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
@@ -122,7 +130,7 @@ mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int num_leds = args[ARG_num_leds].u_int;
     PIO pio = plasma_get_pio(args[ARG_pio].u_int);
     uint sm = plasma_get_sm(pio, args[ARG_sm].u_int);
-    int dat = pimoroni_gpio_from_obj(args[ARG_dat].u_obj);
+    int dat = plasma_get_gpio(args[ARG_dat].u_obj);
     int freq = args[ARG_freq].u_int;
     bool rgbw = args[ARG_rgbw].u_bool;
     WS2812::COLOR_ORDER color_order = (WS2812::COLOR_ORDER)args[ARG_color_order].u_int;
@@ -352,8 +360,8 @@ mp_obj_t PlasmaAPA102_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     int num_leds = args[ARG_num_leds].u_int;
     PIO pio = plasma_get_pio(args[ARG_pio].u_int);
     uint sm = plasma_get_sm(pio, args[ARG_sm].u_int);
-    int dat = pimoroni_gpio_from_obj(args[ARG_dat].u_obj);
-    int clk = pimoroni_gpio_from_obj(args[ARG_clk].u_obj);
+    int dat = plasma_get_gpio(args[ARG_dat].u_obj);
+    int clk = plasma_get_gpio(args[ARG_clk].u_obj);
     int freq = args[ARG_freq].u_int;
 
     APA102::RGB *buffer = nullptr;
