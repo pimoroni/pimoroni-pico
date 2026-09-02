@@ -20,7 +20,7 @@ namespace servo {
     float pwm_frequency;
 
     // Both arrays live in one block sized to the channel count, claimed by the constructors
-    // through pwm_cluster_allocate; init() fails if the claim did
+    // through pwm_allocate; init() fails if the claim did
     ServoState* states = nullptr;
     float* servo_phases = nullptr;
 

@@ -34,7 +34,7 @@ namespace motor {
     float pwm_frequency;
 
     // Both arrays live in one block sized to the motor count, claimed by the constructors
-    // through pwm_cluster_allocate; init() fails if the claim did
+    // through pwm_allocate; init() fails if the claim did
     MotorState* states = nullptr;
     motor_config* configs = nullptr;
 
