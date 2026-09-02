@@ -134,6 +134,24 @@ namespace pimoroni {
     constexpr pin_pair(uint8_t first, uint8_t second) : first(first), second(second) {}
   };
 
+  // One signal per phase. The gate driver generates the low side and owns its deadtime.
+  struct pin_trio {
+    union { uint8_t first;  uint8_t a; uint8_t u; };
+    union { uint8_t second; uint8_t b; uint8_t v; };
+    union { uint8_t third;  uint8_t c; uint8_t w; };
+
+    constexpr pin_trio() : first(0), second(0), third(0) {}
+    constexpr pin_trio(uint8_t first, uint8_t second, uint8_t third) : first(first), second(second), third(third) {}
+  };
+
+  // Three H-bridges, each {signal, inverse}, for drivers whose paired inputs cannot act as independent half bridges.
+  struct bridge_trio {
+    pin_pair u, v, w;
+
+    constexpr bridge_trio() {}
+    constexpr bridge_trio(pin_pair u, pin_pair v, pin_pair w) : u(u), v(v), w(w) {}
+  };
+
   struct bool_pair {
     union {
       bool first;

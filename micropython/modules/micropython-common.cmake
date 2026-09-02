@@ -30,6 +30,7 @@ include(pwm/micropython)
 include(servo/micropython)
 include(encoder/micropython)
 include(motor/micropython)
+include(brushless/micropython)
 
 # Utility
 include(adcfft/micropython)
