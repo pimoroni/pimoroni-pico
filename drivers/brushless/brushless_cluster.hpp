@@ -87,6 +87,8 @@ namespace brushless {
 
     float phase(uint8_t motor) const;
     void phase(uint8_t motor, float phase, bool load = true);
+    void phase(const uint8_t *motors, uint8_t length, float phase, bool load = true);
+    void phase(std::initializer_list<uint8_t> motors, float phase, bool load = true);
     void all_to_phase(float phase, bool load = true);
 
     float frequency() const;
