@@ -1267,6 +1267,13 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     if(mp_obj_is_int(object)) {
         pin_mask = (uint)mp_obj_get_int(object);
     }
+    else if(pimoroni_obj_is_int_or_gpio(object)) {
+        // Only Pin objects reach here; a bare int is a pin mask
+        pins = m_new(uint8_t, 1);
+        pins[0] = (uint8_t)pimoroni_gpio_from_obj(object);
+        pin_count = 1;
+        mask_provided = false;
+    }
     else {
         mp_obj_t *items = nullptr;
         if(mp_obj_is_type(object, &mp_type_list)) {
@@ -1281,7 +1288,7 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         }
 
         if(items == nullptr)
-            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of pins, or a pin mask integer"));
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a pin, a list or tuple of pins, or a pin mask integer"));
         else if(pin_count == 0)
             mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
         else {
