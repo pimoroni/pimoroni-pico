@@ -31,7 +31,7 @@ namespace motor {
 
   MotorCluster::~MotorCluster() {
     // MotorState and motor_config are trivially destructible, so no destructor calls
-    pwm_cluster_deallocate(states);
+    pwm_deallocate(states);
   }
 
   bool MotorCluster::init() {
@@ -718,7 +718,7 @@ namespace motor {
                                          float deadzone, DecayMode mode, bool auto_phase) {
     uint8_t motor_count = pwms.get_chan_pair_count();
     if(motor_count > 0) {
-      states = (MotorState*)pwm_cluster_allocate(((size_t)sizeof(MotorState) + sizeof(motor_config)) * motor_count);
+      states = (MotorState*)pwm_allocate(((size_t)sizeof(MotorState) + sizeof(motor_config)) * motor_count);
       if(states == nullptr) {
         return;  // init() reports the failure
       }

@@ -1,4 +1,5 @@
 #include "calibration.hpp"
+#include "pwm_alloc.hpp"
 
 namespace servo {
   Calibration::Pair::Pair()
@@ -10,7 +11,7 @@ namespace servo {
   }
 
   Calibration::Calibration()
-    : calibration_size(0), limit_lower(true), limit_upper(true) {
+    : calibration(nullptr), calibration_size(0), limit_lower(true), limit_upper(true) {
   }
 
   Calibration::Calibration(CalibrationType default_type)
@@ -19,22 +20,25 @@ namespace servo {
   }
 
   Calibration::Calibration(const Calibration &other)
-    : calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
+    : calibration(nullptr), calibration_size(0), limit_lower(other.limit_lower), limit_upper(other.limit_upper) {
     uint size = other.size();
-    apply_blank_pairs(size);
-    for(uint i = 0; i < size; i++) {
-      calibration[i] = other.calibration[i];
+    if(apply_blank_pairs(size)) {
+      for(uint i = 0; i < size; i++) {
+        calibration[i] = other.calibration[i];
+      }
     }
   }
 
   Calibration::~Calibration() {
+    apply_blank_pairs(0);
   }
 
   Calibration &Calibration::operator=(const Calibration &other) {
     uint size = other.size();
-    apply_blank_pairs(size);
-    for(uint i = 0; i < size; i++) {
-      calibration[i] = other.calibration[i];
+    if(apply_blank_pairs(size)) {
+      for(uint i = 0; i < size; i++) {
+        calibration[i] = other.calibration[i];
+      }
     }
     limit_lower = other.limit_lower;
     limit_upper = other.limit_upper;
@@ -52,33 +56,53 @@ namespace servo {
     return calibration[index];
   }
 
-  void Calibration::apply_blank_pairs(uint size) {
-    if(size > 0) {
-      for(auto i = 0u; i < size; i++) {
-        calibration[i] = Pair();
+  bool Calibration::apply_blank_pairs(uint size) {
+    if(size > MAX_CALIBRATION_PAIRS) {
+      return false;
+    }
+    if(size != calibration_size) {
+      Pair* new_pairs = nullptr;
+      if(size > 0) {
+        new_pairs = (Pair*)pwm_allocate(size * sizeof(Pair));
+        if(new_pairs == nullptr) {
+          return false;
+        }
       }
+      if(calibration != nullptr) {
+        pwm_deallocate(calibration);
+      }
+      calibration = new_pairs;
       calibration_size = size;
     }
-    else {
-      calibration_size = 0;
+    for(uint i = 0; i < size; i++) {
+      calibration[i] = Pair();
     }
+    return true;
   }
 
-  void Calibration::apply_two_pairs(float min_pulse, float max_pulse, float min_value, float max_value) {
-    apply_blank_pairs(2);
+  bool Calibration::apply_two_pairs(float min_pulse, float max_pulse, float min_value, float max_value) {
+    if(!apply_blank_pairs(2)) {
+      return false;
+    }
     calibration[0] = Pair(min_pulse, min_value);
     calibration[1] = Pair(max_pulse, max_value);
+    return true;
   }
 
-  void Calibration::apply_three_pairs(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
-    apply_blank_pairs(3);
+  bool Calibration::apply_three_pairs(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value) {
+    if(!apply_blank_pairs(3)) {
+      return false;
+    }
     calibration[0] = Pair(min_pulse, min_value);
     calibration[1] = Pair(mid_pulse, mid_value);
     calibration[2] = Pair(max_pulse, max_value);
+    return true;
   }
 
-  void Calibration::apply_uniform_pairs(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
-    apply_blank_pairs(size);
+  bool Calibration::apply_uniform_pairs(uint size, float min_pulse, float max_pulse, float min_value, float max_value) {
+    if(!apply_blank_pairs(size)) {
+      return false;
+    }
     if(size > 0) {
       float size_minus_one = (float)(size - 1);
       for(uint i = 0; i < size; i++) {
@@ -87,23 +111,21 @@ namespace servo {
         calibration[i] = Pair(pulse, value);
       }
     }
+    return true;
   }
 
-  void Calibration::apply_default_pairs(CalibrationType default_type) {
+  bool Calibration::apply_default_pairs(CalibrationType default_type) {
     switch(default_type) {
     default:
     case ANGULAR:
-      apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                       -90.0f,            0.0f,              +90.0f);
-      break;
+      return apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                               -90.0f,            0.0f,              +90.0f);
     case LINEAR:
-      apply_two_pairs(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
-                     0.0f,              1.0f);
-      break;
+      return apply_two_pairs(DEFAULT_MIN_PULSE, DEFAULT_MAX_PULSE,
+                             0.0f,              1.0f);
     case CONTINUOUS:
-      apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
-                       -1.0f,            0.0f,              +1.0f);
-      break;
+      return apply_three_pairs(DEFAULT_MIN_PULSE, DEFAULT_MID_PULSE, DEFAULT_MAX_PULSE,
+                               -1.0f,             0.0f,              +1.0f);
     }
   }
 

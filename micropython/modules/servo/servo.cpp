@@ -112,10 +112,10 @@ mp_obj_t Calibration_apply_blank_pairs(size_t n_args, const mp_obj_t *pos_args, 
     _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
     int size = args[ARG_size].u_int;
-    if(size < 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
-    else
-        self->calibration->apply_blank_pairs((uint)size);
+    if(size < 0 || size > (int)Calibration::MAX_CALIBRATION_PAIRS)
+        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 to 255"));
+    else if(!self->calibration->apply_blank_pairs((uint)size))
+        mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
 
     return mp_const_none;
 }
@@ -140,7 +140,8 @@ mp_obj_t Calibration_apply_two_pairs(size_t n_args, const mp_obj_t *pos_args, mp
     float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_two_pairs(min_pulse, max_pulse, min_value, max_value);
+    if(!self->calibration->apply_two_pairs(min_pulse, max_pulse, min_value, max_value))
+        mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
 
     return mp_const_none;
 }
@@ -169,7 +170,8 @@ mp_obj_t Calibration_apply_three_pairs(size_t n_args, const mp_obj_t *pos_args, 
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float mid_value = mp_obj_get_float(args[ARG_mid_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value);
+    if(!self->calibration->apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value))
+        mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
 
     return mp_const_none;
 }
@@ -192,14 +194,15 @@ mp_obj_t Calibration_apply_uniform_pairs(size_t n_args, const mp_obj_t *pos_args
     _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
     int size = args[ARG_size].u_int;
-    if(size < 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
+    if(size < 0 || size > (int)Calibration::MAX_CALIBRATION_PAIRS)
+        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 to 255"));
     else {
         float min_pulse = mp_obj_get_float(args[ARG_min_pulse].u_obj);
         float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
         float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
         float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-        self->calibration->apply_uniform_pairs((uint)size, min_pulse, max_pulse, min_value, max_value);
+        if(!self->calibration->apply_uniform_pairs((uint)size, min_pulse, max_pulse, min_value, max_value))
+            mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
     }
 
     return mp_const_none;
@@ -223,7 +226,8 @@ mp_obj_t Calibration_apply_default_pairs(size_t n_args, const mp_obj_t *pos_args
         mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
     }
     servo::CalibrationType calibration_type = (servo::CalibrationType)type;
-    self->calibration->apply_default_pairs(calibration_type);
+    if(!self->calibration->apply_default_pairs(calibration_type))
+        mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
 
     return mp_const_none;
 }
