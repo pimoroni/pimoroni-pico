@@ -258,6 +258,23 @@ namespace brushless {
     apply_phase(motor, load);
   }
 
+  void BrushlessCluster::phase(const uint8_t *motors, uint8_t length, float phase, bool load) {
+    assert(motors != nullptr);
+    for(uint8_t i = 0; i < length; i++) {
+      this->phase(motors[i], phase, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
+  void BrushlessCluster::phase(std::initializer_list<uint8_t> motors, float phase, bool load) {
+    for(auto motor : motors) {
+      this->phase(motor, phase, false);
+    }
+    if(load)
+      pwms.load_pwm();
+  }
+
   void BrushlessCluster::all_to_phase(float phase, bool load) {
     uint8_t motor_count = count();
     for(uint8_t motor = 0; motor < motor_count; motor++) {
