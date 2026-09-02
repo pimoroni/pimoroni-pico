@@ -501,6 +501,20 @@ void PWMCluster::set_chan_offset(uint8_t channel, uint32_t offset, bool load) {
   }
 }
 
+PulseAlignment PWMCluster::get_chan_alignment(uint8_t channel) const {
+  assert(channel < channel_count);
+  return (initialised && channel < channel_count) ? (PulseAlignment)channels[channel].alignment : LEFT_ALIGN;
+}
+
+void PWMCluster::set_chan_alignment(uint8_t channel, PulseAlignment alignment, bool load) {
+  assert(channel < channel_count);
+  if(initialised && channel < channel_count) {
+    channels[channel].alignment = (uint8_t)alignment;
+    if(load)
+      load_pwm();
+  }
+}
+
 bool PWMCluster::get_chan_polarity(uint8_t channel) const {
   assert(channel < channel_count);
   return (initialised && channel < channel_count) ? channels[channel].polarity : false;
@@ -565,8 +579,8 @@ void PWMCluster::load_pwm() {
       pin_states |= (1u << (channel_to_pin_map[channel] - out_base)); // Set the pin
     }
 
-    const uint channel_start = state.offset;
-    const uint channel_end = (state.offset + state.level);
+    const uint channel_start = channel_start_level(state);
+    const uint channel_end = channel_start + state.level;
     const uint channel_wrapped_end = channel_end % wrap_level;
 
     // If the data has been read, copy the channel overruns from that sequence. Otherwise, keep the ones we had previously stored.
@@ -714,6 +728,18 @@ bool PWMCluster::calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& 
     }
   }
   return success;
+}
+
+uint PWMCluster::channel_start_level(const ChannelState &state) const {
+  uint start = state.offset;
+  switch(state.alignment) {
+    // Centred pulses share a midpoint whatever their levels. Right-aligned pulses end one
+    // count inside the period, keeping the fall out of the looping sequences
+    case CENTRE_ALIGN: start += (wrap_level - MIN(state.level, wrap_level)) / 2; break;
+    case RIGHT_ALIGN:  start += (wrap_level - 1) - MIN(state.level, wrap_level - 1); break;
+    default: break;
+  }
+  return start % wrap_level;
 }
 
 void PWMCluster::sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data) {

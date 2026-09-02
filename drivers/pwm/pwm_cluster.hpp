@@ -10,6 +10,11 @@
 
 namespace pimoroni {
 
+  enum PulseAlignment {
+    LEFT_ALIGN   = 0,
+    CENTRE_ALIGN = 1,
+    RIGHT_ALIGN  = 2,
+  };
 
   class PWMCluster {
     //--------------------------------------------------
@@ -100,13 +105,14 @@ namespace pimoroni {
       uint16_t offset;
       uint16_t overrun;
       uint16_t next_overrun;
+      uint8_t alignment;  // a PulseAlignment, stored narrow
       bool polarity;
 
 
       //--------------------------------------------------
       // Constructors/Destructor
       //--------------------------------------------------
-      ChannelState() : level(0), offset(0), overrun(0), next_overrun(0), polarity(false) {}
+      ChannelState() : level(0), offset(0), overrun(0), next_overrun(0), alignment(LEFT_ALIGN), polarity(false) {}
     };
 
 
@@ -202,6 +208,9 @@ namespace pimoroni {
     uint32_t get_chan_offset(uint8_t channel) const;
     void set_chan_offset(uint8_t channel, uint32_t offset, bool load = true);
 
+    PulseAlignment get_chan_alignment(uint8_t channel) const;
+    void set_chan_alignment(uint8_t channel, PulseAlignment alignment, bool load = true);
+
     bool get_chan_polarity(uint8_t channel) const;
     void set_chan_polarity(uint8_t channel, bool polarity, bool load = true);
 
@@ -221,6 +230,9 @@ namespace pimoroni {
       return ((1llu << bit) & mask) != 0;
     }
     static void sorted_insert(TransitionData array[], uint &size, uint capacity, const TransitionData &data);
+
+    // Where the channel's pulse rises, from its offset, alignment and level
+    uint channel_start_level(const ChannelState &state) const;
 
     // Worst case inserts per load for this cluster's channel count, as for the class limits above
     uint transition_capacity() const { return (channel_count * 3u) + LOADING_ZONE_SIZE; }
