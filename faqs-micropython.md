@@ -11,7 +11,7 @@
   - ['MicroPython - Raspberry Pi Pico' doesn't show up as an interpreter option](#micropython---raspberry-pi-pico-doesnt-show-up-as-an-interpreter-option)
   - [Couldn't find the device automatically?](#couldnt-find-the-device-automatically)
   - [Device is busy?](#device-is-busy)
-  - [I've connected an external button to my RP2350 board and it's being weird](#ive-connected-a-button-to-my-rp2350-board-and-its-being-weird)
+  - [I've connected a button to my RP2350 board and it's being weird](#ive-connected-a-button-to-my-rp2350-board-and-its-being-weird)
 
 ## General MicroPython
 
