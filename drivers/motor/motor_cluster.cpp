@@ -225,7 +225,8 @@ namespace motor {
   void MotorCluster::phase(uint8_t motor, float phase, bool load) {
     assert(motor < pwms.get_chan_pair_count());
     configs[motor].phase = MIN(MAX(phase, 0.0f), 1.0f);
-    pwms.set_chan_offset(motor, (uint32_t)(configs[motor].phase * (float)pwms.get_wrap()), load);
+    pwms.set_chan_offset(POS_MOTOR(motor), (uint32_t)(configs[motor].phase * (float)pwms.get_wrap()), false);
+    pwms.set_chan_offset(NEG_MOTOR(motor), (uint32_t)(configs[motor].phase * (float)pwms.get_wrap()), load);
   }
 
   void MotorCluster::phase(const uint8_t *motors, uint8_t length, float phase, bool load) {
