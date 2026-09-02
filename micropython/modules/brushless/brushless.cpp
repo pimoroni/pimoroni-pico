@@ -1,3 +1,4 @@
+#include "drivers/brushless/brushless.hpp"
 #include "drivers/brushless/brushless_cluster.hpp"
 #include "common/pimoroni_common.hpp"
 #include "micropython/modules/util.hpp"
@@ -53,6 +54,272 @@ static uint8_t brushless_pin_from_obj(const mp_obj_t &object) {
         mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("a pin is out of range. Expected 0 to %d"), NUM_BANK0_GPIOS - 1);
     }
     return (uint8_t)pin;
+}
+
+
+/********** Brushless **********/
+
+/***** Variables Struct *****/
+typedef struct _Brushless_obj_t {
+    mp_obj_base_t base;
+    Brushless* brushless;
+} _Brushless_obj_t;
+
+
+/***** Print *****/
+void Brushless_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind) {
+    (void)kind; //Unused input parameter
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    mp_print_str(print, "Brushless(");
+
+    mp_print_str(print, "pins = (");
+    pin_trio pins = self->brushless->pins();
+    mp_obj_print_helper(print, mp_obj_new_int(pins.u), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(pins.v), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_int(pins.w), PRINT_REPR);
+    mp_print_str(print, "), enabled = ");
+    mp_obj_print_helper(print, self->brushless->is_enabled() ? mp_const_true : mp_const_false, PRINT_REPR);
+    mp_print_str(print, ", duties = (");
+    mp_obj_print_helper(print, mp_obj_new_float(self->brushless->u_duty()), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->brushless->v_duty()), PRINT_REPR);
+    mp_print_str(print, ", ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->brushless->w_duty()), PRINT_REPR);
+    mp_print_str(print, "), freq = ");
+    mp_obj_print_helper(print, mp_obj_new_float(self->brushless->frequency()), PRINT_REPR);
+    if(self->brushless->direction() == NORMAL_DIR)
+        mp_print_str(print, ", direction = NORMAL_DIR");
+    else
+        mp_print_str(print, ", direction = REVERSED_DIR");
+
+    mp_print_str(print, ")");
+}
+
+
+/***** Constructor *****/
+mp_obj_t Brushless_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+    _Brushless_obj_t *self = nullptr;
+
+    enum { ARG_pins, ARG_direction, ARG_freq };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_pins, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_direction, MP_ARG_INT, {.u_int = NORMAL_DIR} },
+        { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    // Determine what pins this motor will use
+    const mp_obj_t object = args[ARG_pins].u_obj;
+    mp_obj_t *items = nullptr;
+    size_t item_count = 0;
+    if(mp_obj_is_type(object, &mp_type_list)) {
+        mp_obj_list_t *list = MP_OBJ_TO_PTR2(object, mp_obj_list_t);
+        item_count = list->len;
+        items = list->items;
+    }
+    else if(mp_obj_is_type(object, &mp_type_tuple)) {
+        mp_obj_tuple_t *tuple = MP_OBJ_TO_PTR2(object, mp_obj_tuple_t);
+        item_count = tuple->len;
+        items = tuple->items;
+    }
+
+    if(items == nullptr)
+        mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a trio of pins, or of bridge pair tuples"));
+    if(item_count != 3)
+        mp_raise_ValueError(MP_ERROR_TEXT("trio must contain three items"));
+
+    bool bridge_form = mp_obj_is_type(items[0], &mp_type_tuple);
+    pin_trio trio;
+    bridge_trio bridges;
+    if(bridge_form) {
+        pin_pair pairs[3];
+        for(uint8_t leg = 0; leg < 3; leg++) {
+            if(!mp_obj_is_type(items[leg], &mp_type_tuple)) {
+                mp_raise_ValueError(MP_ERROR_TEXT("cannot convert item to a bridge pair tuple"));
+            }
+            mp_obj_tuple_t *pair = MP_OBJ_TO_PTR2(items[leg], mp_obj_tuple_t);
+            if(pair->len != 2) {
+                mp_raise_ValueError(MP_ERROR_TEXT("bridge pair tuple must contain two pins"));
+            }
+            pairs[leg].first = brushless_pin_from_obj(pair->items[0]);
+            pairs[leg].second = brushless_pin_from_obj(pair->items[1]);
+        }
+        bridges = bridge_trio(pairs[0], pairs[1], pairs[2]);
+    }
+    else {
+        trio.u = brushless_pin_from_obj(items[0]);
+        trio.v = brushless_pin_from_obj(items[1]);
+        trio.w = brushless_pin_from_obj(items[2]);
+    }
+
+    int direction = args[ARG_direction].u_int;
+    if(direction < 0 || direction > 1) {
+        mp_raise_ValueError(MP_ERROR_TEXT("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)"));
+    }
+
+    float freq = Brushless::DEFAULT_FREQUENCY;
+    if(args[ARG_freq].u_obj != mp_const_none) {
+        freq = mp_obj_get_float(args[ARG_freq].u_obj);
+    }
+
+    Brushless *brushless;
+    if(bridge_form)
+        brushless = m_new_class(Brushless, bridges, (Direction)direction, freq);
+    else
+        brushless = m_new_class(Brushless, trio, (Direction)direction, freq);
+
+    if(!brushless->init()) {
+        uint pin_a, pin_b;
+        bool conflicted = brushless->pin_conflict(pin_a, pin_b);
+        m_del_class(Brushless, brushless);
+        if(conflicted) {
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pins %d and %d share a PWM slice channel, so would emit the same signal"), pin_a, pin_b);
+        }
+        mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 10Hz to 400KHz"));
+    }
+
+    self = mp_obj_malloc_with_finaliser(_Brushless_obj_t, &Brushless_type);
+    self->brushless = brushless;
+
+    return MP_OBJ_FROM_PTR(self);
+}
+
+
+/***** Destructor ******/
+mp_obj_t Brushless___del__(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    m_del_class(Brushless, self->brushless);
+    return mp_const_none;
+}
+
+
+/***** Methods *****/
+extern mp_obj_t Brushless_pins(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    pin_trio pins = self->brushless->pins();
+
+    mp_obj_t tuple[3];
+    tuple[0] = mp_obj_new_int(pins.u);
+    tuple[1] = mp_obj_new_int(pins.v);
+    tuple[2] = mp_obj_new_int(pins.w);
+    return mp_obj_new_tuple(3, tuple);
+}
+
+extern mp_obj_t Brushless_has_inverses(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    return self->brushless->has_inverses() ? mp_const_true : mp_const_false;
+}
+
+extern mp_obj_t Brushless_enable(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    self->brushless->enable();
+    return mp_const_none;
+}
+
+extern mp_obj_t Brushless_disable(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    self->brushless->disable();
+    return mp_const_none;
+}
+
+extern mp_obj_t Brushless_is_enabled(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    return self->brushless->is_enabled() ? mp_const_true : mp_const_false;
+}
+
+extern mp_obj_t Brushless_u_duty(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    return mp_obj_new_float(self->brushless->u_duty());
+}
+
+extern mp_obj_t Brushless_v_duty(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    return mp_obj_new_float(self->brushless->v_duty());
+}
+
+extern mp_obj_t Brushless_w_duty(mp_obj_t self_in) {
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Brushless_obj_t);
+    return mp_obj_new_float(self->brushless->w_duty());
+}
+
+extern mp_obj_t Brushless_duties(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_u, ARG_v, ARG_w };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_u, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_v, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_w, MP_ARG_REQUIRED | MP_ARG_OBJ },
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Brushless_obj_t);
+
+    float u = mp_obj_get_float(args[ARG_u].u_obj);
+    float v = mp_obj_get_float(args[ARG_v].u_obj);
+    float w = mp_obj_get_float(args[ARG_w].u_obj);
+    self->brushless->duties(u, v, w);
+
+    return mp_const_none;
+}
+
+extern mp_obj_t Brushless_frequency(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_freq };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_freq, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Brushless_obj_t);
+
+    if(n_args <= 1) {
+        return mp_obj_new_float(self->brushless->frequency());
+    }
+    else {
+        float freq = mp_obj_get_float(args[ARG_freq].u_obj);
+
+        if(!self->brushless->frequency(freq))
+            mp_raise_ValueError(MP_ERROR_TEXT("freq out of range. Expected 10Hz to 400KHz"));
+        else
+            return mp_const_none;
+    }
+}
+
+extern mp_obj_t Brushless_direction(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    enum { ARG_self, ARG_direction };
+    static const mp_arg_t allowed_args[] = {
+        { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
+        { MP_QSTR_direction, MP_ARG_OBJ, { .u_obj = mp_const_none }},
+    };
+
+    // Parse args.
+    mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
+    mp_arg_parse_all(n_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
+
+    _Brushless_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Brushless_obj_t);
+
+    if(n_args <= 1) {
+        return mp_obj_new_int((int)self->brushless->direction());
+    }
+    else {
+        int direction = mp_obj_get_int(args[ARG_direction].u_obj);
+        if(direction < 0 || direction > 1) {
+            mp_raise_ValueError(MP_ERROR_TEXT("direction out of range. Expected NORMAL_DIR (0) or REVERSED_DIR (1)"));
+        }
+        self->brushless->direction((Direction)direction);
+        return mp_const_none;
+    }
 }
 
 

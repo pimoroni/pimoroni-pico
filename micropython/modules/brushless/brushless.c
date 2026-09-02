@@ -1,6 +1,19 @@
 #include "brushless.h"
 
 /***** Methods *****/
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless___del___obj, Brushless___del__);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_pins_obj, Brushless_pins);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_has_inverses_obj, Brushless_has_inverses);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_enable_obj, Brushless_enable);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_disable_obj, Brushless_disable);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_is_enabled_obj, Brushless_is_enabled);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_u_duty_obj, Brushless_u_duty);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_v_duty_obj, Brushless_v_duty);
+MP_DEFINE_CONST_FUN_OBJ_1(Brushless_w_duty_obj, Brushless_w_duty);
+MP_DEFINE_CONST_FUN_OBJ_KW(Brushless_duties_obj, 4, Brushless_duties);
+MP_DEFINE_CONST_FUN_OBJ_KW(Brushless_frequency_obj, 1, Brushless_frequency);
+MP_DEFINE_CONST_FUN_OBJ_KW(Brushless_direction_obj, 1, Brushless_direction);
+
 MP_DEFINE_CONST_FUN_OBJ_1(BrushlessCluster___del___obj, BrushlessCluster___del__);
 MP_DEFINE_CONST_FUN_OBJ_1(BrushlessCluster_count_obj, BrushlessCluster_count);
 MP_DEFINE_CONST_FUN_OBJ_KW(BrushlessCluster_pins_obj, 2, BrushlessCluster_pins);
@@ -22,6 +35,21 @@ MP_DEFINE_CONST_FUN_OBJ_KW(BrushlessCluster_direction_obj, 2, BrushlessCluster_d
 MP_DEFINE_CONST_FUN_OBJ_1(BrushlessCluster_load_obj, BrushlessCluster_load);
 
 /***** Binding of Methods *****/
+static const mp_rom_map_elem_t Brushless_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&Brushless___del___obj) },
+    { MP_ROM_QSTR(MP_QSTR_pins), MP_ROM_PTR(&Brushless_pins_obj) },
+    { MP_ROM_QSTR(MP_QSTR_has_inverses), MP_ROM_PTR(&Brushless_has_inverses_obj) },
+    { MP_ROM_QSTR(MP_QSTR_enable), MP_ROM_PTR(&Brushless_enable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_disable), MP_ROM_PTR(&Brushless_disable_obj) },
+    { MP_ROM_QSTR(MP_QSTR_is_enabled), MP_ROM_PTR(&Brushless_is_enabled_obj) },
+    { MP_ROM_QSTR(MP_QSTR_u_duty), MP_ROM_PTR(&Brushless_u_duty_obj) },
+    { MP_ROM_QSTR(MP_QSTR_v_duty), MP_ROM_PTR(&Brushless_v_duty_obj) },
+    { MP_ROM_QSTR(MP_QSTR_w_duty), MP_ROM_PTR(&Brushless_w_duty_obj) },
+    { MP_ROM_QSTR(MP_QSTR_duties), MP_ROM_PTR(&Brushless_duties_obj) },
+    { MP_ROM_QSTR(MP_QSTR_frequency), MP_ROM_PTR(&Brushless_frequency_obj) },
+    { MP_ROM_QSTR(MP_QSTR_direction), MP_ROM_PTR(&Brushless_direction_obj) },
+};
+
 static const mp_rom_map_elem_t BrushlessCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&BrushlessCluster___del___obj) },
     { MP_ROM_QSTR(MP_QSTR_count), MP_ROM_PTR(&BrushlessCluster_count_obj) },
@@ -44,9 +72,19 @@ static const mp_rom_map_elem_t BrushlessCluster_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_load), MP_ROM_PTR(&BrushlessCluster_load_obj) },
 };
 
+static MP_DEFINE_CONST_DICT(Brushless_locals_dict, Brushless_locals_dict_table);
 static MP_DEFINE_CONST_DICT(BrushlessCluster_locals_dict, BrushlessCluster_locals_dict_table);
 
 /***** Class Definition *****/
+MP_DEFINE_CONST_OBJ_TYPE(
+    Brushless_type,
+    MP_QSTR_brushless,
+    MP_TYPE_FLAG_NONE,
+    make_new, Brushless_make_new,
+    print, Brushless_print,
+    locals_dict, (mp_obj_dict_t*)&Brushless_locals_dict
+);
+
 MP_DEFINE_CONST_OBJ_TYPE(
     BrushlessCluster_type,
     MP_QSTR_brushless_cluster,
@@ -59,6 +97,7 @@ MP_DEFINE_CONST_OBJ_TYPE(
 /***** Globals Table *****/
 static const mp_map_elem_t brushless_globals_table[] = {
     { MP_OBJ_NEW_QSTR(MP_QSTR___name__), MP_OBJ_NEW_QSTR(MP_QSTR_brushless) },
+    { MP_OBJ_NEW_QSTR(MP_QSTR_Brushless), (mp_obj_t)&Brushless_type },
     { MP_OBJ_NEW_QSTR(MP_QSTR_BrushlessCluster), (mp_obj_t)&BrushlessCluster_type },
 };
 static MP_DEFINE_CONST_DICT(mp_module_brushless_globals, brushless_globals_table);
