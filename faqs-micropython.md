@@ -11,6 +11,7 @@
   - ['MicroPython - Raspberry Pi Pico' doesn't show up as an interpreter option](#micropython---raspberry-pi-pico-doesnt-show-up-as-an-interpreter-option)
   - [Couldn't find the device automatically?](#couldnt-find-the-device-automatically)
   - [Device is busy?](#device-is-busy)
+  - [I've connected a button to my RP2350 board and it's being weird](#ive-connected-a-button-to-my-rp2350-board-and-its-being-weird)
 
 ## General MicroPython
 
@@ -72,3 +73,22 @@ This error suggests your board is in the middle of doing something and you'll ne
 
 If none of that helps, you might have a malfunctioning `main.py` - you can clear everything that's in the board's flash memory by following [these instructions](#how-do-i-get-micropython-onto-my-device). Note that this will delete the all the code saved on your device, so you should only do it as a last resort!
 
+### I've connected a button to my RP2350 board and it's being weird
+
+If your button works once and then appears to stay pressed until the board is power cycled, you may have found a known hardware bug affecting early RP2350 chips. It can happen when you use `Pin.PULL_DOWN`, which should normally keep the input at `0` until the button is pressed.
+
+The simplest workaround is to use `Pin.PULL_UP` in your code:
+
+```python
+from machine import Pin
+
+button = Pin(14, Pin.IN, Pin.PULL_UP)
+
+while True:
+    if button.value() == 0:
+        print("You pressed the button!")
+```
+
+Note that this reverses the logic and the input reads `1` when the button is not pressed and `0` when it is pressed.
+
+The RP2350-E9 issue is described on page 1349 (gulp) of the [RP2350 datasheet](https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf).
