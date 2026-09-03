@@ -18,6 +18,7 @@ extern mp_obj_t PlasmaAPA102_clear(mp_obj_t self_in);
 extern mp_obj_t PlasmaAPA102_update(mp_obj_t self_in);
 extern mp_obj_t PlasmaAPA102_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in);
 extern mp_obj_t PlasmaAPA102_is_busy(mp_obj_t self_in);
+extern mp_obj_t PlasmaAPA102_num_leds(mp_obj_t self_in);
 
 extern void PlasmaWS2812_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_t kind);
 extern mp_obj_t PlasmaWS2812_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
@@ -30,5 +31,6 @@ extern mp_obj_t PlasmaWS2812_clear(mp_obj_t self_in);
 extern mp_obj_t PlasmaWS2812_update(mp_obj_t self_in);
 extern mp_obj_t PlasmaWS2812_set_blocking(mp_obj_t self_in, mp_obj_t blocking_in);
 extern mp_obj_t PlasmaWS2812_is_busy(mp_obj_t self_in);
+extern mp_obj_t PlasmaWS2812_num_leds(mp_obj_t self_in);
 
 extern bool Pimoroni_mp_obj_to_i2c(mp_obj_t in, void *out);

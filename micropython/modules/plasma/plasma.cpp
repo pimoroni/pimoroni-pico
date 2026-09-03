@@ -287,6 +287,11 @@ mp_obj_t PlasmaWS2812_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     return mp_obj_new_tuple(4, tuple);
 }
 
+mp_obj_t PlasmaWS2812_num_leds(mp_obj_t self_in) {
+    _PlasmaWS2812_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaWS2812_obj_t);
+    return mp_obj_new_int(self->ws2812->num_leds);
+}
+
 /********** APA102 **********/
 
 /***** Variables Struct *****/
@@ -523,6 +528,11 @@ mp_obj_t PlasmaAPA102_get(size_t n_args, const mp_obj_t *pos_args, mp_map_t *kw_
     tuple[2] = mp_obj_new_int(rgb.b);
     tuple[3] = mp_obj_new_int(rgb.sof);
     return mp_obj_new_tuple(4, tuple);
+}
+
+mp_obj_t PlasmaAPA102_num_leds(mp_obj_t self_in) {
+    _PlasmaAPA102_obj_t *self = MP_OBJ_TO_PTR2(self_in, _PlasmaAPA102_obj_t);
+    return mp_obj_new_int(self->apa102->num_leds);
 }
 
 }
