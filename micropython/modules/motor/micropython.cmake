@@ -10,6 +10,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/motor/motor_state.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../pin.cpp
 )
 # pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.pio)
 

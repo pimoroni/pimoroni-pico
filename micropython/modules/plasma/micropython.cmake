@@ -7,6 +7,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/apa102.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/ws2812.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../pin.cpp
 )
 pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/apa102.pio)
 pico_generate_pio_header(usermod_${MOD_NAME} ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/plasma/ws2812.pio)
