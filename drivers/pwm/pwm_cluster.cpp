@@ -33,21 +33,6 @@ PWMCluster::TransitionData PWMCluster::looping_transitions[LOOP_TRANSITION_LIMIT
 
 auto_init_mutex(pwm_cluster_load_mutex);
 
-// Default buffer block source, taking the C heap. The SDK wraps malloc and panics on
-// failure where init() reports it, so these call the unwrapped functions; those skip the
-// wrapper's cross-core mutex, so cluster init and destruction must not run concurrently
-// with another core's allocations.
-extern "C" void *__real_malloc(size_t size);
-extern "C" void __real_free(void *mem);
-
-extern "C" __attribute__((weak)) void* pwm_cluster_allocate(size_t size) {
-  return __real_malloc(size);
-}
-
-extern "C" __attribute__((weak)) void pwm_cluster_deallocate(void* mem) {
-  __real_free(mem);
-}
-
 
 PWMCluster::PWMCluster(PIO pio, uint sm, uint64_t pin_mask, bool loading_zone)
 : pio(pio)
@@ -229,7 +214,7 @@ PWMCluster::~PWMCluster() {
       gpio_set_function(channel_to_pin_map[channel], GPIO_FUNC_NULL);
     }
 
-    pwm_cluster_deallocate(allocation);
+    pwm_deallocate(allocation);
   }
 }
 
@@ -336,7 +321,7 @@ bool PWMCluster::init() {
     const uint loop_sequence_entries = loop_transition_capacity() + 1;
     const size_t sequence_bytes = (size_t)NUM_BUFFERS * (sequence_entries + loop_sequence_entries) * sizeof(Transition);
     const size_t allocation_bytes = sequence_bytes + ((size_t)channel_count * sizeof(ChannelState));
-    allocation = (uint8_t*)pwm_cluster_allocate(allocation_bytes);
+    allocation = (uint8_t*)pwm_allocate(allocation_bytes);
     if(allocation == nullptr) {
       return false;
     }
@@ -449,7 +434,7 @@ bool PWMCluster::init() {
   }
 
   if(!initialised && allocation != nullptr) {
-    pwm_cluster_deallocate(allocation);
+    pwm_deallocate(allocation);
     allocation = nullptr;
     channels = nullptr;
     for(uint i = 0; i < NUM_BUFFERS; i++) {

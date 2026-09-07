@@ -50,7 +50,7 @@ namespace servo {
       for(uint servo = 0; servo < servo_count; servo++) {
         states[servo].~ServoState();
       }
-      pwm_cluster_deallocate(states);
+      pwm_deallocate(states);
     }
   }
 
@@ -510,7 +510,7 @@ namespace servo {
   }
 
   bool ServoCluster::allocate_servo_states(uint8_t servo_count) {
-    states = (ServoState*)pwm_cluster_allocate(((size_t)sizeof(ServoState) + sizeof(float)) * servo_count);
+    states = (ServoState*)pwm_allocate(((size_t)sizeof(ServoState) + sizeof(float)) * servo_count);
     if(states == nullptr) {
       return false;
     }

@@ -15,7 +15,7 @@ static bool in_sram(const void *mem) {
     return (uintptr_t)mem >= SRAM_BASE && (uintptr_t)mem < SRAM_END;
 }
 
-void *pwm_cluster_allocate(size_t size) {
+void *pwm_allocate(size_t size) {
     void *mem = m_malloc_maybe(size);
     if (mem != NULL) {
         if (in_sram(mem)) {
@@ -26,7 +26,7 @@ void *pwm_cluster_allocate(size_t size) {
     return __real_malloc(size);
 }
 
-void pwm_cluster_deallocate(void *mem) {
+void pwm_deallocate(void *mem) {
     if (mem == NULL) {
         return;
     }

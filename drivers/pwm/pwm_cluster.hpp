@@ -6,15 +6,7 @@
 #include "hardware/irq.h"
 #include "common/pimoroni_common.hpp"
 #include <initializer_list>
-#include <cstddef>
-
-// The cluster classes claim and release their blocks through these, so a port can supply
-// memory from its own heap. PWMCluster's block is a DMA source, so the memory must be
-// somewhere the DMA reads coherently with the CPU's writes, in practice SRAM. The defaults,
-// defined weak in pwm_cluster.cpp, take the C heap, which the RP2 ports place in SRAM.
-// Returns nullptr on failure; init() reports that to its caller.
-extern "C" void* pwm_cluster_allocate(size_t size);
-extern "C" void pwm_cluster_deallocate(void* mem);
+#include "pwm_alloc.hpp"
 
 namespace pimoroni {
 
@@ -142,7 +134,7 @@ namespace pimoroni {
     uint wrap_level;
 
     // The channel states and both sequence sets live in one block, sized for channel_count
-    // and claimed by init() through pwm_cluster_allocate
+    // and claimed by init() through pwm_allocate
     uint8_t* allocation = nullptr;
     ChannelState* channels = nullptr;
     Sequence sequences[NUM_BUFFERS];
