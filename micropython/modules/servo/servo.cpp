@@ -1347,7 +1347,15 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         m_free(pins);
 
     if(!cluster->init()) {
+        bool reachable = cluster->pins_reachable();
+        bool available = cluster->pins_available();
         m_del_class(ServoCluster, cluster);
+        if(!reachable) {
+            mp_raise_ValueError(MP_ERROR_TEXT("the pins do not fit the 32 pin range this PIO can currently reach"));
+        }
+        if(!available) {
+            mp_raise_ValueError(MP_ERROR_TEXT("the pins overlap a range already driven by another cluster on this PIO"));
+        }
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this ServoCluster. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 
