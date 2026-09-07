@@ -548,40 +548,16 @@ bool PWMCluster::calculate_pwm_factors(float freq, uint32_t& top_out, uint32_t& 
 
   // Check the provided frequency is valid
   if((freq >= 0.01f) && (freq <= (float)(source_hz >> 1))) {
+    // Choose the smallest divider that fits the wrap limit, making the top, and with it
+    // the duty resolution, as large as possible, then set the top by rounding
     uint64_t div256_top = (uint64_t)((float)((uint64_t)source_hz << 8) / freq);
-    uint64_t top = 1;
-
-    while(true) {
-        // Try a few small prime factors to get close to the desired frequency.
-        if((div256_top >= (11 << 8)) && (div256_top % 11 == 0) && (top * 11 <= MAX_PWM_CLUSTER_WRAP)) {
-            div256_top /= 11;
-            top *= 11;
-        }
-        else if((div256_top >= (7 << 8)) && (div256_top % 7 == 0) && (top * 7 <= MAX_PWM_CLUSTER_WRAP)) {
-            div256_top /= 7;
-            top *= 7;
-        }
-        else if((div256_top >= (5 << 8)) && (div256_top % 5 == 0) && (top * 5 <= MAX_PWM_CLUSTER_WRAP)) {
-            div256_top /= 5;
-            top *= 5;
-        }
-        else if((div256_top >= (3 << 8)) && (div256_top % 3 == 0) && (top * 3 <= MAX_PWM_CLUSTER_WRAP)) {
-            div256_top /= 3;
-            top *= 3;
-        }
-        else if((div256_top >= (2 << 8)) && (top * 2 <= MAX_PWM_CLUSTER_WRAP)) {
-            div256_top /= 2;
-            top *= 2;
-        }
-        else {
-            break;
-        }
-    }
+    uint64_t div256 = MAX((div256_top + MAX_PWM_CLUSTER_WRAP - 1) / MAX_PWM_CLUSTER_WRAP, 256u);
+    uint64_t top = MAX((div256_top + (div256 >> 1)) / div256, 1u);
 
     // Only return valid factors if the divisor is actually achievable
-    if(div256_top >= 256 && div256_top <= (UINT8_MAX << 8)) {
-      top_out = top;
-      div256_out = div256_top;
+    if(div256 <= (UINT8_MAX << 8) && top <= MAX_PWM_CLUSTER_WRAP) {
+      top_out = (uint32_t)top;
+      div256_out = (uint32_t)div256;
 
       success = true;
     }
