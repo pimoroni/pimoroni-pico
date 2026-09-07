@@ -1,9 +1,10 @@
 #include "servo_cluster.hpp"
 #include "pwm.hpp"
 #include <cstdio>
+#include <new>
 
 namespace servo {
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, CalibrationType default_type, float freq, bool auto_phase)
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint64_t pin_mask, CalibrationType default_type, float freq, bool auto_phase)
     : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
     create_servo_states(default_type, auto_phase);
   }
@@ -23,7 +24,7 @@ namespace servo {
     create_servo_states(default_type, auto_phase);
   }
 
-  ServoCluster::ServoCluster(PIO pio, uint sm, uint pin_mask, const Calibration& calibration, float freq, bool auto_phase)
+  ServoCluster::ServoCluster(PIO pio, uint sm, uint64_t pin_mask, const Calibration& calibration, float freq, bool auto_phase)
     : pwms(pio, sm, pin_mask), pwm_frequency(freq) {
     create_servo_states(calibration, auto_phase);
   }
@@ -44,10 +45,21 @@ namespace servo {
   }
 
   ServoCluster::~ServoCluster() {
+    if(states != nullptr) {
+      uint8_t servo_count = pwms.get_chan_count();
+      for(uint servo = 0; servo < servo_count; servo++) {
+        states[servo].~ServoState();
+      }
+      pwm_cluster_deallocate(states);
+    }
   }
 
   bool ServoCluster::init() {
     bool success = false;
+
+    if(states == nullptr && pwms.get_chan_count() > 0) {
+      return false;
+    }
 
     if(pwms.init()) {
       // Calculate a suitable pwm wrap period for this frequency
@@ -497,11 +509,20 @@ namespace servo {
     pwms.set_chan_level(servo, ServoState::pulse_to_level(pulse, pwm_period, pwm_frequency), load);
   }
 
+  bool ServoCluster::allocate_servo_states(uint8_t servo_count) {
+    states = (ServoState*)pwm_cluster_allocate(((size_t)sizeof(ServoState) + sizeof(float)) * servo_count);
+    if(states == nullptr) {
+      return false;
+    }
+    servo_phases = (float*)(states + servo_count);
+    return true;
+  }
+
   void ServoCluster::create_servo_states(CalibrationType default_type, bool auto_phase) {
     uint8_t servo_count = pwms.get_chan_count();
-    if(servo_count > 0) {
+    if(servo_count > 0 && allocate_servo_states(servo_count)) {
       for(uint servo = 0; servo < servo_count; servo++) {
-        states[servo] = ServoState(default_type);
+        new(&states[servo]) ServoState(default_type);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }
@@ -509,9 +530,9 @@ namespace servo {
 
   void ServoCluster::create_servo_states(const Calibration& calibration, bool auto_phase) {
     uint8_t servo_count = pwms.get_chan_count();
-    if(servo_count > 0) {
+    if(servo_count > 0 && allocate_servo_states(servo_count)) {
       for(uint servo = 0; servo < servo_count; servo++) {
-        states[servo] = ServoState(calibration);
+        new(&states[servo]) ServoState(calibration);
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }
