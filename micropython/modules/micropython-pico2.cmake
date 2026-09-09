@@ -7,6 +7,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../")
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+# RGBA4444 canvases, half the bytes of RGBA8888, so a full 2.8" canvas fits beside the
+# heap on a board with SRAM alone. picovector and the screen driver both read this, and
+# it has to be set before either is found.
+set(PV_PIXEL_FORMAT 2)
+
 include(micropython-common)
 enable_ulab()
 
