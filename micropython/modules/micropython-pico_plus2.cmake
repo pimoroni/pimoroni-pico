@@ -15,3 +15,7 @@ include(cppmem/micropython)
 
 # Drop the C++ demangler, which nothing can reach
 include(cxx_terminate/micropython)
+
+# SP/CE screens on the connector. The GC heap lives in PSRAM here, so the displays'
+# region is the SRAM it leaves free.
+find_package(SPIDISPLAY CONFIG REQUIRED)

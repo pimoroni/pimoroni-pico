@@ -7,7 +7,11 @@ set(PICO_NUM_GPIOS 48)
 # Board specific version of the frozen manifest
 set(MICROPY_FROZEN_MANIFEST ${MICROPY_BOARD_DIR}/manifest.py)
 
-set(MICROPY_C_HEAP_SIZE 4096)
+# A C heap for libstdc++'s exception pool, 1088 bytes taken at static initialisation.
+# newlib's malloc pads the break to the next 4KB page, so one page fits only when
+# __bss_end__ lands early enough in a page and the board otherwise panics before USB
+# comes up. Two pages fit whatever the alignment.
+set(MICROPY_C_HEAP_SIZE 8192)
 
 # 8MB PSRAM on GPIO47
 set(MICROPY_HW_ENABLE_PSRAM 1)
