@@ -13,6 +13,12 @@ include(enable_cyw43.cmake)
 # Board specific version of the frozen manifest
 set(MICROPY_FROZEN_MANIFEST ${MICROPY_BOARD_DIR}/manifest.py)
 
+# A C heap for libstdc++'s exception pool, 1088 bytes taken at static initialisation.
+# newlib's malloc pads the break to the next 4KB page, so one page fits only when
+# __bss_end__ lands early enough in a page and the board otherwise panics before USB
+# comes up. Two pages fit whatever the alignment.
+set(MICROPY_C_HEAP_SIZE 8192)
+
 if(NOT DEFINED MICROPY_HW_FLASH_STORAGE_BYTES)
     set(MICROPY_HW_FLASH_STORAGE_BYTES 2097152)  # 4MB - 2MB
 endif()

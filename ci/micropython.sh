@@ -9,6 +9,12 @@ MICROPYTHON_VERSION="${MICROPYTHON_VERSION:-cyw43-dynamic-pins}"
 
 PY_DECL_VERSION="${PY_DECL_VERSION:-v0.0.4}"
 
+# PicoVector v3, which the RP2350 boards build in place of the in-tree module
+PIMORONI_PICOVECTOR_VERSION="${PIMORONI_PICOVECTOR_VERSION:-0eac9059cd42f9942009e6761caff612ea8b81b0}"
+
+# The SP/CE screen driver and library, which the boards carrying a Display Pack 2.8" build
+PIMORONI_SPIDISPLAY_VERSION="${PIMORONI_SPIDISPLAY_VERSION:-275d09570605f2b9acddbe88a667328da3c527e2}"
+
 
 function log_success {
 	echo -e "$(tput setaf 2)$1$(tput sgr0)"
@@ -64,6 +70,19 @@ function ci_micropython_clone {
     done
 }
 
+function ci_pimoroni_picovector_clone {
+    log_inform "Using Pimoroni PicoVector pimoroni/$PIMORONI_PICOVECTOR_VERSION"
+    git clone https://github.com/pimoroni/picovector-micropython "$CI_BUILD_ROOT/picovector-micropython" || return $?
+    git -C "$CI_BUILD_ROOT/picovector-micropython" checkout $PIMORONI_PICOVECTOR_VERSION || return $?
+    git -C "$CI_BUILD_ROOT/picovector-micropython" submodule update --init --depth=1 || return $?
+}
+
+function ci_pimoroni_spidisplay_clone {
+    log_inform "Using Pimoroni spidisplay pimoroni/$PIMORONI_SPIDISPLAY_VERSION"
+    git clone https://github.com/pimoroni/spidisplay "$CI_BUILD_ROOT/spidisplay" || return $?
+    git -C "$CI_BUILD_ROOT/spidisplay" checkout $PIMORONI_SPIDISPLAY_VERSION || return $?
+}
+
 function ci_tools_clone {
     mkdir -p "$CI_BUILD_ROOT/tools"
     git clone https://github.com/gadgetoid/py_decl -b "$PY_DECL_VERSION" --depth=1 "$CI_BUILD_ROOT/tools/py_decl" || return $?
@@ -81,6 +100,8 @@ function ci_apt_install_build_deps {
 
 function ci_prepare_all {
     ci_micropython_clone || return $?
+    ci_pimoroni_picovector_clone || return $?
+    ci_pimoroni_spidisplay_clone || return $?
     ci_tools_clone || return $?
     ci_micropython_build_mpy_cross || return $?
 }
@@ -114,6 +135,8 @@ function ci_cmake_configure {
     -DUSER_C_MODULES="$USER_C_MODULES" \
     -DMICROPY_BOARD_DIR="$MICROPY_BOARD_DIR" \
     -DMICROPY_BOARD="$MICROPY_BOARD" \
+    -DPICOVECTOR_MICROPYTHON_DIR="$CI_BUILD_ROOT/picovector-micropython" \
+    -DSPIDISPLAY_DIR="$CI_BUILD_ROOT/spidisplay" \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     "$@"

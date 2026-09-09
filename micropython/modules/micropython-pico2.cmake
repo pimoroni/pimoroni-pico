@@ -15,3 +15,8 @@ include(cppmem/micropython)
 
 # Drop the C++ demangler, which nothing can reach
 include(cxx_terminate/micropython)
+
+# SP/CE screens, on the Pico Display Pack 2.8" and what chains from its output. The GC
+# heap owns this board's SRAM, so the displays' region is a block of it sized for two.
+set(SPIDISPLAY_HEAP_RESERVE_BYTES 16384)
+find_package(SPIDISPLAY CONFIG REQUIRED)
