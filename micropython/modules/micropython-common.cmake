@@ -9,17 +9,18 @@ include(picographics/micropython)
 # Pico Graphics Extra
 include(pngdec/micropython)
 include(jpegdec/micropython)
-include(qrcode/micropython/micropython)
 
-# RP2350 boards take PicoVector v3 from picovector-micropython, rasterising on core1.
-# RP2040 boards keep the in-tree v2, since v3 assumes the RP2350's FIFO interrupt and
-# hardware float. This MicroPython has no no-scan allocator, so the plain one stands in.
+# RP2350 boards take PicoVector v3 from picovector-micropython, rasterising on core1,
+# and their QR codes with it, since it carries its own qrcodegen. RP2040 boards keep
+# the in-tree v2 and qrcode, since v3 assumes the RP2350's FIFO interrupt and hardware
+# float. This MicroPython has no no-scan allocator, so the plain one stands in.
 if(PICO_RP2350)
     set(PV_DUAL_CORE ON)
     find_package(PICOVECTOR_MICROPYTHON CONFIG REQUIRED)
     target_compile_definitions(usermod_picovector INTERFACE m_malloc_no_scan=m_malloc)
 else()
     include(picovector/micropython)
+    include(qrcode/micropython/micropython)
 endif()
 
 # Sensors & Breakouts
