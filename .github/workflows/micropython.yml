@@ -78,6 +78,16 @@ jobs:
         source $BUILD_TOOLS
         ci_micropython_clone
 
+    - name: Checkout PicoVector
+      run: |
+        source $BUILD_TOOLS
+        ci_pimoroni_picovector_clone
+
+    - name: Checkout spidisplay
+      run: |
+        source $BUILD_TOOLS
+        ci_pimoroni_spidisplay_clone
+
     - name: "Py_Decl: Checkout py_decl"
       run: |
         source $BUILD_TOOLS
