@@ -104,6 +104,7 @@ namespace pimoroni {
 
       void write_pixel(const Point &p, uint8_t colour) override;
       void write_pixel_span(const Point &p, uint l, uint8_t colour) override;
+      void write_span(uint32_t offset, uint l, const uint8_t * colours) override;
       void read_pixel_span(const Point &p, uint l, uint8_t *data) override;
 
       void flush();
