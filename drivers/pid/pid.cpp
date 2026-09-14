@@ -27,4 +27,12 @@ namespace pimoroni {
 
     return (error * kp) + (error_sum * ki) - (value_change * kd);
   }
+
+  float PID::get_error_sum() const {
+    return error_sum;
+  }
+
+  void PID::reset_error_sum() {
+    error_sum = 0.0f;
+  }
 }
