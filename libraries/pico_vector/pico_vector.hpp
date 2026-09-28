@@ -76,6 +76,7 @@ namespace pimoroni {
             }
 
             ~PicoVector() {
+                free_font();
                 pp_deinit();
             }
 
@@ -114,11 +115,15 @@ namespace pimoroni {
                 return af_measure(text_metrics.face, text.data(), text.size(), 0, &text_metrics);
             }
 
+            void free_font() {
+                if(!text_metrics.face) return;
+                if(text_metrics.face->glyphs) af_tracked_free(text_metrics.face->glyphs);
+                af_tracked_free(text_metrics.face);
+                text_metrics.face = NULL;
+            }
+
             bool set_font(std::string_view font_path, unsigned int font_size) {
-                if(text_metrics.face) {
-                    af_tracked_free(text_metrics.face->glyphs);
-                    af_tracked_free(text_metrics.face);
-                }
+                free_font();
                 text_metrics.face = (af_face_t *)af_tracked_malloc(sizeof(af_face_t));
                 //bool result = text_metrics.face.load(font_path);
                 void* font = fileio_open(font_path.data());
@@ -130,10 +135,7 @@ namespace pimoroni {
             }
 
             bool set_font(void* font,  unsigned int font_size) {
-                if(text_metrics.face) {
-                    af_tracked_free(text_metrics.face->glyphs);
-                    af_tracked_free(text_metrics.face);
-                }
+                free_font();
                 text_metrics.face = (af_face_t *)af_tracked_malloc(sizeof(af_face_t));
                 bool result = af_load_font_file(font, text_metrics.face);
 

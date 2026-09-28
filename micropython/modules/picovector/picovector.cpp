@@ -690,13 +690,23 @@ mp_obj_t VECTOR_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, 
 
     if(!MP_OBJ_IS_TYPE(args[ARG_picographics].u_obj, &ModPicoGraphics_type)) mp_raise_ValueError(MP_ERROR_TEXT("PicoGraphics Object Required"));
 
-    _VECTOR_obj_t *self = m_new_obj(_VECTOR_obj_t);
-    self->base.type = &VECTOR_type;
+    _VECTOR_obj_t *self = mp_obj_malloc_with_finaliser(_VECTOR_obj_t, &VECTOR_type);
     ModPicoGraphics_obj_t *graphics = (ModPicoGraphics_obj_t *)MP_OBJ_TO_PTR(args[ARG_picographics].u_obj);
 
     self->vector = m_new_class(PicoVector, graphics->graphics);
 
     return self;
+}
+
+mp_obj_t VECTOR__del__(mp_obj_t self_in) {
+    _VECTOR_obj_t *self = MP_OBJ_TO_PTR2(self_in, _VECTOR_obj_t);
+
+    if(self->vector) {
+        m_del_class(PicoVector, self->vector);
+        self->vector = nullptr;
+    }
+
+    return mp_const_none;
 }
 
 mp_obj_t VECTOR_set_transform(mp_obj_t self_in, mp_obj_t transform_in) {

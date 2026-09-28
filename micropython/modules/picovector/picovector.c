@@ -85,6 +85,8 @@ MP_DEFINE_CONST_OBJ_TYPE(
 
 /* PicoVector */
 
+static MP_DEFINE_CONST_FUN_OBJ_1(VECTOR__del__obj, VECTOR__del__);
+
 static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_text_obj, 4, VECTOR_text);
 static MP_DEFINE_CONST_FUN_OBJ_KW(VECTOR_measure_text_obj, 2, VECTOR_measure_text);
 static MP_DEFINE_CONST_FUN_OBJ_3(VECTOR_set_font_obj, VECTOR_set_font);
@@ -105,6 +107,8 @@ static MP_DEFINE_CONST_FUN_OBJ_2(VECTOR_draw_obj, VECTOR_draw);
 static MP_DEFINE_CONST_FUN_OBJ_1(MALLOC_get_stats_obj, MALLOC_get_stats);
 
 static const mp_rom_map_elem_t VECTOR_locals_dict_table[] = {
+    { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&VECTOR__del__obj) },
+
     { MP_ROM_QSTR(MP_QSTR_text), MP_ROM_PTR(&VECTOR_text_obj) },
     { MP_ROM_QSTR(MP_QSTR_measure_text), MP_ROM_PTR(&VECTOR_measure_text_obj) },
 
