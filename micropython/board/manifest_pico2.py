@@ -7,3 +7,5 @@ freeze("../modules_py", "pimoroni.py")
 freeze("../modules_py", "boot.py")
 
 freeze("../modules_py", "lte.py")
+
+freeze("../modules_py", "spce.py")
