@@ -11,6 +11,8 @@ using namespace motor;
 extern "C" {
 #include "motor.h"
 #include "py/builtin.h"
+#include "py/mphal.h"
+#include "extmod/modmachine.h"
 #include "float.h"
 
 void pimoroni_tuple_or_list(const mp_obj_t &object, mp_obj_t **items, size_t *length) {
@@ -136,13 +138,9 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     else if(pin_count != 2)
         mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must only contain two integers"));
     else {
-        int pos = mp_obj_get_int(items[0]);
-        int neg = mp_obj_get_int(items[1]);
-        if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
-           (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
-        }
-        else if(pos == neg) {
+        int pos = mp_hal_get_pin_obj(items[0]);
+        int neg = mp_hal_get_pin_obj(items[1]);
+        if(pos == neg) {
             mp_raise_ValueError(MP_ERROR_TEXT("cannot use the same pin for motor positive and negative"));
         }
 
@@ -634,18 +632,13 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one pair tuple"));
     else {
         // Specific check for is a single 2 pin list/tuple was provided
-        if(pair_count == 2 && mp_obj_is_int(items[0]) && mp_obj_is_int(items[1])) {
+        if(pair_count == 2 && IS_PIN_OBJ(items[0]) && IS_PIN_OBJ(items[1])) {
             pins = m_new(pin_pair, 1);
             pair_count = 1;
 
-            int pos = mp_obj_get_int(items[0]);
-            int neg = mp_obj_get_int(items[1]);
-            if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
-               (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
-                delete[] pins;
-                mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
-            }
-            else if(pos == neg) {
+            int pos = mp_hal_get_pin_obj(items[0]);
+            int neg = mp_hal_get_pin_obj(items[1]);
+            if(pos == neg) {
                 delete[] pins;
                 mp_raise_ValueError(MP_ERROR_TEXT("cannot use the same pin for motor positive and negative"));
             }
@@ -668,14 +661,9 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
                         delete[] pins;
                         mp_raise_ValueError(MP_ERROR_TEXT("pair tuple must only contain two integers"));
                     }
-                    int pos = mp_obj_get_int(tuple->items[0]);
-                    int neg = mp_obj_get_int(tuple->items[1]);
-                    if((pos < 0 || pos >= (int)NUM_BANK0_GPIOS) ||
-                       (neg < 0 || neg >= (int)NUM_BANK0_GPIOS)) {
-                        delete[] pins;
-                        mp_raise_ValueError(MP_ERROR_TEXT("a pin in the pair tuple is out of range. Expected 0 to 29"));
-                    }
-                    else if(pos == neg) {
+                    int pos = mp_hal_get_pin_obj(tuple->items[0]);
+                    int neg = mp_hal_get_pin_obj(tuple->items[1]);
+                    if(pos == neg) {
                         delete[] pins;
                         mp_raise_ValueError(MP_ERROR_TEXT("cannot use the same pin for motor positive and negative"));
                     }

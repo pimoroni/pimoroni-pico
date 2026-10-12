@@ -10,6 +10,7 @@ using namespace encoder;
 extern "C" {
 #include "encoder.h"
 #include "py/builtin.h"
+#include "py/mphal.h"
 
 
 /********** Encoder **********/
@@ -104,13 +105,9 @@ mp_obj_t Encoder_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw,
     else if(pin_count != 2)
         mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must only contain two integers"));
     else {
-        int a = mp_obj_get_int(items[0]);
-        int b = mp_obj_get_int(items[1]);
-        if((a < 0 || a >= (int)NUM_BANK0_GPIOS) ||
-           (b < 0 || b >= (int)NUM_BANK0_GPIOS)) {
-            mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
-        }
-        else if(a == b) {
+        int a = mp_hal_get_pin_obj(items[0]);
+        int b = mp_hal_get_pin_obj(items[1]);
+        if(a == b) {
             mp_raise_ValueError(MP_ERROR_TEXT("cannot use the same pin for encoder A and B"));
         }
 

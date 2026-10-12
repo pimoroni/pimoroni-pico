@@ -10,6 +10,8 @@ using namespace servo;
 extern "C" {
 #include "servo.h"
 #include "py/builtin.h"
+#include "py/mphal.h"
+#include "extmod/modmachine.h"
 
 
 /********** Calibration **********/
@@ -855,7 +857,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 
     enum { ARG_pin, ARG_calibration, ARG_freq };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_INT },
+        { MP_QSTR_pin, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_calibration, MP_ARG_OBJ, {.u_obj = mp_const_none} },
         { MP_QSTR_freq, MP_ARG_OBJ, {.u_obj = mp_const_none} },
     };
@@ -864,7 +866,7 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    int pin = args[ARG_pin].u_int;
+    int pin = mp_hal_get_pin_obj(args[ARG_pin].u_obj);
 
     servo::Calibration *calib = nullptr;
     servo::CalibrationType calibration_type = servo::CalibrationType::ANGULAR;
@@ -1266,6 +1268,13 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     if(mp_obj_is_int(object)) {
         pin_mask = (uint)mp_obj_get_int(object);
     }
+    else if(IS_PIN_OBJ(object)) {
+        // A Pin or pin name is a cluster of one, a bare int being taken as a pin mask above
+        pins = m_new(uint8_t, 1);
+        pins[0] = (uint8_t)mp_hal_get_pin_obj(object);
+        pin_count = 1;
+        mask_provided = false;
+    }
     else {
         mp_obj_t *items = nullptr;
         if(mp_obj_is_type(object, &mp_type_list)) {
@@ -1280,21 +1289,14 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         }
 
         if(items == nullptr)
-            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a list or tuple of pins, or a pin mask integer"));
+            mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a pin, a list or tuple of pins, or a pin mask integer"));
         else if(pin_count == 0)
             mp_raise_TypeError(MP_ERROR_TEXT("list or tuple must contain at least one integer"));
         else {
             // Create and populate a local array of pins
             pins = m_new(uint8_t, pin_count);
             for(size_t i = 0; i < pin_count; i++) {
-                int pin = mp_obj_get_int(items[i]);
-                if(pin < 0 || pin >= (int)NUM_BANK0_GPIOS) {
-                    m_free(pins);
-                    mp_raise_ValueError(MP_ERROR_TEXT("a pin in the list or tuple is out of range. Expected 0 to 29"));
-                }
-                else {
-                    pins[i] = (uint8_t)pin;
-                }
+                pins[i] = (uint8_t)mp_hal_get_pin_obj(items[i]);
             }
             mask_provided = false;
         }
