@@ -27,12 +27,6 @@ SPCE_A_PINS = connector("A")
 SPCE_B_PINS = connector("B")
 
 
-def gpio_number(pin):
-    """The GPIO number of a Pin."""
-    # A Pin gives up its number only through its repr, Pin(GPIO34, ...)
-    return int(str(pin)[8:].split(",")[0])
-
-
 class MotorDriver:
     """Two motors and the chip driving them, on the connector the breakout plugs into.
 
@@ -43,8 +37,7 @@ class MotorDriver:
     def __init__(self, pins):
         from motor import Motor
 
-        # Pin() returns a Pin it is given unchanged, so pins may be Pins or GPIO numbers
-        a_pos, a_neg, b_pos, b_neg, enable = (gpio_number(Pin(pin)) for pin in pins)
+        a_pos, a_neg, b_pos, b_neg, enable = pins
 
         # Named as the breakout labels them, and as a sequence for a program driving both
         self.motor_a = Motor((a_pos, a_neg))
@@ -98,6 +91,9 @@ class Clipper:
 
     @staticmethod
     def __uart_instance(tx):
+        # A Pin gives up its number only through its repr, Pin(GPIO34, ...)
+        gpio = int(str(tx)[8:].split(",")[0])
+
         # RP2 UARTs alternate in blocks of eight GPIOs offset by four, which is the test
         # MicroPython itself applies to a requested pin
-        return ((gpio_number(tx) + 4) & 8) >> 3
+        return ((gpio + 4) & 8) >> 3
