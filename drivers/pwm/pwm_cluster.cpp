@@ -400,6 +400,9 @@ bool PWMCluster::init() {
         0,
         false);
 
+      // A previous user of the channel may have left its interrupt flag raised, which would
+      // fire the moment the interrupt is enabled
+      dma_channel_acknowledge_irq0(dma_channel);
       dma_channel_set_irq0_enabled(dma_channel, true);
 
       pio_sm_init(pio, sm, pio_program_offsets[pio_idx], &c);
@@ -409,16 +412,17 @@ bool PWMCluster::init() {
       for(uint i = 0; i < NUM_PIOS; i++) {
         any_claimed |= (claimed_sms[i] != 0);
       }
+
+      // Keep a record of this cluster for the interrupt callback, before the handler can run
+      clusters[dma_channel] = this;
+      claimed_channel_mask |= 1u << dma_channel;
+      claimed_sms[pio_idx] |= 1u << sm;
+
       if(!any_claimed) {
         // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
         irq_add_shared_handler(DMA_IRQ_0, dma_interrupt_handler, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
         irq_set_enabled(DMA_IRQ_0, true);
       }
-
-      //Keep a record of this cluster for the interrupt callback
-      clusters[dma_channel] = this;
-      claimed_channel_mask |= 1u << dma_channel;
-      claimed_sms[pio_idx] |= 1u << sm;
 
       // Manually set the next dma sequence to trigger the first transfer
       next_dma_sequence();
