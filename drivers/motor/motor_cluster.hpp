@@ -60,6 +60,8 @@ namespace motor {
     //--------------------------------------------------
   public:
     bool init();
+    bool pins_reachable() const { return pwms.pins_reachable(); }
+    bool pins_available() const { return pwms.pins_available(); }
 
     uint8_t count() const;
     pin_pair pins(uint8_t motor) const;

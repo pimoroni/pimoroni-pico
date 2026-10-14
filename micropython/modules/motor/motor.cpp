@@ -599,14 +599,14 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int pio_int = args[ARG_pio].u_int;
-    if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("pio out of range. Expected 0 to 1"));
+    if(pio_int < 0 || pio_int >= (int)NUM_PIOS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pio out of range. Expected 0 to %d"), (int)NUM_PIOS - 1);
     }
-    PIO pio = pio_int == 0 ? pio0 : pio1;
+    PIO pio = pio_get_instance((uint)pio_int);
 
     int sm = args[ARG_sm].u_int;
-    if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
-        mp_raise_ValueError(MP_ERROR_TEXT("sm out of range. Expected 0 to 3"));
+    if(sm < 0 || sm >= (int)NUM_PIO_STATE_MACHINES) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("sm out of range. Expected 0 to %d"), (int)NUM_PIO_STATE_MACHINES - 1);
     }
 
     size_t pair_count = 0;
@@ -724,7 +724,15 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
         delete[] pins;
 
     if(!cluster->init()) {
+        bool reachable = cluster->pins_reachable();
+        bool available = cluster->pins_available();
         m_del_class(MotorCluster, cluster);
+        if(!reachable) {
+            mp_raise_ValueError(MP_ERROR_TEXT("the pins do not fit the 32 pin range this PIO can currently reach"));
+        }
+        if(!available) {
+            mp_raise_ValueError(MP_ERROR_TEXT("the pins overlap a range already driven by another state machine on this PIO"));
+        }
         mp_raise_msg(&mp_type_RuntimeError, MP_ERROR_TEXT("unable to allocate the hardware resources needed to initialise this MotorCluster. Try running `import gc` followed by `gc.collect()` before creating it"));
     }
 

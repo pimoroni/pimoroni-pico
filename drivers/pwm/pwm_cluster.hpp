@@ -128,9 +128,11 @@ namespace pimoroni {
     uint8_t channel_count;
     uint8_t channel_to_pin_map[CHANNEL_LIMIT];
 
-    // First GPIO the PIO instance's 32-pin window can reach, set by init() from the pin set.
-    // The map above stays absolute; the transition masks subtract this
-    uint gpio_base = 0;
+    // The contiguous GPIO span the state machine writes, set by init(). The map above stays
+    // absolute, and the transition masks subtract out_base
+    uint out_base = 0;
+    uint out_count = 0;
+    uint64_t claimed_span = 0;
 
     uint wrap_level;
 
@@ -146,6 +148,8 @@ namespace pimoroni {
 
     bool initialised = false;
     bool loading_zone = true;
+    bool pins_ok = true;
+    bool span_ok = true;
 
 
     //--------------------------------------------------
@@ -154,6 +158,7 @@ namespace pimoroni {
     static PWMCluster* clusters[NUM_DMA_CHANNELS];
     static uint32_t claimed_channel_mask;  // A bit per DMA channel with a cluster attached
     static uint8_t claimed_sms[NUM_PIOS];
+    static uint64_t claimed_spans[NUM_PIOS];  // The GPIO spans written by each PIO's clusters; init() refuses an overlap
     static uint pio_program_offsets[NUM_PIOS];
 
     // Scratch used by load_pwm, shared by every cluster under a mutex
@@ -182,6 +187,11 @@ namespace pimoroni {
     //--------------------------------------------------
   public:
     bool init();
+
+    // Whether the last init() found the pins within the PIO's window, and clear of any other
+    // state machine there. If both hold after a failure, it ran out of resources
+    bool pins_reachable() const { return pins_ok; }
+    bool pins_available() const { return span_ok; }
 
     uint8_t get_chan_count() const;
     uint8_t get_chan_pair_count() const;

@@ -1,5 +1,6 @@
 #include "apa102.hpp"
 #include "common/pimoroni_common.hpp"
+#include "common/pio_pins.hpp"
 
 namespace plasma {
 
@@ -14,26 +15,30 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
     this->sm = sm;
     sm_claimed = true;
 
-    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
-    uint range_max = std::max(pin_dat, pin_clk);
-    uint range_min = std::min(pin_dat, pin_clk);
+    // The buffer comes first, so a strip refused its pins below can still be drawn into
+    if(this->buffer == nullptr) {
+        this->buffer = new RGB[num_leds];
+        managed_buffer = true;
+    }
 
-    // Both pins in 16-48 range
-    if(range_max >= 32 && range_min >= 16) {
-        pio_set_gpio_base(pio, 16);
-    // Both pins in 0-31 range
-    } else if(range_max <= 31) {
-        pio_set_gpio_base(pio, 0);
-    // Pins in different ranges: invalid combo!
-    } else {
-        // TODO: Need some means to notify the caller
-        pio_set_gpio_base(pio, 0);
+    // Pins outside the PIO's window stop construction here, reported by pins_reachable()
+    pins_ok = pimoroni::pio_take_window(pio, sm, std::min(pin_dat, pin_clk), std::max(pin_dat, pin_clk));
+    if(!pins_ok) {
+        return;
+    }
+
+    // So do pins another state machine on the PIO drives, reported by pins_available()
+    pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, (1llu << pin_clk) | (1llu << pin_dat));
+    if(!pins_free) {
+        return;
     }
 
     pio_program_offset = pio_add_program(pio, &apa102_program);
 
-    pio_sm_set_pins_with_mask(pio, sm, 0, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
-    pio_sm_set_pindirs_with_mask(pio, sm, ~0u, (1u << (pin_clk - pio_get_gpio_base(pio))) | (1u << (pin_dat - pio_get_gpio_base(pio))));
+    // These take absolute GPIO masks and shift by the window base themselves
+    uint64_t used_pins = (1llu << pin_clk) | (1llu << pin_dat);
+    pio_sm_set_pins_with_mask64(pio, sm, 0, used_pins);
+    pio_sm_set_pindirs_with_mask64(pio, sm, ~0llu, used_pins);
     pio_gpio_init(pio, pin_clk);
     pio_gpio_init(pio, pin_dat);
 
@@ -58,11 +63,6 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
     channel_config_set_transfer_data_size(&config, DMA_SIZE_32);
     channel_config_set_read_increment(&config, true);
     dma_channel_configure(dma_channel, &config, &pio->txf[sm], NULL, 0, false);
-
-    if(this->buffer == nullptr) {
-        this->buffer = new RGB[num_leds];
-        managed_buffer = true;
-    }
 }
 
 bool APA102::dma_timer_callback(struct repeating_timer *t) {
@@ -70,11 +70,13 @@ bool APA102::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+// A strip refused its pins has no DMA channel, so it is never busy and shows nothing
 bool APA102::is_busy() {
-   return dma_channel_is_busy(dma_channel);
+   return dma_channel != -1 && dma_channel_is_busy(dma_channel);
 }
 
 void APA102::update(bool blocking) {
+    if(dma_channel == -1) return;
     if(is_busy() && !blocking) return;
     while(is_busy()) {}; // Block waiting for DMA finish
     pio->txf[sm] = 0x00000000; // Output the APA102 start-of-frame bytes
@@ -96,6 +98,7 @@ void APA102::update(bool blocking) {
 
 bool APA102::start(uint fps) {
     stop();
+    if(dma_channel == -1) return false;
     timer_running = add_repeating_timer_ms(-(1000 / fps), dma_timer_callback, (void*)this, &timer);
     return timer_running;
 }

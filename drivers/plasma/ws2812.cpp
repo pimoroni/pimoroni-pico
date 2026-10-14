@@ -1,5 +1,6 @@
 #include "ws2812.hpp"
 #include "common/pimoroni_common.hpp"
+#include "common/pio_pins.hpp"
 
 namespace plasma {
 
@@ -14,8 +15,23 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     this->sm = sm;
     sm_claimed = true;
 
-    // NOTE: This sets the gpio_base for *the entire PIO* not just this state machine
-    pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
+    // The buffer comes first, so a strip refused its pins below can still be drawn into
+    if(!this->buffer) {
+        this->buffer = new RGB[num_leds];
+        managed_buffer = true;
+    }
+
+    // A pin outside the PIO's window stops construction here, reported by pins_reachable()
+    pins_ok = pimoroni::pio_take_window(pio, sm, pin, pin);
+    if(!pins_ok) {
+        return;
+    }
+
+    // So does a pin another state machine on the PIO drives, reported by pins_available()
+    pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, 1llu << pin);
+    if(!pins_free) {
+        return;
+    }
 
     pio_program_offset = pio_add_program(pio, &ws2812_program);
 
@@ -44,11 +60,6 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, (uint32_t *)buffer, false);
     dma_channel_configure(dma_channel, &config, &pio->txf[sm], NULL, 0, false);
-
-    if(!this->buffer) {
-        this->buffer = new RGB[num_leds];
-        managed_buffer = true;
-    }
 }
 
 bool WS2812::dma_timer_callback(struct repeating_timer *t) {
@@ -56,11 +67,13 @@ bool WS2812::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+// A strip refused its pins has no DMA channel, so it is never busy and shows nothing
 bool WS2812::is_busy() {
-   return dma_channel_is_busy(dma_channel);
+   return dma_channel != -1 && dma_channel_is_busy(dma_channel);
 }
 
 void WS2812::update(bool blocking) {
+    if(dma_channel == -1) return;
     if(is_busy() && !blocking) return;
     while(is_busy()) {}; // Block waiting for DMA finish
     dma_channel_set_trans_count(dma_channel, num_leds, false);
@@ -71,6 +84,7 @@ void WS2812::update(bool blocking) {
 
 bool WS2812::start(uint fps) {
     stop();
+    if(dma_channel == -1) return false;
     timer_running = add_repeating_timer_ms(-(1000 / fps), dma_timer_callback, (void*)this, &timer);
     return timer_running;
 }

@@ -95,6 +95,11 @@ namespace plasma {
                     managed_buffer = false;
                 }
             }
+            // Whether the pin fits the PIO's window, and whether no other state machine on it
+            // drives the pin. Construction stops at the first false, leaving a strip that shows nothing
+            bool pins_reachable() const { return pins_ok; }
+            bool pins_available() const { return pins_free; }
+
             bool start(uint fps=60);
             bool stop();
             void update(bool blocking=false);
@@ -114,6 +119,8 @@ namespace plasma {
             int pio_program_offset = -1;
             int dma_channel = -1;
             bool sm_claimed = false;
+            bool pins_ok = false;
+            bool pins_free = false;
             bool timer_running = false;
             struct repeating_timer timer = {};
             bool managed_buffer = false;
