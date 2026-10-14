@@ -199,7 +199,11 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 /***** Destructor ******/
 mp_obj_t Motor___del__(mp_obj_t self_in) {
     _Motor_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Motor_obj_t);
-    m_del_class(Motor, self->motor);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->motor != nullptr) {
+        m_del_class(Motor, self->motor);
+        self->motor = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -746,7 +750,11 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 /***** Destructor ******/
 mp_obj_t MotorCluster___del__(mp_obj_t self_in) {
     _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _MotorCluster_obj_t);
-    m_del_class(MotorCluster, self->cluster);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->cluster != nullptr) {
+        m_del_class(MotorCluster, self->cluster);
+        self->cluster = nullptr;
+    }
     return mp_const_none;
 }
 
