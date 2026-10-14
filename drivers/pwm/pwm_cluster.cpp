@@ -281,13 +281,13 @@ void __not_in_flash_func(PWMCluster::next_dma_sequence)() {
 }
 
 bool PWMCluster::init() {
+  pins_ok = true;
+  span_ok = true;
   if(!initialised && !pio_sm_is_claimed(pio, sm)) {
     // Every pin must fit the PIO instance's 32-pin window, 0-31 or 16-47 on chips with
     // more than 32 GPIOs. The base applies to the whole PIO, so while the instance has
     // claimed state machines the window has to be taken as found.
     uint pio_idx = pio_get_index(pio);
-    pins_ok = true;
-    span_ok = true;
     if(channel_count > 0) {
       uint pin_min = NUM_BANK0_GPIOS;
       uint pin_max = 0;
