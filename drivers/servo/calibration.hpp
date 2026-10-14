@@ -19,7 +19,7 @@ namespace servo {
     static constexpr float DEFAULT_MID_PULSE = 1500.0f;  // in microseconds
     static constexpr float DEFAULT_MAX_PULSE = 2500.0f;  // in microseconds
 
-    static const uint MAX_CALIBRATION_PAIRS = 255;  // The reach of the uint8_t pair indices
+    static const uint MAX_CALIBRATION_PAIRS = 255;  // Kept below 256, as pairs are indexed by uint8_t
 
   private:
     static constexpr float LOWER_HARD_LIMIT = 400.0f;   // The minimum microsecond pulse to send
@@ -50,6 +50,7 @@ namespace servo {
     // Constructors/Destructor
     //--------------------------------------------------
   public:
+    // A calibration whose pairs cannot be allocated comes up empty, so callers compare sizes
     Calibration();
     Calibration(CalibrationType default_type);
     Calibration(const Calibration &other);
@@ -69,8 +70,8 @@ namespace servo {
     // Methods
     //--------------------------------------------------
   public:
-    // False when the pairs could not be allocated, or size exceeds MAX_CALIBRATION_PAIRS;
-    // the calibration is then empty and value_to_pulse and pulse_to_value report failure
+    // False when size exceeds MAX_CALIBRATION_PAIRS or the pairs cannot be allocated, which
+    // leaves the existing pairs in place
     bool apply_blank_pairs(uint size);
     bool apply_two_pairs(float min_pulse, float max_pulse, float min_value, float max_value);
     bool apply_three_pairs(float min_pulse, float mid_pulse, float max_pulse, float min_value, float mid_value, float max_value);
@@ -114,8 +115,7 @@ namespace servo {
     // Variables
     //--------------------------------------------------
   private:
-    // Sized to the pairs in use and claimed through pwm_allocate, so a typical
-    // two or three pair calibration does not carry the full MAX_CALIBRATION_PAIRS table
+    // Sized to the pairs in use, and claimed through pwm_allocate
     Pair* calibration;
     uint calibration_size;
     bool limit_lower;

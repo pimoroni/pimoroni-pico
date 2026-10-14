@@ -39,11 +39,13 @@ namespace servo {
       return *this;
     }
 
+    // Left untouched when the pairs cannot be allocated, which callers see as a size mismatch
     uint size = other.size();
-    if(apply_blank_pairs(size)) {
-      for(uint i = 0; i < size; i++) {
-        calibration[i] = other.calibration[i];
-      }
+    if(!apply_blank_pairs(size)) {
+      return *this;
+    }
+    for(uint i = 0; i < size; i++) {
+      calibration[i] = other.calibration[i];
     }
     limit_lower = other.limit_lower;
     limit_upper = other.limit_upper;

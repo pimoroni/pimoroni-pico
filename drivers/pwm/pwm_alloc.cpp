@@ -1,10 +1,9 @@
 #include "pwm_alloc.hpp"
 #include <cstdlib>
 
-// Default block source, taking the C heap. The SDK wraps malloc and panics on failure
-// where the callers report it, so these call the unwrapped functions; those skip the
-// wrapper's cross-core mutex, so cluster init and destruction must not run concurrently
-// with another core's allocations.
+// Default block source, taking the C heap. The SDK's malloc wrapper panics on failure, so
+// these call the unwrapped functions, which skip its cross-core mutex. A cluster or a
+// calibration must not be created, copied or destroyed while another core allocates.
 extern "C" void *__real_malloc(size_t size);
 extern "C" void __real_free(void *mem);
 

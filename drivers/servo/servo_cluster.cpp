@@ -57,7 +57,7 @@ namespace servo {
   bool ServoCluster::init() {
     bool success = false;
 
-    if(states == nullptr && pwms.get_chan_count() > 0) {
+    if((states == nullptr && pwms.get_chan_count() > 0) || !calibrations_complete) {
       return false;
     }
 
@@ -523,6 +523,7 @@ namespace servo {
     if(servo_count > 0 && allocate_servo_states(servo_count)) {
       for(uint servo = 0; servo < servo_count; servo++) {
         new(&states[servo]) ServoState(default_type);
+        calibrations_complete &= states[servo].calibration().size() > 0;
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }
@@ -533,6 +534,7 @@ namespace servo {
     if(servo_count > 0 && allocate_servo_states(servo_count)) {
       for(uint servo = 0; servo < servo_count; servo++) {
         new(&states[servo]) ServoState(calibration);
+        calibrations_complete &= states[servo].calibration().size() == calibration.size();
         servo_phases[servo] = (auto_phase) ? (float)servo / (float)servo_count : 0.0f;
       }
     }
