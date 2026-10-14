@@ -192,9 +192,9 @@ PWMCluster::~PWMCluster() {
     // rather than the ABORT bit, because the ABORT bit can clear prematurely.
     while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
 
-    // Clear the interrupt (if any) and restore the interrupt masks.
+    // Clear the interrupt (if any), leaving it disabled for the channel's next user, which
+    // may not service DMA_IRQ_0
     dma_hw->ints0 = 1u << dma_channel;
-    hw_set_bits(&dma_hw->inte0, irq0_save);
 
     dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
     claimed_channel_mask &= ~(1u << dma_channel);
