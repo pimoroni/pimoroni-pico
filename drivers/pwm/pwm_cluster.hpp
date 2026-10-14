@@ -128,12 +128,8 @@ namespace pimoroni {
     uint8_t channel_count;
     uint8_t channel_to_pin_map[CHANNEL_LIMIT];
 
-    // First GPIO the PIO instance's 32-pin window can reach, set by init() from the pin set
-    uint gpio_base = 0;
-
-    // The state machine only writes the contiguous GPIO span from out_base for out_count
-    // pins, so clusters with disjoint spans coexist on one PIO instance. Set by init(); the
-    // map above stays absolute and the transition masks subtract out_base
+    // The contiguous GPIO span the state machine writes, set by init(). The map above stays
+    // absolute, and the transition masks subtract out_base
     uint out_base = 0;
     uint out_count = 0;
     uint64_t claimed_span = 0;
@@ -192,8 +188,8 @@ namespace pimoroni {
   public:
     bool init();
 
-    // Why the last init() returned false, distinguishing pin problems, which no retry can
-    // fix, from resource exhaustion
+    // Whether the last init() found the pins within the PIO's window, and clear of any other
+    // state machine there. If both hold after a failure, it ran out of resources
     bool pins_reachable() const { return pins_ok; }
     bool pins_available() const { return span_ok; }
 

@@ -4,9 +4,22 @@
 
 namespace pimoroni {
 
-  // Whether any claimed state machine on a PIO, other than own_sm, drives one of the GPIOs in
-  // pin_mask. Judged by the out, set and side-set pins each one's PINCTRL names, which stay
-  // accurate after a driver releases its pins, unlike the GPIO function.
+  // Whether GPIOs pin_min to pin_max fit the PIO's 32-pin window, based at 0 or 16. The base
+  // is set only while no other state machine is claimed, then read back, as the SDK can refuse
+  inline bool pio_take_window(PIO pio, uint own_sm, uint pin_min, uint pin_max) {
+    bool pio_in_use = false;
+    for(uint sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {
+      pio_in_use |= (sm != own_sm) && pio_sm_is_claimed(pio, sm);
+    }
+    if(!pio_in_use) {
+      pio_set_gpio_base(pio, pin_max >= 32 ? 16 : 0);
+    }
+    const uint base = pio_get_gpio_base(pio);
+    return pin_min >= base && pin_max < base + 32;
+  }
+
+  // Whether another claimed state machine on the PIO drives a GPIO in pin_mask, judged by its
+  // PINCTRL, as a released driver's pins keep their GPIO function
   inline bool pio_pins_driven_by_others(PIO pio, uint own_sm, uint64_t pin_mask) {
     const uint gpio_base = pio_get_gpio_base(pio);
     for(uint sm = 0; sm < NUM_PIO_STATE_MACHINES; sm++) {

@@ -21,25 +21,13 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
         managed_buffer = true;
     }
 
-    // The gpio_base applies to the entire PIO, so a busy PIO's window is taken as found.
-    // Pins outside the window stop construction here, reported by pins_reachable()
-    uint range_max = std::max(pin_dat, pin_clk);
-    uint range_min = std::min(pin_dat, pin_clk);
-    bool pio_in_use = false;
-    for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
-        pio_in_use |= (i != sm) && pio_sm_is_claimed(pio, i);
-    }
-    if(!pio_in_use) {
-        pio_set_gpio_base(pio, (range_max >= 32 && range_min >= 16) ? 16 : 0);
-    }
-    uint window_base = pio_get_gpio_base(pio);
-    pins_ok = (range_min >= window_base) && (range_max < window_base + 32);
+    // Pins outside the PIO's window stop construction here, reported by pins_reachable()
+    pins_ok = pimoroni::pio_take_window(pio, sm, std::min(pin_dat, pin_clk), std::max(pin_dat, pin_clk));
     if(!pins_ok) {
         return;
     }
 
-    // Pins another state machine on the PIO drives, a cluster's span included, would be
-    // fought over, so they stop construction too, reported by pins_available()
+    // So do pins another state machine on the PIO drives, reported by pins_available()
     pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, (1llu << pin_clk) | (1llu << pin_dat));
     if(!pins_free) {
         return;

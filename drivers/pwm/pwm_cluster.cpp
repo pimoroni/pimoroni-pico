@@ -285,9 +285,6 @@ bool PWMCluster::init() {
   pins_ok = true;
   span_ok = true;
   if(!initialised && !pio_sm_is_claimed(pio, sm)) {
-    // Every pin must fit the PIO instance's 32-pin window, 0-31 or 16-47 on chips with
-    // more than 32 GPIOs. The base applies to the whole PIO, so while the instance has
-    // claimed state machines the window has to be taken as found.
     uint pio_idx = pio_get_index(pio);
     if(channel_count > 0) {
       uint pin_min = NUM_BANK0_GPIOS;
@@ -297,31 +294,13 @@ bool PWMCluster::init() {
         pin_max = MAX(pin_max, (uint)channel_to_pin_map[channel]);
       }
 
-      bool pio_in_use = false;
-      for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
-        pio_in_use |= pio_sm_is_claimed(pio, i);
-      }
-      if(pio_in_use) {
-        uint current_base = pio_get_gpio_base(pio);
-        if(pin_min < current_base || pin_max >= current_base + 32) {
-          pins_ok = false;
-          return false;
-        }
-        gpio_base = current_base;
-      }
-      else {
-        if(pin_max > 31 && pin_min < 16) {
-          pins_ok = false;
-          return false;
-        }
-        gpio_base = (pin_max > 31) ? 16 : 0;
-        pio_set_gpio_base(pio, gpio_base);
+      if(!pimoroni::pio_take_window(pio, sm, pin_min, pin_max)) {
+        pins_ok = false;
+        return false;
       }
 
-      // The state machine's out instruction writes every pin from pin_min to pin_max each
-      // tick, wired or not, so the whole span is claimed. A span overlapping another
-      // cluster's, or a pin another state machine on the same PIO instance drives, such as a
-      // strip's, must be refused. Spans on separate instances are independent.
+      // The out instruction writes every pin from pin_min to pin_max, wired or not, so the span
+      // is refused if it takes in a pin another state machine on this PIO drives
       out_base = pin_min;
       out_count = (pin_max - pin_min) + 1;
       claimed_span = ((1llu << out_count) - 1) << out_base;
@@ -394,14 +373,12 @@ bool PWMCluster::init() {
       pio_sm_set_consecutive_pindirs(pio, sm, DEBUG_SIDESET, 1, true);
 
       pio_sm_config c = debug_pwm_cluster_program_get_default_config(pio_program_offsets[pio_idx]);
-      sm_config_set_out_pins(&c, 0, IRQ_GPIO);
       sm_config_set_sideset_pins(&c, DEBUG_SIDESET);
     #else
       pio_sm_config c = pwm_cluster_program_get_default_config(pio_program_offsets[pio_idx]);
-      // Only the cluster's own span is written; the out instruction still consumes 32 bits
-      // per tick, so the sequence masks are unchanged in width, just based at out_base
-      sm_config_set_out_pins(&c, out_base, out_count);
     #endif
+      // Only the cluster's own span reaches pins, so the sequence masks count from out_base
+      sm_config_set_out_pins(&c, out_base, out_count);
       sm_config_set_out_shift(&c, false, true, 32);
       sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE); // We actively do not want a joined FIFO even though we are not needing the RX
 

@@ -21,23 +21,13 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
         managed_buffer = true;
     }
 
-    // The gpio_base applies to the entire PIO, so a busy PIO's window is taken as found.
-    // A pin outside the window stops construction here, reported by pins_reachable()
-    bool pio_in_use = false;
-    for(uint i = 0; i < NUM_PIO_STATE_MACHINES; i++) {
-        pio_in_use |= (i != sm) && pio_sm_is_claimed(pio, i);
-    }
-    if(!pio_in_use) {
-        pio_set_gpio_base(pio, pin >= 32 ? 16 : 0);
-    }
-    uint window_base = pio_get_gpio_base(pio);
-    pins_ok = (pin >= window_base) && (pin < window_base + 32);
+    // A pin outside the PIO's window stops construction here, reported by pins_reachable()
+    pins_ok = pimoroni::pio_take_window(pio, sm, pin, pin);
     if(!pins_ok) {
         return;
     }
 
-    // A pin another state machine on the PIO drives, a cluster's span included, would be
-    // fought over, so it stops construction too, reported by pins_available()
+    // So does a pin another state machine on the PIO drives, reported by pins_available()
     pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, 1llu << pin);
     if(!pins_free) {
         return;
