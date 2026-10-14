@@ -1,4 +1,5 @@
 #include "pwm_cluster.hpp"
+#include "common/pio_pins.hpp"
 #include "hardware/gpio.h"
 #include "hardware/clocks.h"
 #include "pico/mutex.h"
@@ -318,12 +319,13 @@ bool PWMCluster::init() {
       }
 
       // The state machine's out instruction writes every pin from pin_min to pin_max each
-      // tick, wired or not, so the whole span is claimed and overlapping spans on the same
-      // PIO instance must be refused. Spans on separate instances are independent.
+      // tick, wired or not, so the whole span is claimed. A span overlapping another
+      // cluster's, or a pin another state machine on the same PIO instance drives, such as a
+      // strip's, must be refused. Spans on separate instances are independent.
       out_base = pin_min;
       out_count = (pin_max - pin_min) + 1;
       claimed_span = ((1llu << out_count) - 1) << out_base;
-      if((claimed_spans[pio_idx] & claimed_span) != 0) {
+      if((claimed_spans[pio_idx] & claimed_span) != 0 || pimoroni::pio_pins_driven_by_others(pio, sm, claimed_span)) {
         claimed_span = 0;
         span_ok = false;
         return false;

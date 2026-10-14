@@ -1,5 +1,6 @@
 #include "apa102.hpp"
 #include "common/pimoroni_common.hpp"
+#include "common/pio_pins.hpp"
 
 namespace plasma {
 
@@ -28,6 +29,13 @@ APA102::APA102(uint num_leds, PIO pio, uint sm, uint pin_dat, uint pin_clk, uint
     uint window_base = pio_get_gpio_base(pio);
     pins_ok = (range_min >= window_base) && (range_max < window_base + 32);
     if(!pins_ok) {
+        return;
+    }
+
+    // Pins another state machine on the PIO drives, a cluster's span included, would be
+    // fought over, so they stop construction too, reported by pins_available()
+    pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, (1llu << pin_clk) | (1llu << pin_dat));
+    if(!pins_free) {
         return;
     }
 

@@ -1,5 +1,6 @@
 #include "ws2812.hpp"
 #include "common/pimoroni_common.hpp"
+#include "common/pio_pins.hpp"
 
 namespace plasma {
 
@@ -26,6 +27,13 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     uint window_base = pio_get_gpio_base(pio);
     pins_ok = (pin >= window_base) && (pin < window_base + 32);
     if(!pins_ok) {
+        return;
+    }
+
+    // A pin another state machine on the PIO drives, a cluster's span included, would be
+    // fought over, so it stops construction too, reported by pins_available()
+    pins_free = !pimoroni::pio_pins_driven_by_others(pio, sm, 1llu << pin);
+    if(!pins_free) {
         return;
     }
 
