@@ -2698,6 +2698,12 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
+        int servo_count = (int)self->cluster->count();
+        if(servo_count == 0)
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
+
         const mp_obj_t object = args[ARG_calibration].u_obj;
         if(mp_obj_is_type(object, &Calibration_type)) {
             _Calibration_obj_t *calib = MP_OBJ_TO_PTR2(object, _Calibration_obj_t);
