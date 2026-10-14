@@ -11,6 +11,7 @@ extern "C" {
 #include "servo.h"
 #include "py/builtin.h"
 #include "py/mphal.h"
+#include "py/objint.h"
 #include "extmod/modmachine.h"
 
 
@@ -1255,10 +1256,18 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
-    PIO pio = args[ARG_pio].u_int == 0 ? pio0 : pio1;
-    int sm = args[ARG_sm].u_int;
+    int pio_int = args[ARG_pio].u_int;
+    if(pio_int < 0 || pio_int >= (int)NUM_PIOS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pio out of range. Expected 0 to %d"), (int)NUM_PIOS - 1);
+    }
+    PIO pio = pio_get_instance((uint)pio_int);
 
-    uint pin_mask = 0;
+    int sm = args[ARG_sm].u_int;
+    if(sm < 0 || sm >= (int)NUM_PIO_STATE_MACHINES) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("sm out of range. Expected 0 to %d"), (int)NUM_PIO_STATE_MACHINES - 1);
+    }
+
+    uint64_t pin_mask = 0;
     bool mask_provided = true;
     uint32_t pin_count = 0;
     uint8_t* pins = nullptr;
@@ -1266,7 +1275,11 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     // Determine what pins this cluster will use
     const mp_obj_t object = args[ARG_pins].u_obj;
     if(mp_obj_is_int(object)) {
-        pin_mask = (uint)mp_obj_get_int(object);
+        // Read whole, as a mask may name GPIOs above 31. A negative or oversized one raises
+        mp_obj_int_to_bytes(object, sizeof(pin_mask), (byte *)&pin_mask, false, false, true);
+        if((pin_mask >> NUM_BANK0_GPIOS) != 0) {
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pin mask names a pin out of range. Expected 0 to %d"), (int)NUM_BANK0_GPIOS - 1);
+        }
     }
     else if(IS_PIN_OBJ(object)) {
         // A Pin or pin name is a cluster of one, a bare int being taken as a pin mask above

@@ -599,14 +599,14 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
 
     int pio_int = args[ARG_pio].u_int;
-    if(pio_int < 0 || pio_int > (int)NUM_PIOS) {
-        mp_raise_ValueError(MP_ERROR_TEXT("pio out of range. Expected 0 to 1"));
+    if(pio_int < 0 || pio_int >= (int)NUM_PIOS) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("pio out of range. Expected 0 to %d"), (int)NUM_PIOS - 1);
     }
-    PIO pio = pio_int == 0 ? pio0 : pio1;
+    PIO pio = pio_get_instance((uint)pio_int);
 
     int sm = args[ARG_sm].u_int;
-    if(sm < 0 || sm > (int)NUM_PIO_STATE_MACHINES) {
-        mp_raise_ValueError(MP_ERROR_TEXT("sm out of range. Expected 0 to 3"));
+    if(sm < 0 || sm >= (int)NUM_PIO_STATE_MACHINES) {
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("sm out of range. Expected 0 to %d"), (int)NUM_PIO_STATE_MACHINES - 1);
     }
 
     size_t pair_count = 0;
