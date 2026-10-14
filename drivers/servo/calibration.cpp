@@ -34,6 +34,11 @@ namespace servo {
   }
 
   Calibration &Calibration::operator=(const Calibration &other) {
+    // Blanking the pairs below would wipe the source too
+    if(this == &other) {
+      return *this;
+    }
+
     uint size = other.size();
     if(apply_blank_pairs(size)) {
       for(uint i = 0; i < size; i++) {
