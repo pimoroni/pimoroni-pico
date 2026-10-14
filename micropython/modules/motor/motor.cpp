@@ -2153,7 +2153,7 @@ extern mp_obj_t MotorCluster_decay_mode(size_t n_args, const mp_obj_t *pos_args,
                 if(motor < 0 || motor >= motor_count)
                     mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("motor out of range. Expected 0 to %d"), motor_count - 1);
                 else {
-                    int mode = args[ARG_mode].u_int;
+                    int mode = mp_obj_get_int(args[ARG_mode].u_obj);
                     if(mode < 0 || mode > 1) {
                         mp_raise_ValueError(MP_ERROR_TEXT("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)"));
                     }
@@ -2168,7 +2168,7 @@ extern mp_obj_t MotorCluster_decay_mode(size_t n_args, const mp_obj_t *pos_args,
                 // Create and populate a local array of motor indices
                 uint8_t *motors = pimoroni_motors_from_items(items, length, motor_count);
 
-                int mode = args[ARG_mode].u_int;
+                int mode = mp_obj_get_int(args[ARG_mode].u_obj);
                 if(mode < 0 || mode > 1) {
                     delete[] motors;
                     mp_raise_ValueError(MP_ERROR_TEXT("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)"));
