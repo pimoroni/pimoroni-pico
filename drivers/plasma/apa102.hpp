@@ -87,7 +87,7 @@ namespace plasma {
                 }
             }
             // Whether the pins fit the PIO's window, and whether no other state machine on it
-            // drives them. Construction stops at the first false, leaving only the destructor
+            // drives them. Construction stops at the first false, leaving a strip that shows nothing
             bool pins_reachable() const { return pins_ok; }
             bool pins_available() const { return pins_free; }
 

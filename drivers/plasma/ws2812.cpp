@@ -15,6 +15,12 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     this->sm = sm;
     sm_claimed = true;
 
+    // The buffer comes first, so a strip refused its pins below can still be drawn into
+    if(!this->buffer) {
+        this->buffer = new RGB[num_leds];
+        managed_buffer = true;
+    }
+
     // The gpio_base applies to the entire PIO, so a busy PIO's window is taken as found.
     // A pin outside the window stops construction here, reported by pins_reachable()
     bool pio_in_use = false;
@@ -64,11 +70,6 @@ WS2812::WS2812(uint num_leds, PIO pio, uint sm, uint pin, uint freq, bool rgbw, 
     dma_channel_set_trans_count(dma_channel, num_leds, false);
     dma_channel_set_read_addr(dma_channel, (uint32_t *)buffer, false);
     dma_channel_configure(dma_channel, &config, &pio->txf[sm], NULL, 0, false);
-
-    if(!this->buffer) {
-        this->buffer = new RGB[num_leds];
-        managed_buffer = true;
-    }
 }
 
 bool WS2812::dma_timer_callback(struct repeating_timer *t) {
@@ -76,11 +77,13 @@ bool WS2812::dma_timer_callback(struct repeating_timer *t) {
     return true;
 }
 
+// A strip refused its pins has no DMA channel, so it is never busy and shows nothing
 bool WS2812::is_busy() {
-   return dma_channel_is_busy(dma_channel);
+   return dma_channel != -1 && dma_channel_is_busy(dma_channel);
 }
 
 void WS2812::update(bool blocking) {
+    if(dma_channel == -1) return;
     if(is_busy() && !blocking) return;
     while(is_busy()) {}; // Block waiting for DMA finish
     dma_channel_set_trans_count(dma_channel, num_leds, false);
@@ -91,6 +94,7 @@ void WS2812::update(bool blocking) {
 
 bool WS2812::start(uint fps) {
     stop();
+    if(dma_channel == -1) return false;
     timer_running = add_repeating_timer_ms(-(1000 / fps), dma_timer_callback, (void*)this, &timer);
     return timer_running;
 }
