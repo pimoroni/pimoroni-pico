@@ -199,7 +199,11 @@ mp_obj_t Motor_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 /***** Destructor ******/
 mp_obj_t Motor___del__(mp_obj_t self_in) {
     _Motor_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Motor_obj_t);
-    m_del_class(Motor, self->motor);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->motor != nullptr) {
+        m_del_class(Motor, self->motor);
+        self->motor = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -746,7 +750,11 @@ mp_obj_t MotorCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 /***** Destructor ******/
 mp_obj_t MotorCluster___del__(mp_obj_t self_in) {
     _MotorCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _MotorCluster_obj_t);
-    m_del_class(MotorCluster, self->cluster);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->cluster != nullptr) {
+        m_del_class(MotorCluster, self->cluster);
+        self->cluster = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -1851,7 +1859,7 @@ extern mp_obj_t MotorCluster_decay_mode(size_t n_args, const mp_obj_t *pos_args,
                 if(motor < 0 || motor >= motor_count)
                     mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("motor out of range. Expected 0 to %d"), motor_count - 1);
                 else {
-                    int mode = args[ARG_mode].u_int;
+                    int mode = mp_obj_get_int(args[ARG_mode].u_obj);
                     if(mode < 0 || mode > 1) {
                         mp_raise_ValueError(MP_ERROR_TEXT("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)"));
                     }
@@ -1866,7 +1874,7 @@ extern mp_obj_t MotorCluster_decay_mode(size_t n_args, const mp_obj_t *pos_args,
                 // Create and populate a local array of motor indices
                 uint8_t *motors = pimoroni_motors_from_items(items, length, motor_count);
 
-                int mode = args[ARG_mode].u_int;
+                int mode = mp_obj_get_int(args[ARG_mode].u_obj);
                 if(mode < 0 || mode > 1) {
                     delete[] motors;
                     mp_raise_ValueError(MP_ERROR_TEXT("mode out of range. Expected FAST_DECAY (0) or SLOW_DECAY (1)"));

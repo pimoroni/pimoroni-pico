@@ -27,22 +27,97 @@ SPCE_A_PINS = connector("A")
 SPCE_B_PINS = connector("B")
 
 
+class __ClusterMotor:
+    # One motor of a MotorCluster, offering the methods of a Motor
+
+    def __init__(self, cluster, index):
+        self.__cluster = cluster
+        self.__index = index
+
+    def pins(self):
+        return self.__cluster.pins(self.__index)
+
+    def enable(self):
+        self.__cluster.enable(self.__index)
+
+    def disable(self):
+        self.__cluster.disable(self.__index)
+
+    def is_enabled(self):
+        return self.__cluster.is_enabled(self.__index)
+
+    # These read with no argument and set with one, as a Motor's methods do
+    def duty(self, *args):
+        return self.__cluster.duty(self.__index, *args)
+
+    def speed(self, *args):
+        return self.__cluster.speed(self.__index, *args)
+
+    # The cluster's, so setting it on either motor sets both
+    def frequency(self, *args):
+        return self.__cluster.frequency(*args)
+
+    def direction(self, *args):
+        return self.__cluster.direction(self.__index, *args)
+
+    def speed_scale(self, *args):
+        return self.__cluster.speed_scale(self.__index, *args)
+
+    def zeropoint(self, *args):
+        return self.__cluster.zeropoint(self.__index, *args)
+
+    def deadzone(self, *args):
+        return self.__cluster.deadzone(self.__index, *args)
+
+    def decay_mode(self, *args):
+        return self.__cluster.decay_mode(self.__index, *args)
+
+    def stop(self):
+        self.__cluster.stop(self.__index)
+
+    def coast(self):
+        self.__cluster.coast(self.__index)
+
+    def brake(self):
+        self.__cluster.brake(self.__index)
+
+    def full_negative(self):
+        self.__cluster.full_negative(self.__index)
+
+    def full_positive(self):
+        self.__cluster.full_positive(self.__index)
+
+    def to_percent(self, *args):
+        self.__cluster.to_percent(self.__index, *args)
+
+
 class MotorDriver:
     """Two motors and the chip driving them, on the connector the breakout plugs into.
 
     The breakout's driver chip runs the motors off four lines, enabled by the fifth.
     It starts disabled, so nothing wired to it moves while a program comes up.
+
+    Given a PIO and state machine, that state machine drives both motors as a MotorCluster
+    at one frequency, leaving the hardware PWM channels behind their pins to other pins.
     """
 
-    def __init__(self, pins):
-        from motor import Motor
-
+    def __init__(self, pins, pio=None, sm=None):
         a_pos, a_neg, b_pos, b_neg, enable = pins
 
-        # Named as the breakout labels them, and as a sequence for a program driving both
-        self.motor_a = Motor((a_pos, a_neg))
-        self.motor_b = Motor((b_pos, b_neg))
-        self.motors = (self.motor_a, self.motor_b)
+        # Check if the motors take hardware PWM, or a cluster on the PIO given.
+        # Either way they are named as the breakout labels them
+        if pio is None:
+            from motor import Motor
+            self.motor_a = Motor((a_pos, a_neg))
+            self.motor_b = Motor((b_pos, b_neg))
+            self.__held = (self.motor_a, self.motor_b)
+        else:
+            from motor import MotorCluster
+            cluster = MotorCluster(pio, sm, ((a_pos, a_neg), (b_pos, b_neg)))
+            self.motor_a = __ClusterMotor(cluster, 0)
+            self.motor_b = __ClusterMotor(cluster, 1)
+            self.__held = (cluster,)
+        self.motors = (self.motor_a, self.motor_b)  # For a program driving both
 
         self.__enable = Pin(enable, Pin.OUT, value=False)
 
@@ -64,6 +139,15 @@ class MotorDriver:
     def is_enabled(self):
         """Whether the driver is enabled."""
         return self.__enable.value() == 1
+
+    def deinit(self):
+        """Disable the driver and release the hardware its motors run on, ending their use.
+
+        Collection alone can leave that hardware claimed, as a stale reference may remain.
+        """
+        self.disable()
+        for held in self.__held:
+            held.__del__()
 
 
 class Clipper:

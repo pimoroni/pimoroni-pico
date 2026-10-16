@@ -928,7 +928,11 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
 /***** Destructor ******/
 mp_obj_t Servo___del__(mp_obj_t self_in) {
     _Servo_obj_t *self = MP_OBJ_TO_PTR2(self_in, _Servo_obj_t);
-    m_del_class(Servo, self->servo);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->servo != nullptr) {
+        m_del_class(Servo, self->servo);
+        self->servo = nullptr;
+    }
     return mp_const_none;
 }
 
@@ -1405,7 +1409,11 @@ mp_obj_t ServoCluster_make_new(const mp_obj_type_t *type, size_t n_args, size_t 
 /***** Destructor ******/
 mp_obj_t ServoCluster___del__(mp_obj_t self_in) {
     _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(self_in, _ServoCluster_obj_t);
-    m_del_class(ServoCluster, self->cluster);
+    // Cleared, so a direct call and the collector's later one free the object only once
+    if(self->cluster != nullptr) {
+        m_del_class(ServoCluster, self->cluster);
+        self->cluster = nullptr;
+    }
     return mp_const_none;
 }
 
