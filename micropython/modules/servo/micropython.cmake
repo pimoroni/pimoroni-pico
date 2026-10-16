@@ -7,6 +7,7 @@ target_sources(usermod_${MOD_NAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/${MOD_NAME}.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_cluster.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/pwm/pwm_alloc.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_cluster.cpp
     ${CMAKE_CURRENT_LIST_DIR}/../../../drivers/servo/servo_state.cpp

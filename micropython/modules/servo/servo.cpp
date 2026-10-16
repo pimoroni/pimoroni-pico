@@ -54,6 +54,12 @@ void Calibration_print(const mp_print_t *print, mp_obj_t self_in, mp_print_kind_
 }
 
 
+// Raised wherever a calibration could not get the memory for its pairs
+MP_NORETURN static void raise_calibration_memory_error() {
+    mp_raise_msg(&mp_type_MemoryError, MP_ERROR_TEXT("failed to allocate the calibration pairs"));
+}
+
+
 /***** Constructor *****/
 mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
     _Calibtration_obj_t *self = nullptr;
@@ -78,6 +84,8 @@ mp_obj_t Calibration_make_new(const mp_obj_type_t *type, size_t n_args, size_t n
 
             self = mp_obj_malloc_with_finaliser(_Calibtration_obj_t, &Calibration_type);
             self->calibration = m_new_class(Calibration, calibration_type);
+            if(self->calibration->size() == 0)
+                raise_calibration_memory_error();
         }
         else {
             mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to an integer"));
@@ -115,10 +123,10 @@ mp_obj_t Calibration_apply_blank_pairs(size_t n_args, const mp_obj_t *pos_args, 
     _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
     int size = args[ARG_size].u_int;
-    if(size < 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
-    else
-        self->calibration->apply_blank_pairs((uint)size);
+    if(size < 0 || size > (int)Calibration::MAX_CALIBRATION_PAIRS)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("size out of range. Expected 0 to %d"), (int)Calibration::MAX_CALIBRATION_PAIRS);
+    else if(!self->calibration->apply_blank_pairs((uint)size))
+        raise_calibration_memory_error();
 
     return mp_const_none;
 }
@@ -143,7 +151,8 @@ mp_obj_t Calibration_apply_two_pairs(size_t n_args, const mp_obj_t *pos_args, mp
     float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_two_pairs(min_pulse, max_pulse, min_value, max_value);
+    if(!self->calibration->apply_two_pairs(min_pulse, max_pulse, min_value, max_value))
+        raise_calibration_memory_error();
 
     return mp_const_none;
 }
@@ -172,7 +181,8 @@ mp_obj_t Calibration_apply_three_pairs(size_t n_args, const mp_obj_t *pos_args, 
     float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
     float mid_value = mp_obj_get_float(args[ARG_mid_value].u_obj);
     float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-    self->calibration->apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value);
+    if(!self->calibration->apply_three_pairs(min_pulse, mid_pulse, max_pulse, min_value, mid_value, max_value))
+        raise_calibration_memory_error();
 
     return mp_const_none;
 }
@@ -195,14 +205,15 @@ mp_obj_t Calibration_apply_uniform_pairs(size_t n_args, const mp_obj_t *pos_args
     _Calibration_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _Calibration_obj_t);
 
     int size = args[ARG_size].u_int;
-    if(size < 0)
-        mp_raise_ValueError(MP_ERROR_TEXT("size out of range. Expected 0 or greater"));
+    if(size < 0 || size > (int)Calibration::MAX_CALIBRATION_PAIRS)
+        mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("size out of range. Expected 0 to %d"), (int)Calibration::MAX_CALIBRATION_PAIRS);
     else {
         float min_pulse = mp_obj_get_float(args[ARG_min_pulse].u_obj);
         float max_pulse = mp_obj_get_float(args[ARG_max_pulse].u_obj);
         float min_value = mp_obj_get_float(args[ARG_min_value].u_obj);
         float max_value = mp_obj_get_float(args[ARG_max_value].u_obj);
-        self->calibration->apply_uniform_pairs((uint)size, min_pulse, max_pulse, min_value, max_value);
+        if(!self->calibration->apply_uniform_pairs((uint)size, min_pulse, max_pulse, min_value, max_value))
+            raise_calibration_memory_error();
     }
 
     return mp_const_none;
@@ -226,7 +237,8 @@ mp_obj_t Calibration_apply_default_pairs(size_t n_args, const mp_obj_t *pos_args
         mp_raise_ValueError(MP_ERROR_TEXT("type out of range. Expected ANGULAR (0), LINEAR (1) or CONTINUOUS (2)"));
     }
     servo::CalibrationType calibration_type = (servo::CalibrationType)type;
-    self->calibration->apply_default_pairs(calibration_type);
+    if(!self->calibration->apply_default_pairs(calibration_type))
+        raise_calibration_memory_error();
 
     return mp_const_none;
 }
@@ -902,6 +914,11 @@ mp_obj_t Servo_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, c
     else
         self->servo = new(servo_target) Servo(pin, calibration_type, freq);
 
+    // Checked before init(), so a short calibration leaves no pin set up
+    size_t pairs = self->servo->calibration().size();
+    if((calib != nullptr) ? pairs != calib->size() : pairs == 0)
+        raise_calibration_memory_error();
+
     self->servo->init();
 
     return MP_OBJ_FROM_PTR(self);
@@ -1164,6 +1181,8 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
         _Calibration_obj_t *calib = mp_obj_malloc_with_finaliser(_Calibration_obj_t, &Calibration_type);
 
         calib->calibration = m_new_class(Calibration, self->servo->calibration());
+        if(calib->calibration->size() != self->servo->calibration().size())
+            raise_calibration_memory_error();
         return MP_OBJ_FROM_PTR(calib);
     }
     else {
@@ -1183,6 +1202,8 @@ extern mp_obj_t Servo_calibration(size_t n_args, const mp_obj_t *pos_args, mp_ma
         if(mp_obj_is_type(object, &Calibration_type)) {
             _Calibration_obj_t *calib = MP_OBJ_TO_PTR2(object, _Calibration_obj_t);
             self->servo->calibration() = *(calib->calibration);
+            if(self->servo->calibration().size() != calib->calibration->size())
+                raise_calibration_memory_error();
         }
         else {
             mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a Calibration class instance"));
@@ -2676,6 +2697,8 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
             _Calibration_obj_t *calib = mp_obj_malloc_with_finaliser(_Calibration_obj_t, &Calibration_type);
 
             calib->calibration = m_new_class(Calibration, self->cluster->calibration((uint)servo));
+            if(calib->calibration->size() != self->cluster->calibration((uint)servo).size())
+                raise_calibration_memory_error();
             return MP_OBJ_FROM_PTR(calib);
         }
     }
@@ -2694,10 +2717,18 @@ extern mp_obj_t ServoCluster_calibration(size_t n_args, const mp_obj_t *pos_args
         _ServoCluster_obj_t *self = MP_OBJ_TO_PTR2(args[ARG_self].u_obj, _ServoCluster_obj_t);
 
         int servo = args[ARG_servo].u_int;
+        int servo_count = (int)self->cluster->count();
+        if(servo_count == 0)
+            mp_raise_ValueError(MP_ERROR_TEXT("this cluster does not have any servos"));
+        else if(servo < 0 || servo >= servo_count)
+            mp_raise_msg_varg(&mp_type_ValueError, MP_ERROR_TEXT("servo out of range. Expected 0 to %d"), servo_count - 1);
+
         const mp_obj_t object = args[ARG_calibration].u_obj;
         if(mp_obj_is_type(object, &Calibration_type)) {
             _Calibration_obj_t *calib = MP_OBJ_TO_PTR2(object, _Calibration_obj_t);
             self->cluster->calibration((uint)servo) = *(calib->calibration);
+            if(self->cluster->calibration((uint)servo).size() != calib->calibration->size())
+                raise_calibration_memory_error();
         }
         else {
             mp_raise_TypeError(MP_ERROR_TEXT("cannot convert object to a Calibration class instance"));
