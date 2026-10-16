@@ -11,32 +11,16 @@ namespace pimoroni {
 
     // Check the provided frequency is valid
     if((freq >= 1.0f) && (freq <= (float)(source_hz >> 1))) {
-      uint32_t div16_top = (uint32_t)((float)(source_hz << 4) / freq);
-      uint32_t top = 1;
-
-      while(true) {
-          // Try a few small prime factors to get close to the desired frequency.
-          if((div16_top >= (5 << 4)) && (div16_top % 5 == 0) && (top * 5 <= MAX_PWM_WRAP)) {
-              div16_top /= 5;
-              top *= 5;
-          }
-          else if((div16_top >= (3 << 4)) && (div16_top % 3 == 0) && (top * 3 <= MAX_PWM_WRAP)) {
-              div16_top /= 3;
-              top *= 3;
-          }
-          else if((div16_top >= (2 << 4)) && (top * 2 <= MAX_PWM_WRAP)) {
-              div16_top /= 2;
-              top *= 2;
-          }
-          else {
-              break;
-          }
-      }
+      uint64_t div16_top = (uint64_t)((float)((uint64_t)source_hz << 4) / freq);
+      // The smallest divider that fits the wrap limit gives the largest top, and the finest duty resolution
+      uint64_t div16 = MAX((div16_top + MAX_PWM_WRAP - 1) / MAX_PWM_WRAP, 16u);
+      // Round the top to the nearest count, for the closest frequency
+      uint64_t top = MAX((div16_top + (div16 >> 1)) / div16, 1u);
 
       // Only return valid factors if the divisor is actually achievable
-      if(div16_top >= 16 && div16_top <= (UINT8_MAX << 4)) {
-        top_out = top;
-        div16_out = div16_top;
+      if(div16 <= (UINT8_MAX << 4) && top <= MAX_PWM_WRAP) {
+        top_out = (uint16_t)top;
+        div16_out = (uint16_t)div16;
 
         success = true;
       }
