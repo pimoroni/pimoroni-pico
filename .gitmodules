@@ -28,3 +28,6 @@
 [submodule "drivers/bme69x/src"]
 	path = drivers/bme69x/src
 	url = https://github.com/boschsensortec/BME690_SensorAPI
+[submodule "micropython/modules_py/lte-micropython"]
+	path = micropython/modules_py/lte-micropython
+	url = https://github.com/pimoroni/lte-micropython
