@@ -27,8 +27,8 @@ Hub75::Hub75(uint width, uint height, Pixel *buffer, PanelType panel_type, bool 
     gpio_init(pin_row_e); gpio_set_function(pin_row_e, GPIO_FUNC_SIO); gpio_set_dir(pin_row_e, true); gpio_put(pin_row_e, 0);
 
     gpio_init(pin_clk); gpio_set_function(pin_clk, GPIO_FUNC_SIO); gpio_set_dir(pin_clk, true); gpio_put(pin_clk, !clk_polarity);
-    gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_clk, !stb_polarity);
-    gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_clk, !oe_polarity);
+    gpio_init(pin_stb); gpio_set_function(pin_stb, GPIO_FUNC_SIO); gpio_set_dir(pin_stb, true); gpio_put(pin_stb, !stb_polarity);
+    gpio_init(pin_oe); gpio_set_function(pin_oe, GPIO_FUNC_SIO); gpio_set_dir(pin_oe, true); gpio_put(pin_oe, !oe_polarity);
 
     if (buffer == nullptr) {
         back_buffer = new Pixel[width * height];
@@ -225,7 +225,7 @@ void Hub75::stop(irq_handler_t handler) {
     gpio_put_masked(0b111111 << pin_r0, 0);
     gpio_put_masked(0b11111 << pin_row_a, 0);
     gpio_put(pin_clk, !clk_polarity);
-    gpio_put(pin_clk, !oe_polarity);
+    gpio_put(pin_oe, !oe_polarity);
 }
 
 Hub75::~Hub75() {
