@@ -200,6 +200,14 @@ const mp_rom_obj_tuple_t motor2040_encoderD_pins = {
     {&mp_type_tuple}, 2, { MP_ROM_INT(15), MP_ROM_INT(14) },
 };
 
+// With MICROPY_OBJ_REPR_C, floats are stored inside the object word rather
+// than on the heap, so a static mp_obj_float_t is not a valid float object.
+// Build those constants from their IEEE-754 single-precision bit patterns.
+#if MICROPY_OBJ_REPR == MICROPY_OBJ_REPR_C
+#define MOTOR2040_SHUNT_RESISTOR MP_OBJ_NEW_CONST_FLOAT(0x3ef0a3d7) // 0.47f
+#define MOTOR2040_VOLTAGE_GAIN MP_OBJ_NEW_CONST_FLOAT(0x3e8fa799) // 3.9f / 13.9f
+#define MOTOR2040_CURRENT_OFFSET MP_OBJ_NEW_CONST_FLOAT(0xbba3d70a) // -0.005f
+#else
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
@@ -207,6 +215,10 @@ typedef struct _mp_obj_float_t {
 mp_obj_float_t motor2040_shunt_resistor = {{&mp_type_float}, 0.47f};
 mp_obj_float_t motor2040_voltage_gain = {{&mp_type_float}, 3.9f / 13.9f};
 mp_obj_float_t motor2040_current_offset = {{&mp_type_float}, -0.005f};
+#define MOTOR2040_SHUNT_RESISTOR MP_ROM_PTR(&motor2040_shunt_resistor)
+#define MOTOR2040_VOLTAGE_GAIN MP_ROM_PTR(&motor2040_voltage_gain)
+#define MOTOR2040_CURRENT_OFFSET MP_ROM_PTR(&motor2040_current_offset)
+#endif
 
 
 /***** Globals Table *****/
@@ -256,10 +268,10 @@ static const mp_rom_map_elem_t motor2040_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_SENSOR_1_ADDR), MP_ROM_INT(0b110) },
     { MP_ROM_QSTR(MP_QSTR_SENSOR_2_ADDR), MP_ROM_INT(0b111) },
     { MP_ROM_QSTR(MP_QSTR_NUM_SENSORS), MP_ROM_INT(2) },
-    { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MP_ROM_PTR(&motor2040_shunt_resistor) },
+    { MP_ROM_QSTR(MP_QSTR_SHUNT_RESISTOR), MOTOR2040_SHUNT_RESISTOR },
     { MP_ROM_QSTR(MP_QSTR_CURRENT_GAIN), MP_ROM_INT(1) },
-    { MP_ROM_QSTR(MP_QSTR_VOLTAGE_GAIN), MP_ROM_PTR(&motor2040_voltage_gain) },
-    { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MP_ROM_PTR(&motor2040_current_offset) },
+    { MP_ROM_QSTR(MP_QSTR_VOLTAGE_GAIN), MOTOR2040_VOLTAGE_GAIN },
+    { MP_ROM_QSTR(MP_QSTR_CURRENT_OFFSET), MOTOR2040_CURRENT_OFFSET },
 };
 
 static MP_DEFINE_CONST_DICT(mp_module_pico_motor_shim_globals, pico_motor_shim_globals_table);
