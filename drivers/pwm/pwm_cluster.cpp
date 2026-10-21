@@ -179,18 +179,9 @@ PWMCluster::~PWMCluster() {
   if(initialised) {
     pio_sm_set_enabled(pio, sm, false);
 
-    // Tear down the DMA channel, its interrupt disabled first since an abort can raise it spuriously
-    hw_clear_bits(&dma_hw->irq_ctrl[DMA_IRQ_INDEX].inte, 1u << dma_channel);
-
-    dma_hw->abort = 1u << dma_channel;
-
-    // To fence off on in-flight transfers, the BUSY bit should be polled
-    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
-    while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
-
-    // Clear the interrupt (if any), leaving it disabled for the channel's next user, which
+    // Tear down the DMA channel, leaving its interrupt disabled for the channel's next user, which
     // may not service this line
-    dma_irqn_acknowledge_channel(DMA_IRQ_INDEX, dma_channel);
+    dma_channel_cleanup(dma_channel);
 
     dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
     claimed_channel_mask &= ~(1u << dma_channel);
