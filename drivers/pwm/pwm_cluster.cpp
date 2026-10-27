@@ -34,6 +34,17 @@ PWMCluster::TransitionData PWMCluster::looping_transitions[LOOP_TRANSITION_LIMIT
 
 auto_init_mutex(pwm_cluster_load_mutex);
 
+// The DMA interrupt the clusters restart their sequences on. Where the chip has a line to spare, one
+// of their own above the default priority, so a long handler sharing DMA_IRQ_0, such as I2S's copy,
+// cannot hold a restart past the loading zone and leave the outputs stalled at their level
+#if NUM_DMA_IRQS > 3
+static const uint DMA_IRQ_INDEX = 3;
+static const uint8_t DMA_IRQ_PRIORITY = 0x40;
+#else
+static const uint DMA_IRQ_INDEX = 0;
+static const uint8_t DMA_IRQ_PRIORITY = PICO_DEFAULT_IRQ_PRIORITY;
+#endif
+
 
 PWMCluster::PWMCluster(PIO pio, uint sm, uint64_t pin_mask, bool loading_zone)
 : pio(pio)
@@ -168,20 +179,9 @@ PWMCluster::~PWMCluster() {
   if(initialised) {
     pio_sm_set_enabled(pio, sm, false);
 
-    // Tear down the DMA channel.
-    // This is copied from: https://github.com/raspberrypi/pico-sdk/pull/744/commits/5e0e8004dd790f0155426e6689a66e08a83cd9fc
-    uint32_t irq0_save = dma_hw->inte0 & (1u << dma_channel);
-    hw_clear_bits(&dma_hw->inte0, irq0_save);
-
-    dma_hw->abort = 1u << dma_channel;
-
-    // To fence off on in-flight transfers, the BUSY bit should be polled
-    // rather than the ABORT bit, because the ABORT bit can clear prematurely.
-    while (dma_hw->ch[dma_channel].ctrl_trig & DMA_CH0_CTRL_TRIG_BUSY_BITS) tight_loop_contents();
-
-    // Clear the interrupt (if any), leaving it disabled for the channel's next user, which
-    // may not service DMA_IRQ_0
-    dma_hw->ints0 = 1u << dma_channel;
+    // Tear down the DMA channel, leaving its interrupt disabled for the channel's next user, which
+    // may not service this line
+    dma_channel_cleanup(dma_channel);
 
     dma_channel_unclaim(dma_channel); // This works now the teardown behaves correctly
     claimed_channel_mask &= ~(1u << dma_channel);
@@ -207,7 +207,7 @@ PWMCluster::~PWMCluster() {
       any_claimed |= (claimed_sms[i] != 0);
     }
     if(!any_claimed) {
-      irq_remove_handler(DMA_IRQ_0, dma_interrupt_handler);
+      irq_remove_handler(DMA_IRQ_NUM(DMA_IRQ_INDEX), dma_interrupt_handler);
     }
 
     // Reset all the pins this PWM will control back to an unused state
@@ -224,7 +224,7 @@ PWMCluster::~PWMCluster() {
 void __not_in_flash_func(PWMCluster::dma_interrupt_handler)() {
   // One register read covers every channel; only those claimed by clusters are visited.
   // A channel asserting after the read stays pending, so the handler runs again for it.
-  uint32_t triggered = dma_hw->ints0 & claimed_channel_mask;
+  uint32_t triggered = dma_hw->irq_ctrl[DMA_IRQ_INDEX].ints & claimed_channel_mask;
   while(triggered != 0) {
     uint8_t channel = (uint8_t)__builtin_ctz(triggered);
     triggered &= ~(1u << channel);
@@ -241,7 +241,7 @@ void __not_in_flash_func(PWMCluster::next_dma_sequence)() {
   #endif
 
   // Clear any interrupt request caused by our channel
-  dma_channel_acknowledge_irq0(dma_channel);
+  dma_irqn_acknowledge_channel(DMA_IRQ_INDEX, dma_channel);
 
   // If new data been written since the last time, switch to reading
   // that sequence, otherwise continue with the looping sequence
@@ -386,8 +386,8 @@ bool PWMCluster::init() {
 
       // A previous user of the channel may have left its interrupt flag raised, which would
       // fire the moment the interrupt is enabled
-      dma_channel_acknowledge_irq0(dma_channel);
-      dma_channel_set_irq0_enabled(dma_channel, true);
+      dma_irqn_acknowledge_channel(DMA_IRQ_INDEX, dma_channel);
+      dma_irqn_set_channel_enabled(DMA_IRQ_INDEX, dma_channel, true);
 
       pio_sm_init(pio, sm, pio_program_offsets[pio_idx], &c);
       pio_sm_set_enabled(pio, sm, true);
@@ -404,9 +404,10 @@ bool PWMCluster::init() {
       claimed_spans[pio_idx] |= claimed_span;
 
       if(!any_claimed) {
-        // Configure the processor to run dma_handler() when DMA IRQ 0 is asserted
-        irq_add_shared_handler(DMA_IRQ_0, dma_interrupt_handler, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
-        irq_set_enabled(DMA_IRQ_0, true);
+        // Configure the processor to run dma_handler() when the clusters' DMA IRQ is asserted
+        irq_add_shared_handler(DMA_IRQ_NUM(DMA_IRQ_INDEX), dma_interrupt_handler, PICO_SHARED_IRQ_HANDLER_DEFAULT_ORDER_PRIORITY);
+        irq_set_priority(DMA_IRQ_NUM(DMA_IRQ_INDEX), DMA_IRQ_PRIORITY);
+        irq_set_enabled(DMA_IRQ_NUM(DMA_IRQ_INDEX), true);
       }
 
       // Manually set the next dma sequence to trigger the first transfer
