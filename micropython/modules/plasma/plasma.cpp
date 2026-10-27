@@ -11,12 +11,20 @@ extern "C" {
 #include "py/builtin.h"
 #include "machine_pin.h"
 
+// With MICROPY_OBJ_REPR_C, floats are stored inside the object word rather
+// than on the heap, so a static mp_obj_float_t is not a valid float object.
+// Build those constants from their IEEE-754 single-precision bit patterns.
+#if MICROPY_OBJ_REPR == MICROPY_OBJ_REPR_C
+#define CONST_FLOAT_1 MP_OBJ_NEW_CONST_FLOAT(0x3f800000) // 1.0f
+#else
 typedef struct _mp_obj_float_t {
     mp_obj_base_t base;
     mp_float_t value;
 } mp_obj_float_t;
 
 const mp_obj_float_t const_float_1 = {{&mp_type_float}, 1.0f};
+#define CONST_FLOAT_1 MP_ROM_PTR(&const_float_1)
+#endif
 
 /********** WS2812 **********/
 
@@ -233,8 +241,8 @@ mp_obj_t PlasmaWS2812_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_hue, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_sat, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} },
-        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} },
+        { MP_QSTR_sat, MP_ARG_OBJ, {.u_rom_obj = CONST_FLOAT_1} },
+        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = CONST_FLOAT_1} },
         { MP_QSTR_w, MP_ARG_INT, {.u_int = 0} }
     };
 
@@ -493,8 +501,8 @@ mp_obj_t PlasmaAPA102_set_hsv(size_t n_args, const mp_obj_t *pos_args, mp_map_t 
         { MP_QSTR_, MP_ARG_REQUIRED | MP_ARG_OBJ },
         { MP_QSTR_index, MP_ARG_REQUIRED | MP_ARG_INT },
         { MP_QSTR_hue, MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_sat, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} },
-        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = MP_ROM_PTR(&const_float_1)} }
+        { MP_QSTR_sat, MP_ARG_OBJ, {.u_rom_obj = CONST_FLOAT_1} },
+        { MP_QSTR_val, MP_ARG_OBJ, {.u_rom_obj = CONST_FLOAT_1} }
     };
 
     // Parse args.
