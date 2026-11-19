@@ -13,7 +13,7 @@ PY_DECL_VERSION="${PY_DECL_VERSION:-v0.0.4}"
 PIMORONI_PICOVECTOR_VERSION="${PIMORONI_PICOVECTOR_VERSION:-rgba4444-pixel-format}"
 
 # The SP/CE screen driver and library, which the boards carrying a Display Pack 2.8" build
-PIMORONI_SPIDISPLAY_VERSION="${PIMORONI_SPIDISPLAY_VERSION:-main}"
+PIMORONI_SPIDISPLAY_VERSION="${PIMORONI_SPIDISPLAY_VERSION:-v1.0.0}"
 
 
 function log_success {
