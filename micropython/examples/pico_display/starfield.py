@@ -1,6 +1,7 @@
 # Travel through a Windows 3.1-esque starfield, with stars growing as they get 'closer'.
 # If you have a Display Pack 2.0" or 2.8" use DISPLAY_PICO_DISPLAY_2 instead of DISPLAY_PICO_DISPLAY
 
+from machine import Pin
 from picographics import PicoGraphics, DISPLAY_PICO_DISPLAY
 import random
 
@@ -8,6 +9,7 @@ import random
 NUMBER_OF_STARS = 200
 TRAVEL_SPEED = 1.2
 STAR_GROWTH = 0.12
+TURN_SPEED = 15
 
 # Set up our display
 graphics = PicoGraphics(display=DISPLAY_PICO_DISPLAY)
@@ -17,6 +19,10 @@ WIDTH, HEIGHT = graphics.get_bounds()
 BLACK = graphics.create_pen(0, 0, 0)
 WHITE = graphics.create_pen(255, 255, 255)
 
+button_a = Pin(12, Pin.IN, Pin.PULL_UP)
+button_b = Pin(13, Pin.IN, Pin.PULL_UP)
+button_x = Pin(14, Pin.IN, Pin.PULL_UP)
+button_y = Pin(15, Pin.IN, Pin.PULL_UP)
 
 def new_star():
     # Create a new star, with initial x, y, and size
@@ -41,6 +47,36 @@ while True:
         # Update y
         s[1] = s[1] * TRAVEL_SPEED
 
+        # The buttons change the direction of the movement od the stars
+        if button_x.value() == 0:
+            s[0] -= TURN_SPEED
+            s[1] -= TURN_SPEED
+
+        if button_y.value() == 0:
+            s[0] += TURN_SPEED
+            s[1] -= TURN_SPEED
+
+        if button_b.value() == 0:
+            s[0] += TURN_SPEED
+            s[1] += TURN_SPEED
+
+        if button_a.value() == 0:
+            s[0] -= TURN_SPEED
+            s[1] += TURN_SPEED
+
+        # Correction when multiple buttons are pressed
+        if button_y.value() == 0 and button_b.value() == 0:
+            s[0] -= TURN_SPEED
+
+        if button_y.value() == 0 and button_x.value() == 0:
+            s[1] += TURN_SPEED
+
+        if button_a.value() == 0 and button_x.value() == 0:
+            s[0] += TURN_SPEED
+
+        if button_a.value() == 0 and button_b.value() == 0:
+            s[1] -= TURN_SPEED
+        
         if s[0] <= - WIDTH // 2 or s[0] >= WIDTH // 2 or s[1] <= - HEIGHT // 2 or s[1] >= HEIGHT // 2 or s[2] >= 5:
             # This star has fallen off the screen (or rolled dead centre and grown too big!)
             # Replace it with a new one
